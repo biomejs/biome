@@ -22,7 +22,7 @@ issue_3394.jsx:3:31 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
       │                               ^^^^
     4 │ </>
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   

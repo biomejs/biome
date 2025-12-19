@@ -72,7 +72,7 @@ codeOptionsUnsorted.jsx:4:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     5 │ 	<div className="px-2 foo p-4 bar" />
     6 │ 	{/* SHOULD emit diagnostics (customClassAttribute attribute specified in options) */}
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -98,7 +98,7 @@ codeOptionsUnsorted.jsx:5:17 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     6 │ 	{/* SHOULD emit diagnostics (customClassAttribute attribute specified in options) */}
     7 │ 	<div customClassAttribute="px-2 foo p-4 bar" />
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -124,7 +124,7 @@ codeOptionsUnsorted.jsx:7:28 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     8 │ 	{/* SHOULD NOT emit diagnostics (notClassAttribute attribute NOT specified in options) */}
     9 │ 	<div notClassAttribute="px-2 foo p-4 bar" />
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -150,7 +150,7 @@ codeOptionsUnsorted.jsx:12:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     13 │ 	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
     14 │ 	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -176,7 +176,7 @@ codeOptionsUnsorted.jsx:13:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     14 │ 	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
     15 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -202,7 +202,7 @@ codeOptionsUnsorted.jsx:14:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     15 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
     16 │ 	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -228,7 +228,7 @@ codeOptionsUnsorted.jsx:15:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     16 │ 	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
     17 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -254,7 +254,7 @@ codeOptionsUnsorted.jsx:16:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     17 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
     18 │ 	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -280,7 +280,7 @@ codeOptionsUnsorted.jsx:17:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     18 │ 	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
     19 │ 	<div class="underline custom-text foo text-2xl font-semibold my-2" />
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -306,7 +306,7 @@ codeOptionsUnsorted.jsx:18:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     19 │ 	<div class="underline custom-text foo text-2xl font-semibold my-2" />
     20 │ 	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -332,7 +332,7 @@ codeOptionsUnsorted.jsx:19:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     20 │ 	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
     21 │ 	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -358,7 +358,7 @@ codeOptionsUnsorted.jsx:20:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     21 │ 	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
     22 │ </>;
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -384,7 +384,7 @@ codeOptionsUnsorted.jsx:21:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     22 │ </>;
     23 │ 
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -410,7 +410,7 @@ codeOptionsUnsorted.jsx:26:6 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     27 │ tw`px-2 foo p-4 bar`;
     28 │ tw.div`px-2 foo p-4 bar`;
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -436,7 +436,7 @@ codeOptionsUnsorted.jsx:27:4 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     28 │ tw.div`px-2 foo p-4 bar`;
     29 │ notClassFunction("px-2 foo p-4 bar");
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -462,7 +462,7 @@ codeOptionsUnsorted.jsx:35:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     36 │ <div class={["px-2 foo p-4 bar"]} />;
     37 │ <div
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -488,7 +488,7 @@ codeOptionsUnsorted.jsx:36:14 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     37 │ <div
     38 │ 	class={{
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -514,7 +514,7 @@ codeOptionsUnsorted.jsx:39:3 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     40 │ 			"px-2 foo p-4 bar",
     41 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -540,7 +540,7 @@ codeOptionsUnsorted.jsx:40:4 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     41 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
     42 │ 		],
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -566,7 +566,7 @@ codeOptionsUnsorted.jsx:41:6 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     42 │ 		],
     43 │ 	}}
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -592,7 +592,7 @@ codeOptionsUnsorted.jsx:41:26 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     42 │ 		],
     43 │ 	}}
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -618,7 +618,7 @@ codeOptionsUnsorted.jsx:41:55 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     42 │ 		],
     43 │ 	}}
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -644,7 +644,7 @@ codeOptionsUnsorted.jsx:46:7 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     47 │ clsx({
     48 │ 	"px-2 foo p-4 bar": [
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -670,7 +670,7 @@ codeOptionsUnsorted.jsx:48:2 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     49 │ 		"px-2 foo p-4 bar",
     50 │ 		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -696,7 +696,7 @@ codeOptionsUnsorted.jsx:49:3 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     50 │ 		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
     51 │ 	],
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -722,7 +722,7 @@ codeOptionsUnsorted.jsx:50:5 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     51 │ 	],
     52 │ });
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -748,7 +748,7 @@ codeOptionsUnsorted.jsx:50:25 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     51 │ 	],
     52 │ });
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -774,7 +774,7 @@ codeOptionsUnsorted.jsx:50:54 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     51 │ 	],
     52 │ });
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   

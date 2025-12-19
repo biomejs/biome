@@ -164,7 +164,7 @@ invalid.ts:5:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━�
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -185,7 +185,7 @@ invalid.ts:12:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -205,7 +205,7 @@ invalid.ts:34:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -226,7 +226,7 @@ invalid.ts:38:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -247,7 +247,7 @@ invalid.ts:42:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -268,7 +268,7 @@ invalid.ts:46:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -289,7 +289,7 @@ invalid.ts:50:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -309,7 +309,7 @@ invalid.ts:55:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -330,7 +330,7 @@ invalid.ts:59:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -351,7 +351,7 @@ invalid.ts:63:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -372,7 +372,7 @@ invalid.ts:67:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -393,7 +393,7 @@ invalid.ts:71:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -414,7 +414,7 @@ invalid.ts:86:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -435,7 +435,7 @@ invalid.ts:91:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -455,7 +455,7 @@ invalid.ts:95:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -476,7 +476,7 @@ invalid.ts:96:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -496,7 +496,7 @@ invalid.ts:99:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the comparison.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -517,7 +517,7 @@ invalid.ts:100:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the comparison.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -538,7 +538,7 @@ invalid.ts:101:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the comparison.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -559,7 +559,7 @@ invalid.ts:102:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the comparison.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -579,7 +579,7 @@ invalid.ts:105:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -600,7 +600,7 @@ invalid.ts:110:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -621,7 +621,7 @@ invalid.ts:117:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -641,7 +641,7 @@ invalid.ts:120:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -662,7 +662,7 @@ invalid.ts:124:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -682,7 +682,7 @@ invalid.ts:139:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -702,7 +702,7 @@ invalid.ts:140:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i Remove the condition.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```
@@ -726,7 +726,7 @@ invalid.ts:141:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i The type being accessed is guaranteed to be non-nullish, making coalescing redundant.
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/6611 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
 
 ```

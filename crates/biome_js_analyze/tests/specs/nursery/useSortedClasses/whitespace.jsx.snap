@@ -34,7 +34,7 @@ whitespace.jsx:3:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     4 │   <p className="            text-sm font-bold">hello world</p>··
     5 │   <p className="text-sm font-bold            other-class">hello world</p>
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -60,7 +60,7 @@ whitespace.jsx:4:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     5 │   <p className="text-sm font-bold            other-class">hello world</p>
     6 │   <p className="   ">empty with spaces</p>
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -86,7 +86,7 @@ whitespace.jsx:5:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     6 │   <p className="   ">empty with spaces</p>
     7 │   <p className="">empty without spaces</p>
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -112,7 +112,7 @@ whitespace.jsx:8:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
      9 │   <p className="  text-sm  font-bold  ">spaces everywhere</p>
     10 │   
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -138,7 +138,7 @@ whitespace.jsx:9:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     10 │   
     11 │   {/* Template literal cases */}
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -163,7 +163,7 @@ whitespace.jsx:12:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     13 │   <p className={`            text-sm font-bold`}>template literal leading</p>
     14 │   <p className={`  text-sm  font-bold  `}>template literal both</p>
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -189,7 +189,7 @@ whitespace.jsx:13:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     14 │   <p className={`  text-sm  font-bold  `}>template literal both</p>
     15 │ </>
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -214,7 +214,7 @@ whitespace.jsx:14:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
        │                  ^^^^^^^^^^^^^^^^^^^^^^
     15 │ </>
   
-  i This rule is still being actively worked on, so it might misses features that still need. Head to the issue https://github.com/biomejs/biome/issues/1274 for more information or file possible bugs.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
