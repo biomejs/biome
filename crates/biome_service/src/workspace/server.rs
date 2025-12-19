@@ -1006,16 +1006,17 @@ impl Workspace for WorkspaceServer {
                 .ok_or_else(WorkspaceError::no_project)?
         };
 
-        settings.merge_with_configuration(configuration, workspace_directory.clone())?;
-
-        let loading_directory = if extends_root {
+        
+        let resolution_directory = if extends_root {
             self.projects.get_project_path(project_key)
         } else {
             workspace_directory.clone()
         };
 
+        settings.merge_with_configuration(configuration, resolution_directory.clone())?;
+
         let plugin_diagnostics = self.load_plugins(
-            &loading_directory.clone().unwrap_or_default(),
+            &resolution_directory.clone().unwrap_or_default(),
             &settings.as_all_plugins(),
         );
 
