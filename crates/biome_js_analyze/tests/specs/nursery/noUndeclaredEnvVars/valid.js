@@ -44,3 +44,14 @@ function testBun() {
     const Bun = { env: { LOCAL_VAR: 'test' } };
     return Bun.env.LOCAL_VAR;
 }
+
+// Deno.env.get with allowed patterns
+const denoNodeEnv = Deno.env.get("NODE_ENV");
+const denoCi = Deno.env.get("CI");
+const denoVite = Deno.env.get("VITE_APP_KEY");
+
+// Local Deno variable (not global) - should not be flagged
+function testDeno() {
+    const Deno = { env: { get: () => 'test' } };
+    return Deno.env.get("LOCAL_VAR");
+}

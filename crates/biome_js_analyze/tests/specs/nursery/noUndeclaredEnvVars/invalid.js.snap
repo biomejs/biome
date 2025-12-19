@@ -22,6 +22,10 @@ const bracketMeta = import.meta.env["BRACKET_META_VAR"];
 const bunVar = Bun.env.BUN_CUSTOM_VAR;
 const bunBracketVar = Bun.env["BUN_BRACKET_VAR"];
 
+// Deno.env.get should also be checked
+const denoVar = Deno.env.get("DENO_CUSTOM_VAR");
+const denoVar2 = Deno.env.get("ANOTHER_DENO_VAR");
+
 ```
 
 # Diagnostics
@@ -136,6 +140,35 @@ invalid.js:17:23 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━
   > 17 │ const bunBracketVar = Bun.env["BUN_BRACKET_VAR"];
        │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
     18 │ 
+    19 │ // Deno.env.get should also be checked
+  
+
+```
+
+```
+invalid.js:20:17 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable DENO_CUSTOM_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    19 │ // Deno.env.get should also be checked
+  > 20 │ const denoVar = Deno.env.get("DENO_CUSTOM_VAR");
+       │                 ^^^^^^^^^^^^
+    21 │ const denoVar2 = Deno.env.get("ANOTHER_DENO_VAR");
+    22 │ 
+  
+
+```
+
+```
+invalid.js:21:18 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable ANOTHER_DENO_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    19 │ // Deno.env.get should also be checked
+    20 │ const denoVar = Deno.env.get("DENO_CUSTOM_VAR");
+  > 21 │ const denoVar2 = Deno.env.get("ANOTHER_DENO_VAR");
+       │                  ^^^^^^^^^^^^
+    22 │ 
   
 
 ```

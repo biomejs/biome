@@ -19,5 +19,12 @@ function getEnvVar(name) {
 // Also with import.meta.env - dynamic access
 const dynamicMeta = import.meta.env[key];
 
+// Also with Bun.env - dynamic access
+const dynamicBun = Bun.env[key];
+
+// Also with Deno.env.get - dynamic access
+const dynamicDeno = Deno.env.get(key);
+
 // These are valid because the rule cannot statically determine the key
 // Note: String literal bracket access like process.env["VAR"] IS now checked
+// Note: String literal in Deno.env.get("VAR") IS now checked
