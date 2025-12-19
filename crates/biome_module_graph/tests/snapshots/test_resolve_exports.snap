@@ -198,7 +198,7 @@ Module TypeId(0) => Object {
   members: []
 }
 
-Module TypeId(1) => value: 1
+Module TypeId(1) => number: 1
 
 Module TypeId(2) => Module(0) TypeId(15)
 

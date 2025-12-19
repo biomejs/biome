@@ -24,17 +24,23 @@ reviews:
     - "!**/backend-jsonrpc/src/workspace.ts"
   auto_review:
     enabled: true
-    base_branches: ["main", "next"]
+    base_branches: [ "main", "next" ]
     drafts: false
   tools:
     biome:
       enabled: false # We use our own Biome workflow :)
     clippy:
       enabled: false # Same for Clippy
+  finishing_touches:
+    docstrings:
+      enabled: false
+  pre_merge_checks:
+    docstrings:
+      mode: off
 tone_instructions: "Please keep it short and to the point. Be patient, especially with new contributors. Feel free to be witty with maintainers."
 knowledge_base:
   code_guidelines:
     enabled: true
-    filePatterns: ["**/CLAUDE.md", "**/CONTRIBUTING.md"]
+    filePatterns: [ "**/CLAUDE.md", "**/CONTRIBUTING.md" ]
 chat:
   auto_reply: false

@@ -1,6 +1,7 @@
 name: autofix.ci # needed to securely identify the workflow
 
 on:
+  merge_group:
   pull_request:
     branches:
       - main
@@ -19,9 +20,10 @@ permissions:
 jobs:
   autofix:
     runs-on: depot-ubuntu-24.04-arm-16
+    if: ${{ github.actor != 'autofix-ci[bot]' }}
     steps:
       - name: Checkout branch
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2

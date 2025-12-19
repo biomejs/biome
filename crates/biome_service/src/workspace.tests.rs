@@ -5,13 +5,13 @@ use std::sync::Arc;
 
 use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::{RuleGroup, RuleSelector};
-use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::{
     Configuration, FilesConfiguration, OverrideGlobs, OverridePattern, Overrides,
 };
 use biome_diagnostics::Diagnostic;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_syntax::{JsFileSource, TextSize};
+use biome_plugin_loader::{PluginConfiguration, Plugins};
 use camino::Utf8PathBuf;
 use insta::{assert_debug_snapshot, assert_snapshot};
 
@@ -273,10 +273,7 @@ fn correctly_pulls_lint_diagnostics() {
     .unwrap();
     let result = graphql_file.pull_diagnostics(
         RuleCategories::all(),
-        vec![RuleSelector::Rule(
-            RuleGroup::Style.as_str(),
-            "useDeprecatedReason",
-        )],
+        vec![RuleSelector::Rule(RuleGroup::Style.as_str(), "useDeprecatedReason").into()],
         vec![],
         true,
     );
@@ -417,6 +414,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
                 ..Default::default()
             },
             workspace_directory: None,
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
@@ -475,6 +473,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
                 ..Default::default()
             },
             workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
@@ -542,6 +541,7 @@ language css;
                 ..Default::default()
             },
             workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
@@ -605,6 +605,7 @@ fn plugins_may_use_invalid_span() {
                 ..Default::default()
             },
             workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
@@ -722,6 +723,7 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
                 ..Default::default()
             },
             workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 

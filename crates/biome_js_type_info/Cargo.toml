@@ -7,6 +7,7 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_js_type_info"
+publish              = true
 repository.workspace = true
 version              = "0.0.1"
 
@@ -21,6 +22,7 @@ biome_resolver            = { workspace = true }
 biome_rowan               = { workspace = true }
 camino                    = { workspace = true }
 hashbrown                 = { workspace = true }
+paste                     = "1.0"
 rustc-hash                = { workspace = true }
 
 [dev-dependencies]

@@ -10,7 +10,8 @@ use biome_fs::FileSystem;
 use camino::Utf8Path;
 pub use license::generated::*;
 pub use node_js_package::{
-    Dependencies, NodeJsPackage, PackageJson, PackageType, TsConfigJson, Version,
+    CompilerOptions, Dependencies, NodeJsPackage, PackageJson, PackageType, TsConfigJson,
+    TurboJson, Version,
 };
 
 use std::any::TypeId;
@@ -30,7 +31,10 @@ pub trait Manifest: Debug + Sized {
     type Language: Language;
 
     /// Loads the manifest of the package from the root node.
-    fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self>;
+    fn deserialize_manifest(
+        root: &LanguageRoot<Self::Language>,
+        path: &Utf8Path,
+    ) -> Deserialized<Self>;
 
     /// Reads the manifest from the given `path`.
     fn read_manifest(fs: &dyn FileSystem, path: &Utf8Path) -> Deserialized<Self>;
@@ -41,7 +45,7 @@ pub trait Package {
     type Manifest: Manifest;
 
     /// Inserts a manifest into the package, taking care of deserialization.
-    fn insert_serialized_manifest(&mut self, root: &PackageRoot<Self>);
+    fn insert_serialized_manifest(&mut self, root: &PackageRoot<Self>, path: &Utf8Path);
 
     fn manifest(&self) -> Option<&Self::Manifest> {
         None

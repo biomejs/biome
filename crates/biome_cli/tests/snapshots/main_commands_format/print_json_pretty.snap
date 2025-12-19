@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `format.js`
 
@@ -34,6 +33,7 @@ The --json option is unstable/experimental and its output might change between p
 		"matches": 0,
 		"errors": 1,
 		"warnings": 0,
+		"infos": 0,
 		"skipped": 0,
 		"suggestedFixesSkipped": 0,
 		"diagnosticsNotPrinted": 0

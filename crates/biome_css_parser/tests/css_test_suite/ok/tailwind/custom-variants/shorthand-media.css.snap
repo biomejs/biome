@@ -1,0 +1,214 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@custom-variant hasgrid (@supports (display: grid));
+
+@custom-variant print (@media print);
+
+@custom-variant md (@media (max-width: 768px));
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwCustomVariantAtRule {
+                custom_variant_token: CUSTOM_VARIANT_KW@1..16 "custom-variant" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@16..24 "hasgrid" [] [Whitespace(" ")],
+                },
+                selector: TwCustomVariantShorthand {
+                    l_paren_token: L_PAREN@24..25 "(" [] [],
+                    selector: CssAtRuleDeclarator {
+                        at_token: AT@25..26 "@" [] [],
+                        declarator: CssSupportsAtRuleDeclarator {
+                            supports_token: SUPPORTS_KW@26..35 "supports" [] [Whitespace(" ")],
+                            condition: CssSupportsFeatureDeclaration {
+                                l_paren_token: L_PAREN@35..36 "(" [] [],
+                                declaration: CssDeclaration {
+                                    property: CssGenericProperty {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@36..43 "display" [] [],
+                                        },
+                                        colon_token: COLON@43..45 ":" [] [Whitespace(" ")],
+                                        value: CssGenericComponentValueList [
+                                            CssIdentifier {
+                                                value_token: IDENT@45..49 "grid" [] [],
+                                            },
+                                        ],
+                                    },
+                                    important: missing (optional),
+                                },
+                                r_paren_token: R_PAREN@49..50 ")" [] [],
+                            },
+                        },
+                    },
+                    r_paren_token: R_PAREN@50..51 ")" [] [],
+                    semicolon_token: SEMICOLON@51..52 ";" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@52..55 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwCustomVariantAtRule {
+                custom_variant_token: CUSTOM_VARIANT_KW@55..70 "custom-variant" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@70..76 "print" [] [Whitespace(" ")],
+                },
+                selector: TwCustomVariantShorthand {
+                    l_paren_token: L_PAREN@76..77 "(" [] [],
+                    selector: CssAtRuleDeclarator {
+                        at_token: AT@77..78 "@" [] [],
+                        declarator: CssMediaAtRuleDeclarator {
+                            media_token: MEDIA_KW@78..84 "media" [] [Whitespace(" ")],
+                            queries: CssMediaQueryList [
+                                CssMediaTypeQuery {
+                                    modifier: missing (optional),
+                                    ty: CssMediaType {
+                                        value: CssIdentifier {
+                                            value_token: IDENT@84..89 "print" [] [],
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    r_paren_token: R_PAREN@89..90 ")" [] [],
+                    semicolon_token: SEMICOLON@90..91 ";" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@91..94 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwCustomVariantAtRule {
+                custom_variant_token: CUSTOM_VARIANT_KW@94..109 "custom-variant" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@109..112 "md" [] [Whitespace(" ")],
+                },
+                selector: TwCustomVariantShorthand {
+                    l_paren_token: L_PAREN@112..113 "(" [] [],
+                    selector: CssAtRuleDeclarator {
+                        at_token: AT@113..114 "@" [] [],
+                        declarator: CssMediaAtRuleDeclarator {
+                            media_token: MEDIA_KW@114..120 "media" [] [Whitespace(" ")],
+                            queries: CssMediaQueryList [
+                                CssMediaConditionQuery {
+                                    condition: CssMediaFeatureInParens {
+                                        l_paren_token: L_PAREN@120..121 "(" [] [],
+                                        feature: CssQueryFeaturePlain {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@121..130 "max-width" [] [],
+                                            },
+                                            colon_token: COLON@130..132 ":" [] [Whitespace(" ")],
+                                            value: CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@132..135 "768" [] [],
+                                                unit_token: IDENT@135..137 "px" [] [],
+                                            },
+                                        },
+                                        r_paren_token: R_PAREN@137..138 ")" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    r_paren_token: R_PAREN@138..139 ")" [] [],
+                    semicolon_token: SEMICOLON@139..140 ";" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@140..141 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..141
+  0: (empty)
+  1: CSS_RULE_LIST@0..140
+    0: CSS_AT_RULE@0..52
+      0: AT@0..1 "@" [] []
+      1: TW_CUSTOM_VARIANT_AT_RULE@1..52
+        0: CUSTOM_VARIANT_KW@1..16 "custom-variant" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@16..24
+          0: IDENT@16..24 "hasgrid" [] [Whitespace(" ")]
+        2: TW_CUSTOM_VARIANT_SHORTHAND@24..52
+          0: L_PAREN@24..25 "(" [] []
+          1: CSS_AT_RULE_DECLARATOR@25..50
+            0: AT@25..26 "@" [] []
+            1: CSS_SUPPORTS_AT_RULE_DECLARATOR@26..50
+              0: SUPPORTS_KW@26..35 "supports" [] [Whitespace(" ")]
+              1: CSS_SUPPORTS_FEATURE_DECLARATION@35..50
+                0: L_PAREN@35..36 "(" [] []
+                1: CSS_DECLARATION@36..49
+                  0: CSS_GENERIC_PROPERTY@36..49
+                    0: CSS_IDENTIFIER@36..43
+                      0: IDENT@36..43 "display" [] []
+                    1: COLON@43..45 ":" [] [Whitespace(" ")]
+                    2: CSS_GENERIC_COMPONENT_VALUE_LIST@45..49
+                      0: CSS_IDENTIFIER@45..49
+                        0: IDENT@45..49 "grid" [] []
+                  1: (empty)
+                2: R_PAREN@49..50 ")" [] []
+          2: R_PAREN@50..51 ")" [] []
+          3: SEMICOLON@51..52 ";" [] []
+    1: CSS_AT_RULE@52..91
+      0: AT@52..55 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_CUSTOM_VARIANT_AT_RULE@55..91
+        0: CUSTOM_VARIANT_KW@55..70 "custom-variant" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@70..76
+          0: IDENT@70..76 "print" [] [Whitespace(" ")]
+        2: TW_CUSTOM_VARIANT_SHORTHAND@76..91
+          0: L_PAREN@76..77 "(" [] []
+          1: CSS_AT_RULE_DECLARATOR@77..89
+            0: AT@77..78 "@" [] []
+            1: CSS_MEDIA_AT_RULE_DECLARATOR@78..89
+              0: MEDIA_KW@78..84 "media" [] [Whitespace(" ")]
+              1: CSS_MEDIA_QUERY_LIST@84..89
+                0: CSS_MEDIA_TYPE_QUERY@84..89
+                  0: (empty)
+                  1: CSS_MEDIA_TYPE@84..89
+                    0: CSS_IDENTIFIER@84..89
+                      0: IDENT@84..89 "print" [] []
+          2: R_PAREN@89..90 ")" [] []
+          3: SEMICOLON@90..91 ";" [] []
+    2: CSS_AT_RULE@91..140
+      0: AT@91..94 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_CUSTOM_VARIANT_AT_RULE@94..140
+        0: CUSTOM_VARIANT_KW@94..109 "custom-variant" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@109..112
+          0: IDENT@109..112 "md" [] [Whitespace(" ")]
+        2: TW_CUSTOM_VARIANT_SHORTHAND@112..140
+          0: L_PAREN@112..113 "(" [] []
+          1: CSS_AT_RULE_DECLARATOR@113..138
+            0: AT@113..114 "@" [] []
+            1: CSS_MEDIA_AT_RULE_DECLARATOR@114..138
+              0: MEDIA_KW@114..120 "media" [] [Whitespace(" ")]
+              1: CSS_MEDIA_QUERY_LIST@120..138
+                0: CSS_MEDIA_CONDITION_QUERY@120..138
+                  0: CSS_MEDIA_FEATURE_IN_PARENS@120..138
+                    0: L_PAREN@120..121 "(" [] []
+                    1: CSS_QUERY_FEATURE_PLAIN@121..137
+                      0: CSS_IDENTIFIER@121..130
+                        0: IDENT@121..130 "max-width" [] []
+                      1: COLON@130..132 ":" [] [Whitespace(" ")]
+                      2: CSS_REGULAR_DIMENSION@132..137
+                        0: CSS_NUMBER_LITERAL@132..135 "768" [] []
+                        1: IDENT@135..137 "px" [] []
+                    2: R_PAREN@137..138 ")" [] []
+          2: R_PAREN@138..139 ")" [] []
+          3: SEMICOLON@139..140 ";" [] []
+  2: EOF@140..141 "" [Newline("\n")] []
+
+```

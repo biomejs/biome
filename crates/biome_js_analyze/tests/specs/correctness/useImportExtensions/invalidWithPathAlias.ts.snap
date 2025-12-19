@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWithPathAlias.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+import foo from "libs/foo";
+
+import bar from "libs/bar";
+
+```
+
+# Diagnostics
+```
+invalidWithPathAlias.ts:3:17 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ import foo from "libs/foo";
+      │                 ^^^^^^^^^^
+    4 │ 
+    5 │ import bar from "libs/bar";
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .ts.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   
+    3   │ - import·foo·from·"libs/foo";
+      3 │ + import·foo·from·"libs/foo.ts";
+    4 4 │   
+    5 5 │   import bar from "libs/bar";
+  
+
+```
+
+```
+invalidWithPathAlias.ts:5:17 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    3 │ import foo from "libs/foo";
+    4 │ 
+  > 5 │ import bar from "libs/bar";
+      │                 ^^^^^^^^^^
+    6 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .ts.
+  
+    5 │ import·bar·from·"libs/bar/index.ts";
+      │                          +++++++++  
+
+```

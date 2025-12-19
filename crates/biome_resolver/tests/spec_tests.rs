@@ -1,4 +1,5 @@
 use biome_fs::OsFileSystem;
+use biome_package::{CompilerOptions, TsConfigJson};
 use biome_resolver::*;
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -571,6 +572,86 @@ fn test_resolve_type_definitions_without_type_specification() {
 }
 
 #[test]
+fn test_resolve_from_base_url() {
+    let base_dir = get_fixtures_path("resolver_cases_7");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        condition_names: &["default"],
+        extensions: &["js", "ts"],
+        ..Default::default()
+    };
+
+    // Make sure resolution works with explicitly specified `tsconfig.json`.
+    assert_eq!(
+        resolve(
+            "bar",
+            &base_dir.join("src"),
+            &fs,
+            &options
+                .clone()
+                .with_tsconfig(DiscoverableManifest::Explicit {
+                    package_path: Utf8PathBuf::from(format!("{base_dir}/tsconfig.json")),
+                    manifest: &TsConfigJson {
+                        compiler_options: CompilerOptions {
+                            base_url: Some(base_dir.join("src")),
+                            ..Default::default()
+                        },
+                        ..Default::default()
+                    }
+                })
+        ),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/bar.ts")))
+    );
+
+    // Make sure resolution works with auto-discovered `tsconfig.json`.
+    assert_eq!(
+        resolve("bar", &base_dir.join("src"), &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/bar.ts")))
+    );
+
+    // It shouldn't matter if we're resolving from a different base directory.
+    assert_eq!(
+        resolve("bar", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/bar.ts")))
+    );
+    assert_eq!(
+        resolve("bar", &base_dir.join("src/foo"), &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/bar.ts")))
+    );
+
+    // Resolution should work in subfolders too.
+    assert_eq!(
+        resolve("foo/foo", &base_dir.join("src"), &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/foo/foo.ts")))
+    );
+
+    // Make sure resolution falls back to `node_modules/` without `baseUrl`.
+    assert_eq!(
+        resolve(
+            "bar",
+            &base_dir.join("src"),
+            &fs,
+            &options
+                .clone()
+                .with_tsconfig(DiscoverableManifest::Explicit {
+                    package_path: Utf8PathBuf::from(format!("{base_dir}/tsconfig.json")),
+                    manifest: &TsConfigJson {
+                        compiler_options: CompilerOptions {
+                            base_url: None,
+                            ..Default::default()
+                        },
+                        ..Default::default()
+                    }
+                })
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/bar/index.js"
+        )))
+    );
+}
+
+#[test]
 fn test_resolve_alias_with_multiple_target_values() {
     let base_dir = get_fixtures_path("resolver_cases_6");
     let fs = OsFileSystem::new(base_dir.clone());
@@ -601,5 +682,67 @@ fn test_resolve_alias_with_multiple_target_values() {
     assert_eq!(
         resolve("#lib/d.js", &base_dir, &fs, &options),
         Ok(Utf8PathBuf::from(format!("{base_dir}/src/lib/d.js")))
+    );
+}
+
+#[test]
+fn test_resolve_extension_alias() {
+    let base_dir = get_fixtures_path("resolver_cases_7");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        default_files: &["index"],
+        extensions: &["js"],
+        extension_aliases: &[("js", &["ts", "js"]), ("mjs", &["mts"])],
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve("./index.js", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/index.ts"))),
+        "should alias fully specified file",
+    );
+
+    assert_eq!(
+        resolve("./dir/index.js", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir/index.ts"))),
+        "should alias fully specified file when there are two alternatives",
+    );
+
+    assert_eq!(
+        resolve("./dir2/index.js", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.js"))),
+        "should also allow the second alternative",
+    );
+
+    assert_eq!(
+        resolve("./dir2/index.mjs", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.mts"))),
+        "should support alias option without an array",
+    );
+}
+
+#[test]
+fn test_resolve_extension_alias_not_apply_to_extension_nor_main_files() {
+    let base_dir = get_fixtures_path("resolver_cases_7");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        default_files: &["index"],
+        extensions: &["js"],
+        extension_aliases: &[("js", &[])],
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve("./dir2", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.js"))),
+        "directory",
+    );
+
+    assert_eq!(
+        resolve("./dir2/index", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.js"))),
+        "file",
     );
 }

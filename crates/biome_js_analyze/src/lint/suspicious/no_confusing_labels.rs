@@ -113,6 +113,7 @@ impl Rule for NoConfusingLabels {
             .options()
             .allowed_labels
             .iter()
+            .flatten()
             .any(|s| s.as_ref() == label)
         {
             return None;
@@ -133,7 +134,10 @@ impl Rule for NoConfusingLabels {
         let labeled_stmt = ctx.query();
         let allowed_labels = &ctx.options().allowed_labels;
 
-        let message = if allowed_labels.is_empty() {
+        let message = if allowed_labels
+            .as_ref()
+            .is_none_or(|allowed_labels| allowed_labels.is_empty())
+        {
             "Only loops should be labeled.\nThe use of labels for other statements is suspicious and unfamiliar."
         } else {
             "Some labels are explicitly allowed, but this one is not.\nOtherwise, only loops should be labeled."

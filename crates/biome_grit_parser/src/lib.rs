@@ -8,7 +8,7 @@ mod token_source;
 use biome_grit_factory::GritSyntaxFactory;
 use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxNode};
 use biome_parser::tree_sink::LosslessTreeSink;
-use biome_parser::{AnyParse, diagnostic::ParseDiagnostic};
+use biome_parser::{AnyParse, NodeParse, diagnostic::ParseDiagnostic};
 use biome_rowan::{AstNode, NodeCache};
 use parser::{GritParser, parse_root};
 
@@ -105,6 +105,6 @@ impl From<GritParse> for AnyParse {
     fn from(parse: GritParse) -> Self {
         let root = parse.syntax();
         let diagnostics = parse.into_diagnostics();
-        Self::new(root.as_send().unwrap(), diagnostics)
+        NodeParse::new(root.as_send().unwrap(), diagnostics).into()
     }
 }

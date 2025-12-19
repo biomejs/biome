@@ -1,6 +1,6 @@
 use crate::react::components::ReactComponentInfo;
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -101,6 +101,7 @@ declare_lint_rule! {
         name: "useComponentExportOnlyModules",
         language: "jsx",
         sources: &[RuleSource::EslintReactRefresh("only-export-components").inspired()],
+        domains: &[RuleDomain::React],
         recommended: false,
         severity: Severity::Warning,
     }
@@ -170,14 +171,19 @@ impl Rule for UseComponentExportOnlyModules {
                         .identifier
                         .as_ref()
                         .and_then(|x| x.name_token())
-                        && ctx.options().allow_export_names.iter().any(|export_name| {
-                            export_name.as_ref() == exported_item_id.text_trimmed()
-                        })
+                        && ctx
+                            .options()
+                            .allow_export_names
+                            .iter()
+                            .flatten()
+                            .any(|export_name| {
+                                export_name.as_ref() == exported_item_id.text_trimmed()
+                            })
                     {
                         continue;
                     }
                     // Allow exporting constants along with components
-                    if ctx.options().allow_constant_export
+                    if ctx.options().allow_constant_export()
                         && exported_item
                             .exported
                             .clone()

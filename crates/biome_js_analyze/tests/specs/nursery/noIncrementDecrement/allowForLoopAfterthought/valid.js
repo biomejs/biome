@@ -1,0 +1,20 @@
+/* should not generate diagnostics */
+var foo = 0; foo = +1;
+
+for (i = 0; i < l; i++) { console.log(i); }
+
+for (var i = 0, j = i + 1; j < example.length; i++, j++) { }
+
+for (; ; i--, foo());
+
+for (;; foo(), --i);
+
+for (;; foo(), ++i, bar);
+
+for (;; i++, (++j, k--));
+
+for (;; foo(), (bar(), i++), baz());
+
+for (;; (--i, j += 2), bar = j + 1);
+
+for (;; a, (i--, (b, ++j, c)), d);

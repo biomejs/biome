@@ -41,6 +41,26 @@ fn creates_config_file() {
 }
 
 #[test]
+fn enables_vcs_and_ignore_dist() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(".gitignore".into(), "".as_bytes());
+    fs.insert("dist".into(), "".as_bytes());
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["init"].as_slice()));
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "enables_vcs_and_ignore_dist",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn creates_config_jsonc_file() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

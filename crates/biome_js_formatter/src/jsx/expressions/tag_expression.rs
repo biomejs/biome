@@ -33,7 +33,7 @@ impl FormatNodeRule<JsxTagExpression> for FormatJsxTagExpression {
 
                 let format_inner = format_with(|f| {
                     if !needs_parentheses {
-                        write!(f, [if_group_breaks(&text("("))])?;
+                        write!(f, [if_group_breaks(&token("("))])?;
                     }
 
                     write!(
@@ -46,7 +46,7 @@ impl FormatNodeRule<JsxTagExpression> for FormatJsxTagExpression {
                     )?;
 
                     if !needs_parentheses {
-                        write!(f, [if_group_breaks(&text(")"))])?;
+                        write!(f, [if_group_breaks(&token(")"))])?;
                     }
 
                     Ok(())

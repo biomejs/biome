@@ -1,0 +1,79 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/html-vue/upper-case-2.html
+---
+# Input
+
+```html
+<!-- issue #8162 -->
+
+<!DOCTYPE html><HTML>
+    <body>
+      <div v-if="foo ===    'foo'">
+  
+  </div>
+      <script>
+  new Vue({el: '#app'})
+      </script>
+    </body>
+  </HTML>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,11 +1,11 @@
+ <!-- issue #8162 -->
+ 
+-<!doctype html>
++<!DOCTYPE html>
+ <html>
+   <body>
+-    <div v-if="foo === 'foo'"></div>
++    <div v-if="foo ===    'foo'"></div>
+     <script>
+-      new Vue({ el: "#app" });
+-    </script>
++  new Vue({el: '#app'})
++      </script>
+   </body>
+ </html>
+```
+
+# Output
+
+```html
+<!-- issue #8162 -->
+
+<!DOCTYPE html>
+<html>
+  <body>
+    <div v-if="foo ===    'foo'"></div>
+    <script>
+  new Vue({el: '#app'})
+      </script>
+  </body>
+</html>
+```
+
+# Errors
+```
+upper-case-2.html:5:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Vue syntax isn't enabled. Is this supposed to be a .vue file?
+  
+    3 │ <!DOCTYPE html><HTML>
+    4 │     <body>
+  > 5 │       <div v-if="foo ===    'foo'">
+      │            ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   
+    7 │   </div>
+  
+  i Remove it or enable the parsing using the html.parser.vue option.
+  
+
+```

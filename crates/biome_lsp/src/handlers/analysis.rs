@@ -1,4 +1,3 @@
-#![expect(clippy::mutable_key_type)]
 use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils;
@@ -7,14 +6,16 @@ use biome_analyze::{
     ActionCategory, RuleCategoriesBuilder, SUPPRESSION_INLINE_ACTION_CATEGORY,
     SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY, SourceActionKind,
 };
-use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::analyzer::{AnalyzerSelector, RuleSelector};
 use biome_diagnostics::Error;
 use biome_fs::BiomePath;
 use biome_line_index::LineIndex;
 use biome_lsp_converters::from_proto;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::WorkspaceError;
-use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
+use biome_service::file_handlers::astro::AstroFileHandler;
+use biome_service::file_handlers::svelte::SvelteFileHandler;
+use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FixFileMode, FixFileParams,
     GetFileContentParams, IgnoreKind, PathIsIgnoredParams, PullActionsParams,
@@ -23,7 +24,7 @@ use biome_service::workspace::{
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ops::Sub;
-use tower_lsp_server::lsp_types::{
+use tower_lsp_server::ls_types::{
     self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse, Uri,
 };
 use tracing::{debug, info};
@@ -124,6 +125,7 @@ pub(crate) fn code_actions(
         Some("svelte") => SvelteFileHandler::start(content.as_str()),
         _ => None,
     };
+
     let cursor_range = from_proto::text_range(&doc.line_index, params.range, position_encoding)
         .with_context(|| {
             format!(
@@ -145,7 +147,6 @@ pub(crate) fn code_actions(
     } else {
         cursor_range
     };
-
     debug!("Cursor range {:?}", &cursor_range);
     let result = match session.workspace.pull_actions(PullActionsParams {
         project_key: doc.project_key,
@@ -158,6 +159,7 @@ pub(crate) fn code_actions(
         enabled_rules: filters
             .iter()
             .filter_map(|filter| RuleSelector::from_lsp_filter(filter))
+            .map(AnalyzerSelector::from)
             .collect(),
         categories: categories.build(),
     }) {
@@ -180,7 +182,7 @@ pub(crate) fn code_actions(
     // document if the action category "source.fixAll" was explicitly requested
     // by the language client
     let fix_all = if has_fix_all {
-        fix_all(session, &url, path, &doc.line_index, &diagnostics, offset)?
+        fix_all(session, &url, path, &doc.line_index, &diagnostics, None)?
     } else {
         None
     };
@@ -240,7 +242,6 @@ pub(crate) fn code_actions(
                 position_encoding,
                 &diagnostics,
                 action,
-                offset,
             )
             .ok()?;
 
@@ -353,24 +354,26 @@ fn fix_all(
         suppression_reason: None,
         rule_categories: categories.build(),
     })?;
-
-    let output = match path.as_path().extension() {
-        Some(extension) => {
-            let input = session.workspace.get_file_content(GetFileContentParams {
-                project_key: doc.project_key,
-                path: path.clone(),
-            })?;
-            match extension {
-                "astro" => AstroFileHandler::output(input.as_str(), fixed.code.as_str()),
-                "vue" => VueFileHandler::output(input.as_str(), fixed.code.as_str()),
-                "svelte" => SvelteFileHandler::output(input.as_str(), fixed.code.as_str()),
-                _ => fixed.code,
+    let output = if file_features.supports_full_html_support() {
+        fixed.code
+    } else {
+        match path.as_path().extension() {
+            Some(extension) => {
+                let input = session.workspace.get_file_content(GetFileContentParams {
+                    project_key: doc.project_key,
+                    path: path.clone(),
+                })?;
+                match extension {
+                    "astro" => AstroFileHandler::output(input.as_str(), fixed.code.as_str()),
+                    "vue" => VueFileHandler::output(input.as_str(), fixed.code.as_str()),
+                    "svelte" => SvelteFileHandler::output(input.as_str(), fixed.code.as_str()),
+                    _ => fixed.code,
+                }
             }
+
+            _ => fixed.code,
         }
-
-        _ => fixed.code,
     };
-
     if fixed.actions.is_empty() {
         return Ok(None);
     }

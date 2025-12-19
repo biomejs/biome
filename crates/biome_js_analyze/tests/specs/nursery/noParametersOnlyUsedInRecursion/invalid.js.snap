@@ -1,0 +1,849 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// Simple case: parameter only used in recursion
+function factorial(n, acc) {
+    if (n === 0) return 1;
+    return factorial(n - 1, acc);
+}
+
+// Multiple parameters only in recursion
+function fn(a, b, c) {
+    if (a === 0) return 0;
+    return fn(a - 1, b, c);
+}
+
+// Arrow function with recursion
+const countdown = (n, acc) => {
+    if (n === 0) return 0;
+    return countdown(n - 1, acc);
+};
+
+// Method in class
+class Counter {
+    count(n, acc) {
+        if (n === 0) return 0;
+        return this.count(n - 1, acc);
+    }
+}
+
+// Parameter with arithmetic in recursion
+function countdown(n, step) {
+    if (n === 0) return 0;
+    return countdown(n - step, step);
+}
+
+// Multiple operations
+function compute(a, b) {
+    if (a === 0) return 0;
+    return compute(a - 1, b * 2 + 1);
+}
+
+// Unary operations
+function negate(n, flag) {
+    if (n === 0) return 0;
+    return negate(n - 1, !flag);
+}
+
+// Object method
+const obj = {
+    count(n, step) {
+        if (n === 0) return 0;
+        return this.count(n - step, step);
+    }
+};
+
+// Assignment expression with recursive arrow function
+foo = (n, acc) => {
+    if (n === 0) return 0;
+    return foo(n - 1, acc);
+};
+
+// Separate declaration and assignment with arrow function
+let bar;
+bar = (x, unused) => {
+    if (x === 0) return 0;
+    return bar(x - 1, unused);
+};
+
+// Logical AND operator
+function fnAnd(n, acc) {
+    if (n === 0) return 0;
+    return fnAnd(n - 1, acc && true);
+}
+
+// Logical OR operator
+function fnOr(n, acc) {
+    if (n === 0) return 0;
+    return fnOr(n - 1, acc || 0);
+}
+
+// Nullish coalescing operator
+function fnNullish(n, acc) {
+    if (n === 0) return 0;
+    return fnNullish(n - 1, acc ?? 0);
+}
+
+// Nested logical operators
+function fnNested(n, acc) {
+    if (n === 0) return 0;
+    return fnNested(n - 1, (acc || 0) && true);
+}
+
+// Conditional expression with parameter in consequent
+function fnCondConsequent(n, acc) {
+    if (n === 0) return 0;
+    return fnCondConsequent(n - 1, n > 5 ? acc : 0);
+}
+
+// Conditional expression with parameter in alternate
+function fnCondAlternate(n, acc) {
+    if (n === 0) return 0;
+    return fnCondAlternate(n - 1, n > 5 ? 0 : acc);
+}
+
+// Conditional expression with parameter in test
+function fnCondTest(n, flag) {
+    if (n === 0) return 0;
+    return fnCondTest(n - 1, flag ? true : false);
+}
+
+// Nested conditional expressions
+function fnCondNested(n, acc) {
+    if (n === 0) return 0;
+    return fnCondNested(n - 1, n > 5 ? (n > 10 ? acc : 0) : 0);
+}
+
+// Optional chaining in class method
+class CounterOptional {
+    count(n, acc) {
+        if (n === 0) return 0;
+        return this?.count(n - 1, acc);
+    }
+}
+
+// Optional chaining in object method
+const objOptional = {
+    count(n, step) {
+        if (n === 0) return 0;
+        return this?.count(n - step, step);
+    }
+};
+
+// Computed member with string literal
+class CounterComputed {
+    count(n, acc) {
+        if (n === 0) return 0;
+        return this["count"](n - 1, acc);
+    }
+}
+
+// Optional chaining with computed member
+class CounterOptionalComputed {
+    count(n, acc) {
+        if (n === 0) return 0;
+        return this?.["count"](n - 1, acc);
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    1 │ // Simple case: parameter only used in recursion
+  > 2 │ function factorial(n, acc) {
+      │                       ^^^
+    3 │     if (n === 0) return 1;
+    4 │     return factorial(n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+      1   1 │   // Simple case: parameter only used in recursion
+      2     │ - function·factorial(n,·acc)·{
+          2 │ + function·factorial(n,·_acc)·{
+      3   3 │       if (n === 0) return 1;
+      4     │ - ····return·factorial(n·-·1,·acc);
+          4 │ + ····return·factorial(n·-·1,·_acc);
+      5   5 │   }
+      6   6 │   
+  
+
+```
+
+```
+invalid.js:8:16 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+     7 │ // Multiple parameters only in recursion
+   > 8 │ function fn(a, b, c) {
+       │                ^
+     9 │     if (a === 0) return 0;
+    10 │     return fn(a - 1, b, c);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend b with an underscore.
+  
+      6   6 │   
+      7   7 │   // Multiple parameters only in recursion
+      8     │ - function·fn(a,·b,·c)·{
+          8 │ + function·fn(a,·_b,·c)·{
+      9   9 │       if (a === 0) return 0;
+     10     │ - ····return·fn(a·-·1,·b,·c);
+         10 │ + ····return·fn(a·-·1,·_b,·c);
+     11  11 │   }
+     12  12 │   
+  
+
+```
+
+```
+invalid.js:8:19 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+     7 │ // Multiple parameters only in recursion
+   > 8 │ function fn(a, b, c) {
+       │                   ^
+     9 │     if (a === 0) return 0;
+    10 │     return fn(a - 1, b, c);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend c with an underscore.
+  
+      6   6 │   
+      7   7 │   // Multiple parameters only in recursion
+      8     │ - function·fn(a,·b,·c)·{
+          8 │ + function·fn(a,·b,·_c)·{
+      9   9 │       if (a === 0) return 0;
+     10     │ - ····return·fn(a·-·1,·b,·c);
+         10 │ + ····return·fn(a·-·1,·b,·_c);
+     11  11 │   }
+     12  12 │   
+  
+
+```
+
+```
+invalid.js:14:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    13 │ // Arrow function with recursion
+  > 14 │ const countdown = (n, acc) => {
+       │                       ^^^
+    15 │     if (n === 0) return 0;
+    16 │     return countdown(n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+     12  12 │   
+     13  13 │   // Arrow function with recursion
+     14     │ - const·countdown·=·(n,·acc)·=>·{
+         14 │ + const·countdown·=·(n,·_acc)·=>·{
+     15  15 │       if (n === 0) return 0;
+     16     │ - ····return·countdown(n·-·1,·acc);
+         16 │ + ····return·countdown(n·-·1,·_acc);
+     17  17 │   };
+     18  18 │   
+  
+
+```
+
+```
+invalid.js:21:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    19 │ // Method in class
+    20 │ class Counter {
+  > 21 │     count(n, acc) {
+       │              ^^^
+    22 │         if (n === 0) return 0;
+    23 │         return this.count(n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+     19  19 │   // Method in class
+     20  20 │   class Counter {
+     21     │ - ····count(n,·acc)·{
+         21 │ + ····count(n,·_acc)·{
+     22  22 │           if (n === 0) return 0;
+     23     │ - ········return·this.count(n·-·1,·acc);
+         23 │ + ········return·this.count(n·-·1,·_acc);
+     24  24 │       }
+     25  25 │   }
+  
+
+```
+
+```
+invalid.js:28:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    27 │ // Parameter with arithmetic in recursion
+  > 28 │ function countdown(n, step) {
+       │                       ^^^^
+    29 │     if (n === 0) return 0;
+    30 │     return countdown(n - step, step);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend step with an underscore.
+  
+     26  26 │   
+     27  27 │   // Parameter with arithmetic in recursion
+     28     │ - function·countdown(n,·step)·{
+         28 │ + function·countdown(n,·_step)·{
+     29  29 │       if (n === 0) return 0;
+     30     │ - ····return·countdown(n·-·step,·step);
+         30 │ + ····return·countdown(n·-·_step,·_step);
+     31  31 │   }
+     32  32 │   
+  
+
+```
+
+```
+invalid.js:34:21 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    33 │ // Multiple operations
+  > 34 │ function compute(a, b) {
+       │                     ^
+    35 │     if (a === 0) return 0;
+    36 │     return compute(a - 1, b * 2 + 1);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend b with an underscore.
+  
+     32  32 │   
+     33  33 │   // Multiple operations
+     34     │ - function·compute(a,·b)·{
+         34 │ + function·compute(a,·_b)·{
+     35  35 │       if (a === 0) return 0;
+     36     │ - ····return·compute(a·-·1,·b·*·2·+·1);
+         36 │ + ····return·compute(a·-·1,·_b·*·2·+·1);
+     37  37 │   }
+     38  38 │   
+  
+
+```
+
+```
+invalid.js:40:20 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    39 │ // Unary operations
+  > 40 │ function negate(n, flag) {
+       │                    ^^^^
+    41 │     if (n === 0) return 0;
+    42 │     return negate(n - 1, !flag);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend flag with an underscore.
+  
+     38  38 │   
+     39  39 │   // Unary operations
+     40     │ - function·negate(n,·flag)·{
+         40 │ + function·negate(n,·_flag)·{
+     41  41 │       if (n === 0) return 0;
+     42     │ - ····return·negate(n·-·1,·!flag);
+         42 │ + ····return·negate(n·-·1,·!_flag);
+     43  43 │   }
+     44  44 │   
+  
+
+```
+
+```
+invalid.js:47:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    45 │ // Object method
+    46 │ const obj = {
+  > 47 │     count(n, step) {
+       │              ^^^^
+    48 │         if (n === 0) return 0;
+    49 │         return this.count(n - step, step);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend step with an underscore.
+  
+     45  45 │   // Object method
+     46  46 │   const obj = {
+     47     │ - ····count(n,·step)·{
+         47 │ + ····count(n,·_step)·{
+     48  48 │           if (n === 0) return 0;
+     49     │ - ········return·this.count(n·-·step,·step);
+         49 │ + ········return·this.count(n·-·_step,·_step);
+     50  50 │       }
+     51  51 │   };
+  
+
+```
+
+```
+invalid.js:54:11 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    53 │ // Assignment expression with recursive arrow function
+  > 54 │ foo = (n, acc) => {
+       │           ^^^
+    55 │     if (n === 0) return 0;
+    56 │     return foo(n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+     52  52 │   
+     53  53 │   // Assignment expression with recursive arrow function
+     54     │ - foo·=·(n,·acc)·=>·{
+         54 │ + foo·=·(n,·_acc)·=>·{
+     55  55 │       if (n === 0) return 0;
+     56     │ - ····return·foo(n·-·1,·acc);
+         56 │ + ····return·foo(n·-·1,·_acc);
+     57  57 │   };
+     58  58 │   
+  
+
+```
+
+```
+invalid.js:61:11 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    59 │ // Separate declaration and assignment with arrow function
+    60 │ let bar;
+  > 61 │ bar = (x, unused) => {
+       │           ^^^^^^
+    62 │     if (x === 0) return 0;
+    63 │     return bar(x - 1, unused);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend unused with an underscore.
+  
+     59  59 │   // Separate declaration and assignment with arrow function
+     60  60 │   let bar;
+     61     │ - bar·=·(x,·unused)·=>·{
+         61 │ + bar·=·(x,·_unused)·=>·{
+     62  62 │       if (x === 0) return 0;
+     63     │ - ····return·bar(x·-·1,·unused);
+         63 │ + ····return·bar(x·-·1,·_unused);
+     64  64 │   };
+     65  65 │   
+  
+
+```
+
+```
+invalid.js:67:19 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    66 │ // Logical AND operator
+  > 67 │ function fnAnd(n, acc) {
+       │                   ^^^
+    68 │     if (n === 0) return 0;
+    69 │     return fnAnd(n - 1, acc && true);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+     65  65 │   
+     66  66 │   // Logical AND operator
+     67     │ - function·fnAnd(n,·acc)·{
+         67 │ + function·fnAnd(n,·_acc)·{
+     68  68 │       if (n === 0) return 0;
+     69     │ - ····return·fnAnd(n·-·1,·acc·&&·true);
+         69 │ + ····return·fnAnd(n·-·1,·_acc·&&·true);
+     70  70 │   }
+     71  71 │   
+  
+
+```
+
+```
+invalid.js:73:18 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    72 │ // Logical OR operator
+  > 73 │ function fnOr(n, acc) {
+       │                  ^^^
+    74 │     if (n === 0) return 0;
+    75 │     return fnOr(n - 1, acc || 0);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+     71  71 │   
+     72  72 │   // Logical OR operator
+     73     │ - function·fnOr(n,·acc)·{
+         73 │ + function·fnOr(n,·_acc)·{
+     74  74 │       if (n === 0) return 0;
+     75     │ - ····return·fnOr(n·-·1,·acc·||·0);
+         75 │ + ····return·fnOr(n·-·1,·_acc·||·0);
+     76  76 │   }
+     77  77 │   
+  
+
+```
+
+```
+invalid.js:79:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    78 │ // Nullish coalescing operator
+  > 79 │ function fnNullish(n, acc) {
+       │                       ^^^
+    80 │     if (n === 0) return 0;
+    81 │     return fnNullish(n - 1, acc ?? 0);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+     77  77 │   
+     78  78 │   // Nullish coalescing operator
+     79     │ - function·fnNullish(n,·acc)·{
+         79 │ + function·fnNullish(n,·_acc)·{
+     80  80 │       if (n === 0) return 0;
+     81     │ - ····return·fnNullish(n·-·1,·acc·??·0);
+         81 │ + ····return·fnNullish(n·-·1,·_acc·??·0);
+     82  82 │   }
+     83  83 │   
+  
+
+```
+
+```
+invalid.js:85:22 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    84 │ // Nested logical operators
+  > 85 │ function fnNested(n, acc) {
+       │                      ^^^
+    86 │     if (n === 0) return 0;
+    87 │     return fnNested(n - 1, (acc || 0) && true);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+     83  83 │   
+     84  84 │   // Nested logical operators
+     85     │ - function·fnNested(n,·acc)·{
+         85 │ + function·fnNested(n,·_acc)·{
+     86  86 │       if (n === 0) return 0;
+     87     │ - ····return·fnNested(n·-·1,·(acc·||·0)·&&·true);
+         87 │ + ····return·fnNested(n·-·1,·(_acc·||·0)·&&·true);
+     88  88 │   }
+     89  89 │   
+  
+
+```
+
+```
+invalid.js:91:30 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    90 │ // Conditional expression with parameter in consequent
+  > 91 │ function fnCondConsequent(n, acc) {
+       │                              ^^^
+    92 │     if (n === 0) return 0;
+    93 │     return fnCondConsequent(n - 1, n > 5 ? acc : 0);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+     89  89 │   
+     90  90 │   // Conditional expression with parameter in consequent
+     91     │ - function·fnCondConsequent(n,·acc)·{
+         91 │ + function·fnCondConsequent(n,·_acc)·{
+     92  92 │       if (n === 0) return 0;
+     93     │ - ····return·fnCondConsequent(n·-·1,·n·>·5·?·acc·:·0);
+         93 │ + ····return·fnCondConsequent(n·-·1,·n·>·5·?·_acc·:·0);
+     94  94 │   }
+     95  95 │   
+  
+
+```
+
+```
+invalid.js:97:29 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    96 │ // Conditional expression with parameter in alternate
+  > 97 │ function fnCondAlternate(n, acc) {
+       │                             ^^^
+    98 │     if (n === 0) return 0;
+    99 │     return fnCondAlternate(n - 1, n > 5 ? 0 : acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+     95  95 │   
+     96  96 │   // Conditional expression with parameter in alternate
+     97     │ - function·fnCondAlternate(n,·acc)·{
+         97 │ + function·fnCondAlternate(n,·_acc)·{
+     98  98 │       if (n === 0) return 0;
+     99     │ - ····return·fnCondAlternate(n·-·1,·n·>·5·?·0·:·acc);
+         99 │ + ····return·fnCondAlternate(n·-·1,·n·>·5·?·0·:·_acc);
+    100 100 │   }
+    101 101 │   
+  
+
+```
+
+```
+invalid.js:103:24 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    102 │ // Conditional expression with parameter in test
+  > 103 │ function fnCondTest(n, flag) {
+        │                        ^^^^
+    104 │     if (n === 0) return 0;
+    105 │     return fnCondTest(n - 1, flag ? true : false);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend flag with an underscore.
+  
+    101 101 │   
+    102 102 │   // Conditional expression with parameter in test
+    103     │ - function·fnCondTest(n,·flag)·{
+        103 │ + function·fnCondTest(n,·_flag)·{
+    104 104 │       if (n === 0) return 0;
+    105     │ - ····return·fnCondTest(n·-·1,·flag·?·true·:·false);
+        105 │ + ····return·fnCondTest(n·-·1,·_flag·?·true·:·false);
+    106 106 │   }
+    107 107 │   
+  
+
+```
+
+```
+invalid.js:109:26 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    108 │ // Nested conditional expressions
+  > 109 │ function fnCondNested(n, acc) {
+        │                          ^^^
+    110 │     if (n === 0) return 0;
+    111 │     return fnCondNested(n - 1, n > 5 ? (n > 10 ? acc : 0) : 0);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    107 107 │   
+    108 108 │   // Nested conditional expressions
+    109     │ - function·fnCondNested(n,·acc)·{
+        109 │ + function·fnCondNested(n,·_acc)·{
+    110 110 │       if (n === 0) return 0;
+    111     │ - ····return·fnCondNested(n·-·1,·n·>·5·?·(n·>·10·?·acc·:·0)·:·0);
+        111 │ + ····return·fnCondNested(n·-·1,·n·>·5·?·(n·>·10·?·_acc·:·0)·:·0);
+    112 112 │   }
+    113 113 │   
+  
+
+```
+
+```
+invalid.js:116:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    114 │ // Optional chaining in class method
+    115 │ class CounterOptional {
+  > 116 │     count(n, acc) {
+        │              ^^^
+    117 │         if (n === 0) return 0;
+    118 │         return this?.count(n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    114 114 │   // Optional chaining in class method
+    115 115 │   class CounterOptional {
+    116     │ - ····count(n,·acc)·{
+        116 │ + ····count(n,·_acc)·{
+    117 117 │           if (n === 0) return 0;
+    118     │ - ········return·this?.count(n·-·1,·acc);
+        118 │ + ········return·this?.count(n·-·1,·_acc);
+    119 119 │       }
+    120 120 │   }
+  
+
+```
+
+```
+invalid.js:124:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    122 │ // Optional chaining in object method
+    123 │ const objOptional = {
+  > 124 │     count(n, step) {
+        │              ^^^^
+    125 │         if (n === 0) return 0;
+    126 │         return this?.count(n - step, step);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend step with an underscore.
+  
+    122 122 │   // Optional chaining in object method
+    123 123 │   const objOptional = {
+    124     │ - ····count(n,·step)·{
+        124 │ + ····count(n,·_step)·{
+    125 125 │           if (n === 0) return 0;
+    126     │ - ········return·this?.count(n·-·step,·step);
+        126 │ + ········return·this?.count(n·-·_step,·_step);
+    127 127 │       }
+    128 128 │   };
+  
+
+```
+
+```
+invalid.js:132:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    130 │ // Computed member with string literal
+    131 │ class CounterComputed {
+  > 132 │     count(n, acc) {
+        │              ^^^
+    133 │         if (n === 0) return 0;
+    134 │         return this["count"](n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    130 130 │   // Computed member with string literal
+    131 131 │   class CounterComputed {
+    132     │ - ····count(n,·acc)·{
+        132 │ + ····count(n,·_acc)·{
+    133 133 │           if (n === 0) return 0;
+    134     │ - ········return·this["count"](n·-·1,·acc);
+        134 │ + ········return·this["count"](n·-·1,·_acc);
+    135 135 │       }
+    136 136 │   }
+  
+
+```
+
+```
+invalid.js:140:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    138 │ // Optional chaining with computed member
+    139 │ class CounterOptionalComputed {
+  > 140 │     count(n, acc) {
+        │              ^^^
+    141 │         if (n === 0) return 0;
+    142 │         return this?.["count"](n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    138 138 │   // Optional chaining with computed member
+    139 139 │   class CounterOptionalComputed {
+    140     │ - ····count(n,·acc)·{
+        140 │ + ····count(n,·_acc)·{
+    141 141 │           if (n === 0) return 0;
+    142     │ - ········return·this?.["count"](n·-·1,·acc);
+        142 │ + ········return·this?.["count"](n·-·1,·_acc);
+    143 143 │       }
+    144 144 │   }
+  
+
+```

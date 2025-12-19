@@ -102,7 +102,7 @@ impl Rule for NoStringCaseMismatch {
             state.literal.clone(),
             AnyJsExpression::AnyJsLiteralExpression(
                 AnyJsLiteralExpression::JsStringLiteralExpression(
-                    make::js_string_literal_expression(if ctx.as_preferred_quote().is_double() {
+                    make::js_string_literal_expression(if ctx.preferred_quote().is_double() {
                         make::js_string_literal(&expected_value)
                     } else {
                         make::js_string_literal_single_quotes(&expected_value)

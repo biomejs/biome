@@ -67,10 +67,10 @@ impl Diagnostic for ExceededTypesLimitDiagnostic {
 
     fn advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
         visitor.record_log(LogCategory::Info, &markup!{
-            "In the meantime, you can ignore this file by adding its name or folder in the "<Emphasis>"files.experimentalScannerIgnores"</Emphasis>" option in your configuration file."
+            "In the meantime, you can force this file to be ignored using a `!!` pattern in the "<Emphasis>"files.includes"</Emphasis>" option in your configuration file."
         })?;
         visitor.record_log(LogCategory::Info, &markup!{
-            "Refer to the "<Hyperlink href={"https://biomejs.dev/reference/configuration/#filesexperimentalscannerignores"}>"documentation"</Hyperlink>" for more information."
+            "Refer to the "<Hyperlink href={"https://biomejs.dev/reference/configuration/#filesincludes"}>"documentation"</Hyperlink>" for more information."
         })?;
 
         visitor.record_log(

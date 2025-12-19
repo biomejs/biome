@@ -1,0 +1,233 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/event-attributes.html
+---
+# Input
+
+```html
+<button onclick="alert(    '1')">click me!</button>
+
+<div onclick="handleClick(  event  )" onmouseover="showTooltip( this )" onmouseout="hideTooltip(  )">Hover me</div>
+
+<img onerror='handleError(  this  )' onload="imageLoaded(  event  )" />
+
+<button onclick="(event) =>   {  console.log('clicked');  handleClick(  event  );  }">Modern JS</button>
+
+<div onclick="processData(  { id: 123, name: 'test'  },  [ 1,  2, 3 ]  )">Data</div>
+
+<button onclick="api.user.get(  123  ).then(  data =>   updateUI( data )  )">API Call</button>
+
+<input onfocus="highlightField(  this  )" onblur="validateField( this.value )" />
+<select onchange="filterResults(  this.value,  this.selectedIndex  )">
+  <option>Option 1</option>
+</select>
+
+<button onclick="
+   alert(1);           alert(2);
+ ">Click</button>
+
+<button onclick="
+    return false
+  ">Click</button>
+
+<button onclick="
+  console.log(arguments)
+  ">Click</button>
+
+<button onclick="
+  console.log(onclick)
+  ">Click</button>
+
+<button onclick="
+  'use strict'
+  console.log(onclick)
+  ">Click</button>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,57 +1,74 @@
+-<button onclick="alert('1')">click me!</button>
++<button onclick="alert(    '1')">click me!</button>
+ 
+ <div
+-  onclick="handleClick(event)"
+-  onmouseover="showTooltip(this)"
+-  onmouseout="hideTooltip()"
++  onclick="handleClick(  event  )"
++  onmouseover="showTooltip( this )"
++  onmouseout="hideTooltip(  )"
+ >
+   Hover me
+ </div>
+ 
+-<img onerror="handleError(this)" onload="imageLoaded(event)" />
++<img onerror="handleError(  this  )" onload="imageLoaded(  event  )" />
+ 
+ <button
+-  onclick="
+-    (event) => {
+-      console.log('clicked');
+-      handleClick(event);
+-    }
+-  "
++  onclick="(event) =>   {  console.log('clicked');  handleClick(  event  );  }"
+ >
+   Modern JS
+ </button>
+ 
+-<div onclick="processData({ id: 123, name: 'test' }, [1, 2, 3])">Data</div>
++<div onclick="processData(  { id: 123, name: 'test'  },  [ 1,  2, 3 ]  )">
++  Data
++</div>
+ 
+-<button onclick="api.user.get(123).then((data) => updateUI(data))">
++<button onclick="api.user.get(  123  ).then(  data =>   updateUI( data )  )">
+   API Call
+ </button>
+ 
+-<input onfocus="highlightField(this)" onblur="validateField(this.value)" />
+-<select onchange="filterResults(this.value, this.selectedIndex)">
++<input
++  onfocus="highlightField(  this  )"
++  onblur="validateField( this.value )"
++/>
++<select onchange="filterResults(  this.value,  this.selectedIndex  )">
+   <option>Option 1</option>
+ </select>
+ 
+ <button
+   onclick="
+-    alert(1);
+-    alert(2);
+-  "
++   alert(1);           alert(2);
++ "
+ >
+   Click
+ </button>
+ 
+-<button onclick="return false;">Click</button>
++<button
++  onclick="
++    return false
++  "
++>
++  Click
++</button>
+ 
+-<button onclick="console.log(arguments)">Click</button>
++<button
++  onclick="
++  console.log(arguments)
++  "
++>
++  Click
++</button>
+ 
+-<button onclick="console.log(onclick)">Click</button>
++<button
++  onclick="
++  console.log(onclick)
++  "
++>
++  Click
++</button>
+ 
+ <button
+-  onclick='
+-    "use strict";
+-    console.log(onclick);
+-  '
++  onclick="
++  'use strict'
++  console.log(onclick)
++  "
+ >
+   Click
+ </button>
+```
+
+# Output
+
+```html
+<button onclick="alert(    '1')">click me!</button>
+
+<div
+  onclick="handleClick(  event  )"
+  onmouseover="showTooltip( this )"
+  onmouseout="hideTooltip(  )"
+>
+  Hover me
+</div>
+
+<img onerror="handleError(  this  )" onload="imageLoaded(  event  )" />
+
+<button
+  onclick="(event) =>   {  console.log('clicked');  handleClick(  event  );  }"
+>
+  Modern JS
+</button>
+
+<div onclick="processData(  { id: 123, name: 'test'  },  [ 1,  2, 3 ]  )">
+  Data
+</div>
+
+<button onclick="api.user.get(  123  ).then(  data =>   updateUI( data )  )">
+  API Call
+</button>
+
+<input
+  onfocus="highlightField(  this  )"
+  onblur="validateField( this.value )"
+/>
+<select onchange="filterResults(  this.value,  this.selectedIndex  )">
+  <option>Option 1</option>
+</select>
+
+<button
+  onclick="
+   alert(1);           alert(2);
+ "
+>
+  Click
+</button>
+
+<button
+  onclick="
+    return false
+  "
+>
+  Click
+</button>
+
+<button
+  onclick="
+  console.log(arguments)
+  "
+>
+  Click
+</button>
+
+<button
+  onclick="
+  console.log(onclick)
+  "
+>
+  Click
+</button>
+
+<button
+  onclick="
+  'use strict'
+  console.log(onclick)
+  "
+>
+  Click
+</button>
+```

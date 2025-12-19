@@ -24,6 +24,7 @@ The --json option is unstable/experimental and its output might change between p
 		"matches": 0,
 		"errors": 0,
 		"warnings": 0,
+		"infos": 0,
 		"skipped": 0,
 		"suggestedFixesSkipped": 0,
 		"diagnosticsNotPrinted": 0

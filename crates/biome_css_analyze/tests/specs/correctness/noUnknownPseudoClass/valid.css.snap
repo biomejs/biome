@@ -44,5 +44,8 @@ a:defined { }
 :seeking, :stalled, :buffering, :volume-locked, :muted {}
 ::-webkit-scrollbar-button:hover {}
 dialog:open {}
+custom-selector:state(checked) {}
 
 ```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._

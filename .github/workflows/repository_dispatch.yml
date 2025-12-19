@@ -13,7 +13,7 @@ permissions:
 env:
   BIOME_WEBSITE_REPO: biomejs/website
   BIOME_PUSH_ON_MAIN_EVENT_TYPE: biome-push-on-main-event
-  WASM_PACK_CACHE_KEY: wasm-pack-cache
+  WASM_CACHE_KEY: wasm-cache
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,49 +25,56 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout repository
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - name: Warm up wasm-pack cache
+      - name: Warm up wasm cache
         id: cache-restore
-        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: |
             ./target
             ./packages/@biomejs/wasm-web
-          key: ${{ env.WASM_PACK_CACHE_KEY }}
+          key: ${{ env.WASM_CACHE_KEY }}
 
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Install just
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        with:
+          bins: wasm-bindgen-cli@0.2.105, wasm-opt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build WASM module for the web
-        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --profiling --scope biomejs crates/biome_wasm
+        run: just build-wasm-web
 
       # https://github.com/actions/cache/issues/342
-      - name: Clear old wasm-pack cache
+      - name: Clear old wasm cache
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         run: |
           gh extension install actions/gh-actions-cache
-          gh actions-cache delete ${{ env.WASM_PACK_CACHE_KEY }} --confirm
+          gh actions-cache delete ${{ env.WASM_CACHE_KEY }} --confirm
         env:
           GH_TOKEN: ${{ github.token }}
         continue-on-error: true
 
-      - name: Save new wasm-pack cache
-        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+      - name: Save new wasm cache
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: |
             ./target
             ./packages/@biomejs/wasm-web
-          key: ${{ env.WASM_PACK_CACHE_KEY }}
+          key: ${{ env.WASM_CACHE_KEY }}
 
       - name: Install pnpm
         # workaround for the issue https://github.com/actions/setup-node/issues/1222
         run: npm i -g --force corepack && corepack enable
 
       - name: Setup node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
-          node-version: 20.19.5
+          node-version: 24.12.0
           cache: pnpm
 
       - name: Update package.json
@@ -87,7 +94,7 @@ jobs:
     steps:
       - name: Dispatch event on push
         if: ${{ github.event_name == 'push' }}
-        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
           repository: ${{ env.BIOME_WEBSITE_REPO }}
@@ -96,7 +103,7 @@ jobs:
       # For testing only, the payload is mocked
       - name: Dispatch event on workflow dispatch
         if: ${{ github.event_name == 'workflow_dispatch' }}
-        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
           repository: ${{ env.BIOME_WEBSITE_REPO }}

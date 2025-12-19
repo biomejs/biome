@@ -7,6 +7,7 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_rule_options"
+publish              = true
 repository.workspace = true
 version              = "0.0.1"
 
@@ -26,6 +27,7 @@ regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true }
+serde_json               = { workspace = true, optional = true }
 smallvec                 = { workspace = true }
 
 [lints]
@@ -33,4 +35,4 @@ workspace = true
 
 
 [features]
-schema = ["dep:schemars"]
+schema = ["dep:schemars", "dep:serde_json"]

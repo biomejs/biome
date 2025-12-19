@@ -1,10 +1,14 @@
 mod package_json;
 mod tsconfig_json;
+mod turbo_json;
 
+use camino::Utf8Path;
 pub use package_json::{Dependencies, PackageJson, PackageType, Version};
-pub use tsconfig_json::TsConfigJson;
+pub use tsconfig_json::{CompilerOptions, TsConfigJson};
+pub use turbo_json::TurboJson;
 
 use biome_rowan::Language;
+use std::sync::Arc;
 
 use crate::{LICENSE_LIST, Manifest, Package, PackageAnalyzeResult, ProjectAnalyzeDiagnostic};
 
@@ -19,13 +23,34 @@ pub struct NodeJsPackage {
 
     /// The `tsconfig.json` manifest
     pub tsconfig: Option<TsConfigJson>,
+
+    /// The `turbo.json` manifest for Turborepo projects.
+    pub turbo_json: Option<Arc<TurboJson>>,
 }
 
 impl NodeJsPackage {
-    pub fn insert_serialized_tsconfig(&mut self, content: &ProjectLanguageRoot<TsConfigJson>) {
-        let tsconfig = TsConfigJson::deserialize_manifest(content);
+    pub fn insert_serialized_tsconfig(
+        &mut self,
+        content: &ProjectLanguageRoot<TsConfigJson>,
+        path: &Utf8Path,
+    ) {
+        let tsconfig = TsConfigJson::deserialize_manifest(content, path);
         let (tsconfig, deserialize_diagnostics) = tsconfig.consume();
         self.tsconfig = Some(tsconfig.unwrap_or_default());
+        self.diagnostics = deserialize_diagnostics
+            .into_iter()
+            .map(biome_diagnostics::serde::Diagnostic::new)
+            .collect();
+    }
+
+    pub fn insert_serialized_turbo_json(
+        &mut self,
+        content: &ProjectLanguageRoot<TurboJson>,
+        path: &Utf8Path,
+    ) {
+        let turbo_json = TurboJson::deserialize_manifest(content, path);
+        let (turbo_json, deserialize_diagnostics) = turbo_json.consume();
+        self.turbo_json = Some(Arc::new(turbo_json.unwrap_or_default()));
         self.diagnostics = deserialize_diagnostics
             .into_iter()
             .map(biome_diagnostics::serde::Diagnostic::new)
@@ -37,6 +62,16 @@ impl NodeJsPackage {
             manifest: self.manifest.clone(),
             diagnostics: self.diagnostics.clone(),
             tsconfig: None,
+            turbo_json: self.turbo_json.clone(),
+        }
+    }
+
+    pub fn without_turbo_json(&self) -> Self {
+        Self {
+            manifest: self.manifest.clone(),
+            diagnostics: self.diagnostics.clone(),
+            tsconfig: self.tsconfig.clone(),
+            turbo_json: None,
         }
     }
 }
@@ -46,8 +81,12 @@ pub(crate) type ProjectLanguageRoot<M> = <<M as Manifest>::Language as Language>
 impl Package for NodeJsPackage {
     type Manifest = PackageJson;
 
-    fn insert_serialized_manifest(&mut self, content: &ProjectLanguageRoot<Self::Manifest>) {
-        let deserialized = Self::Manifest::deserialize_manifest(content);
+    fn insert_serialized_manifest(
+        &mut self,
+        content: &ProjectLanguageRoot<Self::Manifest>,
+        path: &Utf8Path,
+    ) {
+        let deserialized = Self::Manifest::deserialize_manifest(content, path);
         let (manifest, diagnostics) = deserialized.consume();
         self.manifest = manifest;
         self.diagnostics = diagnostics

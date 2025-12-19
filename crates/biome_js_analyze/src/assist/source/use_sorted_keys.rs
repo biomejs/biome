@@ -44,14 +44,14 @@ declare_source_rule! {
     /// ## Examples
     ///
     /// ```js,expect_diff
-    /// {
+    /// const obj = {
     ///   x: 1,
     ///   a: 2,
     /// };
     /// ```
     ///
     /// ```js,expect_diff
-    /// {
+    /// const obj = {
     ///   x: 1,
     ///   ...f,
     ///   y: 4,
@@ -62,8 +62,8 @@ declare_source_rule! {
     /// };
     /// ```
     ///
-    /// ```js,expect_diff
-    /// {
+    /// ```js
+    /// const obj = {
     ///   get aab() {
     ///     return this._aab;
     ///   },
@@ -100,7 +100,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```js,use_options,expect_diagnostic
+    /// ```js,use_options,expect_diff
     /// const obj = {
     ///     val13: 1,
     ///     val1: 1,
@@ -119,7 +119,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```js,use_options,expect_diagnostic
+    /// ```js,use_options,expect_diff
     /// const obj = {
     ///     val13: 1,
     ///     val1: 1,
@@ -147,7 +147,7 @@ impl Rule for UseSortedKeys {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let options = ctx.options();
-        let sort_order = options.sort_order;
+        let sort_order = options.sort_order.unwrap_or_default();
         let comparator = match sort_order {
             SortOrder::Natural => ComparableToken::ascii_nat_cmp,
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
@@ -184,7 +184,7 @@ impl Rule for UseSortedKeys {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let list = ctx.query();
         let options = ctx.options();
-        let sort_order = options.sort_order;
+        let sort_order = options.sort_order.unwrap_or_default();
         let comparator = match sort_order {
             SortOrder::Natural => ComparableToken::ascii_nat_cmp,
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,

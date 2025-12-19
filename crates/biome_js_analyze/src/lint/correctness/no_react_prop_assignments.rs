@@ -2,7 +2,9 @@ use crate::react::components::{
     AnyPotentialReactComponentDeclaration, ReactComponentInfo, ReactComponentKind,
 };
 use crate::services::semantic::Semantic;
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsExpression, AnyJsStatement, JsParameterList};
@@ -42,6 +44,7 @@ declare_lint_rule! {
         name: "noReactPropAssignments",
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("react-compiler").same()],
+        domains: &[RuleDomain::React],
         recommended: false,
     }
 }

@@ -4,5 +4,7 @@ var s = {
     "abc\u42efg": tagged` test ${1} \a`,
     key: `\``,
     escapeTemplateLiteralInterpolation1: `\${`,
-    escapeTemplateLiteralInterpolation2: `\${}`
+    escapeTemplateLiteralInterpolation2: `\${}`,
+    escapeTemplateLiteralInterpolation3: `$\{`,
+    escapeTemplateLiteralInterpolation4: `$\{}`
 };

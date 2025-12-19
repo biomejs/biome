@@ -1,0 +1,51 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@source not "../routes/utils/ds.tsx";
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwSourceAtRule {
+                source_token: SOURCE_KW@1..8 "source" [] [Whitespace(" ")],
+                not_token: NOT_KW@8..12 "not" [] [Whitespace(" ")],
+                source: CssString {
+                    value_token: CSS_STRING_LITERAL@12..36 "\"../routes/utils/ds.tsx\"" [] [],
+                },
+                semicolon_token: SEMICOLON@36..37 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@37..38 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..38
+  0: (empty)
+  1: CSS_RULE_LIST@0..37
+    0: CSS_AT_RULE@0..37
+      0: AT@0..1 "@" [] []
+      1: TW_SOURCE_AT_RULE@1..37
+        0: SOURCE_KW@1..8 "source" [] [Whitespace(" ")]
+        1: NOT_KW@8..12 "not" [] [Whitespace(" ")]
+        2: CSS_STRING@12..36
+          0: CSS_STRING_LITERAL@12..36 "\"../routes/utils/ds.tsx\"" [] []
+        3: SEMICOLON@36..37 ";" [] []
+  2: EOF@37..38 "" [Newline("\n")] []
+
+```

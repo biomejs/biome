@@ -20,9 +20,14 @@ fn quick_test() {
     // quick brown fox
     // "#;
     let src = r#"
-foo bar baz boof
-<!-- comment -->
-quick brown fox
+<template>
+  <template>foo</template>
+</template>
+
+<template>
+  <template>foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo</template>
+</template>
+
 "#;
     let source_type = HtmlFileSource::html();
     let tree = parse_html(src, HtmlParseOptions::from(&source_type));
@@ -31,7 +36,7 @@ quick brown fox
         .with_line_width(LineWidth::try_from(80).unwrap())
         .with_attribute_position(AttributePosition::Auto);
 
-    let doc = format_node(options.clone(), &tree.syntax()).unwrap();
+    let doc = format_node(options.clone(), &tree.syntax(), false).unwrap();
     let result = doc.print().unwrap();
 
     println!("{}", doc.into_document());

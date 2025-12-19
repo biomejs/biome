@@ -3,7 +3,7 @@ use crate::js_kinds_src::Field;
 use crate::language_kind::LanguageKind;
 use biome_string_case::Case;
 use quote::{format_ident, quote};
-use xtask::Result;
+use xtask_glue::Result;
 
 pub fn generate_node_factory(ast: &AstSrc, language_kind: LanguageKind) -> Result<String> {
     let syntax_crate = language_kind.syntax_crate_ident();
@@ -214,6 +214,6 @@ pub fn generate_node_factory(ast: &AstSrc, language_kind: LanguageKind) -> Resul
         #(#bogus)*
     };
 
-    let pretty = xtask::reformat(output)?;
+    let pretty = xtask_glue::reformat(output)?;
     Ok(pretty)
 }

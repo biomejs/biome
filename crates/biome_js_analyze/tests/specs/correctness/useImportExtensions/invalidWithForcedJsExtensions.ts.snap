@@ -30,6 +30,11 @@ require("./sub/foo")
 import "./sub/styles.css"
 import "./sub/component.svg.svelte";
 import "./sub/component.svg.svelte?query=string&query2#hash";
+
+// Invalid extension
+import "./sub/foo.ts";
+import "./sub/bar/index.ts";
+
 ```
 
 # Diagnostics
@@ -418,6 +423,7 @@ invalidWithForcedJsExtensions.ts:25:8 lint/correctness/useImportExtensions  FIXA
   > 25 │ import "./sub/component.svg.svelte";
        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     26 │ import "./sub/component.svg.svelte?query=string&query2#hash";
+    27 │ 
   
   i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
   
@@ -428,6 +434,7 @@ invalidWithForcedJsExtensions.ts:25:8 lint/correctness/useImportExtensions  FIXA
     25    │ - import·"./sub/component.svg.svelte";
        25 │ + import·"./sub/component.svg.svelte.js";
     26 26 │   import "./sub/component.svg.svelte?query=string&query2#hash";
+    27 27 │   
   
 
 ```
@@ -441,8 +448,59 @@ invalidWithForcedJsExtensions.ts:26:8 lint/correctness/useImportExtensions ━�
     25 │ import "./sub/component.svg.svelte";
   > 26 │ import "./sub/component.svg.svelte?query=string&query2#hash";
        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ // Invalid extension
   
   i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:29:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    28 │ // Invalid extension
+  > 29 │ import "./sub/foo.ts";
+       │        ^^^^^^^^^^^^^^
+    30 │ import "./sub/bar/index.ts";
+    31 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    27 27 │   
+    28 28 │   // Invalid extension
+    29    │ - import·"./sub/foo.ts";
+       29 │ + import·"./sub/foo.js";
+    30 30 │   import "./sub/bar/index.ts";
+    31 31 │   
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:30:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    28 │ // Invalid extension
+    29 │ import "./sub/foo.ts";
+  > 30 │ import "./sub/bar/index.ts";
+       │        ^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    28 28 │   // Invalid extension
+    29 29 │   import "./sub/foo.ts";
+    30    │ - import·"./sub/bar/index.ts";
+       30 │ + import·"./sub/bar/index.js";
+    31 31 │   
   
 
 ```

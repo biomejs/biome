@@ -9,7 +9,7 @@ use biome_rowan::SyntaxKind;
 use std::io;
 use std::path::Path;
 use std::process::Command;
-use xtask::project_root;
+use xtask_glue::project_root;
 
 const OK_PATH: &str = "xtask/coverage/babel/packages/babel-parser/test/fixtures/jsx/basic";
 
@@ -45,7 +45,7 @@ impl TestCase for BabelJsxTestCase {
             self.name().to_string(),
             self.code.clone(),
             source_type,
-            options.clone(),
+            options,
         );
         let result = parse(&self.code, source_type, options);
 

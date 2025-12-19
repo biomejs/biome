@@ -20,7 +20,9 @@ CssRoot {
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssFontFaceAtRule {
-                font_face_token: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")],
+                declarator: CssFontFaceAtRuleDeclarator {
+                    font_face_token: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")],
+                },
                 block: CssBogusBlock {
                     items: [],
                 },
@@ -48,7 +50,9 @@ CssRoot {
         CssAtRule {
             at_token: AT@17..19 "@" [Newline("\n")] [],
             rule: CssFontFaceAtRule {
-                font_face_token: FONT_FACE_KW@19..29 "font-face" [] [Whitespace(" ")],
+                declarator: CssFontFaceAtRuleDeclarator {
+                    font_face_token: FONT_FACE_KW@19..29 "font-face" [] [Whitespace(" ")],
+                },
                 block: CssBogusBlock {
                     items: [],
                 },
@@ -76,7 +80,9 @@ CssRoot {
                         CssAtRule {
                             at_token: AT@33..35 "@" [Newline("\n")] [],
                             rule: CssFontFaceAtRule {
-                                font_face_token: FONT_FACE_KW@35..45 "font-face" [] [Whitespace(" ")],
+                                declarator: CssFontFaceAtRuleDeclarator {
+                                    font_face_token: FONT_FACE_KW@35..45 "font-face" [] [Whitespace(" ")],
+                                },
                                 block: CssBogusBlock {
                                     items: [],
                                 },
@@ -103,7 +109,8 @@ CssRoot {
     0: CSS_AT_RULE@0..11
       0: AT@0..1 "@" [] []
       1: CSS_FONT_FACE_AT_RULE@1..11
-        0: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")]
+        0: CSS_FONT_FACE_AT_RULE_DECLARATOR@1..11
+          0: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")]
         1: CSS_BOGUS_BLOCK@11..11
     1: CSS_QUALIFIED_RULE@11..17
       0: CSS_SELECTOR_LIST@11..15
@@ -121,7 +128,8 @@ CssRoot {
     2: CSS_AT_RULE@17..29
       0: AT@17..19 "@" [Newline("\n")] []
       1: CSS_FONT_FACE_AT_RULE@19..29
-        0: FONT_FACE_KW@19..29 "font-face" [] [Whitespace(" ")]
+        0: CSS_FONT_FACE_AT_RULE_DECLARATOR@19..29
+          0: FONT_FACE_KW@19..29 "font-face" [] [Whitespace(" ")]
         1: CSS_BOGUS_BLOCK@29..29
     3: CSS_QUALIFIED_RULE@29..46
       0: CSS_SELECTOR_LIST@29..32
@@ -139,7 +147,8 @@ CssRoot {
           1: CSS_AT_RULE@33..45
             0: AT@33..35 "@" [Newline("\n")] []
             1: CSS_FONT_FACE_AT_RULE@35..45
-              0: FONT_FACE_KW@35..45 "font-face" [] [Whitespace(" ")]
+              0: CSS_FONT_FACE_AT_RULE_DECLARATOR@35..45
+                0: FONT_FACE_KW@35..45 "font-face" [] [Whitespace(" ")]
               1: CSS_BOGUS_BLOCK@45..45
           2: CSS_EMPTY_DECLARATION@45..46
             0: SEMICOLON@45..46 ";" [] []

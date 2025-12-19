@@ -41,7 +41,11 @@ pub fn resolve(
     }
 
     if specifier.starts_with('/') {
-        return resolve_absolute_path(Utf8PathBuf::from(specifier), fs, options);
+        return resolve_absolute_path_with_extension_aliases(
+            Utf8PathBuf::from(specifier),
+            fs,
+            options,
+        );
     }
 
     if is_relative_specifier(specifier) {
@@ -56,6 +60,38 @@ pub fn resolve(
     }
 
     resolve_module(specifier, base_dir, fs, options)
+}
+
+/// Resolves the given absolute `path` with the extension aliases specified in the options.
+fn resolve_absolute_path_with_extension_aliases(
+    path: Utf8PathBuf,
+    fs: &dyn ResolverFsProxy,
+    options: &ResolveOptions,
+) -> Result<Utf8PathBuf, ResolveError> {
+    // Skip if no extension is in the path.
+    let Some(extension) = path.extension() else {
+        return resolve_absolute_path(path, fs, options);
+    };
+
+    // Skip if no extension alias is configured.
+    let Some(&(_, aliases)) = options
+        .extension_aliases
+        .iter()
+        .find(|(ext, _)| *ext == extension)
+    else {
+        return resolve_absolute_path(path, fs, options);
+    };
+
+    // Try to resolve the path for each extension alias.
+    for alias in aliases {
+        match resolve_absolute_path(path.with_extension(alias), fs, options) {
+            Ok(path) => return Ok(path),
+            Err(ResolveError::NotFound) => { /* continue */ }
+            Err(error) => return Err(error),
+        }
+    }
+
+    Err(ResolveError::NotFound)
 }
 
 /// Resolves the given absolute `path`.
@@ -111,7 +147,7 @@ fn resolve_relative_path(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    resolve_absolute_path(base_dir.join(path), fs, options)
+    resolve_absolute_path_with_extension_aliases(base_dir.join(path), fs, options)
 }
 
 /// Resolve the directory `dir_path`.
@@ -183,9 +219,15 @@ fn resolve_module_with_package_json(
 ) -> Result<Utf8PathBuf, ResolveError> {
     // `tsconfig.json` may only be found in directories containing a
     // `package.json`, so this is the only place we need to attempt to use it.
-    let tsconfig = fs.read_tsconfig_json(&package_path.join("tsconfig.json"));
-    if let Some(path) = tsconfig.as_ref().ok().and_then(|ts_config| {
-        resolve_paths_mapping(specifier, ts_config, package_path, fs, options).ok()
+    let tsconfig = match &options.tsconfig {
+        DiscoverableManifest::Auto => fs
+            .read_tsconfig_json(&package_path.join("tsconfig.json"))
+            .map(Cow::Owned),
+        DiscoverableManifest::Explicit { manifest, .. } => Ok(Cow::Borrowed(*manifest)),
+        DiscoverableManifest::Off => Err(ResolveError::NotFound),
+    };
+    if let Some(path) = tsconfig.as_ref().ok().and_then(|tsconfig| {
+        resolve_paths_mapping(specifier, tsconfig, package_path, fs, options).ok()
     }) {
         return Ok(path);
     }
@@ -220,6 +262,17 @@ fn resolve_module_with_package_json(
             fs,
             options,
         );
+    }
+
+    if let Some(base_url) = tsconfig
+        .as_ref()
+        .ok()
+        .and_then(|tsconfig| tsconfig.compiler_options.base_url.as_ref())
+    {
+        match resolve_relative_path(specifier, base_url, fs, options) {
+            Err(ResolveError::NotFound) => { /* continue below */ }
+            result => return result,
+        }
     }
 
     resolve_dependency(specifier, package_path, fs, options)
@@ -340,12 +393,12 @@ fn resolve_paths_mapping(
 
     let resolve_specifier = |specifier: &str| {
         if is_relative_specifier(specifier) {
-            let base_dir = match &tsconfig_json.compiler_options.base_url {
-                Some(base_url) => base_url.as_path(),
-                None => package_path,
-            };
-
-            resolve_relative_path(specifier, base_dir, fs, options)
+            resolve_relative_path(
+                specifier,
+                &tsconfig_json.compiler_options.paths_base,
+                fs,
+                options,
+            )
         } else {
             resolve_dependency(specifier, package_path, fs, options)
         }
@@ -695,6 +748,7 @@ fn strip_query_and_fragment(specifier: &str) -> &str {
 }
 
 /// Options to pass to the resolver.
+#[derive(Clone)]
 pub struct ResolveOptions<'a> {
     /// If `true`, specifiers are assumed to be relative paths. Resolving them
     /// as a package will still be attempted if resolving as a relative path
@@ -729,8 +783,15 @@ pub struct ResolveOptions<'a> {
     /// Extensions are checked in the order given, meaning the first extension
     /// in the list has the highest priority.
     ///
-    /// Extensions should be provided without leading dot.
+    /// Extensions should be provided without a leading dot.
     pub extensions: &'a [&'a str],
+
+    /// List of extension aliases to search for in absolute or relative paths.
+    /// Typically used to resolve `.ts` files by `.js` extension.
+    /// Same behavior as the `extensionAlias` option in [enhanced-resolve](https://github.com/webpack/enhanced-resolve?tab=readme-ov-file#resolver-options).
+    ///
+    /// Extensions should be provided without a leading dot.
+    pub extension_aliases: &'a [(&'a str, &'a [&'a str])],
 
     /// Defines which `package.json` file should be used.
     ///
@@ -801,6 +862,7 @@ impl<'a> ResolveOptions<'a> {
             condition_names: &[],
             default_files: &[],
             extensions: &[],
+            extension_aliases: &[],
             package_json: DiscoverableManifest::Auto,
             resolve_node_builtins: false,
             resolve_types: false,
@@ -836,6 +898,15 @@ impl<'a> ResolveOptions<'a> {
     /// Sets [`Self::extensions`] and returns this instance.
     pub const fn with_extensions(mut self, extensions: &'a [&'a str]) -> Self {
         self.extensions = extensions;
+        self
+    }
+
+    /// Sets [`Self::extension_aliases`] and returns this instance.
+    pub const fn with_extension_aliases(
+        mut self,
+        extension_aliases: &'a [(&'a str, &'a [&'a str])],
+    ) -> Self {
+        self.extension_aliases = extension_aliases;
         self
     }
 
@@ -878,6 +949,7 @@ impl<'a> ResolveOptions<'a> {
             condition_names: self.condition_names,
             default_files: self.default_files,
             extensions: self.extensions,
+            extension_aliases: self.extension_aliases,
             package_json: DiscoverableManifest::Off,
             resolve_node_builtins: self.resolve_node_builtins,
             resolve_types: self.resolve_types,
@@ -892,6 +964,7 @@ impl<'a> ResolveOptions<'a> {
             condition_names: self.condition_names,
             default_files: self.default_files,
             extensions: &[],
+            extension_aliases: &[],
             package_json: DiscoverableManifest::Off,
             resolve_node_builtins: self.resolve_node_builtins,
             resolve_types: self.resolve_types,
@@ -907,7 +980,7 @@ impl<'a> ResolveOptions<'a> {
 /// `tsconfig.json` will be automatically discovered, but this enum allows to
 /// turn them off completely, or to provide an explicit manifest to be used
 /// instead.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub enum DiscoverableManifest<T> {
     #[default]
     Auto,

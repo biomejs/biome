@@ -3,6 +3,7 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, PrintDescription, Resource, Severity};
+use biome_rowan::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use path_absolutize::Absolutize;
 use serde::Serialize;
@@ -172,11 +173,7 @@ impl Display for GitLabDiagnostics<'_> {
                 let initial_fingerprint = self.compute_initial_fingerprint(biome_diagnostic, &path);
                 let fingerprint = hasher.rehash_until_unique(initial_fingerprint);
 
-                GitLabDiagnostic::try_from_diagnostic(
-                    biome_diagnostic,
-                    path.to_string(),
-                    fingerprint,
-                )
+                GitLabDiagnostic::try_from_diagnostic(biome_diagnostic, path.clone(), fingerprint)
             })
             .collect();
         let serialized = serde_json::to_string_pretty(&gitlab_diagnostics)?;
@@ -208,7 +205,9 @@ impl<'a> GitLabDiagnostic<'a> {
         fingerprint: u64,
     ) -> Option<Self> {
         let location = diagnostic.location();
-        let span = location.span?;
+        let span = location
+            .span
+            .unwrap_or(TextRange::new(TextSize::from(1), TextSize::from(1)));
         let source_code = location.source_code?;
         let description = PrintDescription(diagnostic).to_string();
         let begin = match SourceFile::new(source_code).location(span.start()) {

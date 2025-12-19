@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/attach.svelte
+---
+# Input
+
+```svelte
+<div {@attach myAttachment}>...</div>
+<button {@attach tooltip(content)}>
+	Hover me
+</button>
+<canvas
+	width={32}
+	height={32}
+	{@attach (canvas) => {
+		const context = canvas.getContext('2d');
+
+		$effect(() => {
+			context.fillStyle = color;
+			context.fillRect(0, 0, canvas.width, canvas.height);
+		});
+	}}
+></canvas>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```svelte
+<div {@attach myAttachment}>...</div>
+<button {@attach tooltip(content)}>Hover me</button>
+<canvas
+	width={32}
+	height={32}
+	{@attach (canvas) => {
+		const context = canvas.getContext('2d');
+
+		$effect(() => {
+			context.fillStyle = color;
+			context.fillRect(0, 0, canvas.width, canvas.height);
+		});
+	}}
+></canvas>
+```

@@ -1,0 +1,14 @@
+@variant dark {
+	background: black;
+	color: white;
+}
+
+.my-element {
+	background: white;
+
+	@variant dark {
+		@variant hover {
+			background: black;
+		}
+	}
+}

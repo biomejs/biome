@@ -1,0 +1,71 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+'something'.match(/thing/);
+
+'some things are just things'.match(/thing/);
+
+'something'.match(new RegExp(/thing/));
+
+const text = 'something';
+const search = /thing/;
+text.match(search);
+
+const text1 = 'something';
+const search1 = new RegExp(/thing/);
+text1.match(search1);
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/useRegexpExec ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer RegExp#exec() over String#match() when searching within a string.
+  
+  > 1 │ 'something'.match(/thing/);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ 'some things are just things'.match(/thing/);
+  
+  i Use RegExp#exec() instead of String#match() for consistent and slightly faster regex matching.
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useRegexpExec ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer RegExp#exec() over String#match() when searching within a string.
+  
+    1 │ 'something'.match(/thing/);
+    2 │ 
+  > 3 │ 'some things are just things'.match(/thing/);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ 'something'.match(new RegExp(/thing/));
+  
+  i Use RegExp#exec() instead of String#match() for consistent and slightly faster regex matching.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useRegexpExec ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer RegExp#exec() over String#match() when searching within a string.
+  
+     7 │ const text = 'something';
+     8 │ const search = /thing/;
+   > 9 │ text.match(search);
+       │ ^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ const text1 = 'something';
+  
+  i Use RegExp#exec() instead of String#match() for consistent and slightly faster regex matching.
+  
+
+```

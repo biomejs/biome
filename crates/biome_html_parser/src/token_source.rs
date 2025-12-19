@@ -16,7 +16,7 @@ pub(crate) struct HtmlTokenSource<'source> {
     pub(super) trivia_list: Vec<Trivia>,
 }
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum HtmlLexContext {
     /// The default state. This state is used for lexing outside of tags.
     ///
@@ -27,15 +27,25 @@ pub(crate) enum HtmlLexContext {
     Regular,
     /// When the lexer is inside a tag, special characters are lexed as tag tokens.
     InsideTag,
+    /// Like [InsideTag], but with Vue-specific tokens enabled.
+    InsideTagVue,
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
     AttributeValue,
 
+    /// Context to be used when parsing the contents of Svelte blocks. Svelte blocks usually start with `{@`, `{:`, `{/` or `{#`.
+    /// When lexing using this context, specific tokens are emitted such as `if`, `else`, `debug`, etc.
+    ///
+    /// Outside of this context, the lexer doesn't yield any particular keywords.
+    Svelte,
+
     /// Lex tokens inside text expressions. In the following examples, `foo` is the text expression:
     /// - `{{ foo }}`
     /// - `attr={ foo }`
     TextExpression(TextExpressionKind),
+    /// Single expression that stops at certain keywords (e.g., 'as' in Svelte each blocks)
+    RestrictedSingleExpression(RestrictedExpressionStopAt),
     /// Enables the `html` keyword token.
     ///
     /// When the parser has encounters the sequence `<!DOCTYPE`, it switches to this context. It will remain in this context until the next `>` token is encountered.
@@ -49,7 +59,21 @@ pub(crate) enum HtmlLexContext {
     AstroFencedCodeBlock,
 }
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
+impl HtmlLexContext {
+    pub fn single_expression() -> Self {
+        Self::TextExpression(TextExpressionKind::Single)
+    }
+
+    pub fn double_expression() -> Self {
+        Self::TextExpression(TextExpressionKind::Double)
+    }
+
+    pub fn restricted_expression(kind: RestrictedExpressionStopAt) -> Self {
+        Self::RestrictedSingleExpression(kind)
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) enum TextExpressionKind {
     // {{ expr }}
     #[default]
@@ -58,7 +82,17 @@ pub(crate) enum TextExpressionKind {
     Single,
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum RestrictedExpressionStopAt {
+    /// Stops at 'as' keyword or ',' (for Svelte #each blocks)
+    AsOrComma,
+    /// Stops at `(`
+    OpeningParenOrComma,
+    /// Stops at `)`
+    ClosingParen,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum HtmlEmbeddedLanguage {
     Script,
     Style,
@@ -79,6 +113,13 @@ impl LexContext for HtmlLexContext {
     fn is_regular(&self) -> bool {
         matches!(self, Self::Regular)
     }
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) enum HtmlReLexContext {
+    Svelte,
+    /// Relex tokens using `HtmlLexer::consume_html_text`
+    HtmlText,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;
@@ -141,6 +182,10 @@ impl<'source> HtmlTokenSource<'source> {
         assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
         self.trivia_list.truncate(checkpoint.trivia_len as usize);
         self.lexer.rewind(checkpoint.lexer_checkpoint);
+    }
+
+    pub fn re_lex(&mut self, mode: HtmlReLexContext) -> HtmlSyntaxKind {
+        self.lexer.re_lex(mode)
     }
 }
 

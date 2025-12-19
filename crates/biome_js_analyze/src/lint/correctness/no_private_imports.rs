@@ -188,7 +188,7 @@ impl Rule for NoPrivateImports {
             self_path,
             target_path,
             target_info,
-            default_visibility: ctx.options().default_visibility,
+            default_visibility: ctx.options().default_visibility.unwrap_or_default(),
         };
 
         match node {

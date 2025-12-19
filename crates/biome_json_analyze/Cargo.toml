@@ -7,28 +7,35 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_json_analyze"
+publish              = true
 repository.workspace = true
 version              = "0.5.7"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-biome_analyze      = { workspace = true }
-biome_console      = { workspace = true }
-biome_diagnostics  = { workspace = true }
-biome_json_factory = { workspace = true }
-biome_json_syntax  = { workspace = true }
-biome_rowan        = { workspace = true }
-biome_rule_options = { workspace = true }
-biome_string_case  = { workspace = true }
-biome_suppression  = { workspace = true }
-rustc-hash         = { workspace = true }
+biome_analyze = { workspace = true }
+# biome_configuration is optional because the codegen disables it. The codegen generates the configuration schema, and it depends on this crate to to that. It's kinda like a circular dependency. A chicken and egg problem, if you will.
+biome_configuration = { workspace = true, optional = true }
+biome_console       = { workspace = true }
+biome_diagnostics   = { workspace = true }
+biome_json_factory  = { workspace = true }
+biome_json_syntax   = { workspace = true }
+biome_rowan         = { workspace = true }
+biome_rule_options  = { workspace = true }
+biome_string_case   = { workspace = true }
+biome_suppression   = { workspace = true }
+camino              = { workspace = true }
+rustc-hash          = { workspace = true }
+
+[features]
+configuration = ["dep:biome_configuration"]
+default       = ["configuration"]
 
 [dev-dependencies]
 biome_json_parser = { path = "../biome_json_parser" }
 biome_test_utils  = { path = "../biome_test_utils" }
-camino            = { workspace = true }
-criterion         = { package = "codspeed-criterion-compat", version = "=3.0.3" }
+criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta             = { workspace = true, features = ["glob"] }
 tests_macros      = { path = "../tests_macros" }
 

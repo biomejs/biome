@@ -127,7 +127,7 @@ pub const LEGACY_TREESITTER_COMPATIBILITY_PATTERNS: &[LegacyTreeSitterPattern] =
     LegacyTreeSitterPattern {
         name: "jsx_attribute",
         kind: JsSyntaxKind::JSX_ATTRIBUTE,
-        slots: &[],
+        slots: &[("name", 0), ("value", 1)],
     },
     LegacyTreeSitterPattern {
         name: "jsx_element",
@@ -137,12 +137,12 @@ pub const LEGACY_TREESITTER_COMPATIBILITY_PATTERNS: &[LegacyTreeSitterPattern] =
     LegacyTreeSitterPattern {
         name: "jsx_self_closing_element",
         kind: JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT,
-        slots: &[],
+        slots: &[("name", 1), ("type_arguments", 2), ("attributes", 3)],
     },
     LegacyTreeSitterPattern {
         name: "jsx_opening_element",
         kind: JsSyntaxKind::JSX_OPENING_ELEMENT,
-        slots: &[],
+        slots: &[("name", 1), ("type_arguments", 2), ("attributes", 3)],
     },
     LegacyTreeSitterPattern {
         name: "jsx_closing_element",

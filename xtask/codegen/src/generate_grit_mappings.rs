@@ -1,5 +1,5 @@
 use crate::{js_kinds_src::AstSrc, language_kind::LanguageKind};
-use xtask::Result;
+use xtask_glue::Result;
 
 pub fn generate_grit_mappings(ast: &AstSrc, language_kind: LanguageKind) -> Result<String> {
     let lang = LanguageConfig::new(language_kind);
@@ -127,7 +127,7 @@ pub fn kind_by_name(node_name: &str) -> Option<{syntax_kind_type}> {{
         native_patterns = native_patterns,
     );
 
-    xtask::reformat(result)
+    xtask_glue::reformat(result)
 }
 
 struct LanguageConfig {
@@ -275,7 +275,7 @@ const JS_TREESITTER_PATTERNS: &[TreeSitterPattern] = &[
     TreeSitterPattern {
         name: "jsx_attribute",
         biome_kind: "JSX_ATTRIBUTE",
-        slots: &[],
+        slots: &[("name", 0), ("value", 1)],
     },
     TreeSitterPattern {
         name: "jsx_element",
@@ -285,12 +285,12 @@ const JS_TREESITTER_PATTERNS: &[TreeSitterPattern] = &[
     TreeSitterPattern {
         name: "jsx_self_closing_element",
         biome_kind: "JSX_SELF_CLOSING_ELEMENT",
-        slots: &[],
+        slots: &[("name", 1), ("type_arguments", 2), ("attributes", 3)],
     },
     TreeSitterPattern {
         name: "jsx_opening_element",
         biome_kind: "JSX_OPENING_ELEMENT",
-        slots: &[],
+        slots: &[("name", 1), ("type_arguments", 2), ("attributes", 3)],
     },
     TreeSitterPattern {
         name: "jsx_closing_element",

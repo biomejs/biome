@@ -13,7 +13,16 @@ use serde::{Deserialize, Serialize};
 pub struct UseUniqueElementIdsOptions {
     /// Component names that accept an `id` prop that does not translate
     /// to a DOM element id.
-    pub excluded_components: FxHashSet<Box<str>>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub excluded_components: Option<FxHashSet<Box<str>>>,
+}
+
+impl biome_deserialize::Merge for UseUniqueElementIdsOptions {
+    fn merge_with(&mut self, other: Self) {
+        if let Some(excluded_components) = other.excluded_components {
+            self.excluded_components = Some(excluded_components);
+        }
+    }
 }
 
 impl DeserializableValidator for UseUniqueElementIdsOptions {
@@ -23,7 +32,7 @@ impl DeserializableValidator for UseUniqueElementIdsOptions {
         _name: &str,
         range: TextRange,
     ) -> bool {
-        for name in &self.excluded_components {
+        for name in self.excluded_components.iter().flatten() {
             let msg = if name.is_empty() {
                 "empty values"
             } else if name.contains('.') {

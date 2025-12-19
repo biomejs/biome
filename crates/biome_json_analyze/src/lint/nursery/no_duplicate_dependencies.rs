@@ -7,6 +7,8 @@ use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::no_duplicate_dependencies::NoDuplicateDependenciesOptions;
 use rustc_hash::FxHashMap;
 
+use crate::utils::is_package_json;
+
 declare_lint_rule! {
     /// Prevent the listing of duplicate dependencies.
     /// The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
@@ -89,8 +91,6 @@ declare_lint_rule! {
     }
 }
 
-const PACKAGE_JSON: &str = "package.json";
-
 // dependencies <-> devDependencies / optionalDependencies / peerDependencies
 // peerDependencies <-> optionalDependencies
 const UNIQUE_PROPERTY_KEYS: [(&str, &[&str]); 2] = [
@@ -133,7 +133,7 @@ impl Rule for NoDuplicateDependencies {
         let value = query.value().ok()?;
         let object_value = value.as_json_object_value()?;
 
-        if !path.ends_with(PACKAGE_JSON) {
+        if !is_package_json(path) {
             return None;
         }
 

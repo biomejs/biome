@@ -59,6 +59,7 @@ Biome Configuration:
   Linter enabled:               true
   Assist enabled:               true
   VCS enabled:                  false
+  HTML full support enabled:    unset
 
 Linter:
   JavaScript enabled:           unset

@@ -1,0 +1,20 @@
+/* should not generate diagnostics */
+const Valid1 = () => {
+	return <noscript />
+}
+
+const Valid2 = () => {
+	return <script />
+}
+
+const Valid3 = () => {
+	return <script src="" async />
+}
+
+const Valid4 = () => {
+	return <script src="" defer />
+}
+
+const Valid5 = () => {
+	return <script src="" type="module" />
+}

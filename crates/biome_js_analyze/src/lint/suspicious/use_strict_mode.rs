@@ -92,7 +92,7 @@ impl Rule for UseStrictMode {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query().clone();
         let mut mutation = ctx.root().begin();
-        let value = match ctx.as_preferred_quote() {
+        let value = match ctx.preferred_quote() {
             PreferredQuote::Double => "\"use strict\"",
             PreferredQuote::Single => "'use strict'",
         };

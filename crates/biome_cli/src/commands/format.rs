@@ -1,18 +1,18 @@
 use crate::cli_options::CliOptions;
 use crate::commands::{CommandRunner, LoadEditorConfig, get_files_to_process_with_cli_options};
 use crate::{CliDiagnostic, Execution, TraversalMode};
-use biome_configuration::css::CssFormatterConfiguration;
+use biome_configuration::css::{CssFormatterConfiguration, CssParserConfiguration};
 use biome_configuration::graphql::GraphqlFormatterConfiguration;
 use biome_configuration::html::HtmlFormatterConfiguration;
 use biome_configuration::javascript::JsFormatterConfiguration;
-use biome_configuration::json::JsonFormatterConfiguration;
+use biome_configuration::json::{JsonFormatterConfiguration, JsonParserConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, FormatterConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
-use biome_service::configuration::LoadedConfiguration;
 use biome_service::{Workspace, WorkspaceError};
+use camino::Utf8PathBuf;
 use std::ffi::OsString;
 
 pub(crate) struct FormatCommandPayload {
@@ -31,6 +31,8 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
+    pub(crate) json_parser: Option<JsonParserConfiguration>,
+    pub(crate) css_parser: Option<CssParserConfiguration>,
 }
 
 impl LoadEditorConfig for FormatCommandPayload {
@@ -47,18 +49,15 @@ impl CommandRunner for FormatCommandPayload {
 
     fn merge_configuration(
         &mut self,
-        loaded_configuration: LoadedConfiguration,
+        loaded_configuration: Configuration,
+        loaded_directory: Option<Utf8PathBuf>,
+        _loaded_file: Option<Utf8PathBuf>,
+
         fs: &dyn FileSystem,
         _console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError> {
-        let LoadedConfiguration {
-            configuration: biome_configuration,
-            directory_path: configuration_path,
-            ..
-        } = loaded_configuration;
-
         let mut configuration =
-            self.combine_configuration(configuration_path, biome_configuration, fs)?;
+            self.combine_configuration(loaded_directory, loaded_configuration, fs)?;
 
         // merge formatter options
         if configuration
@@ -73,10 +72,15 @@ impl CommandRunner for FormatCommandPayload {
 
             formatter.enabled = Some(true.into());
         }
+        let css = configuration.css.get_or_insert_with(Default::default);
         if self.css_formatter.is_some() {
-            let css = configuration.css.get_or_insert_with(Default::default);
             css.formatter.merge_with(self.css_formatter.clone());
         }
+
+        if self.css_parser.is_some() {
+            css.parser.merge_with(self.css_parser.clone());
+        }
+
         if self.graphql_formatter.is_some() {
             let graphql = configuration.graphql.get_or_insert_with(Default::default);
             graphql.formatter.merge_with(self.graphql_formatter.clone());
@@ -94,9 +98,13 @@ impl CommandRunner for FormatCommandPayload {
                 .formatter
                 .merge_with(self.javascript_formatter.clone());
         }
+        let json = configuration.json.get_or_insert_with(Default::default);
+
         if self.json_formatter.is_some() {
-            let json = configuration.json.get_or_insert_with(Default::default);
             json.formatter.merge_with(self.json_formatter.clone());
+        }
+        if self.json_parser.is_some() {
+            json.parser.merge_with(self.json_parser.clone())
         }
 
         configuration

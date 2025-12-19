@@ -61,7 +61,7 @@ impl Rule for NoSkippedTests {
 
         if node.is_test_call_expression().ok()? {
             let callee = node.callee().ok()?;
-            if callee.contains_a_test_pattern().ok()? {
+            if callee.contains_a_test_pattern() {
                 let function_name = callee.get_callee_member_name()?;
 
                 if FUNCTION_NAMES.contains(&function_name.text_trimmed()) {

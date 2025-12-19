@@ -1,0 +1,95 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<div v-if:aaa="foo"></div>
+<div v-if.mod="foo"></div>
+<div v-if></div>
+<div v-if="foo" v-else></div>
+<div v-if="foo" v-else-if="bar"></div>
+```
+
+# Diagnostics
+```
+invalid.vue:2:10 lint/nursery/useVueValidVIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-if cannot have an argument.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div v-if:aaa="foo"></div>
+      │          ^^^^
+    3 │ <div v-if.mod="foo"></div>
+    4 │ <div v-if></div>
+  
+  i Remove the argument. v-if takes a value expression only.
+  
+
+```
+
+```
+invalid.vue:3:10 lint/nursery/useVueValidVIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-if cannot have modifiers.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div v-if:aaa="foo"></div>
+  > 3 │ <div v-if.mod="foo"></div>
+      │          ^^^^
+    4 │ <div v-if></div>
+    5 │ <div v-if="foo" v-else></div>
+  
+  i Remove the modifier. v-if takes a value expression only.
+  
+
+```
+
+```
+invalid.vue:4:6 lint/nursery/useVueValidVIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-if requires a value expression.
+  
+    2 │ <div v-if:aaa="foo"></div>
+    3 │ <div v-if.mod="foo"></div>
+  > 4 │ <div v-if></div>
+      │      ^^^^
+    5 │ <div v-if="foo" v-else></div>
+    6 │ <div v-if="foo" v-else-if="bar"></div>
+  
+  i Provide a boolean expression, e.g. v-if="condition".
+  
+
+```
+
+```
+invalid.vue:5:17 lint/nursery/useVueValidVIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-if cannot be used on an element that also has v-else or v-else-if.
+  
+    3 │ <div v-if.mod="foo"></div>
+    4 │ <div v-if></div>
+  > 5 │ <div v-if="foo" v-else></div>
+      │                 ^^^^^^
+    6 │ <div v-if="foo" v-else-if="bar"></div>
+  
+  i Place v-if on one element, followed by sibling elements with v-else-if and/or v-else.
+  
+
+```
+
+```
+invalid.vue:6:17 lint/nursery/useVueValidVIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-if cannot be used on an element that also has v-else or v-else-if.
+  
+    4 │ <div v-if></div>
+    5 │ <div v-if="foo" v-else></div>
+  > 6 │ <div v-if="foo" v-else-if="bar"></div>
+      │                 ^^^^^^^^^^^^^^^
+  
+  i Place v-if on one element, followed by sibling elements with v-else-if and/or v-else.
+  
+
+```

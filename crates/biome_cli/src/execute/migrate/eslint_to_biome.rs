@@ -342,10 +342,7 @@ impl eslint_eslint::FlatConfigData {
                 } else {
                     let mut override_pat = biome_config::OverridePattern::default();
                     if let Some(language_options) = flat_config_object.language_options {
-                        let globals = language_options
-                            .globals
-                            .enabled()
-                            .collect::<rustc_hash::FxHashSet<_>>();
+                        let globals = language_options.globals.enabled().collect();
                         let js_config = biome_config::JsConfiguration {
                             globals: Some(globals),
                             ..Default::default()
@@ -512,13 +509,14 @@ fn migrate_eslint_rule(
                 });
                 let group = rules.style.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
+                    let globals = globals.collect::<FxHashMap<_, _>>();
                     group.no_restricted_globals =
                         Some(biome_config::RuleConfiguration::WithOptions(
                             biome_config::RuleWithOptions {
                                 level: severity.into(),
                                 options: *Box::new(
                                     no_restricted_globals::NoRestrictedGlobalsOptions {
-                                        denied_globals: globals.collect::<FxHashMap<_, _>>(),
+                                        denied_globals: (!globals.is_empty()).then_some(globals),
                                     },
                                 ),
                             },

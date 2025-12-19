@@ -31,6 +31,20 @@ a {
     }
 }
 
+a {
+    opacity: 1;
+    @starting-style {
+        opacity: 0;
+    }
+}
+
+a {
+    display: block;
+    @container (min-width: 600px) {
+        display: none;
+    }
+}
+
 /* TODO */
 /* @fontface {
     src: url(font.eof);

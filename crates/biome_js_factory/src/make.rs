@@ -101,6 +101,26 @@ pub fn token_decorated_with_space(kind: JsSyntaxKind) -> JsSyntaxToken {
     }
 }
 
+/// Create a new token with the specified syntax kind, and a whitespace trivia
+/// piece on the leading position
+pub fn token_with_leading_space(kind: JsSyntaxKind) -> JsSyntaxToken {
+    if let Some(text) = kind.to_string() {
+        JsSyntaxToken::new_detached(kind, &format!(" {text}"), [TriviaPiece::whitespace(1)], [])
+    } else {
+        panic!("token kind {kind:?} cannot be transformed to text")
+    }
+}
+
+/// Create a new token with the specified syntax kind, and a whitespace trivia
+/// piece on the trailing position
+pub fn token_with_trailing_space(kind: JsSyntaxKind) -> JsSyntaxToken {
+    if let Some(text) = kind.to_string() {
+        JsSyntaxToken::new_detached(kind, &format!("{text} "), [], [TriviaPiece::whitespace(1)])
+    } else {
+        panic!("token kind {kind:?} cannot be transformed to text")
+    }
+}
+
 /// EOF token
 pub fn eof() -> JsSyntaxToken {
     JsSyntaxToken::new_detached(JsSyntaxKind::EOF, "", [], [])

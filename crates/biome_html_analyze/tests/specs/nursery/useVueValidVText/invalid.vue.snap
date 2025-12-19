@@ -1,0 +1,217 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<div v-text></div>
+<div v-text=""></div>
+<div v-text="    "></div>
+<div v-text:aaa="foo"></div>
+<div v-text.bbb="foo"></div>
+<div v-text:aaa></div>
+<div v-text.bbb></div>
+
+<div v-text />
+<div v-text="" />
+<div v-text:aaa="foo" />
+<div v-text.bbb="foo" />
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:6 lint/nursery/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-text directive is missing a value.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div v-text></div>
+      │      ^^^^^^
+    4 │ <div v-text=""></div>
+    5 │ <div v-text="    "></div>
+  
+  i v-text directives require a value containing the text content to render.
+  
+  i For example, use v-text="foo" to render the content of the foo variable.
+  
+
+```
+
+```
+invalid.vue:4:6 lint/nursery/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-text directive is missing a value.
+  
+    3 │ <div v-text></div>
+  > 4 │ <div v-text=""></div>
+      │      ^^^^^^^^^
+    5 │ <div v-text="    "></div>
+    6 │ <div v-text:aaa="foo"></div>
+  
+  i v-text directives require a value containing the text content to render.
+  
+  i For example, use v-text="foo" to render the content of the foo variable.
+  
+
+```
+
+```
+invalid.vue:5:6 lint/nursery/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-text directive is missing a value.
+  
+    3 │ <div v-text></div>
+    4 │ <div v-text=""></div>
+  > 5 │ <div v-text="    "></div>
+      │      ^^^^^^^^^^^^^
+    6 │ <div v-text:aaa="foo"></div>
+    7 │ <div v-text.bbb="foo"></div>
+  
+  i v-text directives require a value containing the text content to render.
+  
+  i For example, use v-text="foo" to render the content of the foo variable.
+  
+
+```
+
+```
+invalid.vue:6:12 lint/nursery/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-text directive does not accept an argument.
+  
+    4 │ <div v-text=""></div>
+    5 │ <div v-text="    "></div>
+  > 6 │ <div v-text:aaa="foo"></div>
+      │            ^^^^
+    7 │ <div v-text.bbb="foo"></div>
+    8 │ <div v-text:aaa></div>
+  
+  i v-text directives should be used without arguments, like v-text="content".
+  
+
+```
+
+```
+invalid.vue:7:12 lint/nursery/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-text directive does not support modifiers.
+  
+    5 │ <div v-text="    "></div>
+    6 │ <div v-text:aaa="foo"></div>
+  > 7 │ <div v-text.bbb="foo"></div>
+      │            ^^^^
+    8 │ <div v-text:aaa></div>
+    9 │ <div v-text.bbb></div>
+  
+  i v-text directives do not support any modifiers. Remove the modifier.
+  
+
+```
+
+```
+invalid.vue:8:12 lint/nursery/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-text directive does not accept an argument.
+  
+     6 │ <div v-text:aaa="foo"></div>
+     7 │ <div v-text.bbb="foo"></div>
+   > 8 │ <div v-text:aaa></div>
+       │            ^^^^
+     9 │ <div v-text.bbb></div>
+    10 │ 
+  
+  i v-text directives should be used without arguments, like v-text="content".
+  
+
+```
+
+```
+invalid.vue:9:12 lint/nursery/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-text directive does not support modifiers.
+  
+     7 │ <div v-text.bbb="foo"></div>
+     8 │ <div v-text:aaa></div>
+   > 9 │ <div v-text.bbb></div>
+       │            ^^^^
+    10 │ 
+    11 │ <div v-text />
+  
+  i v-text directives do not support any modifiers. Remove the modifier.
+  
+
+```
+
+```
+invalid.vue:11:6 lint/nursery/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-text directive is missing a value.
+  
+     9 │ <div v-text.bbb></div>
+    10 │ 
+  > 11 │ <div v-text />
+       │      ^^^^^^
+    12 │ <div v-text="" />
+    13 │ <div v-text:aaa="foo" />
+  
+  i v-text directives require a value containing the text content to render.
+  
+  i For example, use v-text="foo" to render the content of the foo variable.
+  
+
+```
+
+```
+invalid.vue:12:6 lint/nursery/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-text directive is missing a value.
+  
+    11 │ <div v-text />
+  > 12 │ <div v-text="" />
+       │      ^^^^^^^^^
+    13 │ <div v-text:aaa="foo" />
+    14 │ <div v-text.bbb="foo" />
+  
+  i v-text directives require a value containing the text content to render.
+  
+  i For example, use v-text="foo" to render the content of the foo variable.
+  
+
+```
+
+```
+invalid.vue:13:12 lint/nursery/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-text directive does not accept an argument.
+  
+    11 │ <div v-text />
+    12 │ <div v-text="" />
+  > 13 │ <div v-text:aaa="foo" />
+       │            ^^^^
+    14 │ <div v-text.bbb="foo" />
+    15 │ 
+  
+  i v-text directives should be used without arguments, like v-text="content".
+  
+
+```
+
+```
+invalid.vue:14:12 lint/nursery/useVueValidVText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-text directive does not support modifiers.
+  
+    12 │ <div v-text="" />
+    13 │ <div v-text:aaa="foo" />
+  > 14 │ <div v-text.bbb="foo" />
+       │            ^^^^
+    15 │ 
+  
+  i v-text directives do not support any modifiers. Remove the modifier.
+  
+
+```

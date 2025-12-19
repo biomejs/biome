@@ -1,0 +1,2 @@
+/* should generate diagnostics */
+

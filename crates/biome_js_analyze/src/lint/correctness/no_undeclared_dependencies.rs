@@ -150,10 +150,21 @@ impl Rule for NoUndeclaredDependencies {
         let path = ctx.file_path();
         let is_dev_dependency_available =
             // Type-only imports are always considered as dev dependencies.
-            is_type_import(node) || ctx.options().dev_dependencies.is_available(path);
-        let is_peer_dependency_available = ctx.options().peer_dependencies.is_available(path);
-        let is_optional_dependency_available =
-            ctx.options().optional_dependencies.is_available(path);
+            is_type_import(node)
+                || ctx.options()
+                    .dev_dependencies
+                    .as_ref()
+                    .is_none_or(|dep| dep.is_available(path));
+        let is_peer_dependency_available = ctx
+            .options()
+            .peer_dependencies
+            .as_ref()
+            .is_none_or(|dep| dep.is_available(path));
+        let is_optional_dependency_available = ctx
+            .options()
+            .optional_dependencies
+            .as_ref()
+            .is_none_or(|dep| dep.is_available(path));
 
         let is_available = |package_name| {
             ctx.is_dependency(package_name)

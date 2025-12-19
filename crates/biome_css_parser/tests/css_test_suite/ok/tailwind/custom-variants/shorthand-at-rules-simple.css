@@ -1,0 +1,5 @@
+@custom-variant hasgrid (@supports (display: grid));
+
+@custom-variant print (@media print);
+
+@custom-variant md (@media (max-width: 768px));

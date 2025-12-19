@@ -216,11 +216,16 @@ impl Display for RageConfiguration<'_> {
                         diagnostics,
                         directory_path,
                         file_path,
+                        extended_configurations,
                     } = loaded_configuration;
                     let vcs_enabled = configuration.is_vcs_enabled();
                     let mut settings = Settings::default();
                     settings
-                        .merge_with_configuration(configuration.clone(), None)
+                        .merge_with_configuration(
+                            configuration.clone(),
+                            None,
+                            extended_configurations,
+                        )
                         .unwrap();
 
                     let status = if !diagnostics.is_empty() {
@@ -255,6 +260,7 @@ impl Display for RageConfiguration<'_> {
                         {KeyValuePair("Linter enabled", markup!({DebugDisplay(settings.is_linter_enabled())}))}
                         {KeyValuePair("Assist enabled", markup!({DebugDisplay(settings.is_assist_enabled())}))}
                         {KeyValuePair("VCS enabled", markup!({DebugDisplay(vcs_enabled)}))}
+                        {KeyValuePair("HTML full support enabled", markup!({DisplayOption(configuration.html.as_ref().and_then(|html| html.experimental_full_support_enabled))}))}
                     ).fmt(fmt)?;
 
                     // Print formatter configuration if --formatter option is true

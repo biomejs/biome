@@ -1,0 +1,125 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@utility tab-* {
+	tab-size: --value(--tab-size-*);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
+                name: TwFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@9..12 "tab" [] [],
+                    },
+                    minus_token: MINUS@12..13 "-" [] [],
+                    star_token: STAR@13..15 "*" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@15..16 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@16..26 "tab-size" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@26..28 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@28..35 "--value" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@35..36 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            TwValueThemeReference {
+                                                                reference: CssDashedIdentifier {
+                                                                    value_token: IDENT@36..46 "--tab-size" [] [],
+                                                                },
+                                                                minus_token: MINUS@46..47 "-" [] [],
+                                                                star_token: STAR@47..48 "*" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@48..49 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@49..50 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@50..52 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@52..53 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..53
+  0: (empty)
+  1: CSS_RULE_LIST@0..52
+    0: CSS_AT_RULE@0..52
+      0: AT@0..1 "@" [] []
+      1: TW_UTILITY_AT_RULE@1..52
+        0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
+        1: TW_FUNCTIONAL_UTILITY_NAME@9..15
+          0: CSS_IDENTIFIER@9..12
+            0: IDENT@9..12 "tab" [] []
+          1: MINUS@12..13 "-" [] []
+          2: STAR@13..15 "*" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@15..52
+          0: L_CURLY@15..16 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@16..50
+            0: CSS_DECLARATION_WITH_SEMICOLON@16..50
+              0: CSS_DECLARATION@16..49
+                0: CSS_GENERIC_PROPERTY@16..49
+                  0: CSS_IDENTIFIER@16..26
+                    0: IDENT@16..26 "tab-size" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@26..28 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@28..49
+                    0: CSS_FUNCTION@28..49
+                      0: CSS_IDENTIFIER@28..35
+                        0: IDENT@28..35 "--value" [] []
+                      1: L_PAREN@35..36 "(" [] []
+                      2: CSS_PARAMETER_LIST@36..48
+                        0: CSS_PARAMETER@36..48
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@36..48
+                            0: CSS_COMPONENT_VALUE_LIST@36..48
+                              0: TW_VALUE_THEME_REFERENCE@36..48
+                                0: CSS_DASHED_IDENTIFIER@36..46
+                                  0: IDENT@36..46 "--tab-size" [] []
+                                1: MINUS@46..47 "-" [] []
+                                2: STAR@47..48 "*" [] []
+                      3: R_PAREN@48..49 ")" [] []
+                1: (empty)
+              1: SEMICOLON@49..50 ";" [] []
+          2: R_CURLY@50..52 "}" [Newline("\n")] []
+  2: EOF@52..53 "" [Newline("\n")] []
+
+```

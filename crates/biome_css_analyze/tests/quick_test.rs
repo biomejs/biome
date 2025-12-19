@@ -1,10 +1,10 @@
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter};
 use biome_css_parser::{CssParserOptions, parse_css};
-use biome_css_syntax::TextRange;
+use biome_css_syntax::{CssFileSource, TextRange};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use std::slice;
 
-use biome_css_analyze::analyze;
+use biome_css_analyze::{CssAnalyzerServices, analyze};
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
 #[ignore]
@@ -20,6 +20,10 @@ d { font: 1em SF Mono, Liberation Mono, sans-serif; }
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default();
     let rule_filter = RuleFilter::Rule("suspicious", "noDuplicateFontNames");
+    let semantic_model = biome_css_semantic::semantic_model(&parsed.tree());
+    let services = CssAnalyzerServices::default()
+        .with_file_source(CssFileSource::default())
+        .with_semantic_model(&semantic_model);
 
     analyze(
         &parsed.tree(),
@@ -28,6 +32,7 @@ d { font: 1em SF Mono, Liberation Mono, sans-serif; }
             ..AnalysisFilter::default()
         },
         &options,
+        services,
         &[],
         |signal| {
             if let Some(diag) = signal.diagnostic() {

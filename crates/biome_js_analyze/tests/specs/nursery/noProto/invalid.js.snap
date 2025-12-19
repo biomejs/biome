@@ -1,0 +1,89 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+obj.__proto__ = a;
+obj["__proto__"] = b;
+const c = obj.__proto__;
+const d = obj["__proto__"];
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid use of the deprecated __proto__ accessor.
+  
+  > 1 │ obj.__proto__ = a;
+      │ ^^^^^^^^^^^^^
+    2 │ obj["__proto__"] = b;
+    3 │ const c = obj.__proto__;
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+```
+invalid.js:2:1 lint/nursery/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid use of the deprecated __proto__ accessor.
+  
+    1 │ obj.__proto__ = a;
+  > 2 │ obj["__proto__"] = b;
+      │ ^^^^^^^^^^^^^^^^
+    3 │ const c = obj.__proto__;
+    4 │ const d = obj["__proto__"];
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+```
+invalid.js:3:11 lint/nursery/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid use of the deprecated __proto__ accessor.
+  
+    1 │ obj.__proto__ = a;
+    2 │ obj["__proto__"] = b;
+  > 3 │ const c = obj.__proto__;
+      │           ^^^^^^^^^^^^^
+    4 │ const d = obj["__proto__"];
+    5 │ 
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+```
+invalid.js:4:11 lint/nursery/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid use of the deprecated __proto__ accessor.
+  
+    2 │ obj["__proto__"] = b;
+    3 │ const c = obj.__proto__;
+  > 4 │ const d = obj["__proto__"];
+      │           ^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```

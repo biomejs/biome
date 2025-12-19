@@ -108,14 +108,17 @@ impl Format<JsFormatContext> for FormatReturnOrThrowArgument<'_> {
             && !matches!(argument, AnyJsExpression::JsxTagExpression(_))
             && !is_suppressed
         {
-            write!(f, [text("("), &block_indent(&argument.format()), text(")")])
+            write!(
+                f,
+                [token("("), &block_indent(&argument.format()), token(")")]
+            )
         } else if is_binary_or_sequence_argument(argument) && !is_suppressed {
             write!(
                 f,
                 [group(&format_args![
-                    if_group_breaks(&text("(")),
+                    if_group_breaks(&token("(")),
                     soft_block_indent(&argument.format()),
-                    if_group_breaks(&text(")"))
+                    if_group_breaks(&token(")"))
                 ])]
             )
         } else {
