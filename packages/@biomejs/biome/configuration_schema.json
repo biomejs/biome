@@ -2474,6 +2474,24 @@
 			]
 		},
 		"NoAlertOptions": { "type": "object", "additionalProperties": false },
+		"NoAmbiguousAnchorTextConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAmbiguousAnchorTextOptions" }
+			]
+		},
+		"NoAmbiguousAnchorTextOptions": {
+			"type": "object",
+			"properties": {
+				"words": {
+					"description": "It allows users to modify the strings that can be checked for in the anchor text. Useful for specifying other words in other languages",
+					"type": ["array", "null"],
+					"default": null,
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoApproximativeNumericConstantConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3767,6 +3785,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMultiAssignConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMultiAssignOptions" }
+			]
+		},
+		"NoMultiAssignOptions": { "type": "object", "additionalProperties": false },
 		"NoMultiStrConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4480,6 +4505,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoUndeclaredEnvVarsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUndeclaredEnvVarsOptions" }
+			]
+		},
+		"NoUndeclaredEnvVarsOptions": {
+			"type": "object",
+			"properties": {
+				"allowedEnvVars": {
+					"description": "Environment variables that should always be allowed.\nUse this to specify environment variables that are always available\nin your environment, even when not declared in turbo.json.\nSupports regular expressions, e.g. `[\"MY_ENV_.*\"]`.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/Regex" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoUndeclaredVariablesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5106,6 +5148,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAmbiguousAnchorText": {
+					"description": "Disallow ambiguous anchor descriptions.\nSee <https://biomejs.dev/linter/rules/no-ambiguous-anchor-text>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAmbiguousAnchorTextConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noContinue": {
 					"description": "Disallow continue statements.\nSee <https://biomejs.dev/linter/rules/no-continue>",
 					"anyOf": [
@@ -5197,6 +5246,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMultiAssign": {
+					"description": "Disallow use of chained assignment expressions.\nSee <https://biomejs.dev/linter/rules/no-multi-assign>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMultiAssignConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMultiStr": {
 					"description": "Disallow creating multiline strings by escaping newlines.\nSee <https://biomejs.dev/linter/rules/no-multi-str>",
 					"anyOf": [
@@ -5257,6 +5313,13 @@
 					"description": "Disallow ternary operators.\nSee <https://biomejs.dev/linter/rules/no-ternary>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTernaryConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUndeclaredEnvVars": {
+					"description": "Disallow the use of undeclared environment variables.\nSee <https://biomejs.dev/linter/rules/no-undeclared-env-vars>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUndeclaredEnvVarsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5996,6 +6059,11 @@
 					"description": "Tailwind CSS rules",
 					"type": "string",
 					"const": "tailwind"
+				},
+				{
+					"description": "Turborepo build system rules",
+					"type": "string",
+					"const": "turborepo"
 				}
 			]
 		},
@@ -6082,6 +6150,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAlertOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAmbiguousAnchorTextOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAmbiguousAnchorTextOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -7248,6 +7325,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoMultiAssignOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMultiAssignOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoMultiStrOptions": {
 			"type": "object",
 			"properties": {
@@ -7875,6 +7961,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUndeclaredDependenciesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUndeclaredEnvVarsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUndeclaredEnvVarsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

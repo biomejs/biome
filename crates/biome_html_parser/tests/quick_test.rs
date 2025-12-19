@@ -4,11 +4,11 @@ use biome_test_utils::has_bogus_nodes_or_empty_slots;
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"
-        <div v-bind:[dynamicArg]="val"></div>
-    "#;
+    let code = r#"{#snippet f()}
+    <p></p>
+{/snippet}"#;
 
-    let options = HtmlParseOptions::default().with_vue();
+    let options = HtmlParseOptions::default().with_single_text_expression();
     let root = parse_html(code, options);
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());

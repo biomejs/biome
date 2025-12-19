@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/await_array_destructuring.svelte
+---
+# Input
+
+```svelte
+{#await promise then [first, second, ...rest]}
+<p>First: {first}, Second: {second}</p>
+<p>Rest: {rest.join(', ')}</p>
+{/await}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```svelte
+{#await promise then [first, second, ...rest]}
+	<p>First: {first}, Second: {second}</p>
+	<p>Rest: {rest.join(', ')}</p>
+{/await}
+```

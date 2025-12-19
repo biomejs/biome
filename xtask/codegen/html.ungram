@@ -195,11 +195,14 @@ AnyHtmlAttributeInitializer =
 AnySvelteBlock =
 	SvelteDebugBlock
 	| SvelteKeyBlock
-	| SvelteBogusBlock
 	| SvelteRenderBlock
 	| SvelteHtmlBlock
 	| SvelteConstBlock
 	| SvelteIfBlock
+	| SvelteEachBlock
+	| SvelteAwaitBlock
+	| SvelteSnippetBlock
+	| SvelteBogusBlock
 
 // {@debug}
 // ^^^^^^^^
@@ -234,7 +237,6 @@ SvelteKeyClosingBlock =
 
 SvelteBindingList = (SvelteName (',' SvelteName)*)
 
-SvelteName = 'svelte_ident'
 
 // {@render ...}
 // ^^^^^^^^^^^^^
@@ -313,6 +315,150 @@ SvelteIfClosingBlock =
 	'if'
 	'}'
 
+
+// {#each ... as ...} ... {/each}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteEachBlock =
+	opening_block: SvelteEachOpeningBlock
+	children: HtmlElementList
+	else_clause: SvelteElseClause?
+	closing_block: SvelteEachClosingBlock
+
+// {#each items as item, index (key)} ... {/each}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteEachOpeningBlock =
+	'{#'
+	'each'
+	list: HtmlTextExpression
+	item: AnySvelteBlockItem?
+	'}'
+
+AnySvelteBlockItem =
+	SvelteEachAsKeyedItem
+	| SvelteEachKeyedItem
+
+
+// {#each items as item, index (key)} ... {/each}
+//              ^^^^^^^^^^^^^^^^^^^^
+SvelteEachAsKeyedItem =
+	'as'
+	name: HtmlTextExpression
+	index: SvelteEachIndex?
+	key: SvelteEachKey?
+
+// {#each items, index} ... {/each}
+//             ^^^^^^^^
+SvelteEachKeyedItem =
+		index: SvelteEachIndex?
+
+// {#each items as item, index} ... {/each}
+//                     ^^^^^^^
+SvelteEachIndex =
+	','
+	value: HtmlTextExpression
+
+// {#each items as item, item (key)} ... {/each}
+//                            ^^^^^
+SvelteEachKey =
+	'('
+	expression: HtmlTextExpression
+	')'
+
+// {#each ... as item, i} ... {/each}
+//                            ^^^^^^^
+SvelteEachClosingBlock =
+	'{/'
+	'each'
+	'}'
+
+// {#await ...} {:then} {:catch} {/await}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteAwaitBlock =
+	opening_block: SvelteAwaitOpeningBlock
+	clauses: SvelteAwaitClausesList
+	closing_block: SvelteAwaitClosingBlock
+
+
+// {#await ... } {:then} {:catch} {/await}
+// ^^^^^^^^^^^^^
+SvelteAwaitOpeningBlock =
+	'{#'
+	'await'
+	expression: HtmlTextExpression
+	then_clause: SvelteAwaitThenClause?
+	catch_clause: SvelteAwaitCatchClause?
+	'}'
+	children: HtmlElementList
+
+SvelteAwaitClausesList = AnySvelteAwaitClauses*
+
+AnySvelteAwaitClauses =
+	SvelteAwaitThenBlock
+	| SvelteAwaitCatchBlock
+	| SvelteBogusBlock
+
+// {#await ... then value}
+//             ^^^^^^^^^^
+SvelteAwaitThenClause =
+	'then'
+	name: HtmlTextExpression
+
+// {#await ... catch value}
+//             ^^^^^^^^^^^
+SvelteAwaitCatchClause =
+	'catch'
+	name: HtmlTextExpression
+
+// {#await ... } {:then name} .. {:catch} {/await}
+//               ^^^^^^^^^^^^^^^
+SvelteAwaitThenBlock =
+	'{:'
+	'then'
+	name: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+
+// {#await ... } {:then} .. {:catch name} .. {/await}
+//                          ^^^^^^^^^^^^^^^^
+SvelteAwaitCatchBlock =
+	'{:'
+	'catch'
+	name: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+// {#await ... } {:then} {:catch} {/await}
+//                                ^^^^^^^^
+SvelteAwaitClosingBlock =
+	'{/'
+	'await'
+	'}'
+
+// {#snippet f()} ... {/snippet}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteSnippetBlock =
+	opening_block: SvelteSnippetOpeningBlock
+	closing_block: SvelteSnippetClosingBlock
+
+// {#snippet f()} ... {/snippet}
+// ^^^^^^^^^^^^^^^^^
+SvelteSnippetOpeningBlock =
+	'{#'
+	'snippet'
+	expression: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+// {#snippet f()} ... {/snippet}
+//                   ^^^^^^^^^^
+SvelteSnippetClosingBlock =
+	'{/'
+	'snippet'
+	'}'
+
+// Keep it different just for svelte
+SvelteName = 'ident'
 HtmlString = value: 'html_string_literal'
 HtmlTagName = value: 'html_literal'
 HtmlAttributeName = value: 'html_literal'
@@ -335,7 +481,7 @@ AnyVueDirective =
 // <div v-bind:href="url" />
 //      ^^^^^^^^^^^^^^^^^
 VueDirective =
-  name: 'vue_ident'
+  name: 'ident'
   arg: VueDirectiveArgument?
   modifiers: VueModifierList
 	initializer: HtmlAttributeInitializerClause?

@@ -20,8 +20,8 @@ pub(crate) fn parse_vue_directive(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
     let pos = p.source().position();
-    // FIXME: Ideally, the lexer would just lex VUE_IDENT directly
-    p.bump_remap_with_context(VUE_IDENT, HtmlLexContext::InsideTagVue);
+    // FIXME: Ideally, the lexer would just lex IDENT directly
+    p.bump_remap_with_context(IDENT, HtmlLexContext::InsideTagVue);
     if p.at(T![:]) {
         // is there any trivia after the directive name and before the colon?
         if let Some(last_trivia) = p.source().trivia_list.last()

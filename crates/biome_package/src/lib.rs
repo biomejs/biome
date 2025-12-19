@@ -11,7 +11,7 @@ use camino::Utf8Path;
 pub use license::generated::*;
 pub use node_js_package::{
     Catalogs, CompilerOptions, Dependencies, NodeJsPackage, PackageJson, PackageType, TsConfigJson,
-    Version,
+    TurboJson, Version,
 };
 
 use std::any::TypeId;

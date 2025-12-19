@@ -1,0 +1,8 @@
+{
+	"globalEnv": ["ACME_TOKEN", "ACME_APP_ID", "FOO_*"],
+	"tasks": {
+		"build": {
+			"env": ["BUILD_VAR", "BUILD_OUTPUT"]
+		}
+	}
+}

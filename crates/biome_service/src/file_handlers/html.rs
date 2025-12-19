@@ -496,7 +496,9 @@ pub(crate) fn parse_embedded_script(
             if html_file_source.is_svelte() {
                 file_source = file_source.with_embedding_kind(EmbeddingKind::Svelte);
             } else if html_file_source.is_vue() {
-                file_source = file_source.with_embedding_kind(EmbeddingKind::Vue);
+                file_source = file_source.with_embedding_kind(EmbeddingKind::Vue {
+                    setup: element.is_script_with_setup_attribute(),
+                });
             }
             file_source
         } else if html_file_source.is_astro() {

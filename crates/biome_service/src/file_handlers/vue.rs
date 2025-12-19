@@ -1,4 +1,4 @@
-use super::{SearchCapabilities, parse_lang_from_script_opening_tag};
+use super::{ParsedLangAndSetup, SearchCapabilities, parse_lang_and_setup_from_script_opening_tag};
 use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
@@ -68,12 +68,17 @@ impl VueFileHandler {
         VUE_FENCE
             .captures(text)
             .and_then(|captures| {
-                let (language, variant) =
-                    parse_lang_from_script_opening_tag(captures.name("opening")?.as_str());
+                let ParsedLangAndSetup {
+                    language,
+                    variant,
+                    setup,
+                } = parse_lang_and_setup_from_script_opening_tag(
+                    captures.name("opening")?.as_str(),
+                );
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)
-                        .with_embedding_kind(EmbeddingKind::Vue),
+                        .with_embedding_kind(EmbeddingKind::Vue { setup }),
                 )
             })
             .map_or(JsFileSource::js_module(), |fs| fs)

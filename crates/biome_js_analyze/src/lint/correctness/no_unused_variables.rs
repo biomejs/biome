@@ -83,21 +83,25 @@ declare_lint_rule! {
     /// used_overloaded();
     /// ```
     ///
+    /// By default, unused variables declared inside destructured objects are ignored
+    /// if the destructuring pattern also contains a rest property.
+    /// (See the [rule options](#options) if you want to enable these checks).
     /// ```js
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, ...rest } = car;
-    /// console.log(brand, rest);
+    /// console.log(rest);
     /// ```
     ///
     /// ## Options
     ///
-    /// The rule has the following options
-    ///
     /// ### `ignoreRestSiblings`
     ///
-    /// Whether to ignore unused variables from an object destructuring with a spread (i.e.: `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
+    /// Whether to ignore unused variables declared inside destructured objects
+    /// containing rest properties (such as `const { a, b, ...rest } = obj`.
     ///
-    /// Defaults to `true`.
+    /// Default: `true`
+    ///
+    /// #### Example
     ///
     /// ```json,options
     /// {
@@ -108,8 +112,15 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic,use_options
+    /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, ...other } = car;
-    /// console.log(brand);
+    /// console.log(other);
+    /// ```
+    ///
+    /// ```js,use_options
+    /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
+    /// const { brand: _, ...other } = car;
+    /// console.log(other);
     /// ```
     pub NoUnusedVariables {
         version: "1.0.0",
@@ -332,15 +343,20 @@ impl Rule for NoUnusedVariables {
         );
 
         let mut diag = diag.note(
-            markup! {"Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."},
+            markup! {
+                "Unused variables are often the result of typos, incomplete refactors, or other sources of bugs."
+            },
         );
 
-        // Check if this binding is part of an object pattern with a rest element
+        // Check if this binding is part of an object destructuring pattern with a rest property
         if let Some(decl) = binding.declaration()
             && is_rest_spread_sibling(&decl)
         {
             diag = diag.note(
-                    markup! {"You can use the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables in an object destructuring with a spread."},
+                    markup! {
+                        "You can enable the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables "
+                        "inside destructured objects with rest properties."
+                    },
                 );
         }
 

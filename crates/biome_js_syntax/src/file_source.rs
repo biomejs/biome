@@ -124,7 +124,10 @@ pub enum EmbeddingKind {
         /// Whether the script is inside Astro frontmatter
         frontmatter: bool,
     },
-    Vue,
+    Vue {
+        /// Whether the script is inside script tag with setup attribute
+        setup: bool,
+    },
     Svelte,
     #[default]
     None,
@@ -138,7 +141,10 @@ impl EmbeddingKind {
         matches!(self, Self::Astro { frontmatter: true })
     }
     pub const fn is_vue(&self) -> bool {
-        matches!(self, Self::Vue)
+        matches!(self, Self::Vue { .. })
+    }
+    pub const fn is_vue_setup(&self) -> bool {
+        matches!(self, Self::Vue { setup: true })
     }
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte)
@@ -215,7 +221,12 @@ impl JsFileSource {
 
     /// Vue file definition
     pub fn vue() -> Self {
-        Self::js_module().with_embedding_kind(EmbeddingKind::Vue)
+        Self::js_module().with_embedding_kind(EmbeddingKind::Vue { setup: false })
+    }
+
+    /// Vue file definition with setup attribute
+    pub fn vue_setup() -> Self {
+        Self::js_module().with_embedding_kind(EmbeddingKind::Vue { setup: true })
     }
 
     /// Svelte file definition
