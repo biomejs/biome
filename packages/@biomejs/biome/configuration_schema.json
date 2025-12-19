@@ -3785,6 +3785,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMultiAssignConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMultiAssignOptions" }
+			]
+		},
+		"NoMultiAssignOptions": { "type": "object", "additionalProperties": false },
 		"NoMultiStrConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5236,6 +5243,13 @@
 					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.\nSee <https://biomejs.dev/linter/rules/no-misused-promises>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoMisusedPromisesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noMultiAssign": {
+					"description": "Disallow use of chained assignment expressions.\nSee <https://biomejs.dev/linter/rules/no-multi-assign>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMultiAssignConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7307,6 +7321,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoMisusedPromisesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoMultiAssignOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMultiAssignOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

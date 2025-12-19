@@ -181,6 +181,7 @@ define_categories! {
     "lint/nursery/noLeakedRender": "https://biomejs.dev/linter/rules/no-leaked-render",
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",
     "lint/nursery/noMisusedPromises": "https://biomejs.dev/linter/rules/no-misused-promises",
+    "lint/nursery/noMultiAssign": "https://biomejs.dev/linter/rules/no-multi-assign",
     "lint/nursery/noMultiStr": "https://biomejs.dev/linter/rules/no-multi-str",
     "lint/nursery/noNextAsyncClientComponent": "https://biomejs.dev/linter/rules/no-next-async-client-component",
     "lint/nursery/noParametersOnlyUsedInRecursion": "https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion",
