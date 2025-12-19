@@ -32,6 +32,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TwCssVariableValue::new_unchecked(node) };
                     $body
                 }
+                $crate::TailwindSyntaxKind::TW_DATA_ATTRIBUTE => {
+                    let $pattern = unsafe { $crate::TwDataAttribute::new_unchecked(node) };
+                    $body
+                }
                 $crate::TailwindSyntaxKind::TW_FULL_CANDIDATE => {
                     let $pattern = unsafe { $crate::TwFullCandidate::new_unchecked(node) };
                     $body

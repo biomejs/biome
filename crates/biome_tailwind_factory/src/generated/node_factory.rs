@@ -92,6 +92,20 @@ pub fn tw_css_variable_value(
         ],
     ))
 }
+pub fn tw_data_attribute(
+    data_token: SyntaxToken,
+    minus_token: SyntaxToken,
+    value: AnyTwDataAttributeValue,
+) -> TwDataAttribute {
+    TwDataAttribute::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_DATA_ATTRIBUTE,
+        [
+            Some(SyntaxElement::Token(data_token)),
+            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn tw_full_candidate(
     variants: TwVariantList,
     candidate: AnyTwCandidate,

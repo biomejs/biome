@@ -100,7 +100,11 @@ TwFunctionalCandidate =
 TwVariantList = (AnyTwVariant (':' AnyTwVariant)* ':'?)
 
 // A Variant is a selector that modifies what the Candidate applies to.
-AnyTwVariant = TwArbitraryVariant | TwStaticVariant | TwFunctionalVariant | TwBogusVariant
+AnyTwVariant = TwArbitraryVariant
+	| TwStaticVariant
+	| TwFunctionalVariant
+	| TwDataAttribute
+	| TwBogusVariant
 
 // Arbitrary variants are variants that take a selector and generate a variant on the fly.
 // [&_p]:text-red-500
@@ -126,7 +130,11 @@ TwFunctionalVariant =
 	'-'
 	value: AnyTwValue
 
-AnyTwValue = TwNamedValue | TwArbitraryValue | TwCssVariableValue | TwBogusValue
+AnyTwValue = TwNamedValue
+	| TwArbitraryValue
+	| TwCssVariableValue
+	| TwDataAttribute
+	| TwBogusValue
 
 // bg-red-500
 //    ^^^^^^^
@@ -156,3 +164,25 @@ AnyTwModifier = TwModifier | TwBogusModifier
 TwModifier =
 	'/'
 	value: AnyTwValue
+
+// data-[state=open]:hidden
+// ^^^^^^^^^^^^^^^^^
+// group-data-active:hidden
+//       ^^^^^^^^^^^
+TwDataAttribute =
+	'data'
+	'-'
+	value: AnyTwDataAttributeValue
+
+AnyTwDataAttributeValue =
+	TwNamedValue |
+	TwArbitraryValue |
+	TwBogusValue
+
+// TODO: replace TwArbitraryValue in AnyTwDataAttributeValue with this
+// TwDataAttributeArbitraryValue =
+//	'['
+//	key: 'tw_value'
+//	'='
+//	value: 'tw_value'
+//	']'
