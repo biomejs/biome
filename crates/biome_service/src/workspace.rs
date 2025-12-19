@@ -1628,7 +1628,7 @@ pub struct FileGuard<'app, W: Workspace + ?Sized> {
 }
 
 impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
-    pub fn open(
+    pub fn new(
         workspace: &'app W,
         project_key: ProjectKey,
         path: BiomePath,

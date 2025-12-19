@@ -13,8 +13,11 @@ pub(crate) struct WorkspaceFile<'ctx, 'app> {
 }
 
 impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
-    /// It attempts to read the file from disk, creating a [FileGuard] and
-    /// saving these information internally
+    /// A wrapper that knows how to read and write a file on the file system.
+    /// It the file doesn't exist in the workspace, it opens it.
+    ///
+    /// If you need to operate with the Workspace, call [WorkspaceFile::guard], which returns
+    /// a type that allows to operate with the workspace without operating with the file system.
     pub(crate) fn new(
         ctx: &SharedTraversalOptions<'ctx, 'app>,
         path: BiomePath,
@@ -27,7 +30,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
             .open_with_options(path.as_path(), open_options)
             .with_file_path(path.to_string())?;
 
-        let guard = FileGuard::open(ctx.workspace, ctx.project_key, path.clone())
+        let guard = FileGuard::new(ctx.workspace, ctx.project_key, path.clone())
             .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
 
         if ctx.workspace.file_exists(FileExitsParams {
