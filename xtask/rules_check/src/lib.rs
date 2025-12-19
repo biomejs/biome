@@ -419,7 +419,7 @@ fn assert_lint(
                 let options = test.create_analyzer_options::<CssLanguage>(config)?;
                 let semantic_model = biome_css_semantic::semantic_model(&parse.tree());
                 let services = CssAnalyzerServices::default()
-                    .with_file_source(file_source)
+                    .with_file_source(file_source.with_css_modules().with_tailwind_directives())
                     .with_semantic_model(&semantic_model);
                 biome_css_analyze::analyze(&root, filter, &options, services, &[], |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
