@@ -2,19 +2,27 @@
 
 import { useCallback } from "react";
 
-function onClick() {}
-<Foo onClick={onClick} />
-
-const onClick = function() {}
-<Foo onClick={onClick} />
-
-const onClick = () => {}
-<Foo onClick={onClick} />
-
-<Foo onClick={this.handleClick}></Foo>;
-<Foo onClick={bind()}></Foo>;
+function Foo() {
+	function onClick() { }
+	return <Bar onClick={onClick} />
+}
 
 function Foo() {
-    const onClick = useCallback(() => {}, []);
-    return <Bar onClick={onClick} />
+	const onClick = function () { }
+	return <Bar onClick={onClick} />
+}
+
+function Foo() {
+	const onClick = () => { }
+	<Bar onClick={onClick} />
+}
+
+<>
+	<Foo onClick={this.handleClick}></Foo>;
+	<Foo onClick={bind()}></Foo>;
+</>
+
+function Foo() {
+	const onClick = useCallback(() => { }, []);
+	return <Bar onClick={onClick} />
 }
