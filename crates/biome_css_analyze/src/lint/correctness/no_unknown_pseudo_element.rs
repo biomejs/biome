@@ -129,6 +129,4 @@ fn should_not_trigger(pseudo_element_name: &str, file_source: &CssFileSource) ->
 
     !vender_prefix(pseudo_element_name).is_empty()
         || is_pseudo_elements(pseudo_element_name.to_ascii_lowercase_cow().as_ref())
-        || file_source.is_css_modules()
-            && ["global", "local"].contains(&pseudo_element_name.to_ascii_lowercase_cow().as_ref())
 }
