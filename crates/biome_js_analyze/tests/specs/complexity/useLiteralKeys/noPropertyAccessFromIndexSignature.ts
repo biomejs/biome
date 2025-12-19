@@ -10,10 +10,11 @@ const a: I = {
 }
 
 // Valid
-a.known
-a["unknown"];
+a.known;
 
 // Invalid
 a["known"];
-a.unknown;
 
+// Ignored
+a.unknown;
+a["unknown"];
