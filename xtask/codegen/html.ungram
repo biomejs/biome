@@ -435,13 +435,13 @@ SvelteAwaitClosingBlock =
 	'await'
 	'}'
 
-// {#snippt f()} ... {/snippet}
+// {#snippet f()} ... {/snippet}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 SvelteSnippetBlock =
 	opening_block: SvelteSnippetOpeningBlock
 	closing_block: SvelteSnippetClosingBlock
 
-// {#snippt f()} ... {/snippet}
+// {#snippet f()} ... {/snippet}
 // ^^^^^^^^^^^^^^^^^
 SvelteSnippetOpeningBlock =
 	'{#'
@@ -450,7 +450,7 @@ SvelteSnippetOpeningBlock =
 	'}'
 	children: HtmlElementList
 
-// {#snippt f()} ... {/snippet}
+// {#snippet f()} ... {/snippet}
 //                   ^^^^^^^^^^
 SvelteSnippetClosingBlock =
 	'{/'
