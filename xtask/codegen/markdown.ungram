@@ -110,12 +110,10 @@ MdIndentedCodeLine =
 MdFencedCodeBlock =
 	l_fence: '```'
 	code_list: MdCodeNameList
-	l_hard_line: MdHardLine
-	content: MdTextual
-	r_hard_line: MdHardLine
-	r_fence: '```'
+	content: MdInlineItemList
+	r_fence: '```'?
 
-MdCodeNameList = (MdTextual (',' MdTextual)*)
+MdCodeNameList = MdTextual*
 
 // html block
 MdHtmlBlock = MdTextual

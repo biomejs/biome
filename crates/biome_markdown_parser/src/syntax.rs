@@ -1,3 +1,4 @@
+pub mod fenced_code_block;
 pub mod header;
 pub mod thematic_break_block;
 
@@ -6,6 +7,7 @@ use biome_parser::{
     Parser,
     prelude::ParsedSyntax::{self, *},
 };
+use fenced_code_block::{at_fenced_code_block, parse_fenced_code_block};
 use header::{at_header, parse_header};
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
@@ -14,6 +16,8 @@ use crate::MarkdownParser;
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();
     let _ = parse_block_list(p);
+    // Bump the EOF token - required by the grammar
+    p.bump(T![EOF]);
     m.complete(p, MD_DOCUMENT);
 }
 
@@ -29,6 +33,8 @@ pub(crate) fn parse_block_list(p: &mut MarkdownParser) -> ParsedSyntax {
 pub(crate) fn parse_any_block(p: &mut MarkdownParser) {
     if at_indent_code_block(p) {
         parse_indent_code_block(p);
+    } else if at_fenced_code_block(p) {
+        let _ = parse_fenced_code_block(p);
     } else if at_thematic_break_block(p) {
         let break_block = try_parse(p, |p| {
             let break_block = parse_thematic_break_block(p);

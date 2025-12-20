@@ -102,7 +102,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             }
             MD_FENCED_CODE_BLOCK => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T!["```"]
@@ -119,21 +119,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && MdHardLine::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && MdTextual::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && MdHardLine::can_cast(element.kind())
+                    && MdInlineItemList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -783,13 +769,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             }
             MD_BLOCK_LIST => Self::make_node_list_syntax(kind, children, AnyMdBlock::can_cast),
             MD_BULLET_LIST => Self::make_node_list_syntax(kind, children, MdBullet::can_cast),
-            MD_CODE_NAME_LIST => Self::make_separated_list_syntax(
-                kind,
-                children,
-                MdTextual::can_cast,
-                T ! [,],
-                false,
-            ),
+            MD_CODE_NAME_LIST => Self::make_node_list_syntax(kind, children, MdTextual::can_cast),
             MD_HASH_LIST => Self::make_node_list_syntax(kind, children, MdHash::can_cast),
             MD_INDENTED_CODE_LINE_LIST => {
                 Self::make_node_list_syntax(kind, children, MdIndentedCodeLine::can_cast)

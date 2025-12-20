@@ -163,9 +163,7 @@ impl MdFencedCodeBlock {
         MdFencedCodeBlockFields {
             l_fence_token: self.l_fence_token(),
             code_list: self.code_list(),
-            l_hard_line: self.l_hard_line(),
             content: self.content(),
-            r_hard_line: self.r_hard_line(),
             r_fence_token: self.r_fence_token(),
         }
     }
@@ -175,17 +173,11 @@ impl MdFencedCodeBlock {
     pub fn code_list(&self) -> MdCodeNameList {
         support::list(&self.syntax, 1usize)
     }
-    pub fn l_hard_line(&self) -> SyntaxResult<MdHardLine> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn content(&self) -> MdInlineItemList {
+        support::list(&self.syntax, 2usize)
     }
-    pub fn content(&self) -> SyntaxResult<MdTextual> {
-        support::required_node(&self.syntax, 3usize)
-    }
-    pub fn r_hard_line(&self) -> SyntaxResult<MdHardLine> {
-        support::required_node(&self.syntax, 4usize)
-    }
-    pub fn r_fence_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+    pub fn r_fence_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
     }
 }
 impl Serialize for MdFencedCodeBlock {
@@ -200,10 +192,8 @@ impl Serialize for MdFencedCodeBlock {
 pub struct MdFencedCodeBlockFields {
     pub l_fence_token: SyntaxResult<SyntaxToken>,
     pub code_list: MdCodeNameList,
-    pub l_hard_line: SyntaxResult<MdHardLine>,
-    pub content: SyntaxResult<MdTextual>,
-    pub r_hard_line: SyntaxResult<MdHardLine>,
-    pub r_fence_token: SyntaxResult<SyntaxToken>,
+    pub content: MdInlineItemList,
+    pub r_fence_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdHardLine {
@@ -1520,18 +1510,10 @@ impl std::fmt::Debug for MdFencedCodeBlock {
                     &support::DebugSyntaxResult(self.l_fence_token()),
                 )
                 .field("code_list", &self.code_list())
-                .field(
-                    "l_hard_line",
-                    &support::DebugSyntaxResult(self.l_hard_line()),
-                )
-                .field("content", &support::DebugSyntaxResult(self.content()))
-                .field(
-                    "r_hard_line",
-                    &support::DebugSyntaxResult(self.r_hard_line()),
-                )
+                .field("content", &self.content())
                 .field(
                     "r_fence_token",
-                    &support::DebugSyntaxResult(self.r_fence_token()),
+                    &support::DebugOptionalElement(self.r_fence_token()),
                 )
                 .finish()
         } else {
@@ -3622,7 +3604,7 @@ impl Serialize for MdCodeNameList {
         seq.end()
     }
 }
-impl AstSeparatedList for MdCodeNameList {
+impl AstNodeList for MdCodeNameList {
     type Language = Language;
     type Node = MdTextual;
     fn syntax_list(&self) -> &SyntaxList {
@@ -3635,19 +3617,19 @@ impl AstSeparatedList for MdCodeNameList {
 impl Debug for MdCodeNameList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("MdCodeNameList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        f.debug_list().entries(self.iter()).finish()
     }
 }
-impl IntoIterator for MdCodeNameList {
-    type Item = SyntaxResult<MdTextual>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, MdTextual>;
+impl IntoIterator for &MdCodeNameList {
+    type Item = MdTextual;
+    type IntoIter = AstNodeListIterator<Language, MdTextual>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for &MdCodeNameList {
-    type Item = SyntaxResult<MdTextual>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, MdTextual>;
+impl IntoIterator for MdCodeNameList {
+    type Item = MdTextual;
+    type IntoIter = AstNodeListIterator<Language, MdTextual>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

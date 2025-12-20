@@ -1,0 +1,209 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 131
+expression: snapshot
+---
+## Input
+
+```
+```javascript
+const x = 1;
+```
+
+```
+No language
+```
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdFencedCodeBlock {
+            l_fence_token: TRIPLE_BACKTICK@0..3 "```" [] [],
+            code_list: MdCodeNameList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@3..4 "j" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@4..5 "a" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@5..6 "v" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@6..7 "a" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@7..8 "s" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@8..9 "c" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@9..10 "r" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@10..11 "i" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@11..12 "p" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@12..13 "t" [] [],
+                },
+            ],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@13..15 "c" [Newline("\n")] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@15..16 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@16..17 "n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@17..18 "s" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@18..20 "t" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@20..22 "x" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@22..24 "=" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@24..25 "1" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@25..26 ";" [] [],
+                },
+            ],
+            r_fence_token: TRIPLE_BACKTICK@26..30 "```" [Newline("\n")] [],
+        },
+        MdFencedCodeBlock {
+            l_fence_token: TRIPLE_BACKTICK@30..35 "```" [Newline("\n"), Newline("\n")] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@35..37 "N" [Newline("\n")] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@37..39 "o" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@39..40 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@40..41 "a" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@41..42 "n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@42..43 "g" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@43..44 "u" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@44..45 "a" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@45..46 "g" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@46..47 "e" [] [],
+                },
+            ],
+            r_fence_token: TRIPLE_BACKTICK@47..51 "```" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@51..52 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..52
+  0: (empty)
+  1: MD_BLOCK_LIST@0..51
+    0: MD_FENCED_CODE_BLOCK@0..30
+      0: TRIPLE_BACKTICK@0..3 "```" [] []
+      1: MD_CODE_NAME_LIST@3..13
+        0: MD_TEXTUAL@3..4
+          0: MD_TEXTUAL_LITERAL@3..4 "j" [] []
+        1: MD_TEXTUAL@4..5
+          0: MD_TEXTUAL_LITERAL@4..5 "a" [] []
+        2: MD_TEXTUAL@5..6
+          0: MD_TEXTUAL_LITERAL@5..6 "v" [] []
+        3: MD_TEXTUAL@6..7
+          0: MD_TEXTUAL_LITERAL@6..7 "a" [] []
+        4: MD_TEXTUAL@7..8
+          0: MD_TEXTUAL_LITERAL@7..8 "s" [] []
+        5: MD_TEXTUAL@8..9
+          0: MD_TEXTUAL_LITERAL@8..9 "c" [] []
+        6: MD_TEXTUAL@9..10
+          0: MD_TEXTUAL_LITERAL@9..10 "r" [] []
+        7: MD_TEXTUAL@10..11
+          0: MD_TEXTUAL_LITERAL@10..11 "i" [] []
+        8: MD_TEXTUAL@11..12
+          0: MD_TEXTUAL_LITERAL@11..12 "p" [] []
+        9: MD_TEXTUAL@12..13
+          0: MD_TEXTUAL_LITERAL@12..13 "t" [] []
+      2: MD_INLINE_ITEM_LIST@13..26
+        0: MD_TEXTUAL@13..15
+          0: MD_TEXTUAL_LITERAL@13..15 "c" [Newline("\n")] []
+        1: MD_TEXTUAL@15..16
+          0: MD_TEXTUAL_LITERAL@15..16 "o" [] []
+        2: MD_TEXTUAL@16..17
+          0: MD_TEXTUAL_LITERAL@16..17 "n" [] []
+        3: MD_TEXTUAL@17..18
+          0: MD_TEXTUAL_LITERAL@17..18 "s" [] []
+        4: MD_TEXTUAL@18..20
+          0: MD_TEXTUAL_LITERAL@18..20 "t" [] [Whitespace(" ")]
+        5: MD_TEXTUAL@20..22
+          0: MD_TEXTUAL_LITERAL@20..22 "x" [] [Whitespace(" ")]
+        6: MD_TEXTUAL@22..24
+          0: MD_TEXTUAL_LITERAL@22..24 "=" [] [Whitespace(" ")]
+        7: MD_TEXTUAL@24..25
+          0: MD_TEXTUAL_LITERAL@24..25 "1" [] []
+        8: MD_TEXTUAL@25..26
+          0: MD_TEXTUAL_LITERAL@25..26 ";" [] []
+      3: TRIPLE_BACKTICK@26..30 "```" [Newline("\n")] []
+    1: MD_FENCED_CODE_BLOCK@30..51
+      0: TRIPLE_BACKTICK@30..35 "```" [Newline("\n"), Newline("\n")] []
+      1: MD_CODE_NAME_LIST@35..35
+      2: MD_INLINE_ITEM_LIST@35..47
+        0: MD_TEXTUAL@35..37
+          0: MD_TEXTUAL_LITERAL@35..37 "N" [Newline("\n")] []
+        1: MD_TEXTUAL@37..39
+          0: MD_TEXTUAL_LITERAL@37..39 "o" [] [Whitespace(" ")]
+        2: MD_TEXTUAL@39..40
+          0: MD_TEXTUAL_LITERAL@39..40 "l" [] []
+        3: MD_TEXTUAL@40..41
+          0: MD_TEXTUAL_LITERAL@40..41 "a" [] []
+        4: MD_TEXTUAL@41..42
+          0: MD_TEXTUAL_LITERAL@41..42 "n" [] []
+        5: MD_TEXTUAL@42..43
+          0: MD_TEXTUAL_LITERAL@42..43 "g" [] []
+        6: MD_TEXTUAL@43..44
+          0: MD_TEXTUAL_LITERAL@43..44 "u" [] []
+        7: MD_TEXTUAL@44..45
+          0: MD_TEXTUAL_LITERAL@44..45 "a" [] []
+        8: MD_TEXTUAL@45..46
+          0: MD_TEXTUAL_LITERAL@45..46 "g" [] []
+        9: MD_TEXTUAL@46..47
+          0: MD_TEXTUAL_LITERAL@46..47 "e" [] []
+      3: TRIPLE_BACKTICK@47..51 "```" [Newline("\n")] []
+  2: EOF@51..52 "" [Newline("\n")] []
+
+```
