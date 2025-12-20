@@ -156,13 +156,13 @@ impl MdFencedCodeBlock {
     }
     pub fn as_fields(&self) -> MdFencedCodeBlockFields {
         MdFencedCodeBlockFields {
-            l_fence_token: self.l_fence_token(),
+            l_fence: self.l_fence(),
             code_list: self.code_list(),
             content: self.content(),
-            r_fence_token: self.r_fence_token(),
+            r_fence: self.r_fence(),
         }
     }
-    pub fn l_fence_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn l_fence(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn code_list(&self) -> MdCodeNameList {
@@ -171,7 +171,7 @@ impl MdFencedCodeBlock {
     pub fn content(&self) -> MdInlineItemList {
         support::list(&self.syntax, 2usize)
     }
-    pub fn r_fence_token(&self) -> Option<SyntaxToken> {
+    pub fn r_fence(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 3usize)
     }
 }
@@ -185,10 +185,10 @@ impl Serialize for MdFencedCodeBlock {
 }
 #[derive(Serialize)]
 pub struct MdFencedCodeBlockFields {
-    pub l_fence_token: SyntaxResult<SyntaxToken>,
+    pub l_fence: SyntaxResult<SyntaxToken>,
     pub code_list: MdCodeNameList,
     pub content: MdInlineItemList,
-    pub r_fence_token: Option<SyntaxToken>,
+    pub r_fence: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdHardLine {
@@ -1326,16 +1326,10 @@ impl std::fmt::Debug for MdFencedCodeBlock {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdFencedCodeBlock")
-                .field(
-                    "l_fence_token",
-                    &support::DebugSyntaxResult(self.l_fence_token()),
-                )
+                .field("l_fence", &support::DebugSyntaxResult(self.l_fence()))
                 .field("code_list", &self.code_list())
                 .field("content", &self.content())
-                .field(
-                    "r_fence_token",
-                    &support::DebugOptionalElement(self.r_fence_token()),
-                )
+                .field("r_fence", &support::DebugOptionalElement(self.r_fence()))
                 .finish()
         } else {
             f.debug_struct("MdFencedCodeBlock").finish()

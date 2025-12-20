@@ -420,9 +420,17 @@ impl<'src> MarkdownLexer<'src> {
         BACKTICK
     }
 
-    /// Consume a single tilde character
+    /// Consume tilde(s) - either single for other uses or triple for fenced code blocks
     fn consume_tilde(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
+
+        // Check for triple tilde
+        if self.peek_byte() == Some(b'~') && self.byte_at(2) == Some(b'~') {
+            self.advance(3);
+            return TRIPLE_TILDE;
+        }
+
+        // Single tilde
         self.advance(1);
         TILDE
     }

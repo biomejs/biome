@@ -18,6 +18,9 @@ use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
 use crate::MarkdownParser;
 
+/// CommonMark requires 4 or more spaces for indented code blocks.
+const INDENT_CODE_BLOCK_SPACES: usize = 4;
+
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();
     let _ = parse_block_list(p);
@@ -75,8 +78,7 @@ pub(crate) fn parse_any_block(p: &mut MarkdownParser) {
 
 /// Check if we're at an indented code block (4+ spaces of indentation).
 pub(crate) fn at_indent_code_block(p: &mut MarkdownParser) -> bool {
-    // CommonMark requires 4 or more spaces for indented code blocks
-    p.before_whitespace_count() >= 4
+    p.before_whitespace_count() >= INDENT_CODE_BLOCK_SPACES
 }
 
 /// Parse an indented code block.

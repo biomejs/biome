@@ -7,6 +7,9 @@ use biome_parser::{
 
 use super::parse_any_inline;
 
+/// Maximum number of `#` characters allowed in an ATX header (per CommonMark spec).
+const MAX_HEADER_HASHES: usize = 6;
+
 /// Check if we might be at an ATX header.
 /// We only check if the current token is a HASH - full validation happens in parse_header.
 pub(crate) fn at_header(p: &mut MarkdownParser) -> bool {
@@ -32,7 +35,7 @@ pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
     let hash_count = parse_hash_list(p);
 
     // Validate hash count (must be 1-6)
-    if hash_count > 6 {
+    if hash_count > MAX_HEADER_HASHES {
         // Too many hashes - not a valid header
         m.abandon(p);
         return Absent;
@@ -67,7 +70,8 @@ fn parse_hash_list(p: &mut MarkdownParser) -> usize {
 }
 
 /// Parse header content - inline content for the header.
-/// This stops at end of line (single newline in leading trivia of next token).
+/// This stops at end of line (single newline in leading trivia of next token)
+/// or when trailing hashes are detected.
 fn parse_header_content(p: &mut MarkdownParser) {
     // Check if there's any content (not at EOF)
     if p.at(T![EOF]) {
@@ -93,6 +97,12 @@ fn parse_header_content(p: &mut MarkdownParser) {
             break;
         }
 
+        // Check if we're at trailing hashes (hashes followed by end of line)
+        if p.at(T![#]) && is_trailing_hash_sequence(p) {
+            // Stop content parsing - trailing hashes will be parsed separately
+            break;
+        }
+
         // Parse an inline element
         if parse_any_inline(p).is_absent() {
             break;
@@ -109,6 +119,35 @@ fn parse_header_content(p: &mut MarkdownParser) {
     m.complete(p, MD_PARAGRAPH);
 }
 
+/// Check if the current position has a trailing hash sequence.
+/// A trailing hash sequence is one or more `#` characters followed by end of line
+/// (newline in trivia or EOF), and NOT preceded by a line break (which would
+/// indicate a new block, not trailing hashes).
+fn is_trailing_hash_sequence(p: &mut MarkdownParser) -> bool {
+    // If the current `#` has a preceding line break, it's the start of a new line/block,
+    // not a trailing hash on the current line
+    if p.has_preceding_line_break() {
+        return false;
+    }
+
+    // Save checkpoint to restore position after checking
+    let checkpoint = p.checkpoint();
+    let start_trivia_pos = p.trivia_position();
+
+    // Consume all consecutive hash tokens
+    while p.at(T![#]) {
+        p.bump(T![#]);
+    }
+
+    // Check if we're at end of line (newline in trivia or EOF)
+    let at_end_of_line = p.at(T![EOF]) || p.has_newline_since(start_trivia_pos);
+
+    // Restore position
+    p.rewind(checkpoint);
+
+    at_end_of_line
+}
+
 /// Check if there's any newline in the trivia since the given position.
 /// Unlike has_blank_line_since which requires 2+ newlines, this triggers on 1 newline.
 fn has_newline_since(p: &mut MarkdownParser, since_pos: usize) -> bool {
@@ -119,13 +158,16 @@ fn has_newline_since(p: &mut MarkdownParser, since_pos: usize) -> bool {
 ///
 /// Per CommonMark spec, a closing sequence of `#` characters is optional.
 /// It must be at the end of the line, preceded by optional whitespace.
-///
-/// Note: Currently, trailing hashes are included as part of the header content
-/// (in MdParagraph). Properly separating trailing hashes would require lookahead
-/// to distinguish between hashes in the middle of content vs. at the end of line.
-/// The CST still contains all the text; only the structural representation differs.
 fn parse_trailing_hashes(p: &mut MarkdownParser) {
     let m = p.start();
-    // Emit empty MdHashList - trailing hashes are currently part of content
+
+    // Only parse hashes that are on the same line (no preceding line break)
+    // If there's a preceding line break, we've moved to the next line
+    while p.at(T![#]) && !p.has_preceding_line_break() {
+        let hash_m = p.start();
+        p.bump(T![#]);
+        hash_m.complete(p, MD_HASH);
+    }
+
     m.complete(p, MD_HASH_LIST);
 }

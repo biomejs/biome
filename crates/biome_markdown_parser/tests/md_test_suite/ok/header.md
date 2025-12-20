@@ -9,3 +9,9 @@
 ##### Heading 5
 
 ###### Heading 6
+
+# Trailing hash #
+
+## Multiple trailing ##
+
+### Mixed # content ## with ### trailing ####

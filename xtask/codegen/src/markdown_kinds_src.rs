@@ -17,6 +17,7 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         ("`", "BACKTICK"),
         ("```", "TRIPLE_BACKTICK"),
         ("~", "TILDE"),
+        ("~~~", "TRIPLE_TILDE"),
         ("   ", "WHITESPACE3"),
         ("_", "UNDERSCORE"),
         ("__", "DOUBLE_UNDERSCORE"),

@@ -215,9 +215,7 @@ fn triple_tilde() {
     // Triple tilde for fenced code blocks
     assert_lex! {
         "~~~",
-        TILDE:1,
-        TILDE:1,
-        TILDE:1,
+        TRIPLE_TILDE:3,
     }
 }
 

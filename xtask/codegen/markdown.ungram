@@ -102,11 +102,15 @@ MdIndentCodeBlock =
 // ```shell
 //
 // ```
+// or
+// ~~~shell
+//
+// ~~~
 MdFencedCodeBlock =
-	l_fence: '```'
+	l_fence: ('```' | '~~~')
 	code_list: MdCodeNameList
 	content: MdInlineItemList
-	r_fence: '```'?
+	r_fence: ('```' | '~~~')?
 
 MdCodeNameList = MdTextual*
 

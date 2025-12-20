@@ -7,26 +7,17 @@ use biome_parser::{
 
 /// Check if we're at a fenced code block (``` or ~~~).
 pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
-    p.at(T!["```"]) || at_triple_tilde(p)
-}
-
-/// Check if we're at triple tilde (~~~) for fenced code blocks.
-/// The lexer produces individual TILDE tokens, so we need to check for 3 consecutive.
-fn at_triple_tilde(_p: &mut MarkdownParser) -> bool {
-    // For now, we only support ``` since the lexer produces TRIPLE_BACKTICK as a single token.
-    // Tilde support would require either a lexer change or lookahead.
-    // TODO: Add tilde fence support
-    false
+    p.at(T!["```"]) || p.at(TRIPLE_TILDE)
 }
 
 /// Parse a fenced code block.
 ///
 /// Grammar:
 /// MdFencedCodeBlock =
-///   l_fence: '```'
+///   l_fence: ('```' | '~~~')
 ///   code_list: MdCodeNameList
 ///   content: MdInlineItemList
-///   r_fence: '```'?
+///   r_fence: ('```' | '~~~')?
 pub(crate) fn parse_fenced_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
     if !at_fenced_code_block(p) {
         return Absent;
@@ -34,17 +25,29 @@ pub(crate) fn parse_fenced_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    // Opening fence (```)
-    p.bump(T!["```"]);
+    // Track which fence type we opened with (must close with same type per CommonMark)
+    let is_tilde_fence = p.at(TRIPLE_TILDE);
+
+    // Opening fence (``` or ~~~)
+    if is_tilde_fence {
+        p.bump(TRIPLE_TILDE);
+    } else {
+        p.bump(T!["```"]);
+    }
 
     // Optional language info string (MdCodeNameList)
     parse_code_name_list(p);
 
     // Content (everything until closing fence) - optional
-    parse_code_content(p);
+    parse_code_content(p, is_tilde_fence);
 
     // Closing fence - optional (unclosed code blocks are valid but incomplete)
-    if p.at(T!["```"]) {
+    // Must match the opening fence type
+    if is_tilde_fence {
+        if p.at(TRIPLE_TILDE) {
+            p.bump(TRIPLE_TILDE);
+        }
+    } else if p.at(T!["```"]) {
         p.bump(T!["```"]);
     }
 
@@ -80,11 +83,19 @@ fn parse_code_name_list(p: &mut MarkdownParser) {
 
 /// Parse the code content until we find a closing fence.
 /// Grammar: content: MdInlineItemList
-fn parse_code_content(p: &mut MarkdownParser) {
+fn parse_code_content(p: &mut MarkdownParser, is_tilde_fence: bool) {
     let m = p.start();
 
-    // Consume all tokens until we see a closing fence (```) or EOF
-    while !p.at(T![EOF]) && !p.at(T!["```"]) {
+    // Consume all tokens until we see the matching closing fence or EOF
+    while !p.at(T![EOF]) {
+        // Check for closing fence (must match opening fence type)
+        if is_tilde_fence && p.at(TRIPLE_TILDE) {
+            break;
+        }
+        if !is_tilde_fence && p.at(T!["```"]) {
+            break;
+        }
+
         let text_m = p.start();
         p.bump_any();
         text_m.complete(p, MD_TEXTUAL);
