@@ -1,8 +1,10 @@
+use std::ops::Not;
+
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::JsCallExpression;
+use biome_js_syntax::{JsCallExpression, JsFileSource};
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::use_vue_consistent_define_props_declaration::{
     DeclarationStyle, UseVueConsistentDefinePropsDeclarationOptions,
@@ -20,7 +22,7 @@ declare_lint_rule! {
     /// ```vue,expect_diagnostic
     /// <script setup lang="ts">
     /// const props = defineProps({
-    /// kind: { type: String },
+    ///   kind: { type: String },
     /// });
     /// </script>
     /// ```
@@ -30,7 +32,7 @@ declare_lint_rule! {
     /// ```vue
     /// <script setup lang="ts">
     /// const props = defineProps<{
-    /// kind: string;
+    ///   kind: string;
     /// }>();
     /// </script>
     /// ```
@@ -52,9 +54,12 @@ impl Rule for UseVueConsistentDefinePropsDeclaration {
     type Options = UseVueConsistentDefinePropsDeclarationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        // TODO: Need to run this only on <script setup> blocks.
-        let path = ctx.file_path();
-        if path.extension() != Some("vue") {
+        if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_vue_setup()
+            .not()
+        {
             return None;
         }
 

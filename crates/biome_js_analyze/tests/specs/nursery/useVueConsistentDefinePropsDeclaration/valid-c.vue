@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from "vue";
-
 const props = withDefaults(
 	defineProps<{
 		kind: string;
@@ -12,6 +10,4 @@ const props = withDefaults(
 		enabled: true,
 	},
 );
-
-const label = computed(() => `${props.kind}:${props.count}`);
 </script>
