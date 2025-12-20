@@ -1381,6 +1381,20 @@
 			},
 			"additionalProperties": false
 		},
+		"DeclarationStyle": {
+			"oneOf": [
+				{
+					"description": "defineProps<{...}>()",
+					"type": "string",
+					"const": "type"
+				},
+				{
+					"description": "defineProps({...})",
+					"type": "string",
+					"const": "runtime"
+				}
+			]
+		},
 		"DependencyAvailability": {
 			"oneOf": [
 				{
@@ -5531,7 +5545,7 @@
 					]
 				},
 				"useVueConsistentDefinePropsDeclaration": {
-					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration>",
+					"description": "Enforce consistent defineProps declaration style.\nSee <https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration>",
 					"anyOf": [
 						{
 							"$ref": "#/$defs/UseVueConsistentDefinePropsDeclarationConfiguration"
@@ -12822,6 +12836,11 @@
 		},
 		"UseVueConsistentDefinePropsDeclarationOptions": {
 			"type": "object",
+			"properties": {
+				"style": {
+					"anyOf": [{ "$ref": "#/$defs/DeclarationStyle" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseVueDefineMacrosOrderConfiguration": {

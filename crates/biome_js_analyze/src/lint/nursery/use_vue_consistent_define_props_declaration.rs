@@ -59,7 +59,7 @@ impl Rule for UseVueConsistentDefinePropsDeclaration {
         }
 
         let node = ctx.query();
-        if let Some(callee_name) = get_callee_name(&node)
+        if let Some(callee_name) = get_callee_name(node)
             && callee_name != "defineProps"
         {
             return None;
@@ -67,10 +67,10 @@ impl Rule for UseVueConsistentDefinePropsDeclaration {
 
         let style = ctx.options().style.clone().unwrap_or_default();
         println!("style: {:?}", style);
-        if let Some(kind) = get_declaration_kind(&node) {
-            if kind != style {
-                return Some(());
-            }
+        if let Some(kind) = get_declaration_kind(node)
+            && kind != style
+        {
+            return Some(());
         }
 
         None
@@ -101,13 +101,15 @@ fn get_callee_name(expr: &JsCallExpression) -> Option<TokenText> {
 }
 
 fn get_declaration_kind(expr: &JsCallExpression) -> Option<DeclarationStyle> {
-    if let Ok(arguments) = expr.arguments() {
-        if arguments.args().into_iter().count() != 0 {
-            return Some(DeclarationStyle::Runtime);
-        }
+    // check if the expression has arguments
+    if let Ok(arguments) = expr.arguments()
+        && arguments.args().into_iter().next().is_some()
+    {
+        return Some(DeclarationStyle::Runtime);
     }
 
-    if let Some(_) = expr.type_arguments() {
+    // check if the expression has type arguments
+    if expr.type_arguments().is_some() {
         return Some(DeclarationStyle::Type);
     }
 

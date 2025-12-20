@@ -2132,7 +2132,7 @@ See <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name>
 	 */
 	useUniqueGraphqlOperationName?: UseUniqueGraphqlOperationNameConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Enforce consistent defineProps declaration style.
 See <https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration> 
 	 */
 	useVueConsistentDefinePropsDeclaration?: UseVueConsistentDefinePropsDeclarationConfiguration;
@@ -6545,7 +6545,9 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
-export type UseVueConsistentDefinePropsDeclarationOptions = {};
+export interface UseVueConsistentDefinePropsDeclarationOptions {
+	style?: DeclarationStyle;
+}
 export interface UseVueDefineMacrosOrderOptions {
 	/**
 	 * The order of the Vue define macros.
@@ -6946,6 +6948,7 @@ export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
  * The GraphQL description style to enforce.
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
+export type DeclarationStyle = "type" | "runtime";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
