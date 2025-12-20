@@ -17,7 +17,7 @@ pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
 ///   l_fence: ('```' | '~~~')
 ///   code_list: MdCodeNameList
 ///   content: MdInlineItemList
-///   r_fence: ('```' | '~~~')?
+///   r_fence: ('```' | '~~~')
 pub(crate) fn parse_fenced_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
     if !at_fenced_code_block(p) {
         return Absent;
@@ -38,17 +38,15 @@ pub(crate) fn parse_fenced_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
     // Optional language info string (MdCodeNameList)
     parse_code_name_list(p);
 
-    // Content (everything until closing fence) - optional
+    // Content (everything until closing fence)
     parse_code_content(p, is_tilde_fence);
 
-    // Closing fence - optional (unclosed code blocks are valid but incomplete)
+    // Closing fence - emits diagnostic if missing
     // Must match the opening fence type
     if is_tilde_fence {
-        if p.at(TRIPLE_TILDE) {
-            p.bump(TRIPLE_TILDE);
-        }
-    } else if p.at(T!["```"]) {
-        p.bump(T!["```"]);
+        p.expect(TRIPLE_TILDE);
+    } else {
+        p.expect(T!["```"]);
     }
 
     Present(m.complete(p, MD_FENCED_CODE_BLOCK))

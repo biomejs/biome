@@ -31,10 +31,8 @@ pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
     }
     content.complete(p, MD_INLINE_ITEM_LIST);
 
-    // Closing backtick (if present)
-    if p.at(BACKTICK) {
-        p.bump(BACKTICK);
-    }
+    // Closing backtick - emits diagnostic if missing
+    p.expect(BACKTICK);
 
     Present(m.complete(p, MD_INLINE_CODE))
 }
@@ -69,10 +67,8 @@ pub(crate) fn parse_inline_emphasis(p: &mut MarkdownParser) -> ParsedSyntax {
     }
     content.complete(p, MD_INLINE_ITEM_LIST);
 
-    // Closing marker (if present)
-    if p.at(opener) {
-        p.bump(opener);
-    }
+    // Closing marker - emits diagnostic if missing
+    p.expect(opener);
 
     Present(m.complete(p, MD_INLINE_EMPHASIS))
 }
@@ -107,10 +103,8 @@ pub(crate) fn parse_inline_italic(p: &mut MarkdownParser) -> ParsedSyntax {
     }
     content.complete(p, MD_INLINE_ITEM_LIST);
 
-    // Closing marker (if present)
-    if p.at(opener) {
-        p.bump(opener);
-    }
+    // Closing marker - emits diagnostic if missing
+    p.expect(opener);
 
     Present(m.complete(p, MD_INLINE_ITALIC))
 }
@@ -137,29 +131,23 @@ pub(crate) fn parse_inline_link(p: &mut MarkdownParser) -> ParsedSyntax {
     }
     text.complete(p, MD_INLINE_ITEM_LIST);
 
-    // ]
-    if p.at(R_BRACK) {
-        p.bump(R_BRACK);
+    // ] - emits diagnostic if missing
+    p.expect(R_BRACK);
+
+    // ( - emits diagnostic if missing
+    p.expect(L_PAREN);
+
+    // URL/source
+    let source = p.start();
+    while !p.at(R_PAREN) && !p.at(T![EOF]) && !p.has_preceding_line_break() {
+        let text_m = p.start();
+        p.bump_remap(MD_TEXTUAL_LITERAL);
+        text_m.complete(p, MD_TEXTUAL);
     }
+    source.complete(p, MD_INLINE_ITEM_LIST);
 
-    // (
-    if p.at(L_PAREN) {
-        p.bump(L_PAREN);
-
-        // URL/source
-        let source = p.start();
-        while !p.at(R_PAREN) && !p.at(T![EOF]) && !p.has_preceding_line_break() {
-            let text_m = p.start();
-            p.bump_remap(MD_TEXTUAL_LITERAL);
-            text_m.complete(p, MD_TEXTUAL);
-        }
-        source.complete(p, MD_INLINE_ITEM_LIST);
-
-        // )
-        if p.at(R_PAREN) {
-            p.bump(R_PAREN);
-        }
-    }
+    // ) - emits diagnostic if missing
+    p.expect(R_PAREN);
 
     Present(m.complete(p, MD_INLINE_LINK))
 }
@@ -195,29 +183,23 @@ pub(crate) fn parse_inline_image(p: &mut MarkdownParser) -> ParsedSyntax {
     }
     alt.complete(p, MD_INLINE_ITEM_LIST);
 
-    // ]
-    if p.at(R_BRACK) {
-        p.bump(R_BRACK);
+    // ] - emits diagnostic if missing
+    p.expect(R_BRACK);
+
+    // ( - emits diagnostic if missing
+    p.expect(L_PAREN);
+
+    // source URL
+    let source = p.start();
+    while !p.at(R_PAREN) && !p.at(T![EOF]) && !p.has_preceding_line_break() {
+        let text_m = p.start();
+        p.bump_remap(MD_TEXTUAL_LITERAL);
+        text_m.complete(p, MD_TEXTUAL);
     }
+    source.complete(p, MD_INLINE_ITEM_LIST);
 
-    // (
-    if p.at(L_PAREN) {
-        p.bump(L_PAREN);
-
-        // source URL
-        let source = p.start();
-        while !p.at(R_PAREN) && !p.at(T![EOF]) && !p.has_preceding_line_break() {
-            let text_m = p.start();
-            p.bump_remap(MD_TEXTUAL_LITERAL);
-            text_m.complete(p, MD_TEXTUAL);
-        }
-        source.complete(p, MD_INLINE_ITEM_LIST);
-
-        // )
-        if p.at(R_PAREN) {
-            p.bump(R_PAREN);
-        }
-    }
+    // ) - emits diagnostic if missing
+    p.expect(R_PAREN);
 
     Present(m.complete(p, MD_INLINE_IMAGE))
 }

@@ -110,7 +110,7 @@ MdFencedCodeBlock =
 	l_fence: ('```' | '~~~')
 	code_list: MdCodeNameList
 	content: MdInlineItemList
-	r_fence: ('```' | '~~~')?
+	r_fence: ('```' | '~~~')
 
 MdCodeNameList = MdTextual*
 
@@ -160,51 +160,46 @@ AnyMdInline =
 
 // *italic*
 // ^^^^^^^^
-// Note: r_fence is optional to handle unclosed italic gracefully
 MdInlineItalic =
 	l_fence: ('*' | '_')
 	content: MdInlineItemList
-	r_fence: ('*' | '_')?
+	r_fence: ('*' | '_')
 
 // **bold**
 // ^^^^^^^^
-// Note: r_fence is optional to handle unclosed emphasis gracefully
 MdInlineEmphasis =
 	l_fence: ('**' | '__')
 	content: MdInlineItemList
-	r_fence: ('**' | '__')?
+	r_fence: ('**' | '__')
 
 
 // `code`
 // ^^^^^^
-// Note: r_tick is optional to handle unclosed code spans gracefully
 MdInlineCode =
 	l_tick: '`'
 	content: MdInlineItemList
-	r_tick: '`'?
+	r_tick: '`'
 
 // [text](href)
 // ^^^^^^^^^^^^
-// Note: closing tokens optional to handle malformed links gracefully
 MdInlineLink =
 	'['
 	text: MdInlineItemList
-	']'?
-	'('?
+	']'
+	'('
 	source: MdInlineItemList
-	')'?
+	')'
 
 // ![alt](image)
 // ^^^^^^^^^^^^^^
-// Note: closing tokens optional to handle malformed images gracefully
 MdInlineImage =
 	'!'
 	'['
 	alt: MdInlineItemList
-	']'?
-	'('?
+	']'
+	'('
 	source: MdInlineItemList
-	')'?
+	')'
 
 // ***
 // ---

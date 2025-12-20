@@ -39,6 +39,7 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         // Bogus nodes
         "BOGUS",
         "MD_BOGUS",
+        "MD_BOGUS_BULLET",
         // node
         "MD_DOCUMENT",
         "MD_BLOCK_LIST",

@@ -3,12 +3,19 @@
 //! Supports bullet lists (`-`, `*`, `+`) and ordered lists (`1.`, `2.`, etc.).
 
 use biome_markdown_syntax::T;
-use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
-use biome_parser::Parser;
+use biome_markdown_syntax::kind::MarkdownSyntaxKind::{self, *};
+use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax::{self, *};
-use biome_parser::prelude::TokenSource;
+use biome_parser::prelude::{ParseDiagnostic, TokenSet};
+use biome_parser::{Parser, token_set};
+use biome_rowan::TextRange;
 
 use crate::MarkdownParser;
+
+/// Tokens that start a new block (used for recovery)
+const BLOCK_RECOVERY_SET: TokenSet<MarkdownSyntaxKind> =
+    token_set![T![-], T![*], T![>], T![#], TRIPLE_BACKTICK, TRIPLE_TILDE];
 
 /// Check if we're at the start of a bullet list item (`-`, `*`, or `+`).
 ///
@@ -29,6 +36,44 @@ pub(crate) fn at_bullet_list_item(p: &mut MarkdownParser) -> bool {
     p.has_preceding_line_break() || p.at_start_of_input()
 }
 
+/// Struct implementing `ParseNodeList` for bullet lists.
+struct BulletList;
+
+impl ParseNodeList for BulletList {
+    type Kind = MarkdownSyntaxKind;
+    type Parser<'source> = MarkdownParser<'source>;
+
+    const LIST_KIND: Self::Kind = MD_BULLET_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_bullet(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        // List ends when we're no longer at a bullet marker at line start
+        !at_bullet_list_item(p)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(MD_BOGUS_BULLET, BLOCK_RECOVERY_SET)
+                .enable_recovery_on_line_break(),
+            expected_bullet,
+        )
+    }
+}
+
+/// Error builder for bullet list recovery
+fn expected_bullet(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected a list item", range)
+        .with_hint("List items start with `-` or `*` at the beginning of a line")
+}
+
 /// Parse a bullet list item.
 ///
 /// Grammar:
@@ -45,29 +90,10 @@ pub(crate) fn parse_bullet_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
     }
 
     let item_m = p.start();
-    let list_m = p.start();
 
-    // Parse bullet items until we're no longer at a valid bullet marker.
-    // Track position for error recovery to prevent infinite loops.
-    loop {
-        if !at_bullet_list_item(p) {
-            break;
-        }
+    // Use ParseNodeList to parse the list with proper recovery
+    BulletList.parse_list(p);
 
-        let prev_position = p.source().position();
-
-        if parse_bullet(p).is_absent() {
-            break;
-        }
-
-        // Error recovery: if we didn't advance, break to avoid infinite loop
-        if p.source().position() == prev_position {
-            // Skip the problematic token and continue
-            p.bump_any();
-        }
-    }
-
-    list_m.complete(p, MD_BULLET_LIST);
     Present(item_m.complete(p, MD_BULLET_LIST_ITEM))
 }
 
@@ -75,8 +101,8 @@ pub(crate) fn parse_bullet_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
 ///
 /// Returns `Present` if a bullet was successfully parsed, `Absent` otherwise.
 fn parse_bullet(p: &mut MarkdownParser) -> ParsedSyntax {
-    // Must be at a bullet marker
-    if !p.at(T![-]) && !p.at(T![*]) {
+    // Must be at a bullet marker at line start
+    if !at_bullet_list_item(p) {
         return Absent;
     }
 
