@@ -1,4 +1,4 @@
-//! An extremely fast, lookup table based, JSON lexer which yields SyntaxKind tokens used by the rome-json parser.
+//! An extremely fast, lookup table based, Markdown lexer which yields SyntaxKind tokens used by the biome-markdown parser.
 
 #[rustfmt::skip]
 mod tests;
@@ -10,7 +10,8 @@ use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
 use biome_rowan::{SyntaxKind, TextSize};
-use biome_unicode_table::{Dispatch::*, lookup_byte};
+use biome_unicode_table::Dispatch::{self, *};
+use biome_unicode_table::lookup_byte;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum MarkdownLexContext {
@@ -180,7 +181,16 @@ impl<'src> MarkdownLexer<'src> {
         let dispatched = lookup_byte(current);
         match dispatched {
             WHS => self.consume_newline_or_whitespace(),
-            MUL | MIN | IDT => self.consume_thematic_break_literal(),
+            MUL | MIN | IDT => self.consume_thematic_break_or_emphasis(dispatched),
+            HAS => self.consume_hash(),
+            TPL => self.consume_backtick(),
+            TLD => self.consume_tilde(),
+            MOR => self.consume_byte(R_ANGLE),
+            EXL => self.consume_byte(BANG),
+            BTO => self.consume_byte(L_BRACK),
+            BTC => self.consume_byte(R_BRACK),
+            PNO => self.consume_byte(L_PAREN),
+            PNC => self.consume_byte(R_PAREN),
             _ => self.consume_textual(),
         }
     }
@@ -269,31 +279,98 @@ impl<'src> MarkdownLexer<'src> {
         TAB
     }
 
-    fn consume_thematic_break_literal(&mut self) -> MarkdownSyntaxKind {
+    /// Consumes thematic break literal or returns emphasis marker tokens.
+    /// Called when we see *, -, or _.
+    fn consume_thematic_break_or_emphasis(&mut self, dispatched: Dispatch) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
-        let start_char = match self.current_byte() {
-            Some(b'-') => b'-',
-            Some(b'*') => b'*',
-            Some(b'_') => b'_',
+        let start_char = match dispatched {
+            MUL => b'*',
+            MIN => b'-',
+            IDT => {
+                // IDT can match letters (A-Z, a-z) or underscore
+                // Only underscore should be treated as emphasis marker
+                match self.current_byte() {
+                    Some(b'_') => b'_',
+                    _ => return self.consume_textual(),
+                }
+            }
             _ => return self.consume_textual(),
         };
 
+        // Save position to restore if not a thematic break
+        let start_position = self.position;
+
         let mut count = 0;
         loop {
-            self.consume_whitespace();
+            // Count only the marker characters, skip whitespace
             if matches!(self.current_byte(), Some(ch) if ch == start_char) {
                 self.advance(1);
                 count += 1;
+            } else if matches!(self.current_byte(), Some(b' ')) {
+                self.advance(1);
             } else {
                 break;
             }
         }
-        // until next newline or eof
+
+        // Check if this is a valid thematic break: 3+ of same char, only whitespace between,
+        // and followed by newline or EOF
         if matches!(self.current_byte(), Some(b'\n' | b'\r') | None) && count >= 3 {
             return MD_THEMATIC_BREAK_LITERAL;
         }
-        ERROR_TOKEN
+
+        // Not a thematic break - restore position and consume as emphasis marker
+        self.position = start_position;
+
+        // Check for double emphasis markers (**, __, --)
+        if self.peek_byte() == Some(start_char) {
+            self.advance(2);
+            return match start_char {
+                b'*' => DOUBLE_STAR,
+                b'_' => DOUBLE_UNDERSCORE,
+                b'-' => MINUS, // No DOUBLE_MINUS in grammar, use MINUS
+                _ => unreachable!(),
+            };
+        }
+
+        // Single marker
+        self.advance(1);
+        match start_char {
+            b'*' => STAR,
+            b'_' => UNDERSCORE,
+            b'-' => MINUS,
+            _ => unreachable!(),
+        }
+    }
+
+    /// Consume a single hash character for ATX headers
+    fn consume_hash(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+        self.advance(1);
+        HASH
+    }
+
+    /// Consume backtick(s) - either single for inline code or triple for fenced code blocks
+    fn consume_backtick(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        // Check for triple backtick
+        if self.peek_byte() == Some(b'`') && self.byte_at(2) == Some(b'`') {
+            self.advance(3);
+            return TRIPLE_BACKTICK;
+        }
+
+        // Single backtick
+        self.advance(1);
+        BACKTICK
+    }
+
+    /// Consume a single tilde character
+    fn consume_tilde(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+        self.advance(1);
+        TILDE
     }
 
     /// Get the UTF8 char which starts at the current byte
@@ -361,7 +438,6 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
-    #[expect(dead_code)]
     fn consume_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
         self.advance(1);
         tok

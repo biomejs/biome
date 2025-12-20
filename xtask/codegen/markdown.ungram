@@ -145,7 +145,7 @@ MdOrderList = AnyCodeBlock*
 // Another block paragraph
 MdParagraph =
 	list: MdInlineItemList
-	hard_line: MdHardLine
+	hard_line: MdHardLine?
 
 MdInlineItemList = AnyMdInline*
 

@@ -958,8 +958,8 @@ impl MdParagraph {
     pub fn list(&self) -> MdInlineItemList {
         support::list(&self.syntax, 0usize)
     }
-    pub fn hard_line(&self) -> SyntaxResult<MdHardLine> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn hard_line(&self) -> Option<MdHardLine> {
+        support::node(&self.syntax, 1usize)
     }
 }
 impl Serialize for MdParagraph {
@@ -973,7 +973,7 @@ impl Serialize for MdParagraph {
 #[derive(Serialize)]
 pub struct MdParagraphFields {
     pub list: MdInlineItemList,
-    pub hard_line: SyntaxResult<MdHardLine>,
+    pub hard_line: Option<MdHardLine>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdQuote {
@@ -2457,7 +2457,10 @@ impl std::fmt::Debug for MdParagraph {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdParagraph")
                 .field("list", &self.list())
-                .field("hard_line", &support::DebugSyntaxResult(self.hard_line()))
+                .field(
+                    "hard_line",
+                    &support::DebugOptionalElement(self.hard_line()),
+                )
                 .finish()
         } else {
             f.debug_struct("MdParagraph").finish()

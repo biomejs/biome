@@ -162,3 +162,233 @@ _ _ _ _  _ "#,
         MD_THEMATIC_BREAK_LITERAL:11,
     }
 }
+
+#[test]
+fn hash_token() {
+    // Single hash for ATX header
+    assert_lex! {
+        "#",
+        HASH:1,
+    }
+}
+
+#[test]
+fn multiple_hashes() {
+    // Multiple hashes for different header levels
+    assert_lex! {
+        "###",
+        HASH:1,
+        HASH:1,
+        HASH:1,
+    }
+}
+
+#[test]
+fn backtick_token() {
+    // Single backtick for inline code
+    assert_lex! {
+        "`",
+        BACKTICK:1,
+    }
+}
+
+#[test]
+fn triple_backtick() {
+    // Triple backtick for fenced code blocks
+    assert_lex! {
+        "```",
+        TRIPLE_BACKTICK:3,
+    }
+}
+
+#[test]
+fn tilde_token() {
+    // Single tilde
+    assert_lex! {
+        "~",
+        TILDE:1,
+    }
+}
+
+#[test]
+fn triple_tilde() {
+    // Triple tilde for fenced code blocks
+    assert_lex! {
+        "~~~",
+        TILDE:1,
+        TILDE:1,
+        TILDE:1,
+    }
+}
+
+#[test]
+fn greater_than_token() {
+    // Greater than for block quotes
+    assert_lex! {
+        ">",
+        R_ANGLE:1,
+    }
+}
+
+#[test]
+fn greater_than_with_text() {
+    // Block quote with content
+    assert_lex! {
+        "> text",
+        R_ANGLE:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+    }
+}
+
+#[test]
+fn plus_token() {
+    // Plus for bullet list marker
+    assert_lex! {
+        "+",
+        MD_TEXTUAL_LITERAL:1,
+    }
+}
+
+#[test]
+fn star_token_single() {
+    // Single star followed by space (not a thematic break)
+    assert_lex! {
+        "* ",
+        STAR:1,
+        WHITESPACE:1,
+    }
+}
+
+#[test]
+fn brackets() {
+    // Brackets for links
+    assert_lex! {
+        "[text](url)",
+        L_BRACK:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        R_BRACK:1,
+        L_PAREN:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        R_PAREN:1,
+    }
+}
+
+#[test]
+fn bang_token() {
+    // Exclamation for images
+    assert_lex! {
+        "!",
+        BANG:1,
+    }
+}
+
+#[test]
+fn image_syntax() {
+    // Image syntax
+    assert_lex! {
+        "![alt](src)",
+        BANG:1,
+        L_BRACK:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        R_BRACK:1,
+        L_PAREN:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        R_PAREN:1,
+    }
+}
+
+#[test]
+fn star_and_underscore_emphasis() {
+    // Single star for emphasis
+    assert_lex! {
+        "*text*",
+        STAR:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        STAR:1,
+    }
+}
+
+#[test]
+fn double_star_emphasis() {
+    // Double star for strong emphasis
+    assert_lex! {
+        "**bold**",
+        DOUBLE_STAR:2,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        DOUBLE_STAR:2,
+    }
+}
+
+#[test]
+fn underscore_token() {
+    // Underscore token for emphasis
+    assert_lex! {
+        "_text_",
+        UNDERSCORE:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        UNDERSCORE:1,
+    }
+}
+
+#[test]
+fn double_underscore_emphasis() {
+    // Double underscore for strong emphasis
+    assert_lex! {
+        "__bold__",
+        DOUBLE_UNDERSCORE:2,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        DOUBLE_UNDERSCORE:2,
+    }
+}
+
+#[test]
+fn minus_token_single() {
+    // Single minus followed by text (not a thematic break)
+    assert_lex! {
+        "- item",
+        MINUS:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+    }
+}
+
+#[test]
+fn code_fence_with_language() {
+    // Code fence with language specifier
+    assert_lex! {
+        "```rust",
+        TRIPLE_BACKTICK:3,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+    }
+}

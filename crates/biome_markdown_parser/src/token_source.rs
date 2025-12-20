@@ -83,6 +83,44 @@ impl<'source> MarkdownTokenSource<'source> {
         })
     }
 
+    /// Returns the current trivia list length, used for tracking paragraph boundaries.
+    pub fn trivia_len(&self) -> usize {
+        self.trivia_list.len()
+    }
+
+    /// Returns true if there is a blank line in the trivia added since the given position.
+    /// A blank line is detected when there are 2+ consecutive newlines.
+    pub fn has_blank_line_since(&self, since_trivia_pos: usize) -> bool {
+        let mut newline_count = 0;
+
+        // Only check trivia added since the given position
+        for trivia in self.trivia_list.iter().skip(since_trivia_pos) {
+            if trivia.trailing() {
+                // Trailing trivia resets the newline count
+                newline_count = 0;
+                continue;
+            }
+
+            match trivia.kind() {
+                TriviaPieceKind::Newline => {
+                    newline_count += 1;
+                    if newline_count >= 2 {
+                        return true;
+                    }
+                }
+                TriviaPieceKind::Whitespace | TriviaPieceKind::Skipped => {
+                    // Whitespace between newlines is fine (e.g., "\n  \n")
+                }
+                _ => {
+                    // Any other trivia type resets the count
+                    newline_count = 0;
+                }
+            }
+        }
+
+        false
+    }
+
     #[expect(dead_code)]
     pub fn re_lex(&mut self, mode: MarkdownReLexContext) -> MarkdownSyntaxKind {
         self.lexer.re_lex(mode)
