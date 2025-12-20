@@ -41,6 +41,11 @@ impl<'source> MarkdownParser<'source> {
         self.source.has_blank_line_since(since_pos)
     }
 
+    /// Returns true if there is any newline in the trivia since the given position.
+    pub fn has_newline_since(&self, since_pos: usize) -> bool {
+        self.source.has_newline_since(since_pos)
+    }
+
     pub fn rewind(&mut self, checkpoint: MarkdownParserCheckpoint) {
         let MarkdownParserCheckpoint { context, source } = checkpoint;
 

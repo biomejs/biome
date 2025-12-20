@@ -121,6 +121,17 @@ impl<'source> MarkdownTokenSource<'source> {
         false
     }
 
+    /// Returns true if there is any newline in the trivia since the given position.
+    /// This is used for header parsing where a single newline ends the header.
+    pub fn has_newline_since(&self, since_trivia_pos: usize) -> bool {
+        for trivia in self.trivia_list.iter().skip(since_trivia_pos) {
+            if !trivia.trailing() && trivia.kind() == TriviaPieceKind::Newline {
+                return true;
+            }
+        }
+        false
+    }
+
     #[expect(dead_code)]
     pub fn re_lex(&mut self, mode: MarkdownReLexContext) -> MarkdownSyntaxKind {
         self.lexer.re_lex(mode)

@@ -1,0 +1,484 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 131
+expression: snapshot
+---
+## Input
+
+```
+# Heading 1
+
+## Heading 2
+
+### Heading 3
+
+#### Heading 4
+
+##### Heading 5
+
+###### Heading 6
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@0..2 "#" [] [Whitespace(" ")],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@2..3 "H" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@3..4 "e" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@4..5 "a" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@5..6 "d" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@6..7 "i" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@7..8 "n" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@8..10 "g" [] [Whitespace(" ")],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@10..11 "1" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@11..14 "#" [Newline("\n"), Newline("\n")] [],
+                },
+                MdHash {
+                    hash_token: HASH@14..16 "#" [] [Whitespace(" ")],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@16..17 "H" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@17..18 "e" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@18..19 "a" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@19..20 "d" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@20..21 "i" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@21..22 "n" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@22..24 "g" [] [Whitespace(" ")],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@24..25 "2" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@25..28 "#" [Newline("\n"), Newline("\n")] [],
+                },
+                MdHash {
+                    hash_token: HASH@28..29 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@29..31 "#" [] [Whitespace(" ")],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@31..32 "H" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@32..33 "e" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@33..34 "a" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@34..35 "d" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@35..36 "i" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@36..37 "n" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@37..39 "g" [] [Whitespace(" ")],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@39..40 "3" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@40..43 "#" [Newline("\n"), Newline("\n")] [],
+                },
+                MdHash {
+                    hash_token: HASH@43..44 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@44..45 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@45..47 "#" [] [Whitespace(" ")],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@47..48 "H" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@48..49 "e" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@49..50 "a" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@50..51 "d" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@51..52 "i" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@52..53 "n" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@53..55 "g" [] [Whitespace(" ")],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@55..56 "4" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@56..59 "#" [Newline("\n"), Newline("\n")] [],
+                },
+                MdHash {
+                    hash_token: HASH@59..60 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@60..61 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@61..62 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@62..64 "#" [] [Whitespace(" ")],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@64..65 "H" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@65..66 "e" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@66..67 "a" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@67..68 "d" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@68..69 "i" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@69..70 "n" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@70..72 "g" [] [Whitespace(" ")],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@72..73 "5" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@73..76 "#" [Newline("\n"), Newline("\n")] [],
+                },
+                MdHash {
+                    hash_token: HASH@76..77 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@77..78 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@78..79 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@79..80 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@80..82 "#" [] [Whitespace(" ")],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@82..83 "H" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@83..84 "e" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@84..85 "a" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@85..86 "d" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@86..87 "i" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@87..88 "n" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@88..90 "g" [] [Whitespace(" ")],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@90..91 "6" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+    ],
+    eof_token: EOF@91..92 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..92
+  0: (empty)
+  1: MD_BLOCK_LIST@0..91
+    0: MD_HEADER@0..11
+      0: MD_HASH_LIST@0..2
+        0: MD_HASH@0..2
+          0: HASH@0..2 "#" [] [Whitespace(" ")]
+      1: MD_PARAGRAPH@2..11
+        0: MD_INLINE_ITEM_LIST@2..11
+          0: MD_TEXTUAL@2..3
+            0: MD_TEXTUAL_LITERAL@2..3 "H" [] []
+          1: MD_TEXTUAL@3..4
+            0: MD_TEXTUAL_LITERAL@3..4 "e" [] []
+          2: MD_TEXTUAL@4..5
+            0: MD_TEXTUAL_LITERAL@4..5 "a" [] []
+          3: MD_TEXTUAL@5..6
+            0: MD_TEXTUAL_LITERAL@5..6 "d" [] []
+          4: MD_TEXTUAL@6..7
+            0: MD_TEXTUAL_LITERAL@6..7 "i" [] []
+          5: MD_TEXTUAL@7..8
+            0: MD_TEXTUAL_LITERAL@7..8 "n" [] []
+          6: MD_TEXTUAL@8..10
+            0: MD_TEXTUAL_LITERAL@8..10 "g" [] [Whitespace(" ")]
+          7: MD_TEXTUAL@10..11
+            0: MD_TEXTUAL_LITERAL@10..11 "1" [] []
+        1: (empty)
+      2: MD_HASH_LIST@11..11
+    1: MD_HEADER@11..25
+      0: MD_HASH_LIST@11..16
+        0: MD_HASH@11..14
+          0: HASH@11..14 "#" [Newline("\n"), Newline("\n")] []
+        1: MD_HASH@14..16
+          0: HASH@14..16 "#" [] [Whitespace(" ")]
+      1: MD_PARAGRAPH@16..25
+        0: MD_INLINE_ITEM_LIST@16..25
+          0: MD_TEXTUAL@16..17
+            0: MD_TEXTUAL_LITERAL@16..17 "H" [] []
+          1: MD_TEXTUAL@17..18
+            0: MD_TEXTUAL_LITERAL@17..18 "e" [] []
+          2: MD_TEXTUAL@18..19
+            0: MD_TEXTUAL_LITERAL@18..19 "a" [] []
+          3: MD_TEXTUAL@19..20
+            0: MD_TEXTUAL_LITERAL@19..20 "d" [] []
+          4: MD_TEXTUAL@20..21
+            0: MD_TEXTUAL_LITERAL@20..21 "i" [] []
+          5: MD_TEXTUAL@21..22
+            0: MD_TEXTUAL_LITERAL@21..22 "n" [] []
+          6: MD_TEXTUAL@22..24
+            0: MD_TEXTUAL_LITERAL@22..24 "g" [] [Whitespace(" ")]
+          7: MD_TEXTUAL@24..25
+            0: MD_TEXTUAL_LITERAL@24..25 "2" [] []
+        1: (empty)
+      2: MD_HASH_LIST@25..25
+    2: MD_HEADER@25..40
+      0: MD_HASH_LIST@25..31
+        0: MD_HASH@25..28
+          0: HASH@25..28 "#" [Newline("\n"), Newline("\n")] []
+        1: MD_HASH@28..29
+          0: HASH@28..29 "#" [] []
+        2: MD_HASH@29..31
+          0: HASH@29..31 "#" [] [Whitespace(" ")]
+      1: MD_PARAGRAPH@31..40
+        0: MD_INLINE_ITEM_LIST@31..40
+          0: MD_TEXTUAL@31..32
+            0: MD_TEXTUAL_LITERAL@31..32 "H" [] []
+          1: MD_TEXTUAL@32..33
+            0: MD_TEXTUAL_LITERAL@32..33 "e" [] []
+          2: MD_TEXTUAL@33..34
+            0: MD_TEXTUAL_LITERAL@33..34 "a" [] []
+          3: MD_TEXTUAL@34..35
+            0: MD_TEXTUAL_LITERAL@34..35 "d" [] []
+          4: MD_TEXTUAL@35..36
+            0: MD_TEXTUAL_LITERAL@35..36 "i" [] []
+          5: MD_TEXTUAL@36..37
+            0: MD_TEXTUAL_LITERAL@36..37 "n" [] []
+          6: MD_TEXTUAL@37..39
+            0: MD_TEXTUAL_LITERAL@37..39 "g" [] [Whitespace(" ")]
+          7: MD_TEXTUAL@39..40
+            0: MD_TEXTUAL_LITERAL@39..40 "3" [] []
+        1: (empty)
+      2: MD_HASH_LIST@40..40
+    3: MD_HEADER@40..56
+      0: MD_HASH_LIST@40..47
+        0: MD_HASH@40..43
+          0: HASH@40..43 "#" [Newline("\n"), Newline("\n")] []
+        1: MD_HASH@43..44
+          0: HASH@43..44 "#" [] []
+        2: MD_HASH@44..45
+          0: HASH@44..45 "#" [] []
+        3: MD_HASH@45..47
+          0: HASH@45..47 "#" [] [Whitespace(" ")]
+      1: MD_PARAGRAPH@47..56
+        0: MD_INLINE_ITEM_LIST@47..56
+          0: MD_TEXTUAL@47..48
+            0: MD_TEXTUAL_LITERAL@47..48 "H" [] []
+          1: MD_TEXTUAL@48..49
+            0: MD_TEXTUAL_LITERAL@48..49 "e" [] []
+          2: MD_TEXTUAL@49..50
+            0: MD_TEXTUAL_LITERAL@49..50 "a" [] []
+          3: MD_TEXTUAL@50..51
+            0: MD_TEXTUAL_LITERAL@50..51 "d" [] []
+          4: MD_TEXTUAL@51..52
+            0: MD_TEXTUAL_LITERAL@51..52 "i" [] []
+          5: MD_TEXTUAL@52..53
+            0: MD_TEXTUAL_LITERAL@52..53 "n" [] []
+          6: MD_TEXTUAL@53..55
+            0: MD_TEXTUAL_LITERAL@53..55 "g" [] [Whitespace(" ")]
+          7: MD_TEXTUAL@55..56
+            0: MD_TEXTUAL_LITERAL@55..56 "4" [] []
+        1: (empty)
+      2: MD_HASH_LIST@56..56
+    4: MD_HEADER@56..73
+      0: MD_HASH_LIST@56..64
+        0: MD_HASH@56..59
+          0: HASH@56..59 "#" [Newline("\n"), Newline("\n")] []
+        1: MD_HASH@59..60
+          0: HASH@59..60 "#" [] []
+        2: MD_HASH@60..61
+          0: HASH@60..61 "#" [] []
+        3: MD_HASH@61..62
+          0: HASH@61..62 "#" [] []
+        4: MD_HASH@62..64
+          0: HASH@62..64 "#" [] [Whitespace(" ")]
+      1: MD_PARAGRAPH@64..73
+        0: MD_INLINE_ITEM_LIST@64..73
+          0: MD_TEXTUAL@64..65
+            0: MD_TEXTUAL_LITERAL@64..65 "H" [] []
+          1: MD_TEXTUAL@65..66
+            0: MD_TEXTUAL_LITERAL@65..66 "e" [] []
+          2: MD_TEXTUAL@66..67
+            0: MD_TEXTUAL_LITERAL@66..67 "a" [] []
+          3: MD_TEXTUAL@67..68
+            0: MD_TEXTUAL_LITERAL@67..68 "d" [] []
+          4: MD_TEXTUAL@68..69
+            0: MD_TEXTUAL_LITERAL@68..69 "i" [] []
+          5: MD_TEXTUAL@69..70
+            0: MD_TEXTUAL_LITERAL@69..70 "n" [] []
+          6: MD_TEXTUAL@70..72
+            0: MD_TEXTUAL_LITERAL@70..72 "g" [] [Whitespace(" ")]
+          7: MD_TEXTUAL@72..73
+            0: MD_TEXTUAL_LITERAL@72..73 "5" [] []
+        1: (empty)
+      2: MD_HASH_LIST@73..73
+    5: MD_HEADER@73..91
+      0: MD_HASH_LIST@73..82
+        0: MD_HASH@73..76
+          0: HASH@73..76 "#" [Newline("\n"), Newline("\n")] []
+        1: MD_HASH@76..77
+          0: HASH@76..77 "#" [] []
+        2: MD_HASH@77..78
+          0: HASH@77..78 "#" [] []
+        3: MD_HASH@78..79
+          0: HASH@78..79 "#" [] []
+        4: MD_HASH@79..80
+          0: HASH@79..80 "#" [] []
+        5: MD_HASH@80..82
+          0: HASH@80..82 "#" [] [Whitespace(" ")]
+      1: MD_PARAGRAPH@82..91
+        0: MD_INLINE_ITEM_LIST@82..91
+          0: MD_TEXTUAL@82..83
+            0: MD_TEXTUAL_LITERAL@82..83 "H" [] []
+          1: MD_TEXTUAL@83..84
+            0: MD_TEXTUAL_LITERAL@83..84 "e" [] []
+          2: MD_TEXTUAL@84..85
+            0: MD_TEXTUAL_LITERAL@84..85 "a" [] []
+          3: MD_TEXTUAL@85..86
+            0: MD_TEXTUAL_LITERAL@85..86 "d" [] []
+          4: MD_TEXTUAL@86..87
+            0: MD_TEXTUAL_LITERAL@86..87 "i" [] []
+          5: MD_TEXTUAL@87..88
+            0: MD_TEXTUAL_LITERAL@87..88 "n" [] []
+          6: MD_TEXTUAL@88..90
+            0: MD_TEXTUAL_LITERAL@88..90 "g" [] [Whitespace(" ")]
+          7: MD_TEXTUAL@90..91
+            0: MD_TEXTUAL_LITERAL@90..91 "6" [] []
+        1: (empty)
+      2: MD_HASH_LIST@91..91
+  2: EOF@91..92 "" [Newline("\n")] []
+
+```

@@ -1,3 +1,4 @@
+pub mod header;
 pub mod thematic_break_block;
 
 use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
@@ -5,6 +6,7 @@ use biome_parser::{
     Parser,
     prelude::ParsedSyntax::{self, *},
 };
+use header::{at_header, parse_header};
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
 use crate::MarkdownParser;
@@ -36,6 +38,18 @@ pub(crate) fn parse_any_block(p: &mut MarkdownParser) {
             Ok(break_block)
         });
         if break_block.is_err() {
+            parse_paragraph(p);
+        }
+    } else if at_header(p) {
+        let header_result = try_parse(p, |p| {
+            let header = parse_header(p);
+            if header.is_absent() {
+                return Err(());
+            }
+            Ok(header)
+        });
+        if header_result.is_err() {
+            // Not a valid header (e.g., > 6 hashes), parse as paragraph
             parse_paragraph(p);
         }
     } else {
