@@ -37,18 +37,14 @@ impl MdBullet {
     pub fn as_fields(&self) -> MdBulletFields {
         MdBulletFields {
             bullet: self.bullet(),
-            space_token: self.space_token(),
             content: self.content(),
         }
     }
     pub fn bullet(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn space_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
     pub fn content(&self) -> MdInlineItemList {
-        support::list(&self.syntax, 2usize)
+        support::list(&self.syntax, 1usize)
     }
 }
 impl Serialize for MdBullet {
@@ -62,7 +58,6 @@ impl Serialize for MdBullet {
 #[derive(Serialize)]
 pub struct MdBulletFields {
     pub bullet: SyntaxResult<SyntaxToken>,
-    pub space_token: SyntaxResult<SyntaxToken>,
     pub content: MdInlineItemList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1315,10 +1310,6 @@ impl std::fmt::Debug for MdBullet {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdBullet")
                 .field("bullet", &support::DebugSyntaxResult(self.bullet()))
-                .field(
-                    "space_token",
-                    &support::DebugSyntaxResult(self.space_token()),
-                )
                 .field("content", &self.content())
                 .finish()
         } else {

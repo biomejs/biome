@@ -1,5 +1,7 @@
 pub mod fenced_code_block;
 pub mod header;
+pub mod list;
+pub mod quote;
 pub mod thematic_break_block;
 
 use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
@@ -9,6 +11,8 @@ use biome_parser::{
 };
 use fenced_code_block::{at_fenced_code_block, parse_fenced_code_block};
 use header::{at_header, parse_header};
+use list::{at_bullet_list_item, parse_bullet_list_item};
+use quote::{at_quote, parse_quote};
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
 use crate::MarkdownParser;
@@ -58,6 +62,10 @@ pub(crate) fn parse_any_block(p: &mut MarkdownParser) {
             // Not a valid header (e.g., > 6 hashes), parse as paragraph
             parse_paragraph(p);
         }
+    } else if at_quote(p) {
+        let _ = parse_quote(p);
+    } else if at_bullet_list_item(p) {
+        let _ = parse_bullet_list_item(p);
     } else {
         // Default fallback: parse as paragraph
         parse_paragraph(p);

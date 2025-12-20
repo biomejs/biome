@@ -1,0 +1,89 @@
+//! List parsing for Markdown.
+//!
+//! Supports bullet lists (`-`, `*`, `+`) and ordered lists (`1.`, `2.`, etc.).
+
+use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
+use biome_markdown_syntax::T;
+use biome_parser::Parser;
+use biome_parser::prelude::ParsedSyntax::{self, *};
+
+use crate::MarkdownParser;
+
+/// Check if we're at the start of a bullet list item (`-`, `*`, or `+`).
+///
+/// A bullet list marker at line start followed by content is a list item.
+/// We check that it's at line start and not a thematic break.
+pub(crate) fn at_bullet_list_item(p: &mut MarkdownParser) -> bool {
+    // Check for - or * at the start of a line
+    // Thematic breaks (--- or ***) are lexed as MD_THEMATIC_BREAK_LITERAL,
+    // so if we see MINUS or STAR, it's a single character marker
+    if !p.at(T![-]) && !p.at(T![*]) {
+        return false;
+    }
+
+    // For a bullet list, the marker should be at line start.
+    // This is true if:
+    // 1. We have a preceding line break in trivia, OR
+    // 2. We're at the very start of the document (no trivia collected yet)
+    p.has_preceding_line_break() || p.at_start_of_input()
+}
+
+/// Parse a bullet list item.
+///
+/// Grammar:
+/// MdBulletListItem = MdBulletList
+/// MdBulletList = MdBullet*
+/// MdBullet = bullet: ('-' | '*') content: MdInlineItemList
+///
+/// Parses consecutive bullet items into a single list. Each bullet includes
+/// its marker and inline content. The list continues until we're no longer
+/// at a bullet marker at line start.
+pub(crate) fn parse_bullet_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
+    if !at_bullet_list_item(p) {
+        return Absent;
+    }
+
+    let item_m = p.start();
+    let list_m = p.start();
+
+    // Parse bullet items until we're no longer at a valid bullet marker
+    while at_bullet_list_item(p) {
+        parse_bullet(p);
+    }
+
+    list_m.complete(p, MD_BULLET_LIST);
+    Present(item_m.complete(p, MD_BULLET_LIST_ITEM))
+}
+
+/// Parse a single bullet (marker + content).
+fn parse_bullet(p: &mut MarkdownParser) {
+    let m = p.start();
+
+    // Bump the bullet marker (- or *)
+    // The space after the marker is consumed as trailing trivia on this token
+    if p.at(T![-]) {
+        p.bump(T![-]);
+    } else if p.at(T![*]) {
+        p.bump(T![*]);
+    }
+
+    // Parse inline content
+    super::parse_inline_item_list(p);
+
+    m.complete(p, MD_BULLET);
+}
+
+/// Check if we're at the start of an ordered list item (digit followed by `.` or `)`).
+#[expect(dead_code)]
+pub(crate) fn at_order_list_item(_p: &mut MarkdownParser) -> bool {
+    // For now, ordered lists are not implemented
+    // Would need to check for digit tokens followed by . or )
+    false
+}
+
+/// Parse an ordered list item.
+#[expect(dead_code)]
+pub(crate) fn parse_order_list_item(_p: &mut MarkdownParser) -> ParsedSyntax {
+    // For now, ordered lists are not implemented
+    Absent
+}

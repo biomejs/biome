@@ -128,7 +128,6 @@ MdBulletList = MdBullet*
 // ^^^^^^
 MdBullet =
 	bullet: ('-' | '*')
-	space: 'md_textual_literal'
 	content: MdInlineItemList
 
 MdOrderList = AnyCodeBlock*

@@ -46,6 +46,12 @@ impl<'source> MarkdownParser<'source> {
         self.source.has_newline_since(since_pos)
     }
 
+    /// Returns true if the parser is at the start of input (no trivia has been collected yet).
+    /// This is used for detecting block-level constructs at the start of a document.
+    pub fn at_start_of_input(&self) -> bool {
+        self.source.trivia_len() == 0
+    }
+
     pub fn rewind(&mut self, checkpoint: MarkdownParserCheckpoint) {
         let MarkdownParserCheckpoint { context, source } = checkpoint;
 
