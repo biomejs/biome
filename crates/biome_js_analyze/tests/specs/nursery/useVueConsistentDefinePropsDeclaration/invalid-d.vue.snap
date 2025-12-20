@@ -18,7 +18,7 @@ const props = defineProps<{
 invalid-d.vue:1:15 lint/nursery/useVueConsistentDefinePropsDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This defineProps declaration is invalid.
-
+  
   > 1 │ const props = defineProps<{
       │               ^^^^^^^^^^^^^
   > 2 │ 	kind: string;
@@ -26,9 +26,9 @@ invalid-d.vue:1:15 lint/nursery/useVueConsistentDefinePropsDeclaration ━━━
   > 4 │ 	kind: { type: String },
   > 5 │ });
       │ ^^
-    6 │
-
-  i It should be defined using type declaration like defineProps<...>().
-
+    6 │ 
+  
+  i It should be defined using type declaration like defineProps<...>(). 
+  
 
 ```
