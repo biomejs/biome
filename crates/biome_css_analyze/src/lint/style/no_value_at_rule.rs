@@ -14,13 +14,13 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```css,expect_diagnostic
+    /// ```css,expect_diagnostic,file=example.module.css
     /// @value red: #FF0000;
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```css
+    /// ```css,file=example.module.css
     /// :root {
     ///   --red: #FF0000
     /// }

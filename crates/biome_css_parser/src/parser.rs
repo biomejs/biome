@@ -40,7 +40,7 @@ pub struct CssParserOptions {
     pub tailwind_directives: bool,
 }
 
-#[derive(Default, Debug, Clone, Copy)]
+#[derive(Default, Debug, Clone, Copy, Eq, PartialEq)]
 pub enum CssModulesKind {
     #[default]
     None,

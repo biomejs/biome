@@ -12,7 +12,7 @@ use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
-use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
+use biome_js_parser::{AnyJsRoot, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
 use biome_module_graph::ModuleGraph;
@@ -249,7 +249,7 @@ pub fn module_graph_for_test_file(
     let dir = input_file.parent().unwrap().to_path_buf();
     let paths = get_js_like_paths_in_dir(&dir);
     let fs = OsFileSystem::new(dir);
-    let paths = get_added_paths(&fs, &paths);
+    let paths = get_added_js_paths(&fs, &paths);
 
     module_graph.update_graph_for_js_paths(&fs, project_layout, &paths, &[]);
 
@@ -257,15 +257,20 @@ pub fn module_graph_for_test_file(
 }
 
 /// Loads and parses files from the file system to pass them to service methods.
-pub fn get_added_paths<'a>(
+pub fn get_added_js_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
 ) -> Vec<(&'a BiomePath, AnyJsRoot)> {
     paths
         .iter()
         .filter_map(|path| {
+            let DocumentFileSource::Js(file_source) =
+                DocumentFileSource::from_path(path.as_path(), false)
+            else {
+                return None;
+            };
+
             let root = fs.read_file_from_path(path).ok().and_then(|content| {
-                let file_source = JsFileSource::try_from(path.as_path()).unwrap_or_default();
                 let parsed =
                     biome_js_parser::parse(&content, file_source, JsParserOptions::default());
                 let diagnostics = parsed.diagnostics();

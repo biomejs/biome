@@ -55,7 +55,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let extension = input_file.extension().unwrap_or_default();
     let mut diagnostics = vec![];
     let parser_options = create_parser_options::<CssLanguage>(input_file, &mut diagnostics);
-
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
@@ -74,12 +73,15 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             );
         }
     } else {
-        let Ok(source_type): Result<CssFileSource, _> = input_file.try_into() else {
+        let Ok(mut source_type): Result<CssFileSource, _> = input_file.try_into() else {
             return;
         };
 
         let parser_options = parser_options.unwrap_or(CssParserOptions::from(&source_type));
 
+        if parser_options.tailwind_directives {
+            source_type = source_type.with_tailwind_directives()
+        }
         analyze_and_snap(
             &mut snapshot,
             &input_code,
