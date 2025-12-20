@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: valid-c.vue
+---
+# Input
+```ts
+import { computed } from "vue";
+
+const props = withDefaults(
+	defineProps<{
+		kind: string;
+		count?: number;
+		enabled?: boolean;
+	}>(),
+	{
+		count: 0,
+		enabled: true,
+	},
+);
+
+const label = computed(() => `${props.kind}:${props.count}`);
+
+```
