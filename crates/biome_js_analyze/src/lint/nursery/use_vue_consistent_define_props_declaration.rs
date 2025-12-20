@@ -9,26 +9,30 @@ use biome_rule_options::use_vue_consistent_define_props_declaration::{
 };
 
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Enforce consistent `defineProps` declaration style.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
+    /// This rule enforces `defineProps` typing style which you should use `type` or `runtime` declaration.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// ```vue,expect_diagnostic
+    /// <script setup lang="ts">
+    /// const props = defineProps({
+    /// kind: { type: String },
+    /// });
+    /// </script>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
-    /// // var a = 1;
+    /// ```vue
+    /// <script setup lang="ts">
+    /// const props = defineProps<{
+    /// kind: string;
+    /// }>();
+    /// </script>
     /// ```
     ///
     pub UseVueConsistentDefinePropsDeclaration {
@@ -73,23 +77,20 @@ impl Rule for UseVueConsistentDefinePropsDeclaration {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
+        let style = ctx.options().style.clone().unwrap_or_default();
+        let (current, opposite) = match style {
+            DeclarationStyle::Type => ("type", "runtime"),
+            DeclarationStyle::Runtime => ("runtime", "type"),
+        };
+
         let node = ctx.query();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "Variable is read here."
-                },
-            )
-            .note(markup! {
-                "This note will give you more information."
-            }),
-        )
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            node.range(),
+            markup! {
+                "This "<Emphasis>"defineProps"</Emphasis>" declaration should be defined using "<Emphasis>{current}</Emphasis>" declaration instead of "<Emphasis>{opposite}</Emphasis>" declaration."
+            },
+        ))
     }
 }
 

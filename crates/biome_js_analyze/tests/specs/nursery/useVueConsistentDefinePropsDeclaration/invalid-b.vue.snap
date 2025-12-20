@@ -15,16 +15,14 @@ const props = defineProps<{
 ```
 invalid-b.vue:1:15 lint/nursery/useVueConsistentDefinePropsDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Variable is read here.
-  
+  i This defineProps declaration should be defined using runtime declaration instead of type declaration.
+
   > 1 │ const props = defineProps<{
       │               ^^^^^^^^^^^^^
   > 2 │ 	kind: string;
   > 3 │ }>();
       │ ^^^^
-    4 │ 
-  
-  i This note will give you more information.
-  
+    4 │
+
 
 ```
