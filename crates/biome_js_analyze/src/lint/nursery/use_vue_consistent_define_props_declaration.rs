@@ -66,7 +66,6 @@ impl Rule for UseVueConsistentDefinePropsDeclaration {
         }
 
         let style = ctx.options().style.clone().unwrap_or_default();
-        println!("style: {:?}", style);
         if let Some(kind) = get_declaration_kind(node)
             && kind != style
         {
