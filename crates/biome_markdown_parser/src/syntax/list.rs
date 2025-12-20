@@ -2,10 +2,11 @@
 //!
 //! Supports bullet lists (`-`, `*`, `+`) and ordered lists (`1.`, `2.`, etc.).
 
-use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_markdown_syntax::T;
+use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
+use biome_parser::prelude::TokenSource;
 
 use crate::MarkdownParser;
 
@@ -46,9 +47,24 @@ pub(crate) fn parse_bullet_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
     let item_m = p.start();
     let list_m = p.start();
 
-    // Parse bullet items until we're no longer at a valid bullet marker
-    while at_bullet_list_item(p) {
-        parse_bullet(p);
+    // Parse bullet items until we're no longer at a valid bullet marker.
+    // Track position for error recovery to prevent infinite loops.
+    loop {
+        if !at_bullet_list_item(p) {
+            break;
+        }
+
+        let prev_position = p.source().position();
+
+        if parse_bullet(p).is_absent() {
+            break;
+        }
+
+        // Error recovery: if we didn't advance, break to avoid infinite loop
+        if p.source().position() == prev_position {
+            // Skip the problematic token and continue
+            p.bump_any();
+        }
     }
 
     list_m.complete(p, MD_BULLET_LIST);
@@ -56,21 +72,28 @@ pub(crate) fn parse_bullet_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
 }
 
 /// Parse a single bullet (marker + content).
-fn parse_bullet(p: &mut MarkdownParser) {
+///
+/// Returns `Present` if a bullet was successfully parsed, `Absent` otherwise.
+fn parse_bullet(p: &mut MarkdownParser) -> ParsedSyntax {
+    // Must be at a bullet marker
+    if !p.at(T![-]) && !p.at(T![*]) {
+        return Absent;
+    }
+
     let m = p.start();
 
     // Bump the bullet marker (- or *)
     // The space after the marker is consumed as trailing trivia on this token
     if p.at(T![-]) {
         p.bump(T![-]);
-    } else if p.at(T![*]) {
+    } else {
         p.bump(T![*]);
     }
 
     // Parse inline content - stops at line break
     parse_bullet_content(p);
 
-    m.complete(p, MD_BULLET);
+    Present(m.complete(p, MD_BULLET))
 }
 
 /// Parse the inline content of a bullet item.

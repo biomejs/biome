@@ -1,6 +1,6 @@
 // Markdown Un-Grammar.
 //
-// This grammar specifies the structure of Rust's concrete syntax tree.
+// This grammar specifies the structure of Markdown's concrete syntax tree.
 // It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
 // Tokens are processed -- contextual keywords are recognised, compound operators glued.
 //
@@ -156,46 +156,51 @@ AnyMdInline =
 
 // *italic*
 // ^^^^^^^^
+// Note: r_fence is optional to handle unclosed italic gracefully
 MdInlineItalic =
 	l_fence: ('*' | '_')
 	content: MdInlineItemList
-	r_fence: ('*' | '_')
+	r_fence: ('*' | '_')?
 
 // **bold**
 // ^^^^^^^^
+// Note: r_fence is optional to handle unclosed emphasis gracefully
 MdInlineEmphasis =
 	l_fence: ('**' | '__')
 	content: MdInlineItemList
-	r_fence: ('**' | '__')
+	r_fence: ('**' | '__')?
 
 
 // `code`
 // ^^^^^^
+// Note: r_tick is optional to handle unclosed code spans gracefully
 MdInlineCode =
 	l_tick: '`'
 	content: MdInlineItemList
-	r_tick: '`'
+	r_tick: '`'?
 
 // [text](href)
 // ^^^^^^^^^^^^
+// Note: closing tokens optional to handle malformed links gracefully
 MdInlineLink =
 	'['
 	text: MdInlineItemList
-	']'
-	'('
+	']'?
+	'('?
 	source: MdInlineItemList
-	')'
+	')'?
 
 // ![alt](image)
 // ^^^^^^^^^^^^^^
+// Note: closing tokens optional to handle malformed images gracefully
 MdInlineImage =
 	'!'
 	'['
 	alt: MdInlineItemList
-	']'
-	'('
+	']'?
+	'('?
 	source: MdInlineItemList
-	')'
+	')'?
 
 // ***
 // ---

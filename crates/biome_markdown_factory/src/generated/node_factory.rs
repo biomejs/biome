@@ -143,89 +143,197 @@ pub fn md_indent_code_block(content: MdInlineItemList) -> MdIndentCodeBlock {
         [Some(SyntaxElement::Node(content.into_syntax()))],
     ))
 }
-pub fn md_inline_code(
+pub fn md_inline_code(l_tick_token: SyntaxToken, content: MdInlineItemList) -> MdInlineCodeBuilder {
+    MdInlineCodeBuilder {
+        l_tick_token,
+        content,
+        r_tick_token: None,
+    }
+}
+pub struct MdInlineCodeBuilder {
     l_tick_token: SyntaxToken,
     content: MdInlineItemList,
-    r_tick_token: SyntaxToken,
-) -> MdInlineCode {
-    MdInlineCode::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INLINE_CODE,
-        [
-            Some(SyntaxElement::Token(l_tick_token)),
-            Some(SyntaxElement::Node(content.into_syntax())),
-            Some(SyntaxElement::Token(r_tick_token)),
-        ],
-    ))
+    r_tick_token: Option<SyntaxToken>,
+}
+impl MdInlineCodeBuilder {
+    pub fn with_r_tick_token(mut self, r_tick_token: SyntaxToken) -> Self {
+        self.r_tick_token = Some(r_tick_token);
+        self
+    }
+    pub fn build(self) -> MdInlineCode {
+        MdInlineCode::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_INLINE_CODE,
+            [
+                Some(SyntaxElement::Token(self.l_tick_token)),
+                Some(SyntaxElement::Node(self.content.into_syntax())),
+                self.r_tick_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn md_inline_emphasis(
     l_fence_token: SyntaxToken,
     content: MdInlineItemList,
-    r_fence_token: SyntaxToken,
-) -> MdInlineEmphasis {
-    MdInlineEmphasis::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INLINE_EMPHASIS,
-        [
-            Some(SyntaxElement::Token(l_fence_token)),
-            Some(SyntaxElement::Node(content.into_syntax())),
-            Some(SyntaxElement::Token(r_fence_token)),
-        ],
-    ))
+) -> MdInlineEmphasisBuilder {
+    MdInlineEmphasisBuilder {
+        l_fence_token,
+        content,
+        r_fence_token: None,
+    }
+}
+pub struct MdInlineEmphasisBuilder {
+    l_fence_token: SyntaxToken,
+    content: MdInlineItemList,
+    r_fence_token: Option<SyntaxToken>,
+}
+impl MdInlineEmphasisBuilder {
+    pub fn with_r_fence_token(mut self, r_fence_token: SyntaxToken) -> Self {
+        self.r_fence_token = Some(r_fence_token);
+        self
+    }
+    pub fn build(self) -> MdInlineEmphasis {
+        MdInlineEmphasis::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_INLINE_EMPHASIS,
+            [
+                Some(SyntaxElement::Token(self.l_fence_token)),
+                Some(SyntaxElement::Node(self.content.into_syntax())),
+                self.r_fence_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn md_inline_image(
     excl_token: SyntaxToken,
     l_brack_token: SyntaxToken,
     alt: MdInlineItemList,
-    r_brack_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
     source: MdInlineItemList,
-    r_paren_token: SyntaxToken,
-) -> MdInlineImage {
-    MdInlineImage::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INLINE_IMAGE,
-        [
-            Some(SyntaxElement::Token(excl_token)),
-            Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Node(alt.into_syntax())),
-            Some(SyntaxElement::Token(r_brack_token)),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(source.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
+) -> MdInlineImageBuilder {
+    MdInlineImageBuilder {
+        excl_token,
+        l_brack_token,
+        alt,
+        source,
+        r_brack_token: None,
+        l_paren_token: None,
+        r_paren_token: None,
+    }
+}
+pub struct MdInlineImageBuilder {
+    excl_token: SyntaxToken,
+    l_brack_token: SyntaxToken,
+    alt: MdInlineItemList,
+    source: MdInlineItemList,
+    r_brack_token: Option<SyntaxToken>,
+    l_paren_token: Option<SyntaxToken>,
+    r_paren_token: Option<SyntaxToken>,
+}
+impl MdInlineImageBuilder {
+    pub fn with_r_brack_token(mut self, r_brack_token: SyntaxToken) -> Self {
+        self.r_brack_token = Some(r_brack_token);
+        self
+    }
+    pub fn with_l_paren_token(mut self, l_paren_token: SyntaxToken) -> Self {
+        self.l_paren_token = Some(l_paren_token);
+        self
+    }
+    pub fn with_r_paren_token(mut self, r_paren_token: SyntaxToken) -> Self {
+        self.r_paren_token = Some(r_paren_token);
+        self
+    }
+    pub fn build(self) -> MdInlineImage {
+        MdInlineImage::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_INLINE_IMAGE,
+            [
+                Some(SyntaxElement::Token(self.excl_token)),
+                Some(SyntaxElement::Token(self.l_brack_token)),
+                Some(SyntaxElement::Node(self.alt.into_syntax())),
+                self.r_brack_token.map(|token| SyntaxElement::Token(token)),
+                self.l_paren_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.source.into_syntax())),
+                self.r_paren_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn md_inline_italic(
     l_fence_token: SyntaxToken,
     content: MdInlineItemList,
-    r_fence_token: SyntaxToken,
-) -> MdInlineItalic {
-    MdInlineItalic::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INLINE_ITALIC,
-        [
-            Some(SyntaxElement::Token(l_fence_token)),
-            Some(SyntaxElement::Node(content.into_syntax())),
-            Some(SyntaxElement::Token(r_fence_token)),
-        ],
-    ))
+) -> MdInlineItalicBuilder {
+    MdInlineItalicBuilder {
+        l_fence_token,
+        content,
+        r_fence_token: None,
+    }
+}
+pub struct MdInlineItalicBuilder {
+    l_fence_token: SyntaxToken,
+    content: MdInlineItemList,
+    r_fence_token: Option<SyntaxToken>,
+}
+impl MdInlineItalicBuilder {
+    pub fn with_r_fence_token(mut self, r_fence_token: SyntaxToken) -> Self {
+        self.r_fence_token = Some(r_fence_token);
+        self
+    }
+    pub fn build(self) -> MdInlineItalic {
+        MdInlineItalic::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_INLINE_ITALIC,
+            [
+                Some(SyntaxElement::Token(self.l_fence_token)),
+                Some(SyntaxElement::Node(self.content.into_syntax())),
+                self.r_fence_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn md_inline_link(
     l_brack_token: SyntaxToken,
     text: MdInlineItemList,
-    r_brack_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
     source: MdInlineItemList,
-    r_paren_token: SyntaxToken,
-) -> MdInlineLink {
-    MdInlineLink::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INLINE_LINK,
-        [
-            Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Node(text.into_syntax())),
-            Some(SyntaxElement::Token(r_brack_token)),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(source.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
+) -> MdInlineLinkBuilder {
+    MdInlineLinkBuilder {
+        l_brack_token,
+        text,
+        source,
+        r_brack_token: None,
+        l_paren_token: None,
+        r_paren_token: None,
+    }
+}
+pub struct MdInlineLinkBuilder {
+    l_brack_token: SyntaxToken,
+    text: MdInlineItemList,
+    source: MdInlineItemList,
+    r_brack_token: Option<SyntaxToken>,
+    l_paren_token: Option<SyntaxToken>,
+    r_paren_token: Option<SyntaxToken>,
+}
+impl MdInlineLinkBuilder {
+    pub fn with_r_brack_token(mut self, r_brack_token: SyntaxToken) -> Self {
+        self.r_brack_token = Some(r_brack_token);
+        self
+    }
+    pub fn with_l_paren_token(mut self, l_paren_token: SyntaxToken) -> Self {
+        self.l_paren_token = Some(l_paren_token);
+        self
+    }
+    pub fn with_r_paren_token(mut self, r_paren_token: SyntaxToken) -> Self {
+        self.r_paren_token = Some(r_paren_token);
+        self
+    }
+    pub fn build(self) -> MdInlineLink {
+        MdInlineLink::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_INLINE_LINK,
+            [
+                Some(SyntaxElement::Token(self.l_brack_token)),
+                Some(SyntaxElement::Node(self.text.into_syntax())),
+                self.r_brack_token.map(|token| SyntaxElement::Token(token)),
+                self.l_paren_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.source.into_syntax())),
+                self.r_paren_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn md_link_block(label: MdTextual, url: MdTextual) -> MdLinkBlockBuilder {
     MdLinkBlockBuilder {

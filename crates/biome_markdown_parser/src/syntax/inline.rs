@@ -2,8 +2,8 @@
 //!
 //! Handles inline code spans, emphasis (bold/italic), links, and images.
 
-use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_markdown_syntax::T;
+use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 
@@ -117,7 +117,7 @@ pub(crate) fn parse_inline_italic(p: &mut MarkdownParser) -> ParsedSyntax {
 
 /// Parse inline link (`[text](url)`).
 ///
-/// Grammar: MdInlineLink = '[' text: MdInlineItemList ']' '(' source: MdInlineItemList ')'
+/// Grammar: `MdInlineLink = '[' text: MdInlineItemList ']' '(' source: MdInlineItemList ')'`
 pub(crate) fn parse_inline_link(p: &mut MarkdownParser) -> ParsedSyntax {
     if !p.at(L_BRACK) {
         return Absent;
@@ -166,7 +166,7 @@ pub(crate) fn parse_inline_link(p: &mut MarkdownParser) -> ParsedSyntax {
 
 /// Parse inline image (`![alt](url)`).
 ///
-/// Grammar: MdInlineImage = '!' '[' alt: MdInlineItemList ']' '(' source: MdInlineItemList ')'
+/// Grammar: `MdInlineImage = '!' '[' alt: MdInlineItemList ']' '(' source: MdInlineItemList ')'`
 pub(crate) fn parse_inline_image(p: &mut MarkdownParser) -> ParsedSyntax {
     // Image starts with ![
     if !p.at(BANG) {

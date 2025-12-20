@@ -437,8 +437,8 @@ impl MdInlineCode {
     pub fn content(&self) -> MdInlineItemList {
         support::list(&self.syntax, 1usize)
     }
-    pub fn r_tick_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn r_tick_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for MdInlineCode {
@@ -453,7 +453,7 @@ impl Serialize for MdInlineCode {
 pub struct MdInlineCodeFields {
     pub l_tick_token: SyntaxResult<SyntaxToken>,
     pub content: MdInlineItemList,
-    pub r_tick_token: SyntaxResult<SyntaxToken>,
+    pub r_tick_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdInlineEmphasis {
@@ -482,8 +482,8 @@ impl MdInlineEmphasis {
     pub fn content(&self) -> MdInlineItemList {
         support::list(&self.syntax, 1usize)
     }
-    pub fn r_fence(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn r_fence(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for MdInlineEmphasis {
@@ -498,7 +498,7 @@ impl Serialize for MdInlineEmphasis {
 pub struct MdInlineEmphasisFields {
     pub l_fence: SyntaxResult<SyntaxToken>,
     pub content: MdInlineItemList,
-    pub r_fence: SyntaxResult<SyntaxToken>,
+    pub r_fence: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdInlineImage {
@@ -534,17 +534,17 @@ impl MdInlineImage {
     pub fn alt(&self) -> MdInlineItemList {
         support::list(&self.syntax, 2usize)
     }
-    pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+    pub fn r_brack_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
     }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
     }
     pub fn source(&self) -> MdInlineItemList {
         support::list(&self.syntax, 5usize)
     }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 6usize)
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 6usize)
     }
 }
 impl Serialize for MdInlineImage {
@@ -560,10 +560,10 @@ pub struct MdInlineImageFields {
     pub excl_token: SyntaxResult<SyntaxToken>,
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub alt: MdInlineItemList,
-    pub r_brack_token: SyntaxResult<SyntaxToken>,
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub r_brack_token: Option<SyntaxToken>,
+    pub l_paren_token: Option<SyntaxToken>,
     pub source: MdInlineItemList,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
+    pub r_paren_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdInlineItalic {
@@ -592,8 +592,8 @@ impl MdInlineItalic {
     pub fn content(&self) -> MdInlineItemList {
         support::list(&self.syntax, 1usize)
     }
-    pub fn r_fence(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn r_fence(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for MdInlineItalic {
@@ -608,7 +608,7 @@ impl Serialize for MdInlineItalic {
 pub struct MdInlineItalicFields {
     pub l_fence: SyntaxResult<SyntaxToken>,
     pub content: MdInlineItemList,
-    pub r_fence: SyntaxResult<SyntaxToken>,
+    pub r_fence: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdInlineLink {
@@ -640,17 +640,17 @@ impl MdInlineLink {
     pub fn text(&self) -> MdInlineItemList {
         support::list(&self.syntax, 1usize)
     }
-    pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn r_brack_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
     }
     pub fn source(&self) -> MdInlineItemList {
         support::list(&self.syntax, 4usize)
     }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 5usize)
     }
 }
 impl Serialize for MdInlineLink {
@@ -665,10 +665,10 @@ impl Serialize for MdInlineLink {
 pub struct MdInlineLinkFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub text: MdInlineItemList,
-    pub r_brack_token: SyntaxResult<SyntaxToken>,
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub r_brack_token: Option<SyntaxToken>,
+    pub l_paren_token: Option<SyntaxToken>,
     pub source: MdInlineItemList,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
+    pub r_paren_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdLinkBlock {
@@ -1679,7 +1679,7 @@ impl std::fmt::Debug for MdInlineCode {
                 .field("content", &self.content())
                 .field(
                     "r_tick_token",
-                    &support::DebugSyntaxResult(self.r_tick_token()),
+                    &support::DebugOptionalElement(self.r_tick_token()),
                 )
                 .finish()
         } else {
@@ -1729,7 +1729,7 @@ impl std::fmt::Debug for MdInlineEmphasis {
             f.debug_struct("MdInlineEmphasis")
                 .field("l_fence", &support::DebugSyntaxResult(self.l_fence()))
                 .field("content", &self.content())
-                .field("r_fence", &support::DebugSyntaxResult(self.r_fence()))
+                .field("r_fence", &support::DebugOptionalElement(self.r_fence()))
                 .finish()
         } else {
             f.debug_struct("MdInlineEmphasis").finish()
@@ -1784,16 +1784,16 @@ impl std::fmt::Debug for MdInlineImage {
                 .field("alt", &self.alt())
                 .field(
                     "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
+                    &support::DebugOptionalElement(self.r_brack_token()),
                 )
                 .field(
                     "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
+                    &support::DebugOptionalElement(self.l_paren_token()),
                 )
                 .field("source", &self.source())
                 .field(
                     "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
+                    &support::DebugOptionalElement(self.r_paren_token()),
                 )
                 .finish()
         } else {
@@ -1843,7 +1843,7 @@ impl std::fmt::Debug for MdInlineItalic {
             f.debug_struct("MdInlineItalic")
                 .field("l_fence", &support::DebugSyntaxResult(self.l_fence()))
                 .field("content", &self.content())
-                .field("r_fence", &support::DebugSyntaxResult(self.r_fence()))
+                .field("r_fence", &support::DebugOptionalElement(self.r_fence()))
                 .finish()
         } else {
             f.debug_struct("MdInlineItalic").finish()
@@ -1897,16 +1897,16 @@ impl std::fmt::Debug for MdInlineLink {
                 .field("text", &self.text())
                 .field(
                     "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
+                    &support::DebugOptionalElement(self.r_brack_token()),
                 )
                 .field(
                     "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
+                    &support::DebugOptionalElement(self.l_paren_token()),
                 )
                 .field("source", &self.source())
                 .field(
                     "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
+                    &support::DebugOptionalElement(self.r_paren_token()),
                 )
                 .finish()
         } else {

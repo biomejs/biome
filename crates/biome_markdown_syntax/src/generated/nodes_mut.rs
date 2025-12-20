@@ -144,10 +144,10 @@ impl MdInlineCode {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_r_tick_token(self, element: SyntaxToken) -> Self {
+    pub fn with_r_tick_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -164,10 +164,10 @@ impl MdInlineEmphasis {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_r_fence_token(self, element: SyntaxToken) -> Self {
+    pub fn with_r_fence_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -190,16 +190,16 @@ impl MdInlineImage {
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_r_brack_token(self, element: SyntaxToken) -> Self {
+    pub fn with_r_brack_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+                .splice_slots(3usize..=3usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+    pub fn with_l_paren_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+                .splice_slots(4usize..=4usize, once(element.map(|element| element.into()))),
         )
     }
     pub fn with_source(self, element: MdInlineItemList) -> Self {
@@ -208,10 +208,10 @@ impl MdInlineImage {
                 .splice_slots(5usize..=5usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+    pub fn with_r_paren_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(6usize..=6usize, once(Some(element.into()))),
+                .splice_slots(6usize..=6usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -228,10 +228,10 @@ impl MdInlineItalic {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_r_fence_token(self, element: SyntaxToken) -> Self {
+    pub fn with_r_fence_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -248,16 +248,16 @@ impl MdInlineLink {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_r_brack_token(self, element: SyntaxToken) -> Self {
+    pub fn with_r_brack_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+    pub fn with_l_paren_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+                .splice_slots(3usize..=3usize, once(element.map(|element| element.into()))),
         )
     }
     pub fn with_source(self, element: MdInlineItemList) -> Self {
@@ -266,10 +266,10 @@ impl MdInlineLink {
                 .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+    pub fn with_r_paren_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(5usize..=5usize, once(Some(element.into()))),
+                .splice_slots(5usize..=5usize, once(element.map(|element| element.into()))),
         )
     }
 }
