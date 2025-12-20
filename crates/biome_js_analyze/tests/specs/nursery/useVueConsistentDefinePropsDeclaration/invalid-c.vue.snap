@@ -15,7 +15,7 @@ const props = defineProps({
 ```
 invalid-c.vue:1:15 lint/nursery/useVueConsistentDefinePropsDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This defineProps declaration should be defined using type declaration instead of runtime declaration.
+  i This defineProps declaration uses runtime declaration.
   
   > 1 │ const props = defineProps({
       │               ^^^^^^^^^^^^^
@@ -23,6 +23,8 @@ invalid-c.vue:1:15 lint/nursery/useVueConsistentDefinePropsDeclaration ━━━
   > 3 │ });
       │ ^^
     4 │ 
+  
+  i It should be defined using type declaration like defineProps<...>(). 
   
 
 ```

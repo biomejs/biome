@@ -49,7 +49,7 @@ declare_lint_rule! {
 
 impl Rule for UseVueConsistentDefinePropsDeclaration {
     type Query = Ast<JsCallExpression>;
-    type State = ();
+    type State = DeclarationError;
     type Signals = Option<Self::State>;
     type Options = UseVueConsistentDefinePropsDeclarationOptions;
 
@@ -70,32 +70,57 @@ impl Rule for UseVueConsistentDefinePropsDeclaration {
             return None;
         }
 
+        let is_type_declaration = is_type_declaration(node);
+        let is_runtime_declaration = is_runtime_declaration(node);
         let style = ctx.options().style.clone().unwrap_or_default();
-        if let Some(kind) = get_declaration_kind(node)
-            && kind != style
-        {
-            return Some(());
-        }
 
-        None
+        match (style, is_type_declaration, is_runtime_declaration) {
+            (_, true, true) => Some(DeclarationError::InvalidDeclaration),
+            (DeclarationStyle::Type, _, true) => Some(DeclarationError::WrongStyle),
+            (DeclarationStyle::Runtime, true, _) => Some(DeclarationError::WrongStyle),
+            _ => None,
+        }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let style = ctx.options().style.clone().unwrap_or_default();
-        let (current, opposite) = match style {
-            DeclarationStyle::Type => ("type", "runtime"),
-            DeclarationStyle::Runtime => ("runtime", "type"),
+        let (target_type, current_type, correct_example) = match style {
+            DeclarationStyle::Type => ("type", "runtime", "defineProps<...>()"),
+            DeclarationStyle::Runtime => ("runtime", "type", "defineProps(...)"),
         };
 
         let node = ctx.query();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                "This "<Emphasis>"defineProps"</Emphasis>" declaration should be defined using "<Emphasis>{current}</Emphasis>" declaration instead of "<Emphasis>{opposite}</Emphasis>" declaration."
-            },
-        ))
+
+        let diagnostic = match state {
+            DeclarationError::WrongStyle => RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "This "<Emphasis>"defineProps"</Emphasis>" declaration uses "<Emphasis>{current_type}</Emphasis>" declaration."
+                },
+            )
+            .note(markup! {
+                 "It should be defined using "<Emphasis>{target_type}</Emphasis>" declaration like "<Emphasis>{correct_example}</Emphasis>". "
+            }),
+            DeclarationError::InvalidDeclaration => RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "This "<Emphasis>"defineProps"</Emphasis>" declaration is invalid."
+                },
+            )
+            .note(markup! {
+                 "It should be defined using "<Emphasis>{target_type}</Emphasis>" declaration like "<Emphasis>{correct_example}</Emphasis>". "
+            }),
+        };
+
+        Some(diagnostic)
     }
+}
+
+pub enum DeclarationError {
+    WrongStyle,
+    InvalidDeclaration,
 }
 
 fn get_callee_name(expr: &JsCallExpression) -> Option<TokenText> {
@@ -104,18 +129,13 @@ fn get_callee_name(expr: &JsCallExpression) -> Option<TokenText> {
     Some(name)
 }
 
-fn get_declaration_kind(expr: &JsCallExpression) -> Option<DeclarationStyle> {
-    // check if the expression has arguments
-    if let Ok(arguments) = expr.arguments()
-        && arguments.args().into_iter().next().is_some()
-    {
-        return Some(DeclarationStyle::Runtime);
-    }
+fn is_type_declaration(node: &JsCallExpression) -> bool {
+    node.type_arguments().is_some()
+}
 
-    // check if the expression has type arguments
-    if expr.type_arguments().is_some() {
-        return Some(DeclarationStyle::Type);
-    }
-
-    None
+fn is_runtime_declaration(node: &JsCallExpression) -> bool {
+    node.arguments()
+        .ok()
+        .map(|args| args.args().into_iter().next().is_some())
+        .unwrap_or(false)
 }
