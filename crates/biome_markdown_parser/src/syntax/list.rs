@@ -14,18 +14,25 @@ use biome_rowan::TextRange;
 use crate::MarkdownParser;
 
 /// Tokens that start a new block (used for recovery)
-const BLOCK_RECOVERY_SET: TokenSet<MarkdownSyntaxKind> =
-    token_set![T![-], T![*], T![>], T![#], TRIPLE_BACKTICK, TRIPLE_TILDE];
+const BLOCK_RECOVERY_SET: TokenSet<MarkdownSyntaxKind> = token_set![
+    T![-],
+    T![*],
+    T![+],
+    T![>],
+    T![#],
+    TRIPLE_BACKTICK,
+    TRIPLE_TILDE
+];
 
 /// Check if we're at the start of a bullet list item (`-`, `*`, or `+`).
 ///
 /// A bullet list marker at line start followed by content is a list item.
 /// We check that it's at line start and not a thematic break.
 pub(crate) fn at_bullet_list_item(p: &mut MarkdownParser) -> bool {
-    // Check for - or * at the start of a line
+    // Check for -, *, or + at the start of a line
     // Thematic breaks (--- or ***) are lexed as MD_THEMATIC_BREAK_LITERAL,
-    // so if we see MINUS or STAR, it's a single character marker
-    if !p.at(T![-]) && !p.at(T![*]) {
+    // so if we see MINUS, STAR, or PLUS, it's a single character marker
+    if !p.at(T![-]) && !p.at(T![*]) && !p.at(T![+]) {
         return false;
     }
 
@@ -71,7 +78,7 @@ impl ParseNodeList for BulletList {
 /// Error builder for bullet list recovery
 fn expected_bullet(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Expected a list item", range)
-        .with_hint("List items start with `-` or `*` at the beginning of a line")
+        .with_hint("List items start with `-`, `*`, or `+` at the beginning of a line")
 }
 
 /// Parse a bullet list item.
@@ -108,12 +115,14 @@ fn parse_bullet(p: &mut MarkdownParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    // Bump the bullet marker (- or *)
+    // Bump the bullet marker (-, *, or +)
     // The space after the marker is consumed as trailing trivia on this token
     if p.at(T![-]) {
         p.bump(T![-]);
-    } else {
+    } else if p.at(T![*]) {
         p.bump(T![*]);
+    } else {
+        p.bump(T![+]);
     }
 
     // Parse inline content - stops at line break

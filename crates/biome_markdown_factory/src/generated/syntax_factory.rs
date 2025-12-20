@@ -20,7 +20,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && matches!(element.kind(), T ! [-] | T ! [*])
+                    && matches!(element.kind(), T ! [-] | T ! [*] | T ! [+])
                 {
                     slots.mark_present();
                     current_element = elements.next();

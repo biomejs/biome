@@ -4,3 +4,6 @@
 
 * Alternative marker
 * Another item
+
++ Plus marker
++ Another plus item

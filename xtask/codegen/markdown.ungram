@@ -131,7 +131,7 @@ MdBulletList = MdBullet*
 // - Hey!
 // ^^^^^^
 MdBullet =
-	bullet: ('-' | '*')
+	bullet: ('-' | '*' | '+')
 	content: MdInlineItemList
 
 MdOrderList = AnyCodeBlock*

@@ -109,7 +109,7 @@ fn empty() {
 #[test]
 fn textual() {
     assert_lex! {
-        "+",
+        "a",
        MD_TEXTUAL_LITERAL:1,
     }
 }
@@ -247,7 +247,7 @@ fn plus_token() {
     // Plus for bullet list marker
     assert_lex! {
         "+",
-        MD_TEXTUAL_LITERAL:1,
+        PLUS:1,
     }
 }
 

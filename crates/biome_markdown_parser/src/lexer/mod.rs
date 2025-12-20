@@ -182,6 +182,7 @@ impl<'src> MarkdownLexer<'src> {
         match dispatched {
             WHS => self.consume_newline_or_whitespace(),
             MUL | MIN | IDT => self.consume_thematic_break_or_emphasis(dispatched),
+            PLS => self.consume_byte(PLUS),
             HAS => self.consume_hash(),
             TPL => self.consume_backtick(),
             TLD => self.consume_tilde(),

@@ -13,6 +13,7 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         ("!", "BANG"),
         ("-", "MINUS"),
         ("*", "STAR"),
+        ("+", "PLUS"),
         ("**", "DOUBLE_STAR"),
         ("`", "BACKTICK"),
         ("```", "TRIPLE_BACKTICK"),
