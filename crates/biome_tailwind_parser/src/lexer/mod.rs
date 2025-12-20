@@ -45,7 +45,7 @@ impl<'src> TailwindLexer<'src> {
             bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
             _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, b']'),
             _ if self.current_kind == T!['('] => self.consume_bracketed_thing(TW_VALUE, b')'),
-            _ if self.current_kind == T![-] => self.consume_named_value(),
+            _ if self.current_kind == T![-] => self.consume_after_dash(),
             _ if self.current_kind == T![/] => self.consume_modifier(),
             b':' => self.consume_byte(T![:]),
             b'-' => self.consume_byte(T![-]),
@@ -130,7 +130,11 @@ impl<'src> TailwindLexer<'src> {
         let end = BASENAME_STORE.matcher(slice).base_end();
         self.advance(end);
 
-        TW_BASE
+        if end == 4 && &slice[..end] == b"data" {
+            DATA_KW
+        } else {
+            TW_BASE
+        }
     }
 
     fn consume_named_value(&mut self) -> TailwindSyntaxKind {
@@ -151,6 +155,24 @@ impl<'src> TailwindLexer<'src> {
         }
 
         TW_VALUE
+    }
+
+    /// After seeing a '-', we usually lex a value. However, if the next bytes are "data"
+    /// and they are followed by another '-', this is a Tailwind data-attribute variant.
+    /// In that case, emit DATA_KW so the parser can recognize `TwDataAttribute`.
+    fn consume_after_dash(&mut self) -> TailwindSyntaxKind {
+        self.assert_current_char_boundary();
+
+        let bytes = self.source.as_bytes();
+        let slice = &bytes[self.position..];
+
+        if slice.len() >= 5 && &slice[..4] == b"data" && slice[4] == b'-' {
+            // Advance past "data" only. The following '-' will be emitted as its own token.
+            self.advance(4);
+            return DATA_KW;
+        }
+
+        self.consume_named_value()
     }
 
     fn consume_modifier(&mut self) -> TailwindSyntaxKind {
