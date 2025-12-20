@@ -109,6 +109,13 @@ MdDocument {
                     MdTextual {
                         value_token: MD_TEXTUAL_LITERAL@36..37 "e" [] [],
                     },
+                ],
+                hard_line: missing (optional),
+            },
+        },
+        MdQuote {
+            any_md_block: MdParagraph {
+                list: MdInlineItemList [
                     MdTextual {
                         value_token: MD_TEXTUAL_LITERAL@37..41 ">" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
                     },
@@ -178,9 +185,9 @@ MdDocument {
 0: MD_DOCUMENT@0..61
   0: (empty)
   1: MD_BLOCK_LIST@0..60
-    0: MD_QUOTE@0..60
-      0: MD_PARAGRAPH@0..60
-        0: MD_INLINE_ITEM_LIST@0..60
+    0: MD_QUOTE@0..37
+      0: MD_PARAGRAPH@0..37
+        0: MD_INLINE_ITEM_LIST@0..37
           0: MD_TEXTUAL@0..2
             0: MD_TEXTUAL_LITERAL@0..2 ">" [] [Whitespace(" ")]
           1: MD_TEXTUAL@2..3
@@ -239,41 +246,45 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@35..36 "r" [] []
           28: MD_TEXTUAL@36..37
             0: MD_TEXTUAL_LITERAL@36..37 "e" [] []
-          29: MD_TEXTUAL@37..41
+        1: (empty)
+    1: MD_QUOTE@37..60
+      0: MD_PARAGRAPH@37..60
+        0: MD_INLINE_ITEM_LIST@37..60
+          0: MD_TEXTUAL@37..41
             0: MD_TEXTUAL_LITERAL@37..41 ">" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-          30: MD_TEXTUAL@41..42
+          1: MD_TEXTUAL@41..42
             0: MD_TEXTUAL_LITERAL@41..42 "A" [] []
-          31: MD_TEXTUAL@42..43
+          2: MD_TEXTUAL@42..43
             0: MD_TEXTUAL_LITERAL@42..43 "n" [] []
-          32: MD_TEXTUAL@43..44
+          3: MD_TEXTUAL@43..44
             0: MD_TEXTUAL_LITERAL@43..44 "o" [] []
-          33: MD_TEXTUAL@44..45
+          4: MD_TEXTUAL@44..45
             0: MD_TEXTUAL_LITERAL@44..45 "t" [] []
-          34: MD_TEXTUAL@45..46
+          5: MD_TEXTUAL@45..46
             0: MD_TEXTUAL_LITERAL@45..46 "h" [] []
-          35: MD_TEXTUAL@46..47
+          6: MD_TEXTUAL@46..47
             0: MD_TEXTUAL_LITERAL@46..47 "e" [] []
-          36: MD_TEXTUAL@47..49
+          7: MD_TEXTUAL@47..49
             0: MD_TEXTUAL_LITERAL@47..49 "r" [] [Whitespace(" ")]
-          37: MD_TEXTUAL@49..50
+          8: MD_TEXTUAL@49..50
             0: MD_TEXTUAL_LITERAL@49..50 "q" [] []
-          38: MD_TEXTUAL@50..51
+          9: MD_TEXTUAL@50..51
             0: MD_TEXTUAL_LITERAL@50..51 "u" [] []
-          39: MD_TEXTUAL@51..52
+          10: MD_TEXTUAL@51..52
             0: MD_TEXTUAL_LITERAL@51..52 "o" [] []
-          40: MD_TEXTUAL@52..53
+          11: MD_TEXTUAL@52..53
             0: MD_TEXTUAL_LITERAL@52..53 "t" [] []
-          41: MD_TEXTUAL@53..55
+          12: MD_TEXTUAL@53..55
             0: MD_TEXTUAL_LITERAL@53..55 "e" [] [Whitespace(" ")]
-          42: MD_TEXTUAL@55..56
+          13: MD_TEXTUAL@55..56
             0: MD_TEXTUAL_LITERAL@55..56 "b" [] []
-          43: MD_TEXTUAL@56..57
+          14: MD_TEXTUAL@56..57
             0: MD_TEXTUAL_LITERAL@56..57 "l" [] []
-          44: MD_TEXTUAL@57..58
+          15: MD_TEXTUAL@57..58
             0: MD_TEXTUAL_LITERAL@57..58 "o" [] []
-          45: MD_TEXTUAL@58..59
+          16: MD_TEXTUAL@58..59
             0: MD_TEXTUAL_LITERAL@58..59 "c" [] []
-          46: MD_TEXTUAL@59..60
+          17: MD_TEXTUAL@59..60
             0: MD_TEXTUAL_LITERAL@59..60 "k" [] []
         1: (empty)
   2: EOF@60..61 "" [Newline("\n")] []

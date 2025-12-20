@@ -40,12 +40,11 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
     textual_m.complete(p, MD_TEXTUAL);
 
     // Parse the rest of the inline content
+    let start_trivia_pos = p.trivia_position();
     while !p.at(T![EOF]) {
         if super::parse_any_inline(p).is_absent() {
             break;
         }
-        // Check for blank line
-        let start_trivia_pos = p.trivia_position();
         if p.has_blank_line_since(start_trivia_pos) {
             break;
         }
