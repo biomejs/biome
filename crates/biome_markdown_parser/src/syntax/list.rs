@@ -67,10 +67,35 @@ fn parse_bullet(p: &mut MarkdownParser) {
         p.bump(T![*]);
     }
 
-    // Parse inline content
-    super::parse_inline_item_list(p);
+    // Parse inline content - stops at line break
+    parse_bullet_content(p);
 
     m.complete(p, MD_BULLET);
+}
+
+/// Parse the inline content of a bullet item.
+/// Stops at line break (unlike paragraph which continues across lines).
+fn parse_bullet_content(p: &mut MarkdownParser) {
+    let m = p.start();
+
+    // Parse inline items until we hit:
+    // - EOF
+    // - A newline (list items are single-line)
+    loop {
+        if p.at(T![EOF]) {
+            break;
+        }
+        // Check for newline BEFORE parsing - if the next token has a preceding
+        // line break, we're at the start of the next line
+        if p.has_preceding_line_break() {
+            break;
+        }
+        if super::parse_any_inline(p).is_absent() {
+            break;
+        }
+    }
+
+    m.complete(p, MD_INLINE_ITEM_LIST);
 }
 
 /// Check if we're at the start of an ordered list item (digit followed by `.` or `)`).

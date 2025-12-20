@@ -1,5 +1,6 @@
 pub mod fenced_code_block;
 pub mod header;
+pub mod inline;
 pub mod list;
 pub mod quote;
 pub mod thematic_break_block;
@@ -153,12 +154,9 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
 
 /// Parse any inline element.
 ///
-/// For now, this consumes any non-block token as textual content.
-/// Other inline types (emphasis, links, etc.) will be added in later prompts.
+/// Dispatches to the appropriate inline parser based on the current token.
 pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
-    // For now, consume any token as textual content
-    // Later: add parse_inline_code, parse_inline_emphasis, etc.
-    parse_textual(p)
+    inline::parse_any_inline(p)
 }
 
 /// Parse a textual inline element.

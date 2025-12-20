@@ -186,35 +186,15 @@ MdInlineLink =
 	source: MdInlineItemList
 	')'
 
-// [![alt](image)](link)
-// ^^^^^^^^^^^^^^^^^^^^^
+// ![alt](image)
+// ^^^^^^^^^^^^^^
 MdInlineImage =
-	'['
 	'!'
-	alt: MdInlineImageAlt
-	source: MdInlineImageSource
-	']'
-  link: MdInlineImageLink?
-
-// [![alt](image)](link)
-//   ^^^^^
-MdInlineImageAlt =
 	'['
-	content: MdInlineItemList
+	alt: MdInlineItemList
 	']'
-
-// [![alt](image)](link)
-//        ^^^^^^^
-MdInlineImageSource =
 	'('
-	content: MdInlineItemList
-	')'
-
-// [![alt](image)](link)
-//                ^^^^^^
-MdInlineImageLink =
-	'('
-	content: MdInlineItemList
+	source: MdInlineItemList
 	')'
 
 // ***

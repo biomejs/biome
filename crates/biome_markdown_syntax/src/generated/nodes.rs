@@ -516,31 +516,35 @@ impl MdInlineImage {
     }
     pub fn as_fields(&self) -> MdInlineImageFields {
         MdInlineImageFields {
-            l_brack_token: self.l_brack_token(),
             excl_token: self.excl_token(),
+            l_brack_token: self.l_brack_token(),
             alt: self.alt(),
-            source: self.source(),
             r_brack_token: self.r_brack_token(),
-            link: self.link(),
+            l_paren_token: self.l_paren_token(),
+            source: self.source(),
+            r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn excl_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn excl_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn alt(&self) -> SyntaxResult<MdInlineImageAlt> {
-        support::required_node(&self.syntax, 2usize)
-    }
-    pub fn source(&self) -> SyntaxResult<MdInlineImageSource> {
-        support::required_node(&self.syntax, 3usize)
+    pub fn alt(&self) -> MdInlineItemList {
+        support::list(&self.syntax, 2usize)
     }
     pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 4usize)
     }
-    pub fn link(&self) -> Option<MdInlineImageLink> {
-        support::node(&self.syntax, 5usize)
+    pub fn source(&self) -> MdInlineItemList {
+        support::list(&self.syntax, 5usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 6usize)
     }
 }
 impl Serialize for MdInlineImage {
@@ -553,146 +557,12 @@ impl Serialize for MdInlineImage {
 }
 #[derive(Serialize)]
 pub struct MdInlineImageFields {
-    pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub excl_token: SyntaxResult<SyntaxToken>,
-    pub alt: SyntaxResult<MdInlineImageAlt>,
-    pub source: SyntaxResult<MdInlineImageSource>,
-    pub r_brack_token: SyntaxResult<SyntaxToken>,
-    pub link: Option<MdInlineImageLink>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdInlineImageAlt {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MdInlineImageAlt {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MdInlineImageAltFields {
-        MdInlineImageAltFields {
-            l_brack_token: self.l_brack_token(),
-            content: self.content(),
-            r_brack_token: self.r_brack_token(),
-        }
-    }
-    pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn content(&self) -> MdInlineItemList {
-        support::list(&self.syntax, 1usize)
-    }
-    pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-}
-impl Serialize for MdInlineImageAlt {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MdInlineImageAltFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
-    pub content: MdInlineItemList,
+    pub alt: MdInlineItemList,
     pub r_brack_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdInlineImageLink {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MdInlineImageLink {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MdInlineImageLinkFields {
-        MdInlineImageLinkFields {
-            l_paren_token: self.l_paren_token(),
-            content: self.content(),
-            r_paren_token: self.r_paren_token(),
-        }
-    }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn content(&self) -> MdInlineItemList {
-        support::list(&self.syntax, 1usize)
-    }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-}
-impl Serialize for MdInlineImageLink {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MdInlineImageLinkFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub content: MdInlineItemList,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdInlineImageSource {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MdInlineImageSource {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MdInlineImageSourceFields {
-        MdInlineImageSourceFields {
-            l_paren_token: self.l_paren_token(),
-            content: self.content(),
-            r_paren_token: self.r_paren_token(),
-        }
-    }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn content(&self) -> MdInlineItemList {
-        support::list(&self.syntax, 1usize)
-    }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-}
-impl Serialize for MdInlineImageSource {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MdInlineImageSourceFields {
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub content: MdInlineItemList,
+    pub source: MdInlineItemList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1906,18 +1776,25 @@ impl std::fmt::Debug for MdInlineImage {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdInlineImage")
+                .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
                 .field(
                     "l_brack_token",
                     &support::DebugSyntaxResult(self.l_brack_token()),
                 )
-                .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
-                .field("alt", &support::DebugSyntaxResult(self.alt()))
-                .field("source", &support::DebugSyntaxResult(self.source()))
+                .field("alt", &self.alt())
                 .field(
                     "r_brack_token",
                     &support::DebugSyntaxResult(self.r_brack_token()),
                 )
-                .field("link", &support::DebugOptionalElement(self.link()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("source", &self.source())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
                 .finish()
         } else {
             f.debug_struct("MdInlineImage").finish()
@@ -1933,171 +1810,6 @@ impl From<MdInlineImage> for SyntaxNode {
 }
 impl From<MdInlineImage> for SyntaxElement {
     fn from(n: MdInlineImage) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for MdInlineImageAlt {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_INLINE_IMAGE_ALT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_INLINE_IMAGE_ALT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MdInlineImageAlt {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("MdInlineImageAlt")
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field("content", &self.content())
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("MdInlineImageAlt").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<MdInlineImageAlt> for SyntaxNode {
-    fn from(n: MdInlineImageAlt) -> Self {
-        n.syntax
-    }
-}
-impl From<MdInlineImageAlt> for SyntaxElement {
-    fn from(n: MdInlineImageAlt) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for MdInlineImageLink {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_INLINE_IMAGE_LINK as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_INLINE_IMAGE_LINK
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MdInlineImageLink {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("MdInlineImageLink")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("content", &self.content())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("MdInlineImageLink").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<MdInlineImageLink> for SyntaxNode {
-    fn from(n: MdInlineImageLink) -> Self {
-        n.syntax
-    }
-}
-impl From<MdInlineImageLink> for SyntaxElement {
-    fn from(n: MdInlineImageLink) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for MdInlineImageSource {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_INLINE_IMAGE_SOURCE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_INLINE_IMAGE_SOURCE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MdInlineImageSource {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("MdInlineImageSource")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("content", &self.content())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("MdInlineImageSource").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<MdInlineImageSource> for SyntaxNode {
-    fn from(n: MdInlineImageSource) -> Self {
-        n.syntax
-    }
-}
-impl From<MdInlineImageSource> for SyntaxElement {
-    fn from(n: MdInlineImageSource) -> Self {
         n.syntax.into()
     }
 }
@@ -3157,21 +2869,6 @@ impl std::fmt::Display for MdInlineEmphasis {
     }
 }
 impl std::fmt::Display for MdInlineImage {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for MdInlineImageAlt {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for MdInlineImageLink {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for MdInlineImageSource {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -172,87 +172,23 @@ pub fn md_inline_emphasis(
     ))
 }
 pub fn md_inline_image(
-    l_brack_token: SyntaxToken,
     excl_token: SyntaxToken,
-    alt: MdInlineImageAlt,
-    source: MdInlineImageSource,
-    r_brack_token: SyntaxToken,
-) -> MdInlineImageBuilder {
-    MdInlineImageBuilder {
-        l_brack_token,
-        excl_token,
-        alt,
-        source,
-        r_brack_token,
-        link: None,
-    }
-}
-pub struct MdInlineImageBuilder {
     l_brack_token: SyntaxToken,
-    excl_token: SyntaxToken,
-    alt: MdInlineImageAlt,
-    source: MdInlineImageSource,
+    alt: MdInlineItemList,
     r_brack_token: SyntaxToken,
-    link: Option<MdInlineImageLink>,
-}
-impl MdInlineImageBuilder {
-    pub fn with_link(mut self, link: MdInlineImageLink) -> Self {
-        self.link = Some(link);
-        self
-    }
-    pub fn build(self) -> MdInlineImage {
-        MdInlineImage::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MD_INLINE_IMAGE,
-            [
-                Some(SyntaxElement::Token(self.l_brack_token)),
-                Some(SyntaxElement::Token(self.excl_token)),
-                Some(SyntaxElement::Node(self.alt.into_syntax())),
-                Some(SyntaxElement::Node(self.source.into_syntax())),
-                Some(SyntaxElement::Token(self.r_brack_token)),
-                self.link
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn md_inline_image_alt(
-    l_brack_token: SyntaxToken,
-    content: MdInlineItemList,
-    r_brack_token: SyntaxToken,
-) -> MdInlineImageAlt {
-    MdInlineImageAlt::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INLINE_IMAGE_ALT,
+    l_paren_token: SyntaxToken,
+    source: MdInlineItemList,
+    r_paren_token: SyntaxToken,
+) -> MdInlineImage {
+    MdInlineImage::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_INLINE_IMAGE,
         [
+            Some(SyntaxElement::Token(excl_token)),
             Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Node(content.into_syntax())),
+            Some(SyntaxElement::Node(alt.into_syntax())),
             Some(SyntaxElement::Token(r_brack_token)),
-        ],
-    ))
-}
-pub fn md_inline_image_link(
-    l_paren_token: SyntaxToken,
-    content: MdInlineItemList,
-    r_paren_token: SyntaxToken,
-) -> MdInlineImageLink {
-    MdInlineImageLink::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INLINE_IMAGE_LINK,
-        [
             Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(content.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
-}
-pub fn md_inline_image_source(
-    l_paren_token: SyntaxToken,
-    content: MdInlineItemList,
-    r_paren_token: SyntaxToken,
-) -> MdInlineImageSource {
-    MdInlineImageSource::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INLINE_IMAGE_SOURCE,
-        [
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(content.into_syntax())),
+            Some(SyntaxElement::Node(source.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
