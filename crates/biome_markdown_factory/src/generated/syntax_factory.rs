@@ -251,7 +251,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && MdIndentedCodeLineList::can_cast(element.kind())
+                    && MdInlineItemList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -264,32 +264,6 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     );
                 }
                 slots.into_node(MD_INDENT_CODE_BLOCK, children)
-            }
-            MD_INDENTED_CODE_LINE => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && MdIndent::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && MdTextual::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        MD_INDENTED_CODE_LINE.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(MD_INDENTED_CODE_LINE, children)
             }
             MD_INLINE_CODE => {
                 let mut elements = (&children).into_iter();
@@ -771,9 +745,6 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             MD_BULLET_LIST => Self::make_node_list_syntax(kind, children, MdBullet::can_cast),
             MD_CODE_NAME_LIST => Self::make_node_list_syntax(kind, children, MdTextual::can_cast),
             MD_HASH_LIST => Self::make_node_list_syntax(kind, children, MdHash::can_cast),
-            MD_INDENTED_CODE_LINE_LIST => {
-                Self::make_node_list_syntax(kind, children, MdIndentedCodeLine::can_cast)
-            }
             MD_INLINE_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyMdInline::can_cast)
             }

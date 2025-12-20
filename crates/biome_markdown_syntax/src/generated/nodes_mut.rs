@@ -130,24 +130,10 @@ impl MdIndent {
     }
 }
 impl MdIndentCodeBlock {
-    pub fn with_lines(self, element: MdIndentedCodeLineList) -> Self {
+    pub fn with_content(self, element: MdInlineItemList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
-impl MdIndentedCodeLine {
-    pub fn with_indentation(self, element: MdIndent) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-    pub fn with_content(self, element: MdTextual) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
 }

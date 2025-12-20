@@ -396,10 +396,10 @@ impl MdIndentCodeBlock {
     }
     pub fn as_fields(&self) -> MdIndentCodeBlockFields {
         MdIndentCodeBlockFields {
-            lines: self.lines(),
+            content: self.content(),
         }
     }
-    pub fn lines(&self) -> MdIndentedCodeLineList {
+    pub fn content(&self) -> MdInlineItemList {
         support::list(&self.syntax, 0usize)
     }
 }
@@ -413,47 +413,7 @@ impl Serialize for MdIndentCodeBlock {
 }
 #[derive(Serialize)]
 pub struct MdIndentCodeBlockFields {
-    pub lines: MdIndentedCodeLineList,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdIndentedCodeLine {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MdIndentedCodeLine {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MdIndentedCodeLineFields {
-        MdIndentedCodeLineFields {
-            indentation: self.indentation(),
-            content: self.content(),
-        }
-    }
-    pub fn indentation(&self) -> SyntaxResult<MdIndent> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn content(&self) -> SyntaxResult<MdTextual> {
-        support::required_node(&self.syntax, 1usize)
-    }
-}
-impl Serialize for MdIndentedCodeLine {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MdIndentedCodeLineFields {
-    pub indentation: SyntaxResult<MdIndent>,
-    pub content: SyntaxResult<MdTextual>,
+    pub content: MdInlineItemList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdInlineCode {
@@ -1804,7 +1764,7 @@ impl std::fmt::Debug for MdIndentCodeBlock {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdIndentCodeBlock")
-                .field("lines", &self.lines())
+                .field("content", &self.content())
                 .finish()
         } else {
             f.debug_struct("MdIndentCodeBlock").finish()
@@ -1820,57 +1780,6 @@ impl From<MdIndentCodeBlock> for SyntaxNode {
 }
 impl From<MdIndentCodeBlock> for SyntaxElement {
     fn from(n: MdIndentCodeBlock) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for MdIndentedCodeLine {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_INDENTED_CODE_LINE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_INDENTED_CODE_LINE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MdIndentedCodeLine {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("MdIndentedCodeLine")
-                .field(
-                    "indentation",
-                    &support::DebugSyntaxResult(self.indentation()),
-                )
-                .field("content", &support::DebugSyntaxResult(self.content()))
-                .finish()
-        } else {
-            f.debug_struct("MdIndentedCodeLine").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<MdIndentedCodeLine> for SyntaxNode {
-    fn from(n: MdIndentedCodeLine) -> Self {
-        n.syntax
-    }
-}
-impl From<MdIndentedCodeLine> for SyntaxElement {
-    fn from(n: MdIndentedCodeLine) -> Self {
         n.syntax.into()
     }
 }
@@ -3246,11 +3155,6 @@ impl std::fmt::Display for MdIndentCodeBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for MdIndentedCodeLine {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for MdInlineCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -3712,88 +3616,6 @@ impl IntoIterator for &MdHashList {
 impl IntoIterator for MdHashList {
     type Item = MdHash;
     type IntoIter = AstNodeListIterator<Language, MdHash>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
-pub struct MdIndentedCodeLineList {
-    syntax_list: SyntaxList,
-}
-impl MdIndentedCodeLineList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for MdIndentedCodeLineList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_INDENTED_CODE_LINE_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_INDENTED_CODE_LINE_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-impl Serialize for MdIndentedCodeLineList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstNodeList for MdIndentedCodeLineList {
-    type Language = Language;
-    type Node = MdIndentedCodeLine;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for MdIndentedCodeLineList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("MdIndentedCodeLineList ")?;
-        f.debug_list().entries(self.iter()).finish()
-    }
-}
-impl IntoIterator for &MdIndentedCodeLineList {
-    type Item = MdIndentedCodeLine;
-    type IntoIter = AstNodeListIterator<Language, MdIndentedCodeLine>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for MdIndentedCodeLineList {
-    type Item = MdIndentedCodeLine;
-    type IntoIter = AstNodeListIterator<Language, MdIndentedCodeLine>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

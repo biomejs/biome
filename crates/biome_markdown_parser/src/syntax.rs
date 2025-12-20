@@ -64,12 +64,37 @@ pub(crate) fn parse_any_block(p: &mut MarkdownParser) {
     }
 }
 
+/// Check if we're at an indented code block (4+ spaces of indentation).
 pub(crate) fn at_indent_code_block(p: &mut MarkdownParser) -> bool {
-    p.before_whitespace_count() > 4
+    // CommonMark requires 4 or more spaces for indented code blocks
+    p.before_whitespace_count() >= 4
 }
 
-pub(crate) fn parse_indent_code_block(_p: &mut MarkdownParser) {
-    todo!()
+/// Parse an indented code block.
+///
+/// Grammar: MdIndentCodeBlock = content: MdInlineItemList
+///
+/// An indented code block consists of one or more lines with 4+ spaces
+/// of indentation. The indentation is tracked in trivia.
+pub(crate) fn parse_indent_code_block(p: &mut MarkdownParser) {
+    if !at_indent_code_block(p) {
+        return;
+    }
+
+    let m = p.start();
+    let content = p.start();
+
+    // Parse content while we're at indented lines
+    // Continue until we hit a blank line or a line without 4+ space indent
+    while !p.at(T![EOF]) && at_indent_code_block(p) {
+        let text_m = p.start();
+        // Remap any token to MD_TEXTUAL_LITERAL so the syntax factory accepts it.
+        p.bump_remap(MD_TEXTUAL_LITERAL);
+        text_m.complete(p, MD_TEXTUAL);
+    }
+
+    content.complete(p, MD_INLINE_ITEM_LIST);
+    m.complete(p, MD_INDENT_CODE_BLOCK);
 }
 
 /// Parse a paragraph block.
@@ -140,8 +165,10 @@ pub(crate) fn parse_textual(p: &mut MarkdownParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    // Bump any token - treat everything as textual for now
-    p.bump_any();
+    // Remap any token to MD_TEXTUAL_LITERAL so the syntax factory accepts it.
+    // This is necessary because tokens like L_PAREN, R_PAREN, etc. are lexed
+    // as their specific token kinds, but MdTextual expects MD_TEXTUAL_LITERAL.
+    p.bump_remap(MD_TEXTUAL_LITERAL);
     Present(m.complete(p, MD_TEXTUAL))
 }
 

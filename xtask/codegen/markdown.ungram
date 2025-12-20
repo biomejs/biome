@@ -94,14 +94,9 @@ AnyCodeBlock =
 //     code
 // ^^^^^^^^
 // The space before "code" is intentional.
+// Indentation is tracked in trivia, so we use MdInlineItemList for content.
 MdIndentCodeBlock =
-	lines: MdIndentedCodeLineList
-
-MdIndentedCodeLineList = MdIndentedCodeLine*
-
-MdIndentedCodeLine =
-	indentation: MdIndent
-	content: MdTextual
+	content: MdInlineItemList
 
 
 // ```shell

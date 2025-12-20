@@ -56,10 +56,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdIndentCodeBlock::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_INDENTED_CODE_LINE => {
-                    let $pattern = unsafe { $crate::MdIndentedCodeLine::new_unchecked(node) };
-                    $body
-                }
                 $crate::MarkdownSyntaxKind::MD_INLINE_CODE => {
                     let $pattern = unsafe { $crate::MdInlineCode::new_unchecked(node) };
                     $body
@@ -142,10 +138,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MD_HASH_LIST => {
                     let $pattern = unsafe { $crate::MdHashList::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MD_INDENTED_CODE_LINE_LIST => {
-                    let $pattern = unsafe { $crate::MdIndentedCodeLineList::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_INLINE_ITEM_LIST => {

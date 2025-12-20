@@ -142,19 +142,10 @@ pub fn md_indent(value_token: SyntaxToken) -> MdIndent {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn md_indent_code_block(lines: MdIndentedCodeLineList) -> MdIndentCodeBlock {
+pub fn md_indent_code_block(content: MdInlineItemList) -> MdIndentCodeBlock {
     MdIndentCodeBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_INDENT_CODE_BLOCK,
-        [Some(SyntaxElement::Node(lines.into_syntax()))],
-    ))
-}
-pub fn md_indented_code_line(indentation: MdIndent, content: MdTextual) -> MdIndentedCodeLine {
-    MdIndentedCodeLine::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INDENTED_CODE_LINE,
-        [
-            Some(SyntaxElement::Node(indentation.into_syntax())),
-            Some(SyntaxElement::Node(content.into_syntax())),
-        ],
+        [Some(SyntaxElement::Node(content.into_syntax()))],
     ))
 }
 pub fn md_inline_code(
@@ -439,18 +430,6 @@ where
 {
     MdHashList::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_HASH_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
-    ))
-}
-pub fn md_indented_code_line_list<I>(items: I) -> MdIndentedCodeLineList
-where
-    I: IntoIterator<Item = MdIndentedCodeLine>,
-    I::IntoIter: ExactSizeIterator,
-{
-    MdIndentedCodeLineList::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INDENTED_CODE_LINE_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
