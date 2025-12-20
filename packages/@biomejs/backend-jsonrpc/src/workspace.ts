@@ -1918,6 +1918,11 @@ See <https://biomejs.dev/linter/rules/no-jsx-literals>
 	 */
 	noJsxLiterals?: NoJsxLiteralsConfiguration;
 	/**
+	* Disallow .bind(), arrow functions, or function expressions in JSX props.
+See <https://biomejs.dev/linter/rules/no-jsx-props-bind> 
+	 */
+	noJsxPropsBind?: NoJsxPropsBindConfiguration;
+	/**
 	* Prevent problematic leaked values from being rendered.
 See <https://biomejs.dev/linter/rules/no-leaked-render> 
 	 */
@@ -3641,6 +3646,9 @@ export type NoIncrementDecrementConfiguration =
 export type NoJsxLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxLiteralsOptions;
+export type NoJsxPropsBindConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJsxPropsBindOptions;
 export type NoLeakedRenderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoLeakedRenderOptions;
@@ -5074,6 +5082,10 @@ export interface RuleWithNoJsxLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxLiteralsOptions;
 }
+export interface RuleWithNoJsxPropsBindOptions {
+	level: RulePlainConfiguration;
+	options?: NoJsxPropsBindOptions;
+}
 export interface RuleWithNoLeakedRenderOptions {
 	level: RulePlainConfiguration;
 	options?: NoLeakedRenderOptions;
@@ -6437,6 +6449,7 @@ export interface NoJsxLiteralsOptions {
 	 */
 	noStrings?: boolean;
 }
+export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoMultiAssignOptions = {};
@@ -7294,6 +7307,7 @@ export type Category =
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxLiterals"
+	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
