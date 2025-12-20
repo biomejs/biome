@@ -83,7 +83,7 @@ fn parse_header_content(p: &mut MarkdownParser) {
 
     // Check if we're immediately at a newline (empty header content)
     // This happens when header is just "# " followed by newline
-    if has_newline_since(p, start_trivia_pos) {
+    if p.has_newline_since(start_trivia_pos) {
         return;
     }
 
@@ -110,7 +110,7 @@ fn parse_header_content(p: &mut MarkdownParser) {
 
         // Check if we've hit a newline (header ends at single newline)
         // We check AFTER parsing to ensure the newline is in the trivia
-        if has_newline_since(p, start_trivia_pos) {
+        if p.has_newline_since(start_trivia_pos) {
             break;
         }
     }
@@ -146,12 +146,6 @@ fn is_trailing_hash_sequence(p: &mut MarkdownParser) -> bool {
     p.rewind(checkpoint);
 
     at_end_of_line
-}
-
-/// Check if there's any newline in the trivia since the given position.
-/// Unlike has_blank_line_since which requires 2+ newlines, this triggers on 1 newline.
-fn has_newline_since(p: &mut MarkdownParser, since_pos: usize) -> bool {
-    p.has_newline_since(since_pos)
 }
 
 /// Parse trailing hashes for ATX headers.
