@@ -392,3 +392,33 @@ fn code_fence_with_language() {
         MD_TEXTUAL_LITERAL:1,
     }
 }
+
+#[test]
+fn escape_sequences() {
+    // Backslash escapes punctuation characters
+    assert_lex! {
+        r#"\*\[\]"#,
+        MD_TEXTUAL_LITERAL:2, // \*
+        MD_TEXTUAL_LITERAL:2, // \[
+        MD_TEXTUAL_LITERAL:2, // \]
+    }
+}
+
+#[test]
+fn escape_backslash() {
+    // Escaped backslash
+    assert_lex! {
+        r#"\\"#,
+        MD_TEXTUAL_LITERAL:2, // \\
+    }
+}
+
+#[test]
+fn escape_non_punctuation() {
+    // Backslash before non-punctuation is just backslash
+    assert_lex! {
+        r#"\a"#,
+        MD_TEXTUAL_LITERAL:1, // \
+        MD_TEXTUAL_LITERAL:1, // a
+    }
+}

@@ -19,6 +19,8 @@ pub(crate) fn at_header(p: &mut MarkdownParser) -> bool {
 ///
 /// ATX headers start with 1-6 `#` characters followed by space or end of line.
 /// More than 6 `#` characters is not a valid header.
+///
+/// Trailing hashes are optional and must be at the end of the line.
 pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
     if !at_header(p) {
         return Absent;
@@ -41,11 +43,8 @@ pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
     parse_header_content(p);
 
     // Parse trailing hashes (MdHashList)
-    // For now, we emit an empty list. Trailing hashes (if any) are included
-    // in the paragraph content. Proper trailing hash detection would require
-    // lookahead to verify they're followed by newline/EOF.
-    let after_m = p.start();
-    after_m.complete(p, MD_HASH_LIST);
+    // Trailing hashes are valid if they're at the end of the line
+    parse_trailing_hashes(p);
 
     Present(m.complete(p, MD_HEADER))
 }
@@ -114,4 +113,19 @@ fn parse_header_content(p: &mut MarkdownParser) {
 /// Unlike has_blank_line_since which requires 2+ newlines, this triggers on 1 newline.
 fn has_newline_since(p: &mut MarkdownParser, since_pos: usize) -> bool {
     p.has_newline_since(since_pos)
+}
+
+/// Parse trailing hashes for ATX headers.
+///
+/// Per CommonMark spec, a closing sequence of `#` characters is optional.
+/// It must be at the end of the line, preceded by optional whitespace.
+///
+/// Note: Currently, trailing hashes are included as part of the header content
+/// (in MdParagraph). Properly separating trailing hashes would require lookahead
+/// to distinguish between hashes in the middle of content vs. at the end of line.
+/// The CST still contains all the text; only the structural representation differs.
+fn parse_trailing_hashes(p: &mut MarkdownParser) {
+    let m = p.start();
+    // Emit empty MdHashList - trailing hashes are currently part of content
+    m.complete(p, MD_HASH_LIST);
 }

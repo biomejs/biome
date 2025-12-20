@@ -222,11 +222,17 @@ pub(crate) fn parse_inline_image(p: &mut MarkdownParser) -> ParsedSyntax {
     Present(m.complete(p, MD_INLINE_IMAGE))
 }
 
-/// Try to parse a nested inline element (code, link, but NOT the same emphasis).
+/// Try to parse a nested inline element (code, link, image).
 /// Returns true if something was parsed, false otherwise.
+///
+/// Note: We intentionally don't parse nested emphasis here to avoid
+/// ambiguity and potential infinite recursion. Emphasis markers inside
+/// other emphasis are treated as literal text.
 fn parse_nested_inline(p: &mut MarkdownParser) -> bool {
     if p.at(BACKTICK) {
         parse_inline_code(p).is_present()
+    } else if p.at(BANG) && p.nth_at(1, L_BRACK) {
+        parse_inline_image(p).is_present()
     } else if p.at(L_BRACK) {
         parse_inline_link(p).is_present()
     } else {

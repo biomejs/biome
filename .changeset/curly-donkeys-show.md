@@ -11,5 +11,6 @@ Implements parsing for:
 - Block quotes (`>`)
 - Bullet lists (`-` and `*` markers)
 - Inline elements: code spans, emphasis (bold), italic, links, and images
+- Escape sequences (`\*`, `\[`, etc.) per CommonMark spec
 
-Note: This is the initial parser implementation. Ordered lists, multi-line list items, escape sequences, and some advanced CommonMark features are not yet supported.
+Note: This is the initial parser implementation. Ordered lists, multi-line list items, and some advanced CommonMark features are not yet supported. Trailing hashes in ATX headers are included in content rather than parsed separately.

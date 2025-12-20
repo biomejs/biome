@@ -191,8 +191,62 @@ impl<'src> MarkdownLexer<'src> {
             BTC => self.consume_byte(R_BRACK),
             PNO => self.consume_byte(L_PAREN),
             PNC => self.consume_byte(R_PAREN),
+            BSL => self.consume_escape(),
             _ => self.consume_textual(),
         }
+    }
+
+    /// Consume a backslash escape sequence.
+    /// Per CommonMark spec, a backslash before ASCII punctuation makes it literal.
+    /// Escapable: !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+    fn consume_escape(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        // Consume the backslash
+        self.advance(1);
+
+        // Check if next character is escapable ASCII punctuation
+        if let Some(next) = self.current_byte()
+            && matches!(
+                next,
+                b'!' | b'"'
+                    | b'#'
+                    | b'$'
+                    | b'%'
+                    | b'&'
+                    | b'\''
+                    | b'('
+                    | b')'
+                    | b'*'
+                    | b'+'
+                    | b','
+                    | b'-'
+                    | b'.'
+                    | b'/'
+                    | b':'
+                    | b';'
+                    | b'<'
+                    | b'='
+                    | b'>'
+                    | b'?'
+                    | b'@'
+                    | b'['
+                    | b'\\'
+                    | b']'
+                    | b'^'
+                    | b'_'
+                    | b'`'
+                    | b'{'
+                    | b'|'
+                    | b'}'
+                    | b'~'
+            )
+        {
+            // Consume the escaped character too
+            self.advance(1);
+        }
+
+        MD_TEXTUAL_LITERAL
     }
 
     fn text_position(&self) -> TextSize {
