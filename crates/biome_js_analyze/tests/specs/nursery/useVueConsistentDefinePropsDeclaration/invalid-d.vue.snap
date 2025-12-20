@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: invalid-d.vue
+---
+# Input
+```ts
+const props = defineProps<{
+	kind: string;
+}>({
+	kind: { type: String },
+});
+
+```
+
+# Diagnostics
+```
+invalid-d.vue:1:15 lint/nursery/useVueConsistentDefinePropsDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This defineProps declaration is invalid.
+  
+  > 1 │ const props = defineProps<{
+      │               ^^^^^^^^^^^^^
+  > 2 │ 	kind: string;
+  > 3 │ }>({
+  > 4 │ 	kind: { type: String },
+  > 5 │ });
+      │ ^^
+    6 │ 
+  
+  i It should be defined using type declaration like defineProps<...>(). 
+  
+
+```
