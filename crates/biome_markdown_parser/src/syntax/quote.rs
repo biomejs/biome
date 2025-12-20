@@ -3,8 +3,8 @@
 //! A block quote begins with `>` at the start of a line and can contain
 //! nested block elements.
 
-use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_markdown_syntax::T;
+use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 
