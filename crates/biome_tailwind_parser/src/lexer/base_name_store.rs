@@ -149,7 +149,7 @@ impl<'s, 't> BaseNameMatcher<'s, 't> {
 }
 
 #[inline]
-const fn is_delimiter(b: u8) -> bool {
+pub(crate) const fn is_delimiter(b: u8) -> bool {
     // Delimiters that cannot be part of a basename (excluding '-' which may be inside dashed basenames):
     // - whitespace
     // - '!' important modifier
