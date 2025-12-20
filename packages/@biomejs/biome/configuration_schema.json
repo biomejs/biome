@@ -1350,7 +1350,7 @@
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
-					"description": "Enables parsing of CSS Modules specific features.",
+					"description": "Enables parsing of CSS Modules specific features. Enable this feature only\nwhen your files don't end in `.module.css`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"tailwindDirectives": {
@@ -10259,7 +10259,7 @@
 					]
 				},
 				"noValueAtRule": {
-					"description": "Disallow use of @value rule in css modules.\nSee <https://biomejs.dev/linter/rules/no-value-at-rule>",
+					"description": "Disallow use of @value rule in CSS modules.\nSee <https://biomejs.dev/linter/rules/no-value-at-rule>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoValueAtRuleConfiguration" },
 						{ "type": "null" }

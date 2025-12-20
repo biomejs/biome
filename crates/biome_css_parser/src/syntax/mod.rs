@@ -38,6 +38,12 @@ use self::parse_error::{expected_component_value, expected_declaration_item};
 pub(crate) enum CssSyntaxFeatures {
     /// Enable support for Tailwind CSS directives and syntax.
     Tailwind,
+
+    /// Enable support for CSS Modules syntax.
+    CssModules,
+
+    /// Enable support for CSS Modules syntax plus parsing of pseudo selectors fo `:slotted` and `:deep`
+    CssModulesWithVue,
 }
 
 impl SyntaxFeature for CssSyntaxFeatures {
@@ -46,6 +52,8 @@ impl SyntaxFeature for CssSyntaxFeatures {
     fn is_supported(&self, p: &Self::Parser<'_>) -> bool {
         match self {
             Self::Tailwind => p.options().is_tailwind_directives_enabled(),
+            Self::CssModules => p.options().is_css_modules_enabled(),
+            Self::CssModulesWithVue => p.options().is_css_modules_vue_enabled(),
         }
     }
 }
@@ -58,7 +66,7 @@ pub(crate) fn parse_root(p: &mut CssParser) {
 
             m.complete(p, CSS_SNIPPET_ROOT);
         }
-        EmbeddingKind::None => {
+        EmbeddingKind::None | EmbeddingKind::Html(_) => {
             p.eat(UNICODE_BOM);
 
             RuleList::new(EOF).parse_list(p);

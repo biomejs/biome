@@ -444,7 +444,8 @@ export interface CssParserConfiguration {
 	 */
 	allowWrongLineComments?: Bool;
 	/**
-	 * Enables parsing of CSS Modules specific features.
+	* Enables parsing of CSS Modules specific features. Enable this feature only
+when your files don't end in `.module.css`. 
 	 */
 	cssModules?: Bool;
 	/**
@@ -2397,7 +2398,7 @@ See <https://biomejs.dev/linter/rules/no-useless-else>
 	 */
 	noUselessElse?: NoUselessElseConfiguration;
 	/**
-	* Disallow use of @value rule in css modules.
+	* Disallow use of @value rule in CSS modules.
 See <https://biomejs.dev/linter/rules/no-value-at-rule> 
 	 */
 	noValueAtRule?: NoValueAtRuleConfiguration;
@@ -7845,7 +7846,7 @@ export type LanguageVersion = "eS2022" | "eSNext";
  * It represents the extension of the file
  */
 export type JsonFileVariant = "standard" | "jsonc";
-export type EmbeddingKind2 = "None" | "Styled";
+export type EmbeddingKind2 = "None" | "Styled" | { Html: EmbeddingHtmlKind };
 /**
 	* The style of CSS contained in the file.
 
@@ -7865,6 +7866,7 @@ export type HtmlVariant =
 	| "Vue"
 	| "Svelte";
 export type GritVariant = "Standard";
+export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
 export type HtmlTextExpressions = "None" | "Single" | "Double";
 export interface OpenFileResult {
 	diagnostics: Diagnostic[];
