@@ -163,6 +163,8 @@ const wrapped = {
 
 [function () {}, () => {}];
 
+function greetUser(name, greeting = 'Hello'): string { return `${greeting}, ${name}`; }
+
 ```
 
 _Note: The parser emitted 1 diagnostics which are not shown here._
@@ -883,25 +885,6 @@ invalid.ts:146:26 lint/nursery/useExplicitType ━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:148:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    146 │ const x = { bar: { prop: () => {} } }
-    147 │ 
-  > 148 │ const x = { dynamic: someFunc() }
-        │       ^
-    149 │ 
-    150 │ let x;
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a type to the variable.
-  
-
-```
-
-```
 invalid.ts:150:5 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The variable doesn't have a type defined.
@@ -985,6 +968,7 @@ invalid.ts:158:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   > 158 │ [function () {}, () => {}];
         │  ^^^^^^^^^^^^^^
     159 │ 
+    160 │ function greetUser(name, greeting = 'Hello'): string { return `${greeting}, ${name}`; }
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -1003,10 +987,29 @@ invalid.ts:158:18 lint/nursery/useExplicitType ━━━━━━━━━━━
   > 158 │ [function () {}, () => {}];
         │                  ^^^^^^^^
     159 │ 
+    160 │ function greetUser(name, greeting = 'Hello'): string { return `${greeting}, ${name}`; }
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+
+```
+
+```
+invalid.ts:160:20 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The parameter doesn't have a type defined.
+  
+    158 │ [function () {}, () => {}];
+    159 │ 
+  > 160 │ function greetUser(name, greeting = 'Hello'): string { return `${greeting}, ${name}`; }
+        │                    ^^^^
+    161 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a type to the parameter.
   
 
 ```
