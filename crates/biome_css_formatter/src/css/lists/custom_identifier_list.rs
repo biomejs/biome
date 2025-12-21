@@ -22,7 +22,7 @@ impl FormatCssCustomIdentifierListOptions {
 
 /// Defines how a list of CSS custom identifiers should be formatted.
 ///
-/// - [`OneLine`] — Formats all identifiers on a single line, separated by commas.
+/// - [`OneLine`] — Formats all identifiers on a single line.
 /// - [`Fluid`] — Formats identifiers with soft line breaks, allowing wrapping when needed.
 ///
 /// ## Examples
