@@ -14,7 +14,7 @@ impl FormatRule<AnyCssPseudoClass> for FormatAnyCssPseudoClass {
                 node.format().fmt(f)
             }
             AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifier(node) => node.format().fmt(f),
-            AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierList(node) => {
+            AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierCommaSeparatedList(node) => {
                 node.format().fmt(f)
             }
             AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(node) => node.format().fmt(f),

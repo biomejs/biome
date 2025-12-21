@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/pseudo/pseudo_class_function_custom_identifier_list.css
+info: css/pseudo/pseudo_class_function_custom_identifier_comma_separated_list.css
 ---
 # Input
 

@@ -2,21 +2,22 @@ use crate::css::lists::custom_identifier_comma_separated_list::FormatCssCustomId
 use crate::css::value::identifier::FormatCssIdentifierOptions;
 use crate::prelude::*;
 use biome_css_syntax::{
-    CssPseudoClassFunctionCustomIdentifierList, CssPseudoClassFunctionCustomIdentifierListFields,
+    CssPseudoClassFunctionCustomIdentifierCommaSeparatedList,
+    CssPseudoClassFunctionCustomIdentifierCommaSeparatedListFields,
 };
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatCssPseudoClassFunctionCustomIdentifierList;
-impl FormatNodeRule<CssPseudoClassFunctionCustomIdentifierList>
-    for FormatCssPseudoClassFunctionCustomIdentifierList
+pub(crate) struct FormatCssPseudoClassFunctionCustomIdentifierCommaSeparatedList;
+impl FormatNodeRule<CssPseudoClassFunctionCustomIdentifierCommaSeparatedList>
+    for FormatCssPseudoClassFunctionCustomIdentifierCommaSeparatedList
 {
     fn fmt_fields(
         &self,
-        node: &CssPseudoClassFunctionCustomIdentifierList,
+        node: &CssPseudoClassFunctionCustomIdentifierCommaSeparatedList,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        let CssPseudoClassFunctionCustomIdentifierListFields {
+        let CssPseudoClassFunctionCustomIdentifierCommaSeparatedListFields {
             name,
             l_paren_token,
             items,

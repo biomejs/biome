@@ -1680,14 +1680,14 @@ pub fn css_pseudo_class_function_custom_identifier(
         ],
     ))
 }
-pub fn css_pseudo_class_function_custom_identifier_list(
+pub fn css_pseudo_class_function_custom_identifier_comma_separated_list(
     name: CssIdentifier,
     l_paren_token: SyntaxToken,
     items: CssCustomIdentifierCommaSeparatedList,
     r_paren_token: SyntaxToken,
-) -> CssPseudoClassFunctionCustomIdentifierList {
-    CssPseudoClassFunctionCustomIdentifierList::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST,
+) -> CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
+    CssPseudoClassFunctionCustomIdentifierCommaSeparatedList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST,
         [
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),

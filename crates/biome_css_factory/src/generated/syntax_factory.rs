@@ -3494,7 +3494,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER, children)
             }
-            CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST => {
+            CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -3528,11 +3528,14 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST.to_bogus(),
+                        CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST, children)
+                slots.into_node(
+                    CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST,
+                    children,
+                )
             }
             CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER => {
                 let mut elements = (&children).into_iter();

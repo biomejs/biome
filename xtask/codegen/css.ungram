@@ -227,7 +227,7 @@ AnyCssPseudoClass =
 	| CssPseudoClassFunctionRelativeSelectorList
 	| CssPseudoClassFunctionValueList
 	| CssPseudoClassFunctionNth
-	| CssPseudoClassFunctionCustomIdentifierList
+	| CssPseudoClassFunctionCustomIdentifierCommaSeparatedList
 	| CssPseudoClassFunctionCustomIdentifier
 	| CssBogusPseudoClass
 
@@ -398,7 +398,7 @@ CssPseudoClassFunctionCustomIdentifier =
 
 // :active-view-transition-type(backwards forwards) { }
 //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-CssPseudoClassFunctionCustomIdentifierList =
+CssPseudoClassFunctionCustomIdentifierCommaSeparatedList =
 	name: CssIdentifier
 	'('
 	items: CssCustomIdentifierCommaSeparatedList

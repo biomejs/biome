@@ -11,19 +11,22 @@ use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, TokenSet, token_set};
 
-const PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST_SET: TokenSet<CssSyntaxKind> =
+const PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST_SET: TokenSet<CssSyntaxKind> =
     token_set![T![active_view_transition_type]];
 
 #[inline]
-pub(crate) fn is_at_pseudo_class_function_custom_identifier_list(p: &mut CssParser) -> bool {
-    p.at_ts(PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST_SET) && p.nth_at(1, T!['('])
+pub(crate) fn is_at_pseudo_class_function_custom_identifier_comma_separated_list(
+    p: &mut CssParser,
+) -> bool {
+    p.at_ts(PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST_SET)
+        && p.nth_at(1, T!['('])
 }
 
 #[inline]
-pub(crate) fn parse_pseudo_class_function_custom_identifier_list(
+pub(crate) fn parse_pseudo_class_function_custom_identifier_comma_separated_list(
     p: &mut CssParser,
 ) -> ParsedSyntax {
-    if !is_at_pseudo_class_function_custom_identifier_list(p) {
+    if !is_at_pseudo_class_function_custom_identifier_comma_separated_list(p) {
         return Absent;
     }
 
@@ -32,7 +35,7 @@ pub(crate) fn parse_pseudo_class_function_custom_identifier_list(
     parse_regular_identifier(p).ok();
     p.bump(T!['(']);
 
-    let list = CssCustomIdentifierList.parse_list(p);
+    let list = CssCustomIdentifierCommaSeparatedList.parse_list(p);
     let list_range = list.range(p);
 
     if list_range.is_empty() {
@@ -46,7 +49,7 @@ pub(crate) fn parse_pseudo_class_function_custom_identifier_list(
         expected_non_css_wide_keyword_identifier,
     ) && !list_range.is_empty()
     {
-        CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST
+        CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST
     } else {
         CSS_BOGUS_PSEUDO_CLASS
     };
@@ -54,9 +57,9 @@ pub(crate) fn parse_pseudo_class_function_custom_identifier_list(
     Present(m.complete(p, kind))
 }
 
-struct CssCustomIdentifierList;
+struct CssCustomIdentifierCommaSeparatedList;
 
-impl ParseSeparatedList for CssCustomIdentifierList {
+impl ParseSeparatedList for CssCustomIdentifierCommaSeparatedList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST;
@@ -76,7 +79,7 @@ impl ParseSeparatedList for CssCustomIdentifierList {
     ) -> RecoveryResult {
         parsed_element.or_recover(
             p,
-            &CssCustomIdentifierListParseRecovery,
+            &CssCustomIdentifierCommaSeparatedListParseRecovery,
             expected_non_css_wide_keyword_identifier,
         )
     }
@@ -86,9 +89,9 @@ impl ParseSeparatedList for CssCustomIdentifierList {
     }
 }
 
-struct CssCustomIdentifierListParseRecovery;
+struct CssCustomIdentifierCommaSeparatedListParseRecovery;
 
-impl ParseRecovery for CssCustomIdentifierListParseRecovery {
+impl ParseRecovery for CssCustomIdentifierCommaSeparatedListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_CUSTOM_IDENTIFIER;
