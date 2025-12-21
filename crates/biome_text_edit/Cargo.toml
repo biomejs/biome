@@ -1,15 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Utilities to edit text (This is taken from rust-analyzer)"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_text_edit"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Utilities to edit text (This is taken from rust-analyzer)"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 [dependencies]
 biome_text_size = { workspace = true }
@@ -18,8 +18,8 @@ serde           = { workspace = true, features = ["derive"], optional = true }
 similar         = { workspace = true, features = ["unicode"] }
 
 [features]
-schema = ["dep:schemars", "biome_text_size/schema", "serde"]
-serde  = ["dep:serde", "biome_text_size/serde"]
+schema = ["biome_text_size/schema", "dep:schemars", "serde"]
+serde  = ["biome_text_size/serde", "dep:serde"]
 
 [lints]
 workspace = true

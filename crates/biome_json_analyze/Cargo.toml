@@ -1,20 +1,24 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's JSON linter"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_json_analyze"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's JSON linter"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[bench]]
+harness = false
+name    = "json_analyzer"
+
 [dependencies]
-biome_analyze = { workspace = true }
+biome_analyze       = { workspace = true }
 # biome_configuration is optional because the codegen disables it. The codegen generates the configuration schema, and it depends on this crate to to that. It's kinda like a circular dependency. A chicken and egg problem, if you will.
 biome_configuration = { workspace = true, optional = true }
 biome_console       = { workspace = true }
@@ -28,10 +32,6 @@ biome_suppression   = { workspace = true }
 camino              = { workspace = true }
 rustc-hash          = { workspace = true }
 
-[features]
-configuration = ["dep:biome_configuration"]
-default       = ["configuration"]
-
 [dev-dependencies]
 biome_json_parser = { path = "../biome_json_parser" }
 biome_test_utils  = { path = "../biome_test_utils" }
@@ -39,16 +39,15 @@ criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" 
 insta             = { workspace = true, features = ["glob"] }
 tests_macros      = { path = "../tests_macros" }
 
-[target.'cfg(target_os = "windows")'.dev-dependencies]
-mimalloc = { workspace = true }
-
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
 
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[features]
+default       = ["configuration"]
+configuration = ["dep:biome_configuration"]
 
 [lints]
 workspace = true
-
-[[bench]]
-harness = false
-name    = "json_analyzer"

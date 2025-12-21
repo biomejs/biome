@@ -1,14 +1,14 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Utilities for running code blocks in rule docs"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_ruledoc_utils"
-repository.workspace = true
 version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Utilities for running code blocks in rule docs"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
 
 [dependencies]
 anyhow               = { workspace = true }

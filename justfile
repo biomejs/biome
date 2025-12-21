@@ -10,13 +10,14 @@ alias qt := test-quick
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
-	cargo binstall cargo-insta taplo-cli wasm-opt
+	cargo binstall cargo-insta wasm-opt
 	cargo binstall wasm-bindgen-cli --version 0.2.105
+	pnpm install
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
-	cargo binstall cargo-insta taplo-cli wasm-opt --force
+	cargo binstall cargo-insta wasm-opt --force
 	cargo binstall wasm-bindgen-cli --version 0.2.105 --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
@@ -51,7 +52,7 @@ gen-analyzer:
 
 # Generate and updates the files needed inside the *_analyze crates
 gen-rules:
-    cargo run -p xtask_codegen -- analyzer
+  cargo run -p xtask_codegen -- analyzer
 
 
 gen-configuration:
@@ -190,7 +191,7 @@ move-rule rulename group:
 # Format Rust files and TOML files
 format:
 	cargo format
-	taplo format
+	pnpm format
 
 [unix]
 _touch file:

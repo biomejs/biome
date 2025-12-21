@@ -20,6 +20,9 @@ importers:
       '@types/node':
         specifier: 24.10.3
         version: 24.10.3
+      tombi:
+        specifier: ^0.7.4
+        version: 0.7.4
 
   benchmark:
     devDependencies:
@@ -643,6 +646,54 @@ packages:
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
+
+  '@tombi-toml/cli-darwin-arm64@0.7.4':
+    resolution: {integrity: sha512-56rySAtcjZARTXlMQiBvj2RR/atY4mQoaxEskkst2tGZO7S5od0T+zv3PLRrQV08wDeo5hnCVwXiP3+o+kIu1w==}
+    engines: {node: '>=14.0.0'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@tombi-toml/cli-darwin-x64@0.7.4':
+    resolution: {integrity: sha512-gg8Lq0Ex+WxyQVYuTgRtbLXOuk0oPW/ZwobW8so6H8U868Uj7JNKGxzG9msAv6fW5ICj8DtYzwz9xBhhs9824A==}
+    engines: {node: '>=14.0.0'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@tombi-toml/cli-linux-arm64-musl@0.7.4':
+    resolution: {integrity: sha512-BrEbsx77jZ3s6pfCrFb3kVq/m+6g0o5qQKRvywZzYSE6vlKbKpiGLFzmG5aQHIU8p01GJRDKL3PpdhKKn3MqWg==}
+    engines: {node: '>=14.0.0'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@tombi-toml/cli-linux-arm64@0.7.4':
+    resolution: {integrity: sha512-eOGHbmNtG1dcQ0+9iyvDkmwBYGlhy9nhehXijRagIm+corVutJCda+kXNll9famfEutrVMjmxwqQ9//5d5P6eA==}
+    engines: {node: '>=14.0.0'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@tombi-toml/cli-linux-x64-musl@0.7.4':
+    resolution: {integrity: sha512-EeZwwyn8GCVfhATJOw8RATYpYSsi74qS+10H1iY3qSFes+XKV3EgGgA5R+zM50k2rceY6DUl13PCkwKvS3z2RA==}
+    engines: {node: '>=14.0.0'}
+    cpu: [x64]
+    os: [linux]
+
+  '@tombi-toml/cli-linux-x64@0.7.4':
+    resolution: {integrity: sha512-F1lBGBRyK4lRD4nhS8ZXGbE6z6oPaA1zunlLKRKwsM1FsQVCsMAblacCn1/jys7tZ5zpxUeUUTCRaRDCB/9b2w==}
+    engines: {node: '>=14.0.0'}
+    cpu: [x64]
+    os: [linux]
+
+  '@tombi-toml/cli-win32-arm64@0.7.4':
+    resolution: {integrity: sha512-FM2OCyZZ/KWNyyECFtx+9OUjiIsEG7HeBH7g2eviRU6fDKKd2sn49tvFEd0v0dJBkAMXoY3MNFHfHcDI5Q/bnQ==}
+    engines: {node: '>=14.0.0'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@tombi-toml/cli-win32-x64@0.7.4':
+    resolution: {integrity: sha512-13h0B4LA8MgaXn6upV5dAe7vkyUg+FPbsItRSggZLs19hr0w0MhNzNlz5mtNWyt+4wwrIbfOILJosqDH70GWTw==}
+    engines: {node: '>=14.0.0'}
+    cpu: [x64]
+    os: [win32]
 
   '@types/chai@5.2.2':
     resolution: {integrity: sha512-8kB30R7Hwqf40JPiKhVzodJs2Qc1ZJ5zuT3uzw5Hq/dhNCl3G3l83jfpdI1e20BP348+fV7VIL/+FxaXkqBmWg==}
@@ -1437,6 +1488,11 @@ packages:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
 
+  tombi@0.7.4:
+    resolution: {integrity: sha512-Y2IhNB1F45HIK1ZZFGGrX1d82rvqnXJZv/Beb9aioBNP4Mfshl9rQarRtrAp6sgo4Wr9YG9qWHeAo6c4oH8WSg==}
+    engines: {node: '>=14.0.0'}
+    hasBin: true
+
   tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
 
@@ -2020,6 +2076,30 @@ snapshots:
     optional: true
 
   '@standard-schema/spec@1.0.0': {}
+
+  '@tombi-toml/cli-darwin-arm64@0.7.4':
+    optional: true
+
+  '@tombi-toml/cli-darwin-x64@0.7.4':
+    optional: true
+
+  '@tombi-toml/cli-linux-arm64-musl@0.7.4':
+    optional: true
+
+  '@tombi-toml/cli-linux-arm64@0.7.4':
+    optional: true
+
+  '@tombi-toml/cli-linux-x64-musl@0.7.4':
+    optional: true
+
+  '@tombi-toml/cli-linux-x64@0.7.4':
+    optional: true
+
+  '@tombi-toml/cli-win32-arm64@0.7.4':
+    optional: true
+
+  '@tombi-toml/cli-win32-x64@0.7.4':
+    optional: true
 
   '@types/chai@5.2.2':
     dependencies:
@@ -2828,6 +2908,17 @@ snapshots:
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
+
+  tombi@0.7.4:
+    optionalDependencies:
+      '@tombi-toml/cli-darwin-arm64': 0.7.4
+      '@tombi-toml/cli-darwin-x64': 0.7.4
+      '@tombi-toml/cli-linux-arm64': 0.7.4
+      '@tombi-toml/cli-linux-arm64-musl': 0.7.4
+      '@tombi-toml/cli-linux-x64': 0.7.4
+      '@tombi-toml/cli-linux-x64-musl': 0.7.4
+      '@tombi-toml/cli-win32-arm64': 0.7.4
+      '@tombi-toml/cli-win32-x64': 0.7.4
 
   tr46@0.0.3: {}
 

@@ -6,6 +6,7 @@
     "check:write": "cargo biome-cli-dev check --write --unsafe",
     "check": "cargo biome-cli-dev check",
     "ci": "cargo biome-cli-dev ci",
+    "format": "tombi format",
     "//": "when we create the release PR, we need to update the lock file with the new versions",
     "version": "changeset version && pnpm i --lockfile-only && (git stash list | grep -q '__automated-changes' && git -c advice.skippedCherryPicks=false stash pop || echo 'No stash to pop')"
   },
@@ -21,6 +22,7 @@
     "@biomejs/plugin-api": "workspace:",
     "@changesets/changelog-github": "0.5.2",
     "@changesets/cli": "2.29.8",
-    "@types/node": "24.10.3"
+    "@types/node": "24.10.3",
+    "tombi": "^0.7.4"
   }
 }
