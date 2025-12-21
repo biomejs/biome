@@ -1388,7 +1388,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && CssCustomIdentifierList::can_cast(element.kind())
+                    && CssCustomIdentifierSpaceSeparatedList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -5999,7 +5999,14 @@ impl SyntaxFactory for CssSyntaxFactory {
                 T ! [,],
                 false,
             ),
-            CSS_CUSTOM_IDENTIFIER_LIST => {
+            CSS_CUSTOM_IDENTIFIER_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                AnyCssCustomIdentifier::can_cast,
+                T ! [,],
+                false,
+            ),
+            CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssCustomIdentifier::can_cast)
             }
             CSS_DECLARATION_LIST => {

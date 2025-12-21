@@ -5,6 +5,7 @@ pub(crate) mod component_value_list;
 pub(crate) mod composes_class_list;
 pub(crate) mod compound_selector_list;
 pub(crate) mod custom_identifier_list;
+pub(crate) mod custom_identifier_space_separated_list;
 pub(crate) mod declaration_list;
 pub(crate) mod declaration_or_at_rule_list;
 pub(crate) mod declaration_or_rule_list;

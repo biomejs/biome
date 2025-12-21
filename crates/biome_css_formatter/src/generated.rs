@@ -6865,6 +6865,18 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifierList 
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifierSpaceSeparatedList {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssCustomIdentifierSpaceSeparatedList , crate :: css :: lists :: custom_identifier_space_separated_list :: FormatCssCustomIdentifierSpaceSeparatedList > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: lists :: custom_identifier_space_separated_list :: FormatCssCustomIdentifierSpaceSeparatedList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifierSpaceSeparatedList {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssCustomIdentifierSpaceSeparatedList , crate :: css :: lists :: custom_identifier_space_separated_list :: FormatCssCustomIdentifierSpaceSeparatedList > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: lists :: custom_identifier_space_separated_list :: FormatCssCustomIdentifierSpaceSeparatedList :: default ())
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssDeclarationList {
     type Format<'a> = FormatRefWithRule<
         'a,

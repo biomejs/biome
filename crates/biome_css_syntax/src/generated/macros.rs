@@ -1020,6 +1020,12 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssCustomIdentifierList::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST => {
+                    let $pattern = unsafe {
+                        $crate::CssCustomIdentifierSpaceSeparatedList::new_unchecked(node)
+                    };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_DECLARATION_LIST => {
                     let $pattern = unsafe { $crate::CssDeclarationList::new_unchecked(node) };
                     $body

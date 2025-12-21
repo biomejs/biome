@@ -1971,7 +1971,7 @@ impl CssFontFamilyName {
             names: self.names(),
         }
     }
-    pub fn names(&self) -> CssCustomIdentifierList {
+    pub fn names(&self) -> CssCustomIdentifierSpaceSeparatedList {
         support::list(&self.syntax, 0usize)
     }
 }
@@ -1985,7 +1985,7 @@ impl Serialize for CssFontFamilyName {
 }
 #[derive(Serialize)]
 pub struct CssFontFamilyNameFields {
-    pub names: CssCustomIdentifierList,
+    pub names: CssCustomIdentifierSpaceSeparatedList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssFontFeatureValuesAtRule {
@@ -32380,7 +32380,7 @@ impl Serialize for CssCustomIdentifierList {
         seq.end()
     }
 }
-impl AstNodeList for CssCustomIdentifierList {
+impl AstSeparatedList for CssCustomIdentifierList {
     type Language = Language;
     type Node = AnyCssCustomIdentifier;
     fn syntax_list(&self) -> &SyntaxList {
@@ -32393,17 +32393,100 @@ impl AstNodeList for CssCustomIdentifierList {
 impl Debug for CssCustomIdentifierList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("CssCustomIdentifierList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for CssCustomIdentifierList {
+    type Item = SyntaxResult<AnyCssCustomIdentifier>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssCustomIdentifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
 impl IntoIterator for &CssCustomIdentifierList {
+    type Item = SyntaxResult<AnyCssCustomIdentifier>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssCustomIdentifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssCustomIdentifierSpaceSeparatedList {
+    syntax_list: SyntaxList,
+}
+impl CssCustomIdentifierSpaceSeparatedList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssCustomIdentifierSpaceSeparatedList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for CssCustomIdentifierSpaceSeparatedList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for CssCustomIdentifierSpaceSeparatedList {
+    type Language = Language;
+    type Node = AnyCssCustomIdentifier;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssCustomIdentifierSpaceSeparatedList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssCustomIdentifierSpaceSeparatedList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &CssCustomIdentifierSpaceSeparatedList {
     type Item = AnyCssCustomIdentifier;
     type IntoIter = AstNodeListIterator<Language, AnyCssCustomIdentifier>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for CssCustomIdentifierList {
+impl IntoIterator for CssCustomIdentifierSpaceSeparatedList {
     type Item = AnyCssCustomIdentifier;
     type IntoIter = AstNodeListIterator<Language, AnyCssCustomIdentifier>;
     fn into_iter(self) -> Self::IntoIter {
