@@ -2,10 +2,11 @@ use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, JsConditionalExpression, JsLogicalExpression, JsLogicalOperator, JsSyntaxNode,
-    JsxExpressionChild, JsxTagExpression, binding_ext::AnyJsBindingDeclaration,
-    jsx_ext::AnyJsxElement,
+    AnyJsExpression, AnyJsLiteralExpression, JsConditionalExpression, JsLogicalExpression,
+    JsLogicalOperator, JsReferenceIdentifier, JsSyntaxNode, JsxExpressionChild, JsxTagExpression,
+    binding_ext::AnyJsBindingDeclaration, jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_leaked_render::NoLeakedRenderOptions;
@@ -98,7 +99,7 @@ declare_lint_rule! {
 
 impl Rule for NoLeakedRender {
     type Query = Semantic<NoLeakedRenderQuery>;
-    type State = bool;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = NoLeakedRenderOptions;
 
@@ -165,38 +166,43 @@ impl Rule for NoLeakedRender {
 
                 if let AnyJsExpression::JsIdentifierExpression(ident) = &left {
                     let name = ident.name().ok()?;
-
                     // Use the semantic model to resolve the variable binding and check
-                    // if it's initialized with a boolean literal. This allows us to
+                    // if it's initialized with safe expressions. This allows us to
                     // handle cases like:
                     // let isOpen = false;  // This is safe
+                    // let isError = errorCount > 0; // This is safe
+                    // let isEqual = a === b; // This is safe
+                    // let emptyStr = ''; // This is unsafe
                     // return <div>{isOpen && <Content />}</div>;  // This should pass
-                    if let Some(binding) = model.binding(&name)
-                        && binding
-                            .tree()
-                            .declaration()
-                            .and_then(|declaration| {
-                                if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
-                                    declaration
-                                {
-                                    Some(declarator)
-                                } else {
-                                    None
-                                }
-                            })
-                            .and_then(|declarator| declarator.initializer())
-                            .and_then(|initializer| initializer.expression().ok())
-                            .and_then(|expr| {
-                                if let AnyJsExpression::AnyJsLiteralExpression(literal) = expr {
-                                    Some(literal)
-                                } else {
-                                    None
-                                }
-                            })
-                            .and_then(|literal| literal.value_token().ok())
-                            .is_some_and(|token| matches!(token.text_trimmed(), "true" | "false"))
-                    {
-                        return None;
+                    // return <div> {isError && <Error />}</div>;  // This should pass
+                    // return <div> {isEqual && <Equal />}</div>;  // This should pass
+                    // return <div> {emptyStr && <Empty />}</div>;  // This should fail
+
+                    if let Some(variable) = find_variable(model, &name) {
+                        match variable {
+                            AnyJsExpression::AnyJsLiteralExpression(expr) => {
+                                match expr {
+                                    AnyJsLiteralExpression::JsStringLiteralExpression(str) => {
+                                        if str.value_token().ok()?.text_trimmed().is_empty() {
+                                            return Some(());
+                                        }
+                                        return None;
+                                    }
+                                    AnyJsLiteralExpression::JsNumberLiteralExpression(num) => {
+                                        let value = num.value_token().ok()?;
+                                        if value.text_trimmed() == "0" {
+                                            return Some(());
+                                        }
+                                        return None;
+                                    }
+                                    _ => return None,
+                                };
+                            }
+                            AnyJsExpression::JsUnaryExpression(_)
+                            | AnyJsExpression::JsBinaryExpression(_)
+                            | AnyJsExpression::JsCallExpression(_) => return None,
+                            _ => {}
+                        }
                     }
                 }
 
@@ -205,7 +211,7 @@ impl Rule for NoLeakedRender {
                     return None;
                 }
 
-                Some(true)
+                Some(())
             }
             NoLeakedRenderQuery::JsConditionalExpression(expr) => {
                 let alternate = expr.alternate().ok()?;
@@ -216,7 +222,7 @@ impl Rule for NoLeakedRender {
                     return None;
                 }
 
-                Some(true)
+                Some(())
             }
         }
     }
@@ -275,4 +281,18 @@ fn is_inside_jsx_expression(node: &JsSyntaxNode) -> Option<bool> {
             || JsxTagExpression::can_cast(parent.kind())
             || AnyJsxElement::can_cast(parent.kind()),
     )
+}
+
+fn find_variable(model: &SemanticModel, name: &JsReferenceIdentifier) -> Option<AnyJsExpression> {
+    let Some(binding) = model.binding(name) else {
+        return None;
+    };
+
+    let declaration = binding.tree().declaration()?;
+    let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = declaration else {
+        return None;
+    };
+
+    let expr = declarator.initializer()?.expression().ok()?;
+    return Some(expr);
 }

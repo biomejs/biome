@@ -74,6 +74,18 @@ const MyComponent6 = ({ value }) => {
 	return <div>{(((value))) && <Item />}</div>;
 };
 
+const isNaN = NaN;
+const isZero = 0;
+const emptyStr = '';
+const MyComponent7 = () => {
+	return <>
+		<div> {isNan && 'NaN'} </div>
+		<div> {isZero && 'Zero'} </div>
+		<div>{emptyStr && "Empty String"}</div>
+	</>
+}
+
+
 ```
 
 # Diagnostics
@@ -331,6 +343,44 @@ invalid.jsx:68:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
        │ 	             ^^^^^^^^^^^^^^^^^^^^^^^
     69 │ };
     70 │ 
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+invalid.jsx:76:10 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    74 │ const MyComponent7 = () => {
+    75 │ 	return <>
+  > 76 │ 		<div> {isNan && 'NaN'} </div>
+       │ 		       ^^^^^^^^^^^^^^
+    77 │ 		<div> {isZero && 'Zero'} </div>
+    78 │ 		<div>{emptyStr && "Empty String"}</div>
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+invalid.jsx:77:10 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    75 │ 	return <>
+    76 │ 		<div> {isNan && 'NaN'} </div>
+  > 77 │ 		<div> {isZero && 'Zero'} </div>
+       │ 		       ^^^^^^^^^^^^^^^^
+    78 │ 		<div>{emptyStr && "Empty String"}</div>
+    79 │ 	</>
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
