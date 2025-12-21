@@ -2,7 +2,7 @@
 '@biomejs/biome': patch
 ---
 
-Related to [#8306](https://github.com/biomejs/biome/issues/8491): Fixed the issue with false positive errors for safe boolean expressions.
+Related to [#8491](https://github.com/biomejs/biome/issues/8491): Fixed the issue with false positive errors for safe boolean expressions.
 
 This new change will check for safe boolean expressions in variable declarations.
 
