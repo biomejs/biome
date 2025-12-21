@@ -80,7 +80,7 @@ impl ParseSeparatedList for CssCustomIdentifierList {
             expected_non_css_wide_keyword_identifier,
         )
     }
-    
+
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![,]
     }
