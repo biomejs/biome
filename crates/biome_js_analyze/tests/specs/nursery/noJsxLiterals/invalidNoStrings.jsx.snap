@@ -44,6 +44,8 @@ invalidNoStrings.jsx:3:9 lint/nursery/noJsxLiterals ━━━━━━━━━�
   
   i Consider avoiding hardcoded strings entirely.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -62,6 +64,8 @@ invalidNoStrings.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━�
   i String literals in JSX can make code harder to maintain and internationalize.
   
   i Consider avoiding hardcoded strings entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -82,6 +86,8 @@ invalidNoStrings.jsx:7:5 lint/nursery/noJsxLiterals ━━━━━━━━━�
   
   i Consider avoiding hardcoded strings entirely.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -100,6 +106,8 @@ invalidNoStrings.jsx:8:5 lint/nursery/noJsxLiterals ━━━━━━━━━�
   i String literals in JSX can make code harder to maintain and internationalize.
   
   i Consider avoiding hardcoded strings entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -120,24 +128,7 @@ invalidNoStrings.jsx:9:5 lint/nursery/noJsxLiterals ━━━━━━━━━�
   
   i Consider avoiding hardcoded strings entirely.
   
-
-```
-
-```
-invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Incorrect use of string literal detected.
-  
-    10 │ 		</div>
-    11 │ 	</>
-  > 12 │ 	<Foo bar={"bar"} />
-       │ 	          ^^^^^
-    13 │ 	<Foo bar="test">
-    14 │ 		{'Test' + name}
-  
-  i String literals in JSX can make code harder to maintain and internationalize.
-  
-  i Consider avoiding hardcoded strings entirely.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -157,6 +148,29 @@ invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━�
   i String literals in JSX can make code harder to maintain and internationalize.
   
   i Consider avoiding hardcoded strings entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Incorrect use of string literal detected.
+  
+    10 │ 		</div>
+    11 │ 	</>
+  > 12 │ 	<Foo bar={"bar"} />
+       │ 	          ^^^^^
+    13 │ 	<Foo bar="test">
+    14 │ 		{'Test' + name}
+  
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -177,6 +191,8 @@ invalidNoStrings.jsx:13:11 lint/nursery/noJsxLiterals ━━━━━━━━�
   
   i Consider avoiding hardcoded strings entirely.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -195,6 +211,8 @@ invalidNoStrings.jsx:14:4 lint/nursery/noJsxLiterals ━━━━━━━━━
   i String literals in JSX can make code harder to maintain and internationalize.
   
   i Consider avoiding hardcoded strings entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -215,6 +233,8 @@ invalidNoStrings.jsx:16:12 lint/nursery/noJsxLiterals ━━━━━━━━�
   
   i Consider avoiding hardcoded strings entirely.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -233,6 +253,8 @@ invalidNoStrings.jsx:17:12 lint/nursery/noJsxLiterals ━━━━━━━━�
   i String literals in JSX can make code harder to maintain and internationalize.
   
   i Consider avoiding hardcoded strings entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -253,6 +275,8 @@ invalidNoStrings.jsx:17:22 lint/nursery/noJsxLiterals ━━━━━━━━�
   
   i Consider avoiding hardcoded strings entirely.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -272,6 +296,8 @@ invalidNoStrings.jsx:18:12 lint/nursery/noJsxLiterals ━━━━━━━━�
   
   i Consider avoiding hardcoded strings entirely.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -290,6 +316,8 @@ invalidNoStrings.jsx:19:22 lint/nursery/noJsxLiterals ━━━━━━━━�
   i String literals in JSX can make code harder to maintain and internationalize.
   
   i Consider avoiding hardcoded strings entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

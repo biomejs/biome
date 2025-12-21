@@ -38,6 +38,8 @@ invalid.vue:3:6 lint/nursery/useVueValidVText ━━━━━━━━━━━�
   
   i For example, use v-text="foo" to render the content of the foo variable.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -55,6 +57,8 @@ invalid.vue:4:6 lint/nursery/useVueValidVText ━━━━━━━━━━━�
   i v-text directives require a value containing the text content to render.
   
   i For example, use v-text="foo" to render the content of the foo variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -75,6 +79,8 @@ invalid.vue:5:6 lint/nursery/useVueValidVText ━━━━━━━━━━━�
   
   i For example, use v-text="foo" to render the content of the foo variable.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -91,6 +97,8 @@ invalid.vue:6:12 lint/nursery/useVueValidVText ━━━━━━━━━━━
     8 │ <div v-text:aaa></div>
   
   i v-text directives should be used without arguments, like v-text="content".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -109,6 +117,8 @@ invalid.vue:7:12 lint/nursery/useVueValidVText ━━━━━━━━━━━
   
   i v-text directives do not support any modifiers. Remove the modifier.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -126,6 +136,8 @@ invalid.vue:8:12 lint/nursery/useVueValidVText ━━━━━━━━━━━
   
   i v-text directives should be used without arguments, like v-text="content".
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -142,6 +154,8 @@ invalid.vue:9:12 lint/nursery/useVueValidVText ━━━━━━━━━━━
     11 │ <div v-text />
   
   i v-text directives do not support any modifiers. Remove the modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -162,6 +176,8 @@ invalid.vue:11:6 lint/nursery/useVueValidVText ━━━━━━━━━━━
   
   i For example, use v-text="foo" to render the content of the foo variable.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -180,6 +196,8 @@ invalid.vue:12:6 lint/nursery/useVueValidVText ━━━━━━━━━━━
   
   i For example, use v-text="foo" to render the content of the foo variable.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -197,6 +215,8 @@ invalid.vue:13:12 lint/nursery/useVueValidVText ━━━━━━━━━━�
   
   i v-text directives should be used without arguments, like v-text="content".
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -212,6 +232,8 @@ invalid.vue:14:12 lint/nursery/useVueValidVText ━━━━━━━━━━�
     15 │ 
   
   i v-text directives do not support any modifiers. Remove the modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

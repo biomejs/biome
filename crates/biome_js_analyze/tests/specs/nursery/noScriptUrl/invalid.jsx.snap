@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 151
 expression: invalid.jsx
 ---
 # Input
@@ -40,6 +39,8 @@ invalid.jsx:3:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -58,6 +59,8 @@ invalid.jsx:5:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━
   i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -78,6 +81,8 @@ invalid.jsx:7:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -96,6 +101,8 @@ invalid.jsx:9:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━
   i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -116,6 +123,8 @@ invalid.jsx:11:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━�
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -135,6 +144,8 @@ invalid.jsx:13:34 lint/nursery/noScriptUrl ━━━━━━━━━━━━�
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -152,6 +163,8 @@ invalid.jsx:15:34 lint/nursery/noScriptUrl ━━━━━━━━━━━━�
   i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

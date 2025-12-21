@@ -38,6 +38,8 @@ invalid.vue:4:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━�
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Rename the attribute to some-attr.
   
      2  2 │   
@@ -63,6 +65,8 @@ invalid.vue:5:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━�
     7 │ <div some_attr="x"></div>
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Rename the attribute to some-attr.
   
@@ -90,6 +94,8 @@ invalid.vue:6:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━�
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Rename the attribute to some-attr.
   
      4  4 │   <div someAttr="x"></div>
@@ -116,6 +122,8 @@ invalid.vue:7:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━�
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Rename the attribute to some-attr.
   
      5  5 │   <div SomeAttr="x"></div>
@@ -140,6 +148,8 @@ invalid.vue:10:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━�
     12 │ 
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Rename the attribute to foo-bar.
   
@@ -167,6 +177,8 @@ invalid.vue:11:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━�
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Rename the attribute to foo-bar.
   
      9  9 │   <!-- Vue v-bind: long-form and shorthand with non-hyphenated names -->
@@ -193,6 +205,8 @@ invalid.vue:13:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━�
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Rename the attribute to foo-bar.
   
     11 11 │   <div :fooBar="true"></div>
@@ -217,6 +231,8 @@ invalid.vue:16:9 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━�
     18 │ 
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Rename the attribute to some-prop.
   
@@ -243,6 +259,8 @@ invalid.vue:16:22 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Rename the attribute to another-prop.
   
     14 14 │   
@@ -268,6 +286,8 @@ invalid.vue:17:9 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━�
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Rename the attribute to some-prop.
   
     15 15 │   <!-- Custom component props written in non-hyphenated forms -->
@@ -291,6 +311,8 @@ invalid.vue:17:22 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━
     18 │ 
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Rename the attribute to another-prop.
   

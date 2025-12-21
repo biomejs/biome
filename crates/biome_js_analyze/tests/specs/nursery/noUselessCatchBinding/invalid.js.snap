@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: invalid.js
 ---
 # Input
@@ -51,6 +50,8 @@ invalid.js:3:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━�
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Remove the catch binding.
   
     3 │ try·{·/*·...·*/·}·catch·(unused)·{·}
@@ -71,6 +72,8 @@ invalid.js:5:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━�
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Remove the catch binding.
   
     5 │ try·{·/*·...·*/·}·catch·(_unused)·{·}
@@ -89,6 +92,8 @@ invalid.js:8:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━�
     10 │ try { /* ... */ } catch ({ _unused }) { }
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -111,6 +116,8 @@ invalid.js:10:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Remove the catch binding.
   
     10 │ try·{·/*·...·*/·}·catch·({·_unused·})·{·}
@@ -131,6 +138,8 @@ invalid.js:12:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Remove the catch binding.
   
     12 │ try·{·/*·...·*/·}·catch·({·unused,·_unused·})·{·}
@@ -149,6 +158,8 @@ invalid.js:15:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
     17 │ try { /* ... */ } catch /* leading outer */ (unused) /* trailing outer */ { }
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -170,6 +181,8 @@ invalid.js:17:45 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
     19 │ try { /* ... */ } catch /* leading outer */ (/* leading inner */ unused /* trailing inner */) /* trailing outer */ { }
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -197,6 +210,8 @@ invalid.js:19:45 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Remove the catch binding.
   
     17 17 │   try { /* ... */ } catch /* leading outer */ (unused) /* trailing outer */ { }
@@ -222,6 +237,8 @@ invalid.js:21:45 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Remove the catch binding.
   
     19 19 │   try { /* ... */ } catch /* leading outer */ (/* leading inner */ unused /* trailing inner */) /* trailing outer */ { }
@@ -246,6 +263,8 @@ invalid.js:24:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Remove the catch binding.
   
     24 │ try·{·/*·...·*/·}·catch·({·used:·alias·})·{·}
@@ -267,6 +286,8 @@ invalid.js:26:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Remove the catch binding.
   
     26 │ try·{·/*·...·*/·}·catch·({·nested:·{·unused·}·})·{·}
@@ -286,6 +307,8 @@ invalid.js:28:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
     29 │ 
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   

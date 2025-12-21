@@ -168,6 +168,8 @@ invalid.js:4:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -188,6 +190,8 @@ invalid.js:8:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━�
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -210,6 +214,8 @@ invalid.js:12:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -230,6 +236,8 @@ invalid.js:16:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -252,6 +260,8 @@ invalid.js:20:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -271,6 +281,8 @@ invalid.js:25:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -293,6 +305,8 @@ invalid.js:29:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -313,6 +327,8 @@ invalid.js:33:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -335,6 +351,8 @@ invalid.js:37:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -355,6 +373,8 @@ invalid.js:41:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -377,6 +397,8 @@ invalid.js:45:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -396,6 +418,8 @@ invalid.js:51:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -417,6 +441,8 @@ invalid.js:54:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -436,6 +462,8 @@ invalid.js:57:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -458,6 +486,8 @@ invalid.js:58:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -477,6 +507,8 @@ invalid.js:61:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   i Remove the comparison.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -499,6 +531,8 @@ invalid.js:62:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -519,6 +553,8 @@ invalid.js:63:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   i Remove the comparison.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -541,6 +577,8 @@ invalid.js:64:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -561,6 +599,8 @@ invalid.js:65:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   i Remove the comparison.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -583,6 +623,8 @@ invalid.js:66:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -602,6 +644,8 @@ invalid.js:69:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -624,6 +668,8 @@ invalid.js:74:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -645,6 +691,8 @@ invalid.js:81:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -664,6 +712,8 @@ invalid.js:84:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -685,6 +735,8 @@ invalid.js:88:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -711,6 +763,8 @@ invalid.js:93:18 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   i The type being accessed is guaranteed to be non-nullish, making coalescing redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -740,6 +794,8 @@ invalid.js:94:18 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -768,6 +824,8 @@ invalid.js:95:18 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -787,6 +845,8 @@ invalid.js:98:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -808,6 +868,8 @@ invalid.js:99:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -837,6 +899,8 @@ invalid.js:100:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -862,6 +926,8 @@ invalid.js:104:19 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   i The type being accessed is guaranteed to be non-nullish, making optional chaining redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -891,6 +957,8 @@ invalid.js:105:19 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -912,6 +980,8 @@ invalid.js:109:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -932,6 +1002,8 @@ invalid.js:113:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -951,6 +1023,8 @@ invalid.js:117:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -973,6 +1047,8 @@ invalid.js:118:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -992,6 +1068,8 @@ invalid.js:124:9 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1014,6 +1092,8 @@ invalid.js:135:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -1034,6 +1114,8 @@ invalid.js:141:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   i Remove the condition.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
