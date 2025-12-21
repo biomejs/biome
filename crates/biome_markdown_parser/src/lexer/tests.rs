@@ -230,15 +230,12 @@ fn greater_than_token() {
 
 #[test]
 fn greater_than_with_text() {
-    // Block quote with content
+    // Block quote with content - text is grouped into a single token
     assert_lex! {
         "> text",
         R_ANGLE:1,
         WHITESPACE:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:4, // "text" grouped into single token
     }
 }
 
@@ -263,19 +260,14 @@ fn star_token_single() {
 
 #[test]
 fn brackets() {
-    // Brackets for links
+    // Brackets for links - text is grouped into single tokens
     assert_lex! {
         "[text](url)",
         L_BRACK:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:4, // "text" grouped
         R_BRACK:1,
         L_PAREN:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:3, // "url" grouped
         R_PAREN:1,
     }
 }
@@ -291,103 +283,81 @@ fn bang_token() {
 
 #[test]
 fn image_syntax() {
-    // Image syntax
+    // Image syntax - text is grouped into single tokens
     assert_lex! {
         "![alt](src)",
         BANG:1,
         L_BRACK:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:3, // "alt" grouped
         R_BRACK:1,
         L_PAREN:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:3, // "src" grouped
         R_PAREN:1,
     }
 }
 
 #[test]
 fn star_and_underscore_emphasis() {
-    // Single star for emphasis
+    // Single star for emphasis - text is grouped
     assert_lex! {
         "*text*",
         STAR:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:4, // "text" grouped
         STAR:1,
     }
 }
 
 #[test]
 fn double_star_emphasis() {
-    // Double star for strong emphasis
+    // Double star for strong emphasis - text is grouped
     assert_lex! {
         "**bold**",
         DOUBLE_STAR:2,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:4, // "bold" grouped
         DOUBLE_STAR:2,
     }
 }
 
 #[test]
 fn underscore_token() {
-    // Underscore token for emphasis
+    // Underscore token for emphasis - text is grouped
     assert_lex! {
         "_text_",
         UNDERSCORE:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:4, // "text" grouped
         UNDERSCORE:1,
     }
 }
 
 #[test]
 fn double_underscore_emphasis() {
-    // Double underscore for strong emphasis
+    // Double underscore for strong emphasis - text is grouped
     assert_lex! {
         "__bold__",
         DOUBLE_UNDERSCORE:2,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:4, // "bold" grouped
         DOUBLE_UNDERSCORE:2,
     }
 }
 
 #[test]
 fn minus_token_single() {
-    // Single minus followed by text (not a thematic break)
+    // Single minus followed by text (not a thematic break) - text is grouped
     assert_lex! {
         "- item",
         MINUS:1,
         WHITESPACE:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:4, // "item" grouped
     }
 }
 
 #[test]
 fn code_fence_with_language() {
-    // Code fence with language specifier
+    // Code fence with language specifier - language name is grouped
     assert_lex! {
         "```rust",
         TRIPLE_BACKTICK:3,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
-        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:4, // "rust" grouped
     }
 }
 

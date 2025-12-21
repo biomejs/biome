@@ -34,51 +34,12 @@ MdDocument {
             l_fence: TRIPLE_BACKTICK@0..3 "```" [] [],
             code_list: MdCodeNameList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@3..4 "j" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@4..5 "a" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@5..6 "v" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@6..7 "a" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@7..8 "s" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@8..9 "c" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@9..10 "r" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@10..11 "i" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@11..12 "p" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@12..13 "t" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@3..13 "javascript" [] [],
                 },
             ],
             content: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@13..15 "c" [Newline("\n")] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@15..16 "o" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@16..17 "n" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@17..18 "s" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@18..20 "t" [] [Whitespace(" ")],
+                    value_token: MD_TEXTUAL_LITERAL@13..20 "const" [Newline("\n")] [Whitespace(" ")],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@20..22 "x" [] [Whitespace(" ")],
@@ -87,10 +48,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@22..24 "=" [] [Whitespace(" ")],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@24..25 "1" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@25..26 ";" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@24..26 "1;" [] [],
                 },
             ],
             r_fence: TRIPLE_BACKTICK@26..30 "```" [Newline("\n")] [],
@@ -100,34 +58,10 @@ MdDocument {
             code_list: MdCodeNameList [],
             content: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@35..37 "N" [Newline("\n")] [],
+                    value_token: MD_TEXTUAL_LITERAL@35..39 "No" [Newline("\n")] [Whitespace(" ")],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@37..39 "o" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@39..40 "l" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@40..41 "a" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@41..42 "n" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@42..43 "g" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@43..44 "u" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@44..45 "a" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@45..46 "g" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@46..47 "e" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@39..47 "language" [] [],
                 },
             ],
             r_fence: TRIPLE_BACKTICK@47..51 "```" [Newline("\n")] [],
@@ -136,22 +70,7 @@ MdDocument {
             l_fence: TRIPLE_TILDE@51..56 "~~~" [Newline("\n"), Newline("\n")] [],
             code_list: MdCodeNameList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@56..57 "p" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@57..58 "y" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@58..59 "t" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@59..60 "h" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@60..61 "o" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@61..62 "n" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@56..62 "python" [] [],
                 },
             ],
             content: MdInlineItemList [
@@ -172,49 +91,13 @@ MdDocument {
             code_list: MdCodeNameList [],
             content: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@77..79 "T" [Newline("\n")] [],
+                    value_token: MD_TEXTUAL_LITERAL@77..84 "Tilde" [Newline("\n")] [Whitespace(" ")],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@79..80 "i" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@84..87 "no" [] [Whitespace(" ")],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@80..81 "l" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@81..82 "d" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@82..84 "e" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@84..85 "n" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@85..87 "o" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@87..88 "l" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@88..89 "a" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@89..90 "n" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@90..91 "g" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@91..92 "u" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@92..93 "a" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@93..94 "g" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@94..95 "e" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@87..95 "language" [] [],
                 },
             ],
             r_fence: TRIPLE_TILDE@95..99 "~~~" [Newline("\n")] [],
@@ -233,86 +116,32 @@ MdDocument {
     0: MD_FENCED_CODE_BLOCK@0..30
       0: TRIPLE_BACKTICK@0..3 "```" [] []
       1: MD_CODE_NAME_LIST@3..13
-        0: MD_TEXTUAL@3..4
-          0: MD_TEXTUAL_LITERAL@3..4 "j" [] []
-        1: MD_TEXTUAL@4..5
-          0: MD_TEXTUAL_LITERAL@4..5 "a" [] []
-        2: MD_TEXTUAL@5..6
-          0: MD_TEXTUAL_LITERAL@5..6 "v" [] []
-        3: MD_TEXTUAL@6..7
-          0: MD_TEXTUAL_LITERAL@6..7 "a" [] []
-        4: MD_TEXTUAL@7..8
-          0: MD_TEXTUAL_LITERAL@7..8 "s" [] []
-        5: MD_TEXTUAL@8..9
-          0: MD_TEXTUAL_LITERAL@8..9 "c" [] []
-        6: MD_TEXTUAL@9..10
-          0: MD_TEXTUAL_LITERAL@9..10 "r" [] []
-        7: MD_TEXTUAL@10..11
-          0: MD_TEXTUAL_LITERAL@10..11 "i" [] []
-        8: MD_TEXTUAL@11..12
-          0: MD_TEXTUAL_LITERAL@11..12 "p" [] []
-        9: MD_TEXTUAL@12..13
-          0: MD_TEXTUAL_LITERAL@12..13 "t" [] []
+        0: MD_TEXTUAL@3..13
+          0: MD_TEXTUAL_LITERAL@3..13 "javascript" [] []
       2: MD_INLINE_ITEM_LIST@13..26
-        0: MD_TEXTUAL@13..15
-          0: MD_TEXTUAL_LITERAL@13..15 "c" [Newline("\n")] []
-        1: MD_TEXTUAL@15..16
-          0: MD_TEXTUAL_LITERAL@15..16 "o" [] []
-        2: MD_TEXTUAL@16..17
-          0: MD_TEXTUAL_LITERAL@16..17 "n" [] []
-        3: MD_TEXTUAL@17..18
-          0: MD_TEXTUAL_LITERAL@17..18 "s" [] []
-        4: MD_TEXTUAL@18..20
-          0: MD_TEXTUAL_LITERAL@18..20 "t" [] [Whitespace(" ")]
-        5: MD_TEXTUAL@20..22
+        0: MD_TEXTUAL@13..20
+          0: MD_TEXTUAL_LITERAL@13..20 "const" [Newline("\n")] [Whitespace(" ")]
+        1: MD_TEXTUAL@20..22
           0: MD_TEXTUAL_LITERAL@20..22 "x" [] [Whitespace(" ")]
-        6: MD_TEXTUAL@22..24
+        2: MD_TEXTUAL@22..24
           0: MD_TEXTUAL_LITERAL@22..24 "=" [] [Whitespace(" ")]
-        7: MD_TEXTUAL@24..25
-          0: MD_TEXTUAL_LITERAL@24..25 "1" [] []
-        8: MD_TEXTUAL@25..26
-          0: MD_TEXTUAL_LITERAL@25..26 ";" [] []
+        3: MD_TEXTUAL@24..26
+          0: MD_TEXTUAL_LITERAL@24..26 "1;" [] []
       3: TRIPLE_BACKTICK@26..30 "```" [Newline("\n")] []
     1: MD_FENCED_CODE_BLOCK@30..51
       0: TRIPLE_BACKTICK@30..35 "```" [Newline("\n"), Newline("\n")] []
       1: MD_CODE_NAME_LIST@35..35
       2: MD_INLINE_ITEM_LIST@35..47
-        0: MD_TEXTUAL@35..37
-          0: MD_TEXTUAL_LITERAL@35..37 "N" [Newline("\n")] []
-        1: MD_TEXTUAL@37..39
-          0: MD_TEXTUAL_LITERAL@37..39 "o" [] [Whitespace(" ")]
-        2: MD_TEXTUAL@39..40
-          0: MD_TEXTUAL_LITERAL@39..40 "l" [] []
-        3: MD_TEXTUAL@40..41
-          0: MD_TEXTUAL_LITERAL@40..41 "a" [] []
-        4: MD_TEXTUAL@41..42
-          0: MD_TEXTUAL_LITERAL@41..42 "n" [] []
-        5: MD_TEXTUAL@42..43
-          0: MD_TEXTUAL_LITERAL@42..43 "g" [] []
-        6: MD_TEXTUAL@43..44
-          0: MD_TEXTUAL_LITERAL@43..44 "u" [] []
-        7: MD_TEXTUAL@44..45
-          0: MD_TEXTUAL_LITERAL@44..45 "a" [] []
-        8: MD_TEXTUAL@45..46
-          0: MD_TEXTUAL_LITERAL@45..46 "g" [] []
-        9: MD_TEXTUAL@46..47
-          0: MD_TEXTUAL_LITERAL@46..47 "e" [] []
+        0: MD_TEXTUAL@35..39
+          0: MD_TEXTUAL_LITERAL@35..39 "No" [Newline("\n")] [Whitespace(" ")]
+        1: MD_TEXTUAL@39..47
+          0: MD_TEXTUAL_LITERAL@39..47 "language" [] []
       3: TRIPLE_BACKTICK@47..51 "```" [Newline("\n")] []
     2: MD_FENCED_CODE_BLOCK@51..72
       0: TRIPLE_TILDE@51..56 "~~~" [Newline("\n"), Newline("\n")] []
       1: MD_CODE_NAME_LIST@56..62
-        0: MD_TEXTUAL@56..57
-          0: MD_TEXTUAL_LITERAL@56..57 "p" [] []
-        1: MD_TEXTUAL@57..58
-          0: MD_TEXTUAL_LITERAL@57..58 "y" [] []
-        2: MD_TEXTUAL@58..59
-          0: MD_TEXTUAL_LITERAL@58..59 "t" [] []
-        3: MD_TEXTUAL@59..60
-          0: MD_TEXTUAL_LITERAL@59..60 "h" [] []
-        4: MD_TEXTUAL@60..61
-          0: MD_TEXTUAL_LITERAL@60..61 "o" [] []
-        5: MD_TEXTUAL@61..62
-          0: MD_TEXTUAL_LITERAL@61..62 "n" [] []
+        0: MD_TEXTUAL@56..62
+          0: MD_TEXTUAL_LITERAL@56..62 "python" [] []
       2: MD_INLINE_ITEM_LIST@62..68
         0: MD_TEXTUAL@62..65
           0: MD_TEXTUAL_LITERAL@62..65 "x" [Newline("\n")] [Whitespace(" ")]
@@ -325,36 +154,12 @@ MdDocument {
       0: TRIPLE_TILDE@72..77 "~~~" [Newline("\n"), Newline("\n")] []
       1: MD_CODE_NAME_LIST@77..77
       2: MD_INLINE_ITEM_LIST@77..95
-        0: MD_TEXTUAL@77..79
-          0: MD_TEXTUAL_LITERAL@77..79 "T" [Newline("\n")] []
-        1: MD_TEXTUAL@79..80
-          0: MD_TEXTUAL_LITERAL@79..80 "i" [] []
-        2: MD_TEXTUAL@80..81
-          0: MD_TEXTUAL_LITERAL@80..81 "l" [] []
-        3: MD_TEXTUAL@81..82
-          0: MD_TEXTUAL_LITERAL@81..82 "d" [] []
-        4: MD_TEXTUAL@82..84
-          0: MD_TEXTUAL_LITERAL@82..84 "e" [] [Whitespace(" ")]
-        5: MD_TEXTUAL@84..85
-          0: MD_TEXTUAL_LITERAL@84..85 "n" [] []
-        6: MD_TEXTUAL@85..87
-          0: MD_TEXTUAL_LITERAL@85..87 "o" [] [Whitespace(" ")]
-        7: MD_TEXTUAL@87..88
-          0: MD_TEXTUAL_LITERAL@87..88 "l" [] []
-        8: MD_TEXTUAL@88..89
-          0: MD_TEXTUAL_LITERAL@88..89 "a" [] []
-        9: MD_TEXTUAL@89..90
-          0: MD_TEXTUAL_LITERAL@89..90 "n" [] []
-        10: MD_TEXTUAL@90..91
-          0: MD_TEXTUAL_LITERAL@90..91 "g" [] []
-        11: MD_TEXTUAL@91..92
-          0: MD_TEXTUAL_LITERAL@91..92 "u" [] []
-        12: MD_TEXTUAL@92..93
-          0: MD_TEXTUAL_LITERAL@92..93 "a" [] []
-        13: MD_TEXTUAL@93..94
-          0: MD_TEXTUAL_LITERAL@93..94 "g" [] []
-        14: MD_TEXTUAL@94..95
-          0: MD_TEXTUAL_LITERAL@94..95 "e" [] []
+        0: MD_TEXTUAL@77..84
+          0: MD_TEXTUAL_LITERAL@77..84 "Tilde" [Newline("\n")] [Whitespace(" ")]
+        1: MD_TEXTUAL@84..87
+          0: MD_TEXTUAL_LITERAL@84..87 "no" [] [Whitespace(" ")]
+        2: MD_TEXTUAL@87..95
+          0: MD_TEXTUAL_LITERAL@87..95 "language" [] []
       3: TRIPLE_TILDE@95..99 "~~~" [Newline("\n")] []
   2: EOF@99..100 "" [Newline("\n")] []
 

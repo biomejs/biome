@@ -378,13 +378,13 @@ impl<'src> MarkdownLexer<'src> {
         // Not a thematic break - restore position and consume as emphasis marker
         self.position = start_position;
 
-        // Check for double emphasis markers (**, __, --)
-        if self.peek_byte() == Some(start_char) {
+        // Check for double emphasis markers (**, __)
+        // Note: -- is not valid markdown emphasis, so we don't check for it
+        if start_char != b'-' && self.peek_byte() == Some(start_char) {
             self.advance(2);
             return match start_char {
                 b'*' => DOUBLE_STAR,
                 b'_' => DOUBLE_UNDERSCORE,
-                b'-' => MINUS, // No DOUBLE_MINUS in grammar, use MINUS
                 _ => unreachable!(),
             };
         }
@@ -490,12 +490,51 @@ impl<'src> MarkdownLexer<'src> {
         self.position >= self.source.len()
     }
 
+    /// Consume consecutive textual characters until we hit a special markdown character.
+    /// This groups multiple characters into a single MD_TEXTUAL_LITERAL token for efficiency.
     #[inline]
     fn consume_textual(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
+        // Consume at least one character
         let char = self.current_char_unchecked();
         self.advance(char.len_utf8());
+
+        // Continue consuming characters until we hit a special markdown character
+        // or end of file. Special characters are those that could start inline elements
+        // or block structures: * - _ + # ` ~ > ! [ ] ( ) \ and whitespace/newlines
+        while let Some(byte) = self.current_byte() {
+            let dispatched = lookup_byte(byte);
+            match dispatched {
+                // Stop at characters that could be markdown syntax
+                WHS  // whitespace, newlines
+                | MUL  // *
+                | MIN  // -
+                | PLS  // +
+                | HAS  // #
+                | TPL  // `
+                | TLD  // ~
+                | MOR  // >
+                | EXL  // !
+                | BTO  // [
+                | BTC  // ]
+                | PNO  // (
+                | PNC  // )
+                | BSL  // \
+                => break,
+                // IDT includes A-Z, a-z, and _ - only _ is special for markdown
+                IDT => {
+                    if byte == b'_' {
+                        break;
+                    }
+                    self.advance_char_unchecked();
+                }
+                // All other characters are regular text
+                _ => {
+                    self.advance_char_unchecked();
+                }
+            }
+        }
 
         MD_TEXTUAL_LITERAL
     }
