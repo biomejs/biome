@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: invalid-d.vue
 ---
 # Input
@@ -29,6 +28,8 @@ invalid-d.vue:1:15 lint/nursery/useVueConsistentDefinePropsDeclaration ━━━
     6 │ 
   
   i It should be defined using type declaration like defineProps<...>(). 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
