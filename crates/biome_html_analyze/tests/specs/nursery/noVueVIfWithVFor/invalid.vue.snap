@@ -43,6 +43,8 @@ invalid.vue:5:3 lint/nursery/noVueVIfWithVFor ━━━━━━━━━━━�
   
   i Using v-if and v-for on the same element can lead to unexpected behavior and performance issues.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -67,6 +69,8 @@ invalid.vue:10:3 lint/nursery/noVueVIfWithVFor ━━━━━━━━━━━
     13 │ />
   
   i Using v-if and v-for on the same element can lead to unexpected behavior and performance issues.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
