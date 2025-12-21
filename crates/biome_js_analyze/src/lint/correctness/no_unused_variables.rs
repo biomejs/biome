@@ -307,7 +307,8 @@ impl Rule for NoUnusedVariables {
         }
 
         // Top-level interfaces/namespaces in a script file are exempt
-        if is_script_declaration(binding) {
+        let is_script_by_source = ctx.source_type::<JsFileSource>().is_script();
+        if is_script_declaration(binding, is_script_by_source) {
             return None;
         }
 
@@ -411,9 +412,8 @@ impl Rule for NoUnusedVariables {
 }
 
 /// Returns `true` if the file is considered a script
-/// and is an interface or namespace
-fn is_script_declaration(binding: &AnyJsIdentifierBinding) -> bool {
-    // Verify this binding is from an interface or namespace
+/// and the binding is an interface or namespace
+fn is_script_declaration(binding: &AnyJsIdentifierBinding, is_script_by_source: bool) -> bool {
     let Some(decl) = binding.declaration() else {
         return false;
     };
@@ -423,22 +423,29 @@ fn is_script_declaration(binding: &AnyJsIdentifierBinding) -> bool {
         AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
             | AnyJsBindingDeclaration::TsModuleDeclaration(_)
     );
+
+    // If the file is already classified as a script, interfaces and namespaces are allowed
+    if is_script_by_source {
+        return is_interface_or_namespace;
+    }
+
     if !is_interface_or_namespace {
         return false;
     }
 
+    // JsFileSource::is_script() is extension-based (.cjs) and returns false for
+    // files that still behave like scripts. In those cases determine script-ness
+    // by checking for the absence of top-level imports/exports
     binding
         .syntax()
         .ancestors()
         .find_map(JsModuleItemList::cast)
         .is_some_and(|module_list| {
-            // Only check top-level declarations
             let is_top_level = module_list.parent::<JsModule>().is_some();
             if !is_top_level {
                 return false;
             }
 
-            // If there are imports/exports, it's a module, not a script
             !module_list.into_iter().any(|item| {
                 let kind = item.syntax().kind();
                 JsImport::can_cast(kind) || JsExport::can_cast(kind)

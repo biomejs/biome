@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidScriptGlobals.ts
+---
+# Input
+```ts
+const c = 1;
+
+interface I {}
+
+namespace N {}
+```
+
+# Diagnostics
+```
+invalidScriptGlobals.ts:1:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable c is unused.
+  
+  > 1 │ const c = 1;
+      │       ^
+    2 │ 
+    3 │ interface I {}
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend c with an underscore.
+  
+    1   │ - const·c·=·1;
+      1 │ + const·_c·=·1;
+    2 2 │   
+    3 3 │   interface I {}
+  
+
+```
