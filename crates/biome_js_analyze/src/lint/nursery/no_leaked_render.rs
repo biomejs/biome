@@ -183,7 +183,7 @@ impl Rule for NoLeakedRender {
                             AnyJsExpression::AnyJsLiteralExpression(expr) => {
                                 match expr {
                                     AnyJsLiteralExpression::JsStringLiteralExpression(str) => {
-                                        if str.value_token().ok()?.text_trimmed().is_empty() {
+                                        if str.inner_string_text().ok()?.text().is_empty() {
                                             return Some(());
                                         }
                                         return None;
