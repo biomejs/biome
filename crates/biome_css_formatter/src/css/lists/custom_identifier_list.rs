@@ -22,21 +22,21 @@ impl FormatCssCustomIdentifierListOptions {
 
 /// Defines how a list of CSS custom identifiers should be formatted.
 ///
-/// - [`OneLine`] — Formats all identifiers on a single line, separated by spaces.
+/// - [`OneLine`] — Formats all identifiers on a single line, separated by commas.
 /// - [`Fluid`] — Formats identifiers with soft line breaks, allowing wrapping when needed.
 ///
 /// ## Examples
 ///
 /// ```css
 /// /* OneLine */
-/// custom: value1 value2 value3;
+/// :active-view-transition-type(value1, value2, value3)
 ///
 /// /* Fluid */
-/// custom: value1 value2 value3;
-/// custom-long: value1
-///              value2
-///              value3
-///              value4;
+/// :active-view-transition-type(value1, value2, value3)
+/// :active-view-transition-type(value1,
+///                              value2,
+///                              value3,
+///                              value4)
 /// ```
 #[derive(Debug, Clone, Copy, Default)]
 pub(crate) enum CssCustomIdentifierLayout {
@@ -58,14 +58,22 @@ impl FormatRule<CssCustomIdentifierList> for FormatCssCustomIdentifierList {
     type Context = CssFormatContext;
     fn fmt(&self, node: &CssCustomIdentifierList, f: &mut CssFormatter) -> FormatResult<()> {
         match self.layout {
-            CssCustomIdentifierLayout::OneLine => f
-                .join_with(&space())
-                .entries(node.iter().formatted())
-                .finish(),
-            CssCustomIdentifierLayout::Fluid => f
-                .join_with(&soft_line_break_or_space())
-                .entries(node.iter().formatted())
-                .finish(),
+            CssCustomIdentifierLayout::OneLine => {
+                let separator = space();
+                let mut joiner = f.join_with(&separator);
+                for formatted in node.format_separated(",") {
+                    joiner.entry(&formatted);
+                }
+                joiner.finish()
+            }
+            CssCustomIdentifierLayout::Fluid => {
+                let separator = soft_line_break_or_space();
+                let mut joiner = f.join_with(&separator);
+                for formatted in node.format_separated(",") {
+                    joiner.entry(&formatted);
+                }
+                joiner.finish()
+            }
         }
     }
 }
