@@ -46,7 +46,7 @@ CssRoot {
                                         value_token: IDENT@5..32 "active-view-transition-type" [] [],
                                     },
                                     L_PAREN@32..33 "(" [] [],
-                                    CssCustomIdentifierList [],
+                                    CssCustomIdentifierCommaSeparatedList [],
                                     R_PAREN@33..35 ")" [] [Whitespace(" ")],
                                 ],
                             },
@@ -78,7 +78,7 @@ CssRoot {
                                     value_token: IDENT@46..73 "active-view-transition-type" [] [],
                                 },
                                 l_paren_token: L_PAREN@73..74 "(" [] [],
-                                items: CssCustomIdentifierList [
+                                items: CssCustomIdentifierCommaSeparatedList [
                                     CssCustomIdentifier {
                                         value_token: IDENT@74..79 "first" [] [],
                                     },
@@ -119,7 +119,7 @@ CssRoot {
                                     value_token: IDENT@99..126 "active-view-transition-type" [] [],
                                 },
                                 l_paren_token: L_PAREN@126..127 "(" [] [],
-                                items: CssCustomIdentifierList [
+                                items: CssCustomIdentifierCommaSeparatedList [
                                     CssCustomIdentifier {
                                         value_token: IDENT@127..132 "first" [] [],
                                     },
@@ -165,7 +165,7 @@ CssRoot {
                                     value_token: IDENT@160..187 "active-view-transition-type" [] [],
                                 },
                                 l_paren_token: L_PAREN@187..188 "(" [] [],
-                                items: CssCustomIdentifierList [
+                                items: CssCustomIdentifierCommaSeparatedList [
                                     CssCustomIdentifier {
                                         value_token: IDENT@188..193 "first" [] [],
                                     },
@@ -219,7 +219,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@5..32
                   0: IDENT@5..32 "active-view-transition-type" [] []
                 1: L_PAREN@32..33 "(" [] []
-                2: CSS_CUSTOM_IDENTIFIER_LIST@33..33
+                2: CSS_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST@33..33
                 3: R_PAREN@33..35 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@35..38
         0: L_CURLY@35..36 "{" [] []
@@ -240,7 +240,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@46..73
                   0: IDENT@46..73 "active-view-transition-type" [] []
                 1: L_PAREN@73..74 "(" [] []
-                2: CSS_CUSTOM_IDENTIFIER_LIST@74..87
+                2: CSS_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST@74..87
                   0: CSS_CUSTOM_IDENTIFIER@74..79
                     0: IDENT@74..79 "first" [] []
                   1: COMMA@79..81 "," [] [Whitespace(" ")]
@@ -266,7 +266,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@99..126
                   0: IDENT@99..126 "active-view-transition-type" [] []
                 1: L_PAREN@126..127 "(" [] []
-                2: CSS_CUSTOM_IDENTIFIER_LIST@127..148
+                2: CSS_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST@127..148
                   0: CSS_CUSTOM_IDENTIFIER@127..132
                     0: IDENT@127..132 "first" [] []
                   1: COMMA@132..134 "," [] [Whitespace(" ")]
@@ -296,7 +296,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@160..187
                   0: IDENT@160..187 "active-view-transition-type" [] []
                 1: L_PAREN@187..188 "(" [] []
-                2: CSS_CUSTOM_IDENTIFIER_LIST@188..213
+                2: CSS_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST@188..213
                   0: CSS_CUSTOM_IDENTIFIER@188..193
                     0: IDENT@188..193 "first" [] []
                   1: COMMA@193..195 "," [] [Whitespace(" ")]

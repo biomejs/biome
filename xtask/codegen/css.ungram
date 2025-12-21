@@ -401,7 +401,7 @@ CssPseudoClassFunctionCustomIdentifier =
 CssPseudoClassFunctionCustomIdentifierList =
 	name: CssIdentifier
 	'('
-	items: CssCustomIdentifierList
+	items: CssCustomIdentifierCommaSeparatedList
 	')'
 
 // a::after {}
@@ -804,7 +804,7 @@ CssCustomIdentifierSpaceSeparatedList = AnyCssCustomIdentifier*
 
 // :active-view-transition-type(forwards, backwards) { }
 //                              ^^^^^^^^^^^^^^^^^^^^
-CssCustomIdentifierList = (AnyCssCustomIdentifier (',' AnyCssCustomIdentifier)*)
+CssCustomIdentifierCommaSeparatedList = (AnyCssCustomIdentifier (',' AnyCssCustomIdentifier)*)
 
 AnyCssFontFeatureValuesBlock =
 	CssFontFeatureValuesBlock

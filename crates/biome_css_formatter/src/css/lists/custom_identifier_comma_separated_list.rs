@@ -1,18 +1,18 @@
 use crate::prelude::*;
-use biome_css_syntax::CssCustomIdentifierList;
+use biome_css_syntax::CssCustomIdentifierCommaSeparatedList;
 use biome_formatter::FormatRuleWithOptions;
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatCssCustomIdentifierList {
+pub(crate) struct FormatCssCustomIdentifierCommaSeparatedList {
     layout: CssCustomIdentifierLayout,
 }
 
 #[derive(Debug, Clone, Copy, Default)]
-pub(crate) struct FormatCssCustomIdentifierListOptions {
+pub(crate) struct FormatCssCustomIdentifierCommaSeparatedListOptions {
     pub(crate) layout: CssCustomIdentifierLayout,
 }
 
-impl FormatCssCustomIdentifierListOptions {
+impl FormatCssCustomIdentifierCommaSeparatedListOptions {
     /// Sets the layout to format identifiers with soft line breaks (fluid layout).
     pub(crate) fn with_fluid_layout(mut self) -> Self {
         self.layout = CssCustomIdentifierLayout::Fluid;
@@ -45,8 +45,10 @@ pub(crate) enum CssCustomIdentifierLayout {
     Fluid,
 }
 
-impl FormatRuleWithOptions<CssCustomIdentifierList> for FormatCssCustomIdentifierList {
-    type Options = FormatCssCustomIdentifierListOptions;
+impl FormatRuleWithOptions<CssCustomIdentifierCommaSeparatedList>
+    for FormatCssCustomIdentifierCommaSeparatedList
+{
+    type Options = FormatCssCustomIdentifierCommaSeparatedListOptions;
 
     fn with_options(mut self, options: Self::Options) -> Self {
         self.layout = options.layout;
@@ -54,9 +56,15 @@ impl FormatRuleWithOptions<CssCustomIdentifierList> for FormatCssCustomIdentifie
     }
 }
 
-impl FormatRule<CssCustomIdentifierList> for FormatCssCustomIdentifierList {
+impl FormatRule<CssCustomIdentifierCommaSeparatedList>
+    for FormatCssCustomIdentifierCommaSeparatedList
+{
     type Context = CssFormatContext;
-    fn fmt(&self, node: &CssCustomIdentifierList, f: &mut CssFormatter) -> FormatResult<()> {
+    fn fmt(
+        &self,
+        node: &CssCustomIdentifierCommaSeparatedList,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
         match self.layout {
             CssCustomIdentifierLayout::OneLine => {
                 let separator = space();

@@ -59,7 +59,7 @@ struct CssCustomIdentifierList;
 impl ParseSeparatedList for CssCustomIdentifierList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_CUSTOM_IDENTIFIER_LIST;
+    const LIST_KIND: Self::Kind = CSS_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         parse_custom_identifier(p, CssLexContext::Regular)

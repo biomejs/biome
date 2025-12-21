@@ -1,4 +1,6 @@
-use crate::{css::lists::custom_identifier_list::CssCustomIdentifierLayout, prelude::*};
+use crate::{
+    css::lists::custom_identifier_comma_separated_list::CssCustomIdentifierLayout, prelude::*,
+};
 use biome_css_syntax::CssCustomIdentifierSpaceSeparatedList;
 use biome_formatter::FormatRuleWithOptions;
 

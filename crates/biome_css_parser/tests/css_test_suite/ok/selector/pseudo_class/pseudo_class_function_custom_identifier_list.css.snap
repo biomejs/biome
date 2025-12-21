@@ -35,7 +35,7 @@ CssRoot {
                                     value_token: IDENT@5..32 "active-view-transition-type" [] [],
                                 },
                                 l_paren_token: L_PAREN@32..33 "(" [] [],
-                                items: CssCustomIdentifierList [
+                                items: CssCustomIdentifierCommaSeparatedList [
                                     CssCustomIdentifier {
                                         value_token: IDENT@33..42 "backwards" [] [],
                                     },
@@ -90,7 +90,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@5..32
                   0: IDENT@5..32 "active-view-transition-type" [] []
                 1: L_PAREN@32..33 "(" [] []
-                2: CSS_CUSTOM_IDENTIFIER_LIST@33..73
+                2: CSS_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST@33..73
                   0: CSS_CUSTOM_IDENTIFIER@33..42
                     0: IDENT@33..42 "backwards" [] []
                   1: COMMA@42..44 "," [] [Whitespace(" ")]

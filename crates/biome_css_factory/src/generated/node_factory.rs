@@ -1683,7 +1683,7 @@ pub fn css_pseudo_class_function_custom_identifier(
 pub fn css_pseudo_class_function_custom_identifier_list(
     name: CssIdentifier,
     l_paren_token: SyntaxToken,
-    items: CssCustomIdentifierList,
+    items: CssCustomIdentifierCommaSeparatedList,
     r_paren_token: SyntaxToken,
 ) -> CssPseudoClassFunctionCustomIdentifierList {
     CssPseudoClassFunctionCustomIdentifierList::unwrap_cast(SyntaxNode::new_detached(
@@ -2983,7 +2983,10 @@ where
         }),
     ))
 }
-pub fn css_custom_identifier_list<I, S>(items: I, separators: S) -> CssCustomIdentifierList
+pub fn css_custom_identifier_comma_separated_list<I, S>(
+    items: I,
+    separators: S,
+) -> CssCustomIdentifierCommaSeparatedList
 where
     I: IntoIterator<Item = AnyCssCustomIdentifier>,
     I::IntoIter: ExactSizeIterator,
@@ -2993,8 +2996,8 @@ where
     let mut items = items.into_iter();
     let mut separators = separators.into_iter();
     let length = items.len() + separators.len();
-    CssCustomIdentifierList::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_CUSTOM_IDENTIFIER_LIST,
+    CssCustomIdentifierCommaSeparatedList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())
