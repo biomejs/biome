@@ -25,28 +25,19 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@0..5 "This" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@5..9 "has" [] [Whitespace(" ")],
+                    value_token: MD_TEXTUAL_LITERAL@0..9 "This has " [] [],
                 },
                 MdInlineCode {
                     l_tick_token: BACKTICK@9..10 "`" [] [],
                     content: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@10..17 "inline" [] [Whitespace(" ")],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@17..21 "code" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@10..21 "inline code" [] [],
                         },
                     ],
-                    r_tick_token: BACKTICK@21..23 "`" [] [Whitespace(" ")],
+                    r_tick_token: BACKTICK@21..22 "`" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@23..26 "in" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@26..29 "it." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@22..29 " in it." [] [],
                 },
             ],
             hard_line: missing (optional),
@@ -54,10 +45,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@29..36 "This" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@36..39 "is" [] [Whitespace(" ")],
+                    value_token: MD_TEXTUAL_LITERAL@29..39 "This is " [Newline("\n"), Newline("\n")] [],
                 },
                 MdInlineItalic {
                     l_fence: STAR@39..40 "*" [] [],
@@ -66,16 +54,10 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@40..46 "italic" [] [],
                         },
                     ],
-                    r_fence: STAR@46..48 "*" [] [Whitespace(" ")],
+                    r_fence: STAR@46..47 "*" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@48..52 "and" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@52..57 "this" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@57..60 "is" [] [Whitespace(" ")],
+                    value_token: MD_TEXTUAL_LITERAL@47..60 " and this is " [] [],
                 },
                 MdInlineEmphasis {
                     l_fence: DOUBLE_STAR@60..62 "**" [] [],
@@ -95,34 +77,25 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@69..76 "This" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@76..79 "is" [] [Whitespace(" ")],
+                    value_token: MD_TEXTUAL_LITERAL@69..79 "This is " [Newline("\n"), Newline("\n")] [],
                 },
                 MdInlineItalic {
                     l_fence: UNDERSCORE@79..80 "_" [] [],
                     content: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@80..85 "also" [] [Whitespace(" ")],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@85..91 "italic" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@80..91 "also italic" [] [],
                         },
                     ],
-                    r_fence: UNDERSCORE@91..93 "_" [] [Whitespace(" ")],
+                    r_fence: UNDERSCORE@91..92 "_" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@93..97 "and" [] [Whitespace(" ")],
+                    value_token: MD_TEXTUAL_LITERAL@92..97 " and " [] [],
                 },
                 MdInlineEmphasis {
                     l_fence: DOUBLE_UNDERSCORE@97..99 "__" [] [],
                     content: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@99..104 "also" [] [Whitespace(" ")],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@104..108 "bold" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@99..108 "also bold" [] [],
                         },
                     ],
                     r_fence: DOUBLE_UNDERSCORE@108..110 "__" [] [],
@@ -136,13 +109,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@111..118 "Here" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@118..121 "is" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@121..123 "a" [] [Whitespace(" ")],
+                    value_token: MD_TEXTUAL_LITERAL@111..123 "Here is a " [Newline("\n"), Newline("\n")] [],
                 },
                 MdInlineLink {
                     l_brack_token: L_BRACK@123..124 "[" [] [],
@@ -158,13 +125,10 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@130..149 "https://example.com" [] [],
                         },
                     ],
-                    r_paren_token: R_PAREN@149..151 ")" [] [Whitespace(" ")],
+                    r_paren_token: R_PAREN@149..150 ")" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@151..155 "and" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@155..158 "an" [] [Whitespace(" ")],
+                    value_token: MD_TEXTUAL_LITERAL@150..158 " and an " [] [],
                 },
                 MdInlineImage {
                     excl_token: BANG@158..159 "!" [] [],
@@ -202,86 +166,64 @@ MdDocument {
   1: MD_BLOCK_LIST@0..178
     0: MD_PARAGRAPH@0..29
       0: MD_INLINE_ITEM_LIST@0..29
-        0: MD_TEXTUAL@0..5
-          0: MD_TEXTUAL_LITERAL@0..5 "This" [] [Whitespace(" ")]
-        1: MD_TEXTUAL@5..9
-          0: MD_TEXTUAL_LITERAL@5..9 "has" [] [Whitespace(" ")]
-        2: MD_INLINE_CODE@9..23
+        0: MD_TEXTUAL@0..9
+          0: MD_TEXTUAL_LITERAL@0..9 "This has " [] []
+        1: MD_INLINE_CODE@9..22
           0: BACKTICK@9..10 "`" [] []
           1: MD_INLINE_ITEM_LIST@10..21
-            0: MD_TEXTUAL@10..17
-              0: MD_TEXTUAL_LITERAL@10..17 "inline" [] [Whitespace(" ")]
-            1: MD_TEXTUAL@17..21
-              0: MD_TEXTUAL_LITERAL@17..21 "code" [] []
-          2: BACKTICK@21..23 "`" [] [Whitespace(" ")]
-        3: MD_TEXTUAL@23..26
-          0: MD_TEXTUAL_LITERAL@23..26 "in" [] [Whitespace(" ")]
-        4: MD_TEXTUAL@26..29
-          0: MD_TEXTUAL_LITERAL@26..29 "it." [] []
+            0: MD_TEXTUAL@10..21
+              0: MD_TEXTUAL_LITERAL@10..21 "inline code" [] []
+          2: BACKTICK@21..22 "`" [] []
+        2: MD_TEXTUAL@22..29
+          0: MD_TEXTUAL_LITERAL@22..29 " in it." [] []
       1: (empty)
     1: MD_PARAGRAPH@29..69
       0: MD_INLINE_ITEM_LIST@29..69
-        0: MD_TEXTUAL@29..36
-          0: MD_TEXTUAL_LITERAL@29..36 "This" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-        1: MD_TEXTUAL@36..39
-          0: MD_TEXTUAL_LITERAL@36..39 "is" [] [Whitespace(" ")]
-        2: MD_INLINE_ITALIC@39..48
+        0: MD_TEXTUAL@29..39
+          0: MD_TEXTUAL_LITERAL@29..39 "This is " [Newline("\n"), Newline("\n")] []
+        1: MD_INLINE_ITALIC@39..47
           0: STAR@39..40 "*" [] []
           1: MD_INLINE_ITEM_LIST@40..46
             0: MD_TEXTUAL@40..46
               0: MD_TEXTUAL_LITERAL@40..46 "italic" [] []
-          2: STAR@46..48 "*" [] [Whitespace(" ")]
-        3: MD_TEXTUAL@48..52
-          0: MD_TEXTUAL_LITERAL@48..52 "and" [] [Whitespace(" ")]
-        4: MD_TEXTUAL@52..57
-          0: MD_TEXTUAL_LITERAL@52..57 "this" [] [Whitespace(" ")]
-        5: MD_TEXTUAL@57..60
-          0: MD_TEXTUAL_LITERAL@57..60 "is" [] [Whitespace(" ")]
-        6: MD_INLINE_EMPHASIS@60..68
+          2: STAR@46..47 "*" [] []
+        2: MD_TEXTUAL@47..60
+          0: MD_TEXTUAL_LITERAL@47..60 " and this is " [] []
+        3: MD_INLINE_EMPHASIS@60..68
           0: DOUBLE_STAR@60..62 "**" [] []
           1: MD_INLINE_ITEM_LIST@62..66
             0: MD_TEXTUAL@62..66
               0: MD_TEXTUAL_LITERAL@62..66 "bold" [] []
           2: DOUBLE_STAR@66..68 "**" [] []
-        7: MD_TEXTUAL@68..69
+        4: MD_TEXTUAL@68..69
           0: MD_TEXTUAL_LITERAL@68..69 "." [] []
       1: (empty)
     2: MD_PARAGRAPH@69..111
       0: MD_INLINE_ITEM_LIST@69..111
-        0: MD_TEXTUAL@69..76
-          0: MD_TEXTUAL_LITERAL@69..76 "This" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-        1: MD_TEXTUAL@76..79
-          0: MD_TEXTUAL_LITERAL@76..79 "is" [] [Whitespace(" ")]
-        2: MD_INLINE_ITALIC@79..93
+        0: MD_TEXTUAL@69..79
+          0: MD_TEXTUAL_LITERAL@69..79 "This is " [Newline("\n"), Newline("\n")] []
+        1: MD_INLINE_ITALIC@79..92
           0: UNDERSCORE@79..80 "_" [] []
           1: MD_INLINE_ITEM_LIST@80..91
-            0: MD_TEXTUAL@80..85
-              0: MD_TEXTUAL_LITERAL@80..85 "also" [] [Whitespace(" ")]
-            1: MD_TEXTUAL@85..91
-              0: MD_TEXTUAL_LITERAL@85..91 "italic" [] []
-          2: UNDERSCORE@91..93 "_" [] [Whitespace(" ")]
-        3: MD_TEXTUAL@93..97
-          0: MD_TEXTUAL_LITERAL@93..97 "and" [] [Whitespace(" ")]
-        4: MD_INLINE_EMPHASIS@97..110
+            0: MD_TEXTUAL@80..91
+              0: MD_TEXTUAL_LITERAL@80..91 "also italic" [] []
+          2: UNDERSCORE@91..92 "_" [] []
+        2: MD_TEXTUAL@92..97
+          0: MD_TEXTUAL_LITERAL@92..97 " and " [] []
+        3: MD_INLINE_EMPHASIS@97..110
           0: DOUBLE_UNDERSCORE@97..99 "__" [] []
           1: MD_INLINE_ITEM_LIST@99..108
-            0: MD_TEXTUAL@99..104
-              0: MD_TEXTUAL_LITERAL@99..104 "also" [] [Whitespace(" ")]
-            1: MD_TEXTUAL@104..108
-              0: MD_TEXTUAL_LITERAL@104..108 "bold" [] []
+            0: MD_TEXTUAL@99..108
+              0: MD_TEXTUAL_LITERAL@99..108 "also bold" [] []
           2: DOUBLE_UNDERSCORE@108..110 "__" [] []
-        5: MD_TEXTUAL@110..111
+        4: MD_TEXTUAL@110..111
           0: MD_TEXTUAL_LITERAL@110..111 "." [] []
       1: (empty)
     3: MD_PARAGRAPH@111..178
       0: MD_INLINE_ITEM_LIST@111..178
-        0: MD_TEXTUAL@111..118
-          0: MD_TEXTUAL_LITERAL@111..118 "Here" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-        1: MD_TEXTUAL@118..121
-          0: MD_TEXTUAL_LITERAL@118..121 "is" [] [Whitespace(" ")]
-        2: MD_TEXTUAL@121..123
-          0: MD_TEXTUAL_LITERAL@121..123 "a" [] [Whitespace(" ")]
-        3: MD_INLINE_LINK@123..151
+        0: MD_TEXTUAL@111..123
+          0: MD_TEXTUAL_LITERAL@111..123 "Here is a " [Newline("\n"), Newline("\n")] []
+        1: MD_INLINE_LINK@123..150
           0: L_BRACK@123..124 "[" [] []
           1: MD_INLINE_ITEM_LIST@124..128
             0: MD_TEXTUAL@124..128
@@ -291,12 +233,10 @@ MdDocument {
           4: MD_INLINE_ITEM_LIST@130..149
             0: MD_TEXTUAL@130..149
               0: MD_TEXTUAL_LITERAL@130..149 "https://example.com" [] []
-          5: R_PAREN@149..151 ")" [] [Whitespace(" ")]
-        4: MD_TEXTUAL@151..155
-          0: MD_TEXTUAL_LITERAL@151..155 "and" [] [Whitespace(" ")]
-        5: MD_TEXTUAL@155..158
-          0: MD_TEXTUAL_LITERAL@155..158 "an" [] [Whitespace(" ")]
-        6: MD_INLINE_IMAGE@158..177
+          5: R_PAREN@149..150 ")" [] []
+        2: MD_TEXTUAL@150..158
+          0: MD_TEXTUAL_LITERAL@150..158 " and an " [] []
+        3: MD_INLINE_IMAGE@158..177
           0: BANG@158..159 "!" [] []
           1: L_BRACK@159..160 "[" [] []
           2: MD_INLINE_ITEM_LIST@160..165
@@ -308,7 +248,7 @@ MdDocument {
             0: MD_TEXTUAL@167..176
               0: MD_TEXTUAL_LITERAL@167..176 "image.png" [] []
           6: R_PAREN@176..177 ")" [] []
-        7: MD_TEXTUAL@177..178
+        4: MD_TEXTUAL@177..178
           0: MD_TEXTUAL_LITERAL@177..178 "." [] []
       1: (empty)
   2: EOF@178..179 "" [Newline("\n")] []

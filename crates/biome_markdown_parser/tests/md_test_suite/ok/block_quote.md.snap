@@ -23,31 +23,16 @@ MdDocument {
             any_md_block: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@0..2 ">" [] [Whitespace(" ")],
+                        value_token: MD_TEXTUAL_LITERAL@0..1 ">" [] [],
                     },
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@2..7 "This" [] [Whitespace(" ")],
+                        value_token: MD_TEXTUAL_LITERAL@1..17 " This is a quote" [] [],
                     },
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@7..10 "is" [] [Whitespace(" ")],
+                        value_token: MD_TEXTUAL_LITERAL@17..19 ">" [Newline("\n")] [],
                     },
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@10..12 "a" [] [Whitespace(" ")],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@12..17 "quote" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@17..20 ">" [Newline("\n")] [Whitespace(" ")],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@20..23 "It" [] [Whitespace(" ")],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@23..33 "continues" [] [Whitespace(" ")],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@33..37 "here" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@19..37 " It continues here" [] [],
                     },
                 ],
                 hard_line: missing (optional),
@@ -57,16 +42,10 @@ MdDocument {
             any_md_block: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@37..41 ">" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                        value_token: MD_TEXTUAL_LITERAL@37..40 ">" [Newline("\n"), Newline("\n")] [],
                     },
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@41..49 "Another" [] [Whitespace(" ")],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@49..55 "quote" [] [Whitespace(" ")],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@55..60 "block" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@40..60 " Another quote block" [] [],
                     },
                 ],
                 hard_line: missing (optional),
@@ -86,36 +65,22 @@ MdDocument {
     0: MD_QUOTE@0..37
       0: MD_PARAGRAPH@0..37
         0: MD_INLINE_ITEM_LIST@0..37
-          0: MD_TEXTUAL@0..2
-            0: MD_TEXTUAL_LITERAL@0..2 ">" [] [Whitespace(" ")]
-          1: MD_TEXTUAL@2..7
-            0: MD_TEXTUAL_LITERAL@2..7 "This" [] [Whitespace(" ")]
-          2: MD_TEXTUAL@7..10
-            0: MD_TEXTUAL_LITERAL@7..10 "is" [] [Whitespace(" ")]
-          3: MD_TEXTUAL@10..12
-            0: MD_TEXTUAL_LITERAL@10..12 "a" [] [Whitespace(" ")]
-          4: MD_TEXTUAL@12..17
-            0: MD_TEXTUAL_LITERAL@12..17 "quote" [] []
-          5: MD_TEXTUAL@17..20
-            0: MD_TEXTUAL_LITERAL@17..20 ">" [Newline("\n")] [Whitespace(" ")]
-          6: MD_TEXTUAL@20..23
-            0: MD_TEXTUAL_LITERAL@20..23 "It" [] [Whitespace(" ")]
-          7: MD_TEXTUAL@23..33
-            0: MD_TEXTUAL_LITERAL@23..33 "continues" [] [Whitespace(" ")]
-          8: MD_TEXTUAL@33..37
-            0: MD_TEXTUAL_LITERAL@33..37 "here" [] []
+          0: MD_TEXTUAL@0..1
+            0: MD_TEXTUAL_LITERAL@0..1 ">" [] []
+          1: MD_TEXTUAL@1..17
+            0: MD_TEXTUAL_LITERAL@1..17 " This is a quote" [] []
+          2: MD_TEXTUAL@17..19
+            0: MD_TEXTUAL_LITERAL@17..19 ">" [Newline("\n")] []
+          3: MD_TEXTUAL@19..37
+            0: MD_TEXTUAL_LITERAL@19..37 " It continues here" [] []
         1: (empty)
     1: MD_QUOTE@37..60
       0: MD_PARAGRAPH@37..60
         0: MD_INLINE_ITEM_LIST@37..60
-          0: MD_TEXTUAL@37..41
-            0: MD_TEXTUAL_LITERAL@37..41 ">" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-          1: MD_TEXTUAL@41..49
-            0: MD_TEXTUAL_LITERAL@41..49 "Another" [] [Whitespace(" ")]
-          2: MD_TEXTUAL@49..55
-            0: MD_TEXTUAL_LITERAL@49..55 "quote" [] [Whitespace(" ")]
-          3: MD_TEXTUAL@55..60
-            0: MD_TEXTUAL_LITERAL@55..60 "block" [] []
+          0: MD_TEXTUAL@37..40
+            0: MD_TEXTUAL_LITERAL@37..40 ">" [Newline("\n"), Newline("\n")] []
+          1: MD_TEXTUAL@40..60
+            0: MD_TEXTUAL_LITERAL@40..60 " Another quote block" [] []
         1: (empty)
   2: EOF@60..61 "" [Newline("\n")] []
 

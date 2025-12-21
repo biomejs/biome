@@ -231,11 +231,12 @@ fn greater_than_token() {
 #[test]
 fn greater_than_with_text() {
     // Block quote with content - text is grouped into a single token
+    // Mid-line whitespace is now included in textual content,
+    // so " text" becomes a single token
     assert_lex! {
         "> text",
         R_ANGLE:1,
-        WHITESPACE:1,
-        MD_TEXTUAL_LITERAL:4, // "text" grouped into single token
+        MD_TEXTUAL_LITERAL:5, // " text" grouped (space + text)
     }
 }
 
@@ -251,10 +252,12 @@ fn plus_token() {
 #[test]
 fn star_token_single() {
     // Single star followed by space (not a thematic break)
+    // The trailing space is now included in textual content
+    // since it's not at the start of a line
     assert_lex! {
         "* ",
         STAR:1,
-        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:1, // trailing space as text
     }
 }
 
@@ -342,12 +345,13 @@ fn double_underscore_emphasis() {
 
 #[test]
 fn minus_token_single() {
-    // Single minus followed by text (not a thematic break) - text is grouped
+    // Single minus followed by text (not a thematic break)
+    // Mid-line whitespace is now included in textual content,
+    // so " item" becomes a single token
     assert_lex! {
         "- item",
         MINUS:1,
-        WHITESPACE:1,
-        MD_TEXTUAL_LITERAL:4, // "item" grouped
+        MD_TEXTUAL_LITERAL:5, // " item" grouped (space + text)
     }
 }
 

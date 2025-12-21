@@ -117,12 +117,7 @@ pub(crate) fn parse_indent_code_block(p: &mut MarkdownParser) {
 pub(crate) fn parse_paragraph(p: &mut MarkdownParser) {
     let m = p.start();
 
-    // Parse inline content list
     parse_inline_item_list(p);
-
-    // Note: hard_line is optional in the grammar. We don't emit it here because
-    // newlines are treated as trivia. When explicit hard breaks (like trailing
-    // spaces or backslash) are supported, we'll emit MD_HARD_LINE_LITERAL.
 
     m.complete(p, MD_PARAGRAPH);
 }
@@ -130,23 +125,24 @@ pub(crate) fn parse_paragraph(p: &mut MarkdownParser) {
 /// Parse the inline item list within a block.
 ///
 /// Grammar: MdInlineItemList = AnyMdInline*
+///
+/// Inline content continues until we hit EOF or a blank line (paragraph boundary).
+/// A blank line is detected by checking if the current token has two or more
+/// newlines in its leading trivia.
 pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
     let m = p.start();
 
-    // Record starting trivia position to detect blank lines during parsing
+    // Track trivia position to detect blank lines (paragraph boundaries)
     let start_trivia_pos = p.trivia_position();
 
-    // Continue parsing inline items until we hit:
-    // - EOF
-    // - A blank line (detected via 2+ newlines in trivia since we started)
-    // - A block-level construct
     while !p.at(T![EOF]) {
-        if parse_any_inline(p).is_absent() {
-            // If we couldn't parse any inline, break to avoid infinite loop
+        // Check if we've crossed a blank line (paragraph boundary)
+        // This happens when there are 2+ consecutive newlines in the trivia
+        if p.has_blank_line_since(start_trivia_pos) {
             break;
         }
-        // Check for blank line AFTER bumping a token (so trivia is collected)
-        if p.has_blank_line_since(start_trivia_pos) {
+
+        if parse_any_inline(p).is_absent() {
             break;
         }
     }

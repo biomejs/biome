@@ -167,7 +167,8 @@ impl<'src> MarkdownLexer<'src> {
     pub fn from_str(source: &'src str) -> Self {
         Self {
             source,
-            after_newline: false,
+            // Start of document is treated as start of line for indentation purposes
+            after_newline: true,
             unicode_bom_length: 0,
             current_kind: TOMBSTONE,
             current_start: TextSize::from(0),
@@ -180,7 +181,17 @@ impl<'src> MarkdownLexer<'src> {
     pub(crate) fn consume_token(&mut self, current: u8) -> MarkdownSyntaxKind {
         let dispatched = lookup_byte(current);
         match dispatched {
-            WHS => self.consume_newline_or_whitespace(),
+            // Whitespace handling depends on context:
+            // - At start of line (after_newline): whitespace is significant for indentation
+            //   detection (e.g., 4+ spaces = code block), so emit as separate tokens
+            // - In middle of line: whitespace is just text content, include in textual token
+            WHS => {
+                if self.after_newline || current == b'\n' || current == b'\r' {
+                    self.consume_newline_or_whitespace()
+                } else {
+                    self.consume_textual()
+                }
+            }
             MUL | MIN | IDT => self.consume_thematic_break_or_emphasis(dispatched),
             PLS => self.consume_byte(PLUS),
             HAS => self.consume_hash(),
@@ -492,6 +503,8 @@ impl<'src> MarkdownLexer<'src> {
 
     /// Consume consecutive textual characters until we hit a special markdown character.
     /// This groups multiple characters into a single MD_TEXTUAL_LITERAL token for efficiency.
+    /// Spaces and tabs are included in the text token (treated as regular text content),
+    /// but newlines end the token since they have semantic meaning as block separators.
     #[inline]
     fn consume_textual(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
@@ -502,13 +515,22 @@ impl<'src> MarkdownLexer<'src> {
 
         // Continue consuming characters until we hit a special markdown character
         // or end of file. Special characters are those that could start inline elements
-        // or block structures: * - _ + # ` ~ > ! [ ] ( ) \ and whitespace/newlines
+        // or block structures: * - _ + # ` ~ > ! [ ] ( ) \ and newlines.
+        // Spaces and tabs are now included as regular text content.
         while let Some(byte) = self.current_byte() {
             let dispatched = lookup_byte(byte);
             match dispatched {
+                // Include spaces and tabs in text tokens
+                WHS => {
+                    if byte == b' ' || byte == b'\t' {
+                        self.advance(1);
+                    } else {
+                        // Stop at newlines (\n, \r)
+                        break;
+                    }
+                }
                 // Stop at characters that could be markdown syntax
-                WHS  // whitespace, newlines
-                | MUL  // *
+                MUL  // *
                 | MIN  // -
                 | PLS  // +
                 | HAS  // #

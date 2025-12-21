@@ -20,19 +20,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@0..5 "This" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@5..8 "is" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@8..10 "a" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@10..17 "simple" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@17..27 "paragraph." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@0..27 "This is a simple paragraph." [] [],
                 },
             ],
             hard_line: missing (optional),
@@ -40,16 +28,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@27..34 "This" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@34..37 "is" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@37..45 "another" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@45..55 "paragraph." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@27..55 "This is another paragraph." [Newline("\n"), Newline("\n")] [],
                 },
             ],
             hard_line: missing (optional),
@@ -67,27 +46,13 @@ MdDocument {
   1: MD_BLOCK_LIST@0..55
     0: MD_PARAGRAPH@0..27
       0: MD_INLINE_ITEM_LIST@0..27
-        0: MD_TEXTUAL@0..5
-          0: MD_TEXTUAL_LITERAL@0..5 "This" [] [Whitespace(" ")]
-        1: MD_TEXTUAL@5..8
-          0: MD_TEXTUAL_LITERAL@5..8 "is" [] [Whitespace(" ")]
-        2: MD_TEXTUAL@8..10
-          0: MD_TEXTUAL_LITERAL@8..10 "a" [] [Whitespace(" ")]
-        3: MD_TEXTUAL@10..17
-          0: MD_TEXTUAL_LITERAL@10..17 "simple" [] [Whitespace(" ")]
-        4: MD_TEXTUAL@17..27
-          0: MD_TEXTUAL_LITERAL@17..27 "paragraph." [] []
+        0: MD_TEXTUAL@0..27
+          0: MD_TEXTUAL_LITERAL@0..27 "This is a simple paragraph." [] []
       1: (empty)
     1: MD_PARAGRAPH@27..55
       0: MD_INLINE_ITEM_LIST@27..55
-        0: MD_TEXTUAL@27..34
-          0: MD_TEXTUAL_LITERAL@27..34 "This" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-        1: MD_TEXTUAL@34..37
-          0: MD_TEXTUAL_LITERAL@34..37 "is" [] [Whitespace(" ")]
-        2: MD_TEXTUAL@37..45
-          0: MD_TEXTUAL_LITERAL@37..45 "another" [] [Whitespace(" ")]
-        3: MD_TEXTUAL@45..55
-          0: MD_TEXTUAL_LITERAL@45..55 "paragraph." [] []
+        0: MD_TEXTUAL@27..55
+          0: MD_TEXTUAL_LITERAL@27..55 "This is another paragraph." [Newline("\n"), Newline("\n")] []
       1: (empty)
   2: EOF@55..55 "" [] []
 

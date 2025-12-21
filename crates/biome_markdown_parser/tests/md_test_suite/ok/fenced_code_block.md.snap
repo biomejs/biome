@@ -39,16 +39,7 @@ MdDocument {
             ],
             content: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@13..20 "const" [Newline("\n")] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@20..22 "x" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@22..24 "=" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@24..26 "1;" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@13..26 "const x = 1;" [Newline("\n")] [],
                 },
             ],
             r_fence: TRIPLE_BACKTICK@26..30 "```" [Newline("\n")] [],
@@ -58,10 +49,7 @@ MdDocument {
             code_list: MdCodeNameList [],
             content: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@35..39 "No" [Newline("\n")] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@39..47 "language" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@35..47 "No language" [Newline("\n")] [],
                 },
             ],
             r_fence: TRIPLE_BACKTICK@47..51 "```" [Newline("\n")] [],
@@ -75,13 +63,7 @@ MdDocument {
             ],
             content: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@62..65 "x" [Newline("\n")] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@65..67 "=" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@67..68 "1" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@62..68 "x = 1" [Newline("\n")] [],
                 },
             ],
             r_fence: TRIPLE_TILDE@68..72 "~~~" [Newline("\n")] [],
@@ -91,13 +73,7 @@ MdDocument {
             code_list: MdCodeNameList [],
             content: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@77..84 "Tilde" [Newline("\n")] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@84..87 "no" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@87..95 "language" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@77..95 "Tilde no language" [Newline("\n")] [],
                 },
             ],
             r_fence: TRIPLE_TILDE@95..99 "~~~" [Newline("\n")] [],
@@ -119,23 +95,15 @@ MdDocument {
         0: MD_TEXTUAL@3..13
           0: MD_TEXTUAL_LITERAL@3..13 "javascript" [] []
       2: MD_INLINE_ITEM_LIST@13..26
-        0: MD_TEXTUAL@13..20
-          0: MD_TEXTUAL_LITERAL@13..20 "const" [Newline("\n")] [Whitespace(" ")]
-        1: MD_TEXTUAL@20..22
-          0: MD_TEXTUAL_LITERAL@20..22 "x" [] [Whitespace(" ")]
-        2: MD_TEXTUAL@22..24
-          0: MD_TEXTUAL_LITERAL@22..24 "=" [] [Whitespace(" ")]
-        3: MD_TEXTUAL@24..26
-          0: MD_TEXTUAL_LITERAL@24..26 "1;" [] []
+        0: MD_TEXTUAL@13..26
+          0: MD_TEXTUAL_LITERAL@13..26 "const x = 1;" [Newline("\n")] []
       3: TRIPLE_BACKTICK@26..30 "```" [Newline("\n")] []
     1: MD_FENCED_CODE_BLOCK@30..51
       0: TRIPLE_BACKTICK@30..35 "```" [Newline("\n"), Newline("\n")] []
       1: MD_CODE_NAME_LIST@35..35
       2: MD_INLINE_ITEM_LIST@35..47
-        0: MD_TEXTUAL@35..39
-          0: MD_TEXTUAL_LITERAL@35..39 "No" [Newline("\n")] [Whitespace(" ")]
-        1: MD_TEXTUAL@39..47
-          0: MD_TEXTUAL_LITERAL@39..47 "language" [] []
+        0: MD_TEXTUAL@35..47
+          0: MD_TEXTUAL_LITERAL@35..47 "No language" [Newline("\n")] []
       3: TRIPLE_BACKTICK@47..51 "```" [Newline("\n")] []
     2: MD_FENCED_CODE_BLOCK@51..72
       0: TRIPLE_TILDE@51..56 "~~~" [Newline("\n"), Newline("\n")] []
@@ -143,23 +111,15 @@ MdDocument {
         0: MD_TEXTUAL@56..62
           0: MD_TEXTUAL_LITERAL@56..62 "python" [] []
       2: MD_INLINE_ITEM_LIST@62..68
-        0: MD_TEXTUAL@62..65
-          0: MD_TEXTUAL_LITERAL@62..65 "x" [Newline("\n")] [Whitespace(" ")]
-        1: MD_TEXTUAL@65..67
-          0: MD_TEXTUAL_LITERAL@65..67 "=" [] [Whitespace(" ")]
-        2: MD_TEXTUAL@67..68
-          0: MD_TEXTUAL_LITERAL@67..68 "1" [] []
+        0: MD_TEXTUAL@62..68
+          0: MD_TEXTUAL_LITERAL@62..68 "x = 1" [Newline("\n")] []
       3: TRIPLE_TILDE@68..72 "~~~" [Newline("\n")] []
     3: MD_FENCED_CODE_BLOCK@72..99
       0: TRIPLE_TILDE@72..77 "~~~" [Newline("\n"), Newline("\n")] []
       1: MD_CODE_NAME_LIST@77..77
       2: MD_INLINE_ITEM_LIST@77..95
-        0: MD_TEXTUAL@77..84
-          0: MD_TEXTUAL_LITERAL@77..84 "Tilde" [Newline("\n")] [Whitespace(" ")]
-        1: MD_TEXTUAL@84..87
-          0: MD_TEXTUAL_LITERAL@84..87 "no" [] [Whitespace(" ")]
-        2: MD_TEXTUAL@87..95
-          0: MD_TEXTUAL_LITERAL@87..95 "language" [] []
+        0: MD_TEXTUAL@77..95
+          0: MD_TEXTUAL_LITERAL@77..95 "Tilde no language" [Newline("\n")] []
       3: TRIPLE_TILDE@95..99 "~~~" [Newline("\n")] []
   2: EOF@99..100 "" [Newline("\n")] []
 

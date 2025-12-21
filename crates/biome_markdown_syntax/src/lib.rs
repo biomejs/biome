@@ -57,15 +57,11 @@ impl TryFrom<MarkdownSyntaxKind> for TriviaPieceKind {
     type Error = ();
 
     fn try_from(value: MarkdownSyntaxKind) -> Result<Self, Self::Error> {
-        if value.is_trivia() {
-            match value {
-                MarkdownSyntaxKind::NEWLINE => Ok(Self::Newline),
-                MarkdownSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
-                MarkdownSyntaxKind::TAB => Ok(Self::Skipped),
-                _ => unreachable!("Not Trivia"),
-            }
-        } else {
-            Err(())
+        match value {
+            MarkdownSyntaxKind::NEWLINE => Ok(Self::Newline),
+            MarkdownSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
+            MarkdownSyntaxKind::TAB => Ok(Self::Skipped),
+            _ => Err(()),
         }
     }
 }

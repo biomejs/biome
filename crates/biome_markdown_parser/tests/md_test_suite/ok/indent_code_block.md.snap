@@ -26,19 +26,16 @@ MdDocument {
         MdIndentCodeBlock {
             content: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@0..13 "function" [Whitespace("    ")] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@13..18 "hello" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@0..18 "function hello" [Whitespace("    ")] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@18..19 "(" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@19..21 ")" [] [Whitespace(" ")],
+                    value_token: MD_TEXTUAL_LITERAL@19..20 ")" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@21..22 "{" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@20..22 " {" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@22..42 "console.log" [Newline("\n"), Whitespace("        ")] [],
@@ -63,13 +60,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@61..71 "Regular" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@71..81 "paragraph" [] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@81..86 "here." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@61..86 "Regular paragraph here." [Newline("\n"), Newline("\n")] [],
                 },
             ],
             hard_line: missing (optional),
@@ -77,16 +68,10 @@ MdDocument {
         MdIndentCodeBlock {
             content: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@86..97 "More" [Newline("\n"), Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                    value_token: MD_TEXTUAL_LITERAL@86..101 "More code" [Newline("\n"), Newline("\n"), Whitespace("    ")] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@97..101 "code" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@101..116 "continues" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@116..120 "here" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@101..120 "continues here" [Newline("\n"), Whitespace("    ")] [],
                 },
             ],
         },
@@ -103,47 +88,37 @@ MdDocument {
   1: MD_BLOCK_LIST@0..120
     0: MD_INDENT_CODE_BLOCK@0..61
       0: MD_INLINE_ITEM_LIST@0..61
-        0: MD_TEXTUAL@0..13
-          0: MD_TEXTUAL_LITERAL@0..13 "function" [Whitespace("    ")] [Whitespace(" ")]
-        1: MD_TEXTUAL@13..18
-          0: MD_TEXTUAL_LITERAL@13..18 "hello" [] []
-        2: MD_TEXTUAL@18..19
+        0: MD_TEXTUAL@0..18
+          0: MD_TEXTUAL_LITERAL@0..18 "function hello" [Whitespace("    ")] []
+        1: MD_TEXTUAL@18..19
           0: MD_TEXTUAL_LITERAL@18..19 "(" [] []
-        3: MD_TEXTUAL@19..21
-          0: MD_TEXTUAL_LITERAL@19..21 ")" [] [Whitespace(" ")]
-        4: MD_TEXTUAL@21..22
-          0: MD_TEXTUAL_LITERAL@21..22 "{" [] []
-        5: MD_TEXTUAL@22..42
+        2: MD_TEXTUAL@19..20
+          0: MD_TEXTUAL_LITERAL@19..20 ")" [] []
+        3: MD_TEXTUAL@20..22
+          0: MD_TEXTUAL_LITERAL@20..22 " {" [] []
+        4: MD_TEXTUAL@22..42
           0: MD_TEXTUAL_LITERAL@22..42 "console.log" [Newline("\n"), Whitespace("        ")] []
-        6: MD_TEXTUAL@42..43
+        5: MD_TEXTUAL@42..43
           0: MD_TEXTUAL_LITERAL@42..43 "(" [] []
-        7: MD_TEXTUAL@43..53
+        6: MD_TEXTUAL@43..53
           0: MD_TEXTUAL_LITERAL@43..53 "\"indented\"" [] []
-        8: MD_TEXTUAL@53..54
+        7: MD_TEXTUAL@53..54
           0: MD_TEXTUAL_LITERAL@53..54 ")" [] []
-        9: MD_TEXTUAL@54..55
+        8: MD_TEXTUAL@54..55
           0: MD_TEXTUAL_LITERAL@54..55 ";" [] []
-        10: MD_TEXTUAL@55..61
+        9: MD_TEXTUAL@55..61
           0: MD_TEXTUAL_LITERAL@55..61 "}" [Newline("\n"), Whitespace("    ")] []
     1: MD_PARAGRAPH@61..86
       0: MD_INLINE_ITEM_LIST@61..86
-        0: MD_TEXTUAL@61..71
-          0: MD_TEXTUAL_LITERAL@61..71 "Regular" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-        1: MD_TEXTUAL@71..81
-          0: MD_TEXTUAL_LITERAL@71..81 "paragraph" [] [Whitespace(" ")]
-        2: MD_TEXTUAL@81..86
-          0: MD_TEXTUAL_LITERAL@81..86 "here." [] []
+        0: MD_TEXTUAL@61..86
+          0: MD_TEXTUAL_LITERAL@61..86 "Regular paragraph here." [Newline("\n"), Newline("\n")] []
       1: (empty)
     2: MD_INDENT_CODE_BLOCK@86..120
       0: MD_INLINE_ITEM_LIST@86..120
-        0: MD_TEXTUAL@86..97
-          0: MD_TEXTUAL_LITERAL@86..97 "More" [Newline("\n"), Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
-        1: MD_TEXTUAL@97..101
-          0: MD_TEXTUAL_LITERAL@97..101 "code" [] []
-        2: MD_TEXTUAL@101..116
-          0: MD_TEXTUAL_LITERAL@101..116 "continues" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
-        3: MD_TEXTUAL@116..120
-          0: MD_TEXTUAL_LITERAL@116..120 "here" [] []
+        0: MD_TEXTUAL@86..101
+          0: MD_TEXTUAL_LITERAL@86..101 "More code" [Newline("\n"), Newline("\n"), Whitespace("    ")] []
+        1: MD_TEXTUAL@101..120
+          0: MD_TEXTUAL_LITERAL@101..120 "continues here" [Newline("\n"), Whitespace("    ")] []
   2: EOF@120..121 "" [Newline("\n")] []
 
 ```
