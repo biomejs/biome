@@ -22,7 +22,7 @@ invalid.js:2:5 lint/nursery/noEqualsToNull  FIXABLE  ━━━━━━━━━
     3 │ foo != null;
     4 │ 
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use === instead.
   
@@ -42,7 +42,7 @@ invalid.js:3:5 lint/nursery/noEqualsToNull  FIXABLE  ━━━━━━━━━
       │     ^^
     4 │ 
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use !== instead.
   

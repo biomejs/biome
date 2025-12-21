@@ -29,7 +29,7 @@ invalid.js:2:10 lint/nursery/noDeprecatedImports ━━━━━━━━━━�
   
   i You should probably import a different symbol instead.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -50,7 +50,7 @@ invalid.js:4:10 lint/nursery/noDeprecatedImports ━━━━━━━━━━�
   
   i You should probably import a different symbol instead.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -70,7 +70,7 @@ invalid.js:6:8 lint/nursery/noDeprecatedImports ━━━━━━━━━━�
   
   i You should probably import a different symbol instead.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

@@ -371,7 +371,7 @@ invalid.ts:7:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -393,7 +393,7 @@ invalid.ts:8:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -411,7 +411,7 @@ invalid.ts:13:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -436,7 +436,7 @@ invalid.ts:17:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -459,7 +459,7 @@ invalid.ts:24:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -482,7 +482,7 @@ invalid.ts:32:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -501,7 +501,7 @@ invalid.ts:38:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -519,7 +519,7 @@ invalid.ts:45:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -542,7 +542,7 @@ invalid.ts:53:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -560,7 +560,7 @@ invalid.ts:56:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -579,7 +579,7 @@ invalid.ts:58:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -597,7 +597,7 @@ invalid.ts:59:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -616,7 +616,7 @@ invalid.ts:64:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -635,7 +635,7 @@ invalid.ts:65:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -654,7 +654,7 @@ invalid.ts:70:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -673,7 +673,7 @@ invalid.ts:71:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -692,7 +692,7 @@ invalid.ts:91:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -717,7 +717,7 @@ invalid.ts:95:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -739,7 +739,7 @@ invalid.ts:101:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -761,7 +761,7 @@ invalid.ts:105:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -787,7 +787,7 @@ invalid.ts:112:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -812,7 +812,7 @@ invalid.ts:125:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -835,7 +835,7 @@ invalid.ts:128:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -861,7 +861,7 @@ invalid.ts:133:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -880,7 +880,7 @@ invalid.ts:137:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -899,7 +899,7 @@ invalid.ts:138:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -918,7 +918,7 @@ invalid.ts:139:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -937,7 +937,7 @@ invalid.ts:154:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -962,7 +962,7 @@ invalid.ts:158:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -984,7 +984,7 @@ invalid.ts:164:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1006,7 +1006,7 @@ invalid.ts:168:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1032,7 +1032,7 @@ invalid.ts:175:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1057,7 +1057,7 @@ invalid.ts:188:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1080,7 +1080,7 @@ invalid.ts:191:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1106,7 +1106,7 @@ invalid.ts:196:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1125,7 +1125,7 @@ invalid.ts:200:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1144,7 +1144,7 @@ invalid.ts:201:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1166,7 +1166,7 @@ invalid.ts:202:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1185,7 +1185,7 @@ invalid.ts:219:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1210,7 +1210,7 @@ invalid.ts:223:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1232,7 +1232,7 @@ invalid.ts:229:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1254,7 +1254,7 @@ invalid.ts:233:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1280,7 +1280,7 @@ invalid.ts:240:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1305,7 +1305,7 @@ invalid.ts:253:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1328,7 +1328,7 @@ invalid.ts:256:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1355,7 +1355,7 @@ invalid.ts:262:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1374,7 +1374,7 @@ invalid.ts:266:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1393,7 +1393,7 @@ invalid.ts:267:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1415,7 +1415,7 @@ invalid.ts:268:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1437,7 +1437,7 @@ invalid.ts:271:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1455,7 +1455,7 @@ invalid.ts:289:3 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1474,7 +1474,7 @@ invalid.ts:290:3 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1493,7 +1493,7 @@ invalid.ts:291:3 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1512,7 +1512,7 @@ invalid.ts:295:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1535,7 +1535,7 @@ invalid.ts:296:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1562,7 +1562,7 @@ invalid.ts:297:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1585,7 +1585,7 @@ invalid.ts:301:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1608,7 +1608,7 @@ invalid.ts:309:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1631,7 +1631,7 @@ invalid.ts:314:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1654,7 +1654,7 @@ invalid.ts:319:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1677,7 +1677,7 @@ invalid.ts:324:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1704,7 +1704,7 @@ invalid.ts:330:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await operator.
   
@@ -1727,7 +1727,7 @@ invalid.ts:336:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1746,7 +1746,7 @@ invalid.ts:338:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1764,7 +1764,7 @@ invalid.ts:339:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -1782,7 +1782,7 @@ invalid.ts:349:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

@@ -84,7 +84,7 @@ invalid.tsx:5:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━�
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -103,7 +103,7 @@ invalid.tsx:7:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━�
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -122,7 +122,7 @@ invalid.tsx:9:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━�
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -141,7 +141,7 @@ invalid.tsx:11:2 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -160,7 +160,7 @@ invalid.tsx:13:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -179,7 +179,7 @@ invalid.tsx:15:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -198,7 +198,7 @@ invalid.tsx:17:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -217,7 +217,7 @@ invalid.tsx:19:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -236,7 +236,7 @@ invalid.tsx:21:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -255,7 +255,7 @@ invalid.tsx:23:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -274,7 +274,7 @@ invalid.tsx:25:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -293,7 +293,7 @@ invalid.tsx:27:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -312,7 +312,7 @@ invalid.tsx:29:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -331,7 +331,7 @@ invalid.tsx:31:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -350,7 +350,7 @@ invalid.tsx:33:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -369,7 +369,7 @@ invalid.tsx:35:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -388,7 +388,7 @@ invalid.tsx:37:39 lint/nursery/noUnusedExpressions ━━━━━━━━━�
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -407,7 +407,7 @@ invalid.tsx:39:10 lint/nursery/noUnusedExpressions ━━━━━━━━━�
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -426,7 +426,7 @@ invalid.tsx:41:34 lint/nursery/noUnusedExpressions ━━━━━━━━━�
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -445,7 +445,7 @@ invalid.tsx:43:35 lint/nursery/noUnusedExpressions ━━━━━━━━━�
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -464,7 +464,7 @@ invalid.tsx:45:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -483,7 +483,7 @@ invalid.tsx:47:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -502,7 +502,7 @@ invalid.tsx:49:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -521,7 +521,7 @@ invalid.tsx:51:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -540,7 +540,7 @@ invalid.tsx:53:1 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -559,7 +559,7 @@ invalid.tsx:55:20 lint/nursery/noUnusedExpressions ━━━━━━━━━�
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -578,7 +578,7 @@ invalid.tsx:59:9 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -597,7 +597,7 @@ invalid.tsx:60:9 lint/nursery/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

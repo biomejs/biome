@@ -50,7 +50,7 @@ invalid.js:3:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━�
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -72,7 +72,7 @@ invalid.js:5:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━�
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -93,7 +93,7 @@ invalid.js:8:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━�
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -116,7 +116,7 @@ invalid.js:10:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -138,7 +138,7 @@ invalid.js:12:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -159,7 +159,7 @@ invalid.js:15:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -182,7 +182,7 @@ invalid.js:17:45 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -210,7 +210,7 @@ invalid.js:19:45 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -237,7 +237,7 @@ invalid.js:21:45 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -263,7 +263,7 @@ invalid.js:24:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -286,7 +286,7 @@ invalid.js:26:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   
@@ -308,7 +308,7 @@ invalid.js:28:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
   
   i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the catch binding.
   

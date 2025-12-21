@@ -76,7 +76,7 @@ invalid.jsx:2:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Check the spelling or consider using a valid data-* attribute for custom properties.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -97,7 +97,7 @@ invalid.jsx:3:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Check the spelling or consider using a valid data-* attribute for custom properties.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -118,7 +118,7 @@ invalid.jsx:4:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Check the spelling or consider using a valid data-* attribute for custom properties.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -139,7 +139,7 @@ invalid.jsx:5:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Check the spelling or consider using a valid data-* attribute for custom properties.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -160,7 +160,7 @@ invalid.jsx:6:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Check the spelling or consider using a valid data-* attribute for custom properties.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -181,7 +181,7 @@ invalid.jsx:7:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Use 'className' instead of 'class' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -202,7 +202,7 @@ invalid.jsx:8:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Use 'htmlFor' instead of 'for' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -223,7 +223,7 @@ invalid.jsx:9:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Use 'acceptCharset' instead of 'accept-charset' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -244,7 +244,7 @@ invalid.jsx:10:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Use 'httpEquiv' instead of 'http-equiv' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -265,7 +265,7 @@ invalid.jsx:11:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Use 'accessKey' instead of 'accesskey' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -286,7 +286,7 @@ invalid.jsx:12:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Use 'onClick' instead of 'onclick' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -307,7 +307,7 @@ invalid.jsx:13:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Use 'onMouseDown' instead of 'onmousedown' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -328,7 +328,7 @@ invalid.jsx:14:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Use 'onMouseDown' instead of 'onMousedown' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -349,7 +349,7 @@ invalid.jsx:15:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Use 'xlinkHref' instead of 'xlink:href' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -370,7 +370,7 @@ invalid.jsx:16:8 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Use 'clipPath' instead of 'clip-path' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -391,7 +391,7 @@ invalid.jsx:17:10 lint/nursery/noUnknownAttribute ━━━━━━━━━━
   
   i Use 'crossOrigin' instead of 'crossorigin' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -412,7 +412,7 @@ invalid.jsx:17:22 lint/nursery/noUnknownAttribute ━━━━━━━━━━
   
   i Use 'noModule' instead of 'nomodule' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -433,7 +433,7 @@ invalid.jsx:18:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Use 'crossOrigin' instead of 'crossorigin' for React components.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -454,7 +454,7 @@ invalid.jsx:19:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: script,img,video,audio,link,image
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -475,7 +475,7 @@ invalid.jsx:20:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: link
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -496,7 +496,7 @@ invalid.jsx:22:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: audio,video
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -517,7 +517,7 @@ invalid.jsx:23:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: audio,video
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -538,7 +538,7 @@ invalid.jsx:24:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: audio,video
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -559,7 +559,7 @@ invalid.jsx:25:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: audio,video
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -580,7 +580,7 @@ invalid.jsx:26:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: audio,video
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -601,7 +601,7 @@ invalid.jsx:27:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: audio,video,img,link,source,script,picture,iframe
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -622,7 +622,7 @@ invalid.jsx:29:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: script,img,link,picture,iframe,object,source
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -643,7 +643,7 @@ invalid.jsx:30:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: altGlyph,circle,ellipse,g,line,marker,mask,path,polygon,polyline,rect,svg,symbol,text,textPath,tref,tspan,use,animate,animateColor,animateMotion,animateTransform,set
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -664,7 +664,7 @@ invalid.jsx:32:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: audio,video
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -685,7 +685,7 @@ invalid.jsx:33:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: audio,video
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -706,7 +706,7 @@ invalid.jsx:34:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: audio,video
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -727,7 +727,7 @@ invalid.jsx:36:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: video
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -748,7 +748,7 @@ invalid.jsx:37:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: iframe,video
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -769,7 +769,7 @@ invalid.jsx:39:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: a,area
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -790,7 +790,7 @@ invalid.jsx:40:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: link
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -811,7 +811,7 @@ invalid.jsx:41:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: link
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -832,7 +832,7 @@ invalid.jsx:42:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Check the spelling or consider using a valid data-* attribute for custom properties.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -853,7 +853,7 @@ invalid.jsx:43:48 lint/nursery/noUnknownAttribute ━━━━━━━━━━
   
   i Check the spelling or consider using a valid data-* attribute for custom properties.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -874,7 +874,7 @@ invalid.jsx:44:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: th,td
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -895,7 +895,7 @@ invalid.jsx:45:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: input
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -916,7 +916,7 @@ invalid.jsx:46:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i This attribute is only allowed on: input
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -937,7 +937,7 @@ invalid.jsx:49:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   
   i Check the spelling or consider using a valid data-* attribute for custom properties.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

@@ -26,7 +26,7 @@ invalid-define-props-array.vue:2:5 lint/nursery/noVueReservedProps ━━━━�
   
   i Rename the prop to avoid possible conflicts.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -45,7 +45,7 @@ invalid-define-props-array.vue:3:5 lint/nursery/noVueReservedProps ━━━━�
   
   i Rename the prop to avoid possible conflicts.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

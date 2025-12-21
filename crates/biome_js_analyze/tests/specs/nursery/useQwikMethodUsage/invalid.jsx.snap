@@ -209,7 +209,7 @@ invalid.jsx:6:17 lint/nursery/useQwikMethodUsage ━━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -235,7 +235,7 @@ invalid.jsx:11:3 lint/nursery/useQwikMethodUsage ━━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -257,7 +257,7 @@ invalid.jsx:17:21 lint/nursery/useQwikMethodUsage ━━━━━━━━━━
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -283,7 +283,7 @@ invalid.jsx:22:22 lint/nursery/useQwikMethodUsage ━━━━━━━━━━
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -309,7 +309,7 @@ invalid.jsx:31:22 lint/nursery/useQwikMethodUsage ━━━━━━━━━━
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -335,7 +335,7 @@ invalid.jsx:40:5 lint/nursery/useQwikMethodUsage ━━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -358,7 +358,7 @@ invalid.jsx:49:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -381,7 +381,7 @@ invalid.jsx:50:17 lint/nursery/useQwikMethodUsage ━━━━━━━━━━
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -407,7 +407,7 @@ invalid.jsx:51:3 lint/nursery/useQwikMethodUsage ━━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -430,7 +430,7 @@ invalid.jsx:59:20 lint/nursery/useQwikMethodUsage ━━━━━━━━━━
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -453,7 +453,7 @@ invalid.jsx:66:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -476,7 +476,7 @@ invalid.jsx:73:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -499,7 +499,7 @@ invalid.jsx:79:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -522,7 +522,7 @@ invalid.jsx:86:20 lint/nursery/useQwikMethodUsage ━━━━━━━━━━
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -545,7 +545,7 @@ invalid.jsx:94:20 lint/nursery/useQwikMethodUsage ━━━━━━━━━━
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -568,7 +568,7 @@ invalid.jsx:102:20 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -591,7 +591,7 @@ invalid.jsx:111:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -614,7 +614,7 @@ invalid.jsx:117:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -637,7 +637,7 @@ invalid.jsx:123:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -660,7 +660,7 @@ invalid.jsx:129:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -683,7 +683,7 @@ invalid.jsx:138:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -706,7 +706,7 @@ invalid.jsx:146:22 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -729,7 +729,7 @@ invalid.jsx:155:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -752,7 +752,7 @@ invalid.jsx:162:20 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -775,7 +775,7 @@ invalid.jsx:169:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -798,7 +798,7 @@ invalid.jsx:175:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
   
   i Check the Qwik documentation.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

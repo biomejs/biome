@@ -39,7 +39,7 @@ invalid.jsx:3:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -60,7 +60,7 @@ invalid.jsx:5:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -81,7 +81,7 @@ invalid.jsx:7:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -102,7 +102,7 @@ invalid.jsx:9:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -123,7 +123,7 @@ invalid.jsx:11:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━�
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -144,7 +144,7 @@ invalid.jsx:13:34 lint/nursery/noScriptUrl ━━━━━━━━━━━━�
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -164,7 +164,7 @@ invalid.jsx:15:34 lint/nursery/noScriptUrl ━━━━━━━━━━━━�
   
   i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

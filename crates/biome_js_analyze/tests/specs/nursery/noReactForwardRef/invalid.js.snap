@@ -42,7 +42,7 @@ invalid.js:3:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━�
   
   i Replace the use of forwardRef with passing ref as a prop.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
   
@@ -75,7 +75,7 @@ invalid.js:7:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━�
   
   i Replace the use of forwardRef with passing ref as a prop.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
   
@@ -108,7 +108,7 @@ invalid.js:9:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━�
   
   i Replace the use of forwardRef with passing ref as a prop.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
   
@@ -143,7 +143,7 @@ invalid.js:13:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━�
   
   i Replace the use of forwardRef with passing ref as a prop.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
   

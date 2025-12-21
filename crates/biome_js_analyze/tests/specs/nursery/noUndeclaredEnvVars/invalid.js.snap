@@ -28,7 +28,7 @@ invalid.js:4:21 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━�
     5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
     6 │ const acmeSecret = process.env.ACME_SECRET;
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -45,7 +45,7 @@ invalid.js:5:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━�
     6 │ const acmeSecret = process.env.ACME_SECRET;
     7 │ 
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -62,7 +62,7 @@ invalid.js:6:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━�
     7 │ 
     8 │ // Also invalid with import.meta.env
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -77,7 +77,7 @@ invalid.js:9:23 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━�
        │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ 
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

@@ -111,7 +111,7 @@ invalid.js:3:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the array index access with array destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -132,7 +132,7 @@ invalid.js:6:2 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the array index access with array destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -153,7 +153,7 @@ invalid.js:9:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -174,7 +174,7 @@ invalid.js:12:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -195,7 +195,7 @@ invalid.js:15:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -216,7 +216,7 @@ invalid.js:18:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -237,7 +237,7 @@ invalid.js:21:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -258,7 +258,7 @@ invalid.js:24:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -279,7 +279,7 @@ invalid.js:27:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -300,7 +300,7 @@ invalid.js:33:2 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -321,7 +321,7 @@ invalid.js:41:8 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -341,7 +341,7 @@ invalid.js:47:20 lint/nursery/useDestructuring ━━━━━━━━━━━
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -362,7 +362,7 @@ invalid.js:51:17 lint/nursery/useDestructuring ━━━━━━━━━━━
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -383,7 +383,7 @@ invalid.js:54:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -404,7 +404,7 @@ invalid.js:58:3 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -425,7 +425,7 @@ invalid.js:61:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -446,7 +446,7 @@ invalid.js:65:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -467,7 +467,7 @@ invalid.js:68:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -488,7 +488,7 @@ invalid.js:72:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -509,7 +509,7 @@ invalid.js:75:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -530,7 +530,7 @@ invalid.js:78:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -551,7 +551,7 @@ invalid.js:81:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -572,7 +572,7 @@ invalid.js:85:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
   i Replace the property access with object destructuring syntax.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

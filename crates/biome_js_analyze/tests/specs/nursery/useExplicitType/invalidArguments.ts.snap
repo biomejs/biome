@@ -48,7 +48,7 @@ invalidArguments.ts:2:23 lint/nursery/useExplicitType ━━━━━━━━�
   
   i Add a type to the parameter.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -68,7 +68,7 @@ invalidArguments.ts:5:28 lint/nursery/useExplicitType ━━━━━━━━�
   
   i Replace any with unknown or a more specific type.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -88,7 +88,7 @@ invalidArguments.ts:8:14 lint/nursery/useExplicitType ━━━━━━━━�
   
   i Add a type to the parameter.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -109,7 +109,7 @@ invalidArguments.ts:12:11 lint/nursery/useExplicitType ━━━━━━━━�
   
   i Add a type to the parameter.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -130,7 +130,7 @@ invalidArguments.ts:13:9 lint/nursery/useExplicitType ━━━━━━━━�
   
   i Add a type to the parameter.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -151,7 +151,7 @@ invalidArguments.ts:16:11 lint/nursery/useExplicitType ━━━━━━━━�
   
   i Add a type to the parameter.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -171,7 +171,7 @@ invalidArguments.ts:20:9 lint/nursery/useExplicitType ━━━━━━━━�
   
   i Add a type to the parameter.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -192,7 +192,7 @@ invalidArguments.ts:23:11 lint/nursery/useExplicitType ━━━━━━━━�
   
   i Add a type to the parameter.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

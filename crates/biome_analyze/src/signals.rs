@@ -385,7 +385,7 @@ where
             }
             if <R::Group as RuleGroup>::NAME == "nursery" {
                 diagnostic = diagnostic.note(markup! {
-                    "This rule is in the nursery, which means it is not yet stable and may change in the future. Visit "<Hyperlink href="https://biomejs.dev/linter/#nursery">"https://biomejs.dev/linter/#nursery"</Hyperlink>" for more information."
+                    "This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit "<Hyperlink href="https://biomejs.dev/linter/#nursery">"https://biomejs.dev/linter/#nursery"</Hyperlink>" for more information."
                 });
             }
             AnalyzerDiagnostic::from(diagnostic)

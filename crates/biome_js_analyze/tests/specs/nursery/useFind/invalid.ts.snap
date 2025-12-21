@@ -28,7 +28,7 @@ invalid.ts:1:1 lint/nursery/useFind ━━━━━━━━━━━━━━�
   
   i Use Array#find() instead of Array#filter[0] to improve readability.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -46,7 +46,7 @@ invalid.ts:2:16 lint/nursery/useFind ━━━━━━━━━━━━━━�
   
   i Use Array#find() instead of Array#filter[0] to improve readability.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -65,7 +65,7 @@ invalid.ts:4:1 lint/nursery/useFind ━━━━━━━━━━━━━━�
   
   i Use Array#find() instead of Array#filter[0] to improve readability.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -83,7 +83,7 @@ invalid.ts:5:16 lint/nursery/useFind ━━━━━━━━━━━━━━�
   
   i Use Array#find() instead of Array#filter[0] to improve readability.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -102,7 +102,7 @@ invalid.ts:7:1 lint/nursery/useFind ━━━━━━━━━━━━━━�
   
   i Use Array#find() instead of Array#filter[0] to improve readability.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -119,7 +119,7 @@ invalid.ts:8:1 lint/nursery/useFind ━━━━━━━━━━━━━━�
   
   i Use Array#find() instead of Array#filter[0] to improve readability.
   
-  i This rule is in the nursery, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
