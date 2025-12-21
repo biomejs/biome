@@ -6,7 +6,7 @@ Related to [#8491](https://github.com/biomejs/biome/issues/8491): Fixed the issu
 
 This new change will check for safe boolean expressions in variable declarations.
 
-For example
+For example,
 
 Valid:
 
