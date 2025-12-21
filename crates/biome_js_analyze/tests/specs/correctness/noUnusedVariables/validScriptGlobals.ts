@@ -1,4 +1,6 @@
 /* should not generate diagnostics */
+
+// Top-level interfaces are exempt in script files, since they may merge with global types.
 interface Array<T> {
 	g: (a: T) => void;
 }

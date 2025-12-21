@@ -63,6 +63,15 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### Valid
+    /// 
+    /// Top-level interfaces and namespaces in script files (files without
+    /// imports or exports) are not reported, as they may augment global types:
+    ///
+    /// ```ts
+    /// interface Array<T> {
+    ///     customMethod: (a: T) => void;
+    /// }
+    /// ```
     ///
     /// ```js
     /// function foo(b) {
