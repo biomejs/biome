@@ -9,6 +9,46 @@ use utils::{
 };
 
 #[test]
+fn infer_flattened_type_of_static_member_on_union() {
+    // This test triggers flattening of a static member access on a union type.
+    // It mimics the original bug where `parentNode = parentNode.parentNode;` caused
+    // runaway type growth because accessing a property on a union created new
+    // TypeofExpression::StaticMember nodes for each variant.
+    const CODE: &str = r#"interface Node {
+    parentNode: Node | null;
+}
+
+declare let parentNode: Node | null;
+
+parentNode.parentNode"#;
+
+    let root = parse_ts(CODE);
+    let interface_decl = get_interface_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let interface_ty =
+        TypeData::from_ts_interface_declaration(&mut resolver, ScopeId::GLOBAL, &interface_decl)
+            .expect("interface must be inferred");
+    resolver.run_inference();
+
+    // Create the union type: Node | null
+    let interface_ref = resolver.reference_to_owned_data(interface_ty.clone());
+    let null_ref = resolver.reference_to_owned_data(TypeData::Null);
+    let union_ty = TypeData::union_of(&resolver, [interface_ref, null_ref].into());
+
+    let expr = get_expression(&root);
+    let mut resolver = HardcodedSymbolResolver::new("parentNode", union_ty, resolver);
+    let expr_ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    let expr_ty = expr_ty.inferred(&mut resolver);
+
+    assert_type_data_snapshot(
+        CODE,
+        &expr_ty,
+        &resolver,
+        "infer_flattened_type_of_static_member_on_union",
+    )
+}
+
+#[test]
 fn infer_flattened_type_of_typeof_expression() {
     const CODE: &str = r#"const foo = "foo";
 

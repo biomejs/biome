@@ -8,7 +8,7 @@ use crate::{
     CallArgumentType, DestructureField, Function, FunctionParameter, Literal, MAX_FLATTEN_DEPTH,
     Resolvable, ResolvedTypeData, ResolvedTypeMember, ResolverId, TypeData, TypeMember,
     TypeReference, TypeResolver, TypeofCallExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofStaticMemberExpression,
+    TypeofExpression,
     conditionals::{
         ConditionalType, reference_to_falsy_subset_of, reference_to_non_nullish_subset_of,
         reference_to_truthy_subset_of,
@@ -265,26 +265,31 @@ pub(super) fn flattened_expression(
                 }
 
                 TypeData::Union(_) => {
-                    let types: Vec<_> = object
+                    // Resolve the requested member across union variants directly and build a union of the resulting references.
+                    let variants: Vec<_> = object
                         .flattened_union_variants(resolver)
                         .filter(|variant| *variant != GLOBAL_UNDEFINED_ID.into())
                         .collect();
-                    let types = types
-                        .into_iter()
-                        .map(|variant| {
-                            // Resolve and flatten the type member for each variant.
-                            let variant = TypeData::TypeofExpression(Box::new(
-                                TypeofExpression::StaticMember(TypeofStaticMemberExpression {
-                                    object: variant,
-                                    member: expr.member.clone(),
-                                }),
-                            ));
 
-                            resolver.reference_to_owned_data(variant)
-                        })
-                        .collect();
+                    let mut types: Vec<TypeReference> = Vec::new();
+                    for variant in variants {
+                        if let Some(resolved) = resolver.resolve_and_get(&variant) {
+                            let member_opt = resolved
+                                .find_member(resolver, |member| member.has_name(&expr.member))
+                                .or_else(|| {
+                                    resolved
+                                        .find_index_signature_with_ty(resolver, |ty| ty.is_string())
+                                });
+                            if let Some(member) = member_opt {
+                                let type_ref = resolver.reference_to_owned_data(
+                                    TypeData::Reference(member.deref_ty(resolver).into_owned()),
+                                );
+                                types.push(type_ref);
+                            }
+                        }
+                    }
 
-                    Some(TypeData::union_of(resolver, types))
+                    Some(TypeData::union_of(resolver, types.into_boxed_slice()))
                 }
 
                 _ => {

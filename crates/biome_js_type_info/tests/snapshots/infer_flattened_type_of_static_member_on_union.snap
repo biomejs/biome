@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+interface Node {
+	parentNode: Node | null;
+}
+
+declare let parentNode: Node | null;
+
+parentNode.parentNode;
+
+```
+
+## Result
+
+```
+Global TypeId(0) | Global TypeId(1) | Global TypeId(2)
+```
+
+## Registered types
+
+```
+Thin TypeId(0) => Global TypeId(3) | Global TypeId(1)
+
+Global TypeId(0) => instanceof unresolved reference "Node" (scope ID: 0)
+
+Global TypeId(1) => null
+
+Global TypeId(2) => Global TypeId(0) | Global TypeId(1)
+
+Global TypeId(3) => interface "Node" {
+  extends: []
+  type_args: []
+  members: ["parentNode": Global TypeId(2)]
+}
+```
