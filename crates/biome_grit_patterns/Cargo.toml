@@ -1,15 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome implementation for Grit Patterns"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_grit_patterns"
-publish              = false
-repository.workspace = true
 version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome implementation for Grit Patterns"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
 
 [dependencies]
 biome_analyze        = { workspace = true }
@@ -27,7 +27,7 @@ biome_string_case    = { workspace = true }
 camino               = { workspace = true }
 grit-pattern-matcher = { workspace = true }
 grit-util            = { workspace = true }
-path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
+path-absolutize      = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 rand                 = { version = "=0.8.5" }
 regex                = { workspace = true }
 rustc-hash           = { workspace = true }
@@ -41,7 +41,7 @@ insta            = { workspace = true }
 tests_macros     = { path = "../tests_macros" }
 
 [features]
-schema = ["dep:schemars", "serde", "biome_js_parser/schema"]
+schema = ["biome_js_parser/schema", "dep:schemars", "serde"]
 serde  = ["dep:serde", "dep:serde_json"]
 
 [lints]

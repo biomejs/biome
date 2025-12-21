@@ -1,22 +1,29 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome Configuration"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_configuration"
-publish              = false
-repository.workspace = true
 version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome Configuration"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-biome_analyze = { workspace = true, features = ["serde"] }
-biome_console = { workspace = true }
+[package.metadata.cargo-udeps.ignore]
+# currently technically not used, but needed in order to compile because of the `schema` feature
+normal = ["biome_html_syntax"]
 
+[[bench]]
+harness = false
+name    = "biome_json"
+
+[dependencies]
+biome_analyze            = { workspace = true, features = ["serde"] }
+biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
@@ -40,38 +47,30 @@ rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 
-[features]
-schema = [
-  "dep:schemars",
-  "biome_formatter/schema",
-  "biome_json_syntax/schema",
-  "biome_html_formatter/schema",
-  "biome_html_syntax/schema",
-  "biome_analyze/schema",
-  "biome_json_formatter/schema",
-  "biome_js_formatter/schema",
-  "biome_rule_options/schema",
-  "biome_plugin_loader/schema",
-]
-
 [dev-dependencies]
 criterion    = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta        = { workspace = true }
 tests_macros = { workspace = true }
 
-[target.'cfg(target_os = "windows")'.dev-dependencies]
-mimalloc = { workspace = true }
-
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
 
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[features]
+schema = [
+  "biome_analyze/schema",
+  "biome_formatter/schema",
+  "biome_html_formatter/schema",
+  "biome_html_syntax/schema",
+  "biome_js_formatter/schema",
+  "biome_json_formatter/schema",
+  "biome_json_syntax/schema",
+  "biome_plugin_loader/schema",
+  "biome_rule_options/schema",
+  "dep:schemars",
+]
+
 [lints]
 workspace = true
-
-[package.metadata.cargo-udeps.ignore]
-# currently technically not used, but needed in order to compile because of the `schema` feature
-normal = ["biome_html_syntax"]
-
-[[bench]]
-harness = false
-name    = "biome_json"

@@ -1,15 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's core functionality"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_service"
-publish              = false
-repository.workspace = true
 version              = "0.0.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's core functionality"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -85,23 +85,23 @@ insta = { workspace = true }
 
 [features]
 js_plugin = ["biome_plugin_loader/js_plugin"]
-schema = [
-  "dep:schemars",
+schema    = [
   "biome_configuration/schema",
-  "biome_js_analyze/schema",
+  "biome_css_syntax/schema",
   "biome_formatter/schema",
+  "biome_fs/schema",
+  "biome_graphql_syntax/schema",
+  "biome_grit_patterns/schema",
+  "biome_grit_syntax/schema",
+  "biome_html_formatter/schema",
+  "biome_html_syntax/schema",
+  "biome_js_analyze/schema",
   "biome_js_factory",
   "biome_js_syntax/schema",
-  "biome_text_edit/schema",
   "biome_json_syntax/schema",
-  "biome_css_syntax/schema",
-  "biome_graphql_syntax/schema",
-  "biome_grit_syntax/schema",
-  "biome_grit_patterns/schema",
-  "biome_html_syntax/schema",
-  "biome_html_formatter/schema",
-  "biome_fs/schema",
   "biome_module_graph/schema",
+  "biome_text_edit/schema",
+  "dep:schemars",
 ]
 
 [lints]

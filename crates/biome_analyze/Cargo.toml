@@ -1,15 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's analyzer shared infrastructure"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_analyze"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's analyzer shared infrastructure"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -29,8 +29,8 @@ schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"], optional = true }
 
 [features]
-schema = ["dep:schemars", "biome_console/schema", "serde"]
-serde  = ["dep:serde", "dep:biome_deserialize", "dep:biome_deserialize_macros"]
+schema = ["biome_console/schema", "dep:schemars", "serde"]
+serde  = ["dep:biome_deserialize", "dep:biome_deserialize_macros", "dep:serde"]
 
 [lints]
 workspace = true
