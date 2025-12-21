@@ -1,4 +1,5 @@
 use crate::parser::TailwindParser;
+use crate::syntax::variant::parse_data_attribute;
 use crate::token_source::TailwindLexContext;
 use biome_parser::Parser;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -12,6 +13,9 @@ pub(crate) fn parse_value(p: &mut TailwindParser) -> ParsedSyntax {
     }
     if p.at(T!['(']) {
         return parse_css_variable_value(p);
+    }
+    if p.at(T![data]) {
+        return parse_data_attribute(p);
     }
     parse_named_value(p)
 }

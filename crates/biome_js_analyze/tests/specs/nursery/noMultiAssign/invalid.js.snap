@@ -46,6 +46,8 @@ invalid.js:2:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   
   i Split into separate assignments.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -64,6 +66,8 @@ invalid.js:3:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
   
   i Split into separate assignments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -84,6 +88,8 @@ invalid.js:4:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   
   i Split into separate assignments.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -103,6 +109,8 @@ invalid.js:5:2 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   
   i Split into separate assignments.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -121,6 +129,8 @@ invalid.js:6:2 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
   
   i Split into separate assignments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -144,6 +154,8 @@ invalid.js:7:2 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   
   i Split into separate assignments.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -162,6 +174,8 @@ invalid.js:10:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
   
   i Split into separate assignments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -182,6 +196,8 @@ invalid.js:11:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   
   i Split into separate assignments.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -200,6 +216,8 @@ invalid.js:12:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
   
   i Split into separate assignments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -223,6 +241,8 @@ invalid.js:13:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   
   i Split into separate assignments.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -241,6 +261,8 @@ invalid.js:16:2 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
   
   i Split into separate assignments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -261,6 +283,8 @@ invalid.js:17:2 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   
   i Split into separate assignments.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -279,6 +303,8 @@ invalid.js:19:7 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
   
   i Split into separate assignments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -299,6 +325,8 @@ invalid.js:20:11 lint/nursery/noMultiAssign ━━━━━━━━━━━━
   
   i Split into separate assignments.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -317,6 +345,8 @@ invalid.js:21:11 lint/nursery/noMultiAssign ━━━━━━━━━━━━
   i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
   
   i Split into separate assignments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -337,6 +367,8 @@ invalid.js:22:8 lint/nursery/noMultiAssign ━━━━━━━━━━━━�
   
   i Split into separate assignments.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -354,6 +386,8 @@ invalid.js:23:12 lint/nursery/noMultiAssign ━━━━━━━━━━━━
   i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
   
   i Split into separate assignments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

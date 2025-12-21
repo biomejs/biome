@@ -1381,6 +1381,20 @@
 			},
 			"additionalProperties": false
 		},
+		"DeclarationStyle": {
+			"oneOf": [
+				{
+					"description": "defineProps<{...}>()",
+					"type": "string",
+					"const": "type"
+				},
+				{
+					"description": "defineProps({...})",
+					"type": "string",
+					"const": "runtime"
+				}
+			]
+		},
 		"DependencyAvailability": {
 			"oneOf": [
 				{
@@ -5527,6 +5541,15 @@
 					"description": "Enforce unique operation names across a GraphQL document.\nSee <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseUniqueGraphqlOperationNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueConsistentDefinePropsDeclaration": {
+					"description": "Enforce consistent defineProps declaration style.\nSee <https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration>",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/UseVueConsistentDefinePropsDeclarationConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -9758,6 +9781,17 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueConsistentDefinePropsDeclarationOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/UseVueConsistentDefinePropsDeclarationOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueDefineMacrosOrderOptions": {
 			"type": "object",
 			"properties": {
@@ -12790,6 +12824,23 @@
 		},
 		"UseValidTypeofOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueConsistentDefinePropsDeclarationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{
+					"$ref": "#/$defs/RuleWithUseVueConsistentDefinePropsDeclarationOptions"
+				}
+			]
+		},
+		"UseVueConsistentDefinePropsDeclarationOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"anyOf": [{ "$ref": "#/$defs/DeclarationStyle" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseVueDefineMacrosOrderConfiguration": {

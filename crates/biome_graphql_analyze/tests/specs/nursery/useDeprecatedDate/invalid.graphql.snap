@@ -38,6 +38,8 @@ invalid.graphql:2:10 lint/nursery/useDeprecatedDate ━━━━━━━━━�
   
   i Add a `deletionDate` argument to the directive.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -54,6 +56,8 @@ invalid.graphql:8:10 lint/nursery/useDeprecatedDate ━━━━━━━━━�
   
   i The argument must match the `YYYY-MM-DD` format.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -69,6 +73,8 @@ invalid.graphql:14:10 lint/nursery/useDeprecatedDate ━━━━━━━━━
     16 │ 	}
   
   i Remove deprecated code or move deprecation date to the future.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

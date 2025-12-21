@@ -36,6 +36,8 @@ whitespace.jsx:3:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
      1  1 │   <>
@@ -61,6 +63,8 @@ whitespace.jsx:4:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     6 │   <p className="   ">empty with spaces</p>
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -88,6 +92,8 @@ whitespace.jsx:5:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
      3  3 │     <p className="text-sm font-bold            ">hello world</p>
@@ -113,6 +119,8 @@ whitespace.jsx:8:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     10 │   
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -140,6 +148,8 @@ whitespace.jsx:9:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
      7  7 │     <p className="">empty without spaces</p>
@@ -164,6 +174,8 @@ whitespace.jsx:12:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     14 │   <p className={`  text-sm  font-bold  `}>template literal both</p>
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -191,6 +203,8 @@ whitespace.jsx:13:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     11 11 │     {/* Template literal cases */}
@@ -215,6 +229,8 @@ whitespace.jsx:14:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     15 │ </>
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   

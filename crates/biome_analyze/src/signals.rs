@@ -380,8 +380,13 @@ where
             if let Some(issue_number) = ctx.metadata().issue_number {
                 let url = format!("https://github.com/biomejs/biome/issues/{}", issue_number);
                 diagnostic = diagnostic.note(markup! {
-                         "This rule is still being actively worked on, so it may be missing features or have rough edges. Visit "<Hyperlink href={url.as_str()}>{url.as_str()}</Hyperlink>" for more information or to report possible bugs."
-                     });
+                 "This rule is still being actively worked on, so it may be missing features or have rough edges. Visit "<Hyperlink href={url.as_str()}>{url.as_str()}</Hyperlink>" for more information or to report possible bugs."
+                });
+            }
+            if <R::Group as RuleGroup>::NAME == "nursery" {
+                diagnostic = diagnostic.note(markup! {
+                    "This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit "<Hyperlink href="https://biomejs.dev/linter/#nursery">"https://biomejs.dev/linter/#nursery"</Hyperlink>" for more information."
+                });
             }
             AnalyzerDiagnostic::from(diagnostic)
         })

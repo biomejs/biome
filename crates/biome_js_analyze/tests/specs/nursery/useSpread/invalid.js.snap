@@ -26,6 +26,8 @@ invalid.js:3:1 lint/nursery/useSpread  FIXABLE  ━━━━━━━━━━�
     4 │ foo.apply(null, [1, 2, 3]);
     5 │ foo.apply(undefined, args);
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Use the spread operator.
   
     1 1 │   // should generate diagnostics
@@ -48,6 +50,8 @@ invalid.js:4:1 lint/nursery/useSpread  FIXABLE  ━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ foo.apply(undefined, args);
     6 │ obj.foo.apply(obj, args);
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the spread operator.
   
@@ -73,6 +77,8 @@ invalid.js:5:1 lint/nursery/useSpread  FIXABLE  ━━━━━━━━━━�
     6 │ obj.foo.apply(obj, args);
     7 │ 
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Use the spread operator.
   
     3 3 │   foo.apply(null, args);
@@ -95,6 +101,8 @@ invalid.js:6:1 lint/nursery/useSpread  FIXABLE  ━━━━━━━━━━�
   > 6 │ obj.foo.apply(obj, args);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the spread operator.
   

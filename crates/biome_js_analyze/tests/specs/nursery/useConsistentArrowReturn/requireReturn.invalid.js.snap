@@ -39,6 +39,8 @@ requireReturn.invalid.js:3:28 lint/nursery/useConsistentArrowReturn  FIXABLE  �
       │                            ^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Add braces to the arrow function body.
   
      1  1 │   
@@ -64,6 +66,8 @@ requireReturn.invalid.js:6:30 lint/nursery/useConsistentArrowReturn  FIXABLE  �
   > 8 │ }
       │ ^
     9 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the return statement.
   
@@ -92,6 +96,8 @@ requireReturn.invalid.js:11:27 lint/nursery/useConsistentArrowReturn  FIXABLE  �
     14 │ 
     15 │ const nestedArrow = {
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Remove the return statement.
   
      9  9 │   
@@ -117,6 +123,8 @@ requireReturn.invalid.js:17:23 lint/nursery/useConsistentArrowReturn  FIXABLE  �
        │                       ^^^^^^^^^^^^^^^^
     18 │         return inner;
     19 │     }
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Add braces to the arrow function body.
   
