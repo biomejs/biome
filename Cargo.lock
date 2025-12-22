@@ -85,9 +85,9 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "ascii_table"
-version = "4.0.8"
+version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4ef8ee0b4eedc5a877a8a768fecfabbe4c8b9791e17763225139a858dabd8e7"
+checksum = "2bcff894f0b9ba3bdd4c497c3c39df9662a0eedddf33e872ab29a3bda7167119"
 
 [[package]]
 name = "autocfg"
@@ -115,15 +115,6 @@ name = "base64"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
-
-[[package]]
-name = "bincode"
-version = "1.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1f45e9417d87227c7a56d22e471c6206462cba514c7590c09aff4cf6d1ddcad"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "biome_analyze"
@@ -2123,24 +2114,6 @@ checksum = "cd7cc57abe963c6d3b9d8be5b06ba7c8957a930305ca90304f24ef040aa6f961"
 
 [[package]]
 name = "codspeed"
-version = "3.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35584c5fcba8059780748866387fb97c5a203bcfc563fc3d0790af406727a117"
-dependencies = [
- "anyhow",
- "bincode",
- "colored 2.2.0",
- "glob",
- "libc",
- "nix 0.29.0",
- "serde",
- "serde_json",
- "statrs",
- "uuid",
-]
-
-[[package]]
-name = "codspeed"
 version = "4.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c3b847e05a34be5c38f3f2a5052178a3bd32e6b5702f3ea775efde95c483a539"
@@ -2151,7 +2124,7 @@ dependencies = [
  "getrandom 0.2.15",
  "glob",
  "libc",
- "nix 0.30.1",
+ "nix",
  "serde",
  "serde_json",
  "statrs",
@@ -2159,26 +2132,28 @@ dependencies = [
 
 [[package]]
 name = "codspeed-criterion-compat"
-version = "3.0.5"
+version = "4.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78f6c1c6bed5fd84d319e8b0889da051daa361c79b7709c9394dfe1a882bba67"
+checksum = "30a0e2a53beb18dec493ec133f226e0d35e8bb2fdc638ccf7351696eabee416c"
 dependencies = [
- "codspeed 3.0.5",
+ "clap",
+ "codspeed",
  "codspeed-criterion-compat-walltime",
  "colored 2.2.0",
+ "regex",
 ]
 
 [[package]]
 name = "codspeed-criterion-compat-walltime"
-version = "3.0.5"
+version = "4.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c989289ce6b1cbde72ed560496cb8fbf5aa14d5ef5666f168e7f87751038352e"
+checksum = "1f652d6e6d40bba0f5c244744db94d92a26b7f083df18692df88fb0772f1c793"
 dependencies = [
  "anes",
  "cast",
  "ciborium",
  "clap",
- "codspeed 3.0.5",
+ "codspeed",
  "criterion-plot",
  "is-terminal",
  "itertools 0.10.5",
@@ -2202,7 +2177,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f0f0e9fe5eaa39995ec35e46407f7154346cc25bd1300c64c21636f3d00cb2cc"
 dependencies = [
  "clap",
- "codspeed 4.1.0",
+ "codspeed",
  "codspeed-divan-compat-macros",
  "codspeed-divan-compat-walltime",
  "regex",
@@ -2230,7 +2205,7 @@ checksum = "7f26092328e12a36704ffc552f379c6405dd94d3149970b79b22d371717c2aae"
 dependencies = [
  "cfg-if",
  "clap",
- "codspeed 4.1.0",
+ "codspeed",
  "condtype",
  "divan-macros",
  "libc",
@@ -3779,18 +3754,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c012d14ef788ab066a347d19e3dda699916c92293b05b85ba2c76b8c82d2830"
 dependencies = [
  "uuid",
-]
-
-[[package]]
-name = "nix"
-version = "0.29.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71e2746dc3a24dd78b3cfcb7be93368c6de9963d30f43a6a73998a9cf4b17b46"
-dependencies = [
- "bitflags 2.9.3",
- "cfg-if",
- "cfg_aliases",
- "libc",
 ]
 
 [[package]]
@@ -5581,7 +5544,6 @@ version = "1.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2f87b8aa10b915a06587d0dec516c282ff295b475d94abf425d62b57710070a2"
 dependencies = [
- "getrandom 0.3.2",
  "js-sys",
  "wasm-bindgen",
 ]

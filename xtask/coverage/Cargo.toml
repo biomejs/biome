@@ -5,7 +5,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-ascii_table        = "4.0.8"
+ascii_table        = "5.0.0"
 backtrace          = "0.3.76"
 biome_console      = { workspace = true }
 biome_diagnostics  = { workspace = true }
