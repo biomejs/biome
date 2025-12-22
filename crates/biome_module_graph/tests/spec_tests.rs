@@ -14,8 +14,9 @@ use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::{
-    CssImport, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase, JsReexport,
-    ModuleGraph, ModuleResolver, ResolvedPath,
+    CssImport, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
+    JsModuleInfoDiagnostic, JsReexport, ModuleDiagnostic, ModuleGraph, ModuleResolver,
+    ResolvedPath,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -118,6 +119,40 @@ fn get_fixtures_path() -> Utf8PathBuf {
             .to_path_buf();
     }
     path.join("crates/biome_module_graph/tests/fixtures")
+}
+
+#[test]
+fn test_type_flattening_does_not_explode_on_recursive_parent_element_pattern() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/repro.ts".into(),
+        r#"
+            const root = {} as Element;
+
+            for (let el: Element | null = root; el && el !== root; el = el.parentElement) {
+                // noop
+            }
+        "#,
+    );
+
+    let project_layout = ProjectLayout::default();
+    let added_paths = [BiomePath::new("/src/repro.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
+
+    let data = module_graph.data();
+    let module = data.get(Utf8Path::new("/src/repro.ts")).unwrap();
+    let module = module.as_js_module_info().unwrap();
+
+    assert!(
+        !module.diagnostics().iter().any(|diagnostic| matches!(
+            diagnostic,
+            ModuleDiagnostic::JsInfo(JsModuleInfoDiagnostic::ExceededTypesLimit(_))
+        )),
+        "expected module graph not to hit the types-limit diagnostic",
+    );
 }
 
 #[test]

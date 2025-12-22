@@ -265,31 +265,45 @@ pub(super) fn flattened_expression(
                 }
 
                 TypeData::Union(_) => {
-                    // Resolve the requested member across union variants directly and build a union of the resulting references.
-                    let variants: Vec<_> = object
-                        .flattened_union_variants(resolver)
-                        .filter(|variant| *variant != GLOBAL_UNDEFINED_ID.into())
-                        .collect();
-
-                    let mut types: Vec<TypeReference> = Vec::new();
-                    for variant in variants {
-                        if let Some(resolved) = resolver.resolve_and_get(&variant) {
-                            let member_opt = resolved
-                                .find_member(resolver, |member| member.has_name(&expr.member))
-                                .or_else(|| {
-                                    resolved
-                                        .find_index_signature_with_ty(resolver, |ty| ty.is_string())
-                                });
-                            if let Some(member) = member_opt {
-                                let type_ref = resolver.reference_to_owned_data(
-                                    TypeData::Reference(member.deref_ty(resolver).into_owned()),
-                                );
-                                types.push(type_ref);
-                            }
+                    // Resolve the requested member across union variants directly.
+                    // Avoid distributing `obj.member` into nested inferred expressions, which can
+                    // cause runaway type growth for patterns like `node = node.parent`.
+                    let mut types = Vec::new();
+                    for variant in object.flattened_union_variants(resolver) {
+                        if variant == GLOBAL_UNDEFINED_ID.into() {
+                            continue;
                         }
+
+                        let Some(resolved) = resolver.resolve_and_get(&variant) else {
+                            types.push(TypeReference::unknown());
+                            continue;
+                        };
+
+                        if matches!(resolved.as_raw_data(), TypeData::TypeofExpression(_)) {
+                            return None;
+                        }
+
+                        if matches!(resolved.as_raw_data(), TypeData::Unknown) {
+                            types.push(TypeReference::unknown());
+                            continue;
+                        }
+
+                        let Some(member) = resolved
+                            .find_member(resolver, |member| member.has_name(&expr.member))
+                            .or_else(|| {
+                                resolved.find_index_signature_with_ty(resolver, |ty| ty.is_string())
+                            })
+                        else {
+                            continue;
+                        };
+                        types.push(member.deref_ty(resolver).into_owned());
                     }
 
-                    Some(TypeData::union_of(resolver, types.into_boxed_slice()))
+                    if types.is_empty() {
+                        Some(TypeData::unknown())
+                    } else {
+                        Some(TypeData::union_of(resolver, types.into_boxed_slice()))
+                    }
                 }
 
                 _ => {
