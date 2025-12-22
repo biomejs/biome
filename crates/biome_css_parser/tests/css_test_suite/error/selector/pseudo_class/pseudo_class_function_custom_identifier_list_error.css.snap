@@ -73,7 +73,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@45..46 ":" [] [],
-                            class: CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
+                            class: CssPseudoClassFunctionCustomIdentifierList {
                                 name: CssIdentifier {
                                     value_token: IDENT@46..73 "active-view-transition-type" [] [],
                                 },
@@ -114,7 +114,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@98..99 ":" [] [],
-                            class: CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
+                            class: CssPseudoClassFunctionCustomIdentifierList {
                                 name: CssIdentifier {
                                     value_token: IDENT@99..126 "active-view-transition-type" [] [],
                                 },
@@ -160,7 +160,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@159..160 ":" [] [],
-                            class: CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
+                            class: CssPseudoClassFunctionCustomIdentifierList {
                                 name: CssIdentifier {
                                     value_token: IDENT@160..187 "active-view-transition-type" [] [],
                                 },
@@ -236,7 +236,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@45..89
             0: CSS_PSEUDO_CLASS_SELECTOR@45..89
               0: COLON@45..46 ":" [] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST@46..89
+              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST@46..89
                 0: CSS_IDENTIFIER@46..73
                   0: IDENT@46..73 "active-view-transition-type" [] []
                 1: L_PAREN@73..74 "(" [] []
@@ -262,7 +262,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@98..150
             0: CSS_PSEUDO_CLASS_SELECTOR@98..150
               0: COLON@98..99 ":" [] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST@99..150
+              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST@99..150
                 0: CSS_IDENTIFIER@99..126
                   0: IDENT@99..126 "active-view-transition-type" [] []
                 1: L_PAREN@126..127 "(" [] []
@@ -292,7 +292,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@159..215
             0: CSS_PSEUDO_CLASS_SELECTOR@159..215
               0: COLON@159..160 ":" [] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST@160..215
+              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST@160..215
                 0: CSS_IDENTIFIER@160..187
                   0: IDENT@160..187 "active-view-transition-type" [] []
                 1: L_PAREN@187..188 "(" [] []
@@ -318,7 +318,7 @@ CssRoot {
 ## Diagnostics
 
 ```
-pseudo_class_function_custom_identifier_comma_separated_list_error.css:1:34 parse ━━━━━━━━━━━━━━━━━━
+pseudo_class_function_custom_identifier_list_error.css:1:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found ''.
   
@@ -334,7 +334,7 @@ pseudo_class_function_custom_identifier_comma_separated_list_error.css:1:34 pars
     2 │ }
     3 │ 
   
-pseudo_class_function_custom_identifier_comma_separated_list_error.css:5:41 parse ━━━━━━━━━━━━━━━━━━
+pseudo_class_function_custom_identifier_list_error.css:5:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '123213'.
   
@@ -350,7 +350,7 @@ pseudo_class_function_custom_identifier_comma_separated_list_error.css:5:41 pars
     6 │ }
     7 │ 
   
-pseudo_class_function_custom_identifier_comma_separated_list_error.css:8:41 parse ━━━━━━━━━━━━━━━━━━
+pseudo_class_function_custom_identifier_list_error.css:8:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '123213,'.
   
@@ -370,7 +370,7 @@ pseudo_class_function_custom_identifier_comma_separated_list_error.css:8:41 pars
      9 │ }
     10 │ 
   
-pseudo_class_function_custom_identifier_comma_separated_list_error.css:8:49 parse ━━━━━━━━━━━━━━━━━━
+pseudo_class_function_custom_identifier_list_error.css:8:49 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `second`
   
@@ -383,7 +383,7 @@ pseudo_class_function_custom_identifier_comma_separated_list_error.css:8:49 pars
   
   i Remove second
   
-pseudo_class_function_custom_identifier_comma_separated_list_error.css:11:41 parse ━━━━━━━━━━━━━━━━━
+pseudo_class_function_custom_identifier_list_error.css:11:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '"string??",'.
   
@@ -403,7 +403,7 @@ pseudo_class_function_custom_identifier_comma_separated_list_error.css:11:41 par
     12 │ }
     13 │ 
   
-pseudo_class_function_custom_identifier_comma_separated_list_error.css:11:53 parse ━━━━━━━━━━━━━━━━━
+pseudo_class_function_custom_identifier_list_error.css:11:53 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `second`
   

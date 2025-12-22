@@ -1959,7 +1959,7 @@ impl CssPseudoClassFunctionCustomIdentifier {
         )
     }
 }
-impl CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
+impl CssPseudoClassFunctionCustomIdentifierList {
     pub fn with_name(self, element: CssIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax

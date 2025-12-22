@@ -4961,10 +4961,10 @@ pub struct CssPseudoClassFunctionCustomIdentifierFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
+pub struct CssPseudoClassFunctionCustomIdentifierList {
     pub(crate) syntax: SyntaxNode,
 }
-impl CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
+impl CssPseudoClassFunctionCustomIdentifierList {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -4974,8 +4974,8 @@ impl CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> CssPseudoClassFunctionCustomIdentifierCommaSeparatedListFields {
-        CssPseudoClassFunctionCustomIdentifierCommaSeparatedListFields {
+    pub fn as_fields(&self) -> CssPseudoClassFunctionCustomIdentifierListFields {
+        CssPseudoClassFunctionCustomIdentifierListFields {
             name: self.name(),
             l_paren_token: self.l_paren_token(),
             items: self.items(),
@@ -4995,7 +4995,7 @@ impl CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
         support::required_token(&self.syntax, 3usize)
     }
 }
-impl Serialize for CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
+impl Serialize for CssPseudoClassFunctionCustomIdentifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -5004,7 +5004,7 @@ impl Serialize for CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
     }
 }
 #[derive(Serialize)]
-pub struct CssPseudoClassFunctionCustomIdentifierCommaSeparatedListFields {
+pub struct CssPseudoClassFunctionCustomIdentifierListFields {
     pub name: SyntaxResult<CssIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub items: CssCustomIdentifierCommaSeparatedList,
@@ -10223,9 +10223,7 @@ pub enum AnyCssPseudoClass {
     CssPseudoClassFunctionCompoundSelector(CssPseudoClassFunctionCompoundSelector),
     CssPseudoClassFunctionCompoundSelectorList(CssPseudoClassFunctionCompoundSelectorList),
     CssPseudoClassFunctionCustomIdentifier(CssPseudoClassFunctionCustomIdentifier),
-    CssPseudoClassFunctionCustomIdentifierCommaSeparatedList(
-        CssPseudoClassFunctionCustomIdentifierCommaSeparatedList,
-    ),
+    CssPseudoClassFunctionCustomIdentifierList(CssPseudoClassFunctionCustomIdentifierList),
     CssPseudoClassFunctionIdentifier(CssPseudoClassFunctionIdentifier),
     CssPseudoClassFunctionNth(CssPseudoClassFunctionNth),
     CssPseudoClassFunctionRelativeSelectorList(CssPseudoClassFunctionRelativeSelectorList),
@@ -10265,11 +10263,11 @@ impl AnyCssPseudoClass {
             _ => None,
         }
     }
-    pub fn as_css_pseudo_class_function_custom_identifier_comma_separated_list(
+    pub fn as_css_pseudo_class_function_custom_identifier_list(
         &self,
-    ) -> Option<&CssPseudoClassFunctionCustomIdentifierCommaSeparatedList> {
+    ) -> Option<&CssPseudoClassFunctionCustomIdentifierList> {
         match &self {
-            Self::CssPseudoClassFunctionCustomIdentifierCommaSeparatedList(item) => Some(item),
+            Self::CssPseudoClassFunctionCustomIdentifierList(item) => Some(item),
             _ => None,
         }
     }
@@ -17159,13 +17157,13 @@ impl From<CssPseudoClassFunctionCustomIdentifier> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
+impl AstNode for CssPseudoClassFunctionCustomIdentifierList {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
-        CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST as u16,
+        CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST as u16,
     ));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST
+        kind == CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -17181,13 +17179,13 @@ impl AstNode for CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
+impl std::fmt::Debug for CssPseudoClassFunctionCustomIdentifierList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
         let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
-            f.debug_struct("CssPseudoClassFunctionCustomIdentifierCommaSeparatedList")
+            f.debug_struct("CssPseudoClassFunctionCustomIdentifierList")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
                     "l_paren_token",
@@ -17200,20 +17198,20 @@ impl std::fmt::Debug for CssPseudoClassFunctionCustomIdentifierCommaSeparatedLis
                 )
                 .finish()
         } else {
-            f.debug_struct("CssPseudoClassFunctionCustomIdentifierCommaSeparatedList")
+            f.debug_struct("CssPseudoClassFunctionCustomIdentifierList")
                 .finish()
         };
         DEPTH.set(current_depth);
         result
     }
 }
-impl From<CssPseudoClassFunctionCustomIdentifierCommaSeparatedList> for SyntaxNode {
-    fn from(n: CssPseudoClassFunctionCustomIdentifierCommaSeparatedList) -> Self {
+impl From<CssPseudoClassFunctionCustomIdentifierList> for SyntaxNode {
+    fn from(n: CssPseudoClassFunctionCustomIdentifierList) -> Self {
         n.syntax
     }
 }
-impl From<CssPseudoClassFunctionCustomIdentifierCommaSeparatedList> for SyntaxElement {
-    fn from(n: CssPseudoClassFunctionCustomIdentifierCommaSeparatedList) -> Self {
+impl From<CssPseudoClassFunctionCustomIdentifierList> for SyntaxElement {
+    fn from(n: CssPseudoClassFunctionCustomIdentifierList) -> Self {
         n.syntax.into()
     }
 }
@@ -26389,9 +26387,9 @@ impl From<CssPseudoClassFunctionCustomIdentifier> for AnyCssPseudoClass {
         Self::CssPseudoClassFunctionCustomIdentifier(node)
     }
 }
-impl From<CssPseudoClassFunctionCustomIdentifierCommaSeparatedList> for AnyCssPseudoClass {
-    fn from(node: CssPseudoClassFunctionCustomIdentifierCommaSeparatedList) -> Self {
-        Self::CssPseudoClassFunctionCustomIdentifierCommaSeparatedList(node)
+impl From<CssPseudoClassFunctionCustomIdentifierList> for AnyCssPseudoClass {
+    fn from(node: CssPseudoClassFunctionCustomIdentifierList) -> Self {
+        Self::CssPseudoClassFunctionCustomIdentifierList(node)
     }
 }
 impl From<CssPseudoClassFunctionIdentifier> for AnyCssPseudoClass {
@@ -26435,7 +26433,7 @@ impl AstNode for AnyCssPseudoClass {
         .union(CssPseudoClassFunctionCompoundSelector::KIND_SET)
         .union(CssPseudoClassFunctionCompoundSelectorList::KIND_SET)
         .union(CssPseudoClassFunctionCustomIdentifier::KIND_SET)
-        .union(CssPseudoClassFunctionCustomIdentifierCommaSeparatedList::KIND_SET)
+        .union(CssPseudoClassFunctionCustomIdentifierList::KIND_SET)
         .union(CssPseudoClassFunctionIdentifier::KIND_SET)
         .union(CssPseudoClassFunctionNth::KIND_SET)
         .union(CssPseudoClassFunctionRelativeSelectorList::KIND_SET)
@@ -26450,7 +26448,7 @@ impl AstNode for AnyCssPseudoClass {
                 | CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR
                 | CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST
                 | CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER
-                | CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST
+                | CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST
                 | CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER
                 | CSS_PSEUDO_CLASS_FUNCTION_NTH
                 | CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST
@@ -26478,9 +26476,9 @@ impl AstNode for AnyCssPseudoClass {
                     CssPseudoClassFunctionCustomIdentifier { syntax },
                 )
             }
-            CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST => {
-                Self::CssPseudoClassFunctionCustomIdentifierCommaSeparatedList(
-                    CssPseudoClassFunctionCustomIdentifierCommaSeparatedList { syntax },
+            CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST => {
+                Self::CssPseudoClassFunctionCustomIdentifierList(
+                    CssPseudoClassFunctionCustomIdentifierList { syntax },
                 )
             }
             CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER => {
@@ -26518,7 +26516,7 @@ impl AstNode for AnyCssPseudoClass {
             Self::CssPseudoClassFunctionCompoundSelector(it) => it.syntax(),
             Self::CssPseudoClassFunctionCompoundSelectorList(it) => it.syntax(),
             Self::CssPseudoClassFunctionCustomIdentifier(it) => it.syntax(),
-            Self::CssPseudoClassFunctionCustomIdentifierCommaSeparatedList(it) => it.syntax(),
+            Self::CssPseudoClassFunctionCustomIdentifierList(it) => it.syntax(),
             Self::CssPseudoClassFunctionIdentifier(it) => it.syntax(),
             Self::CssPseudoClassFunctionNth(it) => it.syntax(),
             Self::CssPseudoClassFunctionRelativeSelectorList(it) => it.syntax(),
@@ -26534,7 +26532,7 @@ impl AstNode for AnyCssPseudoClass {
             Self::CssPseudoClassFunctionCompoundSelector(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionCompoundSelectorList(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionCustomIdentifier(it) => it.into_syntax(),
-            Self::CssPseudoClassFunctionCustomIdentifierCommaSeparatedList(it) => it.into_syntax(),
+            Self::CssPseudoClassFunctionCustomIdentifierList(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionIdentifier(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionNth(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionRelativeSelectorList(it) => it.into_syntax(),
@@ -26552,9 +26550,7 @@ impl std::fmt::Debug for AnyCssPseudoClass {
             Self::CssPseudoClassFunctionCompoundSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionCompoundSelectorList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssPseudoClassFunctionCustomIdentifierCommaSeparatedList(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
+            Self::CssPseudoClassFunctionCustomIdentifierList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionNth(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionRelativeSelectorList(it) => std::fmt::Debug::fmt(it, f),
@@ -26572,9 +26568,7 @@ impl From<AnyCssPseudoClass> for SyntaxNode {
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifier(it) => it.into_syntax(),
-            AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierCommaSeparatedList(it) => {
-                it.into_syntax()
-            }
+            AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierList(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionNth(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => it.into_syntax(),
@@ -29971,7 +29965,7 @@ impl std::fmt::Display for CssPseudoClassFunctionCustomIdentifier {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssPseudoClassFunctionCustomIdentifierCommaSeparatedList {
+impl std::fmt::Display for CssPseudoClassFunctionCustomIdentifierList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

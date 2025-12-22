@@ -1,7 +1,7 @@
 mod function_compound_selector;
 mod function_compound_selector_list;
 mod function_custom_identifier;
-mod function_custom_identifier_comma_separated_list;
+mod function_custom_identifier_list;
 mod function_identifier;
 mod function_nth;
 mod function_relative_selector_list;
@@ -38,9 +38,9 @@ use crate::syntax::parse_error::expected_any_pseudo_class;
 use crate::syntax::selector::pseudo_class::function_custom_identifier::{
     is_at_pseudo_class_function_custom_identifier, parse_pseudo_class_function_custom_identifier,
 };
-use crate::syntax::selector::pseudo_class::function_custom_identifier_comma_separated_list::{
-    is_at_pseudo_class_function_custom_identifier_comma_separated_list,
-    parse_pseudo_class_function_custom_identifier_comma_separated_list,
+use crate::syntax::selector::pseudo_class::function_custom_identifier_list::{
+    is_at_pseudo_class_function_custom_identifier_list,
+    parse_pseudo_class_function_custom_identifier_list,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -97,8 +97,8 @@ fn parse_pseudo_class(p: &mut CssParser) -> ParsedSyntax {
         parse_pseudo_class_function_value_list(p)
     } else if is_at_pseudo_class_function_nth(p) {
         parse_pseudo_class_function_nth(p)
-    } else if is_at_pseudo_class_function_custom_identifier_comma_separated_list(p) {
-        parse_pseudo_class_function_custom_identifier_comma_separated_list(p)
+    } else if is_at_pseudo_class_function_custom_identifier_list(p) {
+        parse_pseudo_class_function_custom_identifier_list(p)
     } else if is_at_pseudo_class_function_custom_identifier(p) {
         parse_pseudo_class_function_custom_identifier(p)
     } else {

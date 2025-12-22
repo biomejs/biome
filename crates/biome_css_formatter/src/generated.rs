@@ -4035,21 +4035,17 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassFunctionCu
         FormatOwnedWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_custom_identifier :: FormatCssPseudoClassFunctionCustomIdentifier :: default ())
     }
 }
-impl FormatRule < biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierCommaSeparatedList > for crate :: css :: pseudo :: pseudo_class_function_custom_identifier_comma_separated_list :: FormatCssPseudoClassFunctionCustomIdentifierCommaSeparatedList { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierCommaSeparatedList , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierCommaSeparatedList > :: fmt (self , node , f) } }
-impl AsFormat<CssFormatContext>
-    for biome_css_syntax::CssPseudoClassFunctionCustomIdentifierCommaSeparatedList
-{
-    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierCommaSeparatedList , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_comma_separated_list :: FormatCssPseudoClassFunctionCustomIdentifierCommaSeparatedList > ;
+impl FormatRule < biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList > for crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassFunctionCustomIdentifierList {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_comma_separated_list :: FormatCssPseudoClassFunctionCustomIdentifierCommaSeparatedList :: default ())
+        FormatRefWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList :: default ())
     }
 }
-impl IntoFormat<CssFormatContext>
-    for biome_css_syntax::CssPseudoClassFunctionCustomIdentifierCommaSeparatedList
-{
-    type Format = FormatOwnedWithRule < biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierCommaSeparatedList , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_comma_separated_list :: FormatCssPseudoClassFunctionCustomIdentifierCommaSeparatedList > ;
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassFunctionCustomIdentifierList {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_comma_separated_list :: FormatCssPseudoClassFunctionCustomIdentifierCommaSeparatedList :: default ())
+        FormatOwnedWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList :: default ())
     }
 }
 impl FormatRule<biome_css_syntax::CssPseudoClassFunctionIdentifier>
