@@ -21,7 +21,7 @@ importers:
         specifier: 24.10.3
         version: 24.10.3
       tombi:
-        specifier: ^0.7.4
+        specifier: 0.7.4
         version: 0.7.4
 
   benchmark:
