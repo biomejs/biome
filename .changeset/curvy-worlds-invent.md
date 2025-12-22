@@ -14,7 +14,7 @@ Valid:
 let isOne = 1;
 let isPositiveNumber = number > 0;
 
-return <div> {isOne && "One } { isPositiveNumber && "Is positive" }</div>
+return <div> {isOne && "One" } { isPositiveNumber && "Is positive" }</div>
 ```
 
 Invalid:
