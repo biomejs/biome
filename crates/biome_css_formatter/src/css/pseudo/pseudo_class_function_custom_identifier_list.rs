@@ -1,4 +1,4 @@
-use crate::css::lists::custom_identifier_list::FormatCssCustomIdentifierListOptions;
+use crate::css::lists::custom_identifier_comma_separated_list::FormatCssCustomIdentifierCommaSeparatedListOptions;
 use crate::css::value::identifier::FormatCssIdentifierOptions;
 use crate::prelude::*;
 use biome_css_syntax::{
@@ -30,9 +30,12 @@ impl FormatNodeRule<CssPseudoClassFunctionCustomIdentifierList>
                     .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&items.format().with_options(
-                        FormatCssCustomIdentifierListOptions::default().with_fluid_layout()
-                    )),
+                    soft_block_indent(
+                        &items.format().with_options(
+                            FormatCssCustomIdentifierCommaSeparatedListOptions::default()
+                                .with_fluid_layout()
+                        )
+                    ),
                     r_paren_token.format()
                 ])
             ]

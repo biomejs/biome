@@ -5,7 +5,7 @@ expression: snapshot
 ## Input
 
 ```css
-html:active-view-transition-type(backwards forwards backwards forwards) {
+html:active-view-transition-type(backwards, forwards, backwards, forwards) {
 }
 
 ```
@@ -35,72 +35,78 @@ CssRoot {
                                     value_token: IDENT@5..32 "active-view-transition-type" [] [],
                                 },
                                 l_paren_token: L_PAREN@32..33 "(" [] [],
-                                items: CssCustomIdentifierList [
+                                items: CssCustomIdentifierCommaSeparatedList [
                                     CssCustomIdentifier {
-                                        value_token: IDENT@33..43 "backwards" [] [Whitespace(" ")],
+                                        value_token: IDENT@33..42 "backwards" [] [],
                                     },
+                                    COMMA@42..44 "," [] [Whitespace(" ")],
                                     CssCustomIdentifier {
-                                        value_token: IDENT@43..52 "forwards" [] [Whitespace(" ")],
+                                        value_token: IDENT@44..52 "forwards" [] [],
                                     },
+                                    COMMA@52..54 "," [] [Whitespace(" ")],
                                     CssCustomIdentifier {
-                                        value_token: IDENT@52..62 "backwards" [] [Whitespace(" ")],
+                                        value_token: IDENT@54..63 "backwards" [] [],
                                     },
+                                    COMMA@63..65 "," [] [Whitespace(" ")],
                                     CssCustomIdentifier {
-                                        value_token: IDENT@62..70 "forwards" [] [],
+                                        value_token: IDENT@65..73 "forwards" [] [],
                                     },
                                 ],
-                                r_paren_token: R_PAREN@70..72 ")" [] [Whitespace(" ")],
+                                r_paren_token: R_PAREN@73..75 ")" [] [Whitespace(" ")],
                             },
                         },
                     ],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@72..73 "{" [] [],
+                l_curly_token: L_CURLY@75..76 "{" [] [],
                 items: CssDeclarationOrRuleList [],
-                r_curly_token: R_CURLY@73..75 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@76..78 "}" [Newline("\n")] [],
             },
         },
     ],
-    eof_token: EOF@75..76 "" [Newline("\n")] [],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..76
+0: CSS_ROOT@0..79
   0: (empty)
-  1: CSS_RULE_LIST@0..75
-    0: CSS_QUALIFIED_RULE@0..75
-      0: CSS_SELECTOR_LIST@0..72
-        0: CSS_COMPOUND_SELECTOR@0..72
+  1: CSS_RULE_LIST@0..78
+    0: CSS_QUALIFIED_RULE@0..78
+      0: CSS_SELECTOR_LIST@0..75
+        0: CSS_COMPOUND_SELECTOR@0..75
           0: CSS_NESTED_SELECTOR_LIST@0..0
           1: CSS_TYPE_SELECTOR@0..4
             0: (empty)
             1: CSS_IDENTIFIER@0..4
               0: IDENT@0..4 "html" [] []
-          2: CSS_SUB_SELECTOR_LIST@4..72
-            0: CSS_PSEUDO_CLASS_SELECTOR@4..72
+          2: CSS_SUB_SELECTOR_LIST@4..75
+            0: CSS_PSEUDO_CLASS_SELECTOR@4..75
               0: COLON@4..5 ":" [] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST@5..72
+              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST@5..75
                 0: CSS_IDENTIFIER@5..32
                   0: IDENT@5..32 "active-view-transition-type" [] []
                 1: L_PAREN@32..33 "(" [] []
-                2: CSS_CUSTOM_IDENTIFIER_LIST@33..70
-                  0: CSS_CUSTOM_IDENTIFIER@33..43
-                    0: IDENT@33..43 "backwards" [] [Whitespace(" ")]
-                  1: CSS_CUSTOM_IDENTIFIER@43..52
-                    0: IDENT@43..52 "forwards" [] [Whitespace(" ")]
-                  2: CSS_CUSTOM_IDENTIFIER@52..62
-                    0: IDENT@52..62 "backwards" [] [Whitespace(" ")]
-                  3: CSS_CUSTOM_IDENTIFIER@62..70
-                    0: IDENT@62..70 "forwards" [] []
-                3: R_PAREN@70..72 ")" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@72..75
-        0: L_CURLY@72..73 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@73..73
-        2: R_CURLY@73..75 "}" [Newline("\n")] []
-  2: EOF@75..76 "" [Newline("\n")] []
+                2: CSS_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST@33..73
+                  0: CSS_CUSTOM_IDENTIFIER@33..42
+                    0: IDENT@33..42 "backwards" [] []
+                  1: COMMA@42..44 "," [] [Whitespace(" ")]
+                  2: CSS_CUSTOM_IDENTIFIER@44..52
+                    0: IDENT@44..52 "forwards" [] []
+                  3: COMMA@52..54 "," [] [Whitespace(" ")]
+                  4: CSS_CUSTOM_IDENTIFIER@54..63
+                    0: IDENT@54..63 "backwards" [] []
+                  5: COMMA@63..65 "," [] [Whitespace(" ")]
+                  6: CSS_CUSTOM_IDENTIFIER@65..73
+                    0: IDENT@65..73 "forwards" [] []
+                3: R_PAREN@73..75 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@75..78
+        0: L_CURLY@75..76 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@76..76
+        2: R_CURLY@76..78 "}" [Newline("\n")] []
+  2: EOF@78..79 "" [Newline("\n")] []
 
 ```

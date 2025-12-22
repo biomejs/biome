@@ -5,7 +5,7 @@ use crate::syntax::selector::eat_or_recover_selector_function_close_token;
 use crate::syntax::{is_at_identifier, parse_custom_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -56,10 +56,10 @@ pub(crate) fn parse_pseudo_class_function_custom_identifier_list(
 
 struct CssCustomIdentifierList;
 
-impl ParseNodeList for CssCustomIdentifierList {
+impl ParseSeparatedList for CssCustomIdentifierList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_CUSTOM_IDENTIFIER_LIST;
+    const LIST_KIND: Self::Kind = CSS_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         parse_custom_identifier(p, CssLexContext::Regular)
@@ -79,6 +79,10 @@ impl ParseNodeList for CssCustomIdentifierList {
             &CssCustomIdentifierListParseRecovery,
             expected_non_css_wide_keyword_identifier,
         )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
     }
 }
 

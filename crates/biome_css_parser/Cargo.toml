@@ -1,15 +1,19 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's CSS parser"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_css_parser"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's CSS parser"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
+
+[[bench]]
+harness = false
+name    = "css_parser"
 
 [dependencies]
 biome_console       = { workspace = true }
@@ -34,15 +38,11 @@ quickcheck          = { workspace = true }
 quickcheck_macros   = { workspace = true }
 tests_macros        = { path = "../tests_macros" }
 
-[target.'cfg(target_os = "windows")'.dev-dependencies]
-mimalloc = { workspace = true }
-
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
 
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
 [lints]
 workspace = true
-
-[[bench]]
-harness = false
-name    = "css_parser"

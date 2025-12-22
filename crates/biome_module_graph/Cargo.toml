@@ -1,18 +1,19 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Data structure for tracking inferred information across modules"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_module_graph"
-publish              = true
-repository.workspace = true
 version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Data structure for tracking inferred information across modules"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
-[lints]
-workspace = true
+[[bench]]
+harness = false
+name    = "module_graph"
 
 [dependencies]
 biome_console        = { workspace = true }
@@ -32,7 +33,7 @@ biome_rowan          = { workspace = true }
 camino               = { workspace = true }
 cfg-if               = { workspace = true }
 indexmap             = { workspace = true }
-once_cell            = "1.21.3"                              # Use `std::sync::OnceLock::get_or_try_init` when it is stable.
+once_cell            = "1.21.3"  # Use `std::sync::OnceLock::get_or_try_init` when it is stable.
 papaya               = { workspace = true }
 rust-lapper          = { workspace = true }
 rustc-hash           = { workspace = true }
@@ -52,16 +53,15 @@ divan              = { package = "codspeed-divan-compat", version = "=4.1.0" }
 insta              = { workspace = true }
 walkdir            = { workspace = true }
 
-[target.'cfg(target_os = "windows")'.dev-dependencies]
-mimalloc = { workspace = true }
-
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [features]
 schema = ["dep:schemars"]
 serde  = ["dep:serde"]
 
-[[bench]]
-harness = false
-name    = "module_graph"
+[lints]
+workspace = true
