@@ -287,15 +287,12 @@ fn is_inside_jsx_expression(node: &JsSyntaxNode) -> Option<bool> {
 }
 
 fn find_variable(model: &SemanticModel, name: &JsReferenceIdentifier) -> Option<AnyJsExpression> {
-    let Some(binding) = model.binding(name) else {
-        return None;
-    };
-
+    let binding = model.binding(name)?;
     let declaration = binding.tree().declaration()?;
     let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = declaration else {
         return None;
     };
 
     let expr = declarator.initializer()?.expression().ok()?;
-    return Some(expr);
+    Some(expr)
 }
