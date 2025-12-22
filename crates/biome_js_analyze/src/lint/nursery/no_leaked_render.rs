@@ -188,6 +188,9 @@ impl Rule for NoLeakedRender {
                                         }
                                         return None;
                                     }
+                                    AnyJsLiteralExpression::JsNullLiteralExpression(_) => {
+                                        return Some(());
+                                    }
                                     AnyJsLiteralExpression::JsNumberLiteralExpression(num) => {
                                         let value = num.value_token().ok()?;
                                         if value.text_trimmed() == "0" {
