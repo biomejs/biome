@@ -22,13 +22,13 @@ TwRoot {
             candidate: TwBogusCandidate {
                 items: [
                     TW_BASE@0..4 "text" [] [],
-                    DASH@4..6 "-" [] [Newline("\n")],
+                    DASH@4..5 "-" [] [],
                 ],
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@6..6 "" [] [],
+    eof_token: EOF@5..6 "" [Newline("\n")] [],
 }
 ```
 
@@ -37,15 +37,15 @@ TwRoot {
 ```
 0: TW_ROOT@0..6
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..6
-    0: TW_FULL_CANDIDATE@0..6
+  1: TW_CANDIDATE_LIST@0..5
+    0: TW_FULL_CANDIDATE@0..5
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_BOGUS_CANDIDATE@0..6
+      2: TW_BOGUS_CANDIDATE@0..5
         0: TW_BASE@0..4 "text" [] []
-        1: DASH@4..6 "-" [] [Newline("\n")]
+        1: DASH@4..5 "-" [] []
       3: (empty)
-  2: EOF@6..6 "" [] []
+  2: EOF@5..6 "" [Newline("\n")] []
 
 ```
 

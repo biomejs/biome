@@ -1,15 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's command line interface"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_cli"
-publish              = false
-repository.workspace = true
 version              = "0.0.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's command line interface"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -26,7 +26,7 @@ biome_css_analyze        = { workspace = true }
 biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
-biome_diagnostics        = { workspace = true, features = ["std", "bpaf"] }
+biome_diagnostics        = { workspace = true, features = ["bpaf", "std"] }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true }
 biome_fs                 = { workspace = true }
@@ -63,22 +63,20 @@ serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true }
 smallvec                 = { workspace = true }
 terminal_size            = { workspace = true }
-tokio                    = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }
+tokio                    = { workspace = true, features = [
+  "io-std",
+  "io-util",
+  "macros",
+  "net",
+  "rt",
+  "rt-multi-thread",
+  "sync",
+  "time"
+] }
 tracing                  = { workspace = true }
 tracing-appender         = "0.2.3"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
 tracing-tree             = "0.4.1"
-
-
-[target.'cfg(unix)'.dependencies]
-libc  = "0.2.177"
-tokio = { workspace = true, features = ["process"] }
-
-[target.'cfg(windows)'.dependencies]
-mimalloc = { workspace = true }
-
-[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
-tikv-jemallocator = { workspace = true }
 
 [dev-dependencies]
 biome_css_formatter  = { workspace = true }
@@ -88,6 +86,16 @@ biome_json_parser    = { workspace = true }
 insta                = { workspace = true }
 regex                = { workspace = true }
 tokio                = { workspace = true, features = ["io-util"] }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(unix)'.dependencies]
+libc  = "0.2.177"
+tokio = { workspace = true, features = ["process"] }
+
+[target.'cfg(windows)'.dependencies]
+mimalloc = { workspace = true }
 
 [features]
 docgen    = ["bpaf/docgen"]

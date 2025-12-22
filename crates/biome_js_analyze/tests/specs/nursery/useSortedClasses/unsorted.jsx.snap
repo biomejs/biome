@@ -96,6 +96,8 @@ unsorted.jsx:4:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
      2  2 │   	{/* attributes */}
@@ -121,6 +123,8 @@ unsorted.jsx:5:17 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
     7 │ 	<div customClassAttribute="px-2 foo p-4 bar" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -148,6 +152,8 @@ unsorted.jsx:11:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
      9  9 │   	{/* utility sorting */}
@@ -173,6 +179,8 @@ unsorted.jsx:12:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     14 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -200,6 +208,8 @@ unsorted.jsx:13:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     11 11 │   	<div class="text-center custom-style1 p-4 bg-blue-500 text-white foo rounded-lg shadow-lg" />
@@ -225,6 +235,8 @@ unsorted.jsx:14:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     16 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -252,6 +264,8 @@ unsorted.jsx:15:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     13 13 │   	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
@@ -277,6 +291,8 @@ unsorted.jsx:16:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     18 │ 	<div class="underline custom-text foo text-2xl font-semibold my-2" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -304,6 +320,8 @@ unsorted.jsx:17:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     15 15 │   	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
@@ -329,6 +347,8 @@ unsorted.jsx:18:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     20 │ 	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -356,6 +376,8 @@ unsorted.jsx:19:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     17 17 │   	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
@@ -381,6 +403,8 @@ unsorted.jsx:20:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     22 │ 	{/* SHOULD emit diagnostics (arbitrary variants not supported yet) */}
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -408,6 +432,8 @@ unsorted.jsx:23:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     21 21 │   	{/* variant sorting */}
@@ -433,6 +459,8 @@ unsorted.jsx:24:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     26 │ 	<div class="lg:absolute sm:top-0 md:right-0 lg:m-4 md:p-2 xl:text-sm sm:bg-red-600 sm:text-white sm:rounded-full lg:custom-alert" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -460,6 +488,8 @@ unsorted.jsx:25:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     23 23 │   	<div class="checked:text-center custom-style1 p-4 hover:bg-blue-500 focus:text-white foo hover:focus:rounded-lg shadow-lg" />
@@ -485,6 +515,8 @@ unsorted.jsx:26:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     28 │ 	{/* TODO: arbitrary variant */}
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -512,6 +544,8 @@ unsorted.jsx:27:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     25 25 │   	<div class="focus-within:hover:shadow-md grid custom-grid grid-cols-3 gap-4 p-6 m-6 focus-within:border focus-within:border-gray-300 optional:rounded-md" />
@@ -537,6 +571,8 @@ unsorted.jsx:29:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     31 │ 	<div class="group-aria-disabled:bg-red-50 group-[:visited]:text-red-400 group-target:font-bold" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -564,6 +600,8 @@ unsorted.jsx:30:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     28 28 │   	{/* TODO: arbitrary variant */}
@@ -589,6 +627,8 @@ unsorted.jsx:31:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     33 │ 	{/* negative value utilities */}
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -616,6 +656,8 @@ unsorted.jsx:32:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     30 30 │   	<div class="text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900 group-first:text-yellow-400 [&nth-child(2)]:text-black focus:bg-sky-100 py-4 checked:visited:bg-yellow-300 hover:text-red-400" />
@@ -641,6 +683,8 @@ unsorted.jsx:35:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     37 │ 	<div class="text-center -mx-2 bg-blue-500 -my-4" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -668,6 +712,8 @@ unsorted.jsx:36:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     34 34 │   	{/* SHOULD emit diagnostics (negative values like -ml-2 should be detected) */}
@@ -693,6 +739,8 @@ unsorted.jsx:37:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     39 │ 	<div class="-space-x-2 flex -space-y-4 items-center" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -720,6 +768,8 @@ unsorted.jsx:38:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     36 36 │   	<div class="-mr-4 m-2 -mb-3" />
@@ -745,6 +795,8 @@ unsorted.jsx:39:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     41 │ 	<div class="sm:-mx-4 lg:-my-2 md:p-2" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -772,6 +824,8 @@ unsorted.jsx:40:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     38 38 │   	<div class="-top-2 absolute -left-4 right-0" />
@@ -797,6 +851,8 @@ unsorted.jsx:41:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     43 │ 
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -824,6 +880,8 @@ unsorted.jsx:55:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     53 53 │   // nested values
@@ -849,6 +907,8 @@ unsorted.jsx:56:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     58 │ <div class={[`px-2 foo p-4 bar`]} />;
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -876,6 +936,8 @@ unsorted.jsx:57:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     55 55 │   <div class={"px-2 foo p-4 bar"} />;
@@ -901,6 +963,8 @@ unsorted.jsx:58:15 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     60 │ 	class={{
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -928,6 +992,8 @@ unsorted.jsx:61:3 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     59 59 │   <div
@@ -953,6 +1019,8 @@ unsorted.jsx:62:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
     64 │ 		],
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -980,6 +1048,8 @@ unsorted.jsx:63:6 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     61 61 │   		"px-2 foo p-4 bar": [
@@ -1006,6 +1076,8 @@ unsorted.jsx:63:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     61 61 │   		"px-2 foo p-4 bar": [
@@ -1031,6 +1103,8 @@ unsorted.jsx:63:55 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
     65 │ 	}}
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   

@@ -25,13 +25,12 @@ TwRoot {
                 value: TwArbitraryValue {
                     l_brack_token: L_BRACKET@8..9 "[" [] [],
                     value_token: TW_VALUE@9..13 "14px" [] [],
-                    r_brack_token: R_BRACKET@13..14 "]" [] [],
+                    r_brack_token: R_BRACKET@13..15 "]" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@14..15 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             negative_token: missing (optional),
@@ -41,13 +40,12 @@ TwRoot {
                 value: TwArbitraryValue {
                     l_brack_token: L_BRACKET@23..24 "[" [] [],
                     value_token: TW_VALUE@24..28 "10px" [] [],
-                    r_brack_token: R_BRACKET@28..29 "]" [] [],
+                    r_brack_token: R_BRACKET@28..30 "]" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@29..30 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             negative_token: missing (optional),
@@ -57,13 +55,12 @@ TwRoot {
                 value: TwArbitraryValue {
                     l_brack_token: L_BRACKET@39..40 "[" [] [],
                     value_token: TW_VALUE@40..43 "2px" [] [],
-                    r_brack_token: R_BRACKET@43..44 "]" [] [],
+                    r_brack_token: R_BRACKET@43..45 "]" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@44..45 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             negative_token: missing (optional),
@@ -73,14 +70,14 @@ TwRoot {
                 value: TwArbitraryValue {
                     l_brack_token: L_BRACKET@54..55 "[" [] [],
                     value_token: TW_VALUE@55..58 "3px" [] [],
-                    r_brack_token: R_BRACKET@58..60 "]" [] [Newline("\n")],
+                    r_brack_token: R_BRACKET@58..59 "]" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@60..60 "" [] [],
+    eof_token: EOF@59..60 "" [Newline("\n")] [],
 }
 ```
 
@@ -89,58 +86,55 @@ TwRoot {
 ```
 0: TW_ROOT@0..60
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..60
-    0: TW_FULL_CANDIDATE@0..14
+  1: TW_CANDIDATE_LIST@0..59
+    0: TW_FULL_CANDIDATE@0..15
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..14
+      2: TW_FUNCTIONAL_CANDIDATE@0..15
         0: TW_BASE@0..7 "space-x" [] []
         1: DASH@7..8 "-" [] []
-        2: TW_ARBITRARY_VALUE@8..14
+        2: TW_ARBITRARY_VALUE@8..15
           0: L_BRACKET@8..9 "[" [] []
           1: TW_VALUE@9..13 "14px" [] []
-          2: R_BRACKET@13..14 "]" [] []
+          2: R_BRACKET@13..15 "]" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    1: WHITESPACE@14..15 " " [] []
-    2: TW_FULL_CANDIDATE@15..29
+    1: TW_FULL_CANDIDATE@15..30
       0: TW_VARIANT_LIST@15..15
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@15..29
+      2: TW_FUNCTIONAL_CANDIDATE@15..30
         0: TW_BASE@15..22 "space-y" [] []
         1: DASH@22..23 "-" [] []
-        2: TW_ARBITRARY_VALUE@23..29
+        2: TW_ARBITRARY_VALUE@23..30
           0: L_BRACKET@23..24 "[" [] []
           1: TW_VALUE@24..28 "10px" [] []
-          2: R_BRACKET@28..29 "]" [] []
+          2: R_BRACKET@28..30 "]" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    3: WHITESPACE@29..30 " " [] []
-    4: TW_FULL_CANDIDATE@30..44
+    2: TW_FULL_CANDIDATE@30..45
       0: TW_VARIANT_LIST@30..30
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@30..44
+      2: TW_FUNCTIONAL_CANDIDATE@30..45
         0: TW_BASE@30..38 "divide-x" [] []
         1: DASH@38..39 "-" [] []
-        2: TW_ARBITRARY_VALUE@39..44
+        2: TW_ARBITRARY_VALUE@39..45
           0: L_BRACKET@39..40 "[" [] []
           1: TW_VALUE@40..43 "2px" [] []
-          2: R_BRACKET@43..44 "]" [] []
+          2: R_BRACKET@43..45 "]" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    5: WHITESPACE@44..45 " " [] []
-    6: TW_FULL_CANDIDATE@45..60
+    3: TW_FULL_CANDIDATE@45..59
       0: TW_VARIANT_LIST@45..45
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@45..60
+      2: TW_FUNCTIONAL_CANDIDATE@45..59
         0: TW_BASE@45..53 "divide-y" [] []
         1: DASH@53..54 "-" [] []
-        2: TW_ARBITRARY_VALUE@54..60
+        2: TW_ARBITRARY_VALUE@54..59
           0: L_BRACKET@54..55 "[" [] []
           1: TW_VALUE@55..58 "3px" [] []
-          2: R_BRACKET@58..60 "]" [] [Newline("\n")]
+          2: R_BRACKET@58..59 "]" [] []
         3: (empty)
       3: (empty)
-  2: EOF@60..60 "" [] []
+  2: EOF@59..60 "" [Newline("\n")] []
 
 ```

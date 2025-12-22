@@ -28,14 +28,14 @@ TwRoot {
                 modifier: TwModifier {
                     slash_token: SLASH@11..12 "/" [] [],
                     value: TwNamedValue {
-                        value_token: TW_VALUE@12..15 "50" [] [Newline("\n")],
+                        value_token: TW_VALUE@12..14 "50" [] [],
                     },
                 },
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@15..15 "" [] [],
+    eof_token: EOF@14..15 "" [Newline("\n")] [],
 }
 ```
 
@@ -44,21 +44,21 @@ TwRoot {
 ```
 0: TW_ROOT@0..15
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..15
-    0: TW_FULL_CANDIDATE@0..15
+  1: TW_CANDIDATE_LIST@0..14
+    0: TW_FULL_CANDIDATE@0..14
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_ARBITRARY_CANDIDATE@0..15
+      2: TW_ARBITRARY_CANDIDATE@0..14
         0: L_BRACKET@0..1 "[" [] []
         1: TW_PROPERTY@1..6 "color" [] []
         2: COLON@6..7 ":" [] []
         3: TW_VALUE@7..10 "red" [] []
         4: R_BRACKET@10..11 "]" [] []
-        5: TW_MODIFIER@11..15
+        5: TW_MODIFIER@11..14
           0: SLASH@11..12 "/" [] []
-          1: TW_NAMED_VALUE@12..15
-            0: TW_VALUE@12..15 "50" [] [Newline("\n")]
+          1: TW_NAMED_VALUE@12..14
+            0: TW_VALUE@12..14 "50" [] []
       3: (empty)
-  2: EOF@15..15 "" [] []
+  2: EOF@14..15 "" [Newline("\n")] []
 
 ```

@@ -130,7 +130,7 @@ just install-tools
 This command will install:
 - `cargo-binstall`, to install binary extensions for `cargo`.
 - `cargo-insta`, a `cargo` extension to manage snapshot testing inside the repository.
-- `taplo-cli`, a small tool for formatting TOML files.
+- `tombi`, a small tool for formatting TOML files.
 - `wasm-bindgen-cli` and `wasm-opt` for managing the WASM build of Biome.
 
 You'll also need to have `pnpm` installed on your machine, and run `pnpm install` from the root of the repository. `pnpm` is needed to [create changesets](#create-a-changeset)

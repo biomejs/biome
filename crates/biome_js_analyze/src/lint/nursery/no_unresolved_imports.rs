@@ -260,6 +260,6 @@ fn get_unresolved_imports_from_module_source(
 fn has_exported_symbol(import_name: &Text, options: &GetUnresolvedImportsOptions) -> bool {
     options
         .target_info
-        .find_exported_symbol(options.module_graph, import_name.text())
+        .find_js_exported_symbol(options.module_graph, import_name.text())
         .is_some()
 }

@@ -27,6 +27,8 @@ invalid.js:1:1 lint/nursery/noProto ━━━━━━━━━━━━━━�
   
   i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -45,6 +47,8 @@ invalid.js:2:1 lint/nursery/noProto ━━━━━━━━━━━━━━�
     having been deprecated in 2009 for being inefficient and unreliable.
   
   i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -66,6 +70,8 @@ invalid.js:3:11 lint/nursery/noProto ━━━━━━━━━━━━━━�
   
   i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -84,6 +90,8 @@ invalid.js:4:11 lint/nursery/noProto ━━━━━━━━━━━━━━�
     having been deprecated in 2009 for being inefficient and unreliable.
   
   i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

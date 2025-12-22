@@ -39,6 +39,8 @@ invalid.ts:5:23 lint/nursery/useMaxParams ━━━━━━━━━━━━�
   
   i Consider using an options object, splitting into smaller functions, or grouping related parameters.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -57,6 +59,8 @@ invalid.ts:9:31 lint/nursery/useMaxParams ━━━━━━━━━━━━�
   i Functions with many parameters are hard to read and maintain.
   
   i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -77,6 +81,8 @@ invalid.ts:13:26 lint/nursery/useMaxParams ━━━━━━━━━━━━�
   
   i Consider using an options object, splitting into smaller functions, or grouping related parameters.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -94,6 +100,8 @@ invalid.ts:15:12 lint/nursery/useMaxParams ━━━━━━━━━━━━�
   i Functions with many parameters are hard to read and maintain.
   
   i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

@@ -25,14 +25,14 @@ TwRoot {
                 value: TwArbitraryValue {
                     l_brack_token: L_BRACKET@3..4 "[" [] [],
                     value_token: TW_VALUE@4..27 "url(/img/mountains.jpg)" [] [],
-                    r_brack_token: R_BRACKET@27..29 "]" [] [Newline("\n")],
+                    r_brack_token: R_BRACKET@27..28 "]" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@29..29 "" [] [],
+    eof_token: EOF@28..29 "" [Newline("\n")] [],
 }
 ```
 
@@ -41,19 +41,19 @@ TwRoot {
 ```
 0: TW_ROOT@0..29
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..29
-    0: TW_FULL_CANDIDATE@0..29
+  1: TW_CANDIDATE_LIST@0..28
+    0: TW_FULL_CANDIDATE@0..28
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..29
+      2: TW_FUNCTIONAL_CANDIDATE@0..28
         0: TW_BASE@0..2 "bg" [] []
         1: DASH@2..3 "-" [] []
-        2: TW_ARBITRARY_VALUE@3..29
+        2: TW_ARBITRARY_VALUE@3..28
           0: L_BRACKET@3..4 "[" [] []
           1: TW_VALUE@4..27 "url(/img/mountains.jpg)" [] []
-          2: R_BRACKET@27..29 "]" [] [Newline("\n")]
+          2: R_BRACKET@27..28 "]" [] []
         3: (empty)
       3: (empty)
-  2: EOF@29..29 "" [] []
+  2: EOF@28..29 "" [Newline("\n")] []
 
 ```

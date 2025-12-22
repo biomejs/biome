@@ -81,7 +81,7 @@ impl AnalyzerServicesBuilder {
 
         let module_graph = ModuleGraph::default();
         let added_paths = get_added_paths(&fs, &added_paths);
-        module_graph.update_graph_for_js_paths(&fs, &layout, &added_paths, &[]);
+        module_graph.update_graph_for_js_paths(&fs, &layout, &added_paths);
 
         Self {
             module_graph: Arc::new(module_graph),

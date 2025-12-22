@@ -212,25 +212,4 @@ await_invalid_catch_only_with_clause.svelte:5:1 parse ━━━━━━━━�
     2 │   <p>{error.message}</p>
     3 │ {:catch anotherError}
   
-await_invalid_catch_only_with_clause.svelte:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × {:catch} cannot appear before the {:then} block.
-  
-    1 │ {#await promise catch error}
-    2 │   <p>{error.message}</p>
-  > 3 │ {:catch anotherError}
-      │ ^^^^^^^^^^^^^^^^^^^^^
-  > 4 │   <p>{anotherError.message}</p>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ {/await}
-    6 │ 
-  
-  i This is where the {:then} block starts.
-  
-    3 │ {:catch anotherError}
-    4 │   <p>{anotherError.message}</p>
-  > 5 │ {/await}
-      │ ^^
-    6 │ 
-  
 ```

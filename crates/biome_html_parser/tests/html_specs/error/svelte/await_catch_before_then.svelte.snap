@@ -263,8 +263,10 @@ await_catch_before_then.svelte:3:1 parse ━━━━━━━━━━━━━
     3 │ {:catch error}
     4 │   <p>{error.message}</p>
   > 5 │ {:then value}
-      │ ^^
-    6 │   <p>{value}</p>
+      │ ^^^^^^^^^^^^^
+  > 6 │   <p>{value}</p>
+      │   ^^^^^^^^^^^^^^
     7 │ {/await}
+    8 │ 
   
 ```

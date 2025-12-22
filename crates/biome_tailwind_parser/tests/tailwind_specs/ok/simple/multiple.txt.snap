@@ -20,11 +20,10 @@ TwRoot {
             variants: TwVariantList [],
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@0..6 "border" [] [],
+                base_token: TW_BASE@0..7 "border" [] [Whitespace(" ")],
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@6..7 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwStaticVariant {
@@ -37,14 +36,14 @@ TwRoot {
                 base_token: TW_BASE@13..20 "outline" [] [],
                 minus_token: DASH@20..21 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@21..26 "none" [] [Newline("\n")],
+                    value_token: TW_VALUE@21..25 "none" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@26..26 "" [] [],
+    eof_token: EOF@25..26 "" [Newline("\n")] [],
 }
 ```
 
@@ -53,27 +52,26 @@ TwRoot {
 ```
 0: TW_ROOT@0..26
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..26
-    0: TW_FULL_CANDIDATE@0..6
+  1: TW_CANDIDATE_LIST@0..25
+    0: TW_FULL_CANDIDATE@0..7
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_STATIC_CANDIDATE@0..6
-        0: TW_BASE@0..6 "border" [] []
+      2: TW_STATIC_CANDIDATE@0..7
+        0: TW_BASE@0..7 "border" [] [Whitespace(" ")]
       3: (empty)
-    1: WHITESPACE@6..7 " " [] []
-    2: TW_FULL_CANDIDATE@7..26
+    1: TW_FULL_CANDIDATE@7..25
       0: TW_VARIANT_LIST@7..13
         0: TW_STATIC_VARIANT@7..12
           0: TW_BASE@7..12 "focus" [] []
         1: COLON@12..13 ":" [] []
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@13..26
+      2: TW_FUNCTIONAL_CANDIDATE@13..25
         0: TW_BASE@13..20 "outline" [] []
         1: DASH@20..21 "-" [] []
-        2: TW_NAMED_VALUE@21..26
-          0: TW_VALUE@21..26 "none" [] [Newline("\n")]
+        2: TW_NAMED_VALUE@21..25
+          0: TW_VALUE@21..25 "none" [] []
         3: (empty)
       3: (empty)
-  2: EOF@26..26 "" [] []
+  2: EOF@25..26 "" [Newline("\n")] []
 
 ```

@@ -22,6 +22,8 @@ issue_4855.jsx:1:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     1   │ - <div·class="content-['']·absolute">Hello</div>;
@@ -43,6 +45,8 @@ issue_4855.jsx:2:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     3 │ 
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   

@@ -72,7 +72,7 @@ CssRoot {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@1..21 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@21..27 "ident" [] [Whitespace(" ")],
                             },
@@ -108,7 +108,7 @@ CssRoot {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@69..89 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@89..95 "ident" [] [Whitespace(" ")],
                             },
@@ -156,7 +156,7 @@ CssRoot {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@138..158 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@158..164 "ident" [] [Whitespace(" ")],
                             },
@@ -231,7 +231,7 @@ CssRoot {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@234..254 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@254..260 "ident" [] [Whitespace(" ")],
                             },
@@ -358,7 +358,7 @@ CssRoot {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@442..462 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@462..468 "Otaru" [] [Whitespace(" ")],
                             },
@@ -423,7 +423,7 @@ CssRoot {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@519..539 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@539..545 "Otaru" [] [Whitespace(" ")],
                             },
@@ -491,7 +491,7 @@ CssRoot {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@601..621 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@621..628 "Taisho" [] [Whitespace(" ")],
                             },
@@ -559,7 +559,7 @@ CssRoot {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@680..700 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@700..707 "Taisho" [] [Whitespace(" ")],
                             },
@@ -570,7 +570,7 @@ CssRoot {
                     },
                     COMMA@713..715 "," [] [Whitespace(" ")],
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@715..719 "Bar" [] [Whitespace(" ")],
                             },
@@ -635,7 +635,7 @@ CssRoot {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@764..784 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@784..791 "Taisho" [] [Whitespace(" ")],
                             },
@@ -650,7 +650,7 @@ CssRoot {
                     },
                     COMMA@811..813 "," [] [Whitespace(" ")],
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@813..817 "Bar" [] [Whitespace(" ")],
                             },
@@ -726,7 +726,7 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@1..21 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@21..27
           0: CSS_FONT_FAMILY_NAME@21..27
-            0: CSS_CUSTOM_IDENTIFIER_LIST@21..27
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@21..27
               0: CSS_CUSTOM_IDENTIFIER@21..27
                 0: IDENT@21..27 "ident" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@27..31
@@ -750,7 +750,7 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@69..89 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@89..95
           0: CSS_FONT_FAMILY_NAME@89..95
-            0: CSS_CUSTOM_IDENTIFIER_LIST@89..95
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@89..95
               0: CSS_CUSTOM_IDENTIFIER@89..95
                 0: IDENT@89..95 "ident" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@95..135
@@ -781,7 +781,7 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@138..158 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@158..164
           0: CSS_FONT_FAMILY_NAME@158..164
-            0: CSS_CUSTOM_IDENTIFIER_LIST@158..164
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@158..164
               0: CSS_CUSTOM_IDENTIFIER@158..164
                 0: IDENT@158..164 "ident" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@164..231
@@ -830,7 +830,7 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@234..254 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@254..260
           0: CSS_FONT_FAMILY_NAME@254..260
-            0: CSS_CUSTOM_IDENTIFIER_LIST@254..260
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@254..260
               0: CSS_CUSTOM_IDENTIFIER@254..260
                 0: IDENT@254..260 "ident" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@260..355
@@ -918,7 +918,7 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@442..462 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@462..468
           0: CSS_FONT_FAMILY_NAME@462..468
-            0: CSS_CUSTOM_IDENTIFIER_LIST@462..468
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@462..468
               0: CSS_CUSTOM_IDENTIFIER@462..468
                 0: IDENT@462..468 "Otaru" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@468..516
@@ -960,7 +960,7 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@519..539 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@539..550
           0: CSS_FONT_FAMILY_NAME@539..550
-            0: CSS_CUSTOM_IDENTIFIER_LIST@539..550
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@539..550
               0: CSS_CUSTOM_IDENTIFIER@539..545
                 0: IDENT@539..545 "Otaru" [] [Whitespace(" ")]
               1: CSS_CUSTOM_IDENTIFIER@545..550
@@ -1004,7 +1004,7 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@601..621 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@621..635
           0: CSS_FONT_FAMILY_NAME@621..635
-            0: CSS_CUSTOM_IDENTIFIER_LIST@621..635
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@621..635
               0: CSS_CUSTOM_IDENTIFIER@621..628
                 0: IDENT@621..628 "Taisho" [] [Whitespace(" ")]
               1: CSS_CUSTOM_IDENTIFIER@628..635
@@ -1048,14 +1048,14 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@680..700 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@700..719
           0: CSS_FONT_FAMILY_NAME@700..713
-            0: CSS_CUSTOM_IDENTIFIER_LIST@700..713
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@700..713
               0: CSS_CUSTOM_IDENTIFIER@700..707
                 0: IDENT@700..707 "Taisho" [] [Whitespace(" ")]
               1: CSS_CUSTOM_IDENTIFIER@707..713
                 0: IDENT@707..713 "Gothic" [] []
           1: COMMA@713..715 "," [] [Whitespace(" ")]
           2: CSS_FONT_FAMILY_NAME@715..719
-            0: CSS_CUSTOM_IDENTIFIER_LIST@715..719
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@715..719
               0: CSS_CUSTOM_IDENTIFIER@715..719
                 0: IDENT@715..719 "Bar" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@719..761
@@ -1097,7 +1097,7 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@764..784 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@784..817
           0: CSS_FONT_FAMILY_NAME@784..797
-            0: CSS_CUSTOM_IDENTIFIER_LIST@784..797
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@784..797
               0: CSS_CUSTOM_IDENTIFIER@784..791
                 0: IDENT@784..791 "Taisho" [] [Whitespace(" ")]
               1: CSS_CUSTOM_IDENTIFIER@791..797
@@ -1107,7 +1107,7 @@ CssRoot {
             0: CSS_STRING_LITERAL@799..811 "\"Otaru Kisa\"" [] []
           3: COMMA@811..813 "," [] [Whitespace(" ")]
           4: CSS_FONT_FAMILY_NAME@813..817
-            0: CSS_CUSTOM_IDENTIFIER_LIST@813..817
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@813..817
               0: CSS_CUSTOM_IDENTIFIER@813..817
                 0: IDENT@813..817 "Bar" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@817..859

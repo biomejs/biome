@@ -34,6 +34,8 @@ invalid.js:3:1 lint/nursery/noForIn ━━━━━━━━━━━━━━�
   
   i For-in loops are confusing and easy to misuse. You likely want to use a regular loop, for-of loop or forEach instead.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -52,6 +54,8 @@ invalid.js:7:1 lint/nursery/noForIn ━━━━━━━━━━━━━━�
     10 │ 
   
   i For-in loops are confusing and easy to misuse. You likely want to use a regular loop, for-of loop or forEach instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
