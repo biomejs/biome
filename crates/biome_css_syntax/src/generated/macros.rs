@@ -1016,8 +1016,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssCompoundSelectorList::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_CUSTOM_IDENTIFIER_LIST => {
-                    let $pattern = unsafe { $crate::CssCustomIdentifierList::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST => {
+                    let $pattern = unsafe {
+                        $crate::CssCustomIdentifierCommaSeparatedList::new_unchecked(node)
+                    };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST => {
+                    let $pattern = unsafe {
+                        $crate::CssCustomIdentifierSpaceSeparatedList::new_unchecked(node)
+                    };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_DECLARATION_LIST => {

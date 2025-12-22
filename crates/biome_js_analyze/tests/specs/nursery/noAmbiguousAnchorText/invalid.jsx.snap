@@ -122,6 +122,8 @@ invalid.jsx:3:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -137,6 +139,8 @@ invalid.jsx:7:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
     9 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -154,6 +158,8 @@ invalid.jsx:11:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -169,6 +175,8 @@ invalid.jsx:15:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
     17 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -186,6 +194,8 @@ invalid.jsx:19:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -201,6 +211,8 @@ invalid.jsx:23:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
     25 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -218,6 +230,8 @@ invalid.jsx:27:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -233,6 +247,8 @@ invalid.jsx:31:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
     33 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -250,6 +266,8 @@ invalid.jsx:35:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -265,6 +283,8 @@ invalid.jsx:39:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
     41 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -282,6 +302,8 @@ invalid.jsx:43:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -297,6 +319,8 @@ invalid.jsx:47:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
     49 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -314,6 +338,8 @@ invalid.jsx:51:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -329,6 +355,8 @@ invalid.jsx:55:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
     57 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -346,6 +374,8 @@ invalid.jsx:59:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -361,6 +391,8 @@ invalid.jsx:63:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
     65 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -378,6 +410,8 @@ invalid.jsx:67:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -393,6 +427,8 @@ invalid.jsx:71:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
     73 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -410,6 +446,8 @@ invalid.jsx:75:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -425,6 +463,8 @@ invalid.jsx:79:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
     81 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -442,6 +482,8 @@ invalid.jsx:83:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -457,6 +499,8 @@ invalid.jsx:87:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
     89 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -474,6 +518,8 @@ invalid.jsx:91:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -490,6 +536,8 @@ invalid.jsx:95:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -505,6 +553,8 @@ invalid.jsx:99:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━�
     101 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

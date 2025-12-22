@@ -900,6 +900,351 @@ pub struct SvelteAttachAttributeFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteAwaitBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteAwaitBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteAwaitBlockFields {
+        SvelteAwaitBlockFields {
+            opening_block: self.opening_block(),
+            clauses: self.clauses(),
+            closing_block: self.closing_block(),
+        }
+    }
+    pub fn opening_block(&self) -> SyntaxResult<SvelteAwaitOpeningBlock> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn clauses(&self) -> SvelteAwaitClausesList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn closing_block(&self) -> SyntaxResult<SvelteAwaitClosingBlock> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for SvelteAwaitBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteAwaitBlockFields {
+    pub opening_block: SyntaxResult<SvelteAwaitOpeningBlock>,
+    pub clauses: SvelteAwaitClausesList,
+    pub closing_block: SyntaxResult<SvelteAwaitClosingBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteAwaitCatchBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteAwaitCatchBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteAwaitCatchBlockFields {
+        SvelteAwaitCatchBlockFields {
+            sv_curly_colon_token: self.sv_curly_colon_token(),
+            catch_token: self.catch_token(),
+            name: self.name(),
+            r_curly_token: self.r_curly_token(),
+            children: self.children(),
+        }
+    }
+    pub fn sv_curly_colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn catch_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn name(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+    pub fn children(&self) -> HtmlElementList {
+        support::list(&self.syntax, 4usize)
+    }
+}
+impl Serialize for SvelteAwaitCatchBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteAwaitCatchBlockFields {
+    pub sv_curly_colon_token: SyntaxResult<SyntaxToken>,
+    pub catch_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<HtmlTextExpression>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+    pub children: HtmlElementList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteAwaitCatchClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteAwaitCatchClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteAwaitCatchClauseFields {
+        SvelteAwaitCatchClauseFields {
+            catch_token: self.catch_token(),
+            name: self.name(),
+        }
+    }
+    pub fn catch_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteAwaitCatchClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteAwaitCatchClauseFields {
+    pub catch_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteAwaitClosingBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteAwaitClosingBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteAwaitClosingBlockFields {
+        SvelteAwaitClosingBlockFields {
+            sv_curly_slash_token: self.sv_curly_slash_token(),
+            await_token: self.await_token(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn sv_curly_slash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn await_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for SvelteAwaitClosingBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteAwaitClosingBlockFields {
+    pub sv_curly_slash_token: SyntaxResult<SyntaxToken>,
+    pub await_token: SyntaxResult<SyntaxToken>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteAwaitOpeningBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteAwaitOpeningBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteAwaitOpeningBlockFields {
+        SvelteAwaitOpeningBlockFields {
+            sv_curly_hash_token: self.sv_curly_hash_token(),
+            await_token: self.await_token(),
+            expression: self.expression(),
+            then_clause: self.then_clause(),
+            catch_clause: self.catch_clause(),
+            r_curly_token: self.r_curly_token(),
+            children: self.children(),
+        }
+    }
+    pub fn sv_curly_hash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn await_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn then_clause(&self) -> Option<SvelteAwaitThenClause> {
+        support::node(&self.syntax, 3usize)
+    }
+    pub fn catch_clause(&self) -> Option<SvelteAwaitCatchClause> {
+        support::node(&self.syntax, 4usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 5usize)
+    }
+    pub fn children(&self) -> HtmlElementList {
+        support::list(&self.syntax, 6usize)
+    }
+}
+impl Serialize for SvelteAwaitOpeningBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteAwaitOpeningBlockFields {
+    pub sv_curly_hash_token: SyntaxResult<SyntaxToken>,
+    pub await_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+    pub then_clause: Option<SvelteAwaitThenClause>,
+    pub catch_clause: Option<SvelteAwaitCatchClause>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+    pub children: HtmlElementList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteAwaitThenBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteAwaitThenBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteAwaitThenBlockFields {
+        SvelteAwaitThenBlockFields {
+            sv_curly_colon_token: self.sv_curly_colon_token(),
+            then_token: self.then_token(),
+            name: self.name(),
+            r_curly_token: self.r_curly_token(),
+            children: self.children(),
+        }
+    }
+    pub fn sv_curly_colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn then_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn name(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+    pub fn children(&self) -> HtmlElementList {
+        support::list(&self.syntax, 4usize)
+    }
+}
+impl Serialize for SvelteAwaitThenBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteAwaitThenBlockFields {
+    pub sv_curly_colon_token: SyntaxResult<SyntaxToken>,
+    pub then_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<HtmlTextExpression>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+    pub children: HtmlElementList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteAwaitThenClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteAwaitThenClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteAwaitThenClauseFields {
+        SvelteAwaitThenClauseFields {
+            then_token: self.then_token(),
+            name: self.name(),
+        }
+    }
+    pub fn then_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteAwaitThenClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteAwaitThenClauseFields {
+    pub then_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteConstBlock {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1855,6 +2200,146 @@ pub struct SvelteRenderBlockFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteSnippetBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteSnippetBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteSnippetBlockFields {
+        SvelteSnippetBlockFields {
+            opening_block: self.opening_block(),
+            closing_block: self.closing_block(),
+        }
+    }
+    pub fn opening_block(&self) -> SyntaxResult<SvelteSnippetOpeningBlock> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn closing_block(&self) -> SyntaxResult<SvelteSnippetClosingBlock> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteSnippetBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteSnippetBlockFields {
+    pub opening_block: SyntaxResult<SvelteSnippetOpeningBlock>,
+    pub closing_block: SyntaxResult<SvelteSnippetClosingBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteSnippetClosingBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteSnippetClosingBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteSnippetClosingBlockFields {
+        SvelteSnippetClosingBlockFields {
+            sv_curly_slash_token: self.sv_curly_slash_token(),
+            snippet_token: self.snippet_token(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn sv_curly_slash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn snippet_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for SvelteSnippetClosingBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteSnippetClosingBlockFields {
+    pub sv_curly_slash_token: SyntaxResult<SyntaxToken>,
+    pub snippet_token: SyntaxResult<SyntaxToken>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteSnippetOpeningBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteSnippetOpeningBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteSnippetOpeningBlockFields {
+        SvelteSnippetOpeningBlockFields {
+            sv_curly_hash_token: self.sv_curly_hash_token(),
+            snippet_token: self.snippet_token(),
+            expression: self.expression(),
+            r_curly_token: self.r_curly_token(),
+            children: self.children(),
+        }
+    }
+    pub fn sv_curly_hash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn snippet_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+    pub fn children(&self) -> HtmlElementList {
+        support::list(&self.syntax, 4usize)
+    }
+}
+impl Serialize for SvelteSnippetOpeningBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteSnippetOpeningBlockFields {
+    pub sv_curly_hash_token: SyntaxResult<SyntaxToken>,
+    pub snippet_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+    pub children: HtmlElementList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct VueDirective {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2394,7 +2879,34 @@ impl AnyHtmlTextExpression {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnySvelteAwaitClauses {
+    SvelteAwaitCatchBlock(SvelteAwaitCatchBlock),
+    SvelteAwaitThenBlock(SvelteAwaitThenBlock),
+    SvelteBogusBlock(SvelteBogusBlock),
+}
+impl AnySvelteAwaitClauses {
+    pub fn as_svelte_await_catch_block(&self) -> Option<&SvelteAwaitCatchBlock> {
+        match &self {
+            Self::SvelteAwaitCatchBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_await_then_block(&self) -> Option<&SvelteAwaitThenBlock> {
+        match &self {
+            Self::SvelteAwaitThenBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_bogus_block(&self) -> Option<&SvelteBogusBlock> {
+        match &self {
+            Self::SvelteBogusBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnySvelteBlock {
+    SvelteAwaitBlock(SvelteAwaitBlock),
     SvelteBogusBlock(SvelteBogusBlock),
     SvelteConstBlock(SvelteConstBlock),
     SvelteDebugBlock(SvelteDebugBlock),
@@ -2403,8 +2915,15 @@ pub enum AnySvelteBlock {
     SvelteIfBlock(SvelteIfBlock),
     SvelteKeyBlock(SvelteKeyBlock),
     SvelteRenderBlock(SvelteRenderBlock),
+    SvelteSnippetBlock(SvelteSnippetBlock),
 }
 impl AnySvelteBlock {
+    pub fn as_svelte_await_block(&self) -> Option<&SvelteAwaitBlock> {
+        match &self {
+            Self::SvelteAwaitBlock(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_svelte_bogus_block(&self) -> Option<&SvelteBogusBlock> {
         match &self {
             Self::SvelteBogusBlock(item) => Some(item),
@@ -2450,6 +2969,12 @@ impl AnySvelteBlock {
     pub fn as_svelte_render_block(&self) -> Option<&SvelteRenderBlock> {
         match &self {
             Self::SvelteRenderBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_snippet_block(&self) -> Option<&SvelteSnippetBlock> {
+        match &self {
+            Self::SvelteSnippetBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -3635,6 +4160,403 @@ impl From<SvelteAttachAttribute> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for SvelteAwaitBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_AWAIT_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_AWAIT_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteAwaitBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteAwaitBlock")
+                .field(
+                    "opening_block",
+                    &support::DebugSyntaxResult(self.opening_block()),
+                )
+                .field("clauses", &self.clauses())
+                .field(
+                    "closing_block",
+                    &support::DebugSyntaxResult(self.closing_block()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("SvelteAwaitBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteAwaitBlock> for SyntaxNode {
+    fn from(n: SvelteAwaitBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteAwaitBlock> for SyntaxElement {
+    fn from(n: SvelteAwaitBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteAwaitCatchBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_AWAIT_CATCH_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_AWAIT_CATCH_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteAwaitCatchBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteAwaitCatchBlock")
+                .field(
+                    "sv_curly_colon_token",
+                    &support::DebugSyntaxResult(self.sv_curly_colon_token()),
+                )
+                .field(
+                    "catch_token",
+                    &support::DebugSyntaxResult(self.catch_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .field("children", &self.children())
+                .finish()
+        } else {
+            f.debug_struct("SvelteAwaitCatchBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteAwaitCatchBlock> for SyntaxNode {
+    fn from(n: SvelteAwaitCatchBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteAwaitCatchBlock> for SyntaxElement {
+    fn from(n: SvelteAwaitCatchBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteAwaitCatchClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_AWAIT_CATCH_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_AWAIT_CATCH_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteAwaitCatchClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteAwaitCatchClause")
+                .field(
+                    "catch_token",
+                    &support::DebugSyntaxResult(self.catch_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteAwaitCatchClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteAwaitCatchClause> for SyntaxNode {
+    fn from(n: SvelteAwaitCatchClause) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteAwaitCatchClause> for SyntaxElement {
+    fn from(n: SvelteAwaitCatchClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteAwaitClosingBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_AWAIT_CLOSING_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_AWAIT_CLOSING_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteAwaitClosingBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteAwaitClosingBlock")
+                .field(
+                    "sv_curly_slash_token",
+                    &support::DebugSyntaxResult(self.sv_curly_slash_token()),
+                )
+                .field(
+                    "await_token",
+                    &support::DebugSyntaxResult(self.await_token()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("SvelteAwaitClosingBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteAwaitClosingBlock> for SyntaxNode {
+    fn from(n: SvelteAwaitClosingBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteAwaitClosingBlock> for SyntaxElement {
+    fn from(n: SvelteAwaitClosingBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteAwaitOpeningBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_AWAIT_OPENING_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_AWAIT_OPENING_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteAwaitOpeningBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteAwaitOpeningBlock")
+                .field(
+                    "sv_curly_hash_token",
+                    &support::DebugSyntaxResult(self.sv_curly_hash_token()),
+                )
+                .field(
+                    "await_token",
+                    &support::DebugSyntaxResult(self.await_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "then_clause",
+                    &support::DebugOptionalElement(self.then_clause()),
+                )
+                .field(
+                    "catch_clause",
+                    &support::DebugOptionalElement(self.catch_clause()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .field("children", &self.children())
+                .finish()
+        } else {
+            f.debug_struct("SvelteAwaitOpeningBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteAwaitOpeningBlock> for SyntaxNode {
+    fn from(n: SvelteAwaitOpeningBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteAwaitOpeningBlock> for SyntaxElement {
+    fn from(n: SvelteAwaitOpeningBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteAwaitThenBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_AWAIT_THEN_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_AWAIT_THEN_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteAwaitThenBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteAwaitThenBlock")
+                .field(
+                    "sv_curly_colon_token",
+                    &support::DebugSyntaxResult(self.sv_curly_colon_token()),
+                )
+                .field("then_token", &support::DebugSyntaxResult(self.then_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .field("children", &self.children())
+                .finish()
+        } else {
+            f.debug_struct("SvelteAwaitThenBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteAwaitThenBlock> for SyntaxNode {
+    fn from(n: SvelteAwaitThenBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteAwaitThenBlock> for SyntaxElement {
+    fn from(n: SvelteAwaitThenBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteAwaitThenClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_AWAIT_THEN_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_AWAIT_THEN_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteAwaitThenClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteAwaitThenClause")
+                .field("then_token", &support::DebugSyntaxResult(self.then_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteAwaitThenClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteAwaitThenClause> for SyntaxNode {
+    fn from(n: SvelteAwaitThenClause) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteAwaitThenClause> for SyntaxElement {
+    fn from(n: SvelteAwaitThenClause) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for SvelteConstBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4743,6 +5665,178 @@ impl From<SvelteRenderBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for SvelteSnippetBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_SNIPPET_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_SNIPPET_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteSnippetBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteSnippetBlock")
+                .field(
+                    "opening_block",
+                    &support::DebugSyntaxResult(self.opening_block()),
+                )
+                .field(
+                    "closing_block",
+                    &support::DebugSyntaxResult(self.closing_block()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("SvelteSnippetBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteSnippetBlock> for SyntaxNode {
+    fn from(n: SvelteSnippetBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteSnippetBlock> for SyntaxElement {
+    fn from(n: SvelteSnippetBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteSnippetClosingBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_SNIPPET_CLOSING_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_SNIPPET_CLOSING_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteSnippetClosingBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteSnippetClosingBlock")
+                .field(
+                    "sv_curly_slash_token",
+                    &support::DebugSyntaxResult(self.sv_curly_slash_token()),
+                )
+                .field(
+                    "snippet_token",
+                    &support::DebugSyntaxResult(self.snippet_token()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("SvelteSnippetClosingBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteSnippetClosingBlock> for SyntaxNode {
+    fn from(n: SvelteSnippetClosingBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteSnippetClosingBlock> for SyntaxElement {
+    fn from(n: SvelteSnippetClosingBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteSnippetOpeningBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_SNIPPET_OPENING_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_SNIPPET_OPENING_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteSnippetOpeningBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteSnippetOpeningBlock")
+                .field(
+                    "sv_curly_hash_token",
+                    &support::DebugSyntaxResult(self.sv_curly_hash_token()),
+                )
+                .field(
+                    "snippet_token",
+                    &support::DebugSyntaxResult(self.snippet_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .field("children", &self.children())
+                .finish()
+        } else {
+            f.debug_struct("SvelteSnippetOpeningBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteSnippetOpeningBlock> for SyntaxNode {
+    fn from(n: SvelteSnippetOpeningBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteSnippetOpeningBlock> for SyntaxElement {
+    fn from(n: SvelteSnippetOpeningBlock) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for VueDirective {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5668,6 +6762,87 @@ impl From<AnyHtmlTextExpression> for SyntaxElement {
         node.into()
     }
 }
+impl From<SvelteAwaitCatchBlock> for AnySvelteAwaitClauses {
+    fn from(node: SvelteAwaitCatchBlock) -> Self {
+        Self::SvelteAwaitCatchBlock(node)
+    }
+}
+impl From<SvelteAwaitThenBlock> for AnySvelteAwaitClauses {
+    fn from(node: SvelteAwaitThenBlock) -> Self {
+        Self::SvelteAwaitThenBlock(node)
+    }
+}
+impl From<SvelteBogusBlock> for AnySvelteAwaitClauses {
+    fn from(node: SvelteBogusBlock) -> Self {
+        Self::SvelteBogusBlock(node)
+    }
+}
+impl AstNode for AnySvelteAwaitClauses {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SvelteAwaitCatchBlock::KIND_SET
+        .union(SvelteAwaitThenBlock::KIND_SET)
+        .union(SvelteBogusBlock::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            SVELTE_AWAIT_CATCH_BLOCK | SVELTE_AWAIT_THEN_BLOCK | SVELTE_BOGUS_BLOCK
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SVELTE_AWAIT_CATCH_BLOCK => {
+                Self::SvelteAwaitCatchBlock(SvelteAwaitCatchBlock { syntax })
+            }
+            SVELTE_AWAIT_THEN_BLOCK => Self::SvelteAwaitThenBlock(SvelteAwaitThenBlock { syntax }),
+            SVELTE_BOGUS_BLOCK => Self::SvelteBogusBlock(SvelteBogusBlock { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::SvelteAwaitCatchBlock(it) => it.syntax(),
+            Self::SvelteAwaitThenBlock(it) => it.syntax(),
+            Self::SvelteBogusBlock(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::SvelteAwaitCatchBlock(it) => it.into_syntax(),
+            Self::SvelteAwaitThenBlock(it) => it.into_syntax(),
+            Self::SvelteBogusBlock(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnySvelteAwaitClauses {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::SvelteAwaitCatchBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteAwaitThenBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnySvelteAwaitClauses> for SyntaxNode {
+    fn from(n: AnySvelteAwaitClauses) -> Self {
+        match n {
+            AnySvelteAwaitClauses::SvelteAwaitCatchBlock(it) => it.into_syntax(),
+            AnySvelteAwaitClauses::SvelteAwaitThenBlock(it) => it.into_syntax(),
+            AnySvelteAwaitClauses::SvelteBogusBlock(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnySvelteAwaitClauses> for SyntaxElement {
+    fn from(n: AnySvelteAwaitClauses) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<SvelteAwaitBlock> for AnySvelteBlock {
+    fn from(node: SvelteAwaitBlock) -> Self {
+        Self::SvelteAwaitBlock(node)
+    }
+}
 impl From<SvelteBogusBlock> for AnySvelteBlock {
     fn from(node: SvelteBogusBlock) -> Self {
         Self::SvelteBogusBlock(node)
@@ -5708,20 +6883,28 @@ impl From<SvelteRenderBlock> for AnySvelteBlock {
         Self::SvelteRenderBlock(node)
     }
 }
+impl From<SvelteSnippetBlock> for AnySvelteBlock {
+    fn from(node: SvelteSnippetBlock) -> Self {
+        Self::SvelteSnippetBlock(node)
+    }
+}
 impl AstNode for AnySvelteBlock {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = SvelteBogusBlock::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = SvelteAwaitBlock::KIND_SET
+        .union(SvelteBogusBlock::KIND_SET)
         .union(SvelteConstBlock::KIND_SET)
         .union(SvelteDebugBlock::KIND_SET)
         .union(SvelteEachBlock::KIND_SET)
         .union(SvelteHtmlBlock::KIND_SET)
         .union(SvelteIfBlock::KIND_SET)
         .union(SvelteKeyBlock::KIND_SET)
-        .union(SvelteRenderBlock::KIND_SET);
+        .union(SvelteRenderBlock::KIND_SET)
+        .union(SvelteSnippetBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            SVELTE_BOGUS_BLOCK
+            SVELTE_AWAIT_BLOCK
+                | SVELTE_BOGUS_BLOCK
                 | SVELTE_CONST_BLOCK
                 | SVELTE_DEBUG_BLOCK
                 | SVELTE_EACH_BLOCK
@@ -5729,10 +6912,12 @@ impl AstNode for AnySvelteBlock {
                 | SVELTE_IF_BLOCK
                 | SVELTE_KEY_BLOCK
                 | SVELTE_RENDER_BLOCK
+                | SVELTE_SNIPPET_BLOCK
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            SVELTE_AWAIT_BLOCK => Self::SvelteAwaitBlock(SvelteAwaitBlock { syntax }),
             SVELTE_BOGUS_BLOCK => Self::SvelteBogusBlock(SvelteBogusBlock { syntax }),
             SVELTE_CONST_BLOCK => Self::SvelteConstBlock(SvelteConstBlock { syntax }),
             SVELTE_DEBUG_BLOCK => Self::SvelteDebugBlock(SvelteDebugBlock { syntax }),
@@ -5741,12 +6926,14 @@ impl AstNode for AnySvelteBlock {
             SVELTE_IF_BLOCK => Self::SvelteIfBlock(SvelteIfBlock { syntax }),
             SVELTE_KEY_BLOCK => Self::SvelteKeyBlock(SvelteKeyBlock { syntax }),
             SVELTE_RENDER_BLOCK => Self::SvelteRenderBlock(SvelteRenderBlock { syntax }),
+            SVELTE_SNIPPET_BLOCK => Self::SvelteSnippetBlock(SvelteSnippetBlock { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::SvelteAwaitBlock(it) => it.syntax(),
             Self::SvelteBogusBlock(it) => it.syntax(),
             Self::SvelteConstBlock(it) => it.syntax(),
             Self::SvelteDebugBlock(it) => it.syntax(),
@@ -5755,10 +6942,12 @@ impl AstNode for AnySvelteBlock {
             Self::SvelteIfBlock(it) => it.syntax(),
             Self::SvelteKeyBlock(it) => it.syntax(),
             Self::SvelteRenderBlock(it) => it.syntax(),
+            Self::SvelteSnippetBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::SvelteAwaitBlock(it) => it.into_syntax(),
             Self::SvelteBogusBlock(it) => it.into_syntax(),
             Self::SvelteConstBlock(it) => it.into_syntax(),
             Self::SvelteDebugBlock(it) => it.into_syntax(),
@@ -5767,12 +6956,14 @@ impl AstNode for AnySvelteBlock {
             Self::SvelteIfBlock(it) => it.into_syntax(),
             Self::SvelteKeyBlock(it) => it.into_syntax(),
             Self::SvelteRenderBlock(it) => it.into_syntax(),
+            Self::SvelteSnippetBlock(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnySvelteBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::SvelteAwaitBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteBogusBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteConstBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteDebugBlock(it) => std::fmt::Debug::fmt(it, f),
@@ -5781,12 +6972,14 @@ impl std::fmt::Debug for AnySvelteBlock {
             Self::SvelteIfBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteKeyBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteRenderBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteSnippetBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnySvelteBlock> for SyntaxNode {
     fn from(n: AnySvelteBlock) -> Self {
         match n {
+            AnySvelteBlock::SvelteAwaitBlock(it) => it.into_syntax(),
             AnySvelteBlock::SvelteBogusBlock(it) => it.into_syntax(),
             AnySvelteBlock::SvelteConstBlock(it) => it.into_syntax(),
             AnySvelteBlock::SvelteDebugBlock(it) => it.into_syntax(),
@@ -5795,6 +6988,7 @@ impl From<AnySvelteBlock> for SyntaxNode {
             AnySvelteBlock::SvelteIfBlock(it) => it.into_syntax(),
             AnySvelteBlock::SvelteKeyBlock(it) => it.into_syntax(),
             AnySvelteBlock::SvelteRenderBlock(it) => it.into_syntax(),
+            AnySvelteBlock::SvelteSnippetBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -6078,6 +7272,11 @@ impl std::fmt::Display for AnyHtmlTextExpression {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnySvelteAwaitClauses {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnySvelteBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -6198,6 +7397,41 @@ impl std::fmt::Display for SvelteAttachAttribute {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for SvelteAwaitBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteAwaitCatchBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteAwaitCatchClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteAwaitClosingBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteAwaitOpeningBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteAwaitThenBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteAwaitThenClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for SvelteConstBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -6294,6 +7528,21 @@ impl std::fmt::Display for SvelteName {
     }
 }
 impl std::fmt::Display for SvelteRenderBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteSnippetBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteSnippetClosingBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteSnippetOpeningBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -6947,6 +8196,88 @@ impl IntoIterator for &HtmlElementList {
 impl IntoIterator for HtmlElementList {
     type Item = AnyHtmlElement;
     type IntoIter = AstNodeListIterator<Language, AnyHtmlElement>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct SvelteAwaitClausesList {
+    syntax_list: SyntaxList,
+}
+impl SvelteAwaitClausesList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for SvelteAwaitClausesList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_AWAIT_CLAUSES_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_AWAIT_CLAUSES_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for SvelteAwaitClausesList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for SvelteAwaitClausesList {
+    type Language = Language;
+    type Node = AnySvelteAwaitClauses;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for SvelteAwaitClausesList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("SvelteAwaitClausesList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &SvelteAwaitClausesList {
+    type Item = AnySvelteAwaitClauses;
+    type IntoIter = AstNodeListIterator<Language, AnySvelteAwaitClauses>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for SvelteAwaitClausesList {
+    type Item = AnySvelteAwaitClauses;
+    type IntoIter = AstNodeListIterator<Language, AnySvelteAwaitClauses>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

@@ -41,6 +41,8 @@ invalidSyncCallbackInsideAsyncFn.ts:6:13 lint/nursery/noFloatingPromises ━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -57,6 +59,8 @@ invalidSyncCallbackInsideAsyncFn.ts:16:13 lint/nursery/noFloatingPromises ━━
     18 │     });
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

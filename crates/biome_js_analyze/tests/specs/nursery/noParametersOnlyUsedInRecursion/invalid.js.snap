@@ -167,6 +167,8 @@ invalid.js:2:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
       1   1 │   // Simple case: parameter only used in recursion
@@ -195,6 +197,8 @@ invalid.js:8:16 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend b with an underscore.
   
@@ -226,6 +230,8 @@ invalid.js:8:19 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend c with an underscore.
   
       6   6 │   
@@ -255,6 +261,8 @@ invalid.js:14:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
@@ -287,6 +295,8 @@ invalid.js:21:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
      19  19 │   // Method in class
@@ -316,6 +326,8 @@ invalid.js:28:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend step with an underscore.
   
@@ -347,6 +359,8 @@ invalid.js:34:21 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend b with an underscore.
   
      32  32 │   
@@ -376,6 +390,8 @@ invalid.js:40:20 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend flag with an underscore.
   
@@ -408,6 +424,8 @@ invalid.js:47:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend step with an underscore.
   
      45  45 │   // Object method
@@ -437,6 +455,8 @@ invalid.js:54:11 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
@@ -469,6 +489,8 @@ invalid.js:61:11 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend unused with an underscore.
   
      59  59 │   // Separate declaration and assignment with arrow function
@@ -498,6 +520,8 @@ invalid.js:67:19 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
@@ -529,6 +553,8 @@ invalid.js:73:18 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
      71  71 │   
@@ -558,6 +584,8 @@ invalid.js:79:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
@@ -589,6 +617,8 @@ invalid.js:85:22 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
      83  83 │   
@@ -618,6 +648,8 @@ invalid.js:91:30 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
@@ -649,6 +681,8 @@ invalid.js:97:29 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
      95  95 │   
@@ -679,6 +713,8 @@ invalid.js:103:24 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend flag with an underscore.
   
     101 101 │   
@@ -708,6 +744,8 @@ invalid.js:109:26 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
@@ -740,6 +778,8 @@ invalid.js:116:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
     114 114 │   // Optional chaining in class method
@@ -770,6 +810,8 @@ invalid.js:124:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend step with an underscore.
   
@@ -802,6 +844,8 @@ invalid.js:132:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
     130 130 │   // Computed member with string literal
@@ -832,6 +876,8 @@ invalid.js:140:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   

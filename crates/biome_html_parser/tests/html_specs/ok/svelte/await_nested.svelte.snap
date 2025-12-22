@@ -1,0 +1,459 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#await userPromise}
+  <p>Loading user...</p>
+{:then user}
+  <div>
+    <h1>{user.name}</h1>
+    {#await user.postsPromise then posts}
+      <ul>
+        {#each posts as post}
+          <li>{post.title}</li>
+        {/each}
+      </ul>
+    {/await}
+  </div>
+{:catch error}
+  <p>Error: {error.message}</p>
+{/await}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                await_token: AWAIT_KW@2..7 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@7..19 " userPromise" [] [],
+                },
+                then_clause: missing (optional),
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@19..20 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@20..24 "<" [Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@24..25 "p" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@25..26 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@26..41 "Loading user..." [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@41..42 "<" [] [],
+                            slash_token: SLASH@42..43 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@43..44 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@44..45 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [
+                SvelteAwaitThenBlock {
+                    sv_curly_colon_token: SV_CURLY_COLON@45..48 "{:" [Newline("\n")] [],
+                    then_token: THEN_KW@48..52 "then" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@52..57 " user" [] [],
+                    },
+                    r_curly_token: R_CURLY@57..58 "}" [] [],
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@58..62 "<" [Newline("\n"), Whitespace("  ")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@62..65 "div" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@65..66 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlElement {
+                                    opening_element: HtmlOpeningElement {
+                                        l_angle_token: L_ANGLE@66..72 "<" [Newline("\n"), Whitespace("    ")] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@72..74 "h1" [] [],
+                                        },
+                                        attributes: HtmlAttributeList [],
+                                        r_angle_token: R_ANGLE@74..75 ">" [] [],
+                                    },
+                                    children: HtmlElementList [
+                                        HtmlSingleTextExpression {
+                                            l_curly_token: L_CURLY@75..76 "{" [] [],
+                                            expression: HtmlTextExpression {
+                                                html_literal_token: HTML_LITERAL@76..85 "user.name" [] [],
+                                            },
+                                            r_curly_token: R_CURLY@85..86 "}" [] [],
+                                        },
+                                    ],
+                                    closing_element: HtmlClosingElement {
+                                        l_angle_token: L_ANGLE@86..87 "<" [] [],
+                                        slash_token: SLASH@87..88 "/" [] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@88..90 "h1" [] [],
+                                        },
+                                        r_angle_token: R_ANGLE@90..91 ">" [] [],
+                                    },
+                                },
+                                SvelteAwaitBlock {
+                                    opening_block: SvelteAwaitOpeningBlock {
+                                        sv_curly_hash_token: SV_CURLY_HASH@91..98 "{#" [Newline("\n"), Whitespace("    ")] [],
+                                        await_token: AWAIT_KW@98..103 "await" [] [],
+                                        expression: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@103..122 " user.postsPromise " [] [],
+                                        },
+                                        then_clause: SvelteAwaitThenClause {
+                                            then_token: THEN_KW@122..126 "then" [] [],
+                                            name: HtmlTextExpression {
+                                                html_literal_token: HTML_LITERAL@126..132 " posts" [] [],
+                                            },
+                                        },
+                                        catch_clause: missing (optional),
+                                        r_curly_token: R_CURLY@132..133 "}" [] [],
+                                        children: HtmlElementList [
+                                            HtmlElement {
+                                                opening_element: HtmlOpeningElement {
+                                                    l_angle_token: L_ANGLE@133..141 "<" [Newline("\n"), Whitespace("      ")] [],
+                                                    name: HtmlTagName {
+                                                        value_token: HTML_LITERAL@141..143 "ul" [] [],
+                                                    },
+                                                    attributes: HtmlAttributeList [],
+                                                    r_angle_token: R_ANGLE@143..144 ">" [] [],
+                                                },
+                                                children: HtmlElementList [
+                                                    SvelteEachBlock {
+                                                        opening_block: SvelteEachOpeningBlock {
+                                                            sv_curly_hash_token: SV_CURLY_HASH@144..155 "{#" [Newline("\n"), Whitespace("        ")] [],
+                                                            each_token: EACH_KW@155..159 "each" [] [],
+                                                            list: HtmlTextExpression {
+                                                                html_literal_token: HTML_LITERAL@159..166 " posts " [] [],
+                                                            },
+                                                            item: SvelteEachAsKeyedItem {
+                                                                as_token: AS_KW@166..168 "as" [] [],
+                                                                name: HtmlTextExpression {
+                                                                    html_literal_token: HTML_LITERAL@168..173 " post" [] [],
+                                                                },
+                                                                index: missing (optional),
+                                                                key: missing (optional),
+                                                            },
+                                                            r_curly_token: R_CURLY@173..174 "}" [] [],
+                                                        },
+                                                        children: HtmlElementList [
+                                                            HtmlElement {
+                                                                opening_element: HtmlOpeningElement {
+                                                                    l_angle_token: L_ANGLE@174..186 "<" [Newline("\n"), Whitespace("          ")] [],
+                                                                    name: HtmlTagName {
+                                                                        value_token: HTML_LITERAL@186..188 "li" [] [],
+                                                                    },
+                                                                    attributes: HtmlAttributeList [],
+                                                                    r_angle_token: R_ANGLE@188..189 ">" [] [],
+                                                                },
+                                                                children: HtmlElementList [
+                                                                    HtmlSingleTextExpression {
+                                                                        l_curly_token: L_CURLY@189..190 "{" [] [],
+                                                                        expression: HtmlTextExpression {
+                                                                            html_literal_token: HTML_LITERAL@190..200 "post.title" [] [],
+                                                                        },
+                                                                        r_curly_token: R_CURLY@200..201 "}" [] [],
+                                                                    },
+                                                                ],
+                                                                closing_element: HtmlClosingElement {
+                                                                    l_angle_token: L_ANGLE@201..202 "<" [] [],
+                                                                    slash_token: SLASH@202..203 "/" [] [],
+                                                                    name: HtmlTagName {
+                                                                        value_token: HTML_LITERAL@203..205 "li" [] [],
+                                                                    },
+                                                                    r_angle_token: R_ANGLE@205..206 ">" [] [],
+                                                                },
+                                                            },
+                                                        ],
+                                                        else_clause: missing (optional),
+                                                        closing_block: SvelteEachClosingBlock {
+                                                            sv_curly_slash_token: SV_CURLY_SLASH@206..217 "{/" [Newline("\n"), Whitespace("        ")] [],
+                                                            each_token: EACH_KW@217..221 "each" [] [],
+                                                            r_curly_token: R_CURLY@221..222 "}" [] [],
+                                                        },
+                                                    },
+                                                ],
+                                                closing_element: HtmlClosingElement {
+                                                    l_angle_token: L_ANGLE@222..230 "<" [Newline("\n"), Whitespace("      ")] [],
+                                                    slash_token: SLASH@230..231 "/" [] [],
+                                                    name: HtmlTagName {
+                                                        value_token: HTML_LITERAL@231..233 "ul" [] [],
+                                                    },
+                                                    r_angle_token: R_ANGLE@233..234 ">" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    clauses: SvelteAwaitClausesList [],
+                                    closing_block: SvelteAwaitClosingBlock {
+                                        sv_curly_slash_token: SV_CURLY_SLASH@234..241 "{/" [Newline("\n"), Whitespace("    ")] [],
+                                        await_token: AWAIT_KW@241..246 "await" [] [],
+                                        r_curly_token: R_CURLY@246..247 "}" [] [],
+                                    },
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@247..251 "<" [Newline("\n"), Whitespace("  ")] [],
+                                slash_token: SLASH@251..252 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@252..255 "div" [] [],
+                                },
+                                r_angle_token: R_ANGLE@255..256 ">" [] [],
+                            },
+                        },
+                    ],
+                },
+                SvelteAwaitCatchBlock {
+                    sv_curly_colon_token: SV_CURLY_COLON@256..259 "{:" [Newline("\n")] [],
+                    catch_token: CATCH_KW@259..264 "catch" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@264..270 " error" [] [],
+                    },
+                    r_curly_token: R_CURLY@270..271 "}" [] [],
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@271..275 "<" [Newline("\n"), Whitespace("  ")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@275..276 "p" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@276..277 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@277..284 "Error:" [] [Whitespace(" ")],
+                                },
+                                HtmlSingleTextExpression {
+                                    l_curly_token: L_CURLY@284..285 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@285..298 "error.message" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@298..299 "}" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@299..300 "<" [] [],
+                                slash_token: SLASH@300..301 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@301..302 "p" [] [],
+                                },
+                                r_angle_token: R_ANGLE@302..303 ">" [] [],
+                            },
+                        },
+                    ],
+                },
+            ],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@303..306 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@306..311 "await" [] [],
+                r_curly_token: R_CURLY@311..312 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@312..313 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..313
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..312
+    0: SVELTE_AWAIT_BLOCK@0..312
+      0: SVELTE_AWAIT_OPENING_BLOCK@0..45
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: AWAIT_KW@2..7 "await" [] []
+        2: HTML_TEXT_EXPRESSION@7..19
+          0: HTML_LITERAL@7..19 " userPromise" [] []
+        3: (empty)
+        4: (empty)
+        5: R_CURLY@19..20 "}" [] []
+        6: HTML_ELEMENT_LIST@20..45
+          0: HTML_ELEMENT@20..45
+            0: HTML_OPENING_ELEMENT@20..26
+              0: L_ANGLE@20..24 "<" [Newline("\n"), Whitespace("  ")] []
+              1: HTML_TAG_NAME@24..25
+                0: HTML_LITERAL@24..25 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@25..25
+              3: R_ANGLE@25..26 ">" [] []
+            1: HTML_ELEMENT_LIST@26..41
+              0: HTML_CONTENT@26..41
+                0: HTML_LITERAL@26..41 "Loading user..." [] []
+            2: HTML_CLOSING_ELEMENT@41..45
+              0: L_ANGLE@41..42 "<" [] []
+              1: SLASH@42..43 "/" [] []
+              2: HTML_TAG_NAME@43..44
+                0: HTML_LITERAL@43..44 "p" [] []
+              3: R_ANGLE@44..45 ">" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@45..303
+        0: SVELTE_AWAIT_THEN_BLOCK@45..256
+          0: SV_CURLY_COLON@45..48 "{:" [Newline("\n")] []
+          1: THEN_KW@48..52 "then" [] []
+          2: HTML_TEXT_EXPRESSION@52..57
+            0: HTML_LITERAL@52..57 " user" [] []
+          3: R_CURLY@57..58 "}" [] []
+          4: HTML_ELEMENT_LIST@58..256
+            0: HTML_ELEMENT@58..256
+              0: HTML_OPENING_ELEMENT@58..66
+                0: L_ANGLE@58..62 "<" [Newline("\n"), Whitespace("  ")] []
+                1: HTML_TAG_NAME@62..65
+                  0: HTML_LITERAL@62..65 "div" [] []
+                2: HTML_ATTRIBUTE_LIST@65..65
+                3: R_ANGLE@65..66 ">" [] []
+              1: HTML_ELEMENT_LIST@66..247
+                0: HTML_ELEMENT@66..91
+                  0: HTML_OPENING_ELEMENT@66..75
+                    0: L_ANGLE@66..72 "<" [Newline("\n"), Whitespace("    ")] []
+                    1: HTML_TAG_NAME@72..74
+                      0: HTML_LITERAL@72..74 "h1" [] []
+                    2: HTML_ATTRIBUTE_LIST@74..74
+                    3: R_ANGLE@74..75 ">" [] []
+                  1: HTML_ELEMENT_LIST@75..86
+                    0: HTML_SINGLE_TEXT_EXPRESSION@75..86
+                      0: L_CURLY@75..76 "{" [] []
+                      1: HTML_TEXT_EXPRESSION@76..85
+                        0: HTML_LITERAL@76..85 "user.name" [] []
+                      2: R_CURLY@85..86 "}" [] []
+                  2: HTML_CLOSING_ELEMENT@86..91
+                    0: L_ANGLE@86..87 "<" [] []
+                    1: SLASH@87..88 "/" [] []
+                    2: HTML_TAG_NAME@88..90
+                      0: HTML_LITERAL@88..90 "h1" [] []
+                    3: R_ANGLE@90..91 ">" [] []
+                1: SVELTE_AWAIT_BLOCK@91..247
+                  0: SVELTE_AWAIT_OPENING_BLOCK@91..234
+                    0: SV_CURLY_HASH@91..98 "{#" [Newline("\n"), Whitespace("    ")] []
+                    1: AWAIT_KW@98..103 "await" [] []
+                    2: HTML_TEXT_EXPRESSION@103..122
+                      0: HTML_LITERAL@103..122 " user.postsPromise " [] []
+                    3: SVELTE_AWAIT_THEN_CLAUSE@122..132
+                      0: THEN_KW@122..126 "then" [] []
+                      1: HTML_TEXT_EXPRESSION@126..132
+                        0: HTML_LITERAL@126..132 " posts" [] []
+                    4: (empty)
+                    5: R_CURLY@132..133 "}" [] []
+                    6: HTML_ELEMENT_LIST@133..234
+                      0: HTML_ELEMENT@133..234
+                        0: HTML_OPENING_ELEMENT@133..144
+                          0: L_ANGLE@133..141 "<" [Newline("\n"), Whitespace("      ")] []
+                          1: HTML_TAG_NAME@141..143
+                            0: HTML_LITERAL@141..143 "ul" [] []
+                          2: HTML_ATTRIBUTE_LIST@143..143
+                          3: R_ANGLE@143..144 ">" [] []
+                        1: HTML_ELEMENT_LIST@144..222
+                          0: SVELTE_EACH_BLOCK@144..222
+                            0: SVELTE_EACH_OPENING_BLOCK@144..174
+                              0: SV_CURLY_HASH@144..155 "{#" [Newline("\n"), Whitespace("        ")] []
+                              1: EACH_KW@155..159 "each" [] []
+                              2: HTML_TEXT_EXPRESSION@159..166
+                                0: HTML_LITERAL@159..166 " posts " [] []
+                              3: SVELTE_EACH_AS_KEYED_ITEM@166..173
+                                0: AS_KW@166..168 "as" [] []
+                                1: HTML_TEXT_EXPRESSION@168..173
+                                  0: HTML_LITERAL@168..173 " post" [] []
+                                2: (empty)
+                                3: (empty)
+                              4: R_CURLY@173..174 "}" [] []
+                            1: HTML_ELEMENT_LIST@174..206
+                              0: HTML_ELEMENT@174..206
+                                0: HTML_OPENING_ELEMENT@174..189
+                                  0: L_ANGLE@174..186 "<" [Newline("\n"), Whitespace("          ")] []
+                                  1: HTML_TAG_NAME@186..188
+                                    0: HTML_LITERAL@186..188 "li" [] []
+                                  2: HTML_ATTRIBUTE_LIST@188..188
+                                  3: R_ANGLE@188..189 ">" [] []
+                                1: HTML_ELEMENT_LIST@189..201
+                                  0: HTML_SINGLE_TEXT_EXPRESSION@189..201
+                                    0: L_CURLY@189..190 "{" [] []
+                                    1: HTML_TEXT_EXPRESSION@190..200
+                                      0: HTML_LITERAL@190..200 "post.title" [] []
+                                    2: R_CURLY@200..201 "}" [] []
+                                2: HTML_CLOSING_ELEMENT@201..206
+                                  0: L_ANGLE@201..202 "<" [] []
+                                  1: SLASH@202..203 "/" [] []
+                                  2: HTML_TAG_NAME@203..205
+                                    0: HTML_LITERAL@203..205 "li" [] []
+                                  3: R_ANGLE@205..206 ">" [] []
+                            2: (empty)
+                            3: SVELTE_EACH_CLOSING_BLOCK@206..222
+                              0: SV_CURLY_SLASH@206..217 "{/" [Newline("\n"), Whitespace("        ")] []
+                              1: EACH_KW@217..221 "each" [] []
+                              2: R_CURLY@221..222 "}" [] []
+                        2: HTML_CLOSING_ELEMENT@222..234
+                          0: L_ANGLE@222..230 "<" [Newline("\n"), Whitespace("      ")] []
+                          1: SLASH@230..231 "/" [] []
+                          2: HTML_TAG_NAME@231..233
+                            0: HTML_LITERAL@231..233 "ul" [] []
+                          3: R_ANGLE@233..234 ">" [] []
+                  1: SVELTE_AWAIT_CLAUSES_LIST@234..234
+                  2: SVELTE_AWAIT_CLOSING_BLOCK@234..247
+                    0: SV_CURLY_SLASH@234..241 "{/" [Newline("\n"), Whitespace("    ")] []
+                    1: AWAIT_KW@241..246 "await" [] []
+                    2: R_CURLY@246..247 "}" [] []
+              2: HTML_CLOSING_ELEMENT@247..256
+                0: L_ANGLE@247..251 "<" [Newline("\n"), Whitespace("  ")] []
+                1: SLASH@251..252 "/" [] []
+                2: HTML_TAG_NAME@252..255
+                  0: HTML_LITERAL@252..255 "div" [] []
+                3: R_ANGLE@255..256 ">" [] []
+        1: SVELTE_AWAIT_CATCH_BLOCK@256..303
+          0: SV_CURLY_COLON@256..259 "{:" [Newline("\n")] []
+          1: CATCH_KW@259..264 "catch" [] []
+          2: HTML_TEXT_EXPRESSION@264..270
+            0: HTML_LITERAL@264..270 " error" [] []
+          3: R_CURLY@270..271 "}" [] []
+          4: HTML_ELEMENT_LIST@271..303
+            0: HTML_ELEMENT@271..303
+              0: HTML_OPENING_ELEMENT@271..277
+                0: L_ANGLE@271..275 "<" [Newline("\n"), Whitespace("  ")] []
+                1: HTML_TAG_NAME@275..276
+                  0: HTML_LITERAL@275..276 "p" [] []
+                2: HTML_ATTRIBUTE_LIST@276..276
+                3: R_ANGLE@276..277 ">" [] []
+              1: HTML_ELEMENT_LIST@277..299
+                0: HTML_CONTENT@277..284
+                  0: HTML_LITERAL@277..284 "Error:" [] [Whitespace(" ")]
+                1: HTML_SINGLE_TEXT_EXPRESSION@284..299
+                  0: L_CURLY@284..285 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@285..298
+                    0: HTML_LITERAL@285..298 "error.message" [] []
+                  2: R_CURLY@298..299 "}" [] []
+              2: HTML_CLOSING_ELEMENT@299..303
+                0: L_ANGLE@299..300 "<" [] []
+                1: SLASH@300..301 "/" [] []
+                2: HTML_TAG_NAME@301..302
+                  0: HTML_LITERAL@301..302 "p" [] []
+                3: R_ANGLE@302..303 ">" [] []
+      2: SVELTE_AWAIT_CLOSING_BLOCK@303..312
+        0: SV_CURLY_SLASH@303..306 "{/" [Newline("\n")] []
+        1: AWAIT_KW@306..311 "await" [] []
+        2: R_CURLY@311..312 "}" [] []
+  4: EOF@312..313 "" [Newline("\n")] []
+
+```

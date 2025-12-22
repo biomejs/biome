@@ -33,14 +33,14 @@ TwRoot {
                 modifier: TwModifier {
                     slash_token: SLASH@38..39 "/" [] [],
                     value: TwNamedValue {
-                        value_token: TW_VALUE@39..42 "10" [] [Newline("\n")],
+                        value_token: TW_VALUE@39..41 "10" [] [],
                     },
                 },
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@42..42 "" [] [],
+    eof_token: EOF@41..42 "" [Newline("\n")] [],
 }
 ```
 
@@ -49,24 +49,24 @@ TwRoot {
 ```
 0: TW_ROOT@0..42
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..42
-    0: TW_FULL_CANDIDATE@0..42
+  1: TW_CANDIDATE_LIST@0..41
+    0: TW_FULL_CANDIDATE@0..41
       0: TW_VARIANT_LIST@0..5
         0: TW_STATIC_VARIANT@0..4
           0: TW_BASE@0..4 "dark" [] []
         1: COLON@4..5 ":" [] []
       1: (empty)
-      2: TW_ARBITRARY_CANDIDATE@5..42
+      2: TW_ARBITRARY_CANDIDATE@5..41
         0: L_BRACKET@5..6 "[" [] []
         1: TW_PROPERTY@6..18 "--pattern-fg" [] []
         2: COLON@18..19 ":" [] []
         3: TW_VALUE@19..37 "var(--color-white)" [] []
         4: R_BRACKET@37..38 "]" [] []
-        5: TW_MODIFIER@38..42
+        5: TW_MODIFIER@38..41
           0: SLASH@38..39 "/" [] []
-          1: TW_NAMED_VALUE@39..42
-            0: TW_VALUE@39..42 "10" [] [Newline("\n")]
+          1: TW_NAMED_VALUE@39..41
+            0: TW_VALUE@39..41 "10" [] []
       3: (empty)
-  2: EOF@42..42 "" [] []
+  2: EOF@41..42 "" [Newline("\n")] []
 
 ```

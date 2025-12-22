@@ -1,15 +1,19 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's Markdown parser"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_markdown_parser"
-publish              = false
-repository.workspace = true
 version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's Markdown parser"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
+
+# cargo-workspaces metadata
+[package.metadata.workspaces]
+independent = true
 
 [dependencies]
 biome_console          = { workspace = true }
@@ -28,11 +32,6 @@ insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
-
-
-# cargo-workspaces metadata
-[package.metadata.workspaces]
-independent = true
 
 [lints]
 workspace = true

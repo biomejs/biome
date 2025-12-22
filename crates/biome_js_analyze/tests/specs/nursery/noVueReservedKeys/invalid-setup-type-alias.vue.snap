@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 151
 expression: invalid-setup-type-alias.vue
 ---
 # Input
@@ -25,6 +24,8 @@ invalid-setup-type-alias.vue:2:5 lint/nursery/noVueReservedKeys ━━━━━�
     4 │ defineProps<A>();
   
   i Rename the key to avoid conflicts with Vue reserved keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

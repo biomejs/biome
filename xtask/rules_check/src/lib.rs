@@ -69,6 +69,15 @@ pub fn check_rules() -> anyhow::Result<()> {
             let group = R::Group::NAME;
             let rule_name = R::METADATA.name;
             let rule_severity = R::METADATA.severity;
+
+            if let Some(issue_number) = R::METADATA.issue_number
+                && group != "nursery"
+            {
+                self.errors.push(Errors::new(format!(
+                    "The rule '{rule_name}' has an issue number set to '{issue_number}'. The presence of an issue number indicates that the rule is not yet completed. Rules that have an issue number must belong to the 'nursery' group. Change the group of the rule to 'nursery' or remove the issue number."
+                )));
+            }
+
             if matches!(group, "a11y" | "correctness" | "security")
                 && rule_severity != Severity::Error
                 && !matches!(

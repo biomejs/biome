@@ -1,0 +1,178 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#snippet header()}
+  <h1>Header</h1>
+{/snippet}
+
+{#snippet footer()}
+  <p>Footer</p>
+{/snippet}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteSnippetBlock {
+            opening_block: SvelteSnippetOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                snippet_token: SNIPPET_KW@2..9 "snippet" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@9..18 " header()" [] [],
+                },
+                r_curly_token: R_CURLY@18..19 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@19..23 "<" [Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@23..25 "h1" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@25..26 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@26..32 "Header" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@32..33 "<" [] [],
+                            slash_token: SLASH@33..34 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@34..36 "h1" [] [],
+                            },
+                            r_angle_token: R_ANGLE@36..37 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            closing_block: SvelteSnippetClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@37..40 "{/" [Newline("\n")] [],
+                snippet_token: SNIPPET_KW@40..47 "snippet" [] [],
+                r_curly_token: R_CURLY@47..48 "}" [] [],
+            },
+        },
+        SvelteSnippetBlock {
+            opening_block: SvelteSnippetOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@48..52 "{#" [Newline("\n"), Newline("\n")] [],
+                snippet_token: SNIPPET_KW@52..59 "snippet" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@59..68 " footer()" [] [],
+                },
+                r_curly_token: R_CURLY@68..69 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@69..73 "<" [Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@73..74 "p" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@74..75 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@75..81 "Footer" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@81..82 "<" [] [],
+                            slash_token: SLASH@82..83 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@83..84 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@84..85 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            closing_block: SvelteSnippetClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@85..88 "{/" [Newline("\n")] [],
+                snippet_token: SNIPPET_KW@88..95 "snippet" [] [],
+                r_curly_token: R_CURLY@95..96 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@96..97 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..97
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..96
+    0: SVELTE_SNIPPET_BLOCK@0..48
+      0: SVELTE_SNIPPET_OPENING_BLOCK@0..37
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: SNIPPET_KW@2..9 "snippet" [] []
+        2: HTML_TEXT_EXPRESSION@9..18
+          0: HTML_LITERAL@9..18 " header()" [] []
+        3: R_CURLY@18..19 "}" [] []
+        4: HTML_ELEMENT_LIST@19..37
+          0: HTML_ELEMENT@19..37
+            0: HTML_OPENING_ELEMENT@19..26
+              0: L_ANGLE@19..23 "<" [Newline("\n"), Whitespace("  ")] []
+              1: HTML_TAG_NAME@23..25
+                0: HTML_LITERAL@23..25 "h1" [] []
+              2: HTML_ATTRIBUTE_LIST@25..25
+              3: R_ANGLE@25..26 ">" [] []
+            1: HTML_ELEMENT_LIST@26..32
+              0: HTML_CONTENT@26..32
+                0: HTML_LITERAL@26..32 "Header" [] []
+            2: HTML_CLOSING_ELEMENT@32..37
+              0: L_ANGLE@32..33 "<" [] []
+              1: SLASH@33..34 "/" [] []
+              2: HTML_TAG_NAME@34..36
+                0: HTML_LITERAL@34..36 "h1" [] []
+              3: R_ANGLE@36..37 ">" [] []
+      1: SVELTE_SNIPPET_CLOSING_BLOCK@37..48
+        0: SV_CURLY_SLASH@37..40 "{/" [Newline("\n")] []
+        1: SNIPPET_KW@40..47 "snippet" [] []
+        2: R_CURLY@47..48 "}" [] []
+    1: SVELTE_SNIPPET_BLOCK@48..96
+      0: SVELTE_SNIPPET_OPENING_BLOCK@48..85
+        0: SV_CURLY_HASH@48..52 "{#" [Newline("\n"), Newline("\n")] []
+        1: SNIPPET_KW@52..59 "snippet" [] []
+        2: HTML_TEXT_EXPRESSION@59..68
+          0: HTML_LITERAL@59..68 " footer()" [] []
+        3: R_CURLY@68..69 "}" [] []
+        4: HTML_ELEMENT_LIST@69..85
+          0: HTML_ELEMENT@69..85
+            0: HTML_OPENING_ELEMENT@69..75
+              0: L_ANGLE@69..73 "<" [Newline("\n"), Whitespace("  ")] []
+              1: HTML_TAG_NAME@73..74
+                0: HTML_LITERAL@73..74 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@74..74
+              3: R_ANGLE@74..75 ">" [] []
+            1: HTML_ELEMENT_LIST@75..81
+              0: HTML_CONTENT@75..81
+                0: HTML_LITERAL@75..81 "Footer" [] []
+            2: HTML_CLOSING_ELEMENT@81..85
+              0: L_ANGLE@81..82 "<" [] []
+              1: SLASH@82..83 "/" [] []
+              2: HTML_TAG_NAME@83..84
+                0: HTML_LITERAL@83..84 "p" [] []
+              3: R_ANGLE@84..85 ">" [] []
+      1: SVELTE_SNIPPET_CLOSING_BLOCK@85..96
+        0: SV_CURLY_SLASH@85..88 "{/" [Newline("\n")] []
+        1: SNIPPET_KW@88..95 "snippet" [] []
+        2: R_CURLY@95..96 "}" [] []
+  4: EOF@96..97 "" [Newline("\n")] []
+
+```

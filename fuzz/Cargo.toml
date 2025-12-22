@@ -1,40 +1,20 @@
 [package]
-name = "rome_fuzz"
+name    = "rome_fuzz"
 version = "0.0.0"
 authors = ["Addison Crump <research@addisoncrump.info>"]
 publish = false
 edition = "2024"
 
-[features]
-default = ["libfuzzer"]
-full-idempotency = []
-libfuzzer = ["libfuzzer-sys/link_libfuzzer"]
-rome_all = []
-
 [package.metadata]
 cargo-fuzz = true
-
-[dependencies]
-libfuzzer-sys = { git = "https://github.com/rust-fuzz/libfuzzer", default-features = false }
-biome_analyze = { path = "../crates/biome_analyze" }
-biome_diagnostics = { path = "../crates/biome_diagnostics" }
-biome_formatter = { path = "../crates/biome_formatter" }
-biome_js_analyze = { path = "../crates/biome_js_analyze" }
-biome_js_formatter = { path = "../crates/biome_js_formatter" }
-biome_js_parser = { path = "../crates/biome_js_parser" }
-biome_js_syntax = { path = "../crates/biome_js_syntax" }
-biome_json_formatter = { path = "../crates/biome_json_formatter" }
-biome_json_parser = { path = "../crates/biome_json_parser" }
-biome_service = { path = "../crates/biome_service" }
-similar = { workspace = true }
 
 # Prevent this from interfering with workspaces
 [workspace]
 members = ["."]
 
 [[bin]]
-name = "rome_parse_all"
-path = "fuzz_targets/rome_parse_all.rs"
+name              = "rome_parse_all"
+path              = "fuzz_targets/rome_parse_all.rs"
 required-features = ["rome_all"]
 
 [[bin]]
@@ -66,8 +46,8 @@ name = "rome_parse_typescript"
 path = "fuzz_targets/rome_parse_typescript.rs"
 
 [[bin]]
-name = "rome_format_all"
-path = "fuzz_targets/rome_format_all.rs"
+name              = "rome_format_all"
+path              = "fuzz_targets/rome_format_all.rs"
 required-features = ["rome_all"]
 
 [[bin]]
@@ -98,18 +78,38 @@ path = "fuzz_targets/rome_format_tsx.rs"
 name = "rome_format_typescript"
 path = "fuzz_targets/rome_format_typescript.rs"
 
-# enabling debug seems to cause a massive use of RAM (>12GB)
-[profile.release]
-opt-level = 3
-#debug = true
-debug = false
+[dependencies]
+biome_analyze        = { path = "../crates/biome_analyze" }
+biome_diagnostics    = { path = "../crates/biome_diagnostics" }
+biome_formatter      = { path = "../crates/biome_formatter" }
+biome_js_analyze     = { path = "../crates/biome_js_analyze" }
+biome_js_formatter   = { path = "../crates/biome_js_formatter" }
+biome_js_parser      = { path = "../crates/biome_js_parser" }
+biome_js_syntax      = { path = "../crates/biome_js_syntax" }
+biome_json_formatter = { path = "../crates/biome_json_formatter" }
+biome_json_parser    = { path = "../crates/biome_json_parser" }
+biome_service        = { path = "../crates/biome_service" }
+libfuzzer-sys        = { git = "https://github.com/rust-fuzz/libfuzzer", default-features = false }
+similar              = { workspace = true }
+
+[features]
+default          = ["libfuzzer"]
+full-idempotency = []
+libfuzzer        = ["libfuzzer-sys/link_libfuzzer"]
+rome_all         = []
 
 [profile.dev]
 opt-level = 3
-#debug = true
-debug = false
+# debug = true
+debug     = false
+
+# enabling debug seems to cause a massive use of RAM (>12GB)
+[profile.release]
+opt-level = 3
+# debug = true
+debug     = false
 
 [profile.test]
 opt-level = 3
-#debug = true
-debug = false
+# debug = true
+debug     = false

@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/await_complex_expression.svelte
+---
+# Input
+
+```svelte
+{#await fetchUser(userId).then(u => u.profile)}
+<p>Loading user profile...</p>
+{:then profile}
+<div>
+<h1>{profile.name}</h1>
+<p>{profile.bio}</p>
+</div>
+{:catch error}
+<p>Failed to load profile: {error.message}</p>
+{/await}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```svelte
+{#await fetchUser(userId).then(u => u.profile)}
+	<p>Loading user profile...</p>
+{:then profile}
+	<div>
+		<h1>{profile.name}</h1>
+		<p>{profile.bio}</p>
+	</div>
+{:catch error}
+	<p>Failed to load profile: {error.message}</p>
+{/await}
+```

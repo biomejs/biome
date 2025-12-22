@@ -57,7 +57,7 @@ impl JsModuleInfo {
     /// Finds an exported symbol by `name`, using the `module_graph` to
     /// lookup re-exports if necessary.
     #[inline]
-    pub fn find_exported_symbol(
+    pub fn find_js_exported_symbol(
         &self,
         module_graph: &ModuleGraph,
         name: &str,

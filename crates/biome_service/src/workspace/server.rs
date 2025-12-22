@@ -21,7 +21,7 @@ use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
-use biome_css_syntax::CssVariant;
+use biome_css_syntax::{CssRoot, CssVariant};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
@@ -41,7 +41,7 @@ use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_plugin_loader::{PluginConfiguration, Plugins};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
-use biome_rowan::{AstNode, NodeCache, SendNode};
+use biome_rowan::{NodeCache, SendNode};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
@@ -446,9 +446,21 @@ impl WorkspaceServer {
             Default::default()
         };
 
-        let is_indexed = if reason.is_index() {
-            // If the request is for indexing, we don't insert any document,
-            // we only care about updating the module graph.
+        let is_indexed = if
+        // Dependency files can be skipped altoghether
+        (biome_path.is_dependency() && !biome_path.is_manifest())
+            || (
+                // If the request is for indexing, we don't insert any document
+                // unless the document isn't ignored.
+                // That's usually the case when we want to index a manifest file that belongs to the project.
+                reason.is_index()
+                    && self.is_path_ignored(PathIsIgnoredParams {
+                        project_key,
+                        path: biome_path.clone(),
+                        features: FeaturesBuilder::new().with_all().build(),
+                        ignore_kind: IgnoreKind::Ancestors,
+                    })?
+            ) {
             true
         } else {
             self.documents.pin().update_or_insert_with(
@@ -498,7 +510,9 @@ impl WorkspaceServer {
                 },
             );
 
-            self.is_indexed(&path)
+            // We check both reason or if the path is indexed.
+            // This is required due to the check at line 441
+            reason.is_index() || self.is_indexed(&path)
         };
 
         // Manifest files need to update the module graph
@@ -507,8 +521,8 @@ impl WorkspaceServer {
                 .and_then(Result::ok)
                 .map(|node| node.unwrap_as_send_node())
         {
-            let (dependencies, diagnostics) =
-                self.update_service_data(&path, UpdateKind::AddedOrChanged(reason, root))?;
+            let (dependencies, diagnostics) = self
+                .update_service_data(&path, UpdateKind::AddedOrChanged(reason, root, services))?;
 
             Ok(InternalOpenFileResult {
                 dependencies,
@@ -536,6 +550,28 @@ impl WorkspaceServer {
             Ok(syntax) => match syntax {
                 None => Err(WorkspaceError::not_found()),
                 Some(syntax) => Ok(syntax),
+            },
+            Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
+        }
+    }
+
+    fn get_parse_and_services(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(AnyParse, DocumentServices), WorkspaceError> {
+        let Document {
+            syntax, services, ..
+        } = self
+            .documents
+            .pin()
+            .get(path)
+            .cloned()
+            .ok_or_else(WorkspaceError::not_found)?;
+
+        match syntax.transpose() {
+            Ok(syntax) => match syntax {
+                None => Err(WorkspaceError::not_found()),
+                Some(syntax) => Ok((syntax.clone(), services.clone())),
             },
             Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
         }
@@ -833,7 +869,7 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
 
             match update_kind {
-                UpdateKind::AddedOrChanged(_, root) => {
+                UpdateKind::AddedOrChanged(_, root, _) => {
                     self.project_layout
                         .insert_serialized_node_manifest(package_path, root);
                 }
@@ -848,7 +884,7 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
 
             match update_kind {
-                UpdateKind::AddedOrChanged(_, root) => {
+                UpdateKind::AddedOrChanged(_, root, _) => {
                     self.project_layout
                         .insert_serialized_tsconfig(package_path, root);
                 }
@@ -866,7 +902,7 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
 
             match update_kind {
-                UpdateKind::AddedOrChanged(_, root) => {
+                UpdateKind::AddedOrChanged(_, root, _) => {
                     self.project_layout.insert_serialized_turbo_json(
                         package_path,
                         root,
@@ -894,23 +930,34 @@ impl WorkspaceServer {
         path: &BiomePath,
         update_kind: &UpdateKind,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
-        let (added_or_changed_paths, removed_paths) = match update_kind {
-            UpdateKind::AddedOrChanged(_, root) => {
-                let Some(root) = SendNode::into_node(root.clone()).and_then(AnyJsRoot::cast) else {
-                    return Default::default();
-                };
-
-                (&[(path, root)] as &[_], &[] as &[_])
+        match update_kind {
+            UpdateKind::AddedOrChanged(_, root, services) => {
+                // NOTE: add a new else if branch to handle other language roots
+                if let Some(js_root) = SendNode::into_language_root::<AnyJsRoot>(root.clone()) {
+                    self.module_graph.update_graph_for_js_paths(
+                        self.fs.as_ref(),
+                        &self.project_layout,
+                        &[(path, js_root)],
+                    )
+                } else if let (Some(css_root), Some(services)) = (
+                    SendNode::into_language_root::<CssRoot>(root.clone()),
+                    services.as_css_services(),
+                ) {
+                    self.module_graph.update_graph_for_css_paths(
+                        self.fs.as_ref(),
+                        &self.project_layout,
+                        &[(path, css_root)],
+                        services.semantic_model.as_ref(),
+                    )
+                } else {
+                    Default::default()
+                }
             }
-            UpdateKind::Removed => (&[] as &[_], &[path] as &[_]),
-        };
-
-        self.module_graph.update_graph_for_js_paths(
-            self.fs.as_ref(),
-            &self.project_layout,
-            added_or_changed_paths,
-            removed_paths,
-        )
+            UpdateKind::Removed => {
+                self.module_graph.update_graph_for_removed_paths(&[path]);
+                (ModuleDependencies::default(), vec![])
+            }
+        }
     }
 
     /// Updates the state of any services relevant to the given `path`.
@@ -931,7 +978,7 @@ impl WorkspaceServer {
         let result = self.update_module_graph_internal(&path, &update_kind);
 
         match update_kind {
-            UpdateKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan), _) => {
+            UpdateKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan), _, _) => {
                 // We'll send a single signal at the end of the scan.
             }
             _ => {
@@ -1451,7 +1498,7 @@ impl Workspace for WorkspaceServer {
             file_source_index: index,
             syntax: Some(Ok(parsed.any_parse)),
             embedded_snippets,
-            services,
+            services: services.clone(),
         };
 
         if persist_node_cache {
@@ -1470,7 +1517,7 @@ impl Workspace for WorkspaceServer {
         if self.is_indexed(&path) {
             let (dependencies, diagnostics) = self.update_service_data(
                 &path,
-                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, root),
+                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, root, services),
             )?;
             final_diagnostics.extend(
                 diagnostics
@@ -1531,6 +1578,7 @@ impl Workspace for WorkspaceServer {
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_capabilities(language);
+
         let (diagnostics, errors, skipped_diagnostics) = if (categories.is_lint()
             || categories.is_assist())
             && let Some(lint) = capabilities.analyzer.lint
@@ -2116,11 +2164,12 @@ impl Workspace for WorkspaceServer {
     }
 
     fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
-        let parsed = self.get_parse(params.path.as_path())?;
+        let (parsed, services) = self.get_parse_and_services(params.path.as_path())?;
         let update_kind = match params.update_kind {
             super::UpdateKind::AddOrUpdate => UpdateKind::AddedOrChanged(
                 OpenFileReason::ClientRequest,
                 parsed.unwrap_into_send_node(),
+                services,
             ),
             super::UpdateKind::Remove => UpdateKind::Removed,
         };
@@ -2467,14 +2516,14 @@ impl OpenFileReason {
 
 /// Kind of update being performed.
 pub enum UpdateKind {
-    AddedOrChanged(OpenFileReason, SendNode),
+    AddedOrChanged(OpenFileReason, SendNode, DocumentServices),
     Removed,
 }
 
 impl Debug for UpdateKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AddedOrChanged(reason, _) => {
+            Self::AddedOrChanged(reason, _, _) => {
                 f.debug_tuple("AddedOrChanged").field(reason).finish()
             }
             Self::Removed => write!(f, "Removed"),

@@ -23,13 +23,12 @@ TwRoot {
                 base_token: TW_BASE@0..6 "border" [] [],
                 minus_token: DASH@6..7 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@7..16 "slate-500" [] [],
+                    value_token: TW_VALUE@7..17 "slate-500" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@16..17 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             negative_token: missing (optional),
@@ -37,13 +36,12 @@ TwRoot {
                 base_token: TW_BASE@17..23 "border" [] [],
                 minus_token: DASH@23..24 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@24..32 "teal-600" [] [],
+                    value_token: TW_VALUE@24..33 "teal-600" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@32..33 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             negative_token: missing (optional),
@@ -51,14 +49,14 @@ TwRoot {
                 base_token: TW_BASE@33..39 "border" [] [],
                 minus_token: DASH@39..40 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@40..46 "solid" [] [Newline("\n")],
+                    value_token: TW_VALUE@40..45 "solid" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@46..46 "" [] [],
+    eof_token: EOF@45..46 "" [Newline("\n")] [],
 }
 ```
 
@@ -67,39 +65,37 @@ TwRoot {
 ```
 0: TW_ROOT@0..46
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..46
-    0: TW_FULL_CANDIDATE@0..16
+  1: TW_CANDIDATE_LIST@0..45
+    0: TW_FULL_CANDIDATE@0..17
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..16
+      2: TW_FUNCTIONAL_CANDIDATE@0..17
         0: TW_BASE@0..6 "border" [] []
         1: DASH@6..7 "-" [] []
-        2: TW_NAMED_VALUE@7..16
-          0: TW_VALUE@7..16 "slate-500" [] []
+        2: TW_NAMED_VALUE@7..17
+          0: TW_VALUE@7..17 "slate-500" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    1: WHITESPACE@16..17 " " [] []
-    2: TW_FULL_CANDIDATE@17..32
+    1: TW_FULL_CANDIDATE@17..33
       0: TW_VARIANT_LIST@17..17
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@17..32
+      2: TW_FUNCTIONAL_CANDIDATE@17..33
         0: TW_BASE@17..23 "border" [] []
         1: DASH@23..24 "-" [] []
-        2: TW_NAMED_VALUE@24..32
-          0: TW_VALUE@24..32 "teal-600" [] []
+        2: TW_NAMED_VALUE@24..33
+          0: TW_VALUE@24..33 "teal-600" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    3: WHITESPACE@32..33 " " [] []
-    4: TW_FULL_CANDIDATE@33..46
+    2: TW_FULL_CANDIDATE@33..45
       0: TW_VARIANT_LIST@33..33
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@33..46
+      2: TW_FUNCTIONAL_CANDIDATE@33..45
         0: TW_BASE@33..39 "border" [] []
         1: DASH@39..40 "-" [] []
-        2: TW_NAMED_VALUE@40..46
-          0: TW_VALUE@40..46 "solid" [] [Newline("\n")]
+        2: TW_NAMED_VALUE@40..45
+          0: TW_VALUE@40..45 "solid" [] []
         3: (empty)
       3: (empty)
-  2: EOF@46..46 "" [] []
+  2: EOF@45..46 "" [Newline("\n")] []
 
 ```

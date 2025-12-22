@@ -1,0 +1,123 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#snippet greeting(name = 'World')}
+  <p>Hello, {name}!</p>
+{/snippet}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteSnippetBlock {
+            opening_block: SvelteSnippetOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                snippet_token: SNIPPET_KW@2..9 "snippet" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@9..34 " greeting(name = 'World')" [] [],
+                },
+                r_curly_token: R_CURLY@34..35 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@35..39 "<" [Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@39..40 "p" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@40..41 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@41..48 "Hello," [] [Whitespace(" ")],
+                            },
+                            HtmlSingleTextExpression {
+                                l_curly_token: L_CURLY@48..49 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@49..53 "name" [] [],
+                                },
+                                r_curly_token: R_CURLY@53..54 "}" [] [],
+                            },
+                            HtmlContent {
+                                value_token: HTML_LITERAL@54..55 "!" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@55..56 "<" [] [],
+                            slash_token: SLASH@56..57 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@57..58 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@58..59 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            closing_block: SvelteSnippetClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@59..62 "{/" [Newline("\n")] [],
+                snippet_token: SNIPPET_KW@62..69 "snippet" [] [],
+                r_curly_token: R_CURLY@69..70 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@70..71 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..71
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..70
+    0: SVELTE_SNIPPET_BLOCK@0..70
+      0: SVELTE_SNIPPET_OPENING_BLOCK@0..59
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: SNIPPET_KW@2..9 "snippet" [] []
+        2: HTML_TEXT_EXPRESSION@9..34
+          0: HTML_LITERAL@9..34 " greeting(name = 'World')" [] []
+        3: R_CURLY@34..35 "}" [] []
+        4: HTML_ELEMENT_LIST@35..59
+          0: HTML_ELEMENT@35..59
+            0: HTML_OPENING_ELEMENT@35..41
+              0: L_ANGLE@35..39 "<" [Newline("\n"), Whitespace("  ")] []
+              1: HTML_TAG_NAME@39..40
+                0: HTML_LITERAL@39..40 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@40..40
+              3: R_ANGLE@40..41 ">" [] []
+            1: HTML_ELEMENT_LIST@41..55
+              0: HTML_CONTENT@41..48
+                0: HTML_LITERAL@41..48 "Hello," [] [Whitespace(" ")]
+              1: HTML_SINGLE_TEXT_EXPRESSION@48..54
+                0: L_CURLY@48..49 "{" [] []
+                1: HTML_TEXT_EXPRESSION@49..53
+                  0: HTML_LITERAL@49..53 "name" [] []
+                2: R_CURLY@53..54 "}" [] []
+              2: HTML_CONTENT@54..55
+                0: HTML_LITERAL@54..55 "!" [] []
+            2: HTML_CLOSING_ELEMENT@55..59
+              0: L_ANGLE@55..56 "<" [] []
+              1: SLASH@56..57 "/" [] []
+              2: HTML_TAG_NAME@57..58
+                0: HTML_LITERAL@57..58 "p" [] []
+              3: R_ANGLE@58..59 ">" [] []
+      1: SVELTE_SNIPPET_CLOSING_BLOCK@59..70
+        0: SV_CURLY_SLASH@59..62 "{/" [Newline("\n")] []
+        1: SNIPPET_KW@62..69 "snippet" [] []
+        2: R_CURLY@69..70 "}" [] []
+  4: EOF@70..71 "" [Newline("\n")] []
+
+```

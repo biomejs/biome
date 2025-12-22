@@ -14,10 +14,8 @@ impl FormatNodeRule<SvelteKeyBlock> for FormatSvelteKeyBlock {
         } = node.as_fields();
 
         write!(f, [opening_block.format(),])?;
-        // The order here is important. First, we must check if we can delegate the formatting
-        // of embedded nodes, then we check if we should format them verbatim.
         let format_children = FormatHtmlElementList::default()
-            .with_group_id(f.group_id("svelte-key-group"))
+            .with_multiline()
             .fmt_children(&children, f)?;
 
         write!(f, [format_children, closing_block.format()])

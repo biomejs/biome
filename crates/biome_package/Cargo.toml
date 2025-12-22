@@ -1,17 +1,29 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Workspace package handler"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_package"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Workspace package handler"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bench]]
+harness = false
+name    = "package_json"
+
+[[bench]]
+harness = false
+name    = "tsconfig_json"
+
+[[bench]]
+harness = false
+name    = "semver"
 
 [dependencies]
 biome_console            = { workspace = true }
@@ -36,24 +48,11 @@ divan        = { package = "codspeed-divan-compat", version = "=4.1.0" }
 insta        = { workspace = true }
 tests_macros = { path = "../tests_macros" }
 
-[target.'cfg(target_os = "windows")'.dev-dependencies]
-mimalloc = { workspace = true }
-
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
 
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
 [lints]
 workspace = true
-
-[[bench]]
-harness = false
-name    = "package_json"
-
-
-[[bench]]
-harness = false
-name    = "tsconfig_json"
-
-[[bench]]
-harness = false
-name    = "semver"

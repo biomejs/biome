@@ -1,15 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Utilities to print messages (formatted with biome_markup) and diagnostics"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_console"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Utilities to print messages (formatted with biome_markup) and diagnostics"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -17,7 +17,7 @@ version              = "0.5.7"
 biome_markup         = { workspace = true }
 biome_text_size      = { workspace = true }
 schemars             = { workspace = true, optional = true }
-serde                = { workspace = true, optional = true, features = ["derive"] }
+serde                = { workspace = true, features = ["derive"], optional = true }
 termcolor            = { workspace = true }
 unicode-segmentation = "1.12.0"
 unicode-width        = { workspace = true }
@@ -25,9 +25,8 @@ unicode-width        = { workspace = true }
 [dev-dependencies]
 trybuild = "=1.0.114"
 
-
 [features]
-schema = ["dep:schemars", "serde", "biome_text_size/schema"]
+schema = ["biome_text_size/schema", "dep:schemars", "serde"]
 serde  = ["dep:serde"]
 
 [lints]

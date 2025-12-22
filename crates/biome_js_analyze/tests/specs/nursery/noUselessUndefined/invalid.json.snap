@@ -18,6 +18,8 @@ invalid.json:1:9 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Remove the undefined.
   
     1 │ let·a·=·undefined;
@@ -40,6 +42,8 @@ invalid.json:1:9 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━
       │         ^^^^^^^^^
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the undefined.
   
@@ -64,6 +68,8 @@ invalid.json:1:9 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Remove the undefined.
   
     1 │ var·a·=·undefined;
@@ -86,6 +92,8 @@ invalid.json:1:9 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━
       │         ^^^^^^^^^
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the undefined.
   
@@ -110,6 +118,8 @@ invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Remove the undefined.
   
     1 │ function·foo()·{return·undefined;}
@@ -132,6 +142,8 @@ invalid.json:1:27 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
       │                           ^^^^^^^^^
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the undefined.
   
@@ -156,6 +168,8 @@ invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Remove the undefined.
   
     1 │ function·foo()·{return·undefined;}
@@ -178,6 +192,8 @@ invalid.json:1:38 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
       │                                      ^^^^^^^^^
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the undefined.
   
@@ -202,6 +218,8 @@ invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Remove the undefined.
   
     1 │ function*·foo()·{yield·undefined;}
@@ -224,6 +242,8 @@ invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
       │                        ^^^^^^^^^
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the undefined.
   
@@ -248,6 +268,8 @@ invalid.json:1:14 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Remove the undefined.
   
     1 │ const·{foo·=·undefined}·=·{};
@@ -270,6 +292,8 @@ invalid.json:1:14 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
       │              ^^^^^^^^^
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the undefined.
   
@@ -294,6 +318,8 @@ invalid.json:1:20 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Remove the undefined.
   
     1 │ function·foo(bar·=·undefined)·{}
@@ -316,6 +342,8 @@ invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
       │                     ^^^^^^^^^
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the undefined.
   
@@ -340,6 +368,8 @@ invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Remove the undefined.
   
     1 │ function·foo({bar·=·undefined}·=·{})·{}
@@ -363,6 +393,8 @@ invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Remove the undefined.
   
     1 │ function·foo([bar·=·undefined])·{}
@@ -385,6 +417,8 @@ invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
       │                     ^^^^^^^^^
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the undefined.
   

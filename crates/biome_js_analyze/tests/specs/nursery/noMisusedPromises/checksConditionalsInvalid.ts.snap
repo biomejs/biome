@@ -37,6 +37,8 @@ checksConditionalsInvalid.ts:3:5 lint/nursery/noMisusedPromises ━━━━━�
   
   i You may have intended to `await` the Promise instead.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -55,6 +57,8 @@ checksConditionalsInvalid.ts:7:13 lint/nursery/noMisusedPromises ━━━━━
   i A Promise is always truthy, so this is most likely a mistake.
   
   i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -75,6 +79,8 @@ checksConditionalsInvalid.ts:9:18 lint/nursery/noMisusedPromises ━━━━━
   
   i You may have intended to `await` the Promise, but this does not work inside a synchronous callback.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -93,6 +99,8 @@ checksConditionalsInvalid.ts:11:8 lint/nursery/noMisusedPromises ━━━━━
   i A Promise is always truthy, so this is most likely a mistake.
   
   i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
