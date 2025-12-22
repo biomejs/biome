@@ -1,0 +1,160 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#await finixInit}
+	<Icons.DotsBounce />
+{:catch error}
+	<p>Could not initialize form: {error.message}</p>
+{/await}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                await_token: AWAIT_KW@2..7 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@7..17 " finixInit" [] [],
+                },
+                then_clause: missing (optional),
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@17..18 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSelfClosingElement {
+                        l_angle_token: L_ANGLE@18..21 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@21..38 "Icons.DotsBounce" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [],
+                        slash_token: SLASH@38..39 "/" [] [],
+                        r_angle_token: R_ANGLE@39..40 ">" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [
+                SvelteAwaitCatchBlock {
+                    sv_curly_colon_token: SV_CURLY_COLON@40..43 "{:" [Newline("\n")] [],
+                    catch_token: CATCH_KW@43..48 "catch" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@48..54 " error" [] [],
+                    },
+                    r_curly_token: R_CURLY@54..55 "}" [] [],
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@55..58 "<" [Newline("\n"), Whitespace("\t")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@58..59 "p" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@59..60 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@60..87 "Could not initialize form:" [] [Whitespace(" ")],
+                                },
+                                HtmlSingleTextExpression {
+                                    l_curly_token: L_CURLY@87..88 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@88..101 "error.message" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@101..102 "}" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@102..103 "<" [] [],
+                                slash_token: SLASH@103..104 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@104..105 "p" [] [],
+                                },
+                                r_angle_token: R_ANGLE@105..106 ">" [] [],
+                            },
+                        },
+                    ],
+                },
+            ],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@106..109 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@109..114 "await" [] [],
+                r_curly_token: R_CURLY@114..115 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@115..116 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..116
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..115
+    0: SVELTE_AWAIT_BLOCK@0..115
+      0: SVELTE_AWAIT_OPENING_BLOCK@0..40
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: AWAIT_KW@2..7 "await" [] []
+        2: HTML_TEXT_EXPRESSION@7..17
+          0: HTML_LITERAL@7..17 " finixInit" [] []
+        3: (empty)
+        4: (empty)
+        5: R_CURLY@17..18 "}" [] []
+        6: HTML_ELEMENT_LIST@18..40
+          0: HTML_SELF_CLOSING_ELEMENT@18..40
+            0: L_ANGLE@18..21 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@21..38
+              0: HTML_LITERAL@21..38 "Icons.DotsBounce" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@38..38
+            3: SLASH@38..39 "/" [] []
+            4: R_ANGLE@39..40 ">" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@40..106
+        0: SVELTE_AWAIT_CATCH_BLOCK@40..106
+          0: SV_CURLY_COLON@40..43 "{:" [Newline("\n")] []
+          1: CATCH_KW@43..48 "catch" [] []
+          2: HTML_TEXT_EXPRESSION@48..54
+            0: HTML_LITERAL@48..54 " error" [] []
+          3: R_CURLY@54..55 "}" [] []
+          4: HTML_ELEMENT_LIST@55..106
+            0: HTML_ELEMENT@55..106
+              0: HTML_OPENING_ELEMENT@55..60
+                0: L_ANGLE@55..58 "<" [Newline("\n"), Whitespace("\t")] []
+                1: HTML_TAG_NAME@58..59
+                  0: HTML_LITERAL@58..59 "p" [] []
+                2: HTML_ATTRIBUTE_LIST@59..59
+                3: R_ANGLE@59..60 ">" [] []
+              1: HTML_ELEMENT_LIST@60..102
+                0: HTML_CONTENT@60..87
+                  0: HTML_LITERAL@60..87 "Could not initialize form:" [] [Whitespace(" ")]
+                1: HTML_SINGLE_TEXT_EXPRESSION@87..102
+                  0: L_CURLY@87..88 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@88..101
+                    0: HTML_LITERAL@88..101 "error.message" [] []
+                  2: R_CURLY@101..102 "}" [] []
+              2: HTML_CLOSING_ELEMENT@102..106
+                0: L_ANGLE@102..103 "<" [] []
+                1: SLASH@103..104 "/" [] []
+                2: HTML_TAG_NAME@104..105
+                  0: HTML_LITERAL@104..105 "p" [] []
+                3: R_ANGLE@105..106 ">" [] []
+      2: SVELTE_AWAIT_CLOSING_BLOCK@106..115
+        0: SV_CURLY_SLASH@106..109 "{/" [Newline("\n")] []
+        1: AWAIT_KW@109..114 "await" [] []
+        2: R_CURLY@114..115 "}" [] []
+  4: EOF@115..116 "" [Newline("\n")] []
+
+```

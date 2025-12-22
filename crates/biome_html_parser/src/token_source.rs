@@ -1,5 +1,5 @@
 use crate::lexer::HtmlLexer;
-use biome_html_syntax::HtmlSyntaxKind::EOF;
+use biome_html_syntax::HtmlSyntaxKind::{AS_KW, CATCH_KW, EOF, THEN_KW};
 use biome_html_syntax::{HtmlSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexContext};
@@ -92,6 +92,26 @@ pub(crate) enum RestrictedExpressionStopAt {
     ClosingParen,
     /// Stops at `then` or `catch` keywords
     ThenOrCatch,
+}
+
+impl RestrictedExpressionStopAt {
+    pub(crate) fn matches_punct(&self, byte: u8) -> bool {
+        match self {
+            Self::AsOrComma => byte == b',',
+            Self::OpeningParenOrComma => byte == b'(' || byte == b',',
+            Self::ClosingParen => byte == b')',
+            Self::ThenOrCatch => false,
+        }
+    }
+
+    pub(crate) fn matches_keyword(&self, keyword: HtmlSyntaxKind) -> bool {
+        match self {
+            Self::AsOrComma => keyword == AS_KW,
+            Self::OpeningParenOrComma => false,
+            Self::ClosingParen => false,
+            Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

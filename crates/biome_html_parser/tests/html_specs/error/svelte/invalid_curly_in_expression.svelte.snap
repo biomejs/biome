@@ -1,0 +1,83 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#each somethi{}}
+{/each}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteBogusBlock {
+            items: [
+                SvelteEachOpeningBlock {
+                    sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                    each_token: EACH_KW@2..6 "each" [] [],
+                    list: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@6..16 " somethi{}" [] [],
+                    },
+                    item: missing (optional),
+                    r_curly_token: R_CURLY@16..17 "}" [] [],
+                },
+                HtmlElementList [],
+                SvelteEachClosingBlock {
+                    sv_curly_slash_token: SV_CURLY_SLASH@17..20 "{/" [Newline("\n")] [],
+                    each_token: EACH_KW@20..24 "each" [] [],
+                    r_curly_token: R_CURLY@24..25 "}" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@25..26 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..26
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..25
+    0: SVELTE_BOGUS_BLOCK@0..25
+      0: SVELTE_EACH_OPENING_BLOCK@0..17
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: EACH_KW@2..6 "each" [] []
+        2: HTML_TEXT_EXPRESSION@6..16
+          0: HTML_LITERAL@6..16 " somethi{}" [] []
+        3: (empty)
+        4: R_CURLY@16..17 "}" [] []
+      1: HTML_ELEMENT_LIST@17..17
+      2: SVELTE_EACH_CLOSING_BLOCK@17..25
+        0: SV_CURLY_SLASH@17..20 "{/" [Newline("\n")] []
+        1: EACH_KW@20..24 "each" [] []
+        2: R_CURLY@24..25 "}" [] []
+  4: EOF@25..26 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid_curly_in_expression.svelte:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected 'as' keyword for item binding or ',' for index-only syntax
+  
+  > 1 │ {#each somethi{}}
+      │                 ^
+    2 │ {/each}
+    3 │ 
+  
+```

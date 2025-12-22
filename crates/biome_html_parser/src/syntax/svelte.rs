@@ -151,6 +151,8 @@ pub(crate) fn parse_else_clause(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, SVELTE_ELSE_CLAUSE))
 }
 
+// #region parse `{#each}` functions
+
 fn parse_each_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSyntax {
     if !p.at(T![each]) {
         parent_marker.abandon(p);
@@ -282,11 +284,6 @@ fn parse_svelte_block_item(p: &mut HtmlParser) -> ParsedSyntax {
     } else if p.at(T![,]) {
         parse_each_keyed_item(p)
     } else {
-        // Error: missing 'as' or ','
-        p.error(p.err_builder(
-            "Expected 'as' keyword for item binding or ',' for index-only syntax",
-            p.cur_range(),
-        ));
         Absent
     }
 }
@@ -343,6 +340,7 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
         has_errors,
     )
 }
+// #endregion
 
 // #region await parse functions
 
@@ -488,13 +486,6 @@ impl ParseNodeList for AwaitClausesList {
             .and_then(|parsed| {
                 let range = parsed.range(p);
 
-                if self.seen_then_block.is_none() && block_parsed == BlockParsed::Catch {
-                    p.error(
-                        p.err_builder("{:catch} cannot appear before the {:then} block.", range)
-                            .with_detail(p.cur_range(), "This is where the {:then} block starts."),
-                    )
-                }
-
                 if let Some(seen_catch_block) = self.seen_catch_block
                     && block_parsed == BlockParsed::Catch
                 {
@@ -521,6 +512,19 @@ impl ParseNodeList for AwaitClausesList {
                     self.seen_catch_block = Some(range);
                 } else if block_parsed == BlockParsed::Then {
                     self.seen_then_block = Some(range);
+                }
+
+                if let Some(catch_range) = self.seen_catch_block
+                    && let Some(then_range) = self.seen_then_block
+                    && catch_range < then_range
+                {
+                    p.error(
+                        p.err_builder(
+                            "{:catch} cannot appear before the {:then} block.",
+                            catch_range,
+                        )
+                        .with_detail(then_range, "This is where the {:then} block starts."),
+                    )
                 }
 
                 Present(parsed)
