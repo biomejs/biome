@@ -22,8 +22,36 @@ const expo = process.env.EXPO_PUBLIC_KEY;
 const viteEnv = import.meta.env.VITE_BASE_URL;
 const nodeEnvMeta = import.meta.env.NODE_ENV;
 
+// Bracket notation with allowed variables
+const nodeEnvBracket = process.env["NODE_ENV"];
+const ciBracket = process.env["CI"];
+const viteBracket = import.meta.env["VITE_API_KEY"];
+
+// Bun.env with allowed patterns
+const bunNodeEnv = Bun.env.NODE_ENV;
+const bunCi = Bun.env.CI;
+const bunVite = Bun.env.VITE_APP_KEY;
+const bunNodeEnvBracket = Bun.env["NODE_ENV"];
+
 // Local process variable (not global) - should not be flagged
 function test() {
     const process = { env: { LOCAL_VAR: 'test' } };
     return process.env.LOCAL_VAR;
+}
+
+// Local Bun variable (not global) - should not be flagged
+function testBun() {
+    const Bun = { env: { LOCAL_VAR: 'test' } };
+    return Bun.env.LOCAL_VAR;
+}
+
+// Deno.env.get with allowed patterns
+const denoNodeEnv = Deno.env.get("NODE_ENV");
+const denoCi = Deno.env.get("CI");
+const denoVite = Deno.env.get("VITE_APP_KEY");
+
+// Local Deno variable (not global) - should not be flagged
+function testDeno() {
+    const Deno = { env: { get: () => 'test' } };
+    return Deno.env.get("LOCAL_VAR");
 }

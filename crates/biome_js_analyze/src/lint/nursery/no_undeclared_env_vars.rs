@@ -3,8 +3,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsExpression, JsStaticMemberExpression, global_identifier};
-use biome_rowan::{AstNode, TokenText};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsMemberExpression, JsCallExpression, JsComputedMemberExpression,
+    JsStaticMemberExpression, global_identifier, inner_string_text,
+};
+use biome_rowan::{AstNode, AstSeparatedList, TokenText};
 use biome_rule_options::no_undeclared_env_vars::NoUndeclaredEnvVarsOptions;
 
 use crate::services::turborepo::Turborepo;
@@ -17,8 +20,13 @@ declare_lint_rule! {
     /// Using undeclared environment variables can lead to incorrect cache hits
     /// and unpredictable build behavior.
     ///
-    /// This rule checks for `process.env.VAR_NAME` and `import.meta.env.VAR_NAME`
-    /// accesses and validates them against:
+    /// This rule checks for environment variable accesses in the following patterns:
+    /// - `process.env.VAR_NAME` and `process.env["VAR_NAME"]`
+    /// - `import.meta.env.VAR_NAME` and `import.meta.env["VAR_NAME"]`
+    /// - `Bun.env.VAR_NAME` and `Bun.env["VAR_NAME"]`
+    /// - `Deno.env.get("VAR_NAME")`
+    ///
+    /// It validates them against:
     /// 1. Environment variables declared in `turbo.json(c)` (`globalEnv`, `globalPassThroughEnv`, task-level `env`, and task-level `passThroughEnv`)
     /// 2. Environment variables specified in the rule's `allowedEnvVars` option
     /// 3. Default allowed variables (common system vars and framework-specific patterns)
@@ -92,7 +100,7 @@ pub struct EnvVarAccess {
 }
 
 impl Rule for NoUndeclaredEnvVars {
-    type Query = Turborepo<JsStaticMemberExpression>;
+    type Query = Turborepo<AnyJsMemberExpression>;
     type State = EnvVarAccess;
     type Signals = Option<Self::State>;
     type Options = NoUndeclaredEnvVarsOptions;
@@ -103,50 +111,36 @@ impl Rule for NoUndeclaredEnvVars {
             return None;
         }
 
-        let static_member_expr = ctx.query();
+        let member_expr = ctx.query();
         let options = ctx.options();
         let model = ctx.model();
 
-        // Check if this is either process.env.SOMETHING or import.meta.env.SOMETHING
-        let object = static_member_expr.object().ok()?;
-        let parent_member = object.as_js_static_member_expression()?;
-        let env_member = parent_member.member().ok()?;
+        // Check if this is a Deno.env.get() call
+        if let Some(deno_result) = match_deno_env_get(member_expr, model) {
+            return match deno_result {
+                Some(env_var_name) => check_env_var(ctx, env_var_name, options),
+                // Matched Deno.env.get(...) but couldn't statically resolve the key (e.g. Deno.env.get(key))
+                // so skip it.
+                None => None,
+            };
+        }
 
-        // Must be accessing ".env"
-        if env_member.as_js_name()?.to_trimmed_text().text() != "env" {
+        // Get the env var name and the parent object based on the expression type
+        let (env_var_name, parent_object) = match member_expr {
+            AnyJsMemberExpression::JsStaticMemberExpression(static_expr) => {
+                extract_from_static_member(static_expr)?
+            }
+            AnyJsMemberExpression::JsComputedMemberExpression(computed_expr) => {
+                extract_from_computed_member(computed_expr)?
+            }
+        };
+
+        // Check if the parent object is a valid env access (process.env, import.meta.env, or Bun.env)
+        if !is_global_env_object(&parent_object, model) && !is_import_meta_object(&parent_object) {
             return None;
         }
 
-        let parent_object = parent_member.object().ok()?;
-
-        let is_process_env = is_global_process_object(&parent_object, model);
-        let is_import_meta_env = is_import_meta_object(&parent_object);
-
-        if !is_process_env && !is_import_meta_env {
-            return None;
-        }
-
-        // Get the env var name being accessed (e.g., NODE_ENV from process.env.NODE_ENV)
-        let member = static_member_expr.member().ok()?;
-        let env_var_name = member.as_js_name()?.value_token().ok()?;
-        let env_var_text = env_var_name.token_text_trimmed();
-        let env_var = env_var_text.text();
-
-        // Check if this env var is allowed by default patterns or user options
-        if is_env_var_allowed_by_defaults(env_var)
-            || is_env_var_allowed_by_options(env_var, options)
-        {
-            return None;
-        }
-
-        // Check if declared in turbo.json
-        if ctx.is_env_var_declared(env_var) {
-            return None;
-        }
-
-        Some(EnvVarAccess {
-            env_var_name: env_var_text,
-        })
+        check_env_var(ctx, env_var_name, options)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -163,17 +157,142 @@ impl Rule for NoUndeclaredEnvVars {
     }
 }
 
-/// Checks if the object is the global `process` identifier (not shadowed by a local binding)
-fn is_global_process_object(
-    expr: &AnyJsExpression,
-    model: &biome_js_semantic::SemanticModel,
-) -> bool {
+/// Extracts the env var name and parent object from a static member expression (e.g., `process.env.MY_VAR`)
+fn extract_from_static_member(
+    static_expr: &JsStaticMemberExpression,
+) -> Option<(TokenText, AnyJsExpression)> {
+    // Check if this is process.env.SOMETHING, import.meta.env.SOMETHING, or Bun.env.SOMETHING
+    let object = static_expr.object().ok()?;
+    let parent_member = object.as_js_static_member_expression()?;
+    let env_member = parent_member.member().ok()?;
+
+    // Must be accessing ".env"
+    if env_member.as_js_name()?.to_trimmed_text().text() != "env" {
+        return None;
+    }
+
+    let parent_object = parent_member.object().ok()?;
+
+    // Get the env var name being accessed (e.g., NODE_ENV from process.env.NODE_ENV)
+    let member = static_expr.member().ok()?;
+    let env_var_name = member.as_js_name()?.value_token().ok()?;
+    let env_var_text = env_var_name.token_text_trimmed();
+
+    Some((env_var_text, parent_object))
+}
+
+/// Extracts the env var name and parent object from a computed member expression (e.g., `process.env["MY_VAR"]`)
+/// Only handles string literal keys; dynamic keys like `process.env[key]` are skipped
+fn extract_from_computed_member(
+    computed_expr: &JsComputedMemberExpression,
+) -> Option<(TokenText, AnyJsExpression)> {
+    // Check if this is process.env["SOMETHING"], import.meta.env["SOMETHING"], or Bun.env["SOMETHING"]
+    let object = computed_expr.object().ok()?;
+    let parent_member = object.as_js_static_member_expression()?;
+    let env_member = parent_member.member().ok()?;
+
+    // Must be accessing ".env"
+    if env_member.as_js_name()?.to_trimmed_text().text() != "env" {
+        return None;
+    }
+
+    let parent_object = parent_member.object().ok()?;
+
+    // Get the env var name from the computed member
+    // Only process string literals, skip dynamic accesses like process.env[key]
+    let member = computed_expr.member().ok()?;
+    let member = member.omit_parentheses();
+
+    // Check if it's a string literal
+    let string_literal = member
+        .as_any_js_literal_expression()?
+        .as_js_string_literal_expression()?;
+    let string_token = string_literal.value_token().ok()?;
+    let env_var_name = inner_string_text(&string_token);
+
+    Some((env_var_name, parent_object))
+}
+
+/// Checks if the object is a global env object (`process` or `Bun`, not shadowed by a local binding)
+fn is_global_env_object(expr: &AnyJsExpression, model: &biome_js_semantic::SemanticModel) -> bool {
     let Some((reference, name)) = global_identifier(expr) else {
         return false;
     };
 
-    // Check that it's named "process" and not bound to a local variable
-    name.text() == "process" && model.binding(&reference).is_none()
+    // Check that it's named "process" or "Bun" and not bound to a local variable
+    let name_text = name.text();
+    (name_text == "process" || name_text == "Bun") && model.binding(&reference).is_none()
+}
+
+fn match_deno_env_get(
+    member_expr: &AnyJsMemberExpression,
+    model: &biome_js_semantic::SemanticModel,
+) -> Option<Option<TokenText>> {
+    let AnyJsMemberExpression::JsStaticMemberExpression(static_expr) = member_expr else {
+        return None;
+    };
+
+    let get_member = static_expr.member().ok()?;
+    if get_member.as_js_name()?.to_trimmed_text().text() != "get" {
+        return None;
+    }
+
+    let object = static_expr.object().ok()?.omit_parentheses();
+    let env_member = object.as_js_static_member_expression()?;
+    if env_member
+        .member()
+        .ok()?
+        .as_js_name()?
+        .to_trimmed_text()
+        .text()
+        != "env"
+    {
+        return None;
+    }
+
+    let deno_object = env_member.object().ok()?.omit_parentheses();
+    let Some((reference, name)) = global_identifier(&deno_object) else {
+        return Some(None);
+    };
+    if name.text() != "Deno" || model.binding(&reference).is_some() {
+        return Some(None);
+    }
+
+    let Some(parent) = member_expr.syntax().parent() else {
+        return Some(None);
+    };
+    let Some(call) = JsCallExpression::cast(parent) else {
+        return Some(None);
+    };
+    if call.is_optional() {
+        return Some(None);
+    }
+
+    let first_arg = call.arguments().ok()?.args().first()?.ok()?;
+    let first_arg = first_arg.as_any_js_expression()?.clone().omit_parentheses();
+    let string_literal = first_arg
+        .as_any_js_literal_expression()?
+        .as_js_string_literal_expression()?;
+    let string_token = string_literal.value_token().ok()?;
+
+    Some(Some(inner_string_text(&string_token)))
+}
+
+fn check_env_var(
+    ctx: &RuleContext<NoUndeclaredEnvVars>,
+    env_var_name: TokenText,
+    options: &NoUndeclaredEnvVarsOptions,
+) -> Option<EnvVarAccess> {
+    let env_var = env_var_name.text();
+    if is_env_var_allowed_by_defaults(env_var) || is_env_var_allowed_by_options(env_var, options) {
+        return None;
+    }
+
+    if ctx.is_env_var_declared(env_var) {
+        return None;
+    }
+
+    Some(EnvVarAccess { env_var_name })
 }
 
 /// Checks if the object is `import.meta`
