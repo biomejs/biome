@@ -2,15 +2,9 @@
 "@biomejs/biome": patch
 ---
 
-Added new rule
-[noReturnAssign](https://biomejs.dev/linter/rules/no-return-assign):
+Added new nursery rule [`noReturnAssign`](https://biomejs.dev/linter/rules/no-return-assign), which disallows assignments inside return statements.
 
-Disallows assignments inside return statements
-
-
-Based on [no-return-assign](https://eslint.org/docs/latest/rules/no-return-assign)
-
-Disallowed example:
+**Invalid:**
 
 ```js
 function f(a) {
