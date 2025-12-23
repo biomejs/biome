@@ -10,6 +10,8 @@ expression: invalid.js
 
 'something'.match(new RegExp(/thing/));
 
+'something'.match(new RegExp(/thing/g, ''));
+
 const text = 'something';
 const search = /thing/;
 text.match(search);
@@ -58,16 +60,50 @@ invalid.js:3:1 lint/nursery/useRegexpExec ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:9:1 lint/nursery/useRegexpExec ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/nursery/useRegexpExec ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer RegExp#exec() over String#match() when searching within a string.
   
-     7 │ const text = 'something';
-     8 │ const search = /thing/;
-   > 9 │ text.match(search);
+    3 │ 'some things are just things'.match(/thing/);
+    4 │ 
+  > 5 │ 'something'.match(new RegExp(/thing/));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ 'something'.match(new RegExp(/thing/g, ''));
+  
+  i Use RegExp#exec() instead of String#match() for consistent and slightly faster regex matching.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useRegexpExec ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer RegExp#exec() over String#match() when searching within a string.
+  
+    5 │ 'something'.match(new RegExp(/thing/));
+    6 │ 
+  > 7 │ 'something'.match(new RegExp(/thing/g, ''));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ const text = 'something';
+  
+  i Use RegExp#exec() instead of String#match() for consistent and slightly faster regex matching.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useRegexpExec ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer RegExp#exec() over String#match() when searching within a string.
+  
+     9 │ const text = 'something';
+    10 │ const search = /thing/;
+  > 11 │ text.match(search);
        │ ^^^^^^^^^^^^^^^^^^
-    10 │ 
-    11 │ const text1 = 'something';
+    12 │ 
+    13 │ const text1 = 'something';
   
   i Use RegExp#exec() instead of String#match() for consistent and slightly faster regex matching.
   
