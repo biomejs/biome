@@ -6,7 +6,7 @@ use biome_rowan::AstNode;
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
 use biome_string_case::StrLikeExtension;
 
-const NAME_REQUIRED_ROLES: &[&str] = &["img", "graphics-document", "graphics-symbol"];
+const NAME_REQUIRED_ROLES: &[&str] = &["img", "image", "graphics-document", "graphics-symbol"];
 
 declare_lint_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.
@@ -153,6 +153,7 @@ impl Rule for NoSvgWithoutTitle {
             }
         }
 
+        // TODO: use `aria_roles.has_name_required_image_role` of aria crate
         // Checks if a `svg` element has role='img' and title/aria-label/aria-labelledby attribute
         let Some(role_attribute) = node.find_attribute_by_name("role") else {
             return Some(());
