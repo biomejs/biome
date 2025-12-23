@@ -251,7 +251,7 @@ fn test_module_graph_resolution_kind_from_scan_kind() {
 
     assert_eq!(
         ModuleGraphResolutionKind::from(&ScanKind::TargetedKnownFiles {
-            target_paths: vec![].into(),
+            target_paths: vec![],
             descend_from_targets: false,
         }),
         ModuleGraphResolutionKind::None
