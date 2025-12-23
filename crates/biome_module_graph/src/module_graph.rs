@@ -82,6 +82,7 @@ impl ModuleGraph {
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
         added_or_updated_paths: &[(&BiomePath, AnyJsRoot)],
+        enable_type_inference: bool,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         // Make sure all directories are registered for the added/updated paths.
         let path_info = self.path_info.pin();
@@ -109,7 +110,8 @@ impl ModuleGraph {
         let modules = self.data.pin();
         for (path, root) in added_or_updated_paths {
             let directory = path.parent().unwrap_or(path);
-            let visitor = JsModuleVisitor::new(root.clone(), directory, &fs_proxy);
+            let visitor =
+                JsModuleVisitor::new(root.clone(), directory, &fs_proxy, enable_type_inference);
 
             let module_info = visitor.collect_info();
             for import_path in module_info.all_import_paths() {

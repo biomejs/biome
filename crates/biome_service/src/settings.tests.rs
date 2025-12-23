@@ -1,5 +1,9 @@
-use crate::settings::{LanguageSettings, ServiceLanguage, Settings, to_json_language_settings};
+use crate::settings::{
+    LanguageSettings, ModuleGraphResolutionKind, ServiceLanguage, Settings,
+    to_json_language_settings,
+};
 use crate::workspace::DocumentFileSource;
+use crate::scanner::ScanKind;
 use biome_analyze::RuleFilter;
 use biome_configuration::analyzer::{GroupPlainConfiguration, Nursery, SeverityOrGroup};
 use biome_configuration::javascript::JsxRuntime;
@@ -229,5 +233,65 @@ fn override_inherits_global_formatter_when_not_specified() {
     assert!(
         formatter_enabled_js,
         "Formatter should be enabled for .js files"
+    );
+}
+
+#[test]
+fn test_module_graph_resolution_kind_from_scan_kind() {
+    // Test all ScanKind variants map to correct ModuleGraphResolutionKind
+    assert_eq!(
+        ModuleGraphResolutionKind::from(&ScanKind::NoScanner),
+        ModuleGraphResolutionKind::None
+    );
+
+    assert_eq!(
+        ModuleGraphResolutionKind::from(&ScanKind::KnownFiles),
+        ModuleGraphResolutionKind::None
+    );
+
+    assert_eq!(
+        ModuleGraphResolutionKind::from(&ScanKind::TargetedKnownFiles {
+            target_paths: vec![].into(),
+            descend_from_targets: false,
+        }),
+        ModuleGraphResolutionKind::None
+    );
+
+    assert_eq!(
+        ModuleGraphResolutionKind::from(&ScanKind::Project),
+        ModuleGraphResolutionKind::Modules
+    );
+
+    assert_eq!(
+        ModuleGraphResolutionKind::from(&ScanKind::TypeAware),
+        ModuleGraphResolutionKind::ModulesAndTypes
+    );
+}
+
+#[test]
+fn test_module_graph_resolution_kind_is_modules_and_types() {
+    // Test is_modules_and_types predicate
+    assert!(!ModuleGraphResolutionKind::None.is_modules_and_types());
+    assert!(!ModuleGraphResolutionKind::Modules.is_modules_and_types());
+    assert!(ModuleGraphResolutionKind::ModulesAndTypes.is_modules_and_types());
+}
+
+#[test]
+fn test_type_aware_scan_enables_module_graph_type_inference() {
+    // This test verifies that TypeAware scan kind results in type inference being enabled
+    let type_aware_kind = ModuleGraphResolutionKind::from(&ScanKind::TypeAware);
+    assert!(
+        type_aware_kind.is_modules_and_types(),
+        "TypeAware scan should enable type inference"
+    );
+}
+
+#[test]
+fn test_project_scan_disables_module_graph_type_inference() {
+    // This test verifies that Project scan kind does NOT enable type inference
+    let project_kind = ModuleGraphResolutionKind::from(&ScanKind::Project);
+    assert!(
+        !project_kind.is_modules_and_types(),
+        "Project scan should NOT enable type inference"
     );
 }

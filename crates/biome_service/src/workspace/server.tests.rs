@@ -243,6 +243,7 @@ function Foo({cond}) {
             configuration,
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -359,6 +360,7 @@ function Foo({cond}) {
             configuration,
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -516,6 +518,7 @@ const Bar = styled(Component)`
                 ..Default::default()
             },
             extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -587,6 +590,7 @@ const Bar = graphql(`
                 ..Default::default()
             },
             extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 

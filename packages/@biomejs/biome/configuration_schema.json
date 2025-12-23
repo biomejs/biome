@@ -6238,6 +6238,11 @@
 					"description": "Turborepo build system rules",
 					"type": "string",
 					"const": "turborepo"
+				},
+				{
+					"description": "Rules that require type inference",
+					"type": "string",
+					"const": "types"
 				}
 			]
 		},

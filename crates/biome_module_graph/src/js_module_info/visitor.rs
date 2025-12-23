@@ -30,14 +30,21 @@ pub(crate) struct JsModuleVisitor<'a> {
     root: AnyJsRoot,
     directory: &'a Utf8Path,
     fs_proxy: &'a ModuleGraphFsProxy<'a>,
+    infer_types: bool,
 }
 
 impl<'a> JsModuleVisitor<'a> {
-    pub fn new(root: AnyJsRoot, directory: &'a Utf8Path, fs_proxy: &'a ModuleGraphFsProxy) -> Self {
+    pub fn new(
+        root: AnyJsRoot,
+        directory: &'a Utf8Path,
+        fs_proxy: &'a ModuleGraphFsProxy,
+        infer_types: bool,
+    ) -> Self {
         Self {
             root,
             directory,
             fs_proxy,
+            infer_types,
         }
     }
 
@@ -62,7 +69,7 @@ impl<'a> JsModuleVisitor<'a> {
             }
         }
 
-        JsModuleInfo::new(collector)
+        JsModuleInfo::new(collector, self.infer_types)
     }
 
     fn visit_import(&self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {

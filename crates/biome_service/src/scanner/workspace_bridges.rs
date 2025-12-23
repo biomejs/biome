@@ -86,7 +86,11 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
 
     /// Unloads the index of the file with the given `path` within the
     /// workspace.
-    fn unload_file(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
+    fn unload_file(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Unloads the given `path` from the workspace index.
     ///
@@ -97,7 +101,11 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     ///
     /// If you already know the path is a file, you should use
     /// [`WorkspaceWatcherBridge::unload_file()`] directly instead.
-    fn unload_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
+    fn unload_path(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 }
 
 /// Trait used to give access to workspace functionality required by the
@@ -157,7 +165,11 @@ pub trait WorkspaceWatcherBridge {
 
     /// Unloads the index of the file with the given `path` within the
     /// workspace.
-    fn unload_file(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
+    fn unload_file(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Unloads the given `path` from the workspace index.
     ///
@@ -168,7 +180,11 @@ pub trait WorkspaceWatcherBridge {
     ///
     /// If you already know the path is a file, you should use
     /// [`WorkspaceWatcherBridge::unload_file()`] directly instead.
-    fn unload_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
+    fn unload_path(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Notifies service notification listeners that the watcher has stopped.
     fn notify_stopped(&self);
@@ -270,13 +286,21 @@ where
     }
 
     #[inline]
-    fn unload_file(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
-        self.workspace.unload_file(path)
+    fn unload_file(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        self.workspace.unload_file(path, project_key)
     }
 
     #[inline]
-    fn unload_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
-        self.workspace.unload_path(path)
+    fn unload_path(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        self.workspace.unload_path(path, project_key)
     }
 
     #[inline]

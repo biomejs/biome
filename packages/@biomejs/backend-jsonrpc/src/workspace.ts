@@ -979,7 +979,8 @@ export type RuleDomain =
 	| "vue"
 	| "project"
 	| "tailwind"
-	| "turborepo";
+	| "turborepo"
+	| "typeAware";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
 export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
