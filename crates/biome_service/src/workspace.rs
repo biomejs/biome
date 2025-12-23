@@ -122,7 +122,7 @@ pub struct SupportsFeatureParams {
     pub features: FeatureName,
 
     #[serde(default, skip_serializing_if = "is_false")]
-    pub ignore_includes: bool,
+    pub skip_ignore_check: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]

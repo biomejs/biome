@@ -38,7 +38,7 @@ pub(crate) fn format(
         project_key: doc.project_key,
         path: path.clone(),
         features,
-        ignore_includes: false,
+        skip_ignore_check: false,
     })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);
@@ -108,7 +108,7 @@ pub(crate) fn format_range(
         project_key: doc.project_key,
         path: path.clone(),
         features,
-        ignore_includes: false,
+        skip_ignore_check: false,
     })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);
@@ -201,7 +201,7 @@ pub(crate) fn format_on_type(
         project_key: doc.project_key,
         path: path.clone(),
         features,
-        ignore_includes: false,
+        skip_ignore_check: false,
     })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);

@@ -22,7 +22,7 @@ pub struct GetFileFeaturesParams<'a> {
     pub features: FeatureName,
     pub language: DocumentFileSource,
     pub capabilities: &'a Capabilities,
-    pub ignore_includes: bool,
+    pub skip_ignore_check: bool,
 }
 
 /// The information tracked for each project.
@@ -218,7 +218,7 @@ impl Projects {
             features,
             language,
             capabilities,
-            ignore_includes,
+            skip_ignore_check,
         }: GetFileFeaturesParams<'_>,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let data = self.0.pin();
@@ -246,7 +246,7 @@ impl Projects {
             // Never ignore Biome's top-level config file
         } else {
             let is_ignored = {
-                let is_ignored_by_top_level_config = if ignore_includes {
+                let is_ignored_by_top_level_config = if skip_ignore_check {
                     project_data
                         .root_settings
                         .vcs_settings

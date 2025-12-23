@@ -2,9 +2,9 @@
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
 	features: FeatureName;
-	ignoreIncludes?: boolean;
 	path: BiomePath;
 	projectKey: ProjectKey;
+	skipIgnoreCheck?: boolean;
 }
 export type FeatureName = FeatureKind[];
 export type BiomePath = string;

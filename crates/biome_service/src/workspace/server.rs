@@ -1238,7 +1238,7 @@ impl Workspace for WorkspaceServer {
             features: params.features,
             language,
             capabilities: &capabilities,
-            ignore_includes: params.ignore_includes,
+            skip_ignore_check: params.skip_ignore_check,
         })
     }
 

@@ -38,7 +38,7 @@ pub(crate) fn run<'a>(
         return Ok(());
     }
 
-    let ignore_includes = !workspace.fs().path_exists(biome_path.as_path());
+    let skip_ignore_check = !workspace.fs().path_exists(biome_path.as_path());
 
     if mode.is_format() {
         let FileFeaturesResult {
@@ -47,7 +47,7 @@ pub(crate) fn run<'a>(
             project_key,
             path: biome_path.clone(),
             features: FeaturesBuilder::new().with_formatter().build(),
-            ignore_includes,
+            skip_ignore_check,
         })?;
 
         if file_features.is_ignored() {
@@ -129,7 +129,7 @@ pub(crate) fn run<'a>(
                 .with_assist()
                 .with_formatter()
                 .build(),
-            ignore_includes,
+            skip_ignore_check,
         })?;
 
         if file_features.is_ignored() {
