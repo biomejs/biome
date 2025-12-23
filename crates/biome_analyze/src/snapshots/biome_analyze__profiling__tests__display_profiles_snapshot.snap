@@ -1,0 +1,16 @@
+---
+source: crates/biome_analyze/src/profiling.rs
+expression: rendered
+---
+Rule execution time (does not include any preprocessing)
+  total       avg         min         max         count rule      
+     20.000s      2.000s      1.000s      5.000s     10  lint/correctness/noUnusedVariables
+     18.000s      2.000s      1.000s      4.000s      9  lint/suspicious/noDoubleEquals
+     16.000s      2.000s      1.000s      4.000s      8  lint/complexity/useSimplerLogic
+     14.000s      2.000s      1.000s      3.000s      7  lint/style/useConst
+     12.000s      2.000s      1.000s      3.000s      6  lint/performance/useTopLevelRegex
+     10.000s      2.000s      1.000s      3.000s      5  lint/security/detectHardcodedSecret
+      8.000s      2.000s      1.000s      2.000s      4  lint/a11y/noAutofocus
+      6.000s      2.000s      1.000s      2.000s      3  lint/nursery/useConsistentOperator
+      4.000s      2.000s      1.000s      2.000s      2  plugin/acme/validateApi
+      2.000s      2.000s      1.000s      1.000s      1  plugin/acme/noOddities

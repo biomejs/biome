@@ -44,6 +44,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) css_parser: Option<CssParserConfiguration>,
     pub(crate) only: Vec<AnalyzerSelector>,
     pub(crate) skip: Vec<AnalyzerSelector>,
+    pub(crate) profile_rules: bool,
 }
 
 struct CheckExecution {
@@ -178,6 +179,10 @@ impl TraversalCommand for CheckCommandPayload {
             fix: self.fix,
             unsafe_: self.unsafe_,
         })?;
+
+        if self.profile_rules {
+            biome_analyze::profiling::enable();
+        }
 
         Ok(Box::new(CheckExecution {
             fix_file_mode,
