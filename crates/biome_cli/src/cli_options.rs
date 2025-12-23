@@ -22,6 +22,10 @@ pub struct CliOptions {
     #[bpaf(long("verbose"), switch, fallback(false))]
     pub verbose: bool,
 
+    /// Enable rule profiling output.
+    #[bpaf(long("profile"), switch, fallback(false))]
+    pub profile: bool,
+
     /// Set the file path to the configuration file, or the directory path to find `biome.json` or `biome.jsonc`.
     /// If used, it disables the default configuration file resolution.
     #[bpaf(

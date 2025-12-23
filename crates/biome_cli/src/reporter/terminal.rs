@@ -4,6 +4,7 @@ use crate::reporter::{
     DiagnosticsPayload, EvaluatedPathsDiagnostic, FixedPathsDiagnostic, ReporterVisitor,
     TraversalSummary,
 };
+use biome_analyze::profiling;
 use biome_console::fmt::Formatter;
 use biome_console::{Console, ConsoleExt, fmt, markup};
 use biome_diagnostics::PrintDiagnostic;
@@ -66,6 +67,11 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
         self.0.log(markup! {
             {ConsoleTraversalSummary(execution.traversal_mode(), &summary, verbose)}
         });
+        let profiles = profiling::drain_sorted_by_total(false);
+        if !profiles.is_empty() {
+            let table = profiling::format_profiles_table(profiles, None);
+            self.0.log(markup!({ table }));
+        }
 
         Ok(())
     }
