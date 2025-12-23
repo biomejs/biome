@@ -1,9 +1,9 @@
+use crate::scanner::ScanKind;
 use crate::settings::{
     LanguageSettings, ModuleGraphResolutionKind, ServiceLanguage, Settings,
     to_json_language_settings,
 };
 use crate::workspace::DocumentFileSource;
-use crate::scanner::ScanKind;
 use biome_analyze::RuleFilter;
 use biome_configuration::analyzer::{GroupPlainConfiguration, Nursery, SeverityOrGroup};
 use biome_configuration::javascript::JsxRuntime;
