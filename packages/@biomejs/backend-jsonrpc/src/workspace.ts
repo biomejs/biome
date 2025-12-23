@@ -980,7 +980,7 @@ export type RuleDomain =
 	| "project"
 	| "tailwind"
 	| "turborepo"
-	| "typeAware";
+	| "types";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
 export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
@@ -7375,9 +7375,11 @@ export type SupportKind =
 export interface UpdateSettingsParams {
 	configuration: Configuration;
 	extendedConfigurations?: [BiomePath, Configuration][];
+	moduleGraphResolutionKind?: ModuleGraphResolutionKind;
 	projectKey: ProjectKey;
 	workspaceDirectory?: BiomePath;
 }
+export type ModuleGraphResolutionKind = "none" | "modules" | "modulesAndTypes";
 export interface UpdateSettingsResult {
 	diagnostics: Diagnostic[];
 }
@@ -8027,7 +8029,8 @@ Target paths must be absolute.
 				targetPaths: BiomePath[];
 			};
 	  }
-	| "project";
+	| "project"
+	| "typeAware";
 export interface ScanProjectResult {
 	/**
 	 * A list of child configuration files found inside the project
@@ -8206,6 +8209,7 @@ When this field is empty, Biome checks only `files.includes`.
 export type IgnoreKind = "path" | "ancestors";
 export interface UpdateModuleGraphParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 	/**
 	 * The kind of update to apply to the module graph
 	 */
