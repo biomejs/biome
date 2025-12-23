@@ -58,6 +58,7 @@ impl ReactCallWithDependencyResult {
     pub fn all_captures(&self, model: &SemanticModel) -> impl Iterator<Item = Capture> + use<> {
         self.closure_node
             .as_ref()
+            .and_then(|node| node.inner_expression())
             .and_then(|node| AnyJsFunctionExpression::try_from(node.clone()).ok())
             .map(|function_expression| {
                 let closure = function_expression.closure(model);
