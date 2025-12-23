@@ -2,8 +2,9 @@ use crate::react::{ReactLibrary, is_react_call_api};
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression,
-    JsFunctionExpression, JsObjectBindingPatternProperty, TextRange,
+    AnyJsExpression, AnyJsMemberExpression, AnyJsObjectBindingPatternMember, JsArrayBindingPattern,
+    JsArrayBindingPatternElementList, JsArrowFunctionExpression, JsCallExpression,
+    JsFunctionExpression, JsObjectBindingPattern, JsObjectBindingPatternPropertyList, TextRange,
     binding_ext::AnyJsIdentifierBinding, static_value::StaticValue,
 };
 use biome_js_syntax::{JsArrayBindingPatternElement, JsSyntaxToken};
@@ -268,23 +269,62 @@ pub fn is_binding_react_stable(
     else {
         return false;
     };
-    let index = binding
-        .parent::<JsArrayBindingPatternElement>()
-        .map(|parent| parent.syntax().index() / 2)
-        .and_then(|index| index.try_into().ok());
-    let key = binding
-        // Handle cases like const { foo: bar } = useSomething();
-        .parent::<JsObjectBindingPatternProperty>()
-        .and_then(|pattern_property| pattern_property.member().ok())
-        .and_then(|member| member.name())
-        .map(|name_token| name_token.to_string())
-        .or_else(|| {
-            // Handle the rest of the cases, i.e., var foo = useSomething();
-            binding
-                .name_token()
+    let Ok(id_syntax) = declarator.id().map(|id| id.syntax().clone()) else {
+        return false;
+    };
+    let (top_level_index, top_level_key) = (if let Some(array_pattern_element) =
+        binding.parent::<JsArrayBindingPatternElement>()
+    {
+        if array_pattern_element
+            .parent::<JsArrayBindingPatternElementList>()
+            .and_then(|element_list| element_list.parent::<JsArrayBindingPattern>())
+            .filter(|array_pattern| array_pattern.syntax().eq(&id_syntax))
+            .is_none()
+        {
+            // Return None for non-top-level array elements.
+            None
+        } else {
+            (array_pattern_element.syntax().index() / 2)
+                .try_into()
                 .ok()
-                .map(|token| token.text_trimmed().to_string())
-        });
+                .map(|index| (Some(index), None))
+        }
+    } else if let Some(object_property) = binding.parent::<AnyJsObjectBindingPatternMember>() {
+        if object_property
+            .parent::<JsObjectBindingPatternPropertyList>()
+            .and_then(|property_list| property_list.parent::<JsObjectBindingPattern>())
+            .filter(|object_pattern| object_pattern.syntax().eq(&id_syntax))
+            .is_none()
+        {
+            // Return None for non-top-level object properties.
+            None
+        } else {
+            match object_property {
+                AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                    object_shorthand_property,
+                ) => object_shorthand_property
+                    .identifier()
+                    .ok()
+                    .and_then(|identifier| {
+                        identifier
+                            .as_js_identifier_binding()
+                            .and_then(|identifier_binding| identifier_binding.name_token().ok())
+                            .map(|name_token| (None, Some(name_token.text_trimmed().to_string())))
+                    }),
+                AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
+                    object_aliased_property,
+                ) => object_aliased_property
+                    .member()
+                    .ok()
+                    .and_then(|member| member.name())
+                    .map(|name_token| (None, Some(name_token.to_string()))),
+                _ => None,
+            }
+        }
+    } else {
+        None
+    })
+    .unwrap_or((None, None));
     let Some(callee) = declarator
         .initializer()
         .and_then(|initializer| initializer.expression().ok())
@@ -307,8 +347,8 @@ pub fn is_binding_react_stable(
             return false;
         }
 
-        match (&config.result, index, &key) {
-            (StableHookResult::Identity, None, _) => true,
+        match (&config.result, top_level_index, &top_level_key) {
+            (StableHookResult::Identity, None, None) => true,
             (StableHookResult::Indices(indices), Some(i), _) => indices.contains(&i),
             (StableHookResult::Keys(keys), _, Some(k)) => keys.contains(k),
             _ => false,
@@ -320,23 +360,10 @@ pub fn is_binding_react_stable(
 /// such as type assertions.
 fn unwrap_to_call_expression(mut expression: AnyJsExpression) -> Option<JsCallExpression> {
     loop {
+        expression = expression.inner_expression()?;
         match expression {
             AnyJsExpression::JsCallExpression(expr) => return Some(expr),
-            AnyJsExpression::JsParenthesizedExpression(expr) => {
-                expression = expr.expression().ok()?;
-            }
-            AnyJsExpression::JsSequenceExpression(expr) => {
-                expression = expr.right().ok()?;
-            }
-            AnyJsExpression::TsAsExpression(expr) => {
-                expression = expr.expression().ok()?;
-            }
-            AnyJsExpression::TsSatisfiesExpression(expr) => {
-                expression = expr.expression().ok()?;
-            }
-            AnyJsExpression::TsNonNullAssertionExpression(expr) => {
-                expression = expr.expression().ok()?;
-            }
+            AnyJsExpression::JsSequenceExpression(expr) => expression = expr.right().ok()?,
             _ => return None,
         }
     }
