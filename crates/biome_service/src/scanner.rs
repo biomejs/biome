@@ -710,6 +710,9 @@ pub enum ScanKind {
     },
     /// Scans the entire repository, indexing all files to enable project rules.
     Project,
+
+    /// Scans the entire repository, indexing all files to enable type inference rules
+    TypeAware,
 }
 
 impl ScanKind {
@@ -723,11 +726,16 @@ impl ScanKind {
             Self::KnownFiles => Self::KnownFiles,
             Self::Project => Self::Project,
             Self::TargetedKnownFiles { .. } => Self::KnownFiles,
+            Self::TypeAware => Self::TypeAware,
         }
     }
 
     pub const fn is_project(&self) -> bool {
         matches!(self, Self::Project)
+    }
+
+    pub const fn is_type_aware(&self) -> bool {
+        matches!(self, Self::TypeAware)
     }
 
     pub const fn is_known_files(&self) -> bool {

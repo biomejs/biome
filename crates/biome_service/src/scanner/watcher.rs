@@ -390,7 +390,10 @@ impl Watcher {
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let mut diagnostics = vec![];
         for path in paths {
-            diagnostics.extend(workspace.unload_file(&path)?);
+            let Some(project_key) = workspace.find_project_for_path(&path) else {
+                return Ok(vec![]);
+            };
+            diagnostics.extend(workspace.unload_file(&path, project_key)?);
         }
 
         Ok(diagnostics)
@@ -406,7 +409,10 @@ impl Watcher {
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let mut diagnostics = vec![];
         for path in &paths {
-            let result = workspace.unload_path(path)?;
+            let Some(project_key) = workspace.find_project_for_path(path) else {
+                return Ok(vec![]);
+            };
+            let result = workspace.unload_path(path, project_key)?;
             diagnostics.extend(result);
         }
 
@@ -419,10 +425,13 @@ impl Watcher {
         to: &Utf8Path,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let mut diagnostics = vec![];
+        let Some(project_key) = workspace.find_project_for_path(from) else {
+            return Ok(vec![]);
+        };
         if workspace.fs().path_is_file(from) {
-            diagnostics.extend(workspace.unload_file(from)?);
+            diagnostics.extend(workspace.unload_file(from, project_key)?);
         } else {
-            diagnostics.extend(workspace.unload_path(from)?);
+            diagnostics.extend(workspace.unload_path(from, project_key)?);
         }
         diagnostics.extend(Self::index_path(workspace, to)?);
         Ok(diagnostics)

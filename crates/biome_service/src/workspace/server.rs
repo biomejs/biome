@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use super::{document::Document, *};
 use crate::Watcher;
-use crate::configuration::{LoadedConfiguration, read_config};
+use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, Features,
@@ -516,8 +516,11 @@ impl WorkspaceServer {
                 .and_then(Result::ok)
                 .map(|node| node.unwrap_as_send_node())
         {
-            let (dependencies, diagnostics) =
-                self.update_service_data(&path, UpdateKind::AddedOrChanged(reason, root))?;
+            let (dependencies, diagnostics) = self.update_service_data(
+                &path,
+                UpdateKind::AddedOrChanged(reason, root),
+                project_key,
+            )?;
 
             Ok(InternalOpenFileResult {
                 dependencies,
@@ -744,7 +747,7 @@ impl WorkspaceServer {
             PathKind::Directory { .. } => {
                 if path.is_dependency() {
                     // Every mode ignores dependencies, except project mode.
-                    return Ok(!scan_kind.is_project());
+                    return Ok(!scan_kind.is_project() && !scan_kind.is_type_aware());
                 }
 
                 if self.projects.is_ignored_by_top_level_config(
@@ -788,7 +791,7 @@ impl WorkspaceServer {
                             )
                         }),
                     },
-                    ScanKind::Project => {
+                    ScanKind::Project | ScanKind::TypeAware => {
                         if path.is_dependency() {
                             // During the initial scan, we only care about
                             // `package.json` files inside `node_modules`, so that
@@ -904,6 +907,7 @@ impl WorkspaceServer {
         &self,
         path: &BiomePath,
         update_kind: &UpdateKind,
+        infer_types: bool,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         let (added_or_changed_paths, removed_paths) = match update_kind {
             UpdateKind::AddedOrChanged(_, root) => {
@@ -921,6 +925,7 @@ impl WorkspaceServer {
             &self.project_layout,
             added_or_changed_paths,
             removed_paths,
+            infer_types,
         )
     }
 
@@ -933,13 +938,22 @@ impl WorkspaceServer {
         &self,
         path: &Utf8Path,
         update_kind: UpdateKind,
+        project_key: ProjectKey,
     ) -> Result<(ModuleDependencies, Vec<ModuleDiagnostic>), WorkspaceError> {
         let path = BiomePath::from(path);
         if path.is_manifest() {
             self.update_project_layout(&path, &update_kind)?;
         }
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
 
-        let result = self.update_module_graph_internal(&path, &update_kind);
+        let result = self.update_module_graph_internal(
+            &path,
+            &update_kind,
+            settings.module_graph_resolution_kind.is_modules_and_types(),
+        );
 
         match update_kind {
             UpdateKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan), _) => {
@@ -1034,6 +1048,7 @@ impl Workspace for WorkspaceServer {
             configuration,
             project_key,
             extended_configurations,
+            module_graph_resolution_kind,
         } = params;
         let mut diagnostics: Vec<biome_diagnostics::serde::Diagnostic> = vec![];
         let workspace_directory = workspace_directory.map(|p| p.to_path_buf());
@@ -1055,6 +1070,7 @@ impl Workspace for WorkspaceServer {
                 .get_root_settings(project_key)
                 .ok_or_else(WorkspaceError::no_project)?
         };
+        settings.module_graph_resolution_kind = module_graph_resolution_kind;
 
         settings.merge_with_configuration(
             configuration,
@@ -1487,6 +1503,7 @@ impl Workspace for WorkspaceServer {
             let (dependencies, diagnostics) = self.update_service_data(
                 &path,
                 UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, root),
+                project_key,
             )?;
             final_diagnostics.extend(
                 diagnostics
@@ -2145,6 +2162,10 @@ impl Workspace for WorkspaceServer {
 
     fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
         let parsed = self.get_parse(params.path.as_path())?;
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
         let update_kind = match params.update_kind {
             super::UpdateKind::AddOrUpdate => UpdateKind::AddedOrChanged(
                 OpenFileReason::ClientRequest,
@@ -2153,7 +2174,11 @@ impl Workspace for WorkspaceServer {
             super::UpdateKind::Remove => UpdateKind::Removed,
         };
 
-        self.update_module_graph_internal(&params.path, &update_kind);
+        self.update_module_graph_internal(
+            &params.path,
+            &update_kind,
+            settings.module_graph_resolution_kind.is_modules_and_types(),
+        );
         Ok(())
     }
 
@@ -2375,6 +2400,8 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 nested_configuration
             };
 
+            let scan_kind = ProjectScanComputer::new(&nested_configuration).compute();
+
             let result = self.update_settings(UpdateSettingsParams {
                 project_key,
                 workspace_directory: nested_directory_path.map(BiomePath::from),
@@ -2383,6 +2410,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                     .into_iter()
                     .map(|(path, config)| (BiomePath::from(path), config))
                     .collect(),
+                module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
             })?;
 
             returned_diagnostics.extend(result.diagnostics)
@@ -2441,8 +2469,9 @@ impl WorkspaceScannerBridge for WorkspaceServer {
     fn unload_file(
         &self,
         path: &Utf8Path,
+        project_key: ProjectKey,
     ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
-        self.update_service_data(path, UpdateKind::Removed)
+        self.update_service_data(path, UpdateKind::Removed, project_key)
             .map(|(_, diagnostics)| {
                 diagnostics
                     .into_iter()
@@ -2454,6 +2483,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
     fn unload_path(
         &self,
         path: &Utf8Path,
+        project_key: ProjectKey,
     ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
         // Note that we cannot check the kind of the path, because the watcher
         // would only attempt to unload a file or folder after it has been
@@ -2467,7 +2497,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
         self.project_layout.unload_folder(path);
 
         // Finally unloads the path itself.
-        self.unload_file(path)
+        self.unload_file(path, project_key)
     }
 }
 

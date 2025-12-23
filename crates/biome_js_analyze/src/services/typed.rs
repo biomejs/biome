@@ -68,10 +68,10 @@ impl FromServices for TypedService {
             let has_project_domain = rule_metadata
                 .domains
                 .iter()
-                .any(|d| d == &RuleDomain::Project);
+                .any(|d| d == &RuleDomain::Types);
             if !has_project_domain {
                 panic!(
-                    "The rule {rule_key} uses TypedService, but it is not in the project domain."
+                    "The rule {rule_key} uses TypedService, but it is not in the TypeAware domain."
                 );
             }
         }
