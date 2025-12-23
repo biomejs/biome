@@ -1,9 +1,5 @@
 ---
-"@biomejs/biome": minor
+"@biomejs/biome": patch
 ---
 
-Fixed and supported some behaviors on noSvgWithoutTitle.
-
-- Fixed the rule to not recursively traverse `title` elements.
-- Added support for `graphics-document` and `graphics-symbol` roles.
-- Added support for multiple role specifications.
+Fixed the `noSvgWithoutTitle` rule not to recursively traverse `title` elements.
