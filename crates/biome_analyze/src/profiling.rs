@@ -35,9 +35,12 @@ use rustc_hash::FxHashMap;
 use std::cmp;
 use std::fmt;
 use std::hash::{Hash, Hasher};
+#[cfg(not(target_arch = "wasm32"))]
+use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Mutex, OnceLock};
-use std::time::{Duration, Instant};
+use std::time::Duration;
+#[cfg(not(target_arch = "wasm32"))]
+use std::time::Instant;
 
 /// Identifies the origin of a rule for profiling purposes.
 ///
@@ -203,9 +206,21 @@ impl RuleProfiler {
     }
 }
 
-static PROFILER: OnceLock<Mutex<RuleProfiler>> = OnceLock::new();
-fn profiler() -> &'static Mutex<RuleProfiler> {
-    PROFILER.get_or_init(|| Mutex::new(RuleProfiler::default()))
+#[cfg(not(target_arch = "wasm32"))]
+static PROFILER: Mutex<Option<RuleProfiler>> = Mutex::new(None);
+#[cfg(not(target_arch = "wasm32"))]
+fn with_profiler<R>(f: impl FnOnce(&mut RuleProfiler) -> R) -> Option<R> {
+    if let Ok(mut guard) = PROFILER.lock() {
+        let profiler = guard.get_or_insert_with(RuleProfiler::default);
+        Some(f(profiler))
+    } else {
+        None
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn with_profiler<R>(_f: impl FnOnce(&mut RuleProfiler) -> R) -> Option<R> {
+    None
 }
 
 static ENABLED: AtomicBool = AtomicBool::new(false);
@@ -228,6 +243,7 @@ pub fn is_enabled() -> bool {
 /// RAII timer that records elapsed time for a rule when dropped.
 pub struct RuleRunTimer {
     label: Option<RuleLabel>,
+    #[cfg(not(target_arch = "wasm32"))]
     start: Instant,
 }
 
@@ -235,6 +251,7 @@ impl RuleRunTimer {
     fn new_enabled(label: RuleLabel) -> Self {
         Self {
             label: Some(label),
+            #[cfg(not(target_arch = "wasm32"))]
             start: Instant::now(),
         }
     }
@@ -244,6 +261,7 @@ impl RuleRunTimer {
         // but it won't be used as `label` is None.
         Self {
             label: None,
+            #[cfg(not(target_arch = "wasm32"))]
             start: Instant::now(),
         }
     }
@@ -258,11 +276,11 @@ impl Drop for RuleRunTimer {
     fn drop(&mut self) {
         // We use Drop to record the elapsed time so its impossible to accidentally reuse the timer.
         if let Some(label) = self.label.take() {
+            #[cfg(not(target_arch = "wasm32"))]
             let elapsed = self.start.elapsed();
-            // Best-effort: if the lock is poisoned, skip recording.
-            if let Ok(mut guard) = profiler().lock() {
-                guard.record(label, elapsed);
-            }
+            #[cfg(target_arch = "wasm32")]
+            let elapsed = Duration::ZERO;
+            with_profiler(|p| p.record(label, elapsed));
         }
     }
 }
@@ -295,27 +313,17 @@ pub fn record_rule_time(label: RuleLabel, delta: Duration) {
     if !is_enabled() {
         return;
     }
-    if let Ok(mut guard) = profiler().lock() {
-        guard.record(label, delta);
-    }
+    with_profiler(|p| p.record(label, delta));
 }
 
 /// Returns a snapshot of all collected profiles in unspecified order.
 pub fn snapshot() -> Vec<RuleProfile> {
-    if let Ok(guard) = profiler().lock() {
-        guard.snapshot()
-    } else {
-        Vec::new()
-    }
+    with_profiler(|p| p.snapshot()).unwrap_or_default()
 }
 
 /// Returns all profiles sorted by total time (descending).
 pub fn drain_sorted_by_total(reset_after: bool) -> Vec<RuleProfile> {
-    let mut profiles = if let Ok(guard) = profiler().lock() {
-        guard.snapshot()
-    } else {
-        Vec::new()
-    };
+    let mut profiles = with_profiler(|p| p.snapshot()).unwrap_or_default();
 
     profiles.sort_by(|a, b| b.total.cmp(&a.total));
 
@@ -328,9 +336,7 @@ pub fn drain_sorted_by_total(reset_after: bool) -> Vec<RuleProfile> {
 
 /// Clears all collected metrics.
 pub fn reset() {
-    if let Ok(mut guard) = profiler().lock() {
-        guard.reset();
-    }
+    with_profiler(|p| p.reset());
 }
 
 /// Utility for formatting a summary for display purposes.
