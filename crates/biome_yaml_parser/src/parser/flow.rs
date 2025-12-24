@@ -1,7 +1,7 @@
 use YamlSyntaxKind::*;
 use biome_parser::{
     CompletedMarker, Parser,
-    parse_lists::ParseSeparatedList,
+    parse_lists::{ParseNodeList, ParseSeparatedList},
     parse_recovery::{ParseRecovery, RecoveryResult},
     prelude::ParsedSyntax::{self, *},
 };
@@ -9,6 +9,7 @@ use biome_yaml_syntax::{T, YamlSyntaxKind};
 
 use super::{
     YamlParser,
+    block::PropertyList,
     parse_error::{
         expected_flow_mapping_closing_quote, expected_flow_mapping_entry,
         expected_flow_sequence_closing_bracket, expected_flow_sequence_entry,
@@ -16,17 +17,21 @@ use super::{
 };
 
 pub(crate) fn parse_any_flow_node(p: &mut YamlParser) -> ParsedSyntax {
+    let property_list = PropertyList.parse_list(p);
+    let property_empty = property_list.range(p).is_empty();
+
     if is_at_flow_json_node(p) {
-        Present(parse_flow_json_node(p))
-    } else if is_at_flow_yaml_node(p) {
-        Present(parse_flow_yaml_node(p))
+        Present(parse_flow_json_node(p, property_list))
+    } else if is_at_flow_yaml_node(p) || !property_empty {
+        Present(parse_flow_yaml_node(p, property_list))
     } else {
+        property_list.undo_completion(p).abandon(p);
         Absent
     }
 }
 
-pub(crate) fn parse_flow_json_node(p: &mut YamlParser) -> CompletedMarker {
-    let m = p.start();
+pub(crate) fn parse_flow_json_node(p: &mut YamlParser, property_list: CompletedMarker) -> CompletedMarker {
+    let m = property_list.precede(p);
 
     if is_at_flow_sequence(p) {
         parse_flow_sequence(p);
@@ -41,8 +46,8 @@ pub(crate) fn parse_flow_json_node(p: &mut YamlParser) -> CompletedMarker {
     m.complete(p, YAML_FLOW_JSON_NODE)
 }
 
-pub(crate) fn parse_flow_yaml_node(p: &mut YamlParser) -> CompletedMarker {
-    let m = p.start();
+pub(crate) fn parse_flow_yaml_node(p: &mut YamlParser, property_list: CompletedMarker) -> CompletedMarker {
+    let m = property_list.precede(p);
     parse_plain_scalar(p);
     m.complete(p, YAML_FLOW_YAML_NODE)
 }
@@ -115,36 +120,37 @@ impl ParseSeparatedList for FlowSequenceEntryList {
         // e.g. [a, b, c: d, e: f], which is equivalent to [a, b, {c: d}, {e: f}]
         if p.at(T![?]) {
             parse_flow_map_explicit_entry(p)
-        } else if is_at_flow_yaml_node(p) {
-            let m = p.start();
-            let flow_yaml_node = parse_flow_yaml_node(p);
-            if p.at(T![:]) {
-                parse_flow_map_value(p);
-                Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
-            } else {
-                m.abandon(p);
-                Present(flow_yaml_node)
-            }
-        } else if is_at_flow_json_node(p) {
-            let m = p.start();
-            let flow_json_node = parse_flow_json_node(p);
-            if p.at(T![:]) {
-                parse_flow_map_value(p);
-                Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
-            } else {
-                m.abandon(p);
-                Present(flow_json_node)
-            }
         } else if p.at(T![:]) {
             let m = p.start();
             parse_flow_map_value(p);
             Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
         } else {
-            let entry = parse_any_flow_node(p);
-            if entry.is_absent() {
+            let property_list = PropertyList.parse_list(p);
+            let property_empty = property_list.range(p).is_empty();
+
+            if is_at_flow_yaml_node(p) || !property_empty {
+                let flow_yaml_node = parse_flow_yaml_node(p, property_list);
+                if p.at(T![:]) {
+                    let m = flow_yaml_node.precede(p);
+                    parse_flow_map_value(p);
+                    Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
+                } else {
+                    Present(flow_yaml_node)
+                }
+            } else if is_at_flow_json_node(p) {
+                let flow_json_node = parse_flow_json_node(p, property_list);
+                if p.at(T![:]) {
+                    let m = flow_json_node.precede(p);
+                    parse_flow_map_value(p);
+                    Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
+                } else {
+                    Present(flow_json_node)
+                }
+            } else {
+                property_list.undo_completion(p).abandon(p);
                 p.error(expected_flow_sequence_entry(p, p.cur_range()));
+                Absent
             }
-            entry
         }
     }
 
@@ -233,44 +239,56 @@ fn parse_flow_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
     p.bump(T![?]);
 
     // The entry after '?' is optional
-    if is_at_flow_yaml_node(p) {
-        parse_flow_yaml_node(p);
+    let property_list = PropertyList.parse_list(p);
+    let property_empty = property_list.range(p).is_empty();
+
+    if is_at_flow_yaml_node(p) || !property_empty {
+        parse_flow_yaml_node(p, property_list);
         if p.at(T![:]) {
             parse_flow_map_value(p);
         }
     } else if is_at_flow_json_node(p) {
-        parse_flow_json_node(p);
+        parse_flow_json_node(p, property_list);
         if p.at(T![:]) {
             parse_flow_map_value(p);
         }
-    } else if p.at(T![:]) {
-        parse_flow_map_value(p);
+    } else {
+        property_list.undo_completion(p).abandon(p);
+        if p.at(T![:]) {
+            parse_flow_map_value(p);
+        }
     }
 
     Present(m.complete(p, YAML_FLOW_MAP_EXPLICIT_ENTRY))
 }
 
 fn parse_flow_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
-    if is_at_flow_yaml_node(p) {
-        let m = p.start();
-        parse_flow_yaml_node(p);
+    let property_list = PropertyList.parse_list(p);
+    let property_empty = property_list.range(p).is_empty();
+
+    if is_at_flow_yaml_node(p) || !property_empty {
+        let flow_yaml_node = parse_flow_yaml_node(p, property_list);
+        let m = flow_yaml_node.precede(p);
         if p.at(T![:]) {
             parse_flow_map_value(p);
         }
         Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
     } else if is_at_flow_json_node(p) {
-        let m = p.start();
-        parse_flow_json_node(p);
+        let flow_json_node = parse_flow_json_node(p, property_list);
+        let m = flow_json_node.precede(p);
         if p.at(T![:]) {
             parse_flow_map_value(p);
         }
         Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
-    } else if p.at(T![:]) {
-        let m = p.start();
-        parse_flow_map_value(p);
-        Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
     } else {
-        Absent
+        property_list.undo_completion(p).abandon(p);
+        if p.at(T![:]) {
+            let m = p.start();
+            parse_flow_map_value(p);
+            Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
+        } else {
+            Absent
+        }
     }
 }
 

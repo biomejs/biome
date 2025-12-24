@@ -20,42 +20,44 @@ YamlRoot {
             bom_token: missing (optional),
             directives: YamlDirectiveList [],
             dashdashdash_token: missing (optional),
-            node: YamlBlockMapping {
-                mapping_start_token: MAPPING_START@0..0 "" [] [],
-                properties: missing (optional),
-                entries: YamlBlockMapEntryList [
-                    YamlBlockMapImplicitEntry {
-                        key: YamlFlowYamlNode {
-                            properties: missing (optional),
-                            content: YamlPlainScalar {
-                                value_token: PLAIN_LITERAL@0..1 "a" [] [],
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockMapping {
+                    mapping_start_token: MAPPING_START@0..0 "" [] [],
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@0..1 "a" [] [],
+                                },
                             },
+                            colon_token: COLON@1..2 ":" [] [],
+                            value: missing (optional),
                         },
-                        colon_token: COLON@1..2 ":" [] [],
-                        value: missing (optional),
-                    },
-                    YamlBlockMapImplicitEntry {
-                        key: YamlFlowYamlNode {
-                            properties: missing (optional),
-                            content: YamlPlainScalar {
-                                value_token: PLAIN_LITERAL@2..8 "b" [Newline("\n"), Comments("# b"), Newline("\n")] [],
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@2..8 "b" [Newline("\n"), Comments("# b"), Newline("\n")] [],
+                                },
                             },
+                            colon_token: COLON@8..9 ":" [] [],
+                            value: missing (optional),
                         },
-                        colon_token: COLON@8..9 ":" [] [],
-                        value: missing (optional),
-                    },
-                    YamlBlockMapImplicitEntry {
-                        key: YamlFlowYamlNode {
-                            properties: missing (optional),
-                            content: YamlPlainScalar {
-                                value_token: PLAIN_LITERAL@9..11 "c" [Newline("\n")] [],
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@9..11 "c" [Newline("\n")] [],
+                                },
                             },
+                            colon_token: COLON@11..12 ":" [] [],
+                            value: missing (optional),
                         },
-                        colon_token: COLON@11..12 ":" [] [],
-                        value: missing (optional),
-                    },
-                ],
-                mapping_end_token: MAPPING_END@12..13 "" [Newline("\n")] [],
+                    ],
+                    mapping_end_token: MAPPING_END@12..13 "" [Newline("\n")] [],
+                },
             },
             dotdotdot_token: missing (optional),
         },
@@ -73,32 +75,33 @@ YamlRoot {
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
       2: (empty)
-      3: YAML_BLOCK_MAPPING@0..13
-        0: MAPPING_START@0..0 "" [] []
-        1: (empty)
-        2: YAML_BLOCK_MAP_ENTRY_LIST@0..12
-          0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..2
-            0: YAML_FLOW_YAML_NODE@0..1
-              0: (empty)
-              1: YAML_PLAIN_SCALAR@0..1
-                0: PLAIN_LITERAL@0..1 "a" [] []
-            1: COLON@1..2 ":" [] []
-            2: (empty)
-          1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@2..9
-            0: YAML_FLOW_YAML_NODE@2..8
-              0: (empty)
-              1: YAML_PLAIN_SCALAR@2..8
-                0: PLAIN_LITERAL@2..8 "b" [Newline("\n"), Comments("# b"), Newline("\n")] []
-            1: COLON@8..9 ":" [] []
-            2: (empty)
-          2: YAML_BLOCK_MAP_IMPLICIT_ENTRY@9..12
-            0: YAML_FLOW_YAML_NODE@9..11
-              0: (empty)
-              1: YAML_PLAIN_SCALAR@9..11
-                0: PLAIN_LITERAL@9..11 "c" [Newline("\n")] []
-            1: COLON@11..12 ":" [] []
-            2: (empty)
-        3: MAPPING_END@12..13 "" [Newline("\n")] []
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..13
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_BLOCK_MAPPING@0..13
+          0: MAPPING_START@0..0 "" [] []
+          1: YAML_BLOCK_MAP_ENTRY_LIST@0..12
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..2
+              0: YAML_FLOW_YAML_NODE@0..1
+                0: YAML_PROPERTY_LIST@0..0
+                1: YAML_PLAIN_SCALAR@0..1
+                  0: PLAIN_LITERAL@0..1 "a" [] []
+              1: COLON@1..2 ":" [] []
+              2: (empty)
+            1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@2..9
+              0: YAML_FLOW_YAML_NODE@2..8
+                0: YAML_PROPERTY_LIST@2..2
+                1: YAML_PLAIN_SCALAR@2..8
+                  0: PLAIN_LITERAL@2..8 "b" [Newline("\n"), Comments("# b"), Newline("\n")] []
+              1: COLON@8..9 ":" [] []
+              2: (empty)
+            2: YAML_BLOCK_MAP_IMPLICIT_ENTRY@9..12
+              0: YAML_FLOW_YAML_NODE@9..11
+                0: YAML_PROPERTY_LIST@9..9
+                1: YAML_PLAIN_SCALAR@9..11
+                  0: PLAIN_LITERAL@9..11 "c" [Newline("\n")] []
+              1: COLON@11..12 ":" [] []
+              2: (empty)
+          2: MAPPING_END@12..13 "" [Newline("\n")] []
       4: (empty)
   1: EOF@13..13 "" [] []
 

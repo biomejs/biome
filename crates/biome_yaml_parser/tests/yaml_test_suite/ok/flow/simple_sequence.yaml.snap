@@ -21,33 +21,33 @@ YamlRoot {
             node: YamlFlowInBlockNode {
                 flow_start_token: FLOW_START@0..0 "" [] [],
                 flow: YamlFlowJsonNode {
-                    properties: missing (optional),
+                    properties: YamlPropertyList [],
                     content: YamlFlowSequence {
                         l_brack_token: L_BRACK@0..1 "[" [] [],
                         entries: YamlFlowSequenceEntryList [
                             YamlFlowYamlNode {
-                                properties: missing (optional),
+                                properties: YamlPropertyList [],
                                 content: YamlPlainScalar {
                                     value_token: PLAIN_LITERAL@1..2 "1" [] [],
                                 },
                             },
                             COMMA@2..4 "," [] [Whitespace(" ")],
                             YamlFlowJsonNode {
-                                properties: missing (optional),
+                                properties: YamlPropertyList [],
                                 content: YamlSingleQuotedScalar {
                                     value_token: SINGLE_QUOTED_LITERAL@4..9 "'abc'" [] [],
                                 },
                             },
                             COMMA@9..11 "," [] [Whitespace(" ")],
                             YamlFlowJsonNode {
-                                properties: missing (optional),
+                                properties: YamlPropertyList [],
                                 content: YamlDoubleQuotedScalar {
                                     value_token: DOUBLE_QUOTED_LITERAL@11..16 "\"xyz\"" [] [],
                                 },
                             },
                             COMMA@16..18 "," [] [Whitespace(" ")],
                             YamlFlowYamlNode {
-                                properties: missing (optional),
+                                properties: YamlPropertyList [],
                                 content: YamlPlainScalar {
                                     value_token: PLAIN_LITERAL@18..34 "plain with\nspace" [] [],
                                 },
@@ -77,27 +77,27 @@ YamlRoot {
       3: YAML_FLOW_IN_BLOCK_NODE@0..35
         0: FLOW_START@0..0 "" [] []
         1: YAML_FLOW_JSON_NODE@0..35
-          0: (empty)
+          0: YAML_PROPERTY_LIST@0..0
           1: YAML_FLOW_SEQUENCE@0..35
             0: L_BRACK@0..1 "[" [] []
             1: YAML_FLOW_SEQUENCE_ENTRY_LIST@1..34
               0: YAML_FLOW_YAML_NODE@1..2
-                0: (empty)
+                0: YAML_PROPERTY_LIST@1..1
                 1: YAML_PLAIN_SCALAR@1..2
                   0: PLAIN_LITERAL@1..2 "1" [] []
               1: COMMA@2..4 "," [] [Whitespace(" ")]
               2: YAML_FLOW_JSON_NODE@4..9
-                0: (empty)
+                0: YAML_PROPERTY_LIST@4..4
                 1: YAML_SINGLE_QUOTED_SCALAR@4..9
                   0: SINGLE_QUOTED_LITERAL@4..9 "'abc'" [] []
               3: COMMA@9..11 "," [] [Whitespace(" ")]
               4: YAML_FLOW_JSON_NODE@11..16
-                0: (empty)
+                0: YAML_PROPERTY_LIST@11..11
                 1: YAML_DOUBLE_QUOTED_SCALAR@11..16
                   0: DOUBLE_QUOTED_LITERAL@11..16 "\"xyz\"" [] []
               5: COMMA@16..18 "," [] [Whitespace(" ")]
               6: YAML_FLOW_YAML_NODE@18..34
-                0: (empty)
+                0: YAML_PROPERTY_LIST@18..18
                 1: YAML_PLAIN_SCALAR@18..34
                   0: PLAIN_LITERAL@18..34 "plain with\nspace" [] []
             2: R_BRACK@34..35 "]" [] []
