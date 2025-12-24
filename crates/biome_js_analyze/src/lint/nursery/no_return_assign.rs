@@ -67,21 +67,18 @@ impl Rule for NoReturnAssign {
         run_options(ctx).unwrap_or_default()
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 state,
-                match ctx.query() {
-                    AnyReturn::JsArrowFunctionExpression(_) => markup! {
-                        <Emphasis>"Arrow function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
-                    },
-                    AnyReturn::JsReturnStatement(_) => markup! {
-                        <Emphasis>"Function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
-                    },
-                }
+                markup!{
+                    <Emphasis>"Return statements"</Emphasis>" should not contain "<Emphasis>"assignments"</Emphasis>"."
+                },
             ).note(markup! {
-                "Return statements are often considered side-effect free.\nYou likely want to do a comparison `==`\nOtherwise move the assignment outside of the return statement"
+                "Assignments inside return statements are easy to mistake for comparison operators (`==`), "
+                "and add unexpected side effects to normally-pure code."
+                "\nIf the assignment is intentional, move it outside of the return statement."
             }))
     }
 }
