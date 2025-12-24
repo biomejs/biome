@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use rustc_hash::{FxHashMap, FxHashSet};
 
-use biome_analyze::{FixKind, RuleSource};
+use biome_analyze::{FixKind, QueryMatch, RuleSource};
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -10,7 +10,7 @@ use biome_js_factory::make;
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, JsArrayExpression,
-    JsReferenceIdentifier, T, TsTypeofType,
+    JsReferenceIdentifier, T, TsTypeofType, is_transparent_expression_wrapper,
 };
 use biome_js_syntax::{
     JsCallExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TextRange,
@@ -520,15 +520,19 @@ fn get_whole_static_member_expression(reference: &JsSyntaxNode) -> Option<AnyJsM
         .ancestors()
         .skip(1) // JS_REFERENCE_IDENTIFIER
         .take_while(|x| {
-            x.parent().is_some_and(|parent| {
-                parent
-                    .cast::<AnyJsMemberExpression>()
-                    .is_some_and(|member_expr| {
-                        member_expr
-                            .object()
-                            .is_ok_and(|object| object.syntax() == x)
-                    })
-            })
+            x.ancestors()
+                .skip(1) // the node itself
+                .skip_while(is_transparent_expression_wrapper)
+                .next()
+                .is_some_and(|parent| {
+                    parent
+                        .cast::<AnyJsMemberExpression>()
+                        .is_some_and(|member_expr| {
+                            member_expr.object().is_ok_and(|object| {
+                                object.range().contains_inclusive(x.text_range().start())
+                            })
+                        })
+                })
         })
         .last()?
         .parent()?;
@@ -765,7 +769,11 @@ fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> + use<>
                 if let Some(member_name) = member_name {
                     vec.push(member_name);
                 }
-                next = member_expr.object().ok().map(AstNode::into_syntax);
+                next = member_expr
+                    .object()
+                    .ok()
+                    .and_then(|expr| expr.inner_expression())
+                    .map(AstNode::into_syntax);
             }
             Err(node) => {
                 vec.push(node.text_trimmed().to_string());
