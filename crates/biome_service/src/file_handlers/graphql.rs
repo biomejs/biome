@@ -1,6 +1,6 @@
 use super::{
     AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult, ProcessFixAll,
+    ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult, ProcessFixAllBatched,
     ProcessLint, SearchCapabilities,
 };
 use crate::WorkspaceError;
@@ -14,7 +14,9 @@ use crate::settings::{
     Settings, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult};
-use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleError,
+};
 use biome_configuration::graphql::{
     GraphqlAssistConfiguration, GraphqlAssistEnabled, GraphqlFormatterConfiguration,
     GraphqlFormatterEnabled, GraphqlLinterConfiguration, GraphqlLinterEnabled,
@@ -541,6 +543,9 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 }
 
 /// If applies all the safe fixes to the given syntax tree.
+///
+/// This uses a batched approach that collects multiple non-overlapping fixes
+/// per analysis pass for improved performance.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let mut tree: GraphqlRoot = params.parse.tree();
 
@@ -567,26 +572,24 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         range: None,
     };
 
-    let mut process_fix_all = ProcessFixAll::new(
+    let mut process = ProcessFixAllBatched::<GraphqlLanguage>::new(
         &params,
         rules,
         tree.syntax().text_range_with_trivia().len().into(),
     );
+
     loop {
-        let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
-            process_fix_all.process_signal(signal)
+        // Analyze and collect ALL applicable actions (never breaks early)
+        let (_, _) = analyze(&tree, filter, &analyzer_options, |signal| {
+            process.collect_signal(signal)
         });
 
-        let result = process_fix_all.process_action(action, |root| {
-            tree = match GraphqlRoot::cast(root) {
-                Some(tree) => tree,
-                None => return None,
-            };
-            Some(tree.syntax().text_range_with_trivia().len().into())
-        })?;
+        // Get non-overlapping batch of actions
+        let batch = process.take_batch();
 
-        if result.is_none() {
-            return process_fix_all.finish(|| {
+        if batch.is_empty() {
+            // No more fixes to apply - we're done
+            return process.finish(|| {
                 Ok(if params.should_format {
                     Either::Left(format_node(
                         params.settings.format_options::<GraphqlLanguage>(
@@ -599,6 +602,23 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     Either::Right(tree.syntax().to_string())
                 })
             });
+        }
+
+        // Merge all actions into one mutation and apply
+        if let Some(combined_mutation) = process.merge_actions(batch) {
+            let (new_root, _) = combined_mutation.commit_with_text_range_and_edit(true);
+            tree = match GraphqlRoot::cast(new_root) {
+                Some(tree) => tree,
+                None => {
+                    return Err(WorkspaceError::RuleError(
+                        RuleError::ReplacedRootWithNonRootError { rule_name: None },
+                    ));
+                }
+            };
+
+            // Check for runaway growth
+            let new_len: u32 = tree.syntax().text_range_with_trivia().len().into();
+            process.check_growth(new_len)?;
         }
     }
 }
