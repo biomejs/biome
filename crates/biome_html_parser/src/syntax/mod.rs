@@ -131,7 +131,7 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
 /// will emit diagnostics. We want to allow them if they have no special meaning.
 #[inline(always)]
 fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
-    if p.options().vue {
+    if HtmlSyntaxFeatures::Vue.is_supported(p) {
         HtmlLexContext::InsideTagVue
     } else {
         HtmlLexContext::InsideTag
@@ -181,7 +181,14 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                 HtmlLexContext::Regular
             },
         );
+
         let opening = m.complete(p, HTML_OPENING_ELEMENT);
+
+        // if the lexer found a keyword, rewind and lex as text
+        if is_at_keyword(p) {
+            p.re_lex(HtmlReLexContext::HtmlText);
+        }
+
         if is_embedded_language_tag {
             // embedded language tags always have 1 element as content
             let list = p.start();
@@ -682,4 +689,12 @@ impl TextExpression {
 
         Present(m.complete(p, HTML_TEXT_EXPRESSION))
     }
+}
+
+fn is_at_keyword(p: &mut HtmlParser) -> bool {
+    is_at_svelte_keyword(p) || is_at_html_keyword(p)
+}
+
+fn is_at_html_keyword(p: &mut HtmlParser) -> bool {
+    matches!(p.cur(), T![html] | T![doctype])
 }

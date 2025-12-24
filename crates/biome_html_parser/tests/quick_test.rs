@@ -4,9 +4,12 @@ use biome_test_utils::has_bogus_nodes_or_empty_slots;
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"{#each items as { id, name }}
-  <div>{id}: {name}</div>
-{/each}"#;
+    let code = r#"
+<article>
+	{@html content}
+</article>
+
+"#;
 
     let options = HtmlParseOptions::default().with_single_text_expression();
     let root = parse_html(code, options);
