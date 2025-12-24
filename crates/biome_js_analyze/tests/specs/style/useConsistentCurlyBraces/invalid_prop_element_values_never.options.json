@@ -1,0 +1,15 @@
+{
+	"linter": {
+		"rules": {
+			"style": {
+				"useConsistentCurlyBraces": {
+					"level": "error",
+					"options": {
+						"propElementValues": "never"
+					}
+				}
+			}
+		}
+	}
+}
+

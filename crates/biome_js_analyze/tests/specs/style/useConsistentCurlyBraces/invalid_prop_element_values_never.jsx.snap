@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_prop_element_values_never.jsx
+---
+# Input
+```jsx
+<App prop={<div />} />;
+
+```
+
+# Diagnostics
+```
+invalid_prop_element_values_never.jsx:1:11 lint/style/useConsistentCurlyBraces ━━━━━━━━━━━━━━━━━━━━━
+
+  i Should not have curly braces around expression.
+  
+  > 1 │ <App prop={<div />} />;
+      │           ^^^^^^^^^
+    2 │ 
+  
+  i JSX attribute value does not need to be wrapped in curly braces.
+  
+
+```

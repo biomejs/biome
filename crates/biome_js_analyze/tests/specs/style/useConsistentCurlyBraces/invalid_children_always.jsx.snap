@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_children_always.jsx
+---
+# Input
+```jsx
+<App>Hello world</App>;
+
+```
+
+# Diagnostics
+```
+invalid_children_always.jsx:1:6 lint/style/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Should have curly braces around expression.
+  
+  > 1 │ <App>Hello world</App>;
+      │      ^^^^^^^^^^^
+    2 │ 
+  
+  i JSX child should be wrapped in curly braces.
+  
+  i Unsafe fix: Add curly braces around the expression.
+  
+    1 │ <App>{"Hello·world"}</App>;
+      │      ++           ++       
+
+```

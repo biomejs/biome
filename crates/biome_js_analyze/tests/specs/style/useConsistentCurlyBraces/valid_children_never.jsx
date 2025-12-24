@@ -1,0 +1,2 @@
+<App>Hello world</App>;
+
