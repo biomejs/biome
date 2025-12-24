@@ -1958,6 +1958,11 @@ See <https://biomejs.dev/linter/rules/no-react-forward-ref>
 	 */
 	noReactForwardRef?: NoReactForwardRefConfiguration;
 	/**
+	* Disallow assignments in return statements.
+See <https://biomejs.dev/linter/rules/no-return-assign> 
+	 */
+	noReturnAssign?: NoReturnAssignConfiguration;
+	/**
 	* Disallow javascript: URLs in HTML.
 See <https://biomejs.dev/linter/rules/no-script-url> 
 	 */
@@ -3670,6 +3675,9 @@ export type NoProtoConfiguration =
 export type NoReactForwardRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactForwardRefOptions;
+export type NoReturnAssignConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReturnAssignOptions;
 export type NoScriptUrlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoScriptUrlOptions;
@@ -5117,6 +5125,10 @@ export interface RuleWithNoReactForwardRefOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactForwardRefOptions;
 }
+export interface RuleWithNoReturnAssignOptions {
+	level: RulePlainConfiguration;
+	options?: NoReturnAssignOptions;
+}
 export interface RuleWithNoScriptUrlOptions {
 	level: RulePlainConfiguration;
 	options?: NoScriptUrlOptions;
@@ -6457,6 +6469,7 @@ export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoProtoOptions = {};
 export type NoReactForwardRefOptions = {};
+export type NoReturnAssignOptions = {};
 export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
@@ -7320,6 +7333,7 @@ export type Category =
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noScriptUrl"
+	| "lint/nursery/noReturnAssign"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"

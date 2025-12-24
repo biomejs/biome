@@ -4244,6 +4244,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoReturnAssignConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReturnAssignOptions" }
+			]
+		},
+		"NoReturnAssignOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoScriptUrlConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5299,6 +5309,13 @@
 					"description": "Replaces usages of forwardRef with passing ref as a prop.\nSee <https://biomejs.dev/linter/rules/no-react-forward-ref>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReactForwardRefConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReturnAssign": {
+					"description": "Disallow assignments in return statements.\nSee <https://biomejs.dev/linter/rules/no-return-assign>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReturnAssignConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7733,6 +7750,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoRestrictedTypesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReturnAssignOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReturnAssignOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

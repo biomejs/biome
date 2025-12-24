@@ -188,6 +188,7 @@ define_categories! {
     "lint/nursery/noProto": "https://biomejs.dev/linter/rules/no-proto",
     "lint/nursery/noReactForwardRef": "https://biomejs.dev/linter/rules/no-react-forward-ref",
     "lint/nursery/noScriptUrl": "https://biomejs.dev/linter/rules/no-script-url",
+    "lint/nursery/noReturnAssign": "https://biomejs.dev/linter/rules/no-return-assign",
     "lint/nursery/noShadow": "https://biomejs.dev/linter/rules/no-shadow",
     "lint/nursery/noSyncScripts": "https://biomejs.dev/linter/rules/no-sync-scripts",
     "lint/nursery/noTernary": "https://biomejs.dev/linter/rules/no-ternary",
