@@ -5,8 +5,8 @@ use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsConditionalExpression, JsLogicalExpression,
-    JsLogicalOperator, JsReferenceIdentifier, JsSyntaxNode, JsxExpressionChild, JsxTagExpression,
-    binding_ext::AnyJsBindingDeclaration, jsx_ext::AnyJsxElement,
+    JsLogicalOperator, JsReferenceIdentifier, JsSyntaxNode, JsUnaryOperator, JsxExpressionChild,
+    JsxTagExpression, binding_ext::AnyJsBindingDeclaration, jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_leaked_render::NoLeakedRenderOptions;
@@ -120,14 +120,7 @@ impl Rule for NoLeakedRender {
                 }
                 let left = exp.left().ok()?;
 
-                let is_left_hand_side_safe = matches!(
-                    left,
-                    AnyJsExpression::JsUnaryExpression(_)
-                        | AnyJsExpression::JsCallExpression(_)
-                        | AnyJsExpression::JsBinaryExpression(_)
-                );
-
-                if is_left_hand_side_safe {
+                if is_left_hand_side_safe(&left)? {
                     return None;
                 }
 
@@ -150,13 +143,12 @@ impl Rule for NoLeakedRender {
                         }
                         // If we find expressions that coerce to boolean (unary, call, binary),
                         // then the entire expression is considered safe
-                        AnyJsExpression::JsUnaryExpression(_)
-                        | AnyJsExpression::JsCallExpression(_)
-                        | AnyJsExpression::JsBinaryExpression(_) => {
-                            is_nested_left_hand_side_safe = true;
-                            break;
+                        expr => {
+                            if is_left_hand_side_safe(&expr)? {
+                                is_nested_left_hand_side_safe = true;
+                                break;
+                            }
                         }
-                        _ => {}
                     }
                 }
 
@@ -173,33 +165,13 @@ impl Rule for NoLeakedRender {
                     // let isError = errorCount > 0; // This is safe
                     // let isEqual = a === b; // This is safe
                     // let emptyStr = ''; // This is unsafe
-                    // return <div>{isOpen && <Content />}</div>;  // This should pass
-                    // return <div> {isError && <Error />}</div>;  // This should pass
-                    // return <div> {isEqual && <Equal />}</div>;  // This should pass
-                    // return <div> {emptyStr && <Empty />}</div>;  // This should fail
 
                     if let Some(variable) = find_variable(model, &name) {
                         match variable {
                             AnyJsExpression::AnyJsLiteralExpression(expr) => {
-                                match expr {
-                                    AnyJsLiteralExpression::JsStringLiteralExpression(str) => {
-                                        if str.inner_string_text().ok()?.text().is_empty() {
-                                            return Some(());
-                                        }
-                                        return None;
-                                    }
-                                    AnyJsLiteralExpression::JsNullLiteralExpression(_) => {
-                                        return Some(());
-                                    }
-                                    AnyJsLiteralExpression::JsNumberLiteralExpression(num) => {
-                                        let value = num.value_token().ok()?;
-                                        if value.text_trimmed() == "0" {
-                                            return Some(());
-                                        }
-                                        return None;
-                                    }
-                                    _ => return None,
-                                };
+                                if is_unsafe_literal(&expr)? {
+                                    return Some(());
+                                }
                             }
                             AnyJsExpression::JsUnaryExpression(_)
                             | AnyJsExpression::JsBinaryExpression(_)
@@ -209,9 +181,10 @@ impl Rule for NoLeakedRender {
                     }
                 }
 
-                let is_literal = matches!(left, AnyJsExpression::AnyJsLiteralExpression(_));
-                if is_literal && left.to_trimmed_text().is_empty() {
-                    return None;
+                if let AnyJsExpression::AnyJsLiteralExpression(literal) = left {
+                    if is_unsafe_literal(&literal)? {
+                        return Some(());
+                    }
                 }
 
                 Some(())
@@ -295,4 +268,65 @@ fn find_variable(model: &SemanticModel, name: &JsReferenceIdentifier) -> Option<
 
     let expr = declarator.initializer()?.expression().ok()?;
     Some(expr)
+}
+
+fn is_unsafe_literal(literal: &AnyJsLiteralExpression) -> Option<bool> {
+    match literal {
+        AnyJsLiteralExpression::JsStringLiteralExpression(str) => {
+            if str.inner_string_text().ok()?.text().is_empty() {
+                return Some(true);
+            }
+            return None;
+        }
+        AnyJsLiteralExpression::JsNullLiteralExpression(_) => {
+            return Some(true);
+        }
+        AnyJsLiteralExpression::JsNumberLiteralExpression(num) => {
+            let value = num.value_token().ok()?;
+
+            if is_numeric_zero(value.text_trimmed()) {
+                return Some(true);
+            }
+
+            return None;
+        }
+
+        AnyJsLiteralExpression::JsBigintLiteralExpression(bnum) => {
+            let value = bnum.value_token().ok()?;
+            let literal = value.text_trimmed();
+            let num = literal.strip_suffix("n").unwrap_or(literal);
+
+            if is_numeric_zero(num) {
+                return Some(true);
+            }
+            return None;
+        }
+        _ => return None,
+    };
+}
+
+fn is_numeric_zero(num: &str) -> bool {
+    if let Ok(num) = num.parse::<i64>() {
+        return num == 0;
+    }
+
+    if let Ok(num) = num.parse::<f64>() {
+        return num == 0.0;
+    }
+
+    false
+}
+
+fn is_left_hand_side_safe(expr: &AnyJsExpression) -> Option<bool> {
+    match expr {
+        AnyJsExpression::JsCallExpression(_) | AnyJsExpression::JsBinaryExpression(_) => Some(true),
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            if unary.operator().ok()? == JsUnaryOperator::Minus {
+                Some(false)
+            } else {
+                Some(true)
+            }
+        }
+        _ => Some(false),
+    }
 }

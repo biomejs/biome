@@ -4,6 +4,11 @@ const Example1 = () => {
 	return (
 		<>
 			{0 && <Something />}
+			{0.0 && <Something />}
+			{-0 && <Something />}
+			{-0.0 && <Something />}
+			{0n && <Something />}
+			{-0n && <Something />}
 			{'' && <Something />}
 			{NaN && <Something />}
 		</>
