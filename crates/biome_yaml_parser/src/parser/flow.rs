@@ -30,7 +30,10 @@ pub(crate) fn parse_any_flow_node(p: &mut YamlParser) -> ParsedSyntax {
     }
 }
 
-pub(crate) fn parse_flow_json_node(p: &mut YamlParser, property_list: CompletedMarker) -> CompletedMarker {
+pub(crate) fn parse_flow_json_node(
+    p: &mut YamlParser,
+    property_list: CompletedMarker,
+) -> CompletedMarker {
     let m = property_list.precede(p);
 
     if is_at_flow_sequence(p) {
@@ -46,7 +49,10 @@ pub(crate) fn parse_flow_json_node(p: &mut YamlParser, property_list: CompletedM
     m.complete(p, YAML_FLOW_JSON_NODE)
 }
 
-pub(crate) fn parse_flow_yaml_node(p: &mut YamlParser, property_list: CompletedMarker) -> CompletedMarker {
+pub(crate) fn parse_flow_yaml_node(
+    p: &mut YamlParser,
+    property_list: CompletedMarker,
+) -> CompletedMarker {
     let m = property_list.precede(p);
     parse_plain_scalar(p);
     m.complete(p, YAML_FLOW_YAML_NODE)
