@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: layout.jsx
+---
+# Input
+```jsx
+import Script from 'next/script'
+
+export default function SomePageLayout({ children }) {
+  return (
+    <section>
+      <div>{children}</div>
+      <Script
+        src="https://example.com/script.js"
+        strategy="beforeInteractive"
+      />
+    </section>
+  )
+}
+
+```

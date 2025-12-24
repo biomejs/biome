@@ -1,0 +1,141 @@
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+};
+use biome_console::markup;
+use biome_diagnostics::Severity;
+use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_before_interactive_script_outside_document::NoBeforeInteractiveScriptOutsideDocumentOptions;
+
+use crate::{
+    nextjs::{NextUtility, is_next_import},
+    services::semantic::Semantic,
+};
+
+declare_lint_rule! {
+    /// Prevent usage of `next/script`'s `beforeInteractive` strategy outside of `app/layout.jsx` or `pages/_document.js` in a Next.js project.
+    ///
+    /// Next.js provides a `<Script>` component from `next/script` to optimize the loading of third-party scripts. Using the `beforeInteractive`
+    /// strategy allows scripts to be preloaded before any first-party code. `beforeInteractive` scripts must be placed in either `app/layout.jsx` (App Router) or `pages/_document.js` (Pages Router).
+    ///
+    /// This rule checks for any usage of the `beforeInteractive` scripts outside of these files.
+    ///
+    /// ## Examples
+    ///
+    /// ### Valid
+    ///
+    /// ```jsx
+    /// // app/layout.jsx
+    /// import Script from 'next/script'
+    ///
+    /// export default function RootLayout({ children }) {
+    ///     return (
+    ///         <html lang="en">
+    ///             <body>{children}</body>
+    ///             <Script
+    ///               src="https://example.com/script.js"
+    ///               strategy="beforeInteractive"
+    ///             />
+    ///         </html>
+    ///     )
+    /// }
+    /// ```
+    ///
+    /// ```jsx
+    /// // pages/_document.js
+    /// import { Html, Head, Main, NextScript } from 'next/document'
+    /// import Script from 'next/script'
+    ///
+    /// export default function Document() {
+    ///     return (
+    ///         <Html>
+    ///             <Head />
+    ///             <body>
+    ///                 <Main />
+    ///                 <NextScript />
+    ///                 <Script
+    ///                   src="https://example.com/script.js"
+    ///                   strategy="beforeInteractive"
+    ///                 ></Script>
+    ///             </body>
+    ///         </Html>
+    ///     )
+    /// }
+    /// ```
+    ///
+    pub NoBeforeInteractiveScriptOutsideDocument {
+        version: "next",
+        name: "noBeforeInteractiveScriptOutsideDocument",
+        language: "jsx",
+        sources: &[RuleSource::EslintNext("no-before-interactive-script-outside-document").same()],
+        recommended: true,
+        severity: Severity::Warning,
+        domains: &[RuleDomain::Next],
+    }
+}
+
+impl Rule for NoBeforeInteractiveScriptOutsideDocument {
+    type Query = Semantic<AnyJsxElement>;
+    type State = TextRange;
+    type Signals = Option<Self::State>;
+    type Options = NoBeforeInteractiveScriptOutsideDocumentOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let jsx_element = ctx.query();
+        let element_name = jsx_element.name().ok()?.name_value_token().ok()?;
+        if element_name.text_trimmed() != "Script" {
+            return None;
+        }
+
+        let semantic_model = ctx.model();
+        let reference = jsx_element.name().ok()?;
+        let reference = reference.as_jsx_reference_identifier()?;
+        let binding = semantic_model.binding(reference)?;
+        if !is_next_import(&binding, NextUtility::Script) {
+            return None;
+        }
+
+        let strategy_attribute = jsx_element.find_attribute_by_name("strategy")?;
+        let strategy_attribute_value = strategy_attribute.as_static_value()?;
+        let strategy_attribute_value = strategy_attribute_value.text();
+        if strategy_attribute_value != "beforeInteractive" {
+            return None;
+        }
+
+        let path = ctx.file_path();
+
+        let file_name = path.file_stem()?;
+
+        // pages/_document.(js|ts|jsx|tsx)
+        let is_in_pages_dir = path
+            .ancestors()
+            .nth(1)
+            .is_some_and(|a| a.file_name().is_some_and(|f| f == "pages" && a.is_dir()));
+        if is_in_pages_dir && file_name == "_document" {
+            return None;
+        }
+
+        // app/layout.(js|ts|jsx|tsx)
+        let is_in_app_dir = path
+            .ancestors()
+            .nth(1)
+            .is_some_and(|a| a.file_name().is_some_and(|f| f == "app" && a.is_dir()));
+        if is_in_app_dir && file_name == "layout" {
+            return None;
+        }
+
+        Some(jsx_element.syntax().text_range_with_trivia())
+    }
+
+    fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            range,
+            markup! {
+                "Don't use "<Emphasis>"next/script"</Emphasis>" component with the `"<Emphasis>"beforeInteractive"</Emphasis>"` strategy outside of "<Emphasis>"app/layout.jsx"</Emphasis>" or "<Emphasis>"pages/_document.js"</Emphasis>"."
+            },
+        ).note(markup! {
+            "See the "<Hyperlink href="https://nextjs.org/docs/messages/no-before-interactive-script-outside-document">"Next.js docs"</Hyperlink>" for more details."
+        }))
+    }
+}

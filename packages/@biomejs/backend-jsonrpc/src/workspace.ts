@@ -1856,6 +1856,11 @@ See <https://biomejs.dev/linter/rules/use-yield>
  */
 export interface Nursery {
 	/**
+	* Succinct description of the rule.
+See <https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document> 
+	 */
+	noBeforeInteractiveScriptOutsideDocument?: NoBeforeInteractiveScriptOutsideDocumentConfiguration;
+	/**
 	* Disallow continue statements.
 See <https://biomejs.dev/linter/rules/no-continue> 
 	 */
@@ -3597,6 +3602,9 @@ export type UseValidTypeofConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoBeforeInteractiveScriptOutsideDocumentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions;
 export type NoContinueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoContinueOptions;
@@ -5017,6 +5025,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions {
+	level: RulePlainConfiguration;
+	options?: NoBeforeInteractiveScriptOutsideDocumentOptions;
+}
 export interface RuleWithNoContinueOptions {
 	level: RulePlainConfiguration;
 	options?: NoContinueOptions;
@@ -6379,6 +6391,7 @@ to a DOM element id.
 export type UseValidForDirectionOptions = {};
 export type UseValidTypeofOptions = {};
 export type UseYieldOptions = {};
+export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
 export type NoDuplicateDependenciesOptions = {};
@@ -7279,6 +7292,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"

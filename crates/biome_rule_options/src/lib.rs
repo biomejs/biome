@@ -17,6 +17,7 @@ pub mod no_autofocus;
 pub mod no_await_in_loops;
 pub mod no_banned_types;
 pub mod no_barrel_file;
+pub mod no_before_interactive_script_outside_document;
 pub mod no_biome_first_exception;
 pub mod no_bitwise_operators;
 pub mod no_blank_target;

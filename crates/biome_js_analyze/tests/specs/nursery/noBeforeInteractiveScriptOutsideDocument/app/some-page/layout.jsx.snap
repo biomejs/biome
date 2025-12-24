@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: layout.jsx
+---
+# Input
+```jsx
+import Script from 'next/script'
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+      <Script
+        src="https://example.com/script.js"
+        strategy="beforeInteractive"
+      />
+    </html>
+  )
+}
+
+```
+
+# Diagnostics
+```
+layout.jsx:7:7 lint/nursery/noBeforeInteractiveScriptOutsideDocument ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use next/script component with the `beforeInteractive` strategy outside of app/layout.jsx or pages/_document.js.
+  
+     5 │     <html lang="en">
+     6 │       <body>{children}</body>
+   > 7 │       <Script
+       │       ^^^^^^^
+   > 8 │         src="https://example.com/script.js"
+   > 9 │         strategy="beforeInteractive"
+  > 10 │       />
+       │       ^^
+    11 │     </html>
+    12 │   )
+  
+
+```
