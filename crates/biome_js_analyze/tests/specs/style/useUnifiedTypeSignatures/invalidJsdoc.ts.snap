@@ -16,6 +16,12 @@ function foo(baz: string): string;
 function foo(qux: boolean): string;
 function foo(whatever: any): any {}
 
+// TODO: Decide on whether to allow or deny this example (TSEslint passes, though of dubious merit)
+// /** baba is you */
+// export function foo(bar: string): void	
+// export function foo(bar: number): void
+// export function foo(bar: any): void {} 
+
 // jsdoc on implementation
 
 function bar(a: number): string;
@@ -61,7 +67,7 @@ declare function f10(this: number): void;
 ```
 invalidJsdoc.ts:2:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     1 │ // no jsdoc is still fair game
   > 2 │ function f(bar: number): string;
@@ -85,7 +91,7 @@ invalidJsdoc.ts:2:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
 ```
 invalidJsdoc.ts:9:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
      7 │ /** jsdoc 1 */
      8 │ function foo(bar: number): string;
@@ -108,126 +114,138 @@ invalidJsdoc.ts:9:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
 ```
 
 ```
-invalidJsdoc.ts:15:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidJsdoc.ts:21:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
-    13 │ // jsdoc on implementation
-    14 │ 
-  > 15 │ function bar(a: number): string;
+    19 │ // jsdoc on implementation
+    20 │ 
+  > 21 │ function bar(a: number): string;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    16 │ function bar(a: string): string;
-    17 │ function bar(a: boolean): string;
+    22 │ function bar(a: string): string;
+    23 │ function bar(a: boolean): string;
   
   i Unsafe fix: Combine overloads using a type union.
   
     10 10 │   function foo(qux: boolean): string;
     11 11 │   function foo(whatever: any): any {}
     12    │ - 
-    13    │ - //·jsdoc·on·implementation
-    14    │ - 
-    15    │ - function·bar(a:·number):·string;
-    16    │ - function·bar(a:·string):·string;
+    13    │ - //·TODO:·Decide·on·whether·to·allow·or·deny·this·example·(TSEslint·passes,·though·of·dubious·merit)
+    14    │ - //·/**·baba·is·you·*/
+    15    │ - //·export·function·foo(bar:·string):·void→ 
+    16    │ - //·export·function·foo(bar:·number):·void
+    17    │ - //·export·function·foo(bar:·any):·void·{}·
+    18    │ - 
+    19    │ - //·jsdoc·on·implementation
+    20    │ - 
+    21    │ - function·bar(a:·number):·string;
+    22    │ - function·bar(a:·string):·string;
        12 │ + 
-       13 │ + //·jsdoc·on·implementation
-       14 │ + 
-       15 │ + function·bar(a:·string·|·number):·string;
-    17 16 │   function bar(a: boolean): string;
-    18 17 │   /** jsdoc 1 */
+       13 │ + //·TODO:·Decide·on·whether·to·allow·or·deny·this·example·(TSEslint·passes,·though·of·dubious·merit)
+       14 │ + //·/**·baba·is·you·*/
+       15 │ + //·export·function·foo(bar:·string):·void→ 
+       16 │ + //·export·function·foo(bar:·number):·void
+       17 │ + //·export·function·foo(bar:·any):·void·{}·
+       18 │ + 
+       19 │ + //·jsdoc·on·implementation
+       20 │ + 
+       21 │ + function·bar(a:·string·|·number):·string;
+    23 22 │   function bar(a: boolean): string;
+    24 23 │   /** jsdoc 1 */
   
 
 ```
 
 ```
-invalidJsdoc.ts:26:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidJsdoc.ts:32:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
-    24 │ 	(a: string, b: number, c: number): string;
-    25 │ 	/*************************** HIJKLMNOPQRS */
-  > 26 │ 	(a: number, b: number, c: string): string;
+    30 │ 	(a: string, b: number, c: number): string;
+    31 │ 	/*************************** HIJKLMNOPQRS */
+  > 32 │ 	(a: number, b: number, c: string): string;
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    27 │ 	/* t u v w x y z */
-    28 │ 	(a: number, b: string, c: string): string;
+    33 │ 	/* t u v w x y z */
+    34 │ 	(a: number, b: string, c: string): string;
   
   i Unsafe fix: Combine overloads using a type union.
   
-    23 23 │   	// a b c d e f g...
-    24 24 │   	(a: string, b: number, c: number): string;
-    25    │ - → /***************************·HIJKLMNOPQRS·*/
-    26    │ - → (a:·number,·b:·number,·c:·string):·string;
-    27    │ - → /*·t·u·v·w·x·y·z·*/
-    28    │ - → (a:·number,·b:·string,·c:·string):·string;
-       25 │ + → /***************************·HIJKLMNOPQRS·*/
-       26 │ + → → /*·t·u·v·w·x·y·z·*/
-       27 │ + → (a:·number,·b:·string·|·number,·c:·string):·string;
-    29 28 │   }
-    30 29 │   
+    29 29 │   	// a b c d e f g...
+    30 30 │   	(a: string, b: number, c: number): string;
+    31    │ - → /***************************·HIJKLMNOPQRS·*/
+    32    │ - → (a:·number,·b:·number,·c:·string):·string;
+    33    │ - → /*·t·u·v·w·x·y·z·*/
+    34    │ - → (a:·number,·b:·string,·c:·string):·string;
+       31 │ + → /***************************·HIJKLMNOPQRS·*/
+       32 │ + → → /*·t·u·v·w·x·y·z·*/
+       33 │ + → (a:·number,·b:·string·|·number,·c:·string):·string;
+    35 34 │   }
+    36 35 │   
   
 
 ```
 
 ```
-invalidJsdoc.ts:34:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidJsdoc.ts:40:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
-    32 │ class banana {
-    33 │ 	/** bake a cake */
-  > 34 │ 	public bake(cakeType: string): void;
+    38 │ class banana {
+    39 │ 	/** bake a cake */
+  > 40 │ 	public bake(cakeType: string): void;
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    35 │ 	/** bake a cake */
-    36 │ 	public bake(flourAmt: number): void;
+    41 │ 	/** bake a cake */
+    42 │ 	public bake(flourAmt: number): void;
   
   i Unsafe fix: Combine overloads using a type union.
   
-    31 31 │   // same jsdocs
-    32 32 │   class banana {
-    33    │ - → /**·bake·a·cake·*/
-    34    │ - → public·bake(cakeType:·string):·void;
-    35 33 │   	/** bake a cake */
-    36    │ - → public·bake(flourAmt:·number):·void;
-       34 │ + → → /**·bake·a·cake·*/
-       35 │ + → public·bake(flourAmt:·number·|·string):·void;
-    37 36 │   	/** bake a cake */
-    38 37 │   	public bake(ingredients: object): void;
+    37 37 │   // same jsdocs
+    38 38 │   class banana {
+    39    │ - → /**·bake·a·cake·*/
+    40    │ - → public·bake(cakeType:·string):·void;
+    41 39 │   	/** bake a cake */
+    42    │ - → public·bake(flourAmt:·number):·void;
+       40 │ + → → /**·bake·a·cake·*/
+       41 │ + → public·bake(flourAmt:·number·|·string):·void;
+    43 42 │   	/** bake a cake */
+    44 43 │   	public bake(ingredients: object): void;
   
 
 ```
 
 ```
-invalidJsdoc.ts:46:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidJsdoc.ts:52:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
-    44 │ /** jsdoc 2 */
-    45 │ /** jsdoc 3 */
-  > 46 │ declare function f10(this: string): void;
+    50 │ /** jsdoc 2 */
+    51 │ /** jsdoc 3 */
+  > 52 │ declare function f10(this: string): void;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    47 │ /** jsdoc 1 */
-    48 │ /** jsdoc 2 */
+    53 │ /** jsdoc 1 */
+    54 │ /** jsdoc 2 */
   
   i Unsafe fix: Combine overloads using a type union.
   
-    39 39 │   	public bake(whatever: any): void {};
-    40 40 │   }
-    41    │ - 
-    42    │ - //·several·identical·jsdocs·(all·get·checked)
-    43    │ - /**·jsdoc·1·*/
-    44    │ - /**·jsdoc·2·*/
-    45    │ - /**·jsdoc·3·*/
-    46    │ - declare·function·f10(this:·string):·void;
-       41 │ + 
-       42 │ + //·several·identical·jsdocs·(all·get·checked)
-       43 │ + /**·jsdoc·1·*/
-       44 │ + /**·jsdoc·2·*/
-       45 │ + /**·jsdoc·3·*/
-    47 46 │   /** jsdoc 1 */
-    48 47 │   /** jsdoc 2 */
-    49 48 │   /** jsdoc 3 */
-    50    │ - declare·function·f10(this:·number):·void;
-       49 │ + declare·function·f10(this:·number·|·string):·void;
-    51 50 │   
+    45 45 │   	public bake(whatever: any): void {};
+    46 46 │   }
+    47    │ - 
+    48    │ - //·several·identical·jsdocs·(all·get·checked)
+    49    │ - /**·jsdoc·1·*/
+    50    │ - /**·jsdoc·2·*/
+    51    │ - /**·jsdoc·3·*/
+    52    │ - declare·function·f10(this:·string):·void;
+       47 │ + 
+       48 │ + //·several·identical·jsdocs·(all·get·checked)
+       49 │ + /**·jsdoc·1·*/
+       50 │ + /**·jsdoc·2·*/
+       51 │ + /**·jsdoc·3·*/
+    53 52 │   /** jsdoc 1 */
+    54 53 │   /** jsdoc 2 */
+    55 54 │   /** jsdoc 3 */
+    56    │ - declare·function·f10(this:·number):·void;
+       55 │ + declare·function·f10(this:·number·|·string):·void;
+    57 56 │   
   
 
 ```

@@ -930,7 +930,7 @@ invalid.ts:163:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:166:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     164 │ declare function f10(this: number): void;
     165 │ 
@@ -956,7 +956,7 @@ invalid.ts:166:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:169:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     167 │ function tuple([c, d]: [number, string]): void;
     168 │ 
@@ -982,7 +982,7 @@ invalid.ts:169:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:174:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     173 │ // Merges latter 2 type parameters into 1
   > 174 │ function fizzbuzz([a]: SomeType<string>, { c }: Record<"c", void>): void;

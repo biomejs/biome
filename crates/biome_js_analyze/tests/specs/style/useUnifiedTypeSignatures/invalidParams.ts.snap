@@ -25,7 +25,7 @@ function g(whatever: any): any {}
 ```
 invalidParams.ts:2:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     1 │ // different name from implementation, but same between overloads
   > 2 │ function f(foo: string): string;
@@ -49,7 +49,7 @@ invalidParams.ts:2:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
 ```
 invalidParams.ts:7:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     6 │ // Destructuring doesn't count since they don't have names
   > 7 │ function f2(foo: string, {bar}: Record<"bar", string>): string;
@@ -77,7 +77,7 @@ invalidParams.ts:7:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
 ```
 invalidParams.ts:12:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     11 │ // neither does array spread
   > 12 │ function g(foo: string, [a, b]: [number, string]): string;
