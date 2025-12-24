@@ -159,12 +159,9 @@ impl Rule for NoLeakedRender {
                 if let AnyJsExpression::JsIdentifierExpression(ident) = &left {
                     let name = ident.name().ok()?;
                     // Use the semantic model to resolve the variable binding and check
-                    // if it's initialized with safe expressions. This allows us to
-                    // handle cases like:
-                    // let isOpen = false;  // This is safe
-                    // let isError = errorCount > 0; // This is safe
-                    // let isEqual = a === b; // This is safe
-                    // let emptyStr = ''; // This is unsafe
+                    // if it's initialized with safe expressions.
+                    // Safe: let isOpen = false; let isError = errorCount > 0; let isEqual = a === b;
+                    // Unsafe: let emptyStr = '';
 
                     if let Some(variable) = find_variable(model, &name) {
                         match variable {
@@ -180,11 +177,10 @@ impl Rule for NoLeakedRender {
                         }
                     }
                 }
-
-                if let AnyJsExpression::AnyJsLiteralExpression(literal) = left {
-                    if is_unsafe_literal(&literal)? {
-                        return Some(());
-                    }
+                if let AnyJsExpression::AnyJsLiteralExpression(literal) = left
+                    && is_unsafe_literal(&literal)?
+                {
+                    return Some(());
                 }
 
                 Some(())
@@ -276,11 +272,9 @@ fn is_unsafe_literal(literal: &AnyJsLiteralExpression) -> Option<bool> {
             if str.inner_string_text().ok()?.text().is_empty() {
                 return Some(true);
             }
-            return None;
+            None
         }
-        AnyJsLiteralExpression::JsNullLiteralExpression(_) => {
-            return Some(true);
-        }
+        AnyJsLiteralExpression::JsNullLiteralExpression(_) => Some(true),
         AnyJsLiteralExpression::JsNumberLiteralExpression(num) => {
             let value = num.value_token().ok()?;
 
@@ -288,7 +282,7 @@ fn is_unsafe_literal(literal: &AnyJsLiteralExpression) -> Option<bool> {
                 return Some(true);
             }
 
-            return None;
+            None
         }
 
         AnyJsLiteralExpression::JsBigintLiteralExpression(bnum) => {
@@ -299,10 +293,10 @@ fn is_unsafe_literal(literal: &AnyJsLiteralExpression) -> Option<bool> {
             if is_numeric_zero(num) {
                 return Some(true);
             }
-            return None;
+            None
         }
-        _ => return None,
-    };
+        _ => None,
+    }
 }
 
 fn is_numeric_zero(num: &str) -> bool {
