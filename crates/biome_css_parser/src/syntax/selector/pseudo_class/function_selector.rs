@@ -1,25 +1,32 @@
 use crate::parser::CssParser;
-use crate::syntax::css_modules::{CSS_MODULES_SCOPE_SET, local_or_global_not_allowed};
+use crate::syntax::css_modules::{
+    CSS_MODULES_SCOPE_SET, CSS_MODULES_VUE_ENHANCED_SET, local_or_global_not_allowed,
+    slotted_or_deep_not_allowed,
+};
 use crate::syntax::parse_error::expected_selector;
-use crate::syntax::parse_regular_identifier;
 use crate::syntax::selector::{
     eat_or_recover_selector_function_close_token, parse_selector,
     recover_selector_function_parameter,
 };
+use crate::syntax::{CssSyntaxFeatures, parse_regular_identifier};
+use biome_css_syntax::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_SELECTOR;
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::CssSyntaxKind::{self, CSS_PSEUDO_CLASS_FUNCTION_SELECTOR};
 use biome_css_syntax::T;
-use biome_parser::Parser;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
+use biome_parser::{Parser, SyntaxFeature};
 
-/// Checks if the current parser position is at a pseudo-class function selector for CSS Modules.
+/// Checks if the current parser position is at a pseudo-class function selector for CSS Modules and SFC Vue.
 ///
-/// This function determines if the parser is currently positioned at the start of a `:local` or `:global`
-/// pseudo-class function selector, which is part of the CSS Modules syntax.
+/// This function determines if the parser is currently positioned at the start of a `:local` or `:global`.
 #[inline]
 pub(crate) fn is_at_pseudo_class_function_selector(p: &mut CssParser) -> bool {
     p.at_ts(CSS_MODULES_SCOPE_SET) && p.nth_at(1, T!['('])
+}
+
+#[inline]
+pub(crate) fn is_at_vue_pseudo_class_function_selector(p: &mut CssParser) -> bool {
+    p.at_ts(CSS_MODULES_VUE_ENHANCED_SET) && p.nth_at(1, T!['('])
 }
 
 /// Parses a pseudo-class function selector for CSS Modules.
@@ -39,24 +46,24 @@ pub(crate) fn is_at_pseudo_class_function_selector(p: &mut CssParser) -> bool {
 /// ```
 #[inline]
 pub(crate) fn parse_pseudo_class_function_selector(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_pseudo_class_function_selector(p) {
-        return Absent;
+    if is_at_pseudo_class_function_selector(p) {
+        CssSyntaxFeatures::CssModules.parse_exclusive_syntax(
+            p,
+            parse_pseudo_selector,
+            |p, marker| local_or_global_not_allowed(p, marker.range(p)),
+        )
+    } else if is_at_vue_pseudo_class_function_selector(p) {
+        CssSyntaxFeatures::CssModulesWithVue.parse_exclusive_syntax(
+            p,
+            parse_pseudo_selector,
+            |p, marker| slotted_or_deep_not_allowed(p, marker.range(p)),
+        )
+    } else {
+        Absent
     }
+}
 
-    if p.options().is_css_modules_disabled() {
-        // :local and :global are not standard CSS features
-        // provide a hint on how to enable parsing of these pseudo-classes
-        p.error(local_or_global_not_allowed(p, p.cur_range()));
-
-        // Skip the entire pseudo-class function selector
-        // Skip until the next closing parenthesis
-        while !p.eat(T![')']) && !p.at(CssSyntaxKind::EOF) {
-            p.bump_any();
-        }
-
-        return Absent;
-    }
-
+fn parse_pseudo_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     parse_regular_identifier(p).ok();

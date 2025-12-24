@@ -59,6 +59,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "dir",
         "local",
         "global",
+        "slotted",
+        "deep",
         "any",
         "current",
         "past",
@@ -297,6 +299,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
     ],
     nodes: &[
         "CSS_ROOT",
+        "CSS_SNIPPET_ROOT",
         "CSS_RULE_LIST",
         "CSS_QUALIFIED_RULE",
         "CSS_NESTED_QUALIFIED_RULE",

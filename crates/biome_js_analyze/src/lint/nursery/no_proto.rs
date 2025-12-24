@@ -7,11 +7,27 @@ use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_proto::NoProtoOptions;
 
 declare_lint_rule! {
-    /// Disallow the use of the `__proto__` property.
+    /// Disallow the use of the deprecated `__proto__` object property.
     ///
-    /// The use of `__proto__` for getting or setting the prototype of an object
-    /// is deprecated. Use `Object.getPrototypeOf()` or
-    /// `Object.setPrototypeOf()` instead.
+    /// [`Object.prototype.__proto__`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto)
+    /// is a special accessor used to get or set the prototype of an object. \
+    ///
+    /// However, it has been **deprecated** since _ECMAScript 2009_, being much slower and much less reliable than its
+    /// modern counterparts [`Object.getPrototypeOf()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getPrototypeOf)
+    /// and [`Object.setPrototypeOf()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/setPrototypeOf).
+    ///
+    /// Since it is a regular property on `Object.prototype`,
+    /// `__proto__` **will not work** on `null`-prototype objects that do not extend from `Object.prototype`
+    /// nor ones having created their own `__proto__` properties via `Object.defineProperty`.
+    ///
+    /// As such, this rule encourages the use of `Object.getPrototypeOf()` and `Object.setPrototypeOf()`
+    /// in lieu of directly accessing `__proto__`.
+    ///
+    /// :::info
+    /// Note that this does **not** check for the use of `__proto__` inside object literal definitions
+    /// to set a newly created object's prototype, \
+    /// which is standard practice and well-optimized in modern browsers.
+    /// :::
     ///
     /// ## Examples
     ///
@@ -33,6 +49,15 @@ declare_lint_rule! {
     ///
     /// ```js
     /// Object.setPrototypeOf(obj, b);
+    /// ```
+    ///
+    /// ```js
+    /// // This sets `foo`'s prototype to `null` (similar to `Object.create`), and is
+    /// // well-defined across browsers.
+    /// const foo = {
+    ///   __proto__: null,
+    ///   a: 1,
+    /// }
     /// ```
     pub NoProto {
         version: "2.3.8",
@@ -105,14 +130,16 @@ impl Rule for NoProto {
             rule_category!(),
             node.range(),
             markup! {
-                "Unexpected use of "<Emphasis>"__proto__"</Emphasis>"."
+                "Avoid use of the deprecated "<Emphasis>"__proto__"</Emphasis>" accessor."
             },
         )
             .note(markup! {
-                "The use of "<Emphasis>"__proto__"</Emphasis>" for getting or setting the prototype of an object is deprecated."
+                <Emphasis>"Object.prototype.__proto__"</Emphasis>" is an outdated way to get or set an object's prototype,"
+                "\nhaving been "<Emphasis>"deprecated in 2009"</Emphasis>" for being inefficient and unreliable."
             })
             .note(markup! {
-                "Use "<Emphasis>"Object.getPrototypeOf()"</Emphasis>" or "<Emphasis>"Object.setPrototypeOf()"</Emphasis>" instead."
+                <Emphasis>"Object.getPrototypeOf()"</Emphasis>" and "<Emphasis>"Object.setPrototypeOf()"</Emphasis>" "
+                "are modern alternatives that work on all objects and are more performant."
             })
         )
     }

@@ -88,10 +88,10 @@ use token::string::Quote;
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum IndentStyle {
-    /// Tab
+    /// Indent with Tab
     #[default]
     Tab,
-    /// Space
+    /// Indent with Space
     Space,
 }
 

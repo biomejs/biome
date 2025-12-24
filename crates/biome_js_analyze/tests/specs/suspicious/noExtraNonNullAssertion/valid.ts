@@ -19,3 +19,11 @@ function case5(key: string | null) {
 function issue3419(value: string | null): string {
   return (value!);
 }
+
+// Test case for issue #7927: compound assignment with non-null assertions on both sides
+const arr: number[] = [1, 2, 3];
+arr[0]! ^= arr[1]!;
+
+// Test case for issue #8475
+const _d2 = blob.b!.d!.length;
+const _d2 = blob.b?.d!.length;

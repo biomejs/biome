@@ -1,4 +1,6 @@
-use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
+use crate::reporter::{Reporter, ReporterVisitor};
+use crate::runner::execution::Execution;
+use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, PrintDescription, Resource, Severity};
@@ -6,19 +8,19 @@ use camino::{Utf8Path, Utf8PathBuf};
 use std::collections::BTreeMap;
 use std::io::{self, Write};
 
-pub struct CheckstyleReporter {
+pub struct CheckstyleReporter<'a> {
     pub summary: TraversalSummary,
     pub diagnostics_payload: DiagnosticsPayload,
-    pub execution: Execution,
+    pub execution: &'a dyn Execution,
     pub verbose: bool,
     pub(crate) working_directory: Option<Utf8PathBuf>,
 }
 
-impl Reporter for CheckstyleReporter {
+impl Reporter for CheckstyleReporter<'_> {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
+        visitor.report_summary(self.execution, self.summary, self.verbose)?;
         visitor.report_diagnostics(
-            &self.execution,
+            self.execution,
             self.diagnostics_payload,
             self.verbose,
             self.working_directory.as_deref(),
@@ -40,7 +42,7 @@ impl<'a> CheckstyleReporterVisitor<'a> {
 impl<'a> ReporterVisitor for CheckstyleReporterVisitor<'a> {
     fn report_summary(
         &mut self,
-        _execution: &Execution,
+        _execution: &dyn Execution,
         _summary: TraversalSummary,
         _verbose: bool,
     ) -> io::Result<()> {
@@ -49,7 +51,7 @@ impl<'a> ReporterVisitor for CheckstyleReporterVisitor<'a> {
 
     fn report_diagnostics(
         &mut self,
-        _execution: &Execution,
+        _execution: &dyn Execution,
         payload: DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,

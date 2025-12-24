@@ -25,9 +25,9 @@ use biome_configuration::css::{
 use biome_css_analyze::{CssAnalyzerServices, analyze};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
-use biome_css_parser::CssParserOptions;
+use biome_css_parser::{CssModulesKind, CssParserOptions};
 use biome_css_semantic::semantic_model;
-use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
@@ -154,16 +154,34 @@ impl ServiceLanguage for CssLanguage {
         overrides: &OverrideSettings,
         language: &Self::ParserSettings,
         path: &BiomePath,
-        _file_source: &DocumentFileSource,
+        file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
         let mut options = CssParserOptions {
             allow_wrong_line_comments: language
                 .allow_wrong_line_comments
                 .unwrap_or_default()
                 .into(),
-            css_modules: language.css_modules_enabled.unwrap_or_default().into(),
+            css_modules: language
+                .css_modules_enabled
+                .map(|bool| {
+                    if bool.value() {
+                        CssModulesKind::Classic
+                    } else {
+                        CssModulesKind::None
+                    }
+                })
+                .or_else(|| {
+                    file_source.to_css_file_source().map(|files_source| {
+                        if files_source.is_vue_embedded() {
+                            CssModulesKind::Vue
+                        } else {
+                            CssModulesKind::Classic
+                        }
+                    })
+                })
+                .unwrap_or_default(),
             grit_metavariables: false,
-            tailwind_directives: language.tailwind_directives_enabled(),
+            tailwind_directives: language.tailwind_directives.unwrap_or_default().into(),
         };
 
         overrides.apply_override_css_parser_options(path, &mut options);
@@ -236,15 +254,7 @@ impl ServiceLanguage for CssLanguage {
 
         let configuration = AnalyzerConfiguration::default()
             .with_rules(to_analyzer_rules(global, file_path.as_path()))
-            .with_preferred_quote(preferred_quote)
-            .with_css_modules(
-                global
-                    .languages
-                    .css
-                    .parser
-                    .css_modules_enabled
-                    .is_some_and(|css_modules_enabled| css_modules_enabled.into()),
-            );
+            .with_preferred_quote(preferred_quote);
 
         AnalyzerOptions::default()
             .with_file_path(file_path.as_path())
@@ -397,45 +407,16 @@ fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
 
 fn parse(
     biome_path: &BiomePath,
-    _file_source: DocumentFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let mut options = CssParserOptions {
-        allow_wrong_line_comments: settings
-            .as_ref()
-            .languages
-            .css
-            .parser
-            .allow_wrong_line_comments
-            .unwrap_or_default()
-            .into(),
-        css_modules: settings
-            .as_ref()
-            .languages
-            .css
-            .parser
-            .css_modules_enabled
-            .unwrap_or_default()
-            .into(),
-        grit_metavariables: false,
-        tailwind_directives: settings
-            .as_ref()
-            .languages
-            .css
-            .parser
-            .tailwind_directives
-            .unwrap_or_default()
-            .into(),
-    };
+    let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
 
-    settings
-        .as_ref()
-        .override_settings
-        .apply_override_css_parser_options(biome_path, &mut options);
+    let source_type = file_source.to_css_file_source().unwrap_or_default();
+    let parse = biome_css_parser::parse_css_with_cache(text, source_type, cache, options);
 
-    let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
     ParseResult {
         any_parse: parse.into(),
         language: None,
@@ -467,7 +448,7 @@ fn debug_formatter_ir(
 }
 
 fn debug_semantic_model(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
-    let tree: CssRoot = parse.tree();
+    let tree: AnyCssRoot = parse.tree();
     let model = semantic_model(&tree);
     Ok(model.to_string())
 }
@@ -680,7 +661,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// Applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let mut tree: CssRoot = params.parse.tree();
+    let mut tree: AnyCssRoot = params.parse.tree();
     let Some(file_source) = params.document_file_source.to_css_file_source() else {
         error!("Could not determine the file source of the file");
         return Ok(FixFileResult::default());
@@ -736,7 +717,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         );
 
         let result = process_fix_all.process_action(action, |root| {
-            tree = match CssRoot::cast(root) {
+            tree = match AnyCssRoot::cast(root) {
                 Some(tree) => tree,
                 None => return None,
             };

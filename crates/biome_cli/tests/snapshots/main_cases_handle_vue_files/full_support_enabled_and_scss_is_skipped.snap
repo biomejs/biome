@@ -17,9 +17,9 @@ expression: redactor(content)
 ## `file.vue`
 
 ```vue
-<html>
+<html lang="en">
 	<head>
-		<title>Svelte</title>
+		<title>Vue</title>
 	</head>
 	<body></body>
 </html>

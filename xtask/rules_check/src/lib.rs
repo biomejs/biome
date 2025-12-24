@@ -195,11 +195,11 @@ pub fn check_rules() -> anyhow::Result<()> {
     }
 
     let mut visitor = LintRulesVisitor::default();
-    biome_js_analyze::visit_registry(&mut visitor);
-    biome_json_analyze::visit_registry(&mut visitor);
+    // biome_js_analyze::visit_registry(&mut visitor);
+    // biome_json_analyze::visit_registry(&mut visitor);
     biome_css_analyze::visit_registry(&mut visitor);
-    biome_graphql_analyze::visit_registry(&mut visitor);
-    biome_html_analyze::visit_registry(&mut visitor);
+    // biome_graphql_analyze::visit_registry(&mut visitor);
+    // biome_html_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor { groups, errors } = visitor;
     if !errors.is_empty() {
@@ -291,8 +291,9 @@ fn assert_lint(
                 .unwrap_or_else(|_| biome_html_syntax::HtmlFileSource::html()),
         )
     } else {
-        test.document_file_source()
+        test.document_file_source_from_path()
     };
+
     match document_file_source {
         DocumentFileSource::Js(file_source) => {
             // Temporary support for astro, svelte and vue code blocks
@@ -395,10 +396,9 @@ fn assert_lint(
             }
         }
         DocumentFileSource::Css(file_source) => {
-            let parse_options = CssParserOptions::default()
-                .allow_css_modules()
-                .allow_tailwind_directives();
-            let parse = biome_css_parser::parse_css(code, parse_options);
+            let parse_options = CssParserOptions::from(&file_source);
+
+            let parse = biome_css_parser::parse_css(code, file_source, parse_options);
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {

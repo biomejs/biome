@@ -1,0 +1,157 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 151
+expression: invalid.jsx
+---
+# Input
+```jsx
+// Invalid cases - should trigger the rule
+
+<a href="javascript:void(0)">Link</a>;
+
+<a href="javascript:alert('XSS')">Link</a>;
+
+<a href="javascript:void(0);">Link</a>;
+
+<a href=" javascript:void(0)">Link</a>;
+
+<a href="JAVASCRIPT:void(0)">Link</a>;
+
+React.createElement('a', { href: 'javascript:void(0)' });
+
+React.createElement('a', { href: 'javascript:alert("XSS")' });
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    1 │ // Invalid cases - should trigger the rule
+    2 │ 
+  > 3 │ <a href="javascript:void(0)">Link</a>;
+      │        ^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ <a href="javascript:alert('XSS')">Link</a>;
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
+
+```
+invalid.jsx:5:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    3 │ <a href="javascript:void(0)">Link</a>;
+    4 │ 
+  > 5 │ <a href="javascript:alert('XSS')">Link</a>;
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <a href="javascript:void(0);">Link</a>;
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
+
+```
+invalid.jsx:7:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    5 │ <a href="javascript:alert('XSS')">Link</a>;
+    6 │ 
+  > 7 │ <a href="javascript:void(0);">Link</a>;
+      │        ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ <a href=" javascript:void(0)">Link</a>;
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
+
+```
+invalid.jsx:9:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+     7 │ <a href="javascript:void(0);">Link</a>;
+     8 │ 
+   > 9 │ <a href=" javascript:void(0)">Link</a>;
+       │        ^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ <a href="JAVASCRIPT:void(0)">Link</a>;
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
+
+```
+invalid.jsx:11:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+     9 │ <a href=" javascript:void(0)">Link</a>;
+    10 │ 
+  > 11 │ <a href="JAVASCRIPT:void(0)">Link</a>;
+       │        ^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ React.createElement('a', { href: 'javascript:void(0)' });
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
+
+```
+invalid.jsx:13:34 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    11 │ <a href="JAVASCRIPT:void(0)">Link</a>;
+    12 │ 
+  > 13 │ React.createElement('a', { href: 'javascript:void(0)' });
+       │                                  ^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ React.createElement('a', { href: 'javascript:alert("XSS")' });
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
+
+```
+invalid.jsx:15:34 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    13 │ React.createElement('a', { href: 'javascript:void(0)' });
+    14 │ 
+  > 15 │ React.createElement('a', { href: 'javascript:alert("XSS")' });
+       │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```

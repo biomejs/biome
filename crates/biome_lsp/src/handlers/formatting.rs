@@ -15,7 +15,7 @@ use biome_service::workspace::{
 };
 use biome_service::{WorkspaceError, extension_error};
 use std::ops::Sub;
-use tower_lsp_server::lsp_types::*;
+use tower_lsp_server::ls_types::*;
 
 #[tracing::instrument(level = "debug", skip(session), err)]
 pub(crate) fn format(

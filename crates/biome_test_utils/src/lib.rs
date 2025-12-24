@@ -12,11 +12,11 @@ use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
-use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
+use biome_js_parser::{AnyJsRoot, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
 use biome_module_graph::ModuleGraph;
-use biome_package::{Manifest, PackageJson, TsConfigJson};
+use biome_package::{Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::file_handlers::DocumentFileSource;
@@ -134,6 +134,54 @@ pub fn load_configuration_for_test_file(
     }
 }
 
+pub fn create_parser_options<L: ServiceLanguage>(
+    input_file: &Utf8Path,
+    diagnostics: &mut Vec<String>,
+) -> Option<L::ParserOptions> {
+    let Ok((source, loaded_configuration)) = load_configuration_for_test_file(input_file) else {
+        return None;
+    };
+
+    let projects = Projects::default();
+    let key = projects.insert_project(Utf8PathBuf::from(""));
+
+    if loaded_configuration.has_errors() {
+        let configuration_path = loaded_configuration.file_path.unwrap().clone();
+        diagnostics.extend(
+            loaded_configuration
+                .diagnostics
+                .into_iter()
+                .map(|diagnostic| {
+                    diagnostic_to_string(
+                        configuration_path.file_stem().unwrap(),
+                        &source,
+                        diagnostic,
+                    )
+                })
+                .collect::<Vec<_>>(),
+        );
+
+        Default::default()
+    } else {
+        let configuration = loaded_configuration.configuration;
+        let mut settings = projects.get_root_settings(key).unwrap_or_default();
+        settings
+            .merge_with_configuration(
+                configuration,
+                None,
+                loaded_configuration.extended_configurations,
+            )
+            .unwrap();
+
+        let document_file_source = DocumentFileSource::from_path(
+            input_file,
+            settings.experimental_full_html_support_enabled(),
+        );
+        let handle = SettingsHandle::new(&settings, None);
+        Some(handle.parse_options::<L>(&input_file.into(), &document_file_source))
+    }
+}
+
 pub fn create_formatting_options<L>(
     input_file: &Utf8Path,
     diagnostics: &mut Vec<String>,
@@ -201,7 +249,7 @@ pub fn module_graph_for_test_file(
     let dir = input_file.parent().unwrap().to_path_buf();
     let paths = get_js_like_paths_in_dir(&dir);
     let fs = OsFileSystem::new(dir);
-    let paths = get_added_paths(&fs, &paths);
+    let paths = get_added_js_paths(&fs, &paths);
 
     module_graph.update_graph_for_js_paths(&fs, project_layout, &paths, &[]);
 
@@ -209,15 +257,20 @@ pub fn module_graph_for_test_file(
 }
 
 /// Loads and parses files from the file system to pass them to service methods.
-pub fn get_added_paths<'a>(
+pub fn get_added_js_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
 ) -> Vec<(&'a BiomePath, AnyJsRoot)> {
     paths
         .iter()
         .filter_map(|path| {
+            let DocumentFileSource::Js(file_source) =
+                DocumentFileSource::from_path(path.as_path(), false)
+            else {
+                return None;
+            };
+
             let root = fs.read_file_from_path(path).ok().and_then(|content| {
-                let file_source = JsFileSource::try_from(path.as_path()).unwrap_or_default();
                 let parsed =
                     biome_js_parser::parse(&content, file_source, JsParserOptions::default());
                 let diagnostics = parsed.diagnostics();
@@ -298,6 +351,41 @@ pub fn project_layout_for_test_file(
             );
         } else {
             project_layout.insert_tsconfig(
+                input_file
+                    .parent()
+                    .map(|dir_path| dir_path.to_path_buf())
+                    .unwrap_or_default(),
+                deserialized.into_deserialized().unwrap_or_default(),
+            );
+        }
+    }
+
+    // Try turbo.json first, then turbo.jsonc
+    let turbo_json_file = input_file.with_extension("turbo.json");
+    let turbo_jsonc_file = input_file.with_extension("turbo.jsonc");
+    let turbo_file = if turbo_json_file.exists() {
+        Some(turbo_json_file)
+    } else if turbo_jsonc_file.exists() {
+        Some(turbo_jsonc_file)
+    } else {
+        None
+    };
+
+    if let Some(turbo_file) = turbo_file
+        && let Ok(json) = std::fs::read_to_string(&turbo_file)
+    {
+        let deserialized = TurboJson::read_manifest(&fs, &turbo_file);
+        if deserialized.has_errors() {
+            diagnostics.extend(
+                deserialized
+                    .into_diagnostics()
+                    .into_iter()
+                    .map(|diagnostic| {
+                        diagnostic_to_string(turbo_file.file_stem().unwrap(), &json, diagnostic)
+                    }),
+            );
+        } else {
+            project_layout.insert_turbo_json(
                 input_file
                     .parent()
                     .map(|dir_path| dir_path.to_path_buf())

@@ -868,6 +868,27 @@ impl WorkspaceServer {
                         .remove_tsconfig_from_package(&package_path);
                 }
             }
+        } else if let Some(turbo_filename) =
+            filename.filter(|f| *f == "turbo.json" || *f == "turbo.jsonc")
+        {
+            let package_path = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .ok_or_else(WorkspaceError::not_found)?;
+
+            match update_kind {
+                UpdateKind::AddedOrChanged(_, root) => {
+                    self.project_layout.insert_serialized_turbo_json(
+                        package_path,
+                        root,
+                        turbo_filename,
+                    );
+                }
+                UpdateKind::Removed => {
+                    self.project_layout
+                        .remove_turbo_json_from_package(&package_path);
+                }
+            }
         }
 
         Ok(())
@@ -1378,15 +1399,9 @@ impl Workspace for WorkspaceServer {
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
         let documents = self.documents.pin();
-        let (index, existing_version, services) = documents
+        let (index, existing_version) = documents
             .get(path.as_path())
-            .map(|document| {
-                (
-                    document.file_source_index,
-                    document.version,
-                    document.services.clone(),
-                )
-            })
+            .map(|document| (document.file_source_index, document.version))
             .ok_or_else(WorkspaceError::not_found)?;
 
         if existing_version.is_some_and(|existing_version| existing_version >= version) {
@@ -1416,9 +1431,18 @@ impl Workspace for WorkspaceServer {
         let mut node_cache = node_cache.unwrap_or_default();
 
         let parsed = self.parse(&path, &content, &settings_handle, index, &mut node_cache)?;
+        let mut services = DocumentServices::none();
         let root = parsed.any_parse.unwrap_as_send_node();
         let document_source =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
+        if document_source.is_css_like()
+            && (settings.is_linter_enabled() || settings.is_assist_enabled())
+        {
+            services = CssDocumentServices::default()
+                .with_css_semantic_model(&parsed.any_parse.tree())
+                .into();
+        }
+
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
         let embedded_snippets = if DocumentFileSource::can_contain_embeds(
             path.as_path(),
@@ -2250,7 +2274,9 @@ impl WorkspaceScannerBridge for WorkspaceServer {
     #[inline]
     fn is_indexed(&self, path: &Utf8Path) -> bool {
         match path.file_name() {
-            Some("package.json" | "tsconfig.json") => self.project_layout.is_indexed(path),
+            Some("package.json" | "tsconfig.json" | "turbo.json" | "turbo.jsonc") => {
+                self.project_layout.is_indexed(path)
+            }
             _ => self.module_graph.contains(path),
         }
     }

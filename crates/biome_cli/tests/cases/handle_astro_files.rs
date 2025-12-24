@@ -230,6 +230,9 @@ schema + sure()
 
 <style>
 #id { font-family: comic-sans } .class { background: red}
+:global(div) {
+  color: red;
+}
 </style>
 "#
         .as_bytes(),

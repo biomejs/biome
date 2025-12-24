@@ -84,4 +84,4 @@ a: { --test: attr(data-test type(<color>)); }
 
 ```
 
-_Note: The parser emitted 4 diagnostics which are not shown here._
+_Note: The parser emitted 9 diagnostics which are not shown here._

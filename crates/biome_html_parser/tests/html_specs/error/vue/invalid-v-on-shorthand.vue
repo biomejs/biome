@@ -1,0 +1,1 @@
+<Foo @ click="handleClick" />

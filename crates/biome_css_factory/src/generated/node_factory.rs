@@ -2333,6 +2333,15 @@ pub fn css_scope_range_start(start: CssScopeEdge) -> CssScopeRangeStart {
         [Some(SyntaxElement::Node(start.into_syntax()))],
     ))
 }
+pub fn css_snippet_root(items: CssDeclarationOrRuleList, eof_token: SyntaxToken) -> CssSnippetRoot {
+    CssSnippetRoot::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SNIPPET_ROOT,
+        [
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
+}
 pub fn css_starting_style_at_rule(
     declarator: CssStartingStyleAtRuleDeclarator,
     block: AnyCssConditionalBlock,

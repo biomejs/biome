@@ -66,7 +66,12 @@ fn main() -> io::Result<()> {
 
     // Wasm-bindgen will paste the generated TS code as-is into the final .d.ts file,
     // ensure it looks good by running it through the formatter
-    let formatted = format_node(JsFormatOptions::new(JsFileSource::ts()), module.syntax()).unwrap();
+    let formatted = format_node(
+        JsFormatOptions::new(JsFileSource::ts()),
+        module.syntax(),
+        false,
+    )
+    .unwrap();
     let printed = formatted.print().unwrap();
     let definitions = printed.into_code();
 

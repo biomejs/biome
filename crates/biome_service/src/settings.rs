@@ -7,7 +7,7 @@ use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguration};
-use biome_configuration::javascript::JsxRuntime;
+use biome_configuration::javascript::{ExperimentalEmbeddedSnippetsEnabled, JsxRuntime};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
@@ -19,7 +19,7 @@ use biome_configuration::{
     push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
-use biome_css_parser::CssParserOptions;
+use biome_css_parser::{CssModulesKind, CssParserOptions};
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
 use biome_formatter::{
@@ -74,11 +74,20 @@ pub struct Settings {
 
     // TODO: remove once HTML full support is stable
     pub experimental_full_html_support: Option<ExperimentalFullSupportEnabled>,
+
+    // TODO: remove once embedded snippets support is stable
+    pub experimental_js_embedded_snippets_enabled: Option<ExperimentalEmbeddedSnippetsEnabled>,
 }
 
 impl Settings {
     pub fn experimental_full_html_support_enabled(&self) -> bool {
         self.experimental_full_html_support
+            .unwrap_or_default()
+            .value()
+    }
+
+    pub fn experimental_js_embedded_snippets_enabled(&self) -> bool {
+        self.experimental_js_embedded_snippets_enabled
             .unwrap_or_default()
             .value()
     }
@@ -155,6 +164,8 @@ impl Settings {
 
         // javascript settings
         if let Some(javascript) = configuration.javascript {
+            self.experimental_js_embedded_snippets_enabled =
+                javascript.experimental_embedded_snippets_enabled;
             self.languages.javascript = javascript.into()
         }
         // json settings
@@ -1779,7 +1790,11 @@ impl OverrideSettingPattern {
             options.allow_wrong_line_comments = allow_wrong_line_comments.value();
         }
         if let Some(css_modules) = css_parser.css_modules_enabled {
-            options.css_modules = css_modules.value();
+            options.css_modules = if css_modules.value() {
+                CssModulesKind::Classic
+            } else {
+                CssModulesKind::None
+            };
         }
         if let Some(tailwind_directives) = css_parser.tailwind_directives {
             options.tailwind_directives = tailwind_directives.value();
@@ -1802,7 +1817,7 @@ pub fn to_override_settings(
         let formatter = pattern
             .formatter
             .map(|formatter| OverrideFormatSettings {
-                enabled: formatter.enabled,
+                enabled: formatter.enabled.or(current_settings.formatter.enabled),
                 format_with_errors: formatter
                     .format_with_errors
                     .or(current_settings.formatter.format_with_errors),
@@ -1819,7 +1834,7 @@ pub fn to_override_settings(
         let linter = pattern
             .linter
             .map(|linter| OverrideLinterSettings {
-                enabled: linter.enabled,
+                enabled: linter.enabled.or(current_settings.linter.enabled),
                 rules: linter.rules,
                 domains: linter.domains,
             })
@@ -1827,7 +1842,7 @@ pub fn to_override_settings(
         let assist = pattern
             .assist
             .map(|assist| OverrideAssistSettings {
-                enabled: assist.enabled,
+                enabled: assist.enabled.or(current_settings.assist.enabled),
                 actions: assist.actions,
             })
             .unwrap_or_default();

@@ -1,4 +1,3 @@
-#![expect(clippy::mutable_key_type)]
 use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils;
@@ -25,7 +24,7 @@ use biome_service::workspace::{
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ops::Sub;
-use tower_lsp_server::lsp_types::{
+use tower_lsp_server::ls_types::{
     self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse, Uri,
 };
 use tracing::{debug, info};

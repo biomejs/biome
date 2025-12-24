@@ -1,4 +1,6 @@
-use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
+use crate::reporter::{Reporter, ReporterVisitor};
+use crate::runner::execution::Execution;
+use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::fmt::Formatter;
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
@@ -28,19 +30,19 @@ impl biome_console::fmt::Display for JsonReporterVisitor {
     }
 }
 
-pub struct JsonReporter {
-    pub execution: Execution,
+pub struct JsonReporter<'a> {
+    pub execution: &'a dyn Execution,
     pub diagnostics: DiagnosticsPayload,
     pub summary: TraversalSummary,
     pub verbose: bool,
     pub working_directory: Option<Utf8PathBuf>,
 }
 
-impl Reporter for JsonReporter {
+impl Reporter for JsonReporter<'_> {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
-        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
+        visitor.report_summary(self.execution, self.summary, self.verbose)?;
         visitor.report_diagnostics(
-            &self.execution,
+            self.execution,
             self.diagnostics,
             self.verbose,
             self.working_directory.as_deref(),
@@ -53,19 +55,19 @@ impl Reporter for JsonReporter {
 impl ReporterVisitor for JsonReporterVisitor {
     fn report_summary(
         &mut self,
-        execution: &Execution,
+        execution: &dyn Execution,
         summary: TraversalSummary,
         _verbose: bool,
     ) -> std::io::Result<()> {
         self.summary = summary;
-        self.command = format!("{}", execution.traversal_mode());
+        self.command = execution.as_diagnostic_category().name().to_string();
 
         Ok(())
     }
 
     fn report_diagnostics(
         &mut self,
-        _execution: &Execution,
+        _execution: &dyn Execution,
         payload: DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,

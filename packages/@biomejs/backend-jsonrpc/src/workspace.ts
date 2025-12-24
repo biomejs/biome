@@ -277,6 +277,10 @@ export interface JsConfiguration {
 	 */
 	assist?: JsAssistConfiguration;
 	/**
+	 * Enables support for embedding snippets.
+	 */
+	experimentalEmbeddedSnippetsEnabled?: Bool;
+	/**
 	 * Formatting options
 	 */
 	formatter?: JsFormatterConfiguration;
@@ -440,7 +444,8 @@ export interface CssParserConfiguration {
 	 */
 	allowWrongLineComments?: Bool;
 	/**
-	 * Enables parsing of CSS Modules specific features.
+	* Enables parsing of CSS Modules specific features. Enable this feature only
+when your files don't end in `.module.css`. 
 	 */
 	cssModules?: Bool;
 	/**
@@ -972,7 +977,8 @@ export type RuleDomain =
 	| "qwik"
 	| "vue"
 	| "project"
-	| "tailwind";
+	| "tailwind"
+	| "turborepo";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
 export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
@@ -1138,7 +1144,7 @@ See <https://biomejs.dev/linter/rules/no-noninteractive-tabindex>
 	 */
 	noNoninteractiveTabindex?: NoNoninteractiveTabindexConfiguration;
 	/**
-	* Prevent the usage of positive integers on tabIndex property.
+	* Prevent the usage of positive integers on tabindex attribute.
 See <https://biomejs.dev/linter/rules/no-positive-tabindex> 
 	 */
 	noPositiveTabindex?: NoPositiveTabindexConfiguration;
@@ -1770,7 +1776,7 @@ See <https://biomejs.dev/linter/rules/no-void-type-return>
 	 */
 	recommended?: boolean;
 	/**
-	* Enforce all dependencies are correctly specified in a React hook.
+	* Enforce correct dependency usage within React hooks.
 See <https://biomejs.dev/linter/rules/use-exhaustive-dependencies> 
 	 */
 	useExhaustiveDependencies?: UseExhaustiveDependenciesConfiguration;
@@ -1930,7 +1936,7 @@ See <https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion>
 	 */
 	noParametersOnlyUsedInRecursion?: NoParametersOnlyUsedInRecursionConfiguration;
 	/**
-	* Disallow the use of the __proto__ property.
+	* Disallow the use of the deprecated __proto__ object property.
 See <https://biomejs.dev/linter/rules/no-proto> 
 	 */
 	noProto?: NoProtoConfiguration;
@@ -1939,6 +1945,11 @@ See <https://biomejs.dev/linter/rules/no-proto>
 See <https://biomejs.dev/linter/rules/no-react-forward-ref> 
 	 */
 	noReactForwardRef?: NoReactForwardRefConfiguration;
+	/**
+	* Disallow javascript: URLs in HTML.
+See <https://biomejs.dev/linter/rules/no-script-url> 
+	 */
+	noScriptUrl?: NoScriptUrlConfiguration;
 	/**
 	* Disallow variable declarations from shadowing variables declared in the outer scope.
 See <https://biomejs.dev/linter/rules/no-shadow> 
@@ -1954,6 +1965,11 @@ See <https://biomejs.dev/linter/rules/no-sync-scripts>
 See <https://biomejs.dev/linter/rules/no-ternary> 
 	 */
 	noTernary?: NoTernaryConfiguration;
+	/**
+	* Disallow the use of undeclared environment variables.
+See <https://biomejs.dev/linter/rules/no-undeclared-env-vars> 
+	 */
+	noUndeclaredEnvVars?: NoUndeclaredEnvVarsConfiguration;
 	/**
 	* Disallow unknown DOM properties.
 See <https://biomejs.dev/linter/rules/no-unknown-attribute> 
@@ -2382,7 +2398,7 @@ See <https://biomejs.dev/linter/rules/no-useless-else>
 	 */
 	noUselessElse?: NoUselessElseConfiguration;
 	/**
-	* Disallow use of @value rule in css modules.
+	* Disallow use of @value rule in CSS modules.
 See <https://biomejs.dev/linter/rules/no-value-at-rule> 
 	 */
 	noValueAtRule?: NoValueAtRuleConfiguration;
@@ -3635,6 +3651,9 @@ export type NoProtoConfiguration =
 export type NoReactForwardRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactForwardRefOptions;
+export type NoScriptUrlConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoScriptUrlOptions;
 export type NoShadowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShadowOptions;
@@ -3644,6 +3663,9 @@ export type NoSyncScriptsConfiguration =
 export type NoTernaryConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTernaryOptions;
+export type NoUndeclaredEnvVarsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredEnvVarsOptions;
 export type NoUnknownAttributeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnknownAttributeOptions;
@@ -4323,6 +4345,12 @@ export interface UseSortedAttributesOptions {
 }
 export type UseSortedInterfaceMembersOptions = {};
 export interface UseSortedKeysOptions {
+	/**
+	* When enabled, groups object keys by their value's nesting depth before sorting.
+Simple values (primitives, single-line arrays, single-line objects) are sorted first,
+followed by nested values (multi-line objects, multi-line arrays). 
+	 */
+	groupByNesting?: boolean;
 	sortOrder?: SortOrder;
 }
 export type UseSortedPropertiesOptions = {};
@@ -5066,6 +5094,10 @@ export interface RuleWithNoReactForwardRefOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactForwardRefOptions;
 }
+export interface RuleWithNoScriptUrlOptions {
+	level: RulePlainConfiguration;
+	options?: NoScriptUrlOptions;
+}
 export interface RuleWithNoShadowOptions {
 	level: RulePlainConfiguration;
 	options?: NoShadowOptions;
@@ -5077,6 +5109,10 @@ export interface RuleWithNoSyncScriptsOptions {
 export interface RuleWithNoTernaryOptions {
 	level: RulePlainConfiguration;
 	options?: NoTernaryOptions;
+}
+export interface RuleWithNoUndeclaredEnvVarsOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredEnvVarsOptions;
 }
 export interface RuleWithNoUnknownAttributeOptions {
 	level: RulePlainConfiguration;
@@ -6392,9 +6428,19 @@ export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoProtoOptions = {};
 export type NoReactForwardRefOptions = {};
+export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
+export interface NoUndeclaredEnvVarsOptions {
+	/**
+	* Environment variables that should always be allowed.
+Use this to specify environment variables that are always available
+in your environment, even when not declared in turbo.json.
+Supports regular expressions, e.g. `["MY_ENV_.*"]`. 
+	 */
+	allowedEnvVars?: Regex[];
+}
 export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
@@ -6873,6 +6919,7 @@ while for `useState()` it would be `[1]`.
 	 */
 	stableResult?: StableHookResult;
 }
+export type Regex = string;
 export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
 /**
  * The GraphQL description style to enforce.
@@ -6890,7 +6937,6 @@ export type Accessibility = "noPublic" | "explicit" | "none";
 export type ObjectPropertySyntax = "explicit" | "shorthand";
 export type ConsistentTypeDefinition = "interface" | "type";
 export type FilenameCases = FilenameCase[];
-export type Regex = string;
 /**
  * The style to apply when importing types.
  */
@@ -7263,9 +7309,11 @@ export type Category =
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
+	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
+	| "lint/nursery/noUndeclaredEnvVars"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
@@ -7759,6 +7807,11 @@ export interface JsonFileSource {
 	variant: JsonFileVariant;
 }
 export interface CssFileSource {
+	/**
+	* Used to mark if the CSS is embedded inside some particular files. This affects the parsing.
+For example, if inside a styled`` literal, a top-level declaration is allowed. 
+	 */
+	embeddingKind: EmbeddingKind2;
 	variant: CssVariant;
 }
 export interface GraphqlFileSource {
@@ -7802,6 +7855,7 @@ export type LanguageVersion = "eS2022" | "eSNext";
  * It represents the extension of the file
  */
 export type JsonFileVariant = "standard" | "jsonc";
+export type EmbeddingKind2 = "None" | "Styled" | { Html: EmbeddingHtmlKind };
 /**
 	* The style of CSS contained in the file.
 
@@ -7821,6 +7875,7 @@ export type HtmlVariant =
 	| "Vue"
 	| "Svelte";
 export type GritVariant = "Standard";
+export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
 export type HtmlTextExpressions = "None" | "Single" | "Double";
 export interface OpenFileResult {
 	diagnostics: Diagnostic[];

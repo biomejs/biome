@@ -2,6 +2,7 @@ use super::parse_error::expected_media_query;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::feature::parse_any_query_feature;
 use crate::syntax::block::parse_conditional_block;
+use crate::syntax::util::skip_possible_tailwind_syntax;
 use crate::syntax::{
     is_at_identifier, is_at_metavariable, is_nth_at_identifier, parse_metavariable,
     parse_regular_identifier,
@@ -66,7 +67,11 @@ impl ParseSeparatedList for MediaQueryList {
     const LIST_KIND: Self::Kind = CSS_MEDIA_QUERY_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_any_media_query(p)
+        let parsed = parse_any_media_query(p);
+        if parsed.is_present() {
+            skip_possible_tailwind_syntax(p);
+        }
+        parsed
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

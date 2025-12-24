@@ -82,9 +82,6 @@ pub struct AnalyzerConfiguration {
     /// The JSX fragment factory function identifier (e.g., "Fragment")
     /// Only applies when jsx_runtime is ReactClassic.
     jsx_fragment_factory: Option<Box<str>>,
-
-    /// Whether the CSS files contain CSS Modules
-    css_modules: bool,
 }
 
 impl AnalyzerConfiguration {
@@ -130,11 +127,6 @@ impl AnalyzerConfiguration {
         preferred_indentation: PreferredIndentation,
     ) -> Self {
         self.preferred_indentation = preferred_indentation;
-        self
-    }
-
-    pub fn with_css_modules(mut self, css_modules: bool) -> Self {
-        self.css_modules = css_modules;
         self
     }
 }
@@ -229,10 +221,6 @@ impl AnalyzerOptions {
 
     pub fn preferred_indentation(&self) -> PreferredIndentation {
         self.configuration.preferred_indentation
-    }
-
-    pub fn css_modules(&self) -> bool {
-        self.configuration.css_modules
     }
 }
 

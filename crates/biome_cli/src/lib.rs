@@ -20,23 +20,24 @@ mod diagnostics;
 mod execute;
 mod logging;
 mod panic;
-mod reporter;
+pub(crate) mod reporter;
+pub(crate) mod runner;
 mod service;
 
-use crate::cli_options::{CliOptions, ColorsArg};
-use crate::commands::CommandRunner;
+use crate::cli_options::ColorsArg;
 use crate::commands::check::CheckCommandPayload;
 use crate::commands::ci::CiCommandPayload;
 use crate::commands::format::FormatCommandPayload;
 use crate::commands::lint::LintCommandPayload;
 use crate::commands::migrate::MigrateCommandPayload;
 pub use crate::commands::{BiomeCommand, biome_command};
-use crate::logging::LogOptions;
 pub use crate::logging::{LoggingLevel, setup_cli_subscriber};
+use crate::runner::impls::commands::custom_execution::CustomExecutionCmdImpl;
+use crate::runner::impls::commands::traversal::TraversalCommandImpl;
+use crate::runner::run::run_command;
 pub use diagnostics::CliDiagnostic;
-pub use execute::{Execution, TraversalMode, VcsTargeted, execute_mode};
 pub use panic::setup_panic_handler;
-pub use reporter::{DiagnosticsPayload, Reporter, ReporterVisitor, TraversalSummary};
+pub use reporter::{DiagnosticsPayload, TraversalSummary};
 pub use service::{SocketTransport, open_transport};
 
 pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
@@ -100,7 +101,7 @@ impl<'app> CliSession<'app> {
                 self,
                 &log_options,
                 &cli_options,
-                CheckCommandPayload {
+                TraversalCommandImpl(CheckCommandPayload {
                     write,
                     fix,
                     unsafe_,
@@ -117,7 +118,7 @@ impl<'app> CliSession<'app> {
                     format_with_errors,
                     json_parser,
                     css_parser,
-                },
+                }),
             ),
             BiomeCommand::Lint {
                 write,
@@ -147,7 +148,7 @@ impl<'app> CliSession<'app> {
                 self,
                 &log_options,
                 &cli_options,
-                LintCommandPayload {
+                TraversalCommandImpl(LintCommandPayload {
                     write,
                     suppress,
                     suppression_reason,
@@ -169,7 +170,7 @@ impl<'app> CliSession<'app> {
                     graphql_linter,
                     css_parser,
                     json_parser,
-                },
+                }),
             ),
             BiomeCommand::Ci {
                 linter_enabled,
@@ -190,7 +191,7 @@ impl<'app> CliSession<'app> {
                 self,
                 &log_options,
                 &cli_options,
-                CiCommandPayload {
+                TraversalCommandImpl(CiCommandPayload {
                     linter_enabled,
                     formatter_enabled,
                     assist_enabled,
@@ -202,7 +203,7 @@ impl<'app> CliSession<'app> {
                     format_with_errors,
                     css_parser,
                     json_parser,
-                },
+                }),
             ),
             BiomeCommand::Format {
                 javascript_formatter,
@@ -228,7 +229,7 @@ impl<'app> CliSession<'app> {
                 self,
                 &log_options,
                 &cli_options,
-                FormatCommandPayload {
+                TraversalCommandImpl(FormatCommandPayload {
                     javascript_formatter,
                     formatter_configuration,
                     stdin_file_path,
@@ -246,7 +247,7 @@ impl<'app> CliSession<'app> {
                     since,
                     css_parser,
                     json_parser,
-                },
+                }),
             ),
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
             BiomeCommand::Init(emit_jsonc) => commands::init::init(self, emit_jsonc),
@@ -265,13 +266,13 @@ impl<'app> CliSession<'app> {
                 self,
                 &log_options,
                 &cli_options,
-                MigrateCommandPayload {
+                CustomExecutionCmdImpl(MigrateCommandPayload {
                     write,
                     fix,
                     sub_command,
                     configuration_directory_path: None,
                     configuration_file_path: None,
-                },
+                }),
             ),
             BiomeCommand::Search {
                 cli_options,
@@ -286,14 +287,14 @@ impl<'app> CliSession<'app> {
                 self,
                 &log_options,
                 &cli_options,
-                SearchCommandPayload {
+                TraversalCommandImpl(SearchCommandPayload {
                     files_configuration,
                     paths,
                     pattern,
                     language,
                     stdin_file_path,
                     vcs_configuration,
-                },
+                }),
             ),
             BiomeCommand::RunServer {
                 stop_on_disconnect,
@@ -317,14 +318,4 @@ pub fn to_color_mode(color: Option<&ColorsArg>) -> ColorMode {
         Some(ColorsArg::Force) => ColorMode::Enabled,
         None => ColorMode::Auto,
     }
-}
-
-pub(crate) fn run_command(
-    session: CliSession,
-    log_options: &LogOptions,
-    cli_options: &CliOptions,
-    mut command: impl CommandRunner,
-) -> Result<(), CliDiagnostic> {
-    let command = &mut command;
-    command.run(session, log_options, cli_options)
 }

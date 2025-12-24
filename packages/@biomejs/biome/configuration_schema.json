@@ -162,7 +162,7 @@
 					]
 				},
 				"noPositiveTabindex": {
-					"description": "Prevent the usage of positive integers on tabIndex property.\nSee <https://biomejs.dev/linter/rules/no-positive-tabindex>",
+					"description": "Prevent the usage of positive integers on tabindex attribute.\nSee <https://biomejs.dev/linter/rules/no-positive-tabindex>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoPositiveTabindexConfiguration" },
 						{ "type": "null" }
@@ -1136,7 +1136,7 @@
 					"type": ["boolean", "null"]
 				},
 				"useExhaustiveDependencies": {
-					"description": "Enforce all dependencies are correctly specified in a React hook.\nSee <https://biomejs.dev/linter/rules/use-exhaustive-dependencies>",
+					"description": "Enforce correct dependency usage within React hooks.\nSee <https://biomejs.dev/linter/rules/use-exhaustive-dependencies>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseExhaustiveDependenciesConfiguration" },
 						{ "type": "null" }
@@ -1350,7 +1350,7 @@
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
-					"description": "Enables parsing of CSS Modules specific features.",
+					"description": "Enables parsing of CSS Modules specific features. Enable this feature only\nwhen your files don't end in `.module.css`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"tailwindDirectives": {
@@ -1949,8 +1949,12 @@
 		},
 		"IndentStyle": {
 			"oneOf": [
-				{ "description": "Tab", "type": "string", "const": "tab" },
-				{ "description": "Space", "type": "string", "const": "space" }
+				{ "description": "Indent with Tab", "type": "string", "const": "tab" },
+				{
+					"description": "Indent with Space",
+					"type": "string",
+					"const": "space"
+				}
 			]
 		},
 		"IndentWidth": {
@@ -1980,6 +1984,10 @@
 						{ "$ref": "#/$defs/JsAssistConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"experimentalEmbeddedSnippetsEnabled": {
+					"description": "Enables support for embedding snippets.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"formatter": {
 					"description": "Formatting options",
@@ -4201,6 +4209,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoScriptUrlConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoScriptUrlOptions" }
+			]
+		},
+		"NoScriptUrlOptions": { "type": "object", "additionalProperties": false },
 		"NoSecretsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4465,6 +4480,23 @@
 						{ "$ref": "#/$defs/DependencyAvailability" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoUndeclaredEnvVarsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUndeclaredEnvVarsOptions" }
+			]
+		},
+		"NoUndeclaredEnvVarsOptions": {
+			"type": "object",
+			"properties": {
+				"allowedEnvVars": {
+					"description": "Environment variables that should always be allowed.\nUse this to specify environment variables that are always available\nin your environment, even when not declared in turbo.json.\nSupports regular expressions, e.g. `[\"MY_ENV_.*\"]`.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/Regex" }
 				}
 			},
 			"additionalProperties": false
@@ -5208,7 +5240,7 @@
 					]
 				},
 				"noProto": {
-					"description": "Disallow the use of the __proto__ property.\nSee <https://biomejs.dev/linter/rules/no-proto>",
+					"description": "Disallow the use of the deprecated __proto__ object property.\nSee <https://biomejs.dev/linter/rules/no-proto>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoProtoConfiguration" },
 						{ "type": "null" }
@@ -5218,6 +5250,13 @@
 					"description": "Replaces usages of forwardRef with passing ref as a prop.\nSee <https://biomejs.dev/linter/rules/no-react-forward-ref>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReactForwardRefConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noScriptUrl": {
+					"description": "Disallow javascript: URLs in HTML.\nSee <https://biomejs.dev/linter/rules/no-script-url>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoScriptUrlConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5239,6 +5278,13 @@
 					"description": "Disallow ternary operators.\nSee <https://biomejs.dev/linter/rules/no-ternary>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTernaryConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUndeclaredEnvVars": {
+					"description": "Disallow the use of undeclared environment variables.\nSee <https://biomejs.dev/linter/rules/no-undeclared-env-vars>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUndeclaredEnvVarsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5986,6 +6032,11 @@
 					"description": "Tailwind CSS rules",
 					"type": "string",
 					"const": "tailwind"
+				},
+				{
+					"description": "Turborepo build system rules",
+					"type": "string",
+					"const": "turborepo"
 				}
 			]
 		},
@@ -7618,6 +7669,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoScriptUrlOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoScriptUrlOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoSecretsOptions": {
 			"type": "object",
 			"properties": {
@@ -7856,6 +7916,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUndeclaredDependenciesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUndeclaredEnvVarsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUndeclaredEnvVarsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10190,7 +10259,7 @@
 					]
 				},
 				"noValueAtRule": {
-					"description": "Disallow use of @value rule in css modules.\nSee <https://biomejs.dev/linter/rules/no-value-at-rule>",
+					"description": "Disallow use of @value rule in CSS modules.\nSee <https://biomejs.dev/linter/rules/no-value-at-rule>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoValueAtRuleConfiguration" },
 						{ "type": "null" }
@@ -12470,6 +12539,10 @@
 		"UseSortedKeysOptions": {
 			"type": "object",
 			"properties": {
+				"groupByNesting": {
+					"description": "When enabled, groups object keys by their value's nesting depth before sorting.\nSimple values (primitives, single-line arrays, single-line objects) are sorted first,\nfollowed by nested values (multi-line objects, multi-line arrays).",
+					"type": ["boolean", "null"]
+				},
 				"sortOrder": {
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				}
