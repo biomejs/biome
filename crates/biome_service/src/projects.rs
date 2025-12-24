@@ -245,38 +245,34 @@ impl Projects {
         {
             // Never ignore Biome's top-level config file
         } else {
-            let is_ignored = {
-                let is_ignored_by_top_level_config = if skip_ignore_check {
-                    project_data
-                        .root_settings
-                        .vcs_settings
-                        .is_ignored(path, Some(project_data.path.as_path()))
-                } else {
-                    is_ignored_by_top_level_config(fs, project_data, path, IgnoreKind::Ancestors)
+            if !skip_ignore_check {
+                let is_ignored = {
+                    let is_ignored_by_top_level_config =
+                        is_ignored_by_top_level_config(fs, project_data, path, IgnoreKind::Ancestors);
+
+                    // If there are specific features enabled, but all of them ignore the
+                    // path, then we treat the path as ignored too.
+                    let is_ignored_by_features = !features.is_empty()
+                        && features.iter().all(|feature| {
+                            project_data
+                                .root_settings
+                                .is_path_ignored_for_feature(path, feature)
+                        });
+
+                    is_ignored_by_top_level_config || is_ignored_by_features
                 };
 
-                // If there are specific features enabled, but all of them ignore the
-                // path, then we treat the path as ignored too.
-                let is_ignored_by_features = !features.is_empty()
-                    && features.iter().all(|feature| {
-                        project_data
+                if is_ignored {
+                    file_features.set_ignored_for_all_features();
+                } else {
+                    for feature in features.iter() {
+                        if project_data
                             .root_settings
                             .is_path_ignored_for_feature(path, feature)
-                    });
-
-                is_ignored_by_top_level_config || is_ignored_by_features
-            };
-
-            if is_ignored {
-                file_features.set_ignored_for_all_features();
-            } else {
-                for feature in features.iter() {
-                    if project_data
-                        .root_settings
-                        .is_path_ignored_for_feature(path, feature)
-                        || settings.is_path_ignored_for_feature(path, feature)
-                    {
-                        file_features.set_ignored(feature);
+                            || settings.is_path_ignored_for_feature(path, feature)
+                        {
+                            file_features.set_ignored(feature);
+                        }
                     }
                 }
             }

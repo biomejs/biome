@@ -183,8 +183,8 @@ pub enum BiomeCommand {
         ///
         /// The provided path may also affect whether the input is treated as
         /// ignored. If the path doesn't exist on disk (virtual path), Biome
-        /// won't require it to be part of the project file set, but ignore rules
-        /// may still apply (e.g. VCS ignore files).
+        /// won't require it to be part of the project file set, and ignore
+        /// checks (`files.includes` and VCS ignore rules) are skipped.
         ///
         /// Example:
         /// ```shell
@@ -294,8 +294,8 @@ pub enum BiomeCommand {
         ///
         /// The provided path may also affect whether the input is treated as
         /// ignored. If the path doesn't exist on disk (virtual path), Biome
-        /// won't require it to be part of the project file set, but ignore rules
-        /// may still apply (e.g. VCS ignore files).
+        /// won't require it to be part of the project file set, and ignore
+        /// checks (`files.includes` and VCS ignore rules) are skipped.
         ///
         /// Example:
         /// ```shell
@@ -357,8 +357,8 @@ pub enum BiomeCommand {
         ///
         /// The provided path may also affect whether the input is treated as
         /// ignored. If the path doesn't exist on disk (virtual path), Biome
-        /// won't require it to be part of the project file set, but ignore rules
-        /// may still apply (e.g. VCS ignore files).
+        /// won't require it to be part of the project file set, and ignore
+        /// checks (`files.includes` and VCS ignore rules) are skipped.
         ///
         /// Example:
         /// ```shell
