@@ -117,11 +117,13 @@ function f(a) {
 
 ```
 
+_Note: The parser emitted 4 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.js:3:18 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Arrow function should not return assignment.
+  × Return statements should not contain assignments.
   
     1 │ /* should generate diagnostics */
     2 │ 
@@ -130,9 +132,10 @@ invalid.js:3:18 lint/nursery/noReturnAssign ━━━━━━━━━━━━
     4 │ 
     5 │ function f(a) {
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -140,7 +143,7 @@ invalid.js:3:18 lint/nursery/noReturnAssign ━━━━━━━━━━━━
 ```
 invalid.js:6:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     5 │ function f(a) {
   > 6 │ 	return a = 1;
@@ -148,9 +151,10 @@ invalid.js:6:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━�
     7 │ }
     8 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -158,7 +162,7 @@ invalid.js:6:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━�
 ```
 invalid.js:10:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
      9 │ function f(a) {
   > 10 │ 	return (a = 1);
@@ -166,9 +170,10 @@ invalid.js:10:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     11 │ }
     12 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -176,7 +181,7 @@ invalid.js:10:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:14:16 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     13 │ function f(a, b, c) {
   > 14 │ 	return (a, b, c = 1);
@@ -184,9 +189,10 @@ invalid.js:14:16 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     15 │ }
     16 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -194,7 +200,7 @@ invalid.js:14:16 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:18:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     17 │ function f(a, b, c) {
   > 18 │ 	return a == (b = c);
@@ -202,9 +208,10 @@ invalid.js:18:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     19 │ }
     20 │ function f(a, b) {
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -212,7 +219,7 @@ invalid.js:18:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:21:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     19 │ }
     20 │ function f(a, b) {
@@ -221,9 +228,10 @@ invalid.js:21:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     22 │ }
     23 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -231,7 +239,7 @@ invalid.js:21:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:25:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     24 │ function f(a, b, c) {
   > 25 │ 	return a = (b = c);
@@ -239,9 +247,10 @@ invalid.js:25:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━
     26 │ }
     27 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -249,7 +258,7 @@ invalid.js:25:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━
 ```
 invalid.js:25:14 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     24 │ function f(a, b, c) {
   > 25 │ 	return a = (b = c);
@@ -257,9 +266,10 @@ invalid.js:25:14 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     26 │ }
     27 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -267,7 +277,7 @@ invalid.js:25:14 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:29:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     28 │ function f(a, b, c) {
   > 29 │ 	return (a = 1, b = 2, c = 3);
@@ -275,9 +285,10 @@ invalid.js:29:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     30 │ }
     31 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -285,7 +296,7 @@ invalid.js:29:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:29:17 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     28 │ function f(a, b, c) {
   > 29 │ 	return (a = 1, b = 2, c = 3);
@@ -293,9 +304,10 @@ invalid.js:29:17 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     30 │ }
     31 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -303,7 +315,7 @@ invalid.js:29:17 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:29:24 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     28 │ function f(a, b, c) {
   > 29 │ 	return (a = 1, b = 2, c = 3);
@@ -311,9 +323,10 @@ invalid.js:29:24 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     30 │ }
     31 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -321,7 +334,7 @@ invalid.js:29:24 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:37:16 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     36 │ async function f(a) {
   > 37 │ 	return await (a = 1);
@@ -329,9 +342,10 @@ invalid.js:37:16 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     38 │ }
     39 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -339,7 +353,7 @@ invalid.js:37:16 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:41:14 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     40 │ function f(a) {
   > 41 │ 	return 5 + (a = 1);
@@ -347,9 +361,10 @@ invalid.js:41:14 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     42 │ }
     43 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -357,7 +372,7 @@ invalid.js:41:14 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:45:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     44 │ function f(a) {
   > 45 │ 	return (a = 1) + 5;
@@ -365,9 +380,10 @@ invalid.js:45:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     46 │ }
     47 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -375,7 +391,7 @@ invalid.js:45:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:53:11 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     52 │ function f(a, b) {
   > 53 │ 	return b[a = 1];
@@ -383,9 +399,10 @@ invalid.js:53:11 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     54 │ }
     55 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -393,7 +410,7 @@ invalid.js:53:11 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:57:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     56 │ function f(a) {
   > 57 │ 	return (a = 1) ? true : false;
@@ -401,9 +418,10 @@ invalid.js:57:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     58 │ }
     59 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -411,7 +429,7 @@ invalid.js:57:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:61:16 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     60 │ function f(a) {
   > 61 │ 	return true ? a = 1 : false;
@@ -419,9 +437,10 @@ invalid.js:61:16 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     62 │ }
     63 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -429,7 +448,7 @@ invalid.js:61:16 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:65:24 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     64 │ function f(a, b) {
   > 65 │ 	return true ? false : a = 1;
@@ -437,9 +456,10 @@ invalid.js:65:24 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     66 │ }
     67 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -447,7 +467,7 @@ invalid.js:65:24 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:69:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     68 │ function f(a, b) {
   > 69 │ 	return (a = 1) in b;
@@ -455,9 +475,10 @@ invalid.js:69:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     70 │ }
     71 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -465,7 +486,7 @@ invalid.js:69:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:73:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     72 │ function f(a, Class) {
   > 73 │ 	return (a = 1) instanceof Class;
@@ -473,9 +494,10 @@ invalid.js:73:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     74 │ }
     75 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -483,7 +505,7 @@ invalid.js:73:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:77:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     76 │ function f(a, b) {
   > 77 │ 	return (a = 1) || b;
@@ -491,9 +513,10 @@ invalid.js:77:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     78 │ }
     79 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -501,7 +524,7 @@ invalid.js:77:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:81:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     80 │ function f(a, b) {
   > 81 │ 	return a || (b = 1);
@@ -509,9 +532,10 @@ invalid.js:81:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     82 │ }
     83 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -519,7 +543,7 @@ invalid.js:81:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:85:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     84 │ function f(a, b) {
   > 85 │ 	return (a = 1) ?? b;
@@ -527,9 +551,10 @@ invalid.js:85:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     86 │ }
     87 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -537,7 +562,7 @@ invalid.js:85:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:89:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     88 │ function f(a, b) {
   > 89 │ 	return a ?? (b = 1);
@@ -545,9 +570,10 @@ invalid.js:89:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     90 │ }
     91 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -555,7 +581,7 @@ invalid.js:89:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:93:11 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     92 │ function f(a) {
   > 93 │ 	return !(a = 1);
@@ -563,9 +589,10 @@ invalid.js:93:11 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     94 │ }
     95 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -573,7 +600,7 @@ invalid.js:93:11 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:97:17 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     96 │ function f(a) {
   > 97 │ 	return typeof (a = 1);
@@ -581,9 +608,10 @@ invalid.js:97:17 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     98 │ }
     99 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -591,7 +619,7 @@ invalid.js:97:17 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:101:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     100 │ function f(a) {
   > 101 │ 	return void (a = 1);
@@ -599,9 +627,10 @@ invalid.js:101:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     102 │ }
     103 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -609,7 +638,7 @@ invalid.js:101:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:105:11 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     104 │ function f(a) {
   > 105 │ 	return -(a = 1);
@@ -617,9 +646,10 @@ invalid.js:105:11 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     106 │ }
     107 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -627,7 +657,7 @@ invalid.js:105:11 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:109:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     108 │ function f(a) {
   > 109 │ 	return <div prop={a = 1} />;
@@ -635,9 +665,10 @@ invalid.js:109:9 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     110 │ }
     111 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

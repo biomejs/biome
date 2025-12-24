@@ -27,7 +27,7 @@ function f(a) {
 ```
 invalid.ts:3:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     1 │ /* should generate diagnostics */
     2 │ function f(a) {
@@ -36,9 +36,10 @@ invalid.ts:3:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━
     4 │ }
     5 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -46,7 +47,7 @@ invalid.ts:3:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━
 ```
 invalid.ts:7:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     6 │ function f(a) {
   > 7 │ 	return (a = 1)!;
@@ -54,9 +55,10 @@ invalid.ts:7:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━
     8 │ }
     9 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -64,7 +66,7 @@ invalid.ts:7:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━
 ```
 invalid.ts:11:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     10 │ function f(a) {
   > 11 │ 	return (a = 1) satisfies number;
@@ -72,9 +74,10 @@ invalid.ts:11:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     12 │ }
     13 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -82,7 +85,7 @@ invalid.ts:11:10 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.ts:15:18 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Return statements should not contain assignments.
   
     14 │ function f(a) {
   > 15 │ 	return <number>(a = 1);
@@ -90,9 +93,10 @@ invalid.ts:15:18 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     16 │ }
     17 │ 
   
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
+  i Assignments inside return statements are easy to mistake for comparison operators (`==`), and add unexpected side effects to normally-pure code.
+    If the assignment is intentional, move it outside of the return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
