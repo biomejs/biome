@@ -85,7 +85,7 @@ impl Rule for NoBeforeInteractiveScriptOutsideDocument {
         let is_in_app_dir = ctx
             .file_path()
             .ancestors()
-            .any(|a| a.file_name().is_some_and(|f| f == "app" && a.is_dir()));
+            .any(|a| a.file_name().is_some_and(|f| f == "app"));
         // should not run in app dir
         if is_in_app_dir {
             return None;
@@ -117,10 +117,7 @@ impl Rule for NoBeforeInteractiveScriptOutsideDocument {
         let file_name = path.file_stem()?;
 
         // pages/_document.(js|ts|jsx|tsx)
-        let is_in_pages_dir = path
-            .ancestors()
-            .nth(1)
-            .is_some_and(|a| a.file_name().is_some_and(|f| f == "pages" && a.is_dir()));
+        let is_in_pages_dir = path.parent()?.file_name().is_some_and(|f| f == "pages");
         if is_in_pages_dir && file_name == "_document" {
             return None;
         }
