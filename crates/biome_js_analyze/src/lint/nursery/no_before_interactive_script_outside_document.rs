@@ -13,35 +13,36 @@ use crate::{
 };
 
 declare_lint_rule! {
-    /// Prevent usage of `next/script`'s `beforeInteractive` strategy outside of `app/layout.jsx` or `pages/_document.js` in a Next.js project.
+    /// Prevent usage of `next/script`'s `beforeInteractive` strategy outside of `pages/_document.js` in a Next.js project.
     ///
     /// Next.js provides a `<Script>` component from `next/script` to optimize the loading of third-party scripts. Using the `beforeInteractive`
-    /// strategy allows scripts to be preloaded before any first-party code. `beforeInteractive` scripts must be placed in either `app/layout.jsx` (App Router) or `pages/_document.js` (Pages Router).
+    /// strategy allows scripts to be preloaded before any first-party code. `beforeInteractive` scripts must be placed in `pages/_document.js`.
     ///
     /// This rule checks for any usage of the `beforeInteractive` scripts outside of these files.
     ///
     /// ## Examples
     ///
-    /// ### Valid
+    /// ### Invalid
     ///
-    /// ```jsx
-    /// // app/layout.jsx
+    /// ```js,expect_diagnostic
+    /// // pages/index.js
     /// import Script from 'next/script'
     ///
-    /// export default function RootLayout({ children }) {
-    ///     return (
-    ///         <html lang="en">
-    ///             <body>{children}</body>
-    ///             <Script
-    ///               src="https://example.com/script.js"
-    ///               strategy="beforeInteractive"
-    ///             />
-    ///         </html>
-    ///     )
+    /// export default function Index() {
+    ///   return (
+    ///     <div>
+    ///       <Script
+    ///         src="https://example.com/script.js"
+    ///         strategy="beforeInteractive"
+    ///       ></Script>
+    ///     </div>
+    ///   )
     /// }
     /// ```
     ///
-    /// ```jsx
+    /// ### Valid
+    ///
+    /// ```js
     /// // pages/_document.js
     /// import { Html, Head, Main, NextScript } from 'next/document'
     /// import Script from 'next/script'
@@ -87,6 +88,14 @@ impl Rule for NoBeforeInteractiveScriptOutsideDocument {
             return None;
         }
 
+        let is_in_app_dir = ctx
+            .file_path()
+            .ancestors()
+            .any(|a| a.file_name().is_some_and(|f| f == "app" && a.is_dir()));
+        if is_in_app_dir {
+            return None;
+        }
+
         let semantic_model = ctx.model();
         let reference = jsx_element.name().ok()?;
         let reference = reference.as_jsx_reference_identifier()?;
@@ -115,15 +124,6 @@ impl Rule for NoBeforeInteractiveScriptOutsideDocument {
             return None;
         }
 
-        // app/layout.(js|ts|jsx|tsx)
-        let is_in_app_dir = path
-            .ancestors()
-            .nth(1)
-            .is_some_and(|a| a.file_name().is_some_and(|f| f == "app" && a.is_dir()));
-        if is_in_app_dir && file_name == "layout" {
-            return None;
-        }
-
         Some(jsx_element.syntax().text_range_with_trivia())
     }
 
@@ -132,7 +132,7 @@ impl Rule for NoBeforeInteractiveScriptOutsideDocument {
             rule_category!(),
             range,
             markup! {
-                "Don't use "<Emphasis>"next/script"</Emphasis>" component with the `"<Emphasis>"beforeInteractive"</Emphasis>"` strategy outside of "<Emphasis>"app/layout.jsx"</Emphasis>" or "<Emphasis>"pages/_document.js"</Emphasis>"."
+                "Don't use "<Emphasis>"next/script"</Emphasis>" component with the `"<Emphasis>"beforeInteractive"</Emphasis>"` strategy outside of "<Emphasis>"pages/_document.js"</Emphasis>"."
             },
         ).note(markup! {
             "See the "<Hyperlink href="https://nextjs.org/docs/messages/no-before-interactive-script-outside-document">"Next.js docs"</Hyperlink>" for more details."
