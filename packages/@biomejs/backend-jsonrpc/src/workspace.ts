@@ -1856,7 +1856,7 @@ See <https://biomejs.dev/linter/rules/use-yield>
  */
 export interface Nursery {
 	/**
-	* Prevent usage of next/script's beforeInteractive strategy outside of `pages/_document.js` in a Next.js project.
+	* Prevent usage of next/script's beforeInteractive strategy outside of pages/_document.js in a Next.js project.
 See <https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document> 
 	 */
 	noBeforeInteractiveScriptOutsideDocument?: NoBeforeInteractiveScriptOutsideDocumentConfiguration;
