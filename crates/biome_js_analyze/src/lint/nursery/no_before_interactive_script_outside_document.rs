@@ -68,7 +68,7 @@ declare_lint_rule! {
         name: "noBeforeInteractiveScriptOutsideDocument",
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-before-interactive-script-outside-document").same()],
-        recommended: true,
+        recommended: false,
         severity: Severity::Warning,
         domains: &[RuleDomain::Next],
     }
