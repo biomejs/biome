@@ -37,5 +37,7 @@ layout.jsx:7:7 lint/nursery/noBeforeInteractiveScriptOutsideDocument ━━━�
     11 │     </html>
     12 │   )
   
+  i See the Next.js docs for more details.
+  
 
 ```

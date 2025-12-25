@@ -36,5 +36,7 @@ index.jsx:6:7 lint/nursery/noBeforeInteractiveScriptOutsideDocument ━━━━
     10 │     </div>
     11 │   )
   
+  i See the Next.js docs for more details.
+  
 
 ```
