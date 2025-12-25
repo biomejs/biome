@@ -7,7 +7,8 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression, JsUnaryOperator, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxTriviaPiece, declare_node_union};
+use biome_js_syntax::JsLanguage;
 use biome_rule_options::use_includes::UseIncludesOptions;
 
 declare_lint_rule! {
@@ -180,13 +181,11 @@ impl Rule for UseIncludes {
                     }
                 };
 
-                let mut new_call_expr = make::js_call_expression(
+                let new_call_expr = make::js_call_expression(
                     AnyJsExpression::from(new_member_expr),
                     data.call_expression.arguments().ok()?,
                 )
                 .build();
-
-                new_call_expr = new_call_expr.with_leading_trivia_pieces([])?;
 
                 let mut final_expr = if data.is_negated {
                     let unary_expr = make::js_unary_expression(
@@ -198,12 +197,11 @@ impl Rule for UseIncludes {
                     new_call_expr.into()
                 };
 
-                if let Some(trivia) = data.binary_expression.syntax().first_leading_trivia() {
-                    final_expr = final_expr.with_leading_trivia_pieces(trivia.pieces())?;
-                }
-                if let Some(trivia) = data.binary_expression.syntax().last_trailing_trivia() {
-                    final_expr = final_expr.with_trailing_trivia_pieces(trivia.pieces())?;
-                }
+                let leading_trivia = collect_leading_trivia_for_indexof(&data.binary_expression);
+                final_expr = final_expr.with_leading_trivia_pieces(leading_trivia)?;
+
+                let trailing_trivia = collect_trailing_trivia_for_indexof(&data.binary_expression);
+                final_expr = final_expr.with_trailing_trivia_pieces(trailing_trivia)?;
                 mutation.replace_node(
                     AnyJsExpression::from(data.binary_expression.clone()),
                     final_expr,
@@ -238,7 +236,7 @@ impl Rule for UseIncludes {
                     .clone();
 
                 let new_callee = make::js_static_member_expression(
-                    first_arg,
+                    first_arg.clone(),
                     make::token(T![.]),
                     make::js_name(make::ident("includes")).into(),
                 );
@@ -262,12 +260,12 @@ impl Rule for UseIncludes {
                     make::js_call_expression(AnyJsExpression::from(new_callee), new_arguments)
                         .build();
 
-                if let Some(trivia) = data.call_expression.syntax().first_leading_trivia() {
-                    new_call_expr = new_call_expr.with_leading_trivia_pieces(trivia.pieces())?;
-                }
-                if let Some(trivia) = data.call_expression.syntax().last_trailing_trivia() {
-                    new_call_expr = new_call_expr.with_trailing_trivia_pieces(trivia.pieces())?;
-                }
+                let leading_trivia = collect_leading_trivia_for_regextest(&data.call_expression, &first_arg);
+                new_call_expr = new_call_expr.with_leading_trivia_pieces(leading_trivia)?;
+
+                let trailing_trivia = collect_trailing_trivia_for_regextest(&data.call_expression, &object, &data.member_expression);
+                new_call_expr = new_call_expr.with_trailing_trivia_pieces(trailing_trivia)?;
+
 
                 mutation.replace_node(
                     AnyJsExpression::from(data.call_expression.clone()),
@@ -445,4 +443,76 @@ fn is_simple_regex(pattern: &str, flags: &str) -> bool {
     !pattern
         .chars()
         .any(|c| "\"'.\\+*?[]^$(){}=!<>|:-".contains(c))
+}
+
+// Trivia collection helpers
+fn collect_leading_trivia_for_indexof(binary_expression: &JsBinaryExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+    let mut leading_trivia = Vec::new();
+    if let Some(trivia) = binary_expression.syntax().first_leading_trivia() {
+        leading_trivia.extend(trivia.pieces());
+    }
+    println!("Leading trivia collected: {:?}", leading_trivia);
+
+    leading_trivia
+}
+
+fn collect_trailing_trivia_for_indexof(binary_expression: &JsBinaryExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+    let mut trailing_trivia = Vec::new();
+    if let Ok(left) = binary_expression.left() {
+        if let Some(trivia) = left.syntax().last_trailing_trivia() {
+            trailing_trivia.extend(trivia.pieces());
+        }
+    }
+    if let Ok(operator_token) = binary_expression.operator_token() {
+        trailing_trivia.extend(operator_token.leading_trivia().pieces());
+        trailing_trivia.extend(operator_token.trailing_trivia().pieces());
+    }
+    if let Ok(right) = binary_expression.right() {
+        if let Some(trivia) = right.syntax().first_leading_trivia() {
+            trailing_trivia.extend(trivia.pieces());
+        }
+    }
+    if let Some(trivia) = binary_expression.syntax().last_trailing_trivia() {
+        trailing_trivia.extend(trivia.pieces());
+    }
+    println!("Trailing trivia collected: {:?}", trailing_trivia);
+
+    trailing_trivia
+}
+
+fn collect_leading_trivia_for_regextest(call_expression: &JsCallExpression, first_arg: &AnyJsExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+    let mut leading_trivia = Vec::new();
+    if let Some(trivia) = call_expression.syntax().first_leading_trivia() {
+        leading_trivia.extend(trivia.pieces());
+    }
+    if let Some(trivia) = first_arg.syntax().first_leading_trivia() {
+        leading_trivia.extend(trivia.pieces());
+    }
+    println!("Leading trivia collected: {:?}", leading_trivia);
+    leading_trivia
+}
+
+fn collect_trailing_trivia_for_regextest(call_expression: &JsCallExpression, object: &AnyJsExpression, member_expression: &AnyJsMemberExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+    let mut trailing_trivia = Vec::new();
+    if let Some(trivia) = call_expression.syntax().last_trailing_trivia() {
+        trailing_trivia.extend(trivia.pieces());
+    }
+    if let Some(trivia) = object.syntax().last_trailing_trivia() {
+        trailing_trivia.extend(trivia.pieces());
+    }
+    let member_syntax = match member_expression {
+        AnyJsMemberExpression::JsStaticMemberExpression(e) => {
+            e.member().ok().map(|m| m.into_syntax())
+        }
+        AnyJsMemberExpression::JsComputedMemberExpression(e) => {
+            e.member().ok().map(|m| m.into_syntax())
+        }
+    };
+    if let Some(member_syntax) = member_syntax {
+        if let Some(trivia) = member_syntax.last_trailing_trivia() {
+            trailing_trivia.extend(trivia.pieces());
+        }
+    }
+    println!("Trailing trivia collected: {:?}", trailing_trivia);
+    trailing_trivia
 }
