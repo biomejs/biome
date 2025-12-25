@@ -1863,6 +1863,11 @@ See <https://biomejs.dev/linter/rules/no-ambiguous-anchor-text>
 	 */
 	noAmbiguousAnchorText?: NoAmbiguousAnchorTextConfiguration;
 	/**
+	* Succinct description of the rule.
+See <https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document> 
+	 */
+	noBeforeInteractiveScriptOutsideDocument?: NoBeforeInteractiveScriptOutsideDocumentConfiguration;
+	/**
 	* Disallow continue statements.
 See <https://biomejs.dev/linter/rules/no-continue> 
 	 */
@@ -3618,6 +3623,9 @@ export type UseYieldConfiguration =
 export type NoAmbiguousAnchorTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAmbiguousAnchorTextOptions;
+export type NoBeforeInteractiveScriptOutsideDocumentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions;
 export type NoContinueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoContinueOptions;
@@ -5044,6 +5052,10 @@ export interface RuleWithNoAmbiguousAnchorTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoAmbiguousAnchorTextOptions;
 }
+export interface RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions {
+	level: RulePlainConfiguration;
+	options?: NoBeforeInteractiveScriptOutsideDocumentOptions;
+}
 export interface RuleWithNoContinueOptions {
 	level: RulePlainConfiguration;
 	options?: NoContinueOptions;
@@ -6419,6 +6431,7 @@ export interface NoAmbiguousAnchorTextOptions {
 	 */
 	words?: string[];
 }
+export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
 export type NoDuplicateDependenciesOptions = {};
@@ -7310,6 +7323,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAmbiguousAnchorText"
+	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
@@ -7332,8 +7346,8 @@ export type Category =
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
-	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noReturnAssign"
+	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
