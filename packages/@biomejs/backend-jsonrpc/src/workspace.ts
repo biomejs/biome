@@ -1863,7 +1863,7 @@ See <https://biomejs.dev/linter/rules/no-ambiguous-anchor-text>
 	 */
 	noAmbiguousAnchorText?: NoAmbiguousAnchorTextConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Prevent usage of next/script's beforeInteractive strategy outside of pages/_document.js in a Next.js project.
 See <https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document> 
 	 */
 	noBeforeInteractiveScriptOutsideDocument?: NoBeforeInteractiveScriptOutsideDocumentConfiguration;

@@ -5192,7 +5192,7 @@
 					]
 				},
 				"noBeforeInteractiveScriptOutsideDocument": {
-					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document>",
+					"description": "Prevent usage of next/script's beforeInteractive strategy outside of pages/_document.js in a Next.js project.\nSee <https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document>",
 					"anyOf": [
 						{
 							"$ref": "#/$defs/NoBeforeInteractiveScriptOutsideDocumentConfiguration"
