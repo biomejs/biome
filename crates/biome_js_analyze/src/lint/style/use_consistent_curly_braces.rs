@@ -414,14 +414,10 @@ fn handle_attr_init_clause(
 
     match node {
         AnyJsxAttributeValue::AnyJsxTag(_) => Some(CurlyBraceResolution::AddBraces),
-        AnyJsxAttributeValue::JsxExpressionAttributeValue(ref expr_value) => {
-            if contains_jsx_tag(expr_value) {
-                None
-            } else if contains_string_literal(expr_value) {
+        AnyJsxAttributeValue::JsxExpressionAttributeValue(node) => {
+            if has_curly_braces && contains_string_literal(&node) {
                 match options.props.unwrap_or(CurlyBracesBehavior::Never) {
-                    CurlyBracesBehavior::Never if has_curly_braces => {
-                        Some(CurlyBraceResolution::RemoveBraces)
-                    }
+                    CurlyBracesBehavior::Never => Some(CurlyBraceResolution::RemoveBraces),
                     _ => None,
                 }
             } else {
@@ -500,11 +496,6 @@ fn contains_string_literal(node: &JsxExpressionAttributeValue) -> bool {
             )
         )
     })
-}
-
-fn contains_jsx_tag(node: &JsxExpressionAttributeValue) -> bool {
-    node.expression()
-        .is_ok_and(|expr| matches!(expr, AnyJsExpression::JsxTagExpression(_)))
 }
 
 fn contains_only_spaces(literal: &JsStringLiteralExpression) -> bool {
