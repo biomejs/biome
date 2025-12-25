@@ -60,17 +60,11 @@ declare_lint_rule! {
     /// Whether to enforce or forbid curly braces around string literals in JSX children.
     /// Defaults to `"never"`.
     ///
-    /// ### `propElementValues`
-    ///
-    /// Whether to enforce or forbid curly braces around JSX elements in JSX props.
-    /// Defaults to `"always"`.
-    ///
     /// ```json,options
     /// {
     ///   "options": {
     ///     "props": "always",
-    ///     "children": "always",
-    ///     "propElementValues": "always"
+    ///     "children": "always"
     ///   }
     /// }
     /// ```
@@ -419,20 +413,10 @@ fn handle_attr_init_clause(
     let node = attr.value().ok()?;
 
     match node {
-        AnyJsxAttributeValue::AnyJsxTag(_) => {
-            match options.prop_element_values.unwrap_or(CurlyBracesBehavior::Always) {
-                CurlyBracesBehavior::Always => Some(CurlyBraceResolution::AddBraces),
-                _ => None,
-            }
-        }
+        AnyJsxAttributeValue::AnyJsxTag(_) => Some(CurlyBraceResolution::AddBraces),
         AnyJsxAttributeValue::JsxExpressionAttributeValue(ref expr_value) => {
             if contains_jsx_tag(expr_value) {
-                match options.prop_element_values.unwrap_or(CurlyBracesBehavior::Always) {
-                    CurlyBracesBehavior::Never if has_curly_braces => {
-                        Some(CurlyBraceResolution::RemoveBraces)
-                    }
-                    _ => None,
-                }
+                None
             } else if contains_string_literal(expr_value) {
                 match options.props.unwrap_or(CurlyBracesBehavior::Never) {
                     CurlyBracesBehavior::Never if has_curly_braces => {
