@@ -6,15 +6,15 @@ expression: layout.jsx
 ```jsx
 import Script from 'next/script'
 
-export default function SomePageLayout({ children }) {
+export default function RootLayout({ children }) {
   return (
-    <section>
-      <div>{children}</div>
+    <html lang="en">
+      <body>{children}</body>
       <Script
         src="https://example.com/script.js"
         strategy="beforeInteractive"
       />
-    </section>
+    </html>
   )
 }
 
