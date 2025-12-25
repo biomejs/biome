@@ -24,8 +24,8 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
-    /// // pages/index.js
+    /// ```jsx,expect_diagnostic
+    /// // pages/index.jsx
     /// import Script from 'next/script'
     ///
     /// export default function Index() {
@@ -42,8 +42,8 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
-    /// // pages/_document.js
+    /// ```jsx,ignore
+    /// // pages/_document.jsx
     /// import { Html, Head, Main, NextScript } from 'next/document'
     /// import Script from 'next/script'
     ///
@@ -85,7 +85,7 @@ impl Rule for NoBeforeInteractiveScriptOutsideDocument {
         let is_in_app_dir = ctx
             .file_path()
             .ancestors()
-            .any(|a| a.file_name().is_some_and(|f| f == "app"));
+            .any(|a| a.file_name().is_some_and(|f| f == "app" && a.is_dir()));
         // should not run in app dir
         if is_in_app_dir {
             return None;
