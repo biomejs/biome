@@ -224,12 +224,12 @@ impl Rule for UseConsistentCurlyBraces {
             }
             (CurlyBraceResolution::AddBraces, AnyJsxCurlyQuery::AnyJsxChild(node)) => {
                 if let AnyJsxChild::JsxText(text) = node {
-                    let new_child = wrap_text_in_expression(text)?;
+                    let new_children = wrap_text_in_expression(text)?;
                     let child_list = node.parent::<JsxChildList>()?;
                     let mut children: Vec<AnyJsxChild> = vec![];
                     let mut iter = (&child_list).into_iter();
                     children.extend(iter.by_ref().take_while(|c| c != node));
-                    children.push(new_child);
+                    children.extend(new_children);
                     children.extend(iter);
                     let new_child_list = make::jsx_child_list(children);
                     mutation.replace_element_discard_trivia(
@@ -348,20 +348,41 @@ impl Rule for UseConsistentCurlyBraces {
     }
 }
 
-fn wrap_text_in_expression(text: &JsxText) -> Option<AnyJsxChild> {
+fn wrap_text_in_expression(text: &JsxText) -> Option<Vec<AnyJsxChild>> {
     let text_content = text.value_token().ok()?;
-    let trimmed = text_content.text_trimmed();
+    let full_text = text_content.text_trimmed();
+    let trimmed = full_text.trim();
     if trimmed.is_empty() {
         return None;
     }
-    let quoted = format!("\"{trimmed}\"");
+
+    let mut result = vec![];
+
+    let leading_ws = &full_text[..full_text.len() - full_text.trim_start().len()];
+    if !leading_ws.is_empty() {
+        let ws_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JSX_TEXT_LITERAL, leading_ws, [], []);
+        result.push(AnyJsxChild::JsxText(make::jsx_text(ws_token)));
+    }
+
+    let escaped = trimmed.replace('\\', "\\\\").replace('"', "\\\"");
+    let quoted = format!("\"{escaped}\"");
     let string_token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, &quoted, [], []);
     let string_expr = make::js_string_literal_expression(string_token);
     let expr_child = make::jsx_expression_child(make::token(T!['{']), make::token(T!['}']))
         .with_expression(AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsStringLiteralExpression(string_expr),
         ));
-    Some(AnyJsxChild::JsxExpressionChild(expr_child.build()))
+    result.push(AnyJsxChild::JsxExpressionChild(expr_child.build()));
+
+    let trailing_ws = &full_text[full_text.trim_end().len()..];
+    if !trailing_ws.is_empty() {
+        let ws_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JSX_TEXT_LITERAL, trailing_ws, [], []);
+        result.push(AnyJsxChild::JsxText(make::jsx_text(ws_token)));
+    }
+
+    Some(result)
 }
 
 /// Build a new JSX expression child with the given trivia. Used for preserving comments in the original JSX expression.

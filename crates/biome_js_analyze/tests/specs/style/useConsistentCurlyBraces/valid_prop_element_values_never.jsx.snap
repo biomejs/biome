@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_prop_element_values_never.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<App prop=<div /> />;
+
+
+```

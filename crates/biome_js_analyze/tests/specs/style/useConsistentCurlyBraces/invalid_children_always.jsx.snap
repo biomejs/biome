@@ -5,6 +5,7 @@ expression: invalid_children_always.jsx
 # Input
 ```jsx
 <App>Hello world</App>;
+<App>Hello 'foo' "bar" world</App>;
 
 ```
 
@@ -16,7 +17,8 @@ invalid_children_always.jsx:1:6 lint/style/useConsistentCurlyBraces  FIXABLE  �
   
   > 1 │ <App>Hello world</App>;
       │      ^^^^^^^^^^^
-    2 │ 
+    2 │ <App>Hello 'foo' "bar" world</App>;
+    3 │ 
   
   i JSX child should be wrapped in curly braces.
   
@@ -24,5 +26,24 @@ invalid_children_always.jsx:1:6 lint/style/useConsistentCurlyBraces  FIXABLE  �
   
     1 │ <App>{"Hello·world"}</App>;
       │      ++           ++       
+
+```
+
+```
+invalid_children_always.jsx:2:6 lint/style/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Should have curly braces around expression.
+  
+    1 │ <App>Hello world</App>;
+  > 2 │ <App>Hello 'foo' "bar" world</App>;
+      │      ^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i JSX child should be wrapped in curly braces.
+  
+  i Unsafe fix: Add curly braces around the expression.
+  
+    2 │ <App>{"Hello·'foo'·\"bar\"·world"}</App>;
+      │      ++            +    +       ++       
 
 ```
