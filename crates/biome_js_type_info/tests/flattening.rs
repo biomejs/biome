@@ -1,7 +1,11 @@
 mod utils;
 
-use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
+use biome_js_type_info::{
+    GlobalsResolver, ScopeId, TypeData, TypeReference, TypeResolver, TypeofExpression,
+    TypeofStaticMemberExpression,
+};
 
+use biome_rowan::Text;
 use utils::{
     HardcodedSymbolResolver, assert_type_data_snapshot, assert_typed_bindings_snapshot,
     get_expression, get_function_declaration, get_interface_declaration, get_variable_declaration,
@@ -46,6 +50,73 @@ parentNode.parentNode"#;
         &resolver,
         "infer_flattened_type_of_static_member_on_union",
     )
+}
+
+#[test]
+fn infer_flattened_type_of_static_member_on_union_includes_unknown_for_unknown_variants() {
+    const CODE: &str = r#"interface Node {
+    parentNode: Node | null;
+}
+
+node.parentNode"#;
+
+    let root = parse_ts(CODE);
+    let interface_decl = get_interface_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let interface_ty =
+        TypeData::from_ts_interface_declaration(&mut resolver, ScopeId::GLOBAL, &interface_decl)
+            .expect("interface must be inferred");
+    resolver.run_inference();
+
+    let interface_ref = resolver.reference_to_owned_data(interface_ty);
+    let union_ty = TypeData::union_of(&resolver, [interface_ref, TypeReference::unknown()].into());
+
+    let expr = get_expression(&root);
+    let mut resolver = HardcodedSymbolResolver::new("node", union_ty, resolver);
+    let expr_ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    let expr_ty = expr_ty.inferred(&mut resolver);
+
+    let TypeData::Union(union) = expr_ty else {
+        panic!("expected union type, got: {expr_ty}");
+    };
+    assert!(union.contains(&TypeReference::unknown()));
+}
+
+#[test]
+fn infer_flattened_type_of_static_member_on_union_does_not_flatten_expression_variants() {
+    const CODE: &str = r#"interface Node {
+    parentNode: Node | null;
+}
+
+node.parentNode"#;
+
+    let root = parse_ts(CODE);
+    let interface_decl = get_interface_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let interface_ty =
+        TypeData::from_ts_interface_declaration(&mut resolver, ScopeId::GLOBAL, &interface_decl)
+            .expect("interface must be inferred");
+    resolver.run_inference();
+
+    let interface_ref = resolver.reference_to_owned_data(interface_ty);
+    let expression_variant =
+        resolver.reference_to_owned_data(TypeData::TypeofExpression(Box::new(
+            TypeofExpression::StaticMember(TypeofStaticMemberExpression {
+                object: TypeReference::unknown(),
+                member: Text::new_static("parentNode"),
+            }),
+        )));
+    let union_ty = TypeData::union_of(&resolver, [interface_ref, expression_variant].into());
+
+    let expr = get_expression(&root);
+    let mut resolver = HardcodedSymbolResolver::new("node", union_ty, resolver);
+    let expr_ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    let expr_ty = expr_ty.inferred(&mut resolver);
+
+    assert!(
+        matches!(&expr_ty, TypeData::TypeofExpression(expr) if matches!(expr.as_ref(), TypeofExpression::StaticMember(_))),
+        "expected to keep typeof-expression unflattened, got: {expr_ty}",
+    );
 }
 
 #[test]
