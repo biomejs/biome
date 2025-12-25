@@ -359,7 +359,12 @@ fn wrap_text_in_expression(text: &JsxText) -> Option<Vec<AnyJsxChild>> {
         result.push(AnyJsxChild::JsxText(make::jsx_text(ws_token)));
     }
 
-    let escaped = trimmed.replace('\\', "\\\\").replace('"', "\\\"");
+    let escaped = trimmed
+        .replace('\\', "\\\\")
+        .replace('"', "\\\"")
+        .replace('\n', "\\n")
+        .replace('\r', "\\r");
+
     let quoted = format!("\"{escaped}\"");
     let string_token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, &quoted, [], []);
     let string_expr = make::js_string_literal_expression(string_token);
