@@ -1,0 +1,43 @@
+/* should not generate diagnostics */
+
+/** jsdoc 1 */
+function f(bar: number): string;
+/** jsdoc 2 */
+function f(baz: string): string;
+function f(whatever: any): any {}
+
+// jsdoc on both of the mergeable overloads
+
+function bar(a: number): void;
+/** jsdoc 1 */
+function bar(a: string): string;
+/** jsdoc 2 */
+function bar(a: boolean): string;
+function bar(a: any): any {}
+
+// interface call signstures
+interface frotz {
+	/** ddddd */
+	(a: number, b: number, c: string): string;
+	(a: number, b: string, c: number): string;
+}
+
+// class methods
+class banana {
+	/** bake a cake */
+	private bake(cakeType: string): void;
+	/** bake a crêpe */
+	private bake(flourAmt: number): void;
+	/** bake a pie */
+	private bake(ingredients: object): void;
+}
+
+// several jsdocs (all get checked)
+/** jsdoc 1 */
+/** jsdoc 2 */
+/** jsdoc 3 */
+declare function f10(this: string): void;
+/** not jsdoc 1 */
+/** jsdoc 2 */
+/** jsdoc 3 */
+declare function f10(this: number): void;
