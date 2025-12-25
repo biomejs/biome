@@ -82,17 +82,18 @@ impl Rule for NoBeforeInteractiveScriptOutsideDocument {
     type Options = NoBeforeInteractiveScriptOutsideDocumentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let jsx_element = ctx.query();
-        let element_name = jsx_element.name().ok()?.name_value_token().ok()?;
-        if element_name.text_trimmed() != "Script" {
-            return None;
-        }
-
         let is_in_app_dir = ctx
             .file_path()
             .ancestors()
             .any(|a| a.file_name().is_some_and(|f| f == "app" && a.is_dir()));
+        // should not run in app dir
         if is_in_app_dir {
+            return None;
+        }
+
+        let jsx_element = ctx.query();
+        let element_name = jsx_element.name().ok()?.name_value_token().ok()?;
+        if element_name.text_trimmed() != "Script" {
             return None;
         }
 
