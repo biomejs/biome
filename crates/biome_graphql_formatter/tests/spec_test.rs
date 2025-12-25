@@ -43,6 +43,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
             },
             workspace_directory: None,
             extended_configurations: vec![],
+            module_graph_resolution_kind: Default::default(),
         })
     };
 

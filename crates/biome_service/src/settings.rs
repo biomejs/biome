@@ -1,4 +1,4 @@
-use crate::workspace::{DocumentFileSource, FeatureKind};
+use crate::workspace::{DocumentFileSource, FeatureKind, ScanKind};
 use crate::{WorkspaceError, is_dir};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
@@ -54,6 +54,8 @@ use std::sync::{Arc, RwLock};
 pub struct Settings {
     /// The configuration that originated this setting, if applicable.
     source: Option<Arc<ConfigurationSource>>,
+
+    pub(crate) module_graph_resolution_kind: ModuleGraphResolutionKind,
 
     /// Formatter settings applied to all files in the project.
     pub formatter: FormatSettings,
@@ -360,6 +362,34 @@ impl Settings {
             !feature_includes_files.is_dir_included(path)
         } else {
             !feature_includes_files.is_file_included(path)
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum ModuleGraphResolutionKind {
+    #[default]
+    None,
+    Modules,
+    ModulesAndTypes,
+}
+
+impl ModuleGraphResolutionKind {
+    pub const fn is_modules_and_types(&self) -> bool {
+        matches!(self, Self::ModulesAndTypes)
+    }
+}
+
+impl From<&ScanKind> for ModuleGraphResolutionKind {
+    fn from(value: &ScanKind) -> Self {
+        match value {
+            ScanKind::NoScanner | ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
+                Self::None
+            }
+            ScanKind::Project => Self::Modules,
+            ScanKind::TypeAware => Self::ModulesAndTypes,
         }
     }
 }

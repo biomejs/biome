@@ -100,6 +100,9 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Diagnostics emitted during the collection of module graph information
     diagnostics: Vec<JsModuleInfoDiagnostic>,
+
+    /// Whether to enable type inference when finalizing the module info
+    infer_types: bool,
 }
 
 /// Intermediary representation for an exported symbol.
@@ -556,14 +559,16 @@ impl JsModuleInfoCollector {
                 .collect(),
         );
 
-        self.infer_all_types(&scope_by_range);
-        self.resolve_all_and_downgrade_project_references();
+        if self.infer_types {
+            self.infer_all_types(&scope_by_range);
+            self.resolve_all_and_downgrade_project_references();
 
-        // Purging before flattening will save us from duplicate work during
-        // flattening. We'll purge again after for a final cleanup.
-        self.purge_redundant_types();
-        self.flatten_all();
-        self.purge_redundant_types();
+            // Purging before flattening will save us from duplicate work during
+            // flattening. We'll purge again after for a final cleanup.
+            self.purge_redundant_types();
+            self.flatten_all();
+            self.purge_redundant_types();
+        }
 
         let exports = self.collect_exports();
 
@@ -1114,7 +1119,8 @@ impl TypeResolver for JsModuleInfoCollector {
 }
 
 impl JsModuleInfo {
-    pub(super) fn new(mut collector: JsModuleInfoCollector) -> Self {
+    pub(super) fn new(mut collector: JsModuleInfoCollector, infer_types: bool) -> Self {
+        collector.infer_types = infer_types;
         let (exports, scope_by_range) = collector.finalise();
 
         Self(Arc::new(JsModuleInfoInner {
@@ -1129,6 +1135,7 @@ impl JsModuleInfo {
             scope_by_range,
             types: collector.types.into(),
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
+            infer_types: collector.infer_types,
         }))
     }
 }
