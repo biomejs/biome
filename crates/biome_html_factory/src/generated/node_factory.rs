@@ -1414,6 +1414,138 @@ impl VueVBindShorthandDirectiveBuilder {
         ))
     }
 }
+pub fn vue_v_for_array_binding(
+    l_brack_token: SyntaxToken,
+    bindings: VueVForBindingList,
+    r_brack_token: SyntaxToken,
+) -> VueVForArrayBinding {
+    VueVForArrayBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_ARRAY_BINDING,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(bindings.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
+}
+pub fn vue_v_for_identifier_binding(name_token: SyntaxToken) -> VueVForIdentifierBinding {
+    VueVForIdentifierBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_IDENTIFIER_BINDING,
+        [Some(SyntaxElement::Token(name_token))],
+    ))
+}
+pub fn vue_v_for_in_operator(in_token: SyntaxToken) -> VueVForInOperator {
+    VueVForInOperator::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_IN_OPERATOR,
+        [Some(SyntaxElement::Token(in_token))],
+    ))
+}
+pub fn vue_v_for_object_binding(
+    l_curly_token: SyntaxToken,
+    bindings: VueVForBindingList,
+    r_curly_token: SyntaxToken,
+) -> VueVForObjectBinding {
+    VueVForObjectBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_OBJECT_BINDING,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(bindings.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn vue_v_for_of_operator(of_token: SyntaxToken) -> VueVForOfOperator {
+    VueVForOfOperator::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_OF_OPERATOR,
+        [Some(SyntaxElement::Token(of_token))],
+    ))
+}
+pub fn vue_v_for_rest_binding(
+    dotdotdot_token: SyntaxToken,
+    binding: VueVForIdentifierBinding,
+) -> VueVForRestBinding {
+    VueVForRestBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_REST_BINDING,
+        [
+            Some(SyntaxElement::Token(dotdotdot_token)),
+            Some(SyntaxElement::Node(binding.into_syntax())),
+        ],
+    ))
+}
+pub fn vue_v_for_tuple_binding(
+    l_paren_token: SyntaxToken,
+    value: AnyVueVForBinding,
+    r_paren_token: SyntaxToken,
+) -> VueVForTupleBindingBuilder {
+    VueVForTupleBindingBuilder {
+        l_paren_token,
+        value,
+        r_paren_token,
+        second: None,
+        third: None,
+    }
+}
+pub struct VueVForTupleBindingBuilder {
+    l_paren_token: SyntaxToken,
+    value: AnyVueVForBinding,
+    r_paren_token: SyntaxToken,
+    second: Option<VueVForTupleElement>,
+    third: Option<VueVForTupleElement>,
+}
+impl VueVForTupleBindingBuilder {
+    pub fn with_second(mut self, second: VueVForTupleElement) -> Self {
+        self.second = Some(second);
+        self
+    }
+    pub fn with_third(mut self, third: VueVForTupleElement) -> Self {
+        self.third = Some(third);
+        self
+    }
+    pub fn build(self) -> VueVForTupleBinding {
+        VueVForTupleBinding::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::VUE_V_FOR_TUPLE_BINDING,
+            [
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                self.second
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.third
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn vue_v_for_tuple_element(
+    comma_token: SyntaxToken,
+    binding: AnyVueVForBinding,
+) -> VueVForTupleElement {
+    VueVForTupleElement::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_TUPLE_ELEMENT,
+        [
+            Some(SyntaxElement::Token(comma_token)),
+            Some(SyntaxElement::Node(binding.into_syntax())),
+        ],
+    ))
+}
+pub fn vue_v_for_value(
+    l_quote_token: SyntaxToken,
+    binding: AnyVueVForBinding,
+    operator: AnyVueVForOperator,
+    expression: HtmlTextExpression,
+    r_quote_token: SyntaxToken,
+) -> VueVForValue {
+    VueVForValue::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_VALUE,
+        [
+            Some(SyntaxElement::Token(l_quote_token)),
+            Some(SyntaxElement::Node(binding.into_syntax())),
+            Some(SyntaxElement::Node(operator.into_syntax())),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_quote_token)),
+        ],
+    ))
+}
 pub fn vue_v_on_shorthand_directive(
     at_token: SyntaxToken,
     arg: AnyVueDirectiveArgument,
@@ -1601,6 +1733,27 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn vue_v_for_binding_list<I, S>(items: I, separators: S) -> VueVForBindingList
+where
+    I: IntoIterator<Item = AnyVueVForBindingListElement>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = HtmlSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    VueVForBindingList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_BINDING_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn astro_bogus_frontmatter<I>(slots: I) -> AstroBogusFrontmatter

@@ -83,6 +83,7 @@ impl Rule for NoRedundantAlt {
                 let inner_string_text = value.inner_string_text().ok()?;
                 is_redundant_alt(inner_string_text.text()).then_some(alt)
             }
+            AnyHtmlAttributeInitializer::VueVForValue(_) => None,
         }
     }
 

@@ -208,6 +208,7 @@ HtmlAttributeInitializerClause =
 AnyHtmlAttributeInitializer =
 	HtmlString
 	| HtmlAttributeSingleTextExpression
+	| VueVForValue
 
 
 // <a {{ expression }}>
@@ -770,3 +771,76 @@ AstroDirectiveValue =
 	colon_token: ':'
 	name: HtmlAttributeName
 	initializer: HtmlAttributeInitializerClause?
+
+// <div v-for="item in items" />
+//            ^^^^^^^^^^^^^^^
+VueVForValue =
+	l_quote: ('"' | '\'')
+	binding: AnyVueVForBinding
+	operator: AnyVueVForOperator
+	expression: HtmlTextExpression
+	r_quote: ('"' | '\'')
+
+AnyVueVForOperator =
+	VueVForInOperator
+	| VueVForOfOperator
+
+VueVForInOperator = 'in'
+
+VueVForOfOperator = 'of'
+
+AnyVueVForBinding =
+	VueVForIdentifierBinding
+	| AnyVueVForDestructuredBinding
+	| VueVForTupleBinding
+
+AnyVueVForDestructuredBinding =
+	VueVForObjectBinding
+	| VueVForArrayBinding
+
+VueVForBindingList = (AnyVueVForBindingListElement (',' AnyVueVForBindingListElement)* ','?)
+
+AnyVueVForBindingListElement =
+	VueVForIdentifierBinding
+	| AnyVueVForDestructuredBinding
+	| VueVForRestBinding
+
+// <div v-for="item in items" />
+//             ^^^^
+VueVForIdentifierBinding =
+	name: 'ident'
+
+// <div v-for="{ foo, bar } in items" />
+//             ^^^^^^^^^^^^
+VueVForObjectBinding =
+	'{'
+	bindings: VueVForBindingList
+	'}'
+
+// <div v-for="[ foo, bar ] in items" />
+//             ^^^^^^^^^^^^
+VueVForArrayBinding =
+	'['
+	bindings: VueVForBindingList
+	']'
+
+// <div v-for="{ foo, ...rest } in items" />
+//                    ^^^^^^^
+VueVForRestBinding =
+	'...'
+	binding: VueVForIdentifierBinding
+
+// <div v-for="(value, key, index) in obj" />
+//             ^^^^^^^^^^^^^^^^^^^
+VueVForTupleBinding =
+	'('
+	value: AnyVueVForBinding
+	second: VueVForTupleElement?
+	third: VueVForTupleElement?
+	')'
+
+// <div v-for="(value, key, index) in obj" />
+//                   ^^^^^
+VueVForTupleElement =
+	','
+	binding: AnyVueVForBinding

@@ -136,3 +136,25 @@ pub(crate) fn expected_valid_directive(p: &HtmlParser, range: TextRange) -> Pars
     )
     .into_diagnostic(p)
 }
+
+pub(crate) fn expected_vue_v_for_value(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected a quoted v-for value.", range)
+        .with_hint(markup!("Add a quoted value like "<Emphasis>"\"item in items\""</Emphasis>"."))
+}
+
+pub(crate) fn expected_vue_v_for_operator(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected `in` or `of` in the v-for directive.", range)
+        .with_hint(markup!("Use "<Emphasis>"in"</Emphasis>" or "<Emphasis>"of"</Emphasis>" between the binding and iterable expression."))
+}
+
+pub(crate) fn expected_vue_v_for_expression(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected an iterable expression after the v-for operator.",
+        range,
+    )
+    .with_hint(markup!("Add the collection or expression to iterate over."))
+}
+
+pub(crate) fn expected_vue_v_for_binding(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("v-for binding", range, p).into_diagnostic(p)
+}

@@ -30,6 +30,8 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         (")", "R_PAREN"),
         ("...", "DOT3"),
         ("|", "PIPE"),
+        ("\"", "DOUBLE_QUOTE"),
+        ("'", "SINGLE_QUOTE"),
     ],
     keywords: &[
         "null",
@@ -58,7 +60,10 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "transition",
         "use",
         "animate",
+        #[expect(unused_doc_comments)]
+        /// Vue keywords
         "in",
+        "of",
         "out",
         "style",
         "class",
@@ -170,6 +175,16 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "VUE_DYNAMIC_ARGUMENT",
         "VUE_MODIFIER_LIST",
         "VUE_MODIFIER",
+        "VUE_V_FOR_VALUE",
+        "VUE_V_FOR_IN_OPERATOR",
+        "VUE_V_FOR_OF_OPERATOR",
+        "VUE_V_FOR_IDENTIFIER_BINDING",
+        "VUE_V_FOR_OBJECT_BINDING",
+        "VUE_V_FOR_ARRAY_BINDING",
+        "VUE_V_FOR_BINDING_LIST",
+        "VUE_V_FOR_REST_BINDING",
+        "VUE_V_FOR_TUPLE_BINDING",
+        "VUE_V_FOR_TUPLE_ELEMENT",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",

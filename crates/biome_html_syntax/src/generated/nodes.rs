@@ -3720,6 +3720,391 @@ pub struct VueVBindShorthandDirectiveFields {
     pub initializer: Option<HtmlAttributeInitializerClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueVForArrayBinding {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueVForArrayBinding {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueVForArrayBindingFields {
+        VueVForArrayBindingFields {
+            l_brack_token: self.l_brack_token(),
+            bindings: self.bindings(),
+            r_brack_token: self.r_brack_token(),
+        }
+    }
+    pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn bindings(&self) -> VueVForBindingList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for VueVForArrayBinding {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueVForArrayBindingFields {
+    pub l_brack_token: SyntaxResult<SyntaxToken>,
+    pub bindings: VueVForBindingList,
+    pub r_brack_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueVForIdentifierBinding {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueVForIdentifierBinding {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueVForIdentifierBindingFields {
+        VueVForIdentifierBindingFields {
+            name_token: self.name_token(),
+        }
+    }
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for VueVForIdentifierBinding {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueVForIdentifierBindingFields {
+    pub name_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueVForInOperator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueVForInOperator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueVForInOperatorFields {
+        VueVForInOperatorFields {
+            in_token: self.in_token(),
+        }
+    }
+    pub fn in_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for VueVForInOperator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueVForInOperatorFields {
+    pub in_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueVForObjectBinding {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueVForObjectBinding {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueVForObjectBindingFields {
+        VueVForObjectBindingFields {
+            l_curly_token: self.l_curly_token(),
+            bindings: self.bindings(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn bindings(&self) -> VueVForBindingList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for VueVForObjectBinding {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueVForObjectBindingFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub bindings: VueVForBindingList,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueVForOfOperator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueVForOfOperator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueVForOfOperatorFields {
+        VueVForOfOperatorFields {
+            of_token: self.of_token(),
+        }
+    }
+    pub fn of_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for VueVForOfOperator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueVForOfOperatorFields {
+    pub of_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueVForRestBinding {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueVForRestBinding {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueVForRestBindingFields {
+        VueVForRestBindingFields {
+            dotdotdot_token: self.dotdotdot_token(),
+            binding: self.binding(),
+        }
+    }
+    pub fn dotdotdot_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn binding(&self) -> SyntaxResult<VueVForIdentifierBinding> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for VueVForRestBinding {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueVForRestBindingFields {
+    pub dotdotdot_token: SyntaxResult<SyntaxToken>,
+    pub binding: SyntaxResult<VueVForIdentifierBinding>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueVForTupleBinding {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueVForTupleBinding {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueVForTupleBindingFields {
+        VueVForTupleBindingFields {
+            l_paren_token: self.l_paren_token(),
+            value: self.value(),
+            second: self.second(),
+            third: self.third(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AnyVueVForBinding> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn second(&self) -> Option<VueVForTupleElement> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn third(&self) -> Option<VueVForTupleElement> {
+        support::node(&self.syntax, 3usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for VueVForTupleBinding {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueVForTupleBindingFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AnyVueVForBinding>,
+    pub second: Option<VueVForTupleElement>,
+    pub third: Option<VueVForTupleElement>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueVForTupleElement {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueVForTupleElement {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueVForTupleElementFields {
+        VueVForTupleElementFields {
+            comma_token: self.comma_token(),
+            binding: self.binding(),
+        }
+    }
+    pub fn comma_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn binding(&self) -> SyntaxResult<AnyVueVForBinding> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for VueVForTupleElement {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueVForTupleElementFields {
+    pub comma_token: SyntaxResult<SyntaxToken>,
+    pub binding: SyntaxResult<AnyVueVForBinding>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueVForValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueVForValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueVForValueFields {
+        VueVForValueFields {
+            l_quote: self.l_quote(),
+            binding: self.binding(),
+            operator: self.operator(),
+            expression: self.expression(),
+            r_quote: self.r_quote(),
+        }
+    }
+    pub fn l_quote(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn binding(&self) -> SyntaxResult<AnyVueVForBinding> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn operator(&self) -> SyntaxResult<AnyVueVForOperator> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 3usize)
+    }
+    pub fn r_quote(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for VueVForValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueVForValueFields {
+    pub l_quote: SyntaxResult<SyntaxToken>,
+    pub binding: SyntaxResult<AnyVueVForBinding>,
+    pub operator: SyntaxResult<AnyVueVForOperator>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+    pub r_quote: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct VueVOnShorthandDirective {
     pub(crate) syntax: SyntaxNode,
 }
@@ -3961,6 +4346,7 @@ impl AnyHtmlAttribute {
 pub enum AnyHtmlAttributeInitializer {
     HtmlAttributeSingleTextExpression(HtmlAttributeSingleTextExpression),
     HtmlString(HtmlString),
+    VueVForValue(VueVForValue),
 }
 impl AnyHtmlAttributeInitializer {
     pub fn as_html_attribute_single_text_expression(
@@ -3974,6 +4360,12 @@ impl AnyHtmlAttributeInitializer {
     pub fn as_html_string(&self) -> Option<&HtmlString> {
         match &self {
             Self::HtmlString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_v_for_value(&self) -> Option<&VueVForValue> {
+        match &self {
+            Self::VueVForValue(item) => Some(item),
             _ => None,
         }
     }
@@ -4488,6 +4880,96 @@ impl AnyVueDirectiveArgument {
     pub fn as_vue_static_argument(&self) -> Option<&VueStaticArgument> {
         match &self {
             Self::VueStaticArgument(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyVueVForBinding {
+    AnyVueVForDestructuredBinding(AnyVueVForDestructuredBinding),
+    VueVForIdentifierBinding(VueVForIdentifierBinding),
+    VueVForTupleBinding(VueVForTupleBinding),
+}
+impl AnyVueVForBinding {
+    pub fn as_any_vue_v_for_destructured_binding(&self) -> Option<&AnyVueVForDestructuredBinding> {
+        match &self {
+            Self::AnyVueVForDestructuredBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_v_for_identifier_binding(&self) -> Option<&VueVForIdentifierBinding> {
+        match &self {
+            Self::VueVForIdentifierBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_v_for_tuple_binding(&self) -> Option<&VueVForTupleBinding> {
+        match &self {
+            Self::VueVForTupleBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyVueVForBindingListElement {
+    AnyVueVForDestructuredBinding(AnyVueVForDestructuredBinding),
+    VueVForIdentifierBinding(VueVForIdentifierBinding),
+    VueVForRestBinding(VueVForRestBinding),
+}
+impl AnyVueVForBindingListElement {
+    pub fn as_any_vue_v_for_destructured_binding(&self) -> Option<&AnyVueVForDestructuredBinding> {
+        match &self {
+            Self::AnyVueVForDestructuredBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_v_for_identifier_binding(&self) -> Option<&VueVForIdentifierBinding> {
+        match &self {
+            Self::VueVForIdentifierBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_v_for_rest_binding(&self) -> Option<&VueVForRestBinding> {
+        match &self {
+            Self::VueVForRestBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyVueVForDestructuredBinding {
+    VueVForArrayBinding(VueVForArrayBinding),
+    VueVForObjectBinding(VueVForObjectBinding),
+}
+impl AnyVueVForDestructuredBinding {
+    pub fn as_vue_v_for_array_binding(&self) -> Option<&VueVForArrayBinding> {
+        match &self {
+            Self::VueVForArrayBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_v_for_object_binding(&self) -> Option<&VueVForObjectBinding> {
+        match &self {
+            Self::VueVForObjectBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyVueVForOperator {
+    VueVForInOperator(VueVForInOperator),
+    VueVForOfOperator(VueVForOfOperator),
+}
+impl AnyVueVForOperator {
+    pub fn as_vue_v_for_in_operator(&self) -> Option<&VueVForInOperator> {
+        match &self {
+            Self::VueVForInOperator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_v_for_of_operator(&self) -> Option<&VueVForOfOperator> {
+        match &self {
+            Self::VueVForOfOperator(item) => Some(item),
             _ => None,
         }
     }
@@ -8960,6 +9442,467 @@ impl From<VueVBindShorthandDirective> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for VueVForArrayBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_FOR_ARRAY_BINDING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_FOR_ARRAY_BINDING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueVForArrayBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueVForArrayBinding")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("bindings", &self.bindings())
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("VueVForArrayBinding").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueVForArrayBinding> for SyntaxNode {
+    fn from(n: VueVForArrayBinding) -> Self {
+        n.syntax
+    }
+}
+impl From<VueVForArrayBinding> for SyntaxElement {
+    fn from(n: VueVForArrayBinding) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueVForIdentifierBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_FOR_IDENTIFIER_BINDING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_FOR_IDENTIFIER_BINDING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueVForIdentifierBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueVForIdentifierBinding")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .finish()
+        } else {
+            f.debug_struct("VueVForIdentifierBinding").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueVForIdentifierBinding> for SyntaxNode {
+    fn from(n: VueVForIdentifierBinding) -> Self {
+        n.syntax
+    }
+}
+impl From<VueVForIdentifierBinding> for SyntaxElement {
+    fn from(n: VueVForIdentifierBinding) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueVForInOperator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_FOR_IN_OPERATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_FOR_IN_OPERATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueVForInOperator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueVForInOperator")
+                .field("in_token", &support::DebugSyntaxResult(self.in_token()))
+                .finish()
+        } else {
+            f.debug_struct("VueVForInOperator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueVForInOperator> for SyntaxNode {
+    fn from(n: VueVForInOperator) -> Self {
+        n.syntax
+    }
+}
+impl From<VueVForInOperator> for SyntaxElement {
+    fn from(n: VueVForInOperator) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueVForObjectBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_FOR_OBJECT_BINDING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_FOR_OBJECT_BINDING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueVForObjectBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueVForObjectBinding")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("bindings", &self.bindings())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("VueVForObjectBinding").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueVForObjectBinding> for SyntaxNode {
+    fn from(n: VueVForObjectBinding) -> Self {
+        n.syntax
+    }
+}
+impl From<VueVForObjectBinding> for SyntaxElement {
+    fn from(n: VueVForObjectBinding) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueVForOfOperator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_FOR_OF_OPERATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_FOR_OF_OPERATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueVForOfOperator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueVForOfOperator")
+                .field("of_token", &support::DebugSyntaxResult(self.of_token()))
+                .finish()
+        } else {
+            f.debug_struct("VueVForOfOperator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueVForOfOperator> for SyntaxNode {
+    fn from(n: VueVForOfOperator) -> Self {
+        n.syntax
+    }
+}
+impl From<VueVForOfOperator> for SyntaxElement {
+    fn from(n: VueVForOfOperator) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueVForRestBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_FOR_REST_BINDING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_FOR_REST_BINDING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueVForRestBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueVForRestBinding")
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("binding", &support::DebugSyntaxResult(self.binding()))
+                .finish()
+        } else {
+            f.debug_struct("VueVForRestBinding").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueVForRestBinding> for SyntaxNode {
+    fn from(n: VueVForRestBinding) -> Self {
+        n.syntax
+    }
+}
+impl From<VueVForRestBinding> for SyntaxElement {
+    fn from(n: VueVForRestBinding) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueVForTupleBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_FOR_TUPLE_BINDING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_FOR_TUPLE_BINDING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueVForTupleBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueVForTupleBinding")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field("second", &support::DebugOptionalElement(self.second()))
+                .field("third", &support::DebugOptionalElement(self.third()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("VueVForTupleBinding").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueVForTupleBinding> for SyntaxNode {
+    fn from(n: VueVForTupleBinding) -> Self {
+        n.syntax
+    }
+}
+impl From<VueVForTupleBinding> for SyntaxElement {
+    fn from(n: VueVForTupleBinding) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueVForTupleElement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_FOR_TUPLE_ELEMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_FOR_TUPLE_ELEMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueVForTupleElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueVForTupleElement")
+                .field(
+                    "comma_token",
+                    &support::DebugSyntaxResult(self.comma_token()),
+                )
+                .field("binding", &support::DebugSyntaxResult(self.binding()))
+                .finish()
+        } else {
+            f.debug_struct("VueVForTupleElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueVForTupleElement> for SyntaxNode {
+    fn from(n: VueVForTupleElement) -> Self {
+        n.syntax
+    }
+}
+impl From<VueVForTupleElement> for SyntaxElement {
+    fn from(n: VueVForTupleElement) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueVForValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_FOR_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_FOR_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueVForValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueVForValue")
+                .field("l_quote", &support::DebugSyntaxResult(self.l_quote()))
+                .field("binding", &support::DebugSyntaxResult(self.binding()))
+                .field("operator", &support::DebugSyntaxResult(self.operator()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field("r_quote", &support::DebugSyntaxResult(self.r_quote()))
+                .finish()
+        } else {
+            f.debug_struct("VueVForValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueVForValue> for SyntaxNode {
+    fn from(n: VueVForValue) -> Self {
+        n.syntax
+    }
+}
+impl From<VueVForValue> for SyntaxElement {
+    fn from(n: VueVForValue) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for VueVOnShorthandDirective {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9409,12 +10352,21 @@ impl From<HtmlString> for AnyHtmlAttributeInitializer {
         Self::HtmlString(node)
     }
 }
+impl From<VueVForValue> for AnyHtmlAttributeInitializer {
+    fn from(node: VueVForValue) -> Self {
+        Self::VueVForValue(node)
+    }
+}
 impl AstNode for AnyHtmlAttributeInitializer {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        HtmlAttributeSingleTextExpression::KIND_SET.union(HtmlString::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = HtmlAttributeSingleTextExpression::KIND_SET
+        .union(HtmlString::KIND_SET)
+        .union(VueVForValue::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION | HTML_STRING)
+        matches!(
+            kind,
+            HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION | HTML_STRING | VUE_V_FOR_VALUE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -9424,6 +10376,7 @@ impl AstNode for AnyHtmlAttributeInitializer {
                 })
             }
             HTML_STRING => Self::HtmlString(HtmlString { syntax }),
+            VUE_V_FOR_VALUE => Self::VueVForValue(VueVForValue { syntax }),
             _ => return None,
         };
         Some(res)
@@ -9432,12 +10385,14 @@ impl AstNode for AnyHtmlAttributeInitializer {
         match self {
             Self::HtmlAttributeSingleTextExpression(it) => it.syntax(),
             Self::HtmlString(it) => it.syntax(),
+            Self::VueVForValue(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::HtmlAttributeSingleTextExpression(it) => it.into_syntax(),
             Self::HtmlString(it) => it.into_syntax(),
+            Self::VueVForValue(it) => it.into_syntax(),
         }
     }
 }
@@ -9446,6 +10401,7 @@ impl std::fmt::Debug for AnyHtmlAttributeInitializer {
         match self {
             Self::HtmlAttributeSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlString(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueVForValue(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -9454,6 +10410,7 @@ impl From<AnyHtmlAttributeInitializer> for SyntaxNode {
         match n {
             AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(it) => it.into_syntax(),
             AnyHtmlAttributeInitializer::HtmlString(it) => it.into_syntax(),
+            AnyHtmlAttributeInitializer::VueVForValue(it) => it.into_syntax(),
         }
     }
 }
@@ -10844,6 +11801,286 @@ impl From<AnyVueDirectiveArgument> for SyntaxElement {
         node.into()
     }
 }
+impl From<VueVForIdentifierBinding> for AnyVueVForBinding {
+    fn from(node: VueVForIdentifierBinding) -> Self {
+        Self::VueVForIdentifierBinding(node)
+    }
+}
+impl From<VueVForTupleBinding> for AnyVueVForBinding {
+    fn from(node: VueVForTupleBinding) -> Self {
+        Self::VueVForTupleBinding(node)
+    }
+}
+impl AstNode for AnyVueVForBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AnyVueVForDestructuredBinding::KIND_SET
+        .union(VueVForIdentifierBinding::KIND_SET)
+        .union(VueVForTupleBinding::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            VUE_V_FOR_IDENTIFIER_BINDING | VUE_V_FOR_TUPLE_BINDING => true,
+            k if AnyVueVForDestructuredBinding::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            VUE_V_FOR_IDENTIFIER_BINDING => {
+                Self::VueVForIdentifierBinding(VueVForIdentifierBinding { syntax })
+            }
+            VUE_V_FOR_TUPLE_BINDING => Self::VueVForTupleBinding(VueVForTupleBinding { syntax }),
+            _ => {
+                if let Some(any_vue_v_for_destructured_binding) =
+                    AnyVueVForDestructuredBinding::cast(syntax)
+                {
+                    return Some(Self::AnyVueVForDestructuredBinding(
+                        any_vue_v_for_destructured_binding,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::VueVForIdentifierBinding(it) => it.syntax(),
+            Self::VueVForTupleBinding(it) => it.syntax(),
+            Self::AnyVueVForDestructuredBinding(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::VueVForIdentifierBinding(it) => it.into_syntax(),
+            Self::VueVForTupleBinding(it) => it.into_syntax(),
+            Self::AnyVueVForDestructuredBinding(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyVueVForBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyVueVForDestructuredBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueVForIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueVForTupleBinding(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyVueVForBinding> for SyntaxNode {
+    fn from(n: AnyVueVForBinding) -> Self {
+        match n {
+            AnyVueVForBinding::AnyVueVForDestructuredBinding(it) => it.into_syntax(),
+            AnyVueVForBinding::VueVForIdentifierBinding(it) => it.into_syntax(),
+            AnyVueVForBinding::VueVForTupleBinding(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyVueVForBinding> for SyntaxElement {
+    fn from(n: AnyVueVForBinding) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<VueVForIdentifierBinding> for AnyVueVForBindingListElement {
+    fn from(node: VueVForIdentifierBinding) -> Self {
+        Self::VueVForIdentifierBinding(node)
+    }
+}
+impl From<VueVForRestBinding> for AnyVueVForBindingListElement {
+    fn from(node: VueVForRestBinding) -> Self {
+        Self::VueVForRestBinding(node)
+    }
+}
+impl AstNode for AnyVueVForBindingListElement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AnyVueVForDestructuredBinding::KIND_SET
+        .union(VueVForIdentifierBinding::KIND_SET)
+        .union(VueVForRestBinding::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            VUE_V_FOR_IDENTIFIER_BINDING | VUE_V_FOR_REST_BINDING => true,
+            k if AnyVueVForDestructuredBinding::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            VUE_V_FOR_IDENTIFIER_BINDING => {
+                Self::VueVForIdentifierBinding(VueVForIdentifierBinding { syntax })
+            }
+            VUE_V_FOR_REST_BINDING => Self::VueVForRestBinding(VueVForRestBinding { syntax }),
+            _ => {
+                if let Some(any_vue_v_for_destructured_binding) =
+                    AnyVueVForDestructuredBinding::cast(syntax)
+                {
+                    return Some(Self::AnyVueVForDestructuredBinding(
+                        any_vue_v_for_destructured_binding,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::VueVForIdentifierBinding(it) => it.syntax(),
+            Self::VueVForRestBinding(it) => it.syntax(),
+            Self::AnyVueVForDestructuredBinding(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::VueVForIdentifierBinding(it) => it.into_syntax(),
+            Self::VueVForRestBinding(it) => it.into_syntax(),
+            Self::AnyVueVForDestructuredBinding(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyVueVForBindingListElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyVueVForDestructuredBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueVForIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueVForRestBinding(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyVueVForBindingListElement> for SyntaxNode {
+    fn from(n: AnyVueVForBindingListElement) -> Self {
+        match n {
+            AnyVueVForBindingListElement::AnyVueVForDestructuredBinding(it) => it.into_syntax(),
+            AnyVueVForBindingListElement::VueVForIdentifierBinding(it) => it.into_syntax(),
+            AnyVueVForBindingListElement::VueVForRestBinding(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyVueVForBindingListElement> for SyntaxElement {
+    fn from(n: AnyVueVForBindingListElement) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<VueVForArrayBinding> for AnyVueVForDestructuredBinding {
+    fn from(node: VueVForArrayBinding) -> Self {
+        Self::VueVForArrayBinding(node)
+    }
+}
+impl From<VueVForObjectBinding> for AnyVueVForDestructuredBinding {
+    fn from(node: VueVForObjectBinding) -> Self {
+        Self::VueVForObjectBinding(node)
+    }
+}
+impl AstNode for AnyVueVForDestructuredBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        VueVForArrayBinding::KIND_SET.union(VueVForObjectBinding::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, VUE_V_FOR_ARRAY_BINDING | VUE_V_FOR_OBJECT_BINDING)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            VUE_V_FOR_ARRAY_BINDING => Self::VueVForArrayBinding(VueVForArrayBinding { syntax }),
+            VUE_V_FOR_OBJECT_BINDING => Self::VueVForObjectBinding(VueVForObjectBinding { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::VueVForArrayBinding(it) => it.syntax(),
+            Self::VueVForObjectBinding(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::VueVForArrayBinding(it) => it.into_syntax(),
+            Self::VueVForObjectBinding(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyVueVForDestructuredBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::VueVForArrayBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueVForObjectBinding(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyVueVForDestructuredBinding> for SyntaxNode {
+    fn from(n: AnyVueVForDestructuredBinding) -> Self {
+        match n {
+            AnyVueVForDestructuredBinding::VueVForArrayBinding(it) => it.into_syntax(),
+            AnyVueVForDestructuredBinding::VueVForObjectBinding(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyVueVForDestructuredBinding> for SyntaxElement {
+    fn from(n: AnyVueVForDestructuredBinding) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<VueVForInOperator> for AnyVueVForOperator {
+    fn from(node: VueVForInOperator) -> Self {
+        Self::VueVForInOperator(node)
+    }
+}
+impl From<VueVForOfOperator> for AnyVueVForOperator {
+    fn from(node: VueVForOfOperator) -> Self {
+        Self::VueVForOfOperator(node)
+    }
+}
+impl AstNode for AnyVueVForOperator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        VueVForInOperator::KIND_SET.union(VueVForOfOperator::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, VUE_V_FOR_IN_OPERATOR | VUE_V_FOR_OF_OPERATOR)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            VUE_V_FOR_IN_OPERATOR => Self::VueVForInOperator(VueVForInOperator { syntax }),
+            VUE_V_FOR_OF_OPERATOR => Self::VueVForOfOperator(VueVForOfOperator { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::VueVForInOperator(it) => it.syntax(),
+            Self::VueVForOfOperator(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::VueVForInOperator(it) => it.into_syntax(),
+            Self::VueVForOfOperator(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyVueVForOperator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::VueVForInOperator(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueVForOfOperator(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyVueVForOperator> for SyntaxNode {
+    fn from(n: AnyVueVForOperator) -> Self {
+        match n {
+            AnyVueVForOperator::VueVForInOperator(it) => it.into_syntax(),
+            AnyVueVForOperator::VueVForOfOperator(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyVueVForOperator> for SyntaxElement {
+    fn from(n: AnyVueVForOperator) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl std::fmt::Display for AnyAstroDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -10940,6 +12177,26 @@ impl std::fmt::Display for AnyVueDirective {
     }
 }
 impl std::fmt::Display for AnyVueDirectiveArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyVueVForBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyVueVForBindingListElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyVueVForDestructuredBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyVueVForOperator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -11355,6 +12612,51 @@ impl std::fmt::Display for VueStaticArgument {
     }
 }
 impl std::fmt::Display for VueVBindShorthandDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueVForArrayBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueVForIdentifierBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueVForInOperator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueVForObjectBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueVForOfOperator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueVForRestBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueVForTupleBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueVForTupleElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueVForValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -12470,6 +13772,88 @@ impl IntoIterator for &VueModifierList {
 impl IntoIterator for VueModifierList {
     type Item = VueModifier;
     type IntoIter = AstNodeListIterator<Language, VueModifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct VueVForBindingList {
+    syntax_list: SyntaxList,
+}
+impl VueVForBindingList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for VueVForBindingList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_FOR_BINDING_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_FOR_BINDING_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for VueVForBindingList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for VueVForBindingList {
+    type Language = Language;
+    type Node = AnyVueVForBindingListElement;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for VueVForBindingList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("VueVForBindingList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for VueVForBindingList {
+    type Item = SyntaxResult<AnyVueVForBindingListElement>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyVueVForBindingListElement>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &VueVForBindingList {
+    type Item = SyntaxResult<AnyVueVForBindingListElement>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyVueVForBindingListElement>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

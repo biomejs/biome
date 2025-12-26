@@ -3058,6 +3058,342 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVBindShorthandDirec
         FormatOwnedWithRule :: new (self , crate :: vue :: auxiliary :: v_bind_shorthand_directive :: FormatVueVBindShorthandDirective :: default ())
     }
 }
+impl FormatRule<biome_html_syntax::VueVForArrayBinding>
+    for crate::vue::auxiliary::v_for_array_binding::FormatVueVForArrayBinding
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVForArrayBinding,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVForArrayBinding>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVForArrayBinding {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVForArrayBinding,
+        crate::vue::auxiliary::v_for_array_binding::FormatVueVForArrayBinding,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_array_binding::FormatVueVForArrayBinding::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVForArrayBinding {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVForArrayBinding,
+        crate::vue::auxiliary::v_for_array_binding::FormatVueVForArrayBinding,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_array_binding::FormatVueVForArrayBinding::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueVForIdentifierBinding>
+    for crate::vue::auxiliary::v_for_identifier_binding::FormatVueVForIdentifierBinding
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVForIdentifierBinding,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVForIdentifierBinding>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVForIdentifierBinding {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVForIdentifierBinding,
+        crate::vue::auxiliary::v_for_identifier_binding::FormatVueVForIdentifierBinding,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: vue :: auxiliary :: v_for_identifier_binding :: FormatVueVForIdentifierBinding :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVForIdentifierBinding {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVForIdentifierBinding,
+        crate::vue::auxiliary::v_for_identifier_binding::FormatVueVForIdentifierBinding,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: vue :: auxiliary :: v_for_identifier_binding :: FormatVueVForIdentifierBinding :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::VueVForInOperator>
+    for crate::vue::auxiliary::v_for_in_operator::FormatVueVForInOperator
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVForInOperator,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVForInOperator>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVForInOperator {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVForInOperator,
+        crate::vue::auxiliary::v_for_in_operator::FormatVueVForInOperator,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_in_operator::FormatVueVForInOperator::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVForInOperator {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVForInOperator,
+        crate::vue::auxiliary::v_for_in_operator::FormatVueVForInOperator,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_in_operator::FormatVueVForInOperator::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueVForObjectBinding>
+    for crate::vue::auxiliary::v_for_object_binding::FormatVueVForObjectBinding
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVForObjectBinding,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVForObjectBinding>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVForObjectBinding {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVForObjectBinding,
+        crate::vue::auxiliary::v_for_object_binding::FormatVueVForObjectBinding,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_object_binding::FormatVueVForObjectBinding::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVForObjectBinding {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVForObjectBinding,
+        crate::vue::auxiliary::v_for_object_binding::FormatVueVForObjectBinding,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_object_binding::FormatVueVForObjectBinding::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueVForOfOperator>
+    for crate::vue::auxiliary::v_for_of_operator::FormatVueVForOfOperator
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVForOfOperator,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVForOfOperator>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVForOfOperator {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVForOfOperator,
+        crate::vue::auxiliary::v_for_of_operator::FormatVueVForOfOperator,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_of_operator::FormatVueVForOfOperator::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVForOfOperator {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVForOfOperator,
+        crate::vue::auxiliary::v_for_of_operator::FormatVueVForOfOperator,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_of_operator::FormatVueVForOfOperator::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueVForRestBinding>
+    for crate::vue::auxiliary::v_for_rest_binding::FormatVueVForRestBinding
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVForRestBinding,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVForRestBinding>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVForRestBinding {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVForRestBinding,
+        crate::vue::auxiliary::v_for_rest_binding::FormatVueVForRestBinding,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_rest_binding::FormatVueVForRestBinding::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVForRestBinding {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVForRestBinding,
+        crate::vue::auxiliary::v_for_rest_binding::FormatVueVForRestBinding,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_rest_binding::FormatVueVForRestBinding::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueVForTupleBinding>
+    for crate::vue::auxiliary::v_for_tuple_binding::FormatVueVForTupleBinding
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVForTupleBinding,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVForTupleBinding>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVForTupleBinding {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVForTupleBinding,
+        crate::vue::auxiliary::v_for_tuple_binding::FormatVueVForTupleBinding,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_tuple_binding::FormatVueVForTupleBinding::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVForTupleBinding {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVForTupleBinding,
+        crate::vue::auxiliary::v_for_tuple_binding::FormatVueVForTupleBinding,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_tuple_binding::FormatVueVForTupleBinding::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueVForTupleElement>
+    for crate::vue::auxiliary::v_for_tuple_element::FormatVueVForTupleElement
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVForTupleElement,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVForTupleElement>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVForTupleElement {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVForTupleElement,
+        crate::vue::auxiliary::v_for_tuple_element::FormatVueVForTupleElement,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_tuple_element::FormatVueVForTupleElement::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVForTupleElement {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVForTupleElement,
+        crate::vue::auxiliary::v_for_tuple_element::FormatVueVForTupleElement,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_tuple_element::FormatVueVForTupleElement::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueVForValue>
+    for crate::vue::value::v_for_value::FormatVueVForValue
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVForValue,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVForValue>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVForValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVForValue,
+        crate::vue::value::v_for_value::FormatVueVForValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::value::v_for_value::FormatVueVForValue::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVForValue {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVForValue,
+        crate::vue::value::v_for_value::FormatVueVForValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::value::v_for_value::FormatVueVForValue::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::VueVOnShorthandDirective>
     for crate::vue::auxiliary::v_on_shorthand_directive::FormatVueVOnShorthandDirective
 {
@@ -3300,6 +3636,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueModifierList {
         FormatOwnedWithRule::new(
             self,
             crate::vue::lists::modifier_list::FormatVueModifierList::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVForBindingList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVForBindingList,
+        crate::vue::lists::v_for_binding_list::FormatVueVForBindingList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::lists::v_for_binding_list::FormatVueVForBindingList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVForBindingList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVForBindingList,
+        crate::vue::lists::v_for_binding_list::FormatVueVForBindingList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::lists::v_for_binding_list::FormatVueVForBindingList::default(),
         )
     }
 }
@@ -4086,6 +4447,94 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyVueDirectiveArgumen
         FormatOwnedWithRule::new(
             self,
             crate::vue::any::directive_argument::FormatAnyVueDirectiveArgument::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyVueVForBinding {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyVueVForBinding,
+        crate::vue::any::v_for_binding::FormatAnyVueVForBinding,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::any::v_for_binding::FormatAnyVueVForBinding::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyVueVForBinding {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyVueVForBinding,
+        crate::vue::any::v_for_binding::FormatAnyVueVForBinding,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::any::v_for_binding::FormatAnyVueVForBinding::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyVueVForBindingListElement {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyVueVForBindingListElement,
+        crate::vue::any::v_for_binding_list_element::FormatAnyVueVForBindingListElement,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: vue :: any :: v_for_binding_list_element :: FormatAnyVueVForBindingListElement :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyVueVForBindingListElement {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyVueVForBindingListElement,
+        crate::vue::any::v_for_binding_list_element::FormatAnyVueVForBindingListElement,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: vue :: any :: v_for_binding_list_element :: FormatAnyVueVForBindingListElement :: default ())
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyVueVForDestructuredBinding {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyVueVForDestructuredBinding,
+        crate::vue::any::v_for_destructured_binding::FormatAnyVueVForDestructuredBinding,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: vue :: any :: v_for_destructured_binding :: FormatAnyVueVForDestructuredBinding :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyVueVForDestructuredBinding {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyVueVForDestructuredBinding,
+        crate::vue::any::v_for_destructured_binding::FormatAnyVueVForDestructuredBinding,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: vue :: any :: v_for_destructured_binding :: FormatAnyVueVForDestructuredBinding :: default ())
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyVueVForOperator {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyVueVForOperator,
+        crate::vue::any::v_for_operator::FormatAnyVueVForOperator,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::any::v_for_operator::FormatAnyVueVForOperator::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyVueVForOperator {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyVueVForOperator,
+        crate::vue::any::v_for_operator::FormatAnyVueVForOperator,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::any::v_for_operator::FormatAnyVueVForOperator::default(),
         )
     }
 }
