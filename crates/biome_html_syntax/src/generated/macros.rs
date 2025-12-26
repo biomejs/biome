@@ -244,6 +244,22 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::VueVBindShorthandDirective::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_SIMPLE_BINDING => {
+                    let $pattern = unsafe { $crate::VueVForSimpleBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_TUPLE_BINDING => {
+                    let $pattern = unsafe { $crate::VueVForTupleBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_TUPLE_ELEMENT => {
+                    let $pattern = unsafe { $crate::VueVForTupleElement::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_VALUE => {
+                    let $pattern = unsafe { $crate::VueVForValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::VUE_V_ON_SHORTHAND_DIRECTIVE => {
                     let $pattern = unsafe { $crate::VueVOnShorthandDirective::new_unchecked(node) };
                     $body

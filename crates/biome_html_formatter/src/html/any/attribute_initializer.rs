@@ -10,6 +10,7 @@ impl FormatRule<AnyHtmlAttributeInitializer> for FormatAnyHtmlAttributeInitializ
         match node {
             AnyHtmlAttributeInitializer::HtmlSingleTextExpression(node) => node.format().fmt(f),
             AnyHtmlAttributeInitializer::HtmlString(node) => node.format().fmt(f),
+            AnyHtmlAttributeInitializer::VueVForValue(node) => node.format().fmt(f),
         }
     }
 }
