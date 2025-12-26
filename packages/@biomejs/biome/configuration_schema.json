@@ -5640,10 +5640,24 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueValidTemplateRoot": {
+					"description": "Enforce valid Vue \\<template> root usage.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-template-root>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidTemplateRootConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueValidVBind": {
 					"description": "Forbids v-bind directives with missing arguments or invalid modifiers.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-v-bind>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueValidVBindConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVCloak": {
+					"description": "Enforce valid v-cloak Vue directives.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-v-cloak>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVCloakConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5679,6 +5693,20 @@
 					"description": "Enforce valid v-on directives with proper arguments, modifiers, and handlers.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-v-on>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueValidVOnConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVOnce": {
+					"description": "Enforce valid v-once Vue directives.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-v-once>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVOnceConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVPre": {
+					"description": "Enforce valid v-pre Vue directives.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-v-pre>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVPreConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9943,11 +9971,31 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueValidTemplateRootOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidTemplateRootOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidVBindOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueValidVBindOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueValidVCloakOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVCloakOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9993,6 +10041,26 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueValidVOnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueValidVOnceOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVOnceOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueValidVPreOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVPreOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13065,6 +13133,16 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueValidTemplateRootConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidTemplateRootOptions" }
+			]
+		},
+		"UseVueValidTemplateRootOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueValidVBindConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -13072,6 +13150,16 @@
 			]
 		},
 		"UseVueValidVBindOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVCloakConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVCloakOptions" }
+			]
+		},
+		"UseVueValidVCloakOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -13131,6 +13219,26 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueValidVOnceConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVOnceOptions" }
+			]
+		},
+		"UseVueValidVOnceOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVPreConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVPreOptions" }
+			]
+		},
+		"UseVueValidVPreOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseVueValidVTextConfiguration": {
