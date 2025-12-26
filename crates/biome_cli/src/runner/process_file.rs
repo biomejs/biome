@@ -160,22 +160,6 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
         // then we pick the specific features for this file
         let unsupported_reason = ctx.execution().supports_kind(&file_features);
 
-        // TODO move logic
-        // {
-        //     TraversalMode::Check { .. } | TraversalMode::CI { .. } => file_features
-        //         .support_kind_if_not_enabled(FeatureKind::Lint)
-        //         .and(file_features.support_kind_if_not_enabled(FeatureKind::Format))
-        //         .and(file_features.support_kind_if_not_enabled(FeatureKind::Assist)),
-        //     TraversalMode::Format { .. } => {
-        //         Some(file_features.support_kind_for(FeatureKind::Format))
-        //     }
-        //     TraversalMode::Lint { .. } => Some(file_features.support_kind_for(FeatureKind::Lint)),
-        //     TraversalMode::Migrate { .. } => None,
-        //     TraversalMode::Search { .. } => {
-        //         Some(file_features.support_kind_for(FeatureKind::Search))
-        //     }
-        // };
-
         if let Some(reason) = unsupported_reason {
             match reason {
                 SupportKind::FileNotSupported => {
@@ -251,6 +235,9 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         let mut input = String::new();
         file.read_to_string(&mut input)
             .with_file_path(path.to_string())?;
+
+        let guard = FileGuard::new(ctx.workspace(), ctx.project_key(), path.clone())
+            .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
 
         if ctx.workspace().file_exists(FileExitsParams {
             file_path: path.clone(),
