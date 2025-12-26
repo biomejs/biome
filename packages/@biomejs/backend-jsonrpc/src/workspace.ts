@@ -6804,7 +6804,16 @@ export type UseTemplateOptions = {};
 export type UseThrowNewErrorOptions = {};
 export type UseThrowOnlyErrorOptions = {};
 export type UseTrimStartEndOptions = {};
-export type UseUnifiedTypeSignaturesOptions = {};
+export interface UseUnifiedTypeSignaturesOptions {
+	/**
+	 * Whether to ignore overloads with different JSDoc comments.
+	 */
+	ignoreDifferentJsDoc?: boolean;
+	/**
+	 * Whether to ignore overloads with differently named parameters.
+	 */
+	ignoreDifferentlyNamedParameters?: boolean;
+}
 export type NoAlertOptions = {};
 export type NoApproximativeNumericConstantOptions = {};
 export type NoArrayIndexKeyOptions = {};

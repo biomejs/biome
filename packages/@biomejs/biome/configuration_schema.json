@@ -12765,6 +12765,16 @@
 		},
 		"UseUnifiedTypeSignaturesOptions": {
 			"type": "object",
+			"properties": {
+				"ignoreDifferentJsDoc": {
+					"description": "Whether to ignore overloads with different JSDoc comments.",
+					"type": ["boolean", "null"]
+				},
+				"ignoreDifferentlyNamedParameters": {
+					"description": "Whether to ignore overloads with differently named parameters.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseUniqueElementIdsConfiguration": {

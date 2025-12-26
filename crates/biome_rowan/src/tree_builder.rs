@@ -85,6 +85,7 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
     }
 
     /// Adds new token to the current branch.
+    // TODO: This should return &mut Self for consistency with `token`
     #[inline]
     pub fn token_with_trivia(
         &mut self,

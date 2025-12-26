@@ -1,7 +1,6 @@
-use std::ops::Deref;
-
 use biome_js_syntax::{JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::TriviaPieceKind;
+use std::ops::Deref;
 
 /// Represents a normalised JSDoc comment.
 ///
@@ -22,7 +21,7 @@ use biome_rowan::TriviaPieceKind;
 ///
 /// The normalised representation will become:
 /// `"Magic constant of fooness.\n\nFor if you want more ways to write 1."`.
-///    
+///
 /// See https://jsdoc.app/ for the JSDoc reference.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct JsdocComment(String);
@@ -65,24 +64,31 @@ impl JsdocComment {
             && text.ends_with("*/")
     }
 
-    /// Iterates all JSDoc comments preceding the node.
+    /// Execute a callback on all JSDoc comments preceding the given node.
+    // TODO: Remove this and replace it since we now expose the raw iterator
     pub fn for_each<F>(node: &JsSyntaxNode, mut func: F)
     where
         F: FnMut(&str),
     {
-        if let Some(token) = node.first_token() {
-            for trivia in token.leading_trivia().pieces() {
-                match trivia.kind() {
-                    TriviaPieceKind::MultiLineComment | TriviaPieceKind::SingleLineComment => {
-                        let text = trivia.text();
-                        if Self::text_is_jsdoc_comment(text) {
-                            func(text)
-                        }
-                    }
-                    _ => {}
-                }
-            }
-        }
+        Self::get_jsdocs(node).for_each(|str: String| func(str.as_str()))
+    }
+
+    /// Returns an iterator over the given node's serialized JSDoc comments.
+    /// Nodes lacking a first token will return an empty iterator.
+    pub fn get_jsdocs(node: &JsSyntaxNode) -> impl Iterator<Item = String> {
+        node.first_token()
+            .into_iter()
+            .flat_map(|token| token.leading_trivia().pieces())
+            .filter_map(|trivia| {
+                let text = trivia.text();
+                matches!(
+                    trivia.kind(),
+                    TriviaPieceKind::SingleLineComment | TriviaPieceKind::MultiLineComment
+                )
+                .then(|| text)
+                .filter(|text: &&str| Self::text_is_jsdoc_comment(text))
+                .map(|text| text.to_owned())
+            })
     }
 }
 
@@ -137,6 +143,8 @@ impl TryFrom<JsSyntaxToken> for JsdocComment {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_js_parser::{JsParserOptions, parse};
+    use biome_js_syntax::JsFileSource;
 
     #[test]
     fn test_text_is_jsdoc_comment() {
@@ -150,5 +158,78 @@ mod tests {
         assert!(!JsdocComment::text_is_jsdoc_comment("/*** no */"));
         assert!(!JsdocComment::text_is_jsdoc_comment("/***/"));
         assert!(!JsdocComment::text_is_jsdoc_comment("/**/"));
+    }
+
+    fn assert_jsdoc_comments(text: &str, jsdocs: Vec<&str>) {
+        let source = parse(text, JsFileSource::tsx(), JsParserOptions::default()).syntax();
+        assert!(JsdocComment::get_jsdocs(&source).eq(jsdocs));
+    }
+
+    #[test]
+    fn test_get_jsdocs() {
+        assert_jsdoc_comments(
+            r"
+            /** blubber */
+            const a = 5;
+            ",
+            vec!["/** blubber */"],
+        );
+        assert_jsdoc_comments(
+            r"
+            /** j1 */
+            /** j2 */
+            const a = 5;
+            ",
+            vec!["/** j1 */", "/** j2 */"],
+        );
+        assert_jsdoc_comments(
+            r"
+            /** 
+             * multiline
+             * yay
+             * @param foo - the fooness of great
+             */
+            export function fizzbuzz(foo: any) {};
+            ",
+            vec![
+                r"/** 
+             * multiline
+             * yay
+             * @param foo - the fooness of great
+             */",
+            ],
+        );
+        assert_jsdoc_comments(
+            r"
+            /** j1 */
+            // foo bar baz qux quux
+            /** j2 */
+            const rgb = 555;
+            ",
+            vec!["/** j1 */", "/** j2 */"],
+        );
+
+        assert_jsdoc_comments("const a = 5;", vec![]);
+        assert_jsdoc_comments(
+            r"
+            // not jsdoc
+            const a = () => 5;
+            ",
+            vec![],
+        );
+        assert_jsdoc_comments(
+            r"
+            /* also not jsdoc */
+            class a {};
+            ",
+            vec![],
+        );
+        assert_jsdoc_comments(
+            r"
+            /*** too many asterisks */
+            var l = 345678;
+            ",
+            vec![],
+        );
     }
 }
