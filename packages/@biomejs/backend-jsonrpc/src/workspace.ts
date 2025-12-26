@@ -2132,8 +2132,8 @@ See <https://biomejs.dev/linter/rules/use-spread>
 	 */
 	useSpread?: UseSpreadConfiguration;
 	/**
-	* Succinct description of the rule.
-See https://biomejs.dev/linter/rules/use-starts-ends-with 
+	* Enforce using String.startsWith() and String.endsWith() over more complex alternatives.
+See <https://biomejs.dev/linter/rules/use-starts-ends-with> 
 	 */
 	useStartsEndsWith?: UseStartsEndsWithConfiguration;
 	/**

@@ -5555,7 +5555,7 @@
 					]
 				},
 				"useStartsEndsWith": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-starts-ends-with",
+					"description": "Enforce using String.startsWith() and String.endsWith() over more complex alternatives.\nSee <https://biomejs.dev/linter/rules/use-starts-ends-with>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseStartsEndsWithConfiguration" },
 						{ "type": "null" }

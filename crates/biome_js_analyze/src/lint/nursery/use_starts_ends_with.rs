@@ -1,11 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression,
     JsComputedMemberExpression, JsRegexLiteralExpression, JsStaticMemberExpression,
 };
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, declare_node_union};
 
 declare_lint_rule! {
     /// Enforce using `String.startsWith()` and `String.endsWith()` over more complex alternatives.
@@ -84,7 +84,7 @@ impl Rule for UseStartsEndsWith {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        
+
         match node {
             AnyStringCheckExpression::JsBinaryExpression(binary) => check_binary_expression(binary),
             AnyStringCheckExpression::JsCallExpression(call) => check_call_expression(call),
@@ -135,12 +135,12 @@ fn check_binary_expression(binary: &JsBinaryExpression) -> Option<UseStartsEndsW
 
 fn check_call_expression(call: &JsCallExpression) -> Option<UseStartsEndsWithState> {
     let callee = call.callee().ok()?;
-    
+
     if let AnyJsExpression::JsStaticMemberExpression(member_expr) = callee {
         let object = member_expr.object().ok()?;
         let member = member_expr.member().ok()?;
         let method = member.value_token().ok()?;
-        
+
         if method.text_trimmed() == "test" {
             if let AnyJsExpression::AnyJsLiteralExpression(literal) = object {
                 if let Some(regex) = literal.as_js_regex_literal_expression() {
@@ -204,7 +204,7 @@ fn check_method_call(
     pattern_expr: &AnyJsExpression,
 ) -> Option<UseStartsEndsWithState> {
     let callee = call.callee().ok()?;
-    
+
     if let AnyJsExpression::JsStaticMemberExpression(member_expr) = callee {
         let args = call.arguments().ok()?;
         return check_string_method(&member_expr, pattern_expr, &args);
@@ -264,7 +264,7 @@ fn check_string_method(
         "lastIndexOf" => {
             let pattern_arg = args.args().first()?.ok()?;
             let pattern = extract_string_literal(pattern_arg.as_any_js_expression()?)?;
-            
+
             if let AnyJsExpression::JsBinaryExpression(binary) = pattern_expr {
                 if binary.operator().ok()? == JsBinaryOperator::Minus {
                     let left = binary.left().ok()?;
@@ -276,7 +276,7 @@ fn check_string_method(
                     }
                 }
             }
-            
+
             None
         }
         "slice" => {
