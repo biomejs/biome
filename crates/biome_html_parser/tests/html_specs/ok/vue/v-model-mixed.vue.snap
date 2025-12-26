@@ -74,7 +74,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@62..69 "v-model" [] [],
+                            name_token: IDENT@62..69 "v-model" [] [],
                             arg: missing (optional),
                             modifiers: VueModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -96,7 +96,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@91..98 "v-model" [] [],
+                                name_token: IDENT@91..98 "v-model" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -126,7 +126,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@167..174 "v-model" [] [],
+                            name_token: IDENT@167..174 "v-model" [] [],
                             arg: missing (optional),
                             modifiers: VueModifierList [
                                 VueModifier {
@@ -152,7 +152,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@202..209 "v-model" [] [],
+                            name_token: IDENT@202..209 "v-model" [] [],
                             arg: missing (optional),
                             modifiers: VueModifierList [
                                 VueModifier {
@@ -178,7 +178,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@234..241 "v-model" [] [],
+                            name_token: IDENT@234..241 "v-model" [] [],
                             arg: missing (optional),
                             modifiers: VueModifierList [
                                 VueModifier {
@@ -204,7 +204,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@265..272 "v-model" [] [],
+                            name_token: IDENT@265..272 "v-model" [] [],
                             arg: missing (optional),
                             modifiers: VueModifierList [
                                 VueModifier {
@@ -238,7 +238,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@374..381 "v-model" [] [],
+                            name_token: IDENT@374..381 "v-model" [] [],
                             arg: missing (optional),
                             modifiers: VueModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -259,7 +259,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@404..411 "v-model" [] [],
+                            name_token: IDENT@404..411 "v-model" [] [],
                             arg: missing (optional),
                             modifiers: VueModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -293,7 +293,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@492..499 "v-model" [] [],
+                            name_token: IDENT@492..499 "v-model" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@499..500 ":" [] [],
                                 arg: VueStaticArgument {
@@ -319,7 +319,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@532..539 "v-model" [] [],
+                            name_token: IDENT@532..539 "v-model" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@539..540 ":" [] [],
                                 arg: VueStaticArgument {
@@ -345,7 +345,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@571..578 "v-model" [] [],
+                            name_token: IDENT@571..578 "v-model" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@578..579 ":" [] [],
                                 arg: VueStaticArgument {
@@ -371,7 +371,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@610..617 "v-model" [] [],
+                            name_token: IDENT@610..617 "v-model" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@617..618 ":" [] [],
                                 arg: VueStaticArgument {
@@ -406,7 +406,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@717..724 "v-model" [] [],
+                            name_token: IDENT@717..724 "v-model" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@724..725 ":" [] [],
                                 arg: VueDynamicArgument {
@@ -439,7 +439,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@768..775 "v-model" [] [],
+                            name_token: IDENT@768..775 "v-model" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@775..776 ":" [] [],
                                 arg: VueDynamicArgument {
@@ -472,7 +472,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@818..825 "v-model" [] [],
+                            name_token: IDENT@818..825 "v-model" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@825..826 ":" [] [],
                                 arg: VueDynamicArgument {
@@ -506,7 +506,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@918..925 "v-model" [] [],
+                                name_token: IDENT@918..925 "v-model" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -622,7 +622,7 @@ HtmlRoot {
                             },
                         },
                         VueDirective {
-                            name_token: VUE_IDENT@1049..1056 "v-model" [] [],
+                            name_token: IDENT@1049..1056 "v-model" [] [],
                             arg: missing (optional),
                             modifiers: VueModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -665,7 +665,7 @@ HtmlRoot {
                             },
                         },
                         VueDirective {
-                            name_token: VUE_IDENT@1101..1108 "v-model" [] [],
+                            name_token: IDENT@1101..1108 "v-model" [] [],
                             arg: missing (optional),
                             modifiers: VueModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -708,7 +708,7 @@ HtmlRoot {
                             },
                         },
                         VueDirective {
-                            name_token: VUE_IDENT@1154..1161 "v-model" [] [],
+                            name_token: IDENT@1154..1161 "v-model" [] [],
                             arg: missing (optional),
                             modifiers: VueModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -751,7 +751,7 @@ HtmlRoot {
                             },
                             attributes: HtmlAttributeList [
                                 VueDirective {
-                                    name_token: VUE_IDENT@1275..1282 "v-model" [] [],
+                                    name_token: IDENT@1275..1282 "v-model" [] [],
                                     arg: VueDirectiveArgument {
                                         colon_token: COLON@1282..1283 ":" [] [],
                                         arg: VueStaticArgument {
@@ -817,7 +817,7 @@ HtmlRoot {
             0: HTML_LITERAL@56..62 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@62..77
             0: VUE_DIRECTIVE@62..77
-              0: VUE_IDENT@62..69 "v-model" [] []
+              0: IDENT@62..69 "v-model" [] []
               1: (empty)
               2: VUE_MODIFIER_LIST@69..69
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@69..77
@@ -833,7 +833,7 @@ HtmlRoot {
               0: HTML_LITERAL@82..91 "textarea" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@91..108
               0: VUE_DIRECTIVE@91..108
-                0: VUE_IDENT@91..98 "v-model" [] []
+                0: IDENT@91..98 "v-model" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@98..98
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@98..108
@@ -854,7 +854,7 @@ HtmlRoot {
             0: HTML_LITERAL@161..167 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@167..191
             0: VUE_DIRECTIVE@167..191
-              0: VUE_IDENT@167..174 "v-model" [] []
+              0: IDENT@167..174 "v-model" [] []
               1: (empty)
               2: VUE_MODIFIER_LIST@174..179
                 0: VUE_MODIFIER@174..179
@@ -872,7 +872,7 @@ HtmlRoot {
             0: HTML_LITERAL@196..202 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@202..223
             0: VUE_DIRECTIVE@202..223
-              0: VUE_IDENT@202..209 "v-model" [] []
+              0: IDENT@202..209 "v-model" [] []
               1: (empty)
               2: VUE_MODIFIER_LIST@209..216
                 0: VUE_MODIFIER@209..216
@@ -890,7 +890,7 @@ HtmlRoot {
             0: HTML_LITERAL@228..234 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@234..254
             0: VUE_DIRECTIVE@234..254
-              0: VUE_IDENT@234..241 "v-model" [] []
+              0: IDENT@234..241 "v-model" [] []
               1: (empty)
               2: VUE_MODIFIER_LIST@241..246
                 0: VUE_MODIFIER@241..246
@@ -908,7 +908,7 @@ HtmlRoot {
             0: HTML_LITERAL@259..265 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@265..300
             0: VUE_DIRECTIVE@265..300
-              0: VUE_IDENT@265..272 "v-model" [] []
+              0: IDENT@265..272 "v-model" [] []
               1: (empty)
               2: VUE_MODIFIER_LIST@272..289
                 0: VUE_MODIFIER@272..277
@@ -932,7 +932,7 @@ HtmlRoot {
             0: HTML_LITERAL@361..374 "custom-input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@374..390
             0: VUE_DIRECTIVE@374..390
-              0: VUE_IDENT@374..381 "v-model" [] []
+              0: IDENT@374..381 "v-model" [] []
               1: (empty)
               2: VUE_MODIFIER_LIST@381..381
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@381..390
@@ -947,7 +947,7 @@ HtmlRoot {
             0: HTML_LITERAL@395..404 "my-input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@404..435
             0: VUE_DIRECTIVE@404..418
-              0: VUE_IDENT@404..411 "v-model" [] []
+              0: IDENT@404..411 "v-model" [] []
               1: (empty)
               2: VUE_MODIFIER_LIST@411..411
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@411..418
@@ -971,7 +971,7 @@ HtmlRoot {
             0: HTML_LITERAL@480..492 "date-picker" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@492..513
             0: VUE_DIRECTIVE@492..513
-              0: VUE_IDENT@492..499 "v-model" [] []
+              0: IDENT@492..499 "v-model" [] []
               1: VUE_DIRECTIVE_ARGUMENT@499..505
                 0: COLON@499..500 ":" [] []
                 1: VUE_STATIC_ARGUMENT@500..505
@@ -989,7 +989,7 @@ HtmlRoot {
             0: HTML_LITERAL@518..532 "custom-select" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@532..560
             0: VUE_DIRECTIVE@532..560
-              0: VUE_IDENT@532..539 "v-model" [] []
+              0: IDENT@532..539 "v-model" [] []
               1: VUE_DIRECTIVE_ARGUMENT@539..548
                 0: COLON@539..540 ":" [] []
                 1: VUE_STATIC_ARGUMENT@540..548
@@ -1007,7 +1007,7 @@ HtmlRoot {
             0: HTML_LITERAL@565..571 "child" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@571..599
             0: VUE_DIRECTIVE@571..599
-              0: VUE_IDENT@571..578 "v-model" [] []
+              0: IDENT@571..578 "v-model" [] []
               1: VUE_DIRECTIVE_ARGUMENT@578..586
                 0: COLON@578..579 ":" [] []
                 1: VUE_STATIC_ARGUMENT@579..586
@@ -1025,7 +1025,7 @@ HtmlRoot {
             0: HTML_LITERAL@604..610 "child" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@610..646
             0: VUE_DIRECTIVE@610..646
-              0: VUE_IDENT@610..617 "v-model" [] []
+              0: IDENT@610..617 "v-model" [] []
               1: VUE_DIRECTIVE_ARGUMENT@617..624
                 0: COLON@617..618 ":" [] []
                 1: VUE_STATIC_ARGUMENT@618..624
@@ -1049,7 +1049,7 @@ HtmlRoot {
             0: HTML_LITERAL@705..717 "component-a" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@717..751
             0: VUE_DIRECTIVE@717..751
-              0: VUE_IDENT@717..724 "v-model" [] []
+              0: IDENT@717..724 "v-model" [] []
               1: VUE_DIRECTIVE_ARGUMENT@724..735
                 0: COLON@724..725 ":" [] []
                 1: VUE_DYNAMIC_ARGUMENT@725..735
@@ -1072,7 +1072,7 @@ HtmlRoot {
             0: HTML_LITERAL@756..768 "component-b" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@768..801
             0: VUE_DIRECTIVE@768..801
-              0: VUE_IDENT@768..775 "v-model" [] []
+              0: IDENT@768..775 "v-model" [] []
               1: VUE_DIRECTIVE_ARGUMENT@775..787
                 0: COLON@775..776 ":" [] []
                 1: VUE_DYNAMIC_ARGUMENT@776..787
@@ -1095,7 +1095,7 @@ HtmlRoot {
             0: HTML_LITERAL@806..818 "component-c" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@818..855
             0: VUE_DIRECTIVE@818..855
-              0: VUE_IDENT@818..825 "v-model" [] []
+              0: IDENT@818..825 "v-model" [] []
               1: VUE_DIRECTIVE_ARGUMENT@825..839
                 0: COLON@825..826 ":" [] []
                 1: VUE_DYNAMIC_ARGUMENT@826..839
@@ -1119,7 +1119,7 @@ HtmlRoot {
               0: HTML_LITERAL@911..918 "select" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@918..942
               0: VUE_DIRECTIVE@918..942
-                0: VUE_IDENT@918..925 "v-model" [] []
+                0: IDENT@918..925 "v-model" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@925..925
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@925..942
@@ -1196,7 +1196,7 @@ HtmlRoot {
                 1: HTML_STRING@1038..1049
                   0: HTML_STRING_LITERAL@1038..1049 "\"checkbox\"" [] [Whitespace(" ")]
             1: VUE_DIRECTIVE@1049..1065
-              0: VUE_IDENT@1049..1056 "v-model" [] []
+              0: IDENT@1049..1056 "v-model" [] []
               1: (empty)
               2: VUE_MODIFIER_LIST@1056..1056
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1056..1065
@@ -1225,7 +1225,7 @@ HtmlRoot {
                 1: HTML_STRING@1095..1101
                   0: HTML_STRING_LITERAL@1095..1101 "\"one\"" [] [Whitespace(" ")]
             2: VUE_DIRECTIVE@1101..1118
-              0: VUE_IDENT@1101..1108 "v-model" [] []
+              0: IDENT@1101..1108 "v-model" [] []
               1: (empty)
               2: VUE_MODIFIER_LIST@1108..1108
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1108..1118
@@ -1254,7 +1254,7 @@ HtmlRoot {
                 1: HTML_STRING@1148..1154
                   0: HTML_STRING_LITERAL@1148..1154 "\"two\"" [] [Whitespace(" ")]
             2: VUE_DIRECTIVE@1154..1171
-              0: VUE_IDENT@1154..1161 "v-model" [] []
+              0: IDENT@1154..1161 "v-model" [] []
               1: (empty)
               2: VUE_MODIFIER_LIST@1161..1161
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1161..1171
@@ -1284,7 +1284,7 @@ HtmlRoot {
                 0: HTML_LITERAL@1269..1275 "child" [] [Whitespace(" ")]
               2: HTML_ATTRIBUTE_LIST@1275..1297
                 0: VUE_DIRECTIVE@1275..1297
-                  0: VUE_IDENT@1275..1282 "v-model" [] []
+                  0: IDENT@1275..1282 "v-model" [] []
                   1: VUE_DIRECTIVE_ARGUMENT@1282..1287
                     0: COLON@1282..1283 ":" [] []
                     1: VUE_STATIC_ARGUMENT@1283..1287

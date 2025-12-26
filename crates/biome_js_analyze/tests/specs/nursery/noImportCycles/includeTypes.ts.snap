@@ -24,5 +24,7 @@ includeTypes.ts:2:26 lint/nursery/noImportCycles ━━━━━━━━━━�
         ... which imports tests/specs/nursery/noImportCycles/includeTypes.ts
         ... which is the file we're importing from.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```

@@ -1,0 +1,73 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/await_multiple.svelte
+---
+# Input
+
+```svelte
+{#await userPromise then user}
+  <h1>{user.name}</h1>
+{/await}
+
+{#await postsPromise then posts}
+  <ul>
+    {#each posts as post}
+      <li>{post.title}</li>
+    {/each}
+  </ul>
+{/await}
+
+{#await commentsPromise}
+  <p>Loading comments...</p>
+{:then comments}
+  <div>
+    {#each comments as comment}
+      <p>{comment.text}</p>
+    {/each}
+  </div>
+{/await}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```svelte
+{#await userPromise then user}
+	<h1>{user.name}</h1>
+{/await}
+
+{#await postsPromise then posts}
+	<ul>
+		{#each posts as post}
+			<li>{post.title}</li>
+		{/each}
+	</ul>
+{/await}
+
+{#await commentsPromise}
+	<p>Loading comments...</p>
+{:then comments}
+	<div>
+		{#each comments as comment}
+			<p>{comment.text}</p>
+		{/each}
+	</div>
+{/await}
+```

@@ -59,7 +59,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@40..44 "v-on" [] [],
+                                name_token: IDENT@40..44 "v-on" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@44..45 ":" [] [],
                                     arg: VueStaticArgument {
@@ -99,7 +99,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@83..87 "v-on" [] [],
+                                name_token: IDENT@83..87 "v-on" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@87..88 ":" [] [],
                                     arg: VueStaticArgument {
@@ -144,7 +144,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@133..137 "v-on" [] [],
+                                name_token: IDENT@133..137 "v-on" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@137..138 ":" [] [],
                                     arg: VueStaticArgument {
@@ -184,7 +184,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@188..192 "v-on" [] [],
+                            name_token: IDENT@188..192 "v-on" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@192..193 ":" [] [],
                                 arg: VueStaticArgument {
@@ -342,7 +342,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@448..452 "v-on" [] [],
+                                name_token: IDENT@448..452 "v-on" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@452..453 ":" [] [],
                                     arg: VueDynamicArgument {
@@ -415,7 +415,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@570..574 "v-on" [] [],
+                                name_token: IDENT@570..574 "v-on" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@574..575 ":" [] [],
                                     arg: VueDynamicArgument {
@@ -534,7 +534,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@742..746 "v-on" [] [],
+                                name_token: IDENT@742..746 "v-on" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@746..747 ":" [] [],
                                     arg: VueStaticArgument {
@@ -579,7 +579,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@812..816 "v-on" [] [],
+                                name_token: IDENT@812..816 "v-on" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@816..817 ":" [] [],
                                     arg: VueStaticArgument {
@@ -650,7 +650,7 @@ HtmlRoot {
               0: HTML_LITERAL@33..40 "button" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@40..60
               0: VUE_DIRECTIVE@40..60
-                0: VUE_IDENT@40..44 "v-on" [] []
+                0: IDENT@40..44 "v-on" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@44..50
                   0: COLON@44..45 ":" [] []
                   1: VUE_STATIC_ARGUMENT@45..50
@@ -677,7 +677,7 @@ HtmlRoot {
               0: HTML_LITERAL@78..83 "form" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@83..118
               0: VUE_DIRECTIVE@83..118
-                0: VUE_IDENT@83..87 "v-on" [] []
+                0: IDENT@83..87 "v-on" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@87..94
                   0: COLON@87..88 ":" [] []
                   1: VUE_STATIC_ARGUMENT@88..94
@@ -708,7 +708,7 @@ HtmlRoot {
               0: HTML_LITERAL@129..133 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@133..172
               0: VUE_DIRECTIVE@133..172
-                0: VUE_IDENT@133..137 "v-on" [] []
+                0: IDENT@133..137 "v-on" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@137..148
                   0: COLON@137..138 ":" [] []
                   1: VUE_STATIC_ARGUMENT@138..148
@@ -735,7 +735,7 @@ HtmlRoot {
             0: HTML_LITERAL@182..188 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@188..221
             0: VUE_DIRECTIVE@188..221
-              0: VUE_IDENT@188..192 "v-on" [] []
+              0: IDENT@188..192 "v-on" [] []
               1: VUE_DIRECTIVE_ARGUMENT@192..198
                 0: COLON@192..193 ":" [] []
                 1: VUE_STATIC_ARGUMENT@193..198
@@ -842,7 +842,7 @@ HtmlRoot {
               0: HTML_LITERAL@444..448 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@448..475
               0: VUE_DIRECTIVE@448..475
-                0: VUE_IDENT@448..452 "v-on" [] []
+                0: IDENT@448..452 "v-on" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@452..458
                   0: COLON@452..453 ":" [] []
                   1: VUE_DYNAMIC_ARGUMENT@453..458
@@ -894,7 +894,7 @@ HtmlRoot {
               0: HTML_LITERAL@566..570 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@570..609
               0: VUE_DIRECTIVE@570..609
-                0: VUE_IDENT@570..574 "v-on" [] []
+                0: IDENT@570..574 "v-on" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@574..580
                   0: COLON@574..575 ":" [] []
                   1: VUE_DYNAMIC_ARGUMENT@575..580
@@ -977,7 +977,7 @@ HtmlRoot {
               0: HTML_LITERAL@735..742 "button" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@742..782
               0: VUE_DIRECTIVE@742..782
-                0: VUE_IDENT@742..746 "v-on" [] []
+                0: IDENT@742..746 "v-on" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@746..758
                   0: COLON@746..747 ":" [] []
                   1: VUE_STATIC_ARGUMENT@747..758
@@ -1007,7 +1007,7 @@ HtmlRoot {
               0: HTML_LITERAL@802..812 "component" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@812..847
               0: VUE_DIRECTIVE@812..847
-                0: VUE_IDENT@812..816 "v-on" [] []
+                0: IDENT@812..816 "v-on" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@816..822
                   0: COLON@816..817 ":" [] []
                   1: VUE_STATIC_ARGUMENT@817..822

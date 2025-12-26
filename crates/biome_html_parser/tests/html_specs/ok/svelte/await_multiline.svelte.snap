@@ -1,0 +1,600 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#await promise}
+  <div class="loading">
+    <span class="spinner"></span>
+    <p>Please wait while we load your data...</p>
+  </div>
+{:then data}
+  <div class="success">
+    <h2>Success!</h2>
+    <pre>{JSON.stringify(data, null, 2)}</pre>
+  </div>
+{:catch error}
+  <div class="error">
+    <h2>Error</h2>
+    <p>{error.message}</p>
+    <button on:click={retry}>Retry</button>
+  </div>
+{/await}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                await_token: AWAIT_KW@2..7 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@7..15 " promise" [] [],
+                },
+                then_clause: missing (optional),
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@15..16 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@16..20 "<" [Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@20..24 "div" [] [Whitespace(" ")],
+                            },
+                            attributes: HtmlAttributeList [
+                                HtmlAttribute {
+                                    name: HtmlAttributeName {
+                                        value_token: HTML_LITERAL@24..29 "class" [] [],
+                                    },
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@29..30 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@30..39 "\"loading\"" [] [],
+                                        },
+                                    },
+                                },
+                            ],
+                            r_angle_token: R_ANGLE@39..40 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlElement {
+                                opening_element: HtmlOpeningElement {
+                                    l_angle_token: L_ANGLE@40..46 "<" [Newline("\n"), Whitespace("    ")] [],
+                                    name: HtmlTagName {
+                                        value_token: HTML_LITERAL@46..51 "span" [] [Whitespace(" ")],
+                                    },
+                                    attributes: HtmlAttributeList [
+                                        HtmlAttribute {
+                                            name: HtmlAttributeName {
+                                                value_token: HTML_LITERAL@51..56 "class" [] [],
+                                            },
+                                            initializer: HtmlAttributeInitializerClause {
+                                                eq_token: EQ@56..57 "=" [] [],
+                                                value: HtmlString {
+                                                    value_token: HTML_STRING_LITERAL@57..66 "\"spinner\"" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                    r_angle_token: R_ANGLE@66..67 ">" [] [],
+                                },
+                                children: HtmlElementList [],
+                                closing_element: HtmlClosingElement {
+                                    l_angle_token: L_ANGLE@67..68 "<" [] [],
+                                    slash_token: SLASH@68..69 "/" [] [],
+                                    name: HtmlTagName {
+                                        value_token: HTML_LITERAL@69..73 "span" [] [],
+                                    },
+                                    r_angle_token: R_ANGLE@73..74 ">" [] [],
+                                },
+                            },
+                            HtmlElement {
+                                opening_element: HtmlOpeningElement {
+                                    l_angle_token: L_ANGLE@74..80 "<" [Newline("\n"), Whitespace("    ")] [],
+                                    name: HtmlTagName {
+                                        value_token: HTML_LITERAL@80..81 "p" [] [],
+                                    },
+                                    attributes: HtmlAttributeList [],
+                                    r_angle_token: R_ANGLE@81..82 ">" [] [],
+                                },
+                                children: HtmlElementList [
+                                    HtmlContent {
+                                        value_token: HTML_LITERAL@82..120 "Please wait while we load your data..." [] [],
+                                    },
+                                ],
+                                closing_element: HtmlClosingElement {
+                                    l_angle_token: L_ANGLE@120..121 "<" [] [],
+                                    slash_token: SLASH@121..122 "/" [] [],
+                                    name: HtmlTagName {
+                                        value_token: HTML_LITERAL@122..123 "p" [] [],
+                                    },
+                                    r_angle_token: R_ANGLE@123..124 ">" [] [],
+                                },
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@124..128 "<" [Newline("\n"), Whitespace("  ")] [],
+                            slash_token: SLASH@128..129 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@129..132 "div" [] [],
+                            },
+                            r_angle_token: R_ANGLE@132..133 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [
+                SvelteAwaitThenBlock {
+                    sv_curly_colon_token: SV_CURLY_COLON@133..136 "{:" [Newline("\n")] [],
+                    then_token: THEN_KW@136..140 "then" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@140..145 " data" [] [],
+                    },
+                    r_curly_token: R_CURLY@145..146 "}" [] [],
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@146..150 "<" [Newline("\n"), Whitespace("  ")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@150..154 "div" [] [Whitespace(" ")],
+                                },
+                                attributes: HtmlAttributeList [
+                                    HtmlAttribute {
+                                        name: HtmlAttributeName {
+                                            value_token: HTML_LITERAL@154..159 "class" [] [],
+                                        },
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@159..160 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@160..169 "\"success\"" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_angle_token: R_ANGLE@169..170 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlElement {
+                                    opening_element: HtmlOpeningElement {
+                                        l_angle_token: L_ANGLE@170..176 "<" [Newline("\n"), Whitespace("    ")] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@176..178 "h2" [] [],
+                                        },
+                                        attributes: HtmlAttributeList [],
+                                        r_angle_token: R_ANGLE@178..179 ">" [] [],
+                                    },
+                                    children: HtmlElementList [
+                                        HtmlContent {
+                                            value_token: HTML_LITERAL@179..187 "Success!" [] [],
+                                        },
+                                    ],
+                                    closing_element: HtmlClosingElement {
+                                        l_angle_token: L_ANGLE@187..188 "<" [] [],
+                                        slash_token: SLASH@188..189 "/" [] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@189..191 "h2" [] [],
+                                        },
+                                        r_angle_token: R_ANGLE@191..192 ">" [] [],
+                                    },
+                                },
+                                HtmlElement {
+                                    opening_element: HtmlOpeningElement {
+                                        l_angle_token: L_ANGLE@192..198 "<" [Newline("\n"), Whitespace("    ")] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@198..201 "pre" [] [],
+                                        },
+                                        attributes: HtmlAttributeList [],
+                                        r_angle_token: R_ANGLE@201..202 ">" [] [],
+                                    },
+                                    children: HtmlElementList [
+                                        HtmlEmbeddedContent {
+                                            value_token: HTML_LITERAL@202..233 "{JSON.stringify(data, null, 2)}" [] [],
+                                        },
+                                    ],
+                                    closing_element: HtmlClosingElement {
+                                        l_angle_token: L_ANGLE@233..234 "<" [] [],
+                                        slash_token: SLASH@234..235 "/" [] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@235..238 "pre" [] [],
+                                        },
+                                        r_angle_token: R_ANGLE@238..239 ">" [] [],
+                                    },
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@239..243 "<" [Newline("\n"), Whitespace("  ")] [],
+                                slash_token: SLASH@243..244 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@244..247 "div" [] [],
+                                },
+                                r_angle_token: R_ANGLE@247..248 ">" [] [],
+                            },
+                        },
+                    ],
+                },
+                SvelteAwaitCatchBlock {
+                    sv_curly_colon_token: SV_CURLY_COLON@248..251 "{:" [Newline("\n")] [],
+                    catch_token: CATCH_KW@251..256 "catch" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@256..262 " error" [] [],
+                    },
+                    r_curly_token: R_CURLY@262..263 "}" [] [],
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@263..267 "<" [Newline("\n"), Whitespace("  ")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@267..271 "div" [] [Whitespace(" ")],
+                                },
+                                attributes: HtmlAttributeList [
+                                    HtmlAttribute {
+                                        name: HtmlAttributeName {
+                                            value_token: HTML_LITERAL@271..276 "class" [] [],
+                                        },
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@276..277 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@277..284 "\"error\"" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_angle_token: R_ANGLE@284..285 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlElement {
+                                    opening_element: HtmlOpeningElement {
+                                        l_angle_token: L_ANGLE@285..291 "<" [Newline("\n"), Whitespace("    ")] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@291..293 "h2" [] [],
+                                        },
+                                        attributes: HtmlAttributeList [],
+                                        r_angle_token: R_ANGLE@293..294 ">" [] [],
+                                    },
+                                    children: HtmlElementList [
+                                        HtmlContent {
+                                            value_token: HTML_LITERAL@294..299 "Error" [] [],
+                                        },
+                                    ],
+                                    closing_element: HtmlClosingElement {
+                                        l_angle_token: L_ANGLE@299..300 "<" [] [],
+                                        slash_token: SLASH@300..301 "/" [] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@301..303 "h2" [] [],
+                                        },
+                                        r_angle_token: R_ANGLE@303..304 ">" [] [],
+                                    },
+                                },
+                                HtmlElement {
+                                    opening_element: HtmlOpeningElement {
+                                        l_angle_token: L_ANGLE@304..310 "<" [Newline("\n"), Whitespace("    ")] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@310..311 "p" [] [],
+                                        },
+                                        attributes: HtmlAttributeList [],
+                                        r_angle_token: R_ANGLE@311..312 ">" [] [],
+                                    },
+                                    children: HtmlElementList [
+                                        HtmlSingleTextExpression {
+                                            l_curly_token: L_CURLY@312..313 "{" [] [],
+                                            expression: HtmlTextExpression {
+                                                html_literal_token: HTML_LITERAL@313..326 "error.message" [] [],
+                                            },
+                                            r_curly_token: R_CURLY@326..327 "}" [] [],
+                                        },
+                                    ],
+                                    closing_element: HtmlClosingElement {
+                                        l_angle_token: L_ANGLE@327..328 "<" [] [],
+                                        slash_token: SLASH@328..329 "/" [] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@329..330 "p" [] [],
+                                        },
+                                        r_angle_token: R_ANGLE@330..331 ">" [] [],
+                                    },
+                                },
+                                HtmlElement {
+                                    opening_element: HtmlOpeningElement {
+                                        l_angle_token: L_ANGLE@331..337 "<" [Newline("\n"), Whitespace("    ")] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@337..344 "button" [] [Whitespace(" ")],
+                                        },
+                                        attributes: HtmlAttributeList [
+                                            HtmlAttribute {
+                                                name: HtmlAttributeName {
+                                                    value_token: HTML_LITERAL@344..352 "on:click" [] [],
+                                                },
+                                                initializer: HtmlAttributeInitializerClause {
+                                                    eq_token: EQ@352..353 "=" [] [],
+                                                    value: HtmlSingleTextExpression {
+                                                        l_curly_token: L_CURLY@353..354 "{" [] [],
+                                                        expression: HtmlTextExpression {
+                                                            html_literal_token: HTML_LITERAL@354..359 "retry" [] [],
+                                                        },
+                                                        r_curly_token: R_CURLY@359..360 "}" [] [],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_angle_token: R_ANGLE@360..361 ">" [] [],
+                                    },
+                                    children: HtmlElementList [
+                                        HtmlContent {
+                                            value_token: HTML_LITERAL@361..366 "Retry" [] [],
+                                        },
+                                    ],
+                                    closing_element: HtmlClosingElement {
+                                        l_angle_token: L_ANGLE@366..367 "<" [] [],
+                                        slash_token: SLASH@367..368 "/" [] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@368..374 "button" [] [],
+                                        },
+                                        r_angle_token: R_ANGLE@374..375 ">" [] [],
+                                    },
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@375..379 "<" [Newline("\n"), Whitespace("  ")] [],
+                                slash_token: SLASH@379..380 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@380..383 "div" [] [],
+                                },
+                                r_angle_token: R_ANGLE@383..384 ">" [] [],
+                            },
+                        },
+                    ],
+                },
+            ],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@384..387 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@387..392 "await" [] [],
+                r_curly_token: R_CURLY@392..393 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@393..394 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..394
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..393
+    0: SVELTE_AWAIT_BLOCK@0..393
+      0: SVELTE_AWAIT_OPENING_BLOCK@0..133
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: AWAIT_KW@2..7 "await" [] []
+        2: HTML_TEXT_EXPRESSION@7..15
+          0: HTML_LITERAL@7..15 " promise" [] []
+        3: (empty)
+        4: (empty)
+        5: R_CURLY@15..16 "}" [] []
+        6: HTML_ELEMENT_LIST@16..133
+          0: HTML_ELEMENT@16..133
+            0: HTML_OPENING_ELEMENT@16..40
+              0: L_ANGLE@16..20 "<" [Newline("\n"), Whitespace("  ")] []
+              1: HTML_TAG_NAME@20..24
+                0: HTML_LITERAL@20..24 "div" [] [Whitespace(" ")]
+              2: HTML_ATTRIBUTE_LIST@24..39
+                0: HTML_ATTRIBUTE@24..39
+                  0: HTML_ATTRIBUTE_NAME@24..29
+                    0: HTML_LITERAL@24..29 "class" [] []
+                  1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@29..39
+                    0: EQ@29..30 "=" [] []
+                    1: HTML_STRING@30..39
+                      0: HTML_STRING_LITERAL@30..39 "\"loading\"" [] []
+              3: R_ANGLE@39..40 ">" [] []
+            1: HTML_ELEMENT_LIST@40..124
+              0: HTML_ELEMENT@40..74
+                0: HTML_OPENING_ELEMENT@40..67
+                  0: L_ANGLE@40..46 "<" [Newline("\n"), Whitespace("    ")] []
+                  1: HTML_TAG_NAME@46..51
+                    0: HTML_LITERAL@46..51 "span" [] [Whitespace(" ")]
+                  2: HTML_ATTRIBUTE_LIST@51..66
+                    0: HTML_ATTRIBUTE@51..66
+                      0: HTML_ATTRIBUTE_NAME@51..56
+                        0: HTML_LITERAL@51..56 "class" [] []
+                      1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@56..66
+                        0: EQ@56..57 "=" [] []
+                        1: HTML_STRING@57..66
+                          0: HTML_STRING_LITERAL@57..66 "\"spinner\"" [] []
+                  3: R_ANGLE@66..67 ">" [] []
+                1: HTML_ELEMENT_LIST@67..67
+                2: HTML_CLOSING_ELEMENT@67..74
+                  0: L_ANGLE@67..68 "<" [] []
+                  1: SLASH@68..69 "/" [] []
+                  2: HTML_TAG_NAME@69..73
+                    0: HTML_LITERAL@69..73 "span" [] []
+                  3: R_ANGLE@73..74 ">" [] []
+              1: HTML_ELEMENT@74..124
+                0: HTML_OPENING_ELEMENT@74..82
+                  0: L_ANGLE@74..80 "<" [Newline("\n"), Whitespace("    ")] []
+                  1: HTML_TAG_NAME@80..81
+                    0: HTML_LITERAL@80..81 "p" [] []
+                  2: HTML_ATTRIBUTE_LIST@81..81
+                  3: R_ANGLE@81..82 ">" [] []
+                1: HTML_ELEMENT_LIST@82..120
+                  0: HTML_CONTENT@82..120
+                    0: HTML_LITERAL@82..120 "Please wait while we load your data..." [] []
+                2: HTML_CLOSING_ELEMENT@120..124
+                  0: L_ANGLE@120..121 "<" [] []
+                  1: SLASH@121..122 "/" [] []
+                  2: HTML_TAG_NAME@122..123
+                    0: HTML_LITERAL@122..123 "p" [] []
+                  3: R_ANGLE@123..124 ">" [] []
+            2: HTML_CLOSING_ELEMENT@124..133
+              0: L_ANGLE@124..128 "<" [Newline("\n"), Whitespace("  ")] []
+              1: SLASH@128..129 "/" [] []
+              2: HTML_TAG_NAME@129..132
+                0: HTML_LITERAL@129..132 "div" [] []
+              3: R_ANGLE@132..133 ">" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@133..384
+        0: SVELTE_AWAIT_THEN_BLOCK@133..248
+          0: SV_CURLY_COLON@133..136 "{:" [Newline("\n")] []
+          1: THEN_KW@136..140 "then" [] []
+          2: HTML_TEXT_EXPRESSION@140..145
+            0: HTML_LITERAL@140..145 " data" [] []
+          3: R_CURLY@145..146 "}" [] []
+          4: HTML_ELEMENT_LIST@146..248
+            0: HTML_ELEMENT@146..248
+              0: HTML_OPENING_ELEMENT@146..170
+                0: L_ANGLE@146..150 "<" [Newline("\n"), Whitespace("  ")] []
+                1: HTML_TAG_NAME@150..154
+                  0: HTML_LITERAL@150..154 "div" [] [Whitespace(" ")]
+                2: HTML_ATTRIBUTE_LIST@154..169
+                  0: HTML_ATTRIBUTE@154..169
+                    0: HTML_ATTRIBUTE_NAME@154..159
+                      0: HTML_LITERAL@154..159 "class" [] []
+                    1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@159..169
+                      0: EQ@159..160 "=" [] []
+                      1: HTML_STRING@160..169
+                        0: HTML_STRING_LITERAL@160..169 "\"success\"" [] []
+                3: R_ANGLE@169..170 ">" [] []
+              1: HTML_ELEMENT_LIST@170..239
+                0: HTML_ELEMENT@170..192
+                  0: HTML_OPENING_ELEMENT@170..179
+                    0: L_ANGLE@170..176 "<" [Newline("\n"), Whitespace("    ")] []
+                    1: HTML_TAG_NAME@176..178
+                      0: HTML_LITERAL@176..178 "h2" [] []
+                    2: HTML_ATTRIBUTE_LIST@178..178
+                    3: R_ANGLE@178..179 ">" [] []
+                  1: HTML_ELEMENT_LIST@179..187
+                    0: HTML_CONTENT@179..187
+                      0: HTML_LITERAL@179..187 "Success!" [] []
+                  2: HTML_CLOSING_ELEMENT@187..192
+                    0: L_ANGLE@187..188 "<" [] []
+                    1: SLASH@188..189 "/" [] []
+                    2: HTML_TAG_NAME@189..191
+                      0: HTML_LITERAL@189..191 "h2" [] []
+                    3: R_ANGLE@191..192 ">" [] []
+                1: HTML_ELEMENT@192..239
+                  0: HTML_OPENING_ELEMENT@192..202
+                    0: L_ANGLE@192..198 "<" [Newline("\n"), Whitespace("    ")] []
+                    1: HTML_TAG_NAME@198..201
+                      0: HTML_LITERAL@198..201 "pre" [] []
+                    2: HTML_ATTRIBUTE_LIST@201..201
+                    3: R_ANGLE@201..202 ">" [] []
+                  1: HTML_ELEMENT_LIST@202..233
+                    0: HTML_EMBEDDED_CONTENT@202..233
+                      0: HTML_LITERAL@202..233 "{JSON.stringify(data, null, 2)}" [] []
+                  2: HTML_CLOSING_ELEMENT@233..239
+                    0: L_ANGLE@233..234 "<" [] []
+                    1: SLASH@234..235 "/" [] []
+                    2: HTML_TAG_NAME@235..238
+                      0: HTML_LITERAL@235..238 "pre" [] []
+                    3: R_ANGLE@238..239 ">" [] []
+              2: HTML_CLOSING_ELEMENT@239..248
+                0: L_ANGLE@239..243 "<" [Newline("\n"), Whitespace("  ")] []
+                1: SLASH@243..244 "/" [] []
+                2: HTML_TAG_NAME@244..247
+                  0: HTML_LITERAL@244..247 "div" [] []
+                3: R_ANGLE@247..248 ">" [] []
+        1: SVELTE_AWAIT_CATCH_BLOCK@248..384
+          0: SV_CURLY_COLON@248..251 "{:" [Newline("\n")] []
+          1: CATCH_KW@251..256 "catch" [] []
+          2: HTML_TEXT_EXPRESSION@256..262
+            0: HTML_LITERAL@256..262 " error" [] []
+          3: R_CURLY@262..263 "}" [] []
+          4: HTML_ELEMENT_LIST@263..384
+            0: HTML_ELEMENT@263..384
+              0: HTML_OPENING_ELEMENT@263..285
+                0: L_ANGLE@263..267 "<" [Newline("\n"), Whitespace("  ")] []
+                1: HTML_TAG_NAME@267..271
+                  0: HTML_LITERAL@267..271 "div" [] [Whitespace(" ")]
+                2: HTML_ATTRIBUTE_LIST@271..284
+                  0: HTML_ATTRIBUTE@271..284
+                    0: HTML_ATTRIBUTE_NAME@271..276
+                      0: HTML_LITERAL@271..276 "class" [] []
+                    1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@276..284
+                      0: EQ@276..277 "=" [] []
+                      1: HTML_STRING@277..284
+                        0: HTML_STRING_LITERAL@277..284 "\"error\"" [] []
+                3: R_ANGLE@284..285 ">" [] []
+              1: HTML_ELEMENT_LIST@285..375
+                0: HTML_ELEMENT@285..304
+                  0: HTML_OPENING_ELEMENT@285..294
+                    0: L_ANGLE@285..291 "<" [Newline("\n"), Whitespace("    ")] []
+                    1: HTML_TAG_NAME@291..293
+                      0: HTML_LITERAL@291..293 "h2" [] []
+                    2: HTML_ATTRIBUTE_LIST@293..293
+                    3: R_ANGLE@293..294 ">" [] []
+                  1: HTML_ELEMENT_LIST@294..299
+                    0: HTML_CONTENT@294..299
+                      0: HTML_LITERAL@294..299 "Error" [] []
+                  2: HTML_CLOSING_ELEMENT@299..304
+                    0: L_ANGLE@299..300 "<" [] []
+                    1: SLASH@300..301 "/" [] []
+                    2: HTML_TAG_NAME@301..303
+                      0: HTML_LITERAL@301..303 "h2" [] []
+                    3: R_ANGLE@303..304 ">" [] []
+                1: HTML_ELEMENT@304..331
+                  0: HTML_OPENING_ELEMENT@304..312
+                    0: L_ANGLE@304..310 "<" [Newline("\n"), Whitespace("    ")] []
+                    1: HTML_TAG_NAME@310..311
+                      0: HTML_LITERAL@310..311 "p" [] []
+                    2: HTML_ATTRIBUTE_LIST@311..311
+                    3: R_ANGLE@311..312 ">" [] []
+                  1: HTML_ELEMENT_LIST@312..327
+                    0: HTML_SINGLE_TEXT_EXPRESSION@312..327
+                      0: L_CURLY@312..313 "{" [] []
+                      1: HTML_TEXT_EXPRESSION@313..326
+                        0: HTML_LITERAL@313..326 "error.message" [] []
+                      2: R_CURLY@326..327 "}" [] []
+                  2: HTML_CLOSING_ELEMENT@327..331
+                    0: L_ANGLE@327..328 "<" [] []
+                    1: SLASH@328..329 "/" [] []
+                    2: HTML_TAG_NAME@329..330
+                      0: HTML_LITERAL@329..330 "p" [] []
+                    3: R_ANGLE@330..331 ">" [] []
+                2: HTML_ELEMENT@331..375
+                  0: HTML_OPENING_ELEMENT@331..361
+                    0: L_ANGLE@331..337 "<" [Newline("\n"), Whitespace("    ")] []
+                    1: HTML_TAG_NAME@337..344
+                      0: HTML_LITERAL@337..344 "button" [] [Whitespace(" ")]
+                    2: HTML_ATTRIBUTE_LIST@344..360
+                      0: HTML_ATTRIBUTE@344..360
+                        0: HTML_ATTRIBUTE_NAME@344..352
+                          0: HTML_LITERAL@344..352 "on:click" [] []
+                        1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@352..360
+                          0: EQ@352..353 "=" [] []
+                          1: HTML_SINGLE_TEXT_EXPRESSION@353..360
+                            0: L_CURLY@353..354 "{" [] []
+                            1: HTML_TEXT_EXPRESSION@354..359
+                              0: HTML_LITERAL@354..359 "retry" [] []
+                            2: R_CURLY@359..360 "}" [] []
+                    3: R_ANGLE@360..361 ">" [] []
+                  1: HTML_ELEMENT_LIST@361..366
+                    0: HTML_CONTENT@361..366
+                      0: HTML_LITERAL@361..366 "Retry" [] []
+                  2: HTML_CLOSING_ELEMENT@366..375
+                    0: L_ANGLE@366..367 "<" [] []
+                    1: SLASH@367..368 "/" [] []
+                    2: HTML_TAG_NAME@368..374
+                      0: HTML_LITERAL@368..374 "button" [] []
+                    3: R_ANGLE@374..375 ">" [] []
+              2: HTML_CLOSING_ELEMENT@375..384
+                0: L_ANGLE@375..379 "<" [Newline("\n"), Whitespace("  ")] []
+                1: SLASH@379..380 "/" [] []
+                2: HTML_TAG_NAME@380..383
+                  0: HTML_LITERAL@380..383 "div" [] []
+                3: R_ANGLE@383..384 ">" [] []
+      2: SVELTE_AWAIT_CLOSING_BLOCK@384..393
+        0: SV_CURLY_SLASH@384..387 "{/" [Newline("\n")] []
+        1: AWAIT_KW@387..392 "await" [] []
+        2: R_CURLY@392..393 "}" [] []
+  4: EOF@393..394 "" [Newline("\n")] []
+
+```

@@ -412,7 +412,7 @@ CssPseudoClassFunctionCustomIdentifier =
 CssPseudoClassFunctionCustomIdentifierList =
 	name: CssIdentifier
 	'('
-	items: CssCustomIdentifierList
+	items: CssCustomIdentifierCommaSeparatedList
 	')'
 
 // a::after {}
@@ -807,11 +807,15 @@ AnyCssFontFamilyName =
     | CssBogusFontFamilyName
 
 CssFontFamilyName =
-	names: CssCustomIdentifierList
+	names: CssCustomIdentifierSpaceSeparatedList
 
 // @font-feature-values Font Second Gothic { }
 //                      ^^^^^^^^^^^^^^^^^^
-CssCustomIdentifierList = AnyCssCustomIdentifier*
+CssCustomIdentifierSpaceSeparatedList = AnyCssCustomIdentifier*
+
+// :active-view-transition-type(forwards, backwards) { }
+//                              ^^^^^^^^^^^^^^^^^^^^
+CssCustomIdentifierCommaSeparatedList = (AnyCssCustomIdentifier (',' AnyCssCustomIdentifier)*)
 
 AnyCssFontFeatureValuesBlock =
 	CssFontFeatureValuesBlock

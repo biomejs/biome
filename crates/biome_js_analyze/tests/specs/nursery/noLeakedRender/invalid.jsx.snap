@@ -93,6 +93,8 @@ invalid.jsx:6:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -111,6 +113,8 @@ invalid.jsx:7:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -131,6 +135,8 @@ invalid.jsx:8:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -148,6 +154,8 @@ invalid.jsx:14:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -167,6 +175,8 @@ invalid.jsx:18:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -184,6 +194,8 @@ invalid.jsx:22:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -204,6 +216,8 @@ invalid.jsx:27:9 lint/nursery/noLeakedRender ━━━━━━━━━━━�
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -222,6 +236,8 @@ invalid.jsx:32:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -239,6 +255,8 @@ invalid.jsx:36:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -264,6 +282,8 @@ invalid.jsx:42:5 lint/nursery/noLeakedRender ━━━━━━━━━━━�
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -281,6 +301,8 @@ invalid.jsx:52:12 lint/nursery/noLeakedRender ━━━━━━━━━━━�
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -300,6 +322,8 @@ invalid.jsx:56:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -318,6 +342,8 @@ invalid.jsx:60:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -335,6 +361,8 @@ invalid.jsx:68:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

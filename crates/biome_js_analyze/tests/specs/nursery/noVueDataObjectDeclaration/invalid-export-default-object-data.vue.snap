@@ -31,6 +31,8 @@ invalid-export-default-object-data.vue:3:2 lint/nursery/noVueDataObjectDeclarati
   
   i Using an object declaration for `data` is deprecated, and can result in different component instances sharing the same data.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Refactor the data object into a function returning the data object
   
     1 1 │   // export default with object `data`

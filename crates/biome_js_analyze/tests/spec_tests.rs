@@ -6,7 +6,7 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, JsLanguage, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::{AstNode, FileSourceError};
@@ -121,7 +121,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         // This is needed to set the language to TypeScript for Vue files
         // because we can't do it in <script> definition in the current implementation.
         let source_type = if source_type.as_embedding_kind().is_vue() {
-            JsFileSource::ts().with_embedding_kind(EmbeddingKind::Vue)
+            JsFileSource::ts()
+                .with_embedding_kind(*VueFileHandler::file_source(&input_code).as_embedding_kind())
         } else {
             source_type
         };

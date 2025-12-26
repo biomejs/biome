@@ -78,6 +78,8 @@ invalid.jsx:3:16 lint/nursery/noNextAsyncClientComponent ━━━━━━━�
   
   i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -99,6 +101,8 @@ invalid.jsx:7:1 lint/nursery/noNextAsyncClientComponent ━━━━━━━━
   i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
   
   i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -122,6 +126,8 @@ invalid.jsx:11:7 lint/nursery/noNextAsyncClientComponent ━━━━━━━�
   
   i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -144,6 +150,8 @@ invalid.jsx:15:7 lint/nursery/noNextAsyncClientComponent ━━━━━━━�
   
   i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -164,6 +172,8 @@ invalid.jsx:20:1 lint/nursery/noNextAsyncClientComponent ━━━━━━━�
   i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
   
   i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -186,6 +196,8 @@ invalid.jsx:25:1 lint/nursery/noNextAsyncClientComponent ━━━━━━━�
   
   i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -206,6 +218,8 @@ invalid.jsx:30:3 lint/nursery/noNextAsyncClientComponent ━━━━━━━�
   i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
   
   i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -228,6 +242,8 @@ invalid.jsx:36:3 lint/nursery/noNextAsyncClientComponent ━━━━━━━�
   
   i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -249,6 +265,8 @@ invalid.jsx:42:3 lint/nursery/noNextAsyncClientComponent ━━━━━━━�
   
   i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -269,6 +287,8 @@ invalid.jsx:48:3 lint/nursery/noNextAsyncClientComponent ━━━━━━━�
   i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
   
   i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

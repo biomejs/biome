@@ -24,13 +24,13 @@ TwRoot {
                 property_token: TW_PROPERTY@1..11 "background" [] [],
                 colon_token: COLON@11..12 ":" [] [],
                 value_token: TW_VALUE@12..16 "blue" [] [],
-                r_brack_token: R_BRACKET@16..18 "]" [] [Newline("\n")],
+                r_brack_token: R_BRACKET@16..17 "]" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@18..18 "" [] [],
+    eof_token: EOF@17..18 "" [Newline("\n")] [],
 }
 ```
 
@@ -39,18 +39,18 @@ TwRoot {
 ```
 0: TW_ROOT@0..18
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..18
-    0: TW_FULL_CANDIDATE@0..18
+  1: TW_CANDIDATE_LIST@0..17
+    0: TW_FULL_CANDIDATE@0..17
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_ARBITRARY_CANDIDATE@0..18
+      2: TW_ARBITRARY_CANDIDATE@0..17
         0: L_BRACKET@0..1 "[" [] []
         1: TW_PROPERTY@1..11 "background" [] []
         2: COLON@11..12 ":" [] []
         3: TW_VALUE@12..16 "blue" [] []
-        4: R_BRACKET@16..18 "]" [] [Newline("\n")]
+        4: R_BRACKET@16..17 "]" [] []
         5: (empty)
       3: (empty)
-  2: EOF@18..18 "" [] []
+  2: EOF@17..18 "" [Newline("\n")] []
 
 ```

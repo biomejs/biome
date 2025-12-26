@@ -1,0 +1,69 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+border -top-2
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@0..7 "border" [] [Whitespace(" ")],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: DASH@7..8 "-" [] [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@8..11 "top" [] [],
+                minus_token: DASH@11..12 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@12..13 "2" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@13..14 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..14
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..13
+    0: TW_FULL_CANDIDATE@0..7
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: TW_STATIC_CANDIDATE@0..7
+        0: TW_BASE@0..7 "border" [] [Whitespace(" ")]
+      3: (empty)
+    1: TW_FULL_CANDIDATE@7..13
+      0: TW_VARIANT_LIST@7..7
+      1: DASH@7..8 "-" [] []
+      2: TW_FUNCTIONAL_CANDIDATE@8..13
+        0: TW_BASE@8..11 "top" [] []
+        1: DASH@11..12 "-" [] []
+        2: TW_NAMED_VALUE@12..13
+          0: TW_VALUE@12..13 "2" [] []
+        3: (empty)
+      3: (empty)
+  2: EOF@13..14 "" [Newline("\n")] []
+
+```

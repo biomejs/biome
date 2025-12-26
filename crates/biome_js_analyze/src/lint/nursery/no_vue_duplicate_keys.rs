@@ -125,9 +125,10 @@ impl Rule for NoVueDuplicateKeys {
     type Options = NoVueDuplicateKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let model = ctx.model();
         let Some(component) = VueComponent::from_potential_component(
             ctx.query(),
-            ctx.model(),
+            model,
             ctx.source_type(),
             ctx.file_path(),
         ) else {
@@ -139,6 +140,12 @@ impl Rule for NoVueDuplicateKeys {
         // Collect all declarations across all Vue component sections
         for declaration in component.declarations(VueDeclarationCollectionFilter::all()) {
             if let Some(name) = declaration.declaration_name() {
+                // Handle cases like `const { foo } = defineProps(...);`.
+                if let VueDeclaration::Setup(ref setup_decl) = declaration
+                    && setup_decl.is_assigned_to_props(model)
+                {
+                    continue;
+                }
                 let key = name.text().to_string();
                 key_declarations.entry(key).or_default().push(declaration);
             }

@@ -1,0 +1,72 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+group-data-[collapsible=icon]:hidden
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwFunctionalVariant {
+                    base_token: TW_BASE@0..5 "group" [] [],
+                    minus_token: DASH@5..6 "-" [] [],
+                    value: TwDataAttribute {
+                        data_token: DATA_KW@6..10 "data" [] [],
+                        minus_token: DASH@10..11 "-" [] [],
+                        value: TwArbitraryValue {
+                            l_brack_token: L_BRACKET@11..12 "[" [] [],
+                            value_token: TW_VALUE@12..28 "collapsible=icon" [] [],
+                            r_brack_token: R_BRACKET@28..29 "]" [] [],
+                        },
+                    },
+                },
+                COLON@29..30 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@30..36 "hidden" [] [],
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@36..37 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..37
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..36
+    0: TW_FULL_CANDIDATE@0..36
+      0: TW_VARIANT_LIST@0..30
+        0: TW_FUNCTIONAL_VARIANT@0..29
+          0: TW_BASE@0..5 "group" [] []
+          1: DASH@5..6 "-" [] []
+          2: TW_DATA_ATTRIBUTE@6..29
+            0: DATA_KW@6..10 "data" [] []
+            1: DASH@10..11 "-" [] []
+            2: TW_ARBITRARY_VALUE@11..29
+              0: L_BRACKET@11..12 "[" [] []
+              1: TW_VALUE@12..28 "collapsible=icon" [] []
+              2: R_BRACKET@28..29 "]" [] []
+        1: COLON@29..30 ":" [] []
+      1: (empty)
+      2: TW_STATIC_CANDIDATE@30..36
+        0: TW_BASE@30..36 "hidden" [] []
+      3: (empty)
+  2: EOF@36..37 "" [Newline("\n")] []
+
+```

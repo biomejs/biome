@@ -1,0 +1,207 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#each cells.filter(f => { return f === 1}), item}
+	<InputOTP.Slot {cell} />
+{/each}
+
+{#each cells.slice(0, 3) as cell, i (i)}
+	<InputOTP.Slot {cell} />
+{/each}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                each_token: EACH_KW@2..6 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@6..43 " cells.filter(f => { return f === 1})" [] [],
+                },
+                item: SvelteEachKeyedItem {
+                    index: SvelteEachIndex {
+                        comma_token: COMMA@43..44 "," [] [],
+                        value: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@44..49 " item" [] [],
+                        },
+                    },
+                },
+                r_curly_token: R_CURLY@49..50 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@50..53 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlTagName {
+                        value_token: HTML_LITERAL@53..67 "InputOTP.Slot" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@67..68 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@68..72 "cell" [] [],
+                            },
+                            r_curly_token: R_CURLY@72..74 "}" [] [Whitespace(" ")],
+                        },
+                    ],
+                    slash_token: SLASH@74..75 "/" [] [],
+                    r_angle_token: R_ANGLE@75..76 ">" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@76..79 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@79..83 "each" [] [],
+                r_curly_token: R_CURLY@83..84 "}" [] [],
+            },
+        },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@84..88 "{#" [Newline("\n"), Newline("\n")] [],
+                each_token: EACH_KW@88..92 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@92..111 " cells.slice(0, 3) " [] [],
+                },
+                item: SvelteEachAsKeyedItem {
+                    as_token: AS_KW@111..113 "as" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@113..118 " cell" [] [],
+                    },
+                    index: SvelteEachIndex {
+                        comma_token: COMMA@118..119 "," [] [],
+                        value: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@119..122 " i " [] [],
+                        },
+                    },
+                    key: SvelteEachKey {
+                        l_paren_token: L_PAREN@122..123 "(" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@123..124 "i" [] [],
+                        },
+                        r_paren_token: R_PAREN@124..125 ")" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@125..126 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@126..129 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlTagName {
+                        value_token: HTML_LITERAL@129..143 "InputOTP.Slot" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@143..144 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@144..148 "cell" [] [],
+                            },
+                            r_curly_token: R_CURLY@148..150 "}" [] [Whitespace(" ")],
+                        },
+                    ],
+                    slash_token: SLASH@150..151 "/" [] [],
+                    r_angle_token: R_ANGLE@151..152 ">" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@152..155 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@155..159 "each" [] [],
+                r_curly_token: R_CURLY@159..160 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@160..161 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..161
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..160
+    0: SVELTE_EACH_BLOCK@0..84
+      0: SVELTE_EACH_OPENING_BLOCK@0..50
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: EACH_KW@2..6 "each" [] []
+        2: HTML_TEXT_EXPRESSION@6..43
+          0: HTML_LITERAL@6..43 " cells.filter(f => { return f === 1})" [] []
+        3: SVELTE_EACH_KEYED_ITEM@43..49
+          0: SVELTE_EACH_INDEX@43..49
+            0: COMMA@43..44 "," [] []
+            1: HTML_TEXT_EXPRESSION@44..49
+              0: HTML_LITERAL@44..49 " item" [] []
+        4: R_CURLY@49..50 "}" [] []
+      1: HTML_ELEMENT_LIST@50..76
+        0: HTML_SELF_CLOSING_ELEMENT@50..76
+          0: L_ANGLE@50..53 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@53..67
+            0: HTML_LITERAL@53..67 "InputOTP.Slot" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@67..74
+            0: HTML_SINGLE_TEXT_EXPRESSION@67..74
+              0: L_CURLY@67..68 "{" [] []
+              1: HTML_TEXT_EXPRESSION@68..72
+                0: HTML_LITERAL@68..72 "cell" [] []
+              2: R_CURLY@72..74 "}" [] [Whitespace(" ")]
+          3: SLASH@74..75 "/" [] []
+          4: R_ANGLE@75..76 ">" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@76..84
+        0: SV_CURLY_SLASH@76..79 "{/" [Newline("\n")] []
+        1: EACH_KW@79..83 "each" [] []
+        2: R_CURLY@83..84 "}" [] []
+    1: SVELTE_EACH_BLOCK@84..160
+      0: SVELTE_EACH_OPENING_BLOCK@84..126
+        0: SV_CURLY_HASH@84..88 "{#" [Newline("\n"), Newline("\n")] []
+        1: EACH_KW@88..92 "each" [] []
+        2: HTML_TEXT_EXPRESSION@92..111
+          0: HTML_LITERAL@92..111 " cells.slice(0, 3) " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@111..125
+          0: AS_KW@111..113 "as" [] []
+          1: HTML_TEXT_EXPRESSION@113..118
+            0: HTML_LITERAL@113..118 " cell" [] []
+          2: SVELTE_EACH_INDEX@118..122
+            0: COMMA@118..119 "," [] []
+            1: HTML_TEXT_EXPRESSION@119..122
+              0: HTML_LITERAL@119..122 " i " [] []
+          3: SVELTE_EACH_KEY@122..125
+            0: L_PAREN@122..123 "(" [] []
+            1: HTML_TEXT_EXPRESSION@123..124
+              0: HTML_LITERAL@123..124 "i" [] []
+            2: R_PAREN@124..125 ")" [] []
+        4: R_CURLY@125..126 "}" [] []
+      1: HTML_ELEMENT_LIST@126..152
+        0: HTML_SELF_CLOSING_ELEMENT@126..152
+          0: L_ANGLE@126..129 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@129..143
+            0: HTML_LITERAL@129..143 "InputOTP.Slot" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@143..150
+            0: HTML_SINGLE_TEXT_EXPRESSION@143..150
+              0: L_CURLY@143..144 "{" [] []
+              1: HTML_TEXT_EXPRESSION@144..148
+                0: HTML_LITERAL@144..148 "cell" [] []
+              2: R_CURLY@148..150 "}" [] [Whitespace(" ")]
+          3: SLASH@150..151 "/" [] []
+          4: R_ANGLE@151..152 ">" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@152..160
+        0: SV_CURLY_SLASH@152..155 "{/" [Newline("\n")] []
+        1: EACH_KW@155..159 "each" [] []
+        2: R_CURLY@159..160 "}" [] []
+  4: EOF@160..161 "" [Newline("\n")] []
+
+```

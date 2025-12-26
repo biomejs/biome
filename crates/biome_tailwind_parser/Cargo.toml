@@ -1,18 +1,19 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's Tailwind parser"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_tailwind_parser"
-publish              = true
-repository.workspace = true
 version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's Tailwind parser"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
-[lints]
-workspace = true
+[[bench]]
+harness = false
+name    = "tailwind_parser"
 
 [dependencies]
 biome_console          = { workspace = true }
@@ -24,7 +25,6 @@ biome_tailwind_syntax  = { workspace = true }
 biome_unicode_table    = { workspace = true }
 tracing                = { workspace = true }
 
-
 [dev-dependencies]
 biome_test_utils  = { workspace = true }
 camino            = { workspace = true }
@@ -34,12 +34,11 @@ quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
 
-[target.'cfg(target_os = "windows")'.dev-dependencies]
-mimalloc = { workspace = true }
-
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
 
-[[bench]]
-harness = false
-name    = "tailwind_parser"
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[lints]
+workspace = true

@@ -235,10 +235,7 @@ fn find_misused_promise_expression(
     //let printed = format!("type of {expression:?} = {ty:?}");
     let is_promise = ty.is_promise_instance();
     let is_maybe_promise = ty.has_variant(|ty| ty.is_promise_instance());
-    let should_signal =
-        // "maybe" promises could still be considered conditionals, so we
-        // don't signal those for the conditional variants
-        is_promise || (!matches!(state, NoMisusedPromisesState::Conditional) && is_maybe_promise);
+    let should_signal = is_promise || is_maybe_promise;
     should_signal.then_some(state)
 }
 

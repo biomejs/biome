@@ -1856,6 +1856,11 @@ See <https://biomejs.dev/linter/rules/use-yield>
  */
 export interface Nursery {
 	/**
+	* Disallow ambiguous anchor descriptions.
+See <https://biomejs.dev/linter/rules/no-ambiguous-anchor-text> 
+	 */
+	noAmbiguousAnchorText?: NoAmbiguousAnchorTextConfiguration;
+	/**
 	* Disallow continue statements.
 See <https://biomejs.dev/linter/rules/no-continue> 
 	 */
@@ -1921,6 +1926,11 @@ See <https://biomejs.dev/linter/rules/no-misused-promises>
 	 */
 	noMisusedPromises?: NoMisusedPromisesConfiguration;
 	/**
+	* Disallow use of chained assignment expressions.
+See <https://biomejs.dev/linter/rules/no-multi-assign> 
+	 */
+	noMultiAssign?: NoMultiAssignConfiguration;
+	/**
 	* Disallow creating multiline strings by escaping newlines.
 See <https://biomejs.dev/linter/rules/no-multi-str> 
 	 */
@@ -1945,6 +1955,11 @@ See <https://biomejs.dev/linter/rules/no-proto>
 See <https://biomejs.dev/linter/rules/no-react-forward-ref> 
 	 */
 	noReactForwardRef?: NoReactForwardRefConfiguration;
+	/**
+	* Disallow assignments in return statements.
+See <https://biomejs.dev/linter/rules/no-return-assign> 
+	 */
+	noReturnAssign?: NoReturnAssignConfiguration;
 	/**
 	* Disallow javascript: URLs in HTML.
 See <https://biomejs.dev/linter/rules/no-script-url> 
@@ -2119,6 +2134,11 @@ See <https://biomejs.dev/linter/rules/use-spread>
 See <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name> 
 	 */
 	useUniqueGraphqlOperationName?: UseUniqueGraphqlOperationNameConfiguration;
+	/**
+	* Enforce consistent defineProps declaration style.
+See <https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration> 
+	 */
+	useVueConsistentDefinePropsDeclaration?: UseVueConsistentDefinePropsDeclarationConfiguration;
 	/**
 	* Enforce specific order of Vue compiler macros.
 See <https://biomejs.dev/linter/rules/use-vue-define-macros-order> 
@@ -3597,6 +3617,9 @@ export type UseValidTypeofConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoAmbiguousAnchorTextConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAmbiguousAnchorTextOptions;
 export type NoContinueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoContinueOptions;
@@ -3636,6 +3659,9 @@ export type NoLeakedRenderConfiguration =
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
+export type NoMultiAssignConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMultiAssignOptions;
 export type NoMultiStrConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMultiStrOptions;
@@ -3651,6 +3677,9 @@ export type NoProtoConfiguration =
 export type NoReactForwardRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactForwardRefOptions;
+export type NoReturnAssignConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReturnAssignOptions;
 export type NoScriptUrlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoScriptUrlOptions;
@@ -3753,6 +3782,9 @@ export type UseSpreadConfiguration =
 export type UseUniqueGraphqlOperationNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueGraphqlOperationNameOptions;
+export type UseVueConsistentDefinePropsDeclarationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
 export type UseVueDefineMacrosOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefineMacrosOrderOptions;
@@ -5017,6 +5049,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithNoAmbiguousAnchorTextOptions {
+	level: RulePlainConfiguration;
+	options?: NoAmbiguousAnchorTextOptions;
+}
 export interface RuleWithNoContinueOptions {
 	level: RulePlainConfiguration;
 	options?: NoContinueOptions;
@@ -5072,6 +5108,10 @@ export interface RuleWithNoMisusedPromisesOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisusedPromisesOptions;
 }
+export interface RuleWithNoMultiAssignOptions {
+	level: RulePlainConfiguration;
+	options?: NoMultiAssignOptions;
+}
 export interface RuleWithNoMultiStrOptions {
 	level: RulePlainConfiguration;
 	options?: NoMultiStrOptions;
@@ -5093,6 +5133,10 @@ export interface RuleWithNoReactForwardRefOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoReactForwardRefOptions;
+}
+export interface RuleWithNoReturnAssignOptions {
+	level: RulePlainConfiguration;
+	options?: NoReturnAssignOptions;
 }
 export interface RuleWithNoScriptUrlOptions {
 	level: RulePlainConfiguration;
@@ -5236,6 +5280,10 @@ export interface RuleWithUseSpreadOptions {
 export interface RuleWithUseUniqueGraphqlOperationNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueGraphqlOperationNameOptions;
+}
+export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentDefinePropsDeclarationOptions;
 }
 export interface RuleWithUseVueDefineMacrosOrderOptions {
 	fix?: FixKind;
@@ -6379,6 +6427,12 @@ to a DOM element id.
 export type UseValidForDirectionOptions = {};
 export type UseValidTypeofOptions = {};
 export type UseYieldOptions = {};
+export interface NoAmbiguousAnchorTextOptions {
+	/**
+	 * It allows users to modify the strings that can be checked for in the anchor text. Useful for specifying other words in other languages
+	 */
+	words?: string[];
+}
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
 export type NoDuplicateDependenciesOptions = {};
@@ -6423,11 +6477,13 @@ export interface NoJsxLiteralsOptions {
 }
 export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
+export type NoMultiAssignOptions = {};
 export type NoMultiStrOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoProtoOptions = {};
 export type NoReactForwardRefOptions = {};
+export type NoReturnAssignOptions = {};
 export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
@@ -6516,6 +6572,9 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
+export interface UseVueConsistentDefinePropsDeclarationOptions {
+	style?: DeclarationStyle;
+}
 export interface UseVueDefineMacrosOrderOptions {
 	/**
 	 * The order of the Vue define macros.
@@ -6916,6 +6975,7 @@ export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
  * The GraphQL description style to enforce.
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
+export type DeclarationStyle = "type" | "runtime";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
@@ -7279,6 +7339,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
@@ -7295,12 +7356,14 @@ export type Category =
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
+	| "lint/nursery/noMultiAssign"
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noScriptUrl"
+	| "lint/nursery/noReturnAssign"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
@@ -7342,6 +7405,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"
+	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
@@ -7815,7 +7879,6 @@ export interface GritFileSource {
 	variant: GritVariant;
 }
 export type EmbeddingKind =
-	| "Vue"
 	| "Svelte"
 	| "None"
 	| {
@@ -7824,6 +7887,14 @@ export type EmbeddingKind =
 				 * Whether the script is inside Astro frontmatter
 				 */
 				frontmatter: boolean;
+			};
+	  }
+	| {
+			Vue: {
+				/**
+				 * Whether the script is inside script tag with setup attribute
+				 */
+				setup: boolean;
 			};
 	  };
 export type Language =
@@ -7956,8 +8027,11 @@ export interface GetSemanticModelParams {
 }
 export type GetModuleGraphParams = {};
 export interface GetModuleGraphResult {
-	data: Record<string, SerializedJsModuleInfo>;
+	data: Record<string, SerializedModuleInfo>;
 }
+export type SerializedModuleInfo =
+	| { js: SerializedJsModuleInfo }
+	| { css: SerializedCssModuleInfo };
 export interface SerializedJsModuleInfo {
 	/**
 	 * Dynamic imports.
@@ -7990,6 +8064,14 @@ specifier itself.
 Maps from the local imported name to the absolute path it resolves to. 
 	 */
 	staticImports: Record<string, string>;
+}
+export interface SerializedCssModuleInfo {
+	/**
+	* Map of all static imports found in the module.
+
+Maps from the local imported name to the absolute path it resolves to. 
+	 */
+	imports: string[];
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
