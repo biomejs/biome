@@ -1,11 +1,11 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression,
     JsComputedMemberExpression, JsRegexLiteralExpression, JsStaticMemberExpression,
 };
-use biome_rowan::{AstNode, AstSeparatedList, declare_node_union};
+use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
 
 declare_lint_rule! {
     /// Enforce using `String.startsWith()` and `String.endsWith()` over more complex alternatives.
@@ -84,7 +84,7 @@ impl Rule for UseStartsEndsWith {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-
+        
         match node {
             AnyStringCheckExpression::JsBinaryExpression(binary) => check_binary_expression(binary),
             AnyStringCheckExpression::JsCallExpression(call) => check_call_expression(call),
@@ -135,19 +135,20 @@ fn check_binary_expression(binary: &JsBinaryExpression) -> Option<UseStartsEndsW
 
 fn check_call_expression(call: &JsCallExpression) -> Option<UseStartsEndsWithState> {
     let callee = call.callee().ok()?;
+    
+    let AnyJsExpression::JsStaticMemberExpression(member_expr) = callee else {
+        return None;
+    };
 
-    if let AnyJsExpression::JsStaticMemberExpression(member_expr) = callee {
-        let object = member_expr.object().ok()?;
-        let member = member_expr.member().ok()?;
-        let method = member.value_token().ok()?;
-
-        if method.text_trimmed() == "test" {
-            if let AnyJsExpression::AnyJsLiteralExpression(literal) = object {
-                if let Some(regex) = literal.as_js_regex_literal_expression() {
-                    return check_regex(&regex);
-                }
-            }
-        }
+    let object = member_expr.object().ok()?;
+    let member = member_expr.member().ok()?;
+    let method = member.value_token().ok()?;
+    
+    if method.text_trimmed() == "test"
+        && let AnyJsExpression::AnyJsLiteralExpression(literal) = object
+        && let Some(regex) = literal.as_js_regex_literal_expression()
+    {
+        return check_regex(regex);
     }
 
     None
@@ -182,17 +183,17 @@ fn check_computed_member(
         });
     }
 
-    if let AnyJsExpression::JsBinaryExpression(binary) = member {
-        if binary.operator().ok()? == JsBinaryOperator::Minus {
-            let left = binary.left().ok()?;
-            let right = binary.right().ok()?;
+    if let AnyJsExpression::JsBinaryExpression(binary) = member
+        && binary.operator().ok()? == JsBinaryOperator::Minus
+    {
+        let left = binary.left().ok()?;
+        let right = binary.right().ok()?;
 
-            if is_length_access(&left) && is_number_literal(&right, 1.0) {
-                return Some(UseStartsEndsWithState {
-                    variant: StartsEndsWithVariant::EndsWith,
-                    pattern: pattern_str,
-                });
-            }
+        if is_length_access(&left) && is_number_literal(&right, 1.0) {
+            return Some(UseStartsEndsWithState {
+                variant: StartsEndsWithVariant::EndsWith,
+                pattern: pattern_str,
+            });
         }
     }
 
@@ -204,7 +205,7 @@ fn check_method_call(
     pattern_expr: &AnyJsExpression,
 ) -> Option<UseStartsEndsWithState> {
     let callee = call.callee().ok()?;
-
+    
     if let AnyJsExpression::JsStaticMemberExpression(member_expr) = callee {
         let args = call.arguments().ok()?;
         return check_string_method(&member_expr, pattern_expr, &args);
@@ -235,16 +236,16 @@ fn check_string_method(
                 });
             }
 
-            if let AnyJsExpression::JsBinaryExpression(binary) = arg_expr {
-                if binary.operator().ok()? == JsBinaryOperator::Minus {
-                    let left = binary.left().ok()?;
-                    let right = binary.right().ok()?;
-                    if is_length_access(&left) && is_number_literal(&right, 1.0) {
-                        return Some(UseStartsEndsWithState {
-                            variant: StartsEndsWithVariant::EndsWith,
-                            pattern,
-                        });
-                    }
+            if let AnyJsExpression::JsBinaryExpression(binary) = arg_expr
+                && binary.operator().ok()? == JsBinaryOperator::Minus
+            {
+                let left = binary.left().ok()?;
+                let right = binary.right().ok()?;
+                if is_length_access(&left) && is_number_literal(&right, 1.0) {
+                    return Some(UseStartsEndsWithState {
+                        variant: StartsEndsWithVariant::EndsWith,
+                        pattern,
+                    });
                 }
             }
 
@@ -264,19 +265,19 @@ fn check_string_method(
         "lastIndexOf" => {
             let pattern_arg = args.args().first()?.ok()?;
             let pattern = extract_string_literal(pattern_arg.as_any_js_expression()?)?;
-
-            if let AnyJsExpression::JsBinaryExpression(binary) = pattern_expr {
-                if binary.operator().ok()? == JsBinaryOperator::Minus {
-                    let left = binary.left().ok()?;
-                    if is_length_access(&left) {
-                        return Some(UseStartsEndsWithState {
-                            variant: StartsEndsWithVariant::EndsWith,
-                            pattern,
-                        });
-                    }
+            
+            if let AnyJsExpression::JsBinaryExpression(binary) = pattern_expr
+                && binary.operator().ok()? == JsBinaryOperator::Minus
+            {
+                let left = binary.left().ok()?;
+                if is_length_access(&left) {
+                    return Some(UseStartsEndsWithState {
+                        variant: StartsEndsWithVariant::EndsWith,
+                        pattern,
+                    });
                 }
             }
-
+            
             None
         }
         "slice" => {
@@ -314,15 +315,15 @@ fn check_string_method(
                 });
             }
 
-            if let AnyJsExpression::JsBinaryExpression(binary) = arg_expr {
-                if binary.operator().ok()? == JsBinaryOperator::Minus {
-                    let left = binary.left().ok()?;
-                    if is_length_access(&left) {
-                        return Some(UseStartsEndsWithState {
-                            variant: StartsEndsWithVariant::EndsWith,
-                            pattern,
-                        });
-                    }
+            if let AnyJsExpression::JsBinaryExpression(binary) = arg_expr
+                && binary.operator().ok()? == JsBinaryOperator::Minus
+            {
+                let left = binary.left().ok()?;
+                if is_length_access(&left) {
+                    return Some(UseStartsEndsWithState {
+                        variant: StartsEndsWithVariant::EndsWith,
+                        pattern,
+                    });
                 }
             }
 
@@ -332,10 +333,9 @@ fn check_string_method(
             let pattern_arg = args.args().first()?.ok()?;
             if let AnyJsExpression::AnyJsLiteralExpression(literal) =
                 pattern_arg.as_any_js_expression()?
+                && let Some(regex) = literal.as_js_regex_literal_expression()
             {
-                if let Some(regex) = literal.as_js_regex_literal_expression() {
-                    return check_regex(&regex);
-                }
+                return check_regex(regex);
             }
             None
         }
@@ -379,34 +379,31 @@ fn check_regex(regex: &JsRegexLiteralExpression) -> Option<UseStartsEndsWithStat
 }
 
 fn is_number_literal(expr: &AnyJsExpression, expected: f64) -> bool {
-    if let AnyJsExpression::AnyJsLiteralExpression(literal) = expr {
-        if let Some(number) = literal.as_js_number_literal_expression() {
-            if let Ok(value) = number.value_token() {
-                if let Ok(parsed) = value.text_trimmed().parse::<f64>() {
-                    return (parsed - expected).abs() < f64::EPSILON;
-                }
-            }
-        }
+    if let AnyJsExpression::AnyJsLiteralExpression(literal) = expr
+        && let Some(number) = literal.as_js_number_literal_expression()
+        && let Ok(value) = number.value_token()
+        && let Ok(parsed) = value.text_trimmed().parse::<f64>()
+    {
+        return (parsed - expected).abs() < f64::EPSILON;
     }
     false
 }
 
 fn extract_string_literal(expr: &AnyJsExpression) -> Option<String> {
-    if let AnyJsExpression::AnyJsLiteralExpression(literal) = expr {
-        if let Some(string) = literal.as_js_string_literal_expression() {
-            return Some(string.inner_string_text().ok()?.to_string());
-        }
+    if let AnyJsExpression::AnyJsLiteralExpression(literal) = expr
+        && let Some(string) = literal.as_js_string_literal_expression()
+    {
+        return Some(string.inner_string_text().ok()?.to_string());
     }
     None
 }
 
 fn is_length_access(expr: &AnyJsExpression) -> bool {
-    if let AnyJsExpression::JsStaticMemberExpression(member) = expr {
-        if let Ok(prop) = member.member() {
-            if let Ok(token) = prop.value_token() {
-                return token.text_trimmed() == "length";
-            }
-        }
+    if let AnyJsExpression::JsStaticMemberExpression(member) = expr
+        && let Ok(prop) = member.member()
+        && let Ok(token) = prop.value_token()
+    {
+        return token.text_trimmed() == "length";
     }
     false
 }
