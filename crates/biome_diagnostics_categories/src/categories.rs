@@ -236,6 +236,8 @@ define_categories! {
     "lint/nursery/useUniqueInputFieldNames": "https://biomejs.dev/linter/rules/use-unique-input-field-names",
     "lint/nursery/useUniqueVariableNames": "https://biomejs.dev/linter/rules/use-unique-variable-names",
     "lint/nursery/useVueConsistentDefinePropsDeclaration": "https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
+    "lint/nursery/useVueConsistentVBindStyle": "https://biomejs.dev/linter/rules/use-vue-consistent-v-bind-style",
+    "lint/nursery/useVueConsistentVOnStyle": "https://biomejs.dev/linter/rules/use-vue-consistent-v-on-style",
     "lint/nursery/useVueDefineMacrosOrder": "https://biomejs.dev/linter/rules/use-vue-define-macros-order",
     "lint/nursery/useVueHyphenatedAttributes": "https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes",
     "lint/nursery/useVueMultiWordComponentNames": "https://biomejs.dev/linter/rules/use-vue-multi-word-component-names",

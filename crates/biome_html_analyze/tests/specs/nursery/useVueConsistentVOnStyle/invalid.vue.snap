@@ -1,0 +1,70 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<template>
+	<div v-on:click="onClick" />
+  <div disabled v-on:click="onClick" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:7 lint/nursery/useVueConsistentVOnStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use shorthand '@' syntax instead of 'v-on'.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ 	<div v-on:click="onClick" />
+      │ 	     ^^^^^^^^^^^^^^^^^^^^
+    4 │   <div disabled v-on:click="onClick" />
+    5 │ </template>
+  
+  i This project prefers to use shorthand syntax for v-on.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite to shorthand '@' syntax.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <template>
+    3   │ - → <div·v-on:click="onClick"·/>
+      3 │ + → <div·@click="onClick"·/>
+    4 4 │     <div disabled v-on:click="onClick" />
+    5 5 │   </template>
+  
+
+```
+
+```
+invalid.vue:4:17 lint/nursery/useVueConsistentVOnStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use shorthand '@' syntax instead of 'v-on'.
+  
+    2 │ <template>
+    3 │ 	<div v-on:click="onClick" />
+  > 4 │   <div disabled v-on:click="onClick" />
+      │                 ^^^^^^^^^^^^^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i This project prefers to use shorthand syntax for v-on.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite to shorthand '@' syntax.
+  
+    2 2 │   <template>
+    3 3 │   	<div v-on:click="onClick" />
+    4   │ - ··<div·disabled·v-on:click="onClick"·/>
+      4 │ + ··<div·disabled·@click="onClick"·/>
+    5 5 │   </template>
+    6 6 │   
+  
+
+```

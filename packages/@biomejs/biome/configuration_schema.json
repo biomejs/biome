@@ -5619,6 +5619,20 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueConsistentVBindStyle": {
+					"description": "Enforce a consistent style for v-bind in Vue templates. Prefer either shorthand (:prop=\"...\") or longhand (v-bind:prop=\"...\").\nSee <https://biomejs.dev/linter/rules/use-vue-consistent-v-bind-style>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentVBindStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueConsistentVOnStyle": {
+					"description": "Enforce a consistent style for v-on in Vue templates. Prefer either shorthand (@event=\"...\") or longhand (v-on:event=\"...\").\nSee <https://biomejs.dev/linter/rules/use-vue-consistent-v-on-style>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentVOnStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueDefineMacrosOrder": {
 					"description": "Enforce specific order of Vue compiler macros.\nSee <https://biomejs.dev/linter/rules/use-vue-define-macros-order>",
 					"anyOf": [
@@ -9942,6 +9956,26 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueConsistentVBindStyleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentVBindStyleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueConsistentVOnStyleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentVOnStyleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueDefineMacrosOrderOptions": {
 			"type": "object",
 			"properties": {
@@ -13073,6 +13107,41 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueConsistentVBindStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentVBindStyleOptions" }
+			]
+		},
+		"UseVueConsistentVBindStyleOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"description": "Preferred style for `v-bind` usage: \"shorthand\" or \"longhand\".\nIf omitted, shorthand is preferred.",
+					"anyOf": [{ "$ref": "#/$defs/VueDirectiveStyle" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseVueConsistentVOnStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentVOnStyleOptions" }
+			]
+		},
+		"UseVueConsistentVOnStyleOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"description": "Preferred style for `v-on` usage: \"shorthand\" or \"longhand\".\nIf omitted, shorthand is preferred.",
+					"anyOf": [
+						{ "$ref": "#/$defs/VueDirectiveStyle2" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseVueDefineMacrosOrderConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -13304,6 +13373,14 @@
 		"Visibility": {
 			"type": "string",
 			"enum": ["public", "package", "private"]
+		},
+		"VueDirectiveStyle": {
+			"type": "string",
+			"enum": ["shorthand", "longhand"]
+		},
+		"VueDirectiveStyle2": {
+			"type": "string",
+			"enum": ["shorthand", "longhand"]
 		},
 		"WhitespaceSensitivity": {
 			"description": "Whitespace sensitivity for HTML formatting.\n\nThe following two cases won't produce the same output:\n\n|                |      html      |    output    |\n| -------------- | :------------: | :----------: |\n| with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 |\n| without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |\n\nThis happens because whitespace is significant in inline elements.\n\nAs a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20):\n```html\n<span>really long content</span>\n```\nas this, where the content hugs the tags:\n```html\n<span\n   >really long content</span\n>\n```\n\nNote that this is only necessary for inline elements. Block elements do not have this restriction.",
