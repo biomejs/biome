@@ -10,7 +10,7 @@ use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    FeaturesSupported, FileFeaturesResult, SupportKind, SupportsFeatureParams,
+    FeaturesSupported, FileExitsParams, FileFeaturesResult, SupportKind, SupportsFeatureParams,
 };
 use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
@@ -252,20 +252,26 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         file.read_to_string(&mut input)
             .with_file_path(path.to_string())?;
 
-        let guard = FileGuard::open(
-            ctx.workspace(),
-            OpenFileParams {
+        if ctx.workspace().file_exists(FileExitsParams {
+            file_path: path.clone(),
+        })? {
+            Ok(Self { guard, path, file })
+        } else {
+            let mut input = String::new();
+            file.read_to_string(&mut input)
+                .with_file_path(path.to_string())?;
+
+            ctx.workspace().open_file(OpenFileParams {
                 project_key: ctx.project_key(),
                 document_file_source: None,
                 path: path.clone(),
                 content: FileContent::from_client(&input),
                 persist_node_cache: false,
                 inline_config: None,
-            },
-        )
-        .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
+            })?;
 
-        Ok(Self { file, guard, path })
+            Ok(Self { guard, path, file })
+        }
     }
 
     pub(crate) fn guard(&self) -> &FileGuard<'app, dyn Workspace + 'ctx> {
