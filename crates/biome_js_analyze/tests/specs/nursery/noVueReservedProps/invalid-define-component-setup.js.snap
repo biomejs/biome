@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 146
 expression: invalid-define-component-setup.js
 ---
 # Input
@@ -32,6 +31,8 @@ invalid-define-component-setup.js:5:9 lint/nursery/noVueReservedProps ━━━�
   
   i Rename the prop to avoid possible conflicts.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -48,6 +49,8 @@ invalid-define-component-setup.js:6:9 lint/nursery/noVueReservedProps ━━━�
     8 │     ]
   
   i Rename the prop to avoid possible conflicts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

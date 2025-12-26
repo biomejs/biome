@@ -1,0 +1,104 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<Foo : foo="5" />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..5 "Foo" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlBogusAttribute {
+                    items: [
+                        VueBogusDirective {
+                            items: [
+                                COLON@5..7 ":" [] [Whitespace(" ")],
+                            ],
+                        },
+                        VueModifierList [],
+                    ],
+                },
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@7..10 "foo" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@10..11 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@11..15 "\"5\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@15..16 "/" [] [],
+            r_angle_token: R_ANGLE@16..17 ">" [] [],
+        },
+    ],
+    eof_token: EOF@17..18 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..18
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..17
+    0: HTML_SELF_CLOSING_ELEMENT@0..17
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..5
+        0: HTML_LITERAL@1..5 "Foo" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@5..15
+        0: HTML_BOGUS_ATTRIBUTE@5..7
+          0: VUE_BOGUS_DIRECTIVE@5..7
+            0: COLON@5..7 ":" [] [Whitespace(" ")]
+          1: VUE_MODIFIER_LIST@7..7
+        1: HTML_ATTRIBUTE@7..15
+          0: HTML_ATTRIBUTE_NAME@7..10
+            0: HTML_LITERAL@7..10 "foo" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@10..15
+            0: EQ@10..11 "=" [] []
+            1: HTML_STRING@11..15
+              0: HTML_STRING_LITERAL@11..15 "\"5\"" [] [Whitespace(" ")]
+      3: SLASH@15..16 "/" [] []
+      4: R_ANGLE@16..17 ">" [] []
+  4: EOF@17..18 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid-v-bind-shorthand.vue:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a vue directive argument but instead found ' '.
+  
+  > 1 │ <Foo : foo="5" />
+      │       ^
+    2 │ 
+  
+  i Expected a vue directive argument here.
+  
+  > 1 │ <Foo : foo="5" />
+      │       ^
+    2 │ 
+  
+```

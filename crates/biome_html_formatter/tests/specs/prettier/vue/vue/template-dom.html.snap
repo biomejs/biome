@@ -1,0 +1,68 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/vue/template-dom.html
+---
+# Input
+
+```html
+<!DOCTYPE html><html>
+  <body>
+    <div v-if="foo ===    'foo'">
+
+</div>
+    <script>
+new Vue({el: '#app'})
+    </script>
+  </body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,7 +3,7 @@
+   <body>
+     <div v-if="foo ===    'foo'"></div>
+     <script>
+-      new Vue({el: '#app'})
++new Vue({el: '#app'})
+     </script>
+   </body>
+ </html>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html>
+  <body>
+    <div v-if="foo ===    'foo'"></div>
+    <script>
+new Vue({el: '#app'})
+    </script>
+  </body>
+</html>
+```
+
+# Errors
+```
+template-dom.html:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Vue syntax isn't enabled. Is this supposed to be a .vue file?
+  
+    1 │ <!DOCTYPE html><html>
+    2 │   <body>
+  > 3 │     <div v-if="foo ===    'foo'">
+      │          ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ </div>
+  
+  i Remove it or enable the parsing using the html.parser.vue option.
+  
+
+```

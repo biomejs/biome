@@ -1,8 +1,9 @@
 use crate::run_cli;
+use crate::run_cli_with_dyn_fs;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_formatter::LineWidth;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use bpaf::Args;
 use camino::Utf8Path;
 
@@ -752,6 +753,69 @@ fn extends_config_rule_fine_grained_options_merge2() {
         module_path!(),
         "extends_config_rule_fine_grained_options_merge2",
         fs,
+        console,
+        result,
+    ));
+}
+
+// See: https://github.com/biomejs/biome/issues/7343
+#[test]
+fn extends_config_two_levels_deep() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("extends_config_two_levels_deep");
+
+    // Root config at the project root
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "formatter": {
+        "lineWidth": 120
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "suspicious": {
+                "noDebugger": "error"
+            }
+        }
+    }
+}"#,
+    );
+
+    // Child config two levels deep: sub-project/sub-sub-project/biome.jsonc
+    // It extends the root config using a relative path ../../biome.jsonc
+    fs.create_file(
+        "sub-project/sub-sub-project/biome.jsonc",
+        r#"{
+    "extends": ["../../biome.jsonc"],
+    "root": false
+}"#,
+    );
+
+    // Test file in the same directory as child config
+    fs.create_file(
+        "sub-project/sub-sub-project/test.js",
+        r#"debugger; console.log("string"); "#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "check",
+                &format!("{}/sub-project/sub-sub-project/test.js", fs.cli_path()),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_config_two_levels_deep",
+        fs.create_mem(),
         console,
         result,
     ));

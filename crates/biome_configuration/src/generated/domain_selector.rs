@@ -30,8 +30,10 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noUnnecessaryConditions"),
         RuleFilter::Rule("nursery", "noUnresolvedImports"),
         RuleFilter::Rule("nursery", "useArraySortCompare"),
+        RuleFilter::Rule("nursery", "useAwaitThenable"),
         RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
         RuleFilter::Rule("nursery", "useFind"),
+        RuleFilter::Rule("nursery", "useRegexpExec"),
     ]
 });
 static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
@@ -83,12 +85,16 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("suspicious", "noFocusedTests"),
     ]
 });
+static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
+    LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noUndeclaredEnvVars")]);
 static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noVueDataObjectDeclaration"),
         RuleFilter::Rule("nursery", "noVueDuplicateKeys"),
         RuleFilter::Rule("nursery", "noVueReservedKeys"),
         RuleFilter::Rule("nursery", "noVueReservedProps"),
+        RuleFilter::Rule("nursery", "noVueSetupPropsReactivityLoss"),
+        RuleFilter::Rule("nursery", "useVueConsistentDefinePropsDeclaration"),
         RuleFilter::Rule("nursery", "useVueDefineMacrosOrder"),
         RuleFilter::Rule("nursery", "useVueMultiWordComponentNames"),
     ]
@@ -102,6 +108,7 @@ impl DomainSelector {
             "react" => REACT_FILTERS.clone(),
             "solid" => SOLID_FILTERS.clone(),
             "test" => TEST_FILTERS.clone(),
+            "turborepo" => TURBOREPO_FILTERS.clone(),
             "vue" => VUE_FILTERS.clone(),
             _ => unreachable!("DomainFilter::as_rule_filters: domain {} not found", self.0),
         }
@@ -119,6 +126,9 @@ impl DomainSelector {
             "react" => REACT_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "solid" => SOLID_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "test" => TEST_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+            "turborepo" => TURBOREPO_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule::<R>()),
             "vue" => VUE_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             _ => false,
         }

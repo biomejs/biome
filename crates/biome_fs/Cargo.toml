@@ -1,15 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "A small wrapper around std::path::PathBuf contains additional information and convenient methods"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_fs"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "A small wrapper around std::path::PathBuf contains additional information and convenient methods"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -32,9 +32,8 @@ tracing           = { workspace = true }
 [dev-dependencies]
 serde_json = { workspace = true }
 
-
 [features]
-schema = ["dep:schemars", "serde", "biome_diagnostics/schema"]
+schema = ["biome_diagnostics/schema", "dep:schemars", "serde"]
 serde  = ["camino/serde1"]
 
 [lints]

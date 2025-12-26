@@ -1,4 +1,4 @@
-use super::{SearchCapabilities, parse_lang_from_script_opening_tag};
+use super::{ParsedLangAndSetup, SearchCapabilities, parse_lang_and_setup_from_script_opening_tag};
 use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
@@ -7,7 +7,7 @@ use crate::file_handlers::{
 };
 use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
-use biome_formatter::Printed;
+use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
@@ -68,8 +68,11 @@ impl SvelteFileHandler {
         SVELTE_FENCE
             .captures(text)
             .and_then(|captures| {
-                let (language, variant) =
-                    parse_lang_from_script_opening_tag(captures.name("opening")?.as_str());
+                let ParsedLangAndSetup {
+                    language, variant, ..
+                } = parse_lang_and_setup_from_script_opening_tag(
+                    captures.name("opening")?.as_str(),
+                );
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)
@@ -157,7 +160,7 @@ fn format(
     };
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
-    match formatted.print_with_indent(indent_amount) {
+    match formatted.print_with_indent(indent_amount, SourceMapGeneration::Disabled) {
         Ok(printed) => Ok(printed),
         Err(error) => {
             error!("The file {} couldn't be formatted", biome_path.as_str());

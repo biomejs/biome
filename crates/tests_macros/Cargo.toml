@@ -1,14 +1,14 @@
 [package]
+name                 = "tests_macros"
+version              = "0.0.0"
 authors.workspace    = true
-categories.workspace = true
 edition.workspace    = true
 homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
-name                 = "tests_macros"
-publish              = false
 repository.workspace = true
-version              = "0.0.0"
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
 
 [lib]
 proc-macro = true

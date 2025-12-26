@@ -8,3 +8,5 @@ expression: query.graphql
 query Test {}
 
 ```
+
+_Note: The parser emitted 4 diagnostics which are not shown here._

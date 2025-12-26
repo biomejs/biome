@@ -66,6 +66,8 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::fmt::Debug;
+use std::iter::FusedIterator;
+use std::slice::Iter;
 use std::str::FromStr;
 use std::sync::LazyLock;
 use vcs::VcsClientKind;
@@ -735,5 +737,80 @@ impl ConfigurationPathHint {
                 Some(path.to_path_buf())
             }
         }
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct ConfigurationSource {
+    /// It contains [Configuration] and the folder where it was found.
+    pub source: Option<(Configuration, Option<Utf8PathBuf>)>,
+
+    /// It contains possible extended configuration. If the configuration comes from a npm module,
+    ///  its URL will be its specifier e.g. `org/core`
+    pub extended_configurations: ExtendedConfigurations,
+}
+
+impl ConfigurationSource {
+    pub fn as_configuration(&self) -> Option<&Configuration> {
+        self.source.as_ref().map(|(config, _)| config)
+    }
+
+    pub fn extended_configurations(&self) -> ExtendedConfigurationIterator<'_> {
+        ExtendedConfigurationIterator {
+            inner: self.extended_configurations.0.iter(),
+        }
+    }
+}
+
+pub struct ExtendedConfigurationIterator<'a> {
+    inner: Iter<'a, (Utf8PathBuf, Configuration)>,
+}
+
+impl<'a> Iterator for ExtendedConfigurationIterator<'a> {
+    type Item = &'a Configuration;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|(_, config)| config)
+    }
+}
+
+impl FusedIterator for ExtendedConfigurationIterator<'_> {}
+
+impl DoubleEndedIterator for ExtendedConfigurationIterator<'_> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.inner.next_back().map(|(_, config)| config)
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct ExtendedConfigurations(Vec<(Utf8PathBuf, Configuration)>);
+
+impl<Path> From<Vec<(Path, Configuration)>> for ExtendedConfigurations
+where
+    Path: Into<Utf8PathBuf>,
+{
+    fn from(value: Vec<(Path, Configuration)>) -> Self {
+        Self(
+            value
+                .into_iter()
+                .map(|(path, config)| (path.into(), config))
+                .collect(),
+        )
+    }
+}
+
+impl ConfigurationSource {
+    pub fn source(&self) -> Option<Configuration> {
+        self.source.as_ref().map(|source| {
+            let (config, _) = source.clone();
+            config
+        })
+    }
+
+    pub fn source_path(&self) -> Option<Utf8PathBuf> {
+        self.source.as_ref().and_then(|source| {
+            let (_, path) = source.clone();
+            path.map(|p| p.as_path().to_path_buf())
+        })
     }
 }

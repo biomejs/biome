@@ -23,15 +23,14 @@ impl FormatNodeRule<SvelteElseIfClause> for FormatSvelteElseIfClause {
                 else_token.format(),
                 space(),
                 if_token.format(),
+                space(),
                 expression.format(),
                 r_curly_token.format()
             ]
         )?;
 
-        // The order here is important. First, we must check if we can delegate the formatting
-        // of embedded nodes, then we check if we should format them verbatim.
         let format_children = FormatHtmlElementList::default()
-            .with_group_id(f.group_id("svelte-else-if-group"))
+            .with_multiline()
             .fmt_children(&children, f)?;
 
         write!(f, [format_children, hard_line_break(),])

@@ -6,10 +6,9 @@ info: css/pseudo/pseudo_class_function_custom_identifier_list.css
 
 ```css
 html:active-view-transition-type(
-		backwards
-		 		forwards
-		 		 		backwards
-
+		backwards,
+		 		forwards,
+		 		 		backwards,
 
 
 		 		 		forwards) {
@@ -17,30 +16,30 @@ html:active-view-transition-type(
 
 
 html:active-view-transition-type(
-		backwards
-		 		forwards
-		 		 		backwards
+		backwards,
+		 		forwards,
+		 		 		backwards,
 
 
 
-		 		 		forwards
-		 		 				backwards
-		 		forwards
-		 		 		backwards
+		 		 		forwards,
+		 		 				backwards,
+		 		forwards,
+		 		 		backwards,
 
 
 
-		 		 		forwards
-		 		 				backwards
-		 		forwards
-		 		 		backwards
+		 		 		forwards,
+		 		 				backwards,
+		 		forwards,
+		 		 		backwards,
 
 
 
-		 		 		forwards
-		 		 				backwards
-		 		forwards
-		 		 		backwards
+		 		 		forwards,
+		 		 				backwards,
+		 		forwards,
+		 		 		backwards,
 
 
 
@@ -66,25 +65,25 @@ Quote style: Double Quotes
 -----
 
 ```css
-html:active-view-transition-type(backwards forwards backwards forwards) {
+html:active-view-transition-type(backwards, forwards, backwards, forwards) {
 }
 
 html:active-view-transition-type(
-		backwards
-		forwards
-		backwards
-		forwards
-		backwards
-		forwards
-		backwards
-		forwards
-		backwards
-		forwards
-		backwards
-		forwards
-		backwards
-		forwards
-		backwards
+		backwards,
+		forwards,
+		backwards,
+		forwards,
+		backwards,
+		forwards,
+		backwards,
+		forwards,
+		backwards,
+		forwards,
+		backwards,
+		forwards,
+		backwards,
+		forwards,
+		backwards,
 		forwards
 	) {
 }

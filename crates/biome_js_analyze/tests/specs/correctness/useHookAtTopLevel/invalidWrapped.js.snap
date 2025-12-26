@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 134
 expression: invalidWrapped.js
 ---
 # Input
@@ -22,6 +21,8 @@ const TestForwardRef = forwardRef((props, ref) => {
 });
 
 ```
+
+_Note: The parser emitted 4 diagnostics which are not shown here._
 
 # Diagnostics
 ```

@@ -1,14 +1,18 @@
 [package]
+name                 = "biome_html_formatter"
+version              = "0.0.0"
 authors.workspace    = true
-categories.workspace = true
 edition.workspace    = true
 homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
-name                 = "biome_html_formatter"
-publish              = true
 repository.workspace = true
-version              = "0.0.0"
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
+
+[[bench]]
+harness = false
+name    = "html_formatter"
 
 [dependencies]
 biome_deserialize            = { workspace = true }
@@ -36,19 +40,15 @@ countme              = { workspace = true, features = ["enable"] }
 criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 tests_macros         = { workspace = true }
 
-[target.'cfg(target_os = "windows")'.dev-dependencies]
-mimalloc = { workspace = true }
-
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
 
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
 [features]
 schema = ["dep:schemars", "serde"]
-serde  = ["dep:serde", "biome_rowan/serde"]
+serde  = ["biome_rowan/serde", "dep:serde"]
 
 [lints]
 workspace = true
-
-[[bench]]
-harness = false
-name    = "html_formatter"

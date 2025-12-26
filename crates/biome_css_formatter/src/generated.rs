@@ -6840,29 +6840,28 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCompoundSelectorList 
         )
     }
 }
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifierList {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::CssCustomIdentifierList,
-        crate::css::lists::custom_identifier_list::FormatCssCustomIdentifierList,
-    >;
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifierCommaSeparatedList {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssCustomIdentifierCommaSeparatedList , crate :: css :: lists :: custom_identifier_comma_separated_list :: FormatCssCustomIdentifierCommaSeparatedList > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::css::lists::custom_identifier_list::FormatCssCustomIdentifierList::default(),
-        )
+        FormatRefWithRule :: new (self , crate :: css :: lists :: custom_identifier_comma_separated_list :: FormatCssCustomIdentifierCommaSeparatedList :: default ())
     }
 }
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifierList {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssCustomIdentifierList,
-        crate::css::lists::custom_identifier_list::FormatCssCustomIdentifierList,
-    >;
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifierCommaSeparatedList {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssCustomIdentifierCommaSeparatedList , crate :: css :: lists :: custom_identifier_comma_separated_list :: FormatCssCustomIdentifierCommaSeparatedList > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::css::lists::custom_identifier_list::FormatCssCustomIdentifierList::default(),
-        )
+        FormatOwnedWithRule :: new (self , crate :: css :: lists :: custom_identifier_comma_separated_list :: FormatCssCustomIdentifierCommaSeparatedList :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifierSpaceSeparatedList {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssCustomIdentifierSpaceSeparatedList , crate :: css :: lists :: custom_identifier_space_separated_list :: FormatCssCustomIdentifierSpaceSeparatedList > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: lists :: custom_identifier_space_separated_list :: FormatCssCustomIdentifierSpaceSeparatedList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifierSpaceSeparatedList {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssCustomIdentifierSpaceSeparatedList , crate :: css :: lists :: custom_identifier_space_separated_list :: FormatCssCustomIdentifierSpaceSeparatedList > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: lists :: custom_identifier_space_separated_list :: FormatCssCustomIdentifierSpaceSeparatedList :: default ())
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssDeclarationList {

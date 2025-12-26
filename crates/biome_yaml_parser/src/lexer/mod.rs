@@ -24,9 +24,6 @@ pub(crate) struct YamlLexer<'src> {
 
     /// Cache of tokens to be emitted to the parser
     tokens: LinkedList<LexToken>,
-
-    /// Cache of tokens that should only be emitted after the current scope has been properly closed.
-    cached_scope_closing_tokens: Option<LinkedList<LexToken>>,
 }
 
 impl<'src> YamlLexer<'src> {
@@ -37,7 +34,6 @@ impl<'src> YamlLexer<'src> {
             scopes: Default::default(),
             current_coordinate: Default::default(),
             tokens: LexToken::default().into(),
-            cached_scope_closing_tokens: None,
         }
     }
 
@@ -136,14 +132,7 @@ impl<'src> YamlLexer<'src> {
         let start = self.current_coordinate;
         let mut tokens = self.consume_potential_mapping_key(current);
         if self.scopes.last().is_none_or(|scope| scope.indent(start)) {
-            // Potentially start of a mapping collection
-            if let Some(mut trivia_tokens) = self.cached_scope_closing_tokens.take() {
-                // Either flow tokens that end prematurely, or plain followed by newline, so can't be a mapping key
-                let tokens_end = tokens.back().map_or(start, |token| token.end);
-                tokens.push_front(LexToken::pseudo(FLOW_START, start));
-                tokens.push_back(LexToken::pseudo(FLOW_END, tokens_end));
-                tokens.append(&mut trivia_tokens);
-            } else if self.is_at_mapping_indicator() {
+            if self.is_at_mapping_indicator() {
                 let indicator = self.consume_byte_as_token(T![:]);
                 tokens.push_front(LexToken::pseudo(MAPPING_START, start));
                 tokens.push_back(indicator);
@@ -157,9 +146,6 @@ impl<'src> YamlLexer<'src> {
                 tokens.append(&mut trivia);
                 tokens.push_back(LexToken::pseudo(FLOW_END, self.current_coordinate));
             }
-        } else if let Some(mut trivia) = self.cached_scope_closing_tokens.take() {
-            // A mapping key that ends prematurely
-            tokens.append(&mut trivia);
         } else if self.is_at_mapping_indicator() {
             // At a valid mapping key, lex the `:` so that the lexer wouldn't confuse it with a
             // standalone `:` token, which indicate the start of an empty mapping key
@@ -185,11 +171,6 @@ impl<'src> YamlLexer<'src> {
         tokens.append(&mut headers);
 
         tokens.push_back(self.lex_block_content());
-
-        // Block content trailing trivia
-        if let Some(mut trivia) = self.cached_scope_closing_tokens.take() {
-            tokens.append(&mut trivia);
-        }
 
         tokens
     }
@@ -346,11 +327,16 @@ impl<'src> YamlLexer<'src> {
         let mut just_lexed_json_key = false;
         while let Some(current) = self.current_byte() {
             if is_break(current) {
-                if let Some(mut trivia) = self.evaluate_flow_scope() {
+                let start = self.current_coordinate;
+                let mut trivia = self.consume_trivia(false);
+                if self.breach_parent_scope() {
+                    // The lexed trivia is actually significant and signals the end of current
+                    // block scope
+                    self.current_coordinate = start;
+                    break;
+                } else {
                     collection_tokens.append(&mut trivia);
                     continue;
-                } else {
-                    break;
                 }
             }
             let token = match (current, self.peek_byte()) {
@@ -397,7 +383,7 @@ impl<'src> YamlLexer<'src> {
                 _ => self.consume_unexpected_token(),
             };
             collection_tokens.push_back(token);
-            if self.cached_scope_closing_tokens.is_some() {
+            if self.breach_parent_scope() {
                 break;
             }
             if current_depth == 0 {
@@ -560,22 +546,6 @@ impl<'src> YamlLexer<'src> {
         LexToken::new(tok, start, self.current_coordinate)
     }
 
-    /// Check whether the next line break closes the current flow collection
-    /// Return a list of trivia if this is not the end of the current flow
-    fn evaluate_flow_scope(&mut self) -> Option<LinkedList<LexToken>> {
-        debug_assert!(self.current_byte().is_some_and(is_break));
-        let start = self.current_coordinate;
-        let mut trivia = self.consume_trivia(false);
-        if self.breach_parent_scope() {
-            let mut scope_end_tokens = self.close_breached_scopes(start);
-            scope_end_tokens.append(&mut trivia);
-            self.cached_scope_closing_tokens = Some(scope_end_tokens);
-            None
-        } else {
-            Some(trivia)
-        }
-    }
-
     fn consume_trivia(&mut self, trailing: bool) -> LinkedList<LexToken> {
         let mut trivia = LinkedList::new();
         while let Some(current) = self.current_byte() {
@@ -609,9 +579,7 @@ impl<'src> YamlLexer<'src> {
             }
         }
         if self.breach_parent_scope() {
-            let mut scope_end_tokens = self.close_breached_scopes(start);
-            scope_end_tokens.append(&mut trivia);
-            self.cached_scope_closing_tokens = Some(scope_end_tokens);
+            self.current_coordinate = start;
             false
         } else {
             true

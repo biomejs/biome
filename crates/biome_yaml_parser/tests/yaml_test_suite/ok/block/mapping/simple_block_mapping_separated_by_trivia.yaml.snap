@@ -7,6 +7,10 @@ expression: snapshot
 ? a: 10
 # this is another trivia
 c: 30
+d:
+  e: 50
+# this is another trivia
+  f: 70
 
 ```
 
@@ -73,29 +77,83 @@ YamlRoot {
                             flow_end_token: FLOW_END@38..38 "" [] [],
                         },
                     },
+                    YamlBlockMapImplicitEntry {
+                        key: YamlFlowYamlNode {
+                            properties: missing (optional),
+                            content: YamlPlainScalar {
+                                value_token: PLAIN_LITERAL@38..40 "d" [Newline("\n")] [],
+                            },
+                        },
+                        colon_token: COLON@40..41 ":" [] [],
+                        value: YamlBlockMapping {
+                            mapping_start_token: MAPPING_START@41..44 "" [Newline("\n"), Whitespace("  ")] [],
+                            properties: missing (optional),
+                            entries: YamlBlockMapEntryList [
+                                YamlBlockMapImplicitEntry {
+                                    key: YamlFlowYamlNode {
+                                        properties: missing (optional),
+                                        content: YamlPlainScalar {
+                                            value_token: PLAIN_LITERAL@44..45 "e" [] [],
+                                        },
+                                    },
+                                    colon_token: COLON@45..47 ":" [] [Whitespace(" ")],
+                                    value: YamlFlowInBlockNode {
+                                        flow_start_token: FLOW_START@47..47 "" [] [],
+                                        flow: YamlFlowYamlNode {
+                                            properties: missing (optional),
+                                            content: YamlPlainScalar {
+                                                value_token: PLAIN_LITERAL@47..49 "50" [] [],
+                                            },
+                                        },
+                                        flow_end_token: FLOW_END@49..49 "" [] [],
+                                    },
+                                },
+                                YamlBlockMapImplicitEntry {
+                                    key: YamlFlowYamlNode {
+                                        properties: missing (optional),
+                                        content: YamlPlainScalar {
+                                            value_token: PLAIN_LITERAL@49..78 "f" [Newline("\n"), Comments("# this is another trivia"), Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                    },
+                                    colon_token: COLON@78..80 ":" [] [Whitespace(" ")],
+                                    value: YamlFlowInBlockNode {
+                                        flow_start_token: FLOW_START@80..80 "" [] [],
+                                        flow: YamlFlowYamlNode {
+                                            properties: missing (optional),
+                                            content: YamlPlainScalar {
+                                                value_token: PLAIN_LITERAL@80..82 "70" [] [],
+                                            },
+                                        },
+                                        flow_end_token: FLOW_END@82..82 "" [] [],
+                                    },
+                                },
+                            ],
+                            mapping_end_token: MAPPING_END@82..82 "" [] [],
+                        },
+                    },
                 ],
-                mapping_end_token: MAPPING_END@38..39 "" [Newline("\n")] [],
+                mapping_end_token: MAPPING_END@82..83 "" [Newline("\n")] [],
             },
             dotdotdot_token: missing (optional),
         },
     ],
-    eof_token: EOF@39..39 "" [] [],
+    eof_token: EOF@83..83 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: YAML_ROOT@0..39
-  0: YAML_DOCUMENT_LIST@0..39
-    0: YAML_DOCUMENT@0..39
+0: YAML_ROOT@0..83
+  0: YAML_DOCUMENT_LIST@0..83
+    0: YAML_DOCUMENT@0..83
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
       2: (empty)
-      3: YAML_BLOCK_MAPPING@0..39
+      3: YAML_BLOCK_MAPPING@0..83
         0: MAPPING_START@0..0 "" [] []
         1: (empty)
-        2: YAML_BLOCK_MAP_ENTRY_LIST@0..38
+        2: YAML_BLOCK_MAP_ENTRY_LIST@0..82
           0: YAML_BLOCK_MAP_EXPLICIT_ENTRY@0..7
             0: QUESTION@0..2 "?" [] [Whitespace(" ")]
             1: YAML_BLOCK_MAPPING@2..7
@@ -131,8 +189,45 @@ YamlRoot {
                 1: YAML_PLAIN_SCALAR@36..38
                   0: PLAIN_LITERAL@36..38 "30" [] []
               2: FLOW_END@38..38 "" [] []
-        3: MAPPING_END@38..39 "" [Newline("\n")] []
+          2: YAML_BLOCK_MAP_IMPLICIT_ENTRY@38..82
+            0: YAML_FLOW_YAML_NODE@38..40
+              0: (empty)
+              1: YAML_PLAIN_SCALAR@38..40
+                0: PLAIN_LITERAL@38..40 "d" [Newline("\n")] []
+            1: COLON@40..41 ":" [] []
+            2: YAML_BLOCK_MAPPING@41..82
+              0: MAPPING_START@41..44 "" [Newline("\n"), Whitespace("  ")] []
+              1: (empty)
+              2: YAML_BLOCK_MAP_ENTRY_LIST@44..82
+                0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@44..49
+                  0: YAML_FLOW_YAML_NODE@44..45
+                    0: (empty)
+                    1: YAML_PLAIN_SCALAR@44..45
+                      0: PLAIN_LITERAL@44..45 "e" [] []
+                  1: COLON@45..47 ":" [] [Whitespace(" ")]
+                  2: YAML_FLOW_IN_BLOCK_NODE@47..49
+                    0: FLOW_START@47..47 "" [] []
+                    1: YAML_FLOW_YAML_NODE@47..49
+                      0: (empty)
+                      1: YAML_PLAIN_SCALAR@47..49
+                        0: PLAIN_LITERAL@47..49 "50" [] []
+                    2: FLOW_END@49..49 "" [] []
+                1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@49..82
+                  0: YAML_FLOW_YAML_NODE@49..78
+                    0: (empty)
+                    1: YAML_PLAIN_SCALAR@49..78
+                      0: PLAIN_LITERAL@49..78 "f" [Newline("\n"), Comments("# this is another trivia"), Newline("\n"), Whitespace("  ")] []
+                  1: COLON@78..80 ":" [] [Whitespace(" ")]
+                  2: YAML_FLOW_IN_BLOCK_NODE@80..82
+                    0: FLOW_START@80..80 "" [] []
+                    1: YAML_FLOW_YAML_NODE@80..82
+                      0: (empty)
+                      1: YAML_PLAIN_SCALAR@80..82
+                        0: PLAIN_LITERAL@80..82 "70" [] []
+                    2: FLOW_END@82..82 "" [] []
+              3: MAPPING_END@82..82 "" [] []
+        3: MAPPING_END@82..83 "" [Newline("\n")] []
       4: (empty)
-  1: EOF@39..39 "" [] []
+  1: EOF@83..83 "" [] []
 
 ```

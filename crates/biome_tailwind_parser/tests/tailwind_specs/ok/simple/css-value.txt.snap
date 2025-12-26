@@ -25,14 +25,14 @@ TwRoot {
                 value: TwCssVariableValue {
                     l_paren_token: L_PAREN@5..6 "(" [] [],
                     value_token: TW_VALUE@6..16 "--my-color" [] [],
-                    r_paren_token: R_PAREN@16..18 ")" [] [Newline("\n")],
+                    r_paren_token: R_PAREN@16..17 ")" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@18..18 "" [] [],
+    eof_token: EOF@17..18 "" [Newline("\n")] [],
 }
 ```
 
@@ -41,19 +41,19 @@ TwRoot {
 ```
 0: TW_ROOT@0..18
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..18
-    0: TW_FULL_CANDIDATE@0..18
+  1: TW_CANDIDATE_LIST@0..17
+    0: TW_FULL_CANDIDATE@0..17
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..18
+      2: TW_FUNCTIONAL_CANDIDATE@0..17
         0: TW_BASE@0..4 "text" [] []
         1: DASH@4..5 "-" [] []
-        2: TW_CSS_VARIABLE_VALUE@5..18
+        2: TW_CSS_VARIABLE_VALUE@5..17
           0: L_PAREN@5..6 "(" [] []
           1: TW_VALUE@6..16 "--my-color" [] []
-          2: R_PAREN@16..18 ")" [] [Newline("\n")]
+          2: R_PAREN@16..17 ")" [] []
         3: (empty)
       3: (empty)
-  2: EOF@18..18 "" [] []
+  2: EOF@17..18 "" [Newline("\n")] []
 
 ```

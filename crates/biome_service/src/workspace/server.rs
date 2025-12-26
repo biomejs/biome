@@ -15,14 +15,13 @@ use crate::scanner::{
     IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
     WorkspaceScannerBridge,
 };
-use crate::workspace::document::AnyEmbeddedSnippet;
-use append_only_vec::AppendOnlyVec;
+use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices};
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
-use biome_css_syntax::CssVariant;
+use biome_css_syntax::{CssRoot, CssVariant};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
@@ -42,7 +41,7 @@ use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_plugin_loader::{PluginConfiguration, Plugins};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
-use biome_rowan::{AstNode, NodeCache, SendNode};
+use biome_rowan::{NodeCache, SendNode};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
@@ -72,7 +71,7 @@ pub struct WorkspaceServer {
     documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
 
     /// Stores the document sources used across the workspace
-    file_sources: AppendOnlyVec<DocumentFileSource>,
+    file_sources: boxcar::Vec<DocumentFileSource>,
 
     /// Stores patterns to search for.
     patterns: HashMap<PatternId, GritQuery, FxBuildHasher>,
@@ -132,7 +131,7 @@ impl WorkspaceServer {
             module_graph: Default::default(),
             plugin_caches: Default::default(),
             documents: Default::default(),
-            file_sources: AppendOnlyVec::default(),
+            file_sources: boxcar::Vec::default(),
             patterns: Default::default(),
             node_cache: Default::default(),
             scanner: Scanner::new(watcher_tx),
@@ -260,11 +259,7 @@ impl WorkspaceServer {
     ///
     /// File sources can be inserted using `insert_source()`.
     fn get_source(&self, index: usize) -> Option<DocumentFileSource> {
-        if index < self.file_sources.len() {
-            Some(self.file_sources[index])
-        } else {
-            None
-        }
+        self.file_sources.get(index).copied()
     }
 
     /// Inserts a file source so that it can be retrieved by index later.
@@ -274,7 +269,7 @@ impl WorkspaceServer {
     fn insert_source(&self, document_file_source: DocumentFileSource) -> usize {
         self.file_sources
             .iter()
-            .position(|file_source| *file_source == document_file_source)
+            .position(|(_, file_source)| *file_source == document_file_source)
             .unwrap_or_else(|| self.file_sources.push(document_file_source))
     }
 
@@ -385,10 +380,13 @@ impl WorkspaceServer {
         let size = content.len();
         let limit = settings.get_max_file_size(&path);
 
-        let syntax = if size > limit {
-            Some(Err(FileTooLarge { size, limit }))
+        let (syntax, services) = if size > limit {
+            (
+                Some(Err(FileTooLarge { size, limit })),
+                DocumentServices::none(),
+            )
         } else if document_file_source.is_none() && !DocumentFileSource::can_parse(path.as_path()) {
-            None
+            (None, DocumentServices::none())
         } else {
             let mut node_cache = NodeCache::default();
             let parsed = self.parse(
@@ -399,8 +397,22 @@ impl WorkspaceServer {
                 &mut node_cache,
             )?;
 
-            if let Some(language) = parsed.language {
+            let ParseResult {
+                any_parse,
+                language,
+            } = parsed;
+
+            let mut services = DocumentServices::none();
+            if let Some(language) = language {
                 file_source_index = self.insert_source(language);
+
+                if language.is_css_like()
+                    && (settings.is_linter_enabled() || settings.is_assist_enabled())
+                {
+                    services = CssDocumentServices::default()
+                        .with_css_semantic_model(&any_parse.tree())
+                        .into();
+                }
             }
 
             if persist_node_cache {
@@ -410,7 +422,7 @@ impl WorkspaceServer {
                     .insert(path.clone(), node_cache);
             }
 
-            Some(Ok(parsed.any_parse))
+            (Some(Ok(any_parse)), services)
         };
         // Second-pass parsing for HTML files with embedded JavaScript and CSS
         // content.
@@ -434,9 +446,21 @@ impl WorkspaceServer {
             Default::default()
         };
 
-        let is_indexed = if reason.is_index() {
-            // If the request is for indexing, we don't insert any document,
-            // we only care about updating the module graph.
+        let is_indexed = if
+        // Dependency files can be skipped altoghether
+        (biome_path.is_dependency() && !biome_path.is_manifest())
+            || (
+                // If the request is for indexing, we don't insert any document
+                // unless the document isn't ignored.
+                // That's usually the case when we want to index a manifest file that belongs to the project.
+                reason.is_index()
+                    && self.is_path_ignored(PathIsIgnoredParams {
+                        project_key,
+                        path: biome_path.clone(),
+                        features: FeaturesBuilder::new().with_all().build(),
+                        ignore_kind: IgnoreKind::Ancestors,
+                    })?
+            ) {
             true
         } else {
             self.documents.pin().update_or_insert_with(
@@ -473,6 +497,7 @@ impl WorkspaceServer {
                         file_source_index,
                         syntax: syntax.clone(),
                         embedded_snippets: embedded_snippets.clone(),
+                        services: services.clone(),
                     }
                 },
                 || Document {
@@ -481,10 +506,13 @@ impl WorkspaceServer {
                     file_source_index,
                     syntax: syntax.clone(),
                     embedded_snippets: embedded_snippets.clone(),
+                    services: services.clone(),
                 },
             );
 
-            self.is_indexed(&path)
+            // We check both reason or if the path is indexed.
+            // This is required due to the check at line 441
+            reason.is_index() || self.is_indexed(&path)
         };
 
         // Manifest files need to update the module graph
@@ -493,8 +521,8 @@ impl WorkspaceServer {
                 .and_then(Result::ok)
                 .map(|node| node.unwrap_as_send_node())
         {
-            let (dependencies, diagnostics) =
-                self.update_service_data(&path, UpdateKind::AddedOrChanged(reason, root))?;
+            let (dependencies, diagnostics) = self
+                .update_service_data(&path, UpdateKind::AddedOrChanged(reason, root, services))?;
 
             Ok(InternalOpenFileResult {
                 dependencies,
@@ -527,17 +555,43 @@ impl WorkspaceServer {
         }
     }
 
-    fn get_parse_with_snippets(
+    fn get_parse_and_services(
         &self,
         path: &Utf8Path,
-    ) -> Result<(AnyParse, Vec<AnyEmbeddedSnippet>), WorkspaceError> {
+    ) -> Result<(AnyParse, DocumentServices), WorkspaceError> {
+        let Document {
+            syntax, services, ..
+        } = self
+            .documents
+            .pin()
+            .get(path)
+            .cloned()
+            .ok_or_else(WorkspaceError::not_found)?;
+
+        match syntax.transpose() {
+            Ok(syntax) => match syntax {
+                None => Err(WorkspaceError::not_found()),
+                Some(syntax) => Ok((syntax.clone(), services.clone())),
+            },
+            Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
+        }
+    }
+
+    fn get_parse_with_snippets_and_services(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(AnyParse, Vec<AnyEmbeddedSnippet>, DocumentServices), WorkspaceError> {
         self.documents
             .pin()
             .get(path)
             .ok_or_else(WorkspaceError::not_found)
             .and_then(|doc| match &doc.syntax {
                 Some(syntax) => match syntax {
-                    Ok(syntax) => Ok((syntax.clone(), doc.embedded_snippets.clone())),
+                    Ok(syntax) => Ok((
+                        syntax.clone(),
+                        doc.embedded_snippets.clone(),
+                        doc.services.clone(),
+                    )),
                     Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
                 },
                 None => Err(WorkspaceError::not_found()),
@@ -815,7 +869,7 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
 
             match update_kind {
-                UpdateKind::AddedOrChanged(_, root) => {
+                UpdateKind::AddedOrChanged(_, root, _) => {
                     self.project_layout
                         .insert_serialized_node_manifest(package_path, root);
                 }
@@ -830,13 +884,34 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
 
             match update_kind {
-                UpdateKind::AddedOrChanged(_, root) => {
+                UpdateKind::AddedOrChanged(_, root, _) => {
                     self.project_layout
                         .insert_serialized_tsconfig(package_path, root);
                 }
                 UpdateKind::Removed => {
                     self.project_layout
                         .remove_tsconfig_from_package(&package_path);
+                }
+            }
+        } else if let Some(turbo_filename) =
+            filename.filter(|f| *f == "turbo.json" || *f == "turbo.jsonc")
+        {
+            let package_path = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .ok_or_else(WorkspaceError::not_found)?;
+
+            match update_kind {
+                UpdateKind::AddedOrChanged(_, root, _) => {
+                    self.project_layout.insert_serialized_turbo_json(
+                        package_path,
+                        root,
+                        turbo_filename,
+                    );
+                }
+                UpdateKind::Removed => {
+                    self.project_layout
+                        .remove_turbo_json_from_package(&package_path);
                 }
             }
         }
@@ -855,23 +930,34 @@ impl WorkspaceServer {
         path: &BiomePath,
         update_kind: &UpdateKind,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
-        let (added_or_changed_paths, removed_paths) = match update_kind {
-            UpdateKind::AddedOrChanged(_, root) => {
-                let Some(root) = SendNode::into_node(root.clone()).and_then(AnyJsRoot::cast) else {
-                    return Default::default();
-                };
-
-                (&[(path, root)] as &[_], &[] as &[_])
+        match update_kind {
+            UpdateKind::AddedOrChanged(_, root, services) => {
+                // NOTE: add a new else if branch to handle other language roots
+                if let Some(js_root) = SendNode::into_language_root::<AnyJsRoot>(root.clone()) {
+                    self.module_graph.update_graph_for_js_paths(
+                        self.fs.as_ref(),
+                        &self.project_layout,
+                        &[(path, js_root)],
+                    )
+                } else if let (Some(css_root), Some(services)) = (
+                    SendNode::into_language_root::<CssRoot>(root.clone()),
+                    services.as_css_services(),
+                ) {
+                    self.module_graph.update_graph_for_css_paths(
+                        self.fs.as_ref(),
+                        &self.project_layout,
+                        &[(path, css_root)],
+                        services.semantic_model.as_ref(),
+                    )
+                } else {
+                    Default::default()
+                }
             }
-            UpdateKind::Removed => (&[] as &[_], &[path] as &[_]),
-        };
-
-        self.module_graph.update_graph_for_js_paths(
-            self.fs.as_ref(),
-            &self.project_layout,
-            added_or_changed_paths,
-            removed_paths,
-        )
+            UpdateKind::Removed => {
+                self.module_graph.update_graph_for_removed_paths(&[path]);
+                (ModuleDependencies::default(), vec![])
+            }
+        }
     }
 
     /// Updates the state of any services relevant to the given `path`.
@@ -892,7 +978,7 @@ impl WorkspaceServer {
         let result = self.update_module_graph_internal(&path, &update_kind);
 
         match update_kind {
-            UpdateKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan), _) => {
+            UpdateKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan), _, _) => {
                 // We'll send a single signal at the end of the scan.
             }
             _ => {
@@ -983,11 +1069,11 @@ impl Workspace for WorkspaceServer {
             workspace_directory,
             configuration,
             project_key,
+            extended_configurations,
         } = params;
         let mut diagnostics: Vec<biome_diagnostics::serde::Diagnostic> = vec![];
         let workspace_directory = workspace_directory.map(|p| p.to_path_buf());
         let is_root = configuration.is_root();
-        let extends_root = configuration.extends_root();
         let mut settings = if !is_root {
             if !self.projects.is_project_registered(project_key) {
                 return Err(WorkspaceError::no_project());
@@ -1006,16 +1092,17 @@ impl Workspace for WorkspaceServer {
                 .ok_or_else(WorkspaceError::no_project)?
         };
 
-        settings.merge_with_configuration(configuration, workspace_directory.clone())?;
-
-        let loading_directory = if extends_root {
-            self.projects.get_project_path(project_key)
-        } else {
-            workspace_directory.clone()
-        };
+        settings.merge_with_configuration(
+            configuration,
+            workspace_directory.clone(),
+            extended_configurations
+                .into_iter()
+                .map(|(path, config)| (path.into(), config))
+                .collect(),
+        )?;
 
         let plugin_diagnostics = self.load_plugins(
-            &loading_directory.clone().unwrap_or_default(),
+            &workspace_directory.clone().unwrap_or_default(),
             &settings.as_all_plugins(),
         );
 
@@ -1375,9 +1462,17 @@ impl Workspace for WorkspaceServer {
         let mut node_cache = node_cache.unwrap_or_default();
 
         let parsed = self.parse(&path, &content, &settings, index, &mut node_cache)?;
+        let mut services = DocumentServices::none();
         let root = parsed.any_parse.unwrap_as_send_node();
         let document_source =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
+        if document_source.is_css_like()
+            && (settings.is_linter_enabled() || settings.is_assist_enabled())
+        {
+            services = CssDocumentServices::default()
+                .with_css_semantic_model(&parsed.any_parse.tree())
+                .into();
+        }
 
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
         let embedded_snippets = if DocumentFileSource::can_contain_embeds(
@@ -1403,6 +1498,7 @@ impl Workspace for WorkspaceServer {
             file_source_index: index,
             syntax: Some(Ok(parsed.any_parse)),
             embedded_snippets,
+            services: services.clone(),
         };
 
         if persist_node_cache {
@@ -1421,7 +1517,7 @@ impl Workspace for WorkspaceServer {
         if self.is_indexed(&path) {
             let (dependencies, diagnostics) = self.update_service_data(
                 &path,
-                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, root),
+                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, root, services),
             )?;
             final_diagnostics.extend(
                 diagnostics
@@ -1477,10 +1573,12 @@ impl Workspace for WorkspaceServer {
             .projects
             .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let (parse, embedded_snippets) = self.get_parse_with_snippets(&path)?;
+        let (parse, embedded_snippets, services) =
+            self.get_parse_with_snippets_and_services(&path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_capabilities(language);
+
         let (diagnostics, errors, skipped_diagnostics) = if (categories.is_lint()
             || categories.is_assist())
             && let Some(lint) = capabilities.analyzer.lint
@@ -1509,6 +1607,7 @@ impl Workspace for WorkspaceServer {
                 pull_code_actions,
                 plugins: plugins.clone(),
                 diagnostic_offset: None,
+                document_services: &services,
             });
 
             let LintResults {
@@ -1524,6 +1623,7 @@ impl Workspace for WorkspaceServer {
                 let Some(lint) = capabilities.analyzer.lint else {
                     continue;
                 };
+                let services = embedded_node.as_snippet_services();
 
                 let results = lint(LintParams {
                     parse: embedded_node.parse().clone(),
@@ -1540,6 +1640,7 @@ impl Workspace for WorkspaceServer {
                     pull_code_actions,
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
+                    document_services: services,
                 });
 
                 diagnostics.extend(results.diagnostics);
@@ -1602,7 +1703,8 @@ impl Workspace for WorkspaceServer {
             .projects
             .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let (parse, embedded_snippets) = self.get_parse_with_snippets(&path)?;
+        let (parse, embedded_snippets, services) =
+            self.get_parse_with_snippets_and_services(&path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_capabilities(language);
@@ -1633,6 +1735,7 @@ impl Workspace for WorkspaceServer {
                 enabled_selectors: &enabled_rules,
                 plugins: plugins.clone(),
                 diagnostic_offset: None,
+                document_services: &services,
             });
 
             for embedded_node in embedded_snippets {
@@ -1660,6 +1763,7 @@ impl Workspace for WorkspaceServer {
                     enabled_selectors: &enabled_rules,
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
+                    document_services: &services,
                 });
 
                 final_result.diagnostics.extend(snippet_result.diagnostics);
@@ -1709,7 +1813,8 @@ impl Workspace for WorkspaceServer {
             .code_actions
             .ok_or_else(self.build_capability_error(&path))?;
 
-        let (parse, embedded_snippets) = self.get_parse_with_snippets(&path)?;
+        let (parse, embedded_snippets, services) =
+            self.get_parse_with_snippets_and_services(&path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let mut result = code_actions(CodeActionsParams {
@@ -1727,6 +1832,7 @@ impl Workspace for WorkspaceServer {
             plugins: Vec::new(),
             categories,
             action_offset: None,
+            document_services: &services,
         });
 
         for embedded_snippet in embedded_snippets {
@@ -1753,6 +1859,7 @@ impl Workspace for WorkspaceServer {
                 plugins: Vec::new(),
                 categories,
                 action_offset: Some(embedded_snippet.content_offset()),
+                document_services: &services,
             });
 
             result.actions.extend(embedded_actions_result.actions);
@@ -1917,7 +2024,8 @@ impl Workspace for WorkspaceServer {
             .fix_all
             .ok_or_else(self.build_capability_error(&path))?;
 
-        let (mut parse, embedded_snippets) = self.get_parse_with_snippets(&path)?;
+        let (mut parse, embedded_snippets, services) =
+            self.get_parse_with_snippets_and_services(&path)?;
 
         let plugins = self
             .get_analyzer_plugins_for_project(
@@ -1965,6 +2073,7 @@ impl Workspace for WorkspaceServer {
                     suppression_reason: suppression_reason.clone(),
                     enabled_rules: &enabled_rules,
                     plugins: plugins.clone(),
+                    document_services: &services,
                 })?;
 
                 actions.extend(results.actions);
@@ -1996,6 +2105,7 @@ impl Workspace for WorkspaceServer {
             suppression_reason: suppression_reason.clone(),
             enabled_rules: &enabled_rules,
             plugins: plugins.clone(),
+            document_services: &services,
         })?;
 
         actions.extend(fix_result.actions);
@@ -2054,11 +2164,12 @@ impl Workspace for WorkspaceServer {
     }
 
     fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
-        let parsed = self.get_parse(params.path.as_path())?;
+        let (parsed, services) = self.get_parse_and_services(params.path.as_path())?;
         let update_kind = match params.update_kind {
             super::UpdateKind::AddOrUpdate => UpdateKind::AddedOrChanged(
                 OpenFileReason::ClientRequest,
                 parsed.unwrap_into_send_node(),
+                services,
             ),
             super::UpdateKind::Remove => UpdateKind::Removed,
         };
@@ -2183,7 +2294,9 @@ impl WorkspaceScannerBridge for WorkspaceServer {
     #[inline]
     fn is_indexed(&self, path: &Utf8Path) -> bool {
         match path.file_name() {
-            Some("package.json" | "tsconfig.json") => self.project_layout.is_indexed(path),
+            Some("package.json" | "tsconfig.json" | "turbo.json" | "turbo.jsonc") => {
+                self.project_layout.is_indexed(path)
+            }
             _ => self.module_graph.contains(path),
         }
     }
@@ -2238,6 +2351,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 directory_path: nested_directory_path,
                 configuration: nested_configuration,
                 diagnostics,
+                extended_configurations,
                 ..
             } = loaded_nested_configuration;
             let has_errors = diagnostics.iter().any(|d| d.severity() >= Severity::Error);
@@ -2283,6 +2397,10 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 project_key,
                 workspace_directory: nested_directory_path.map(BiomePath::from),
                 configuration: nested_configuration,
+                extended_configurations: extended_configurations
+                    .into_iter()
+                    .map(|(path, config)| (BiomePath::from(path), config))
+                    .collect(),
             })?;
 
             returned_diagnostics.extend(result.diagnostics)
@@ -2398,14 +2516,14 @@ impl OpenFileReason {
 
 /// Kind of update being performed.
 pub enum UpdateKind {
-    AddedOrChanged(OpenFileReason, SendNode),
+    AddedOrChanged(OpenFileReason, SendNode, DocumentServices),
     Removed,
 }
 
 impl Debug for UpdateKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AddedOrChanged(reason, _) => {
+            Self::AddedOrChanged(reason, _, _) => {
                 f.debug_tuple("AddedOrChanged").field(reason).finish()
             }
             Self::Removed => write!(f, "Removed"),

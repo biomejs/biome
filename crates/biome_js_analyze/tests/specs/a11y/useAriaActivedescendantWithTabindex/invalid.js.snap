@@ -1,10 +1,11 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
 <div aria-activedescendant={someID} />;
 
 ```
+
+_Note: The parser emitted 3 diagnostics which are not shown here._

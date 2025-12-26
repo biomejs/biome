@@ -8,10 +8,11 @@ use crate::syntax::HtmlSyntaxFeatures::{DoubleTextExpressions, SingleTextExpress
 use crate::syntax::astro::parse_astro_fence;
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
-    parse_attach_attribute, parse_svelte_at_block, parse_svelte_hash_block,
+    is_at_svelte_keyword, parse_attach_attribute, parse_svelte_at_block, parse_svelte_hash_block,
 };
 use crate::syntax::vue::{
     parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_on_shorthand_directive,
+    parse_vue_v_slot_shorthand_directive,
 };
 use crate::token_source::{
     HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
@@ -130,7 +131,7 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
 /// will emit diagnostics. We want to allow them if they have no special meaning.
 #[inline(always)]
 fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
-    if p.options().vue {
+    if HtmlSyntaxFeatures::Vue.is_supported(p) {
         HtmlLexContext::InsideTagVue
     } else {
         HtmlLexContext::InsideTag
@@ -180,7 +181,14 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                 HtmlLexContext::Regular
             },
         );
+
         let opening = m.complete(p, HTML_OPENING_ELEMENT);
+
+        // if the lexer found a keyword, rewind and lex as text
+        if is_at_keyword(p) {
+            p.re_lex(HtmlReLexContext::HtmlText);
+        }
+
         if is_embedded_language_tag {
             // embedded language tags always have 1 element as content
             let list = p.start();
@@ -258,6 +266,14 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
             // we remap to HTML_LITERAL
             let m = p.start();
             p.bump_remap(HTML_LITERAL);
+            Present(m.complete(p, HTML_CONTENT))
+        }
+        // At this position, we shouldn't have svelte keyword, so we relex everything
+        // as text
+        _ if is_at_svelte_keyword(p) => {
+            let m = p.start();
+            p.re_lex(HtmlReLexContext::HtmlText);
+            p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
             Present(m.complete(p, HTML_CONTENT))
         }
         HTML_LITERAL => {
@@ -369,6 +385,11 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             parse_vue_v_on_shorthand_directive,
             |p, m| disabled_vue(p, m.range(p)),
         ),
+        T![#] => HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
+            p,
+            parse_vue_v_slot_shorthand_directive,
+            |p, m| disabled_vue(p, m.range(p)),
+        ),
         T!['{'] => SingleTextExpressions.parse_exclusive_syntax(
             p,
             |p| parse_single_text_expression(p, HtmlLexContext::InsideTag),
@@ -398,8 +419,14 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
-    p.at_ts(token_set![HTML_LITERAL, T!["{{"], T!['{'], T![:], T![@]])
-        || (SingleTextExpressions.is_supported(p) && p.at(T!["{@"]))
+    p.at_ts(token_set![
+        HTML_LITERAL,
+        T!["{{"],
+        T!['{'],
+        T![:],
+        T![@],
+        T![#],
+    ]) || (SingleTextExpressions.is_supported(p) && p.at(T!["{@"]))
 }
 
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
@@ -622,11 +649,7 @@ fn parse_single_text_expression_content(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
 
-    if p.at(SVELTE_IDENT) {
-        p.re_lex(HtmlReLexContext::SingleTextExpression);
-    } else {
-        p.bump_remap(HTML_LITERAL);
-    }
+    p.bump_remap(HTML_LITERAL);
 
     Present(m.complete(p, HTML_TEXT_EXPRESSION))
 }
@@ -666,4 +689,12 @@ impl TextExpression {
 
         Present(m.complete(p, HTML_TEXT_EXPRESSION))
     }
+}
+
+fn is_at_keyword(p: &mut HtmlParser) -> bool {
+    is_at_svelte_keyword(p) || is_at_html_keyword(p)
+}
+
+fn is_at_html_keyword(p: &mut HtmlParser) -> bool {
+    matches!(p.cur(), T![html] | T![doctype])
 }

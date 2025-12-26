@@ -1,8 +1,8 @@
 [package]
-edition = "2024"
 name    = "xtask_coverage"
-publish = false
 version = "0.0.0"
+edition = "2024"
+publish = false
 
 [dependencies]
 ascii_table        = "4.0.8"

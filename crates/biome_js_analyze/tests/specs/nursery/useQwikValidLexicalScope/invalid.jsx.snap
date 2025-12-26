@@ -191,6 +191,8 @@ invalid.jsx:5:11 lint/nursery/useQwikValidLexicalScope ━━━━━━━━�
   
   i Wrap the expression with $(...) to make it serializable. Learn more: Qwik documentation.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -216,6 +218,8 @@ invalid.jsx:20:23 lint/nursery/useQwikValidLexicalScope ━━━━━━━━
     - Optimized rehydration (client-side continuation)
   
   i Wrap the expression with $(...) to make it serializable. Learn more: Qwik documentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -244,6 +248,8 @@ invalid.jsx:56:23 lint/nursery/useQwikValidLexicalScope ━━━━━━━━
   
   i Wrap the expression with $(...) to make it serializable. Learn more: Qwik documentation.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -270,6 +276,8 @@ invalid.jsx:67:29 lint/nursery/useQwikValidLexicalScope ━━━━━━━━
     - Optimized rehydration (client-side continuation)
   
   i Wrap the expression with $(...) to make it serializable. Learn more: Qwik documentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -298,6 +306,8 @@ invalid.jsx:79:29 lint/nursery/useQwikValidLexicalScope ━━━━━━━━
   
   i Wrap the expression with $(...) to make it serializable. Learn more: Qwik documentation.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -325,6 +335,8 @@ invalid.jsx:91:29 lint/nursery/useQwikValidLexicalScope ━━━━━━━━
   
   i Wrap the expression with $(...) to make it serializable. Learn more: Qwik documentation.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -350,6 +362,8 @@ invalid.jsx:132:25 lint/nursery/useQwikValidLexicalScope ━━━━━━━�
     - Optimized rehydration (client-side continuation)
   
   i Wrap the expression with $(...) to make it serializable. Learn more: Qwik documentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

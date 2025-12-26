@@ -23,6 +23,8 @@ b > .foo:error { }
 
 ```
 
+_Note: The parser emitted 5 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.css:1:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

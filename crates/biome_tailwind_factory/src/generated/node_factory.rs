@@ -92,6 +92,20 @@ pub fn tw_css_variable_value(
         ],
     ))
 }
+pub fn tw_data_attribute(
+    data_token: SyntaxToken,
+    minus_token: SyntaxToken,
+    value: AnyTwDataAttributeValue,
+) -> TwDataAttribute {
+    TwDataAttribute::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_DATA_ATTRIBUTE,
+        [
+            Some(SyntaxElement::Token(data_token)),
+            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn tw_full_candidate(
     variants: TwVariantList,
     candidate: AnyTwCandidate,
@@ -235,25 +249,16 @@ pub fn tw_static_variant(base_token: SyntaxToken) -> TwStaticVariant {
         [Some(SyntaxElement::Token(base_token))],
     ))
 }
-pub fn tw_candidate_list<I, S>(items: I, separators: S) -> TwCandidateList
+pub fn tw_candidate_list<I>(items: I) -> TwCandidateList
 where
     I: IntoIterator<Item = AnyTwFullCandidate>,
     I::IntoIter: ExactSizeIterator,
-    S: IntoIterator<Item = TailwindSyntaxToken>,
-    S::IntoIter: ExactSizeIterator,
 {
-    let mut items = items.into_iter();
-    let mut separators = separators.into_iter();
-    let length = items.len() + separators.len();
     TwCandidateList::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_CANDIDATE_LIST,
-        (0..length).map(|index| {
-            if index % 2 == 0 {
-                Some(items.next()?.into_syntax().into())
-            } else {
-                Some(separators.next()?.into())
-            }
-        }),
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn tw_variant_list<I, S>(items: I, separators: S) -> TwVariantList

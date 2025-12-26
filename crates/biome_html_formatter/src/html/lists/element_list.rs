@@ -32,8 +32,8 @@ pub(crate) struct FormatHtmlElementList {
 }
 
 impl FormatHtmlElementList {
-    pub(crate) fn with_group_id(mut self, group: GroupId) -> Self {
-        self.group = Some(group);
+    pub(crate) fn with_multiline(mut self) -> Self {
+        self.layout = HtmlChildListLayout::Multiline;
         self
     }
 }

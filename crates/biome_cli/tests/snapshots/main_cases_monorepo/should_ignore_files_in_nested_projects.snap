@@ -86,7 +86,7 @@ file.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
   > 1 │ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
       │          ^
   
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend f with an underscore.
   
@@ -104,7 +104,7 @@ file.js:1:22 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
   > 1 │ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
       │                      ^^^^^^^^^^^^^^^
   
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend lorem_and_ipsum with an underscore.
   
@@ -122,7 +122,7 @@ packages/lib/file.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━
   > 1 │ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
       │          ^
   
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend f with an underscore.
   
@@ -140,7 +140,7 @@ packages/lib/file.js:1:22 lint/correctness/noUnusedVariables  FIXABLE  ━━━
   > 1 │ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
       │                      ^^^^^^^^^^^^^^^
   
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend lorem_and_ipsum with an underscore.
   

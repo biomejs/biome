@@ -1,6 +1,7 @@
 [
 	"function foo() {return;}",
 	"const foo = () => {};",
+	"const foo = () => undefined;",
 	"let foo;",
 	"var foo;",
 	"const foo = undefined;",

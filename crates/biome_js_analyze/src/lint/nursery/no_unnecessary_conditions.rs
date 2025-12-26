@@ -91,6 +91,7 @@ declare_lint_rule! {
         recommended: false,
         severity: Severity::Warning,
         domains: &[RuleDomain::Project],
+        issue_number: Some("6611"),
     }
 }
 

@@ -4,6 +4,7 @@ mod css_modules;
 mod parse_error;
 mod property;
 mod selector;
+mod util;
 mod value;
 
 use crate::lexer::CssLexContext;

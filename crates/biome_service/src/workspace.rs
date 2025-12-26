@@ -63,12 +63,12 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
-use biome_module_graph::SerializedJsModuleInfo;
+use biome_module_graph::SerializedModuleInfo;
 use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::bounded;
-pub use document::{AnyEmbeddedSnippet, EmbeddedSnippet};
+pub use document::{AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet};
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -735,6 +735,8 @@ pub struct UpdateSettingsParams {
     pub project_key: ProjectKey,
     pub configuration: Configuration,
     pub workspace_directory: Option<BiomePath>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub extended_configurations: Vec<(BiomePath, Configuration)>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -788,6 +790,15 @@ pub enum FileContent {
 
     /// The server will be responsible for loading the content from the file system.
     FromServer,
+}
+
+impl Display for FileContent {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::FromClient { .. } => f.write_str("FromClient"),
+            Self::FromServer => f.write_str("FromServer"),
+        }
+    }
 }
 
 impl FileContent {
@@ -1076,7 +1087,7 @@ pub struct FixFileParams {
     pub suppression_reason: Option<String>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FixFileResult {
@@ -1348,7 +1359,7 @@ impl From<BiomePath> for FileExitsParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetModuleGraphResult {
-    pub data: FxHashMap<String, SerializedJsModuleInfo>,
+    pub data: FxHashMap<String, SerializedModuleInfo>,
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {
@@ -1617,10 +1628,11 @@ pub struct FileGuard<'app, W: Workspace + ?Sized> {
 }
 
 impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
-    pub fn open(workspace: &'app W, params: OpenFileParams) -> Result<Self, WorkspaceError> {
-        let project_key = params.project_key;
-        let path = params.path.clone();
-        workspace.open_file(params)?;
+    pub fn new(
+        workspace: &'app W,
+        project_key: ProjectKey,
+        path: BiomePath,
+    ) -> Result<Self, WorkspaceError> {
         Ok(Self {
             workspace,
             project_key,

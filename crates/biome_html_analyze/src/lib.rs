@@ -1,5 +1,6 @@
 #![deny(clippy::use_self)]
 
+mod a11y;
 mod lint;
 pub mod options;
 mod registry;

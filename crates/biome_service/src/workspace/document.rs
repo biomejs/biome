@@ -2,7 +2,7 @@ use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::FormatEmbedNode;
 use crate::settings::ServiceLanguage;
 use crate::workspace::DocumentFileSource;
-use biome_css_syntax::CssLanguage;
+use biome_css_syntax::{CssLanguage, CssRoot};
 use biome_diagnostics::Error;
 use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
 use biome_js_syntax::JsLanguage;
@@ -13,26 +13,26 @@ use std::marker::PhantomData;
 
 #[derive(Debug, Clone)]
 pub enum AnyEmbeddedSnippet {
-    Js(EmbeddedSnippet<JsLanguage>),
-    Css(EmbeddedSnippet<CssLanguage>),
-    Json(EmbeddedSnippet<JsonLanguage>),
+    Js(EmbeddedSnippet<JsLanguage>, DocumentServices),
+    Css(EmbeddedSnippet<CssLanguage>, DocumentServices),
+    Json(EmbeddedSnippet<JsonLanguage>, DocumentServices),
 }
 
 impl From<EmbeddedSnippet<JsLanguage>> for AnyEmbeddedSnippet {
     fn from(content: EmbeddedSnippet<JsLanguage>) -> Self {
-        Self::Js(content)
+        Self::Js(content, DocumentServices::none())
     }
 }
 
-impl From<EmbeddedSnippet<CssLanguage>> for AnyEmbeddedSnippet {
-    fn from(content: EmbeddedSnippet<CssLanguage>) -> Self {
-        Self::Css(content)
+impl From<(EmbeddedSnippet<CssLanguage>, DocumentServices)> for AnyEmbeddedSnippet {
+    fn from(content: (EmbeddedSnippet<CssLanguage>, DocumentServices)) -> Self {
+        Self::Css(content.0, content.1)
     }
 }
 
 impl From<EmbeddedSnippet<JsonLanguage>> for AnyEmbeddedSnippet {
     fn from(content: EmbeddedSnippet<JsonLanguage>) -> Self {
-        Self::Json(content)
+        Self::Json(content, DocumentServices::none())
     }
 }
 
@@ -46,7 +46,7 @@ impl AnyEmbeddedSnippet {
     }
 
     pub fn as_js_embedded_snippet(&self) -> Option<&EmbeddedSnippet<JsLanguage>> {
-        if let Self::Js(content) = self {
+        if let Self::Js(content, _) = self {
             Some(content)
         } else {
             None
@@ -54,7 +54,7 @@ impl AnyEmbeddedSnippet {
     }
 
     pub fn as_css_embedded_snippet(&self) -> Option<&EmbeddedSnippet<CssLanguage>> {
-        if let Self::Css(content) = self {
+        if let Self::Css(content, _) = self {
             Some(content)
         } else {
             None
@@ -62,7 +62,7 @@ impl AnyEmbeddedSnippet {
     }
 
     pub fn as_json_embedded_snippet(&self) -> Option<&EmbeddedSnippet<JsonLanguage>> {
-        if let Self::Json(content) = self {
+        if let Self::Json(content, _) = self {
             Some(content)
         } else {
             None
@@ -71,57 +71,65 @@ impl AnyEmbeddedSnippet {
 
     pub fn content_range(&self) -> TextRange {
         match self {
-            Self::Js(node) => node.content_range,
-            Self::Css(node) => node.content_range,
-            Self::Json(node) => node.content_range,
+            Self::Js(node, _) => node.content_range,
+            Self::Css(node, _) => node.content_range,
+            Self::Json(node, _) => node.content_range,
         }
     }
 
     pub fn element_range(&self) -> TextRange {
         match self {
-            Self::Js(node) => node.element_range,
-            Self::Css(node) => node.element_range,
-            Self::Json(node) => node.element_range,
+            Self::Js(node, _) => node.element_range,
+            Self::Css(node, _) => node.element_range,
+            Self::Json(node, _) => node.element_range,
         }
     }
 
     pub fn parse(&self) -> AnyParse {
         match self {
-            Self::Js(node) => node.parse.clone(),
-            Self::Css(node) => node.parse.clone(),
-            Self::Json(node) => node.parse.clone(),
+            Self::Js(node, _) => node.parse.clone(),
+            Self::Css(node, _) => node.parse.clone(),
+            Self::Json(node, _) => node.parse.clone(),
         }
     }
 
     pub fn file_source_index(&self) -> usize {
         match self {
-            Self::Js(node) => node.file_source_index,
-            Self::Css(node) => node.file_source_index,
-            Self::Json(node) => node.file_source_index,
+            Self::Js(node, _) => node.file_source_index,
+            Self::Css(node, _) => node.file_source_index,
+            Self::Json(node, _) => node.file_source_index,
         }
     }
 
     pub fn set_file_source_index(&mut self, index: usize) {
         match self {
-            Self::Js(node) => node.file_source_index = index,
-            Self::Css(node) => node.file_source_index = index,
-            Self::Json(node) => node.file_source_index = index,
+            Self::Js(node, _) => node.file_source_index = index,
+            Self::Css(node, _) => node.file_source_index = index,
+            Self::Json(node, _) => node.file_source_index = index,
         }
     }
 
     pub fn content_offset(&self) -> TextSize {
         match self {
-            Self::Js(node) => node.content_offset,
-            Self::Css(node) => node.content_offset,
-            Self::Json(node) => node.content_offset,
+            Self::Js(node, _) => node.content_offset,
+            Self::Css(node, _) => node.content_offset,
+            Self::Json(node, _) => node.content_offset,
         }
     }
 
     pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
         match self {
-            Self::Js(node) => node.into_serde_diagnostics(),
-            Self::Css(node) => node.into_serde_diagnostics(),
-            Self::Json(node) => node.into_serde_diagnostics(),
+            Self::Js(node, _) => node.into_serde_diagnostics(),
+            Self::Css(node, _) => node.into_serde_diagnostics(),
+            Self::Json(node, _) => node.into_serde_diagnostics(),
+        }
+    }
+
+    pub fn as_snippet_services(&self) -> &DocumentServices {
+        match self {
+            Self::Js(_, services) => services,
+            Self::Css(_, services) => services,
+            Self::Json(_, services) => services,
         }
     }
 }
@@ -221,6 +229,8 @@ pub(crate) struct Document {
 
     /// Embedded content for foreign language snippets.
     pub(crate) embedded_snippets: Vec<AnyEmbeddedSnippet>,
+
+    pub(crate) services: DocumentServices,
 }
 
 impl Document {
@@ -236,5 +246,56 @@ impl Document {
                 node: node.parse().clone(),
             })
             .collect()
+    }
+}
+
+/// Represents the services that can be part of a document or a snippet.
+/// These services must implement [Clone]. Also, they must support [Sync] and [Send]
+///
+/// To be sharable across threads, and a service needs to save language nodes, they must be
+/// stored with [biome_rowan::AstPtr]. The service needs to accept the language root so
+/// the pointer can be retrieved with its typed counter part.
+#[derive(Clone, Debug)]
+pub enum DocumentServices {
+    /// The document doesn't have any services
+    None,
+    Css(CssDocumentServices),
+}
+
+impl From<CssDocumentServices> for DocumentServices {
+    fn from(services: CssDocumentServices) -> Self {
+        Self::Css(services)
+    }
+}
+
+impl DocumentServices {
+    pub fn new_css() -> Self {
+        Self::Css(CssDocumentServices {
+            semantic_model: None,
+        })
+    }
+
+    pub fn none() -> Self {
+        Self::None
+    }
+
+    pub fn as_css_services(&self) -> Option<&CssDocumentServices> {
+        if let Self::Css(services) = self {
+            Some(services)
+        } else {
+            None
+        }
+    }
+}
+#[derive(Clone, Default, Debug)]
+pub struct CssDocumentServices {
+    /// Semantic model that belongs to the file
+    pub(crate) semantic_model: Option<biome_css_semantic::model::SemanticModel>,
+}
+
+impl CssDocumentServices {
+    pub fn with_css_semantic_model(mut self, root: &CssRoot) -> Self {
+        self.semantic_model = Some(biome_css_semantic::semantic_model(root));
+        self
     }
 }

@@ -1,15 +1,18 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome utility to codegen a grammar for the parser"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_syntax_codegen"
-publish              = false
-repository.workspace = true
 version              = "0.1.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome utility to codegen a grammar for the parser"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
+
+[[example]]
+name = "minigrammar"
 
 [dependencies]
 anyhow            = { workspace = true }
@@ -20,6 +23,3 @@ quote             = { workspace = true }
 
 [lints]
 workspace = true
-
-[[example]]
-name = "minigrammar"

@@ -20,11 +20,15 @@ fn quick_test() {
     // quick brown fox
     // "#;
     let src = r#"
-foo bar baz boof
-<!-- comment -->
-quick brown fox
+{#snippet ff.call()}
+    {page.value}
+    {second.value}
+    <div>
+        <span></span>
+    </div>
+{/snippet}
 "#;
-    let source_type = HtmlFileSource::html();
+    let source_type = HtmlFileSource::svelte();
     let tree = parse_html(src, HtmlParseOptions::from(&source_type));
     let options = HtmlFormatOptions::new(HtmlFileSource::html())
         .with_indent_style(IndentStyle::Space)

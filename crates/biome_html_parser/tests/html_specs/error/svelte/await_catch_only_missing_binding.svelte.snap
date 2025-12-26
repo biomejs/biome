@@ -1,0 +1,135 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#await promise catch}
+  <p>Error!</p>
+{/await}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusElement {
+            items: [
+                HtmlBogus {
+                    items: [
+                        SV_CURLY_HASH@0..2 "{#" [] [],
+                        AWAIT_KW@2..7 "await" [] [],
+                        HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@7..16 " promise " [] [],
+                        },
+                        HtmlBogus {
+                            items: [
+                                CATCH_KW@16..21 "catch" [] [],
+                                HTML_LITERAL@21..21 "" [] [],
+                            ],
+                        },
+                        R_CURLY@21..22 "}" [] [],
+                        HtmlElementList [
+                            HtmlElement {
+                                opening_element: HtmlOpeningElement {
+                                    l_angle_token: L_ANGLE@22..26 "<" [Newline("\n"), Whitespace("  ")] [],
+                                    name: HtmlTagName {
+                                        value_token: HTML_LITERAL@26..27 "p" [] [],
+                                    },
+                                    attributes: HtmlAttributeList [],
+                                    r_angle_token: R_ANGLE@27..28 ">" [] [],
+                                },
+                                children: HtmlElementList [
+                                    HtmlContent {
+                                        value_token: HTML_LITERAL@28..34 "Error!" [] [],
+                                    },
+                                ],
+                                closing_element: HtmlClosingElement {
+                                    l_angle_token: L_ANGLE@34..35 "<" [] [],
+                                    slash_token: SLASH@35..36 "/" [] [],
+                                    name: HtmlTagName {
+                                        value_token: HTML_LITERAL@36..37 "p" [] [],
+                                    },
+                                    r_angle_token: R_ANGLE@37..38 ">" [] [],
+                                },
+                            },
+                        ],
+                    ],
+                },
+                SvelteAwaitClausesList [],
+                SvelteAwaitClosingBlock {
+                    sv_curly_slash_token: SV_CURLY_SLASH@38..41 "{/" [Newline("\n")] [],
+                    await_token: AWAIT_KW@41..46 "await" [] [],
+                    r_curly_token: R_CURLY@46..47 "}" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@47..48 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..48
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..47
+    0: HTML_BOGUS_ELEMENT@0..47
+      0: HTML_BOGUS@0..38
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: AWAIT_KW@2..7 "await" [] []
+        2: HTML_TEXT_EXPRESSION@7..16
+          0: HTML_LITERAL@7..16 " promise " [] []
+        3: HTML_BOGUS@16..21
+          0: CATCH_KW@16..21 "catch" [] []
+          1: HTML_LITERAL@21..21 "" [] []
+        4: R_CURLY@21..22 "}" [] []
+        5: HTML_ELEMENT_LIST@22..38
+          0: HTML_ELEMENT@22..38
+            0: HTML_OPENING_ELEMENT@22..28
+              0: L_ANGLE@22..26 "<" [Newline("\n"), Whitespace("  ")] []
+              1: HTML_TAG_NAME@26..27
+                0: HTML_LITERAL@26..27 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@27..27
+              3: R_ANGLE@27..28 ">" [] []
+            1: HTML_ELEMENT_LIST@28..34
+              0: HTML_CONTENT@28..34
+                0: HTML_LITERAL@28..34 "Error!" [] []
+            2: HTML_CLOSING_ELEMENT@34..38
+              0: L_ANGLE@34..35 "<" [] []
+              1: SLASH@35..36 "/" [] []
+              2: HTML_TAG_NAME@36..37
+                0: HTML_LITERAL@36..37 "p" [] []
+              3: R_ANGLE@37..38 ">" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@38..38
+      2: SVELTE_AWAIT_CLOSING_BLOCK@38..47
+        0: SV_CURLY_SLASH@38..41 "{/" [Newline("\n")] []
+        1: AWAIT_KW@41..46 "await" [] []
+        2: R_CURLY@46..47 "}" [] []
+  4: EOF@47..48 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+await_catch_only_missing_binding.svelte:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, instead none was found.
+  
+  > 1 │ {#await promise catch}
+      │                      
+    2 │   <p>Error!</p>
+    3 │ {/await}
+  
+```

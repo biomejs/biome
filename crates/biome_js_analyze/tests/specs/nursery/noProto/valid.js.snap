@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+const a = Object.getPrototypeOf(obj);
+const b = {
+	__proto__: a,
+	val: 12
+}
+Object.setPrototypeOf(obj, b);
+
+```

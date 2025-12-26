@@ -36,6 +36,8 @@ invalid.js:2:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
   
   i This pattern can be replaced with `startsWith('b')`.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -52,6 +54,8 @@ invalid.js:3:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
     5 │ foo.slice(0, 3) === 'bar';
   
   i This pattern can be replaced with `startsWith('b')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -70,6 +74,8 @@ invalid.js:4:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
   
   i This pattern can be replaced with `startsWith('bar')`.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -86,6 +92,8 @@ invalid.js:5:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
     7 │ foo.match(/^bar/) != null;
   
   i This pattern can be replaced with `startsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -104,6 +112,8 @@ invalid.js:6:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
   
   i This pattern can be replaced with `startsWith('bar')`.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -120,6 +130,8 @@ invalid.js:7:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
     9 │ foo[foo.length - 1] === 'b';
   
   i This pattern can be replaced with `startsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -138,6 +150,8 @@ invalid.js:8:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
   
   i This pattern can be replaced with `startsWith('bar')`.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -154,6 +168,8 @@ invalid.js:9:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
     11 │ foo.lastIndexOf('bar') === foo.length - 3;
   
   i This pattern can be replaced with `endsWith('b')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -172,6 +188,8 @@ invalid.js:10:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━
   
   i This pattern can be replaced with `endsWith('b')`.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -188,6 +206,8 @@ invalid.js:11:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━
     13 │ foo.substring(foo.length - 3) === 'bar';
   
   i This pattern can be replaced with `endsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -206,6 +226,8 @@ invalid.js:12:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━
   
   i This pattern can be replaced with `endsWith('bar')`.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -222,6 +244,8 @@ invalid.js:13:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━
     15 │ /bar$/.test(foo);
   
   i This pattern can be replaced with `endsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -240,6 +264,8 @@ invalid.js:14:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━
   
   i This pattern can be replaced with `endsWith('bar')`.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -255,6 +281,8 @@ invalid.js:15:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━
     16 │ 
   
   i This pattern can be replaced with `endsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

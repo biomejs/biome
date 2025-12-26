@@ -22,7 +22,7 @@ use biome_configuration::css::{
     CssFormatterConfiguration, CssFormatterEnabled, CssLinterConfiguration, CssLinterEnabled,
     CssModulesEnabled, CssParserConfiguration, CssTailwindDirectivesEnabled,
 };
-use biome_css_analyze::analyze;
+use biome_css_analyze::{CssAnalyzerServices, analyze};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::CssParserOptions;
@@ -38,7 +38,7 @@ use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
-use tracing::{debug_span, error, info, trace_span};
+use tracing::{error, info};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -538,8 +538,14 @@ fn format_on_type(
 }
 
 fn lint(params: LintParams) -> LintResults {
-    let _ =
-        debug_span!("Linting CSS file", path =? params.path, language =? params.language).entered();
+    let Some(file_source) = params.language.to_css_file_source() else {
+        return LintResults {
+            diagnostics: vec![],
+            errors: 0,
+            skipped_diagnostics: 0,
+        };
+    };
+
     let settings = &params.settings;
     let analyzer_options = settings.analyzer_options::<CssLanguage>(
         params.path,
@@ -565,11 +571,18 @@ fn lint(params: LintParams) -> LintResults {
     };
 
     let mut process_lint = ProcessLint::new(&params);
-
+    let css_services = CssAnalyzerServices {
+        semantic_model: params
+            .document_services
+            .as_css_services()
+            .and_then(|services| services.semantic_model.as_ref()),
+        file_source,
+    };
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,
         &analyzer_options,
+        css_services,
         &params.plugins,
         |signal| process_lint.process_signal(signal),
     );
@@ -599,11 +612,10 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         plugins,
         categories,
         action_offset,
+        document_services,
     } = params;
-    let _ = debug_span!("Code actions CSS", range =? range, path =? path).entered();
     let tree = parse.tree();
-    let _ = trace_span!("Parsed file", tree =? tree).entered();
-    let Some(_) = language.to_css_file_source() else {
+    let Some(file_source) = language.to_css_file_source() else {
         error!("Could not determine the file source of the file");
         return PullActionsResult {
             actions: Vec::new(),
@@ -630,21 +642,34 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     };
 
     info!("CSS runs the analyzer");
+    let css_services = CssAnalyzerServices {
+        semantic_model: document_services
+            .as_css_services()
+            .and_then(|services| services.semantic_model.as_ref()),
+        file_source,
+    };
 
-    analyze(&tree, filter, &analyzer_options, &plugins, |signal| {
-        actions.extend(signal.actions().into_code_action_iter().map(|item| {
-            CodeAction {
-                category: item.category.clone(),
-                rule_name: item
-                    .rule_name
-                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                offset: action_offset,
-                suggestion: item.suggestion,
-            }
-        }));
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        css_services,
+        &plugins,
+        |signal| {
+            actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                CodeAction {
+                    category: item.category.clone(),
+                    rule_name: item
+                        .rule_name
+                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                    offset: action_offset,
+                    suggestion: item.suggestion,
+                }
+            }));
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     PullActionsResult { actions }
 }
@@ -652,7 +677,10 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 /// Applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let mut tree: CssRoot = params.parse.tree();
-
+    let Some(file_source) = params.document_file_source.to_css_file_source() else {
+        error!("Could not determine the file source of the file");
+        return Ok(FixFileResult::default());
+    };
     // Compute final rules (taking `overrides` into account)
     let rules = params.settings.as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<CssLanguage>(
@@ -683,10 +711,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     );
 
     loop {
+        let css_services = CssAnalyzerServices {
+            semantic_model: params
+                .document_services
+                .as_css_services()
+                .and_then(|services| services.semantic_model.as_ref()),
+            file_source,
+        };
+
         let (action, _) = analyze(
             &tree,
             filter,
             &analyzer_options,
+            css_services,
             &params.plugins,
             |signal| process_fix_all.process_signal(signal),
         );

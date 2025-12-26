@@ -272,4 +272,14 @@ mod test {
         assert!(globals[0].is_read());
         assert_eq!(globals[0].syntax().text_trimmed(), "console");
     }
+
+    #[test]
+    pub fn ok_semantic_model_ts_construct_signature_member() {
+        let r = biome_js_parser::parse(
+            "export interface TypedEventConstructor<T, I> { new(): Event & TypedEvent; }",
+            JsFileSource::ts(),
+            JsParserOptions::default(),
+        );
+        let _model = semantic_model(&r.tree(), SemanticModelOptions::default());
+    }
 }

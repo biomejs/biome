@@ -20,6 +20,8 @@ import type LinkOnInterfaceIndexer from "mod";
 import type LinkOnEnum from "mod";
 import type LinkOnEnumMember from "mod";
 
+import type LinkOnObjectProperty from "mod";
+
 
 /**
  * {@linkplain LinkOnFunction}
@@ -109,3 +111,10 @@ enum TestLinkOnEnumMember {
      */
     member
 }
+
+const testLinkOnObjectProperty = {
+	/**
+	 * {@linkplain LinkOnObjectProperty}
+	 */
+	property: 0,
+};

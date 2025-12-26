@@ -169,7 +169,7 @@ impl ModuleResolver {
             Entry::Occupied(entry) => Some(*entry.get()),
             Entry::Vacant(entry) => {
                 let path = entry.key().as_path()?;
-                let module_info = self.module_graph.module_info_for_path(path)?;
+                let module_info = self.module_graph.js_module_info_for_path(path)?;
                 let module_id = ModuleId::new(self.modules.len());
                 self.modules.push(module_info);
                 self.types
