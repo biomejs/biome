@@ -59,6 +59,7 @@ pub const YAML_KINDS_SRC: KindsSrc = KindsSrc {
         "YAML_FLOW_MAP_IMPLICIT_ENTRY",
         "YAML_ALIAS_NODE",
         "YAML_FLOW_IN_BLOCK_NODE",
+        "YAML_BLOCK_IN_BLOCK_NODE",
         "YAML_BLOCK_SEQUENCE",
         "YAML_BLOCK_SEQUENCE_ENTRY_LIST",
         "YAML_BLOCK_SEQUENCE_ENTRY",
@@ -81,8 +82,7 @@ pub const YAML_KINDS_SRC: KindsSrc = KindsSrc {
         "YAML_BLOCK_KEEP_INDICATOR",
         "YAML_INDENTATION_INDICATOR",
         "YAML_BLOCK_CONTENT",
-        "YAML_PROPERTIES_ANCHOR_FIRST",
-        "YAML_PROPERTIES_TAG_FIRST",
+        "YAML_PROPERTY_LIST",
         "YAML_ANCHOR_PROPERTY",
         "YAML_TAG_PROPERTY",
         // Bogus nodes
