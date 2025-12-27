@@ -1,9 +1,11 @@
+use std::collections::HashSet;
+
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlVariableDefinitions;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::use_unique_variable_names::UseUniqueVariableNamesOptions;
 
 declare_lint_rule! {
@@ -46,18 +48,18 @@ impl Rule for UseUniqueVariableNames {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let mut found: Vec<String> = Vec::new();
+        let mut found: HashSet<TokenText> = HashSet::new();
 
         for element in node.elements() {
             if let Some(variable) = element.variable().ok()
                 && let Some(name) = variable.name().ok()
                 && let Some(value_token) = name.value_token().ok()
             {
-                let string = value_token.to_string();
+                let string = value_token.token_text();
                 if found.contains(&string) {
                     return Some(());
                 } else {
-                    found.push(string);
+                    found.insert(string);
                 }
             }
         }
