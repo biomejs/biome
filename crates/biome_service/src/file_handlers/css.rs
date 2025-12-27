@@ -1,6 +1,7 @@
 use super::{
     AnalyzerVisitorBuilder, CodeActionsParams, EnabledForPath, ExtensionHandler, FixAllParams,
-    LintParams, LintResults, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, search,
+    LintParams, LintResults, ParseResult, ProcessFixAllBatched, ProcessLint, SearchCapabilities,
+    search,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
@@ -16,7 +17,9 @@ use crate::workspace::{
     CodeAction, DocumentFileSource, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
 };
 use biome_analyze::options::PreferredQuote;
-use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleError,
+};
 use biome_configuration::css::{
     CssAllowWrongLineCommentsEnabled, CssAssistConfiguration, CssAssistEnabled,
     CssFormatterConfiguration, CssFormatterEnabled, CssLinterConfiguration, CssLinterEnabled,
@@ -675,6 +678,9 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 }
 
 /// Applies all the safe fixes to the given syntax tree.
+///
+/// This uses a batched approach that collects multiple non-overlapping fixes
+/// per analysis pass for improved performance.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let mut tree: CssRoot = params.parse.tree();
     let Some(file_source) = params.document_file_source.to_css_file_source() else {
@@ -704,7 +710,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         range: None,
     };
 
-    let mut process_fix_all = ProcessFixAll::new(
+    let mut process = ProcessFixAllBatched::<CssLanguage>::new(
         &params,
         rules,
         tree.syntax().text_range_with_trivia().len().into(),
@@ -719,25 +725,22 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             file_source,
         };
 
-        let (action, _) = analyze(
+        // Analyze and collect ALL applicable actions (never breaks early)
+        let (_, _) = analyze(
             &tree,
             filter,
             &analyzer_options,
             css_services,
             &params.plugins,
-            |signal| process_fix_all.process_signal(signal),
+            |signal| process.collect_signal(signal),
         );
 
-        let result = process_fix_all.process_action(action, |root| {
-            tree = match CssRoot::cast(root) {
-                Some(tree) => tree,
-                None => return None,
-            };
-            Some(tree.syntax().text_range_with_trivia().len().into())
-        })?;
+        // Get non-overlapping batch of actions
+        let batch = process.take_batch();
 
-        if result.is_none() {
-            return process_fix_all.finish(|| {
+        if batch.is_empty() {
+            // No more fixes to apply - we're done
+            return process.finish(|| {
                 Ok(if params.should_format {
                     Either::Left(format_node(
                         params.settings.format_options::<CssLanguage>(
@@ -750,6 +753,23 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     Either::Right(tree.syntax().to_string())
                 })
             });
+        }
+
+        // Merge all actions into one mutation and apply
+        if let Some(combined_mutation) = process.merge_actions(batch) {
+            let (new_root, _) = combined_mutation.commit_with_text_range_and_edit(true);
+            tree = match CssRoot::cast(new_root) {
+                Some(tree) => tree,
+                None => {
+                    return Err(WorkspaceError::RuleError(
+                        RuleError::ReplacedRootWithNonRootError { rule_name: None },
+                    ));
+                }
+            };
+
+            // Check for runaway growth
+            let new_len: u32 = tree.syntax().text_range_with_trivia().len().into();
+            process.check_growth(new_len)?;
         }
     }
 }
