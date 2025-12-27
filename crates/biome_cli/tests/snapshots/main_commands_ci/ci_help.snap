@@ -10,7 +10,7 @@ Files won't be modified, the command is a read-only operation.
 
 Usage: ci [--formatter-enabled=<true|false>] [--linter-enabled=<true|false>] [--assist-enabled=
 <true|false>] [--format-with-errors=<true|false>] [--enforce-assist=<true|false>] [--changed] [
---since=REF] [PATH]...
+--since=REF] [--only=<GROUP|RULE|DOMAIN>]... [--skip=<GROUP|RULE|DOMAIN>]... [PATH]...
 
 Options that changes how the JSON parser behaves
         --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
@@ -275,6 +275,18 @@ Available options:
         --threads=NUMBER      The number of threads to use. This is useful when running the CLI in
                               environments with limited resource, for example CI.
                               [env:BIOME_THREADS: N/A]
+        --only=<GROUP|RULE|DOMAIN>  Run only the given rule, group of rules or domain. If the
+                              severity level of a rule is `off`, then the severity level of the rule
+                              is set to `error` if it is a recommended rule or `warn` otherwise.
+                              Example:
+                              ```shell biome ci --only=correctness/noUnusedVariables
+                              --only=suspicious --only=test ```
+        --skip=<GROUP|RULE|DOMAIN>  Skip the given rule, group of rules or domain by setting the
+                              severity level of the rules to `off`. This option takes precedence
+                              over `--only`.
+                              Example:
+                              ```shell biome ci --skip=correctness/noUnusedVariables
+                              --skip=suspicious --skip=project ```
     -h, --help                Prints help information
 
 ```

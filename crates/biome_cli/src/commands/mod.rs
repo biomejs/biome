@@ -176,6 +176,29 @@ pub enum BiomeCommand {
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
 
+        /// Run only the given rule, group of rules or domain.
+        /// If the severity level of a rule is `off`,
+        /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
+        ///
+        /// Example:
+        ///
+        /// ```shell
+        /// biome check --only=correctness/noUnusedVariables --only=suspicious --only=test
+        /// ```
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
+        only: Vec<AnalyzerSelector>,
+
+        /// Skip the given rule, group of rules or domain by setting the severity level of the rules to `off`.
+        /// This option takes precedence over `--only`.
+        ///
+        /// Example:
+        ///
+        /// ```shell
+        /// biome check --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+        /// ```
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN"))]
+        skip: Vec<AnalyzerSelector>,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
@@ -420,6 +443,29 @@ pub enum BiomeCommand {
             hide_usage
         )]
         threads: Option<usize>,
+
+        /// Run only the given rule, group of rules or domain.
+        /// If the severity level of a rule is `off`,
+        /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
+        ///
+        /// Example:
+        ///
+        /// ```shell
+        /// biome ci --only=correctness/noUnusedVariables --only=suspicious --only=test
+        /// ```
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
+        only: Vec<AnalyzerSelector>,
+
+        /// Skip the given rule, group of rules or domain by setting the severity level of the rules to `off`.
+        /// This option takes precedence over `--only`.
+        ///
+        /// Example:
+        ///
+        /// ```shell
+        /// biome ci --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+        /// ```
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN"))]
+        skip: Vec<AnalyzerSelector>,
 
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
