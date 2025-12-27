@@ -1,0 +1,92 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 432
+expression: redactor(content)
+---
+## `packages/mobile/biome.json`
+
+```json
+{
+  "extends": "//",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
+```
+
+## `biome.json`
+
+```json
+{
+  "root": true,
+  "plugins": ["./biome/no-object-assign.grit"],
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
+```
+
+## `biome/no-object-assign.grit`
+
+```grit
+`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}
+```
+
+## `packages/mobile/src/file.js`
+
+```js
+const merged = Object.assign({}, a, b);
+
+```
+
+# Emitted Messages
+
+```block
+packages/mobile/src/file.js:1:16 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer object spread instead of Object.assign()
+  
+  > 1 │ const merged = Object.assign({}, a, b);
+      │                ^^^^^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+packages/mobile/src/file.js:1:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable merged is unused.
+  
+  > 1 │ const merged = Object.assign({}, a, b);
+      │       ^^^^^^
+    2 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend merged with an underscore.
+  
+    1   │ - const·merged·=·Object.assign({},·a,·b);
+      1 │ + const·_merged·=·Object.assign({},·a,·b);
+    2 2 │   
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 warnings.
+```

@@ -86,6 +86,23 @@ impl LoadedConfiguration {
                     &mut diagnostics,
                 )?);
                 partial_configuration.migrate_deprecated_fields();
+
+                // Normalize plugin paths relative to the configuration file directory so
+                // merged configurations (e.g. nested configs extending from root) can
+                // still load plugins defined in other configuration files.
+                let config_dir = configuration_file_path
+                    .parent()
+                    .unwrap_or(external_resolution_base_path.as_path());
+                if let Some(plugins) = partial_configuration.plugins.as_mut() {
+                    plugins.normalize_relative_paths(config_dir);
+                }
+                if let Some(overrides) = partial_configuration.overrides.as_mut() {
+                    for pattern in overrides.0.iter_mut() {
+                        if let Some(plugins) = pattern.plugins.as_mut() {
+                            plugins.normalize_relative_paths(config_dir);
+                        }
+                    }
+                }
                 partial_configuration
             }
             None => Configuration::default(),
