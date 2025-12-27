@@ -52,7 +52,7 @@
 //!   format a file with a language that does not have a formatter
 
 mod client;
-mod document;
+pub(crate) mod document;
 mod server;
 
 use biome_analyze::{ActionCategory, RuleCategories};

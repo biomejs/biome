@@ -11,6 +11,7 @@ pub use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::vue::VueFileHandler;
 use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
+use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
     AnyEmbeddedSnippet, CodeAction, DocumentServices, FixAction, FixFileMode, FixFileResult,
     GetSyntaxTreeResult, PullActionsResult, PullDiagnosticsAndActionsResult, RenameResult,
@@ -491,6 +492,7 @@ pub struct ParseResult {
     pub(crate) language: Option<DocumentFileSource>,
 }
 
+#[derive(Default)]
 pub struct ParseEmbedResult {
     pub(crate) nodes: Vec<(AnyEmbeddedSnippet, DocumentFileSource)>,
 }
@@ -503,6 +505,7 @@ type ParseEmbeddedNodes = fn(
     &DocumentFileSource,
     &SettingsWithEditor,
     &mut NodeCache,
+    &mut EmbeddedBuilder,
 ) -> ParseEmbedResult;
 #[derive(Default)]
 pub struct ParserCapabilities {

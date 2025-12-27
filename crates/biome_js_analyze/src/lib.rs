@@ -14,8 +14,9 @@ use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_module_graph::{ModuleGraph, ModuleResolver};
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::TextRange;
+use biome_rowan::{TextRange, TokenText};
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use rustc_hash::FxHashMap;
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
 
@@ -35,6 +36,7 @@ pub mod utils;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::control_flow::ControlFlowGraph;
+use crate::services::embedded_bindings::EmbeddedBindingsService;
 
 pub(crate) type JsRuleAction = RuleAction<JsLanguage>;
 
@@ -49,6 +51,7 @@ pub struct JsAnalyzerServices {
     module_graph: Arc<ModuleGraph>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
+    embedded_bindings: Vec<FxHashMap<TextRange, TokenText>>,
 }
 
 impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
@@ -63,7 +66,14 @@ impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             module_graph,
             project_layout,
             source_type,
+            embedded_bindings: Default::default(),
         }
+    }
+}
+
+impl JsAnalyzerServices {
+    pub fn set_embedded_bindings(&mut self, bindings: Vec<FxHashMap<TextRange, TokenText>>) {
+        self.embedded_bindings = bindings;
     }
 }
 
@@ -120,6 +130,7 @@ where
         module_graph,
         project_layout,
         source_type,
+        embedded_bindings,
     } = services;
 
     let (registry, mut services, diagnostics, visitors) = registry.build();
@@ -175,6 +186,7 @@ where
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
+    services.insert_service(Arc::new(EmbeddedBindingsService(embedded_bindings)));
 
     (
         analyzer.run(AnalyzerContext {

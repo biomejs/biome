@@ -542,3 +542,50 @@ fn check_stdin_write_unsafe_successfully() {
         result,
     ));
 }
+
+#[test]
+fn embedded_bindings_are_tracked_correctly() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script>
+import { Component } from "./component.svelte";
+let hello = "Hello World";
+let array = [];
+</script>
+
+<html>
+    <span>{hello}</span>
+    {#each array as item}
+    {/each}
+    <Component />
+</html>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "embedded_bindings_are_tracked_correctly",
+        fs,
+        console,
+        result,
+    ));
+}
