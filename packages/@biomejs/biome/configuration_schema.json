@@ -5605,6 +5605,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueVForKey": {
+					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/use-vue-v-for-key>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueVForKeyConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueValidTemplateRoot": {
 					"description": "Enforce valid Vue \\<template> root usage.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-template-root>",
 					"anyOf": [
@@ -9909,6 +9916,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueVForKeyOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueVForKeyOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidTemplateRootOptions": {
 			"type": "object",
 			"properties": {
@@ -13066,6 +13082,13 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueVForKeyConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueVForKeyOptions" }
+			]
+		},
+		"UseVueVForKeyOptions": { "type": "object", "additionalProperties": false },
 		"UseVueValidTemplateRootConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
