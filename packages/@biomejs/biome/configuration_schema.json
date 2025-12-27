@@ -5562,7 +5562,7 @@
 					]
 				},
 				"useUniqueInputFieldNames": {
-					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/use-unique-input-field-names>",
+					"description": "Require fields within an input object to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-input-field-names>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseUniqueInputFieldNamesConfiguration" },
 						{ "type": "null" }
