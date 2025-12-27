@@ -5554,6 +5554,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useStartsEndsWith": {
+					"description": "Enforce using String.startsWith() and String.endsWith() over more complex alternatives.\nSee <https://biomejs.dev/linter/rules/use-starts-ends-with>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseStartsEndsWithConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUniqueGraphqlOperationName": {
 					"description": "Enforce unique operation names across a GraphQL document.\nSee <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name>",
 					"anyOf": [
@@ -9627,6 +9634,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseStartsEndsWithOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseStartsEndsWithOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseStaticResponseMethodsOptions": {
 			"type": "object",
 			"properties": {
@@ -12645,6 +12661,16 @@
 			]
 		},
 		"UseSpreadOptions": { "type": "object", "additionalProperties": false },
+		"UseStartsEndsWithConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseStartsEndsWithOptions" }
+			]
+		},
+		"UseStartsEndsWithOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseStaticResponseMethodsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

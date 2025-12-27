@@ -229,6 +229,7 @@ define_categories! {
     "lint/nursery/useRequiredScripts": "https://biomejs.dev/linter/rules/use-required-scripts",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useSpread": "https://biomejs.dev/linter/rules/no-spread",
+    "lint/nursery/useStartsEndsWith": "https://biomejs.dev/linter/rules/use-starts-ends-with",
     "lint/nursery/useUniqueGraphqlOperationName": "https://biomejs.dev/linter/rules/use-unique-graphql-operation-name",
     "lint/nursery/useVueConsistentDefinePropsDeclaration": "https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
     "lint/nursery/useVueDefineMacrosOrder": "https://biomejs.dev/linter/rules/use-vue-define-macros-order",

@@ -1,0 +1,288 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// should generate diagnostics
+foo[0] === 'b';
+foo.charAt(0) === 'b';
+foo.indexOf('bar') === 0;
+foo.slice(0, 3) === 'bar';
+foo.substring(0, 3) === 'bar';
+foo.match(/^bar/) != null;
+/^bar/.test(foo);
+foo[foo.length - 1] === 'b';
+foo.charAt(foo.length - 1) === 'b';
+foo.lastIndexOf('bar') === foo.length - 3;
+foo.slice(-3) === 'bar';
+foo.substring(foo.length - 3) === 'bar';
+foo.match(/bar$/) != null;
+/bar$/.test(foo);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `startsWith()` method for string comparison.
+  
+    1 │ // should generate diagnostics
+  > 2 │ foo[0] === 'b';
+      │ ^^^^^^^^^^^^^^
+    3 │ foo.charAt(0) === 'b';
+    4 │ foo.indexOf('bar') === 0;
+  
+  i This pattern can be replaced with `startsWith('b')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `startsWith()` method for string comparison.
+  
+    1 │ // should generate diagnostics
+    2 │ foo[0] === 'b';
+  > 3 │ foo.charAt(0) === 'b';
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    4 │ foo.indexOf('bar') === 0;
+    5 │ foo.slice(0, 3) === 'bar';
+  
+  i This pattern can be replaced with `startsWith('b')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `startsWith()` method for string comparison.
+  
+    2 │ foo[0] === 'b';
+    3 │ foo.charAt(0) === 'b';
+  > 4 │ foo.indexOf('bar') === 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ foo.slice(0, 3) === 'bar';
+    6 │ foo.substring(0, 3) === 'bar';
+  
+  i This pattern can be replaced with `startsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `startsWith()` method for string comparison.
+  
+    3 │ foo.charAt(0) === 'b';
+    4 │ foo.indexOf('bar') === 0;
+  > 5 │ foo.slice(0, 3) === 'bar';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ foo.substring(0, 3) === 'bar';
+    7 │ foo.match(/^bar/) != null;
+  
+  i This pattern can be replaced with `startsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `startsWith()` method for string comparison.
+  
+    4 │ foo.indexOf('bar') === 0;
+    5 │ foo.slice(0, 3) === 'bar';
+  > 6 │ foo.substring(0, 3) === 'bar';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ foo.match(/^bar/) != null;
+    8 │ /^bar/.test(foo);
+  
+  i This pattern can be replaced with `startsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `startsWith()` method for string comparison.
+  
+    5 │ foo.slice(0, 3) === 'bar';
+    6 │ foo.substring(0, 3) === 'bar';
+  > 7 │ foo.match(/^bar/) != null;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ /^bar/.test(foo);
+    9 │ foo[foo.length - 1] === 'b';
+  
+  i This pattern can be replaced with `startsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `startsWith()` method for string comparison.
+  
+     6 │ foo.substring(0, 3) === 'bar';
+     7 │ foo.match(/^bar/) != null;
+   > 8 │ /^bar/.test(foo);
+       │ ^^^^^^^^^^^^^^^^
+     9 │ foo[foo.length - 1] === 'b';
+    10 │ foo.charAt(foo.length - 1) === 'b';
+  
+  i This pattern can be replaced with `startsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `endsWith()` method for string comparison.
+  
+     7 │ foo.match(/^bar/) != null;
+     8 │ /^bar/.test(foo);
+   > 9 │ foo[foo.length - 1] === 'b';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ foo.charAt(foo.length - 1) === 'b';
+    11 │ foo.lastIndexOf('bar') === foo.length - 3;
+  
+  i This pattern can be replaced with `endsWith('b')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `endsWith()` method for string comparison.
+  
+     8 │ /^bar/.test(foo);
+     9 │ foo[foo.length - 1] === 'b';
+  > 10 │ foo.charAt(foo.length - 1) === 'b';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ foo.lastIndexOf('bar') === foo.length - 3;
+    12 │ foo.slice(-3) === 'bar';
+  
+  i This pattern can be replaced with `endsWith('b')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `endsWith()` method for string comparison.
+  
+     9 │ foo[foo.length - 1] === 'b';
+    10 │ foo.charAt(foo.length - 1) === 'b';
+  > 11 │ foo.lastIndexOf('bar') === foo.length - 3;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ foo.slice(-3) === 'bar';
+    13 │ foo.substring(foo.length - 3) === 'bar';
+  
+  i This pattern can be replaced with `endsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `endsWith()` method for string comparison.
+  
+    10 │ foo.charAt(foo.length - 1) === 'b';
+    11 │ foo.lastIndexOf('bar') === foo.length - 3;
+  > 12 │ foo.slice(-3) === 'bar';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ foo.substring(foo.length - 3) === 'bar';
+    14 │ foo.match(/bar$/) != null;
+  
+  i This pattern can be replaced with `endsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `endsWith()` method for string comparison.
+  
+    11 │ foo.lastIndexOf('bar') === foo.length - 3;
+    12 │ foo.slice(-3) === 'bar';
+  > 13 │ foo.substring(foo.length - 3) === 'bar';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ foo.match(/bar$/) != null;
+    15 │ /bar$/.test(foo);
+  
+  i This pattern can be replaced with `endsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `endsWith()` method for string comparison.
+  
+    12 │ foo.slice(-3) === 'bar';
+    13 │ foo.substring(foo.length - 3) === 'bar';
+  > 14 │ foo.match(/bar$/) != null;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ /bar$/.test(foo);
+    16 │ 
+  
+  i This pattern can be replaced with `endsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use `endsWith()` method for string comparison.
+  
+    13 │ foo.substring(foo.length - 3) === 'bar';
+    14 │ foo.match(/bar$/) != null;
+  > 15 │ /bar$/.test(foo);
+       │ ^^^^^^^^^^^^^^^^
+    16 │ 
+  
+  i This pattern can be replaced with `endsWith('bar')`.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
