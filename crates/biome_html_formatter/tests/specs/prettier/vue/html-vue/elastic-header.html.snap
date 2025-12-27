@@ -127,20 +127,7 @@ info: vue/html-vue/elastic-header.html
  <html lang="en">
    <head>
      <meta charset="utf-8" />
-@@ -36,8 +36,10 @@
-         <template slot="header">
-           <h1>Elastic Draggable SVG Header</h1>
-           <p>
--            with <a href="https://vuejs.org">Vue.js</a> +
--            <a href="http://dynamicsjs.com">dynamics.js</a>
-+            with <a href="https://vuejs.org">Vue.js</a>+ <a
-+              href="http://dynamicsjs.com"
-+              >dynamics.js</a
-+            >
-           </p>
-         </template>
-         <template slot="content">
-@@ -54,69 +56,65 @@
+@@ -54,69 +54,65 @@
      </div>
  
      <script>
@@ -308,10 +295,8 @@ info: vue/html-vue/elastic-header.html
         <template slot="header">
           <h1>Elastic Draggable SVG Header</h1>
           <p>
-            with <a href="https://vuejs.org">Vue.js</a>+ <a
-              href="http://dynamicsjs.com"
-              >dynamics.js</a
-            >
+            with <a href="https://vuejs.org">Vue.js</a> +
+            <a href="http://dynamicsjs.com">dynamics.js</a>
           </p>
         </template>
         <template slot="content">

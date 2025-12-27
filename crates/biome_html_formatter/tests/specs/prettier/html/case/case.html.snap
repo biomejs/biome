@@ -36,14 +36,14 @@ info: html/case/case.html
  <html class="no-js mY-ClAsS">
    <head>
      <meta charset="utf-8" />
-@@ -7,17 +7,13 @@
+@@ -7,17 +7,12 @@
    </head>
    <body>
      <p>
 -      Hello world!<br />
+-      This is HTML5 Boilerplate.
 +      Hello world!
-+      <br />
-       This is HTML5 Boilerplate.
++      <br /> This is HTML5 Boilerplate.
      </p>
      <script>
 -      window.ga = function () {
@@ -73,8 +73,7 @@ info: html/case/case.html
   <body>
     <p>
       Hello world!
-      <br />
-      This is HTML5 Boilerplate.
+      <br /> This is HTML5 Boilerplate.
     </p>
     <script>
       window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
@@ -91,5 +90,5 @@ info: html/case/case.html
 
 # Lines exceeding max width of 80 characters
 ```
-   15:       window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
+   14:       window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
 ```

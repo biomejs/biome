@@ -48,7 +48,7 @@ Self close void elements: never
 {/each}
 
 {#each users as { name, email }, i}
-	<div>{i}: {name}({email})</div>
+	<div>{i}: {name} ({email})</div>
 {/each}
 
 {#each products as [id, title]}
