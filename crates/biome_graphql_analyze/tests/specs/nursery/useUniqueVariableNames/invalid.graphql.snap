@@ -1,0 +1,68 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+query A($x: Int, $x: Int, $x: String) { __typename }
+query B($x: String, $x: Int) { __typename }
+query C($x: Int, $x: Int) { __typename }
+
+```
+
+# Diagnostics
+```
+invalid.graphql:2:8 lint/nursery/useUniqueVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate variable name.
+  
+    1 │ # should generate diagnostics
+  > 2 │ query A($x: Int, $x: Int, $x: String) { __typename }
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ query B($x: String, $x: Int) { __typename }
+    4 │ query C($x: Int, $x: Int) { __typename }
+  
+  i A GraphQL operation is only valid if all its variables are uniquely named. Make sure to name every variable differently.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:3:8 lint/nursery/useUniqueVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate variable name.
+  
+    1 │ # should generate diagnostics
+    2 │ query A($x: Int, $x: Int, $x: String) { __typename }
+  > 3 │ query B($x: String, $x: Int) { __typename }
+      │        ^^^^^^^^^^^^^^^^^^^^^
+    4 │ query C($x: Int, $x: Int) { __typename }
+    5 │ 
+  
+  i A GraphQL operation is only valid if all its variables are uniquely named. Make sure to name every variable differently.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:4:8 lint/nursery/useUniqueVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate variable name.
+  
+    2 │ query A($x: Int, $x: Int, $x: String) { __typename }
+    3 │ query B($x: String, $x: Int) { __typename }
+  > 4 │ query C($x: Int, $x: Int) { __typename }
+      │        ^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i A GraphQL operation is only valid if all its variables are uniquely named. Make sure to name every variable differently.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
