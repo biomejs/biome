@@ -22,7 +22,7 @@ use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
-use biome_css_syntax::{CssRoot, CssVariant};
+use biome_css_syntax::{AnyCssRoot, CssVariant};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
@@ -951,7 +951,7 @@ impl WorkspaceServer {
                         &[(path, js_root)],
                     )
                 } else if let (Some(css_root), Some(services)) = (
-                    SendNode::into_language_root::<CssRoot>(root.clone()),
+                    SendNode::into_language_root::<AnyCssRoot>(root.clone()),
                     services.as_css_services(),
                 ) {
                     self.module_graph.update_graph_for_css_paths(

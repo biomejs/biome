@@ -137,7 +137,7 @@ fn test_type_flattening_does_not_explode_on_recursive_parent_element_pattern() {
 
     let project_layout = ProjectLayout::default();
     let added_paths = [BiomePath::new("/src/repro.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
