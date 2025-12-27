@@ -94,6 +94,7 @@ impl<'app> CliSession<'app> {
                 format_with_errors,
                 json_parser,
                 css_parser,
+                profile_rules,
             } => run_command(
                 self,
                 &cli_options,
@@ -114,6 +115,7 @@ impl<'app> CliSession<'app> {
                     format_with_errors,
                     json_parser,
                     css_parser,
+                    profile_rules,
                 },
             ),
             BiomeCommand::Lint {
@@ -139,6 +141,7 @@ impl<'app> CliSession<'app> {
                 graphql_linter,
                 css_parser,
                 json_parser,
+                profile_rules,
             } => run_command(
                 self,
                 &cli_options,
@@ -164,6 +167,7 @@ impl<'app> CliSession<'app> {
                     graphql_linter,
                     css_parser,
                     json_parser,
+                    profile_rules,
                 },
             ),
             BiomeCommand::Ci {

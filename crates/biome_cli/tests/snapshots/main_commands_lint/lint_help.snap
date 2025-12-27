@@ -8,7 +8,7 @@ expression: redactor(content)
 Run various checks on a set of files.
 
 Usage: lint [--write] [--unsafe] [--suppress] [--reason=STRING] [--only=<GROUP|RULE|DOMAIN>]... [
---skip=<GROUP|RULE|DOMAIN>]... [--staged] [--changed] [--since=REF] [PATH]...
+--skip=<GROUP|RULE|DOMAIN>]... [--staged] [--changed] [--since=REF] [--profile-rules] [PATH]...
 
 Options that changes how the JSON parser behaves
         --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
@@ -51,7 +51,6 @@ Global options applied to all commands
         --verbose             Print additional diagnostics, and some diagnostics show more
                               information. Also, print out what files were processed and which ones
                               were modified.
-        --profile             Enable rule profiling output.
         --config-path=PATH    Set the file path to the configuration file, or the directory path to
                               find `biome.json` or `biome.jsonc`. If used, it disables the default
                               configuration file resolution.
@@ -116,6 +115,8 @@ Available options:
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag and the `defaultBranch` is not set in your
                               biome.json
+        --profile-rules       Enable rule profiling output. Captures timing only for rule execution,
+                              not preprocessing such as querying or building the semantic model.
     -h, --help                Prints help information
 
 ```

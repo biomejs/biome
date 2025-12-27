@@ -30,7 +30,7 @@ namespace:
 
 use crate::matcher::RuleKey;
 use crate::rule::Rule;
-use biome_console::{MarkupBuf, markup};
+use biome_console::markup;
 use rustc_hash::FxHashMap;
 use std::cmp;
 use std::fmt;
@@ -339,137 +339,139 @@ pub fn reset() {
     with_profiler(|p| p.reset());
 }
 
-/// Utility for formatting a summary for display purposes.
-pub fn format_profiles_table(mut profiles: Vec<RuleProfile>, top_n: Option<usize>) -> MarkupBuf {
-    // Sort by total time descending
-    profiles.sort_by(|a, b| b.total.cmp(&a.total));
-    let limit = top_n.unwrap_or(profiles.len()).min(profiles.len());
+/// Utility for formatting a summary of rule profiles for display purposes.
+pub struct DisplayProfiles(pub Vec<RuleProfile>, pub Option<usize>);
 
-    // minimum width of 5, or wider if needed for larger counts
-    let count_column_width = profiles
-        .iter()
-        .map(|p| p.count)
-        .max()
-        .unwrap_or(0)
-        .to_string()
-        .len()
-        .max(5);
+impl biome_console::fmt::Display for DisplayProfiles {
+    fn fmt(&self, f: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        let mut profiles = self.0.clone();
+        // Sort by total time descending
+        profiles.sort_by(|a, b| b.total.cmp(&a.total));
+        let limit = self.1.unwrap_or(profiles.len()).min(profiles.len());
 
-    // Build the entire output as Markup from the beginning
-    let mut out = markup!(
-        <Emphasis>"Rule execution time"</Emphasis>" "<Dim>"(does not include any preprocessing)"</Dim>"\n"
-        <Dim>
-            "  "
-            {format!("{:<10}", "total")} "  "
-            {format!("{:<10}", "avg")} "  "
-            {format!("{:<10}", "min")} "  "
-            {format!("{:<10}", "max")} "  "
-            {format!("{:<1$}", "count", count_column_width)} "  "
-            {"rule"}
-        </Dim>"\n"
-    )
-    .to_owned();
+        // minimum width of 5, or wider if needed for larger counts
+        let count_column_width = profiles
+            .iter()
+            .map(|p| p.count)
+            .max()
+            .unwrap_or(0)
+            .to_string()
+            .len()
+            .max(5);
 
-    // Determine per-column cutoffs for the largest 10% values among displayed rows
-    let warn_count = ((limit as f64) * 0.10).ceil() as usize;
+        // Build the entire output as Markup from the beginning
+        markup! {
+            <Emphasis>"Rule execution time"</Emphasis>" "<Dim>"(does not include any preprocessing)"</Dim>"\n"
+            <Dim>
+                "  "
+                {format!("{:<10}", "total")} "  "
+                {format!("{:<10}", "avg")} "  "
+                {format!("{:<10}", "min")} "  "
+                {format!("{:<10}", "max")} "  "
+                {format!("{:<1$}", "count", count_column_width)} "  "
+                {"rule"}
+            </Dim>"\n"
+        }.fmt(f)?;
 
-    // Collect column values from the displayed slice
-    let displayed: Vec<&RuleProfile> = profiles.iter().take(limit).collect();
+        // Determine per-column cutoffs for the largest 10% values among displayed rows
+        let warn_count = ((limit as f64) * 0.10).ceil() as usize;
 
-    let mut totals: Vec<_> = displayed.iter().map(|p| p.total).collect();
-    let mut avgs: Vec<_> = displayed.iter().map(|p| p.avg()).collect();
-    let mut mins: Vec<_> = displayed.iter().map(|p| p.min).collect();
-    let mut maxs: Vec<_> = displayed.iter().map(|p| p.max).collect();
-    let mut counts: Vec<_> = displayed.iter().map(|p| p.count).collect();
+        // Collect column values from the displayed slice
+        let displayed: Vec<_> = profiles.iter().take(limit).collect();
 
-    // Compute cutoffs (smallest value among the top 10% when sorted descending)
-    let totals_cutoff = if warn_count == 0 || totals.is_empty() {
-        None
-    } else {
-        totals.sort_by(|a, b| b.cmp(a));
-        totals.get(warn_count - 1).copied()
-    };
+        let mut totals: Vec<_> = displayed.iter().map(|p| p.total).collect();
+        let mut avgs: Vec<_> = displayed.iter().map(|p| p.avg()).collect();
+        let mut mins: Vec<_> = displayed.iter().map(|p| p.min).collect();
+        let mut maxs: Vec<_> = displayed.iter().map(|p| p.max).collect();
+        let mut counts: Vec<_> = displayed.iter().map(|p| p.count).collect();
 
-    let avgs_cutoff = if warn_count == 0 || avgs.is_empty() {
-        None
-    } else {
-        avgs.sort_by(|a, b| b.cmp(a));
-        avgs.get(warn_count - 1).copied()
-    };
-
-    let mins_cutoff = if warn_count == 0 || mins.is_empty() {
-        None
-    } else {
-        mins.sort_by(|a, b| b.cmp(a));
-        mins.get(warn_count - 1).copied()
-    };
-
-    let maxs_cutoff = if warn_count == 0 || maxs.is_empty() {
-        None
-    } else {
-        maxs.sort_by(|a, b| b.cmp(a));
-        maxs.get(warn_count - 1).copied()
-    };
-
-    let counts_cutoff = if warn_count == 0 || counts.is_empty() {
-        None
-    } else {
-        counts.sort_by(|a, b| b.cmp(a));
-        counts.get(warn_count - 1).copied()
-    };
-
-    for p in profiles.into_iter().take(limit) {
-        let total_str = format!("{:>10}", fmt_dur(p.total));
-        let avg_str = format!("{:>10}", fmt_dur(p.avg()));
-        let min_str = format!("{:>10}", fmt_dur(p.min));
-        let max_str = format!("{:>10}", fmt_dur(p.max));
-        let count_str = format!("{:>1$}", p.count, count_column_width);
-
-        let total_markup = if totals_cutoff.is_some_and(|c| p.total >= c) {
-            markup! { <Warn>{total_str}</Warn> }
+        // Compute cutoffs (smallest value among the top 10% when sorted descending)
+        let totals_cutoff = if warn_count == 0 || totals.is_empty() {
+            None
         } else {
-            markup! { {total_str} }
+            totals.sort_by(|a, b| b.cmp(a));
+            totals.get(warn_count - 1).copied()
         };
 
-        let avg_markup = if avgs_cutoff.is_some_and(|c| p.avg() >= c) {
-            markup! { <Warn>{avg_str}</Warn> }
+        let avgs_cutoff = if warn_count == 0 || avgs.is_empty() {
+            None
         } else {
-            markup! { {avg_str} }
+            avgs.sort_by(|a, b| b.cmp(a));
+            avgs.get(warn_count - 1).copied()
         };
 
-        let min_markup = if mins_cutoff.is_some_and(|c| p.min >= c) {
-            markup! { <Warn>{min_str}</Warn> }
+        let mins_cutoff = if warn_count == 0 || mins.is_empty() {
+            None
         } else {
-            markup! { {min_str} }
+            mins.sort_by(|a, b| b.cmp(a));
+            mins.get(warn_count - 1).copied()
         };
 
-        let max_markup = if maxs_cutoff.is_some_and(|c| p.max >= c) {
-            markup! { <Warn>{max_str}</Warn> }
+        let maxs_cutoff = if warn_count == 0 || maxs.is_empty() {
+            None
         } else {
-            markup! { {max_str} }
+            maxs.sort_by(|a, b| b.cmp(a));
+            maxs.get(warn_count - 1).copied()
         };
 
-        let count_markup = if counts_cutoff.is_some_and(|c| p.count >= c) {
-            markup! { <Warn>{count_str}</Warn> }
+        let counts_cutoff = if warn_count == 0 || counts.is_empty() {
+            None
         } else {
-            markup! { {count_str} }
+            counts.sort_by(|a, b| b.cmp(a));
+            counts.get(warn_count - 1).copied()
         };
 
-        let row = markup! {
-            "  "
-            {total_markup} "  "
-            {avg_markup} "  "
-            {min_markup} "  "
-            {max_markup} "  "
-            {count_markup} "  "
-            <Info>{p.label.to_string()}</Info> "\n"
-        };
+        for p in profiles.into_iter().take(limit) {
+            let total_str = format!("{:>10}", fmt_dur(p.total));
+            let avg_str = format!("{:>10}", fmt_dur(p.avg()));
+            let min_str = format!("{:>10}", fmt_dur(p.min));
+            let max_str = format!("{:>10}", fmt_dur(p.max));
+            let count_str = format!("{:>1$}", p.count, count_column_width);
+            write!(f, "  ")?;
 
-        out.extend_with(row);
+            if totals_cutoff.is_some_and(|c| p.total >= c) {
+                markup! { <Warn>{total_str}</Warn> }.fmt(f)?;
+            } else {
+                markup! { {total_str} }.fmt(f)?;
+            }
+            write!(f, "  ")?;
+
+            if avgs_cutoff.is_some_and(|c| p.avg() >= c) {
+                markup! { <Warn>{avg_str}</Warn> }.fmt(f)?;
+            } else {
+                markup! { {avg_str} }.fmt(f)?;
+            }
+            write!(f, "  ")?;
+
+            if mins_cutoff.is_some_and(|c| p.min >= c) {
+                markup! { <Warn>{min_str}</Warn> }.fmt(f)?;
+            } else {
+                markup! { {min_str} }.fmt(f)?;
+            }
+            write!(f, "  ")?;
+
+            if maxs_cutoff.is_some_and(|c| p.max >= c) {
+                markup! { <Warn>{max_str}</Warn> }.fmt(f)?;
+            } else {
+                markup! { {max_str} }.fmt(f)?;
+            }
+            write!(f, "  ")?;
+
+            if counts_cutoff.is_some_and(|c| p.count >= c) {
+                markup! { <Warn>{count_str}</Warn> }.fmt(f)?;
+            } else {
+                markup! { {count_str} }.fmt(f)?;
+            }
+            write!(f, "  ")?;
+
+            markup! {
+                <Info>{p.label.to_string()}</Info> "\n"
+            }
+            .fmt(f)?;
+        }
+
+        write!(f, "test")
     }
-
-    // Return the composed Markup
-    out
 }
 
 fn fmt_dur(d: Duration) -> String {

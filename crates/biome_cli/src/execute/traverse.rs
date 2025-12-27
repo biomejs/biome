@@ -6,7 +6,6 @@ use crate::execute::diagnostics::{
 };
 use crate::reporter::TraversalSummary;
 use crate::{CliDiagnostic, CliSession};
-use biome_analyze::profiling;
 use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::{DiagnosticExt, Error, Resource, Severity, category};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
@@ -43,9 +42,6 @@ pub(crate) fn traverse(
     cli_options: &CliOptions,
     inputs: Vec<String>,
 ) -> Result<TraverseResult, CliDiagnostic> {
-    if cli_options.profile {
-        profiling::enable();
-    }
     let (interner, recv_files) = PathInterner::new();
     let (sender, receiver) = unbounded();
 
