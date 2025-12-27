@@ -257,9 +257,12 @@ impl FormatHtmlElementList {
 
                         Some(HtmlChild::Verbatim(_)) => None,
 
-                        Some(HtmlChild::Newline | HtmlChild::Whitespace | HtmlChild::EmptyLine) => {
-                            None
-                        }
+                        Some(
+                            HtmlChild::Newline
+                            | HtmlChild::Whitespace
+                            | HtmlChild::EmptyLine
+                            | HtmlChild::TrailingWhitespace,
+                        ) => None,
 
                         None => None,
                     };
@@ -328,6 +331,51 @@ impl FormatHtmlElementList {
                 HtmlChild::Whitespace => {
                     flat.write(&HtmlSpace, f);
                     multiline.write_separator(&soft_line_break_or_space(), f);
+                }
+
+                // Extracted whitespace that should be kept as a space and not converted to a newline
+                HtmlChild::TrailingWhitespace => {
+                    let mut is_hard = false;
+                    if let Some(HtmlChild::NonText(prev) | HtmlChild::Verbatim(prev)) = last {
+                        if let Some(
+                            HtmlChild::NonText(next_non_text) | HtmlChild::Verbatim(next_non_text),
+                        ) = children_iter.peek()
+                        {
+                            if !is_element_whitespace_sensitive_from_element(f, prev) {
+                                is_hard = true;
+                            } else if is_element_whitespace_sensitive_from_element(f, next_non_text)
+                            {
+                                // only add whitespace if there is already whitespace between these elements
+                                // We are the whitespace, so we keep it (Space)
+                                is_hard = false;
+                            } else {
+                                is_hard = true;
+                            }
+                        } else if let Some(HtmlChild::Word(word)) = children_iter.peek() {
+                            let is_current_whitespace_sensitive =
+                                is_element_whitespace_sensitive_from_element(f, prev);
+                            if is_current_whitespace_sensitive {
+                                // Keep as space
+                                is_hard = false;
+                            } else if matches!(prev, AnyHtmlElement::HtmlSelfClosingElement(_))
+                                && !word.is_single_character()
+                            {
+                                is_hard = true;
+                            } else {
+                                is_hard = false;
+                            }
+                        }
+                    }
+
+                    if is_hard {
+                        let separator = hard_line_break();
+                        flat.write(&separator, f);
+                        multiline.write_separator(&separator, f);
+                    } else {
+                        let separator = soft_line_break_or_space();
+                        flat.write(&separator, f);
+                        multiline.write_separator(&separator, f);
+                    }
                 }
 
                 // A new line between some JSX text and an element
@@ -478,9 +526,12 @@ impl FormatHtmlElementList {
                             }
                         }
 
-                        Some(HtmlChild::Newline | HtmlChild::Whitespace | HtmlChild::EmptyLine) => {
-                            None
-                        }
+                        Some(
+                            HtmlChild::Newline
+                            | HtmlChild::Whitespace
+                            | HtmlChild::EmptyLine
+                            | HtmlChild::TrailingWhitespace,
+                        ) => None,
                         // Don't insert trailing line breaks
                         None => None,
                     };

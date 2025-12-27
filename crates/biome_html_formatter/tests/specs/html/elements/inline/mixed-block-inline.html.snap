@@ -1,7 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: elements/inline/mixed-block-inline.html
-snapshot_kind: text
 ---
 # Input
 

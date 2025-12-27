@@ -126,6 +126,13 @@ pub(crate) enum HtmlChild {
     ///
     /// Used for content that has formatting suppressed.
     Verbatim(AnyHtmlElement),
+
+    /// A whitespace that was extracted from the trailing trivia of a [HtmlChild::NonText] element.
+    ///
+    /// This whitespace should be treated as "attached" to the element, meaning it should generally
+    /// not cause a line break (unless the line is too long), similar to how a space in the source
+    /// code is treated.
+    TrailingWhitespace,
 }
 
 impl HtmlChild {
@@ -395,6 +402,28 @@ where
                 builder.entry(HtmlChild::Verbatim(child.clone()));
             } else {
                 builder.entry(HtmlChild::NonText(child.clone()));
+
+                // We need to check if the last token has any trailing whitespace
+                // because the formatter might skip it if it's not part of the content
+                if let Some(last_token) = child.syntax().last_token() {
+                    let mut trailing_trivia = last_token.trailing_trivia().pieces().peekable();
+
+                    while let Some(piece) = trailing_trivia.next() {
+                        if piece.is_whitespace() || piece.is_newline() {
+                            let text = piece.text();
+                            if text.contains('\n') {
+                                let newlines = text.chars().filter(|c| *c == '\n').count();
+                                if newlines > 1 {
+                                    builder.entry(HtmlChild::EmptyLine);
+                                } else {
+                                    builder.entry(HtmlChild::Newline);
+                                }
+                            } else {
+                                builder.entry(HtmlChild::TrailingWhitespace);
+                            }
+                        }
+                    }
+                }
             }
             prev_child_was_content = false;
         }
@@ -420,9 +449,23 @@ impl HtmlSplitChildrenBuilder {
 
     fn entry(&mut self, child: HtmlChild) {
         match self.buffer.last_mut() {
-            Some(last @ (HtmlChild::EmptyLine | HtmlChild::Newline | HtmlChild::Whitespace)) => {
+            Some(
+                last @ (HtmlChild::EmptyLine
+                | HtmlChild::Newline
+                | HtmlChild::Whitespace
+                | HtmlChild::TrailingWhitespace),
+            ) => {
                 if matches!(child, HtmlChild::Whitespace) {
                     *last = child;
+                } else if matches!(child, HtmlChild::TrailingWhitespace) {
+                    if matches!(last, HtmlChild::TrailingWhitespace) {
+                        // Collapse consecutive trailing whitespaces
+                    } else if matches!(last, HtmlChild::Whitespace | HtmlChild::Newline | HtmlChild::EmptyLine) {
+                        // Keep the existing whitespace/newline as it's more significant (allows breaking)
+                    } else {
+                        // Should be unreachable if logic is correct (last is one of the matched types)
+                        *last = child;
+                    }
                 } else if matches!(
                     child,
                     HtmlChild::NonText(_)
