@@ -2132,6 +2132,11 @@ See <https://biomejs.dev/linter/rules/use-spread>
 	 */
 	useSpread?: UseSpreadConfiguration;
 	/**
+	* Require all argument names for fields & directives to be unique.
+See <https://biomejs.dev/linter/rules/use-unique-argument-names> 
+	 */
+	useUniqueArgumentNames?: UseUniqueArgumentNamesConfiguration;
+	/**
 	* Enforce unique operation names across a GraphQL document.
 See <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name> 
 	 */
@@ -3782,6 +3787,9 @@ export type UseSortedClassesConfiguration =
 export type UseSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSpreadOptions;
+export type UseUniqueArgumentNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueArgumentNamesOptions;
 export type UseUniqueGraphqlOperationNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueGraphqlOperationNameOptions;
@@ -5276,6 +5284,10 @@ export interface RuleWithUseSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: UseSpreadOptions;
 }
+export interface RuleWithUseUniqueArgumentNamesOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueArgumentNamesOptions;
+}
 export interface RuleWithUseUniqueGraphqlOperationNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueGraphqlOperationNameOptions;
@@ -6569,6 +6581,7 @@ export interface UseSortedClassesOptions {
 	functions?: string[];
 }
 export type UseSpreadOptions = {};
+export type UseUniqueArgumentNamesOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
 export type UseUniqueVariableNamesOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
@@ -7387,6 +7400,7 @@ export type Category =
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
+	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
