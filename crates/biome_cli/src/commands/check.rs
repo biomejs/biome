@@ -32,6 +32,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) format_with_errors: Option<FormatWithErrorsEnabled>,
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
+    pub(crate) profile_rules: bool,
 }
 
 impl LoadEditorConfig for CheckCommandPayload {
@@ -155,6 +156,9 @@ impl CommandRunner for CheckCommandPayload {
             unsafe_: self.unsafe_,
         })?;
 
+        if self.profile_rules {
+            biome_analyze::profiling::enable();
+        }
         Ok(Execution::new(TraversalMode::Check {
             fix_file_mode,
             stdin: self.get_stdin(console)?,
