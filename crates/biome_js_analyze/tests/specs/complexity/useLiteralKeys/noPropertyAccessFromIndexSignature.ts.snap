@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: noPropertyAccessFromIndexSignature.ts
+---
+# Input
+```ts
+interface I {
+	known: string;
+
+	[key: string]: string;
+}
+
+const a: I = {
+	known: "",
+	unknown: "",
+}
+
+// Valid
+a.known;
+
+// Invalid
+a["known"];
+
+// Ignored
+a.unknown;
+a["unknown"];
+
+```
+
+# Diagnostics
+```
+noPropertyAccessFromIndexSignature.ts:16:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    15 │ // Invalid
+  > 16 │ a["known"];
+       │   ^^^^^^^
+    17 │ 
+    18 │ // Ignored
+  
+  i Unsafe fix: Use a literal key instead.
+  
+    14 14 │   
+    15 15 │   // Invalid
+    16    │ - a["known"];
+       16 │ + a.known;
+    17 17 │   
+    18 18 │   // Ignored
+  
+
+```

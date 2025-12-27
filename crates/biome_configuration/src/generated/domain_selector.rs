@@ -19,6 +19,7 @@ static NEXT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 });
 static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("complexity", "useLiteralKeys"),
         RuleFilter::Rule("correctness", "noPrivateImports"),
         RuleFilter::Rule("correctness", "noUndeclaredDependencies"),
         RuleFilter::Rule("correctness", "useImportExtensions"),
