@@ -1374,6 +1374,20 @@ The documentation needs to adhere to the following rules:
   /// ```
   ````
 
+- **Callout blocks (Asides)**
+
+  You can use [Starlight asides](https://starlight.astro.build/guides/authoring-content/#asides) (also known as "admonitions" or "callouts") to highlight important notes, warnings, or tips in your rule documentation.
+
+  Example usage:
+
+  ````rust
+  /// :::caution
+  /// The rule doesn't support dependencies installed inside a monorepo.
+  /// :::
+  ````
+
+  Supported types: `:::note`, `:::tip`, `:::caution`, `:::danger`.
+
 - **Ordering of code block properties**
 
   In addition to the language, a code block can be tagged with a few additional properties like `expect_diagnostic`, `options`, `full_options`, `use_options`, `ignore` and/or `file=<path>`.
