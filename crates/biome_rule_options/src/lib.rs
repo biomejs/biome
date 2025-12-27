@@ -419,3 +419,4 @@ pub mod use_vue_valid_v_text;
 pub mod use_vue_vapor;
 pub mod use_while;
 pub mod use_yield;
+pub mod use_unique_enum_value_names;
