@@ -1,22 +1,36 @@
-use std::panic::RefUnwindSafe;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
-
-use super::{document::Document, *};
-use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, Features,
     FixAllParams, FormatEmbedNode, LintParams, LintResults, ParseResult, UpdateSnippetsNodes,
 };
-use crate::projects::{GetFileFeaturesParams, Projects};
+use crate::projects::{GetFileFeaturesParams, ProjectKey, Projects};
 use crate::scanner::{
     IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
     WorkspaceScannerBridge,
 };
 use crate::settings::{SettingsHandle, SettingsWithEditor};
+use crate::workspace::document::services::embedded_bindings::{
+    EmbeddedBuilder, EmbeddedExportedBindings,
+};
+use crate::workspace::document::*;
 use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices};
+use crate::workspace::{
+    ChangeFileParams, ChangeFileResult, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
+    CloseProjectParams, CssDocumentServices, DropPatternParams, FeaturesBuilder, FileContent,
+    FileExitsParams, FileFeaturesResult, FixFileParams, FixFileResult, FormatFileParams,
+    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams,
+    GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult, GetRegisteredTypesParams,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GetTypeInfoParams,
+    IgnoreKind, OpenFileParams, OpenFileResult, OpenProjectParams, OpenProjectResult,
+    ParsePatternParams, ParsePatternResult, PathIsIgnoredParams, PatternId, PullActionsParams,
+    PullActionsResult, PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult,
+    PullDiagnosticsParams, PullDiagnosticsResult, RageEntry, RageParams, RageResult, RenameParams,
+    RenameResult, ScanKind, ScanProjectParams, ScanProjectResult, SearchPatternParams,
+    SearchResults, ServerInfo, ServiceNotification, Settings, SupportsFeatureParams,
+    UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
+};
+use crate::{Watcher, Workspace, WorkspaceError};
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
@@ -47,7 +61,12 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
+use std::fmt::Debug;
+use std::panic::RefUnwindSafe;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
+use tokio::sync::watch;
 use tracing::{info, instrument, warn};
 
 pub struct WorkspaceServer {
@@ -389,7 +408,8 @@ impl WorkspaceServer {
         let size = content.len();
         let limit = settings.get_max_file_size(&path);
         let settings_handle = self.settings_handle(&settings, inline_config);
-        let (syntax, services) = if size > limit {
+
+        let (syntax, mut services) = if size > limit {
             (
                 Some(Err(FileTooLarge { size, limit })),
                 DocumentServices::none(),
@@ -433,6 +453,10 @@ impl WorkspaceServer {
 
             (Some(Ok(any_parse)), services)
         };
+
+        let mut exported_bindings = EmbeddedExportedBindings::default();
+        let mut builder = exported_bindings.builder();
+
         // Second-pass parsing for HTML files with embedded JavaScript and CSS
         // content.
         let embedded_snippets = if DocumentFileSource::can_contain_embeds(
@@ -441,8 +465,6 @@ impl WorkspaceServer {
         ) && let Some(Ok(any_parse)) = &syntax
         {
             // Second-pass parsing for HTML files with embedded JavaScript and CSS content
-
-            debug!("{:#?}", &any_parse);
             let mut node_cache = NodeCache::default();
             self.parse_embedded_language_snippets(
                 &biome_path,
@@ -450,10 +472,13 @@ impl WorkspaceServer {
                 any_parse,
                 &mut node_cache,
                 &settings_handle,
+                &mut builder,
             )?
         } else {
             Default::default()
         };
+        exported_bindings.finish(builder);
+        services.set_embedded_bindings(exported_bindings);
 
         let is_indexed = if
         // Dependency files can be skipped altoghether
@@ -641,6 +666,7 @@ impl WorkspaceServer {
         root: &AnyParse,
         cache: &mut NodeCache,
         settings: &SettingsWithEditor,
+        builder: &mut EmbeddedBuilder,
     ) -> Result<Vec<AnyEmbeddedSnippet>, WorkspaceError> {
         let mut embedded_nodes = Vec::new();
         let capabilities = self.get_file_capabilities(
@@ -650,7 +676,7 @@ impl WorkspaceServer {
         let Some(parse_embedded) = capabilities.parser.parse_embedded_nodes else {
             return Ok(Default::default());
         };
-        let result = parse_embedded(root, path, source, settings, cache);
+        let result = parse_embedded(root, path, source, settings, cache, builder);
 
         for (mut content, file_source) in result.nodes {
             let index = self.insert_source(file_source);
@@ -1499,13 +1525,9 @@ impl Workspace for WorkspaceServer {
         let root = parsed.any_parse.unwrap_as_send_node();
         let document_source =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
-        if document_source.is_css_like()
-            && (settings.is_linter_enabled() || settings.is_assist_enabled())
-        {
-            services = CssDocumentServices::default()
-                .with_css_semantic_model(&parsed.any_parse.tree())
-                .into();
-        }
+
+        let mut exported_bindings = EmbeddedExportedBindings::default();
+        let mut builder = exported_bindings.builder();
 
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
         let embedded_snippets = if DocumentFileSource::can_contain_embeds(
@@ -1520,10 +1542,22 @@ impl Workspace for WorkspaceServer {
                 &parsed.any_parse,
                 &mut node_cache,
                 &settings_handle,
+                &mut builder,
             )?
         } else {
             vec![]
         };
+
+        if document_source.is_css_like()
+            && (settings.is_linter_enabled() || settings.is_assist_enabled())
+        {
+            services = CssDocumentServices::default()
+                .with_css_semantic_model(&parsed.any_parse.tree())
+                .into();
+        }
+
+        exported_bindings.finish(builder);
+        services.set_embedded_bindings(exported_bindings);
 
         let document = Document {
             content,
@@ -1644,6 +1678,7 @@ impl Workspace for WorkspaceServer {
                 plugins: plugins.clone(),
                 diagnostic_offset: None,
                 document_services: &services,
+                embedded_exported_bindings: services.embedded_bindings(),
             });
 
             let LintResults {
@@ -1659,7 +1694,7 @@ impl Workspace for WorkspaceServer {
                 let Some(lint) = capabilities.analyzer.lint else {
                     continue;
                 };
-                let services = embedded_node.as_snippet_services();
+                let snippet_services = embedded_node.as_snippet_services();
 
                 let results = lint(LintParams {
                     parse: embedded_node.parse().clone(),
@@ -1676,7 +1711,8 @@ impl Workspace for WorkspaceServer {
                     pull_code_actions,
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
-                    document_services: services,
+                    document_services: &snippet_services,
+                    embedded_exported_bindings: services.embedded_bindings(),
                 });
 
                 diagnostics.extend(results.diagnostics);
@@ -2583,7 +2619,7 @@ pub enum UpdateKind {
 }
 
 impl Debug for UpdateKind {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AddedOrChanged(reason, _, _) => {
                 f.debug_tuple("AddedOrChanged").field(reason).finish()

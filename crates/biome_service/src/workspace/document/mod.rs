@@ -1,14 +1,18 @@
+pub(crate) mod services;
+
 use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::FormatEmbedNode;
 use crate::settings::ServiceLanguage;
 use crate::workspace::DocumentFileSource;
+use crate::workspace::document::services::embedded_bindings::EmbeddedExportedBindings;
 use biome_css_syntax::{AnyCssRoot, CssLanguage};
 use biome_diagnostics::Error;
 use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use biome_parser::AnyParse;
-use biome_rowan::{SyntaxNodeWithOffset, TextRange, TextSize};
+use biome_rowan::{AstNode, SyntaxNodeWithOffset, TextRange, TextSize, TokenText};
+use rustc_hash::FxHashMap;
 use std::marker::PhantomData;
 
 #[derive(Debug, Clone)]
@@ -184,6 +188,14 @@ impl<L: ServiceLanguage + 'static> EmbeddedSnippet<L> {
         self.parse.unwrap_as_embedded_syntax_node().into_node::<L>()
     }
 
+    pub fn tree<N>(&self) -> N
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
+        self.parse.tree()
+    }
+
     /// This function transforms diagnostics coming from the parser into serializable diagnostics
     pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
         self.parse
@@ -256,7 +268,43 @@ impl Document {
 /// stored with [biome_rowan::AstPtr]. The service needs to accept the language root so
 /// the pointer can be retrieved with its typed counter part.
 #[derive(Clone, Debug)]
-pub enum DocumentServices {
+pub struct DocumentServices {
+    /// Service to track bindings exported by the document
+    exported_bindings: Option<EmbeddedExportedBindings>,
+
+    /// The document doesn't have any services
+    language: LanguageServices,
+}
+
+impl DocumentServices {
+    pub fn none() -> Self {
+        Self {
+            exported_bindings: None,
+            language: LanguageServices::None,
+        }
+    }
+
+    pub(crate) fn set_embedded_bindings(&mut self, bindings: EmbeddedExportedBindings) {
+        self.exported_bindings = Some(bindings);
+    }
+
+    pub fn as_css_services(&self) -> Option<&CssDocumentServices> {
+        if let LanguageServices::Css(services) = &self.language {
+            Some(services)
+        } else {
+            None
+        }
+    }
+
+    pub fn embedded_bindings(&self) -> Option<EmbeddedExportedBindings> {
+        self.exported_bindings
+            .as_ref()
+            .map(|bindings| bindings.clone())
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum LanguageServices {
     /// The document doesn't have any services
     None,
     Css(CssDocumentServices),
@@ -264,29 +312,13 @@ pub enum DocumentServices {
 
 impl From<CssDocumentServices> for DocumentServices {
     fn from(services: CssDocumentServices) -> Self {
-        Self::Css(services)
-    }
-}
-
-impl DocumentServices {
-    pub fn new_css() -> Self {
-        Self::Css(CssDocumentServices {
-            semantic_model: None,
-        })
-    }
-
-    pub fn none() -> Self {
-        Self::None
-    }
-
-    pub fn as_css_services(&self) -> Option<&CssDocumentServices> {
-        if let Self::Css(services) = self {
-            Some(services)
-        } else {
-            None
+        Self {
+            exported_bindings: None,
+            language: LanguageServices::Css(services),
         }
     }
 }
+
 #[derive(Clone, Default, Debug)]
 pub struct CssDocumentServices {
     /// Semantic model that belongs to the file
