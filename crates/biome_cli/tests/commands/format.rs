@@ -1,6 +1,6 @@
 use crate::configs::{
-    CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FORMAT, CONFIG_FORMAT_JSONC,
-    CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
+    CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FILES_INCLUDES_EXCLUDES_STDIN_PATH,
+    CONFIG_FORMAT, CONFIG_FORMAT_JSONC, CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
 };
 use crate::snap_test::{SnapshotPayload, assert_file_contents, markup_to_string};
 use crate::{
@@ -1204,6 +1204,49 @@ fn format_stdin_successfully() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_stdin_successfully",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_stdin_formats_virtual_path_outside_includes() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config_path = Utf8Path::new("biome.json");
+    fs.insert(
+        config_path.into(),
+        CONFIG_FILES_INCLUDES_EXCLUDES_STDIN_PATH.as_bytes(),
+    );
+
+    console
+        .in_buffer
+        .push("function f() {return{}}".to_string());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--stdin-file-path", "a.tsx"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let message = console
+        .out_buffer
+        .first()
+        .expect("Console should have written a message");
+
+    let content = markup_to_string(markup! {
+        {message.content}
+    });
+
+    assert_eq!(content, "function f() {\n\treturn {};\n}\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_stdin_formats_virtual_path_outside_includes",
         fs,
         console,
         result,
