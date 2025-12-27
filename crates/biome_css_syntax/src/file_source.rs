@@ -29,6 +29,8 @@ pub enum CssVariant {
     CssModules,
     /// The file belongs to tailwind
     TailwindCss,
+    // The file is Scss
+    Scss,
 }
 
 impl CssFileSource {
@@ -44,12 +46,22 @@ impl CssFileSource {
         }
     }
 
+    pub fn scss() -> Self {
+        Self {
+            variant: CssVariant::Scss,
+        }
+    }
+
     pub fn is_css_modules(&self) -> bool {
         self.variant == CssVariant::CssModules
     }
 
     pub fn is_tailwind_css(&self) -> bool {
         self.variant == CssVariant::TailwindCss
+    }
+
+    pub fn is_scss(&self) -> bool {
+        self.variant == CssVariant::Scss
     }
 
     pub fn set_variant(&mut self, variant: CssVariant) {
@@ -67,6 +79,7 @@ impl CssFileSource {
         // We assume the file extension is normalized to lowercase
         match extension {
             "css" => Ok(Self::css()),
+            "scss" => Ok(Self::scss()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -81,6 +94,7 @@ impl CssFileSource {
         match language_id {
             "css" => Ok(Self::css()),
             "tailwindcss" => Ok(Self::tailwind_css()),
+            "scss" => Ok(Self::scss()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }
