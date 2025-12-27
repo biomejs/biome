@@ -21,7 +21,7 @@ use biome_module_graph::{
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
-use biome_test_utils::{get_added_paths, get_css_added_paths};
+use biome_test_utils::{get_added_js_paths, get_css_added_paths};
 use camino::{Utf8Path, Utf8PathBuf};
 use walkdir::WalkDir;
 
@@ -137,7 +137,7 @@ fn test_type_flattening_does_not_explode_on_recursive_parent_element_pattern() {
 
     let project_layout = ProjectLayout::default();
     let added_paths = [BiomePath::new("/src/repro.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
@@ -162,7 +162,7 @@ fn test_resolve_relative_import() {
         BiomePath::new("/src/index.ts"),
         BiomePath::new("/src/bar.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
@@ -189,7 +189,7 @@ fn test_resolve_package_import() {
         BiomePath::new("/src/index.ts"),
         BiomePath::new("/node_modules/shared/dist/index.js"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
@@ -216,7 +216,7 @@ fn test_import_through_path_alias() {
         BiomePath::new("/src/index.ts"),
         BiomePath::new("/src/components/Hello.tsx"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
@@ -292,7 +292,7 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         )),
         BiomePath::new(format!("{fixtures_path}/shared/dist/index.js")),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
@@ -340,7 +340,7 @@ fn test_export_referenced_function() {
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -365,7 +365,7 @@ fn test_export_default_function_declaration() {
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -393,7 +393,7 @@ fn test_export_const_type_declaration_with_namespace() {
     );
 
     let added_paths = [BiomePath::new("/src/index.d.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -480,7 +480,7 @@ fn test_resolve_exports() {
         BiomePath::new("/src/reexports.ts"),
         BiomePath::new("/src/renamed-reexports.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
@@ -590,7 +590,7 @@ fn test_resolve_export_types() {
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -618,7 +618,7 @@ export const promise = makePromiseCb();
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -651,7 +651,7 @@ fn test_resolve_generic_mapped_value() {
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -713,7 +713,7 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
         BiomePath::new("/src/bar.ts"),
         BiomePath::new("/src/index.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -760,7 +760,7 @@ fn test_resolve_import_as_namespace() {
         BiomePath::new("/src/foo.ts"),
         BiomePath::new("/src/index.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -804,7 +804,7 @@ fn test_resolve_nested_function_call_with_namespace_in_return_type() {
         BiomePath::new("/src/foo.ts"),
         BiomePath::new("/src/index.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -837,7 +837,7 @@ fn test_resolve_return_value_of_function() {
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -895,7 +895,7 @@ fn test_resolve_type_of_property_with_getter() {
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -988,7 +988,7 @@ fn class_this_test_helper(case_name: &str, prefix: &str) {
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1063,7 +1063,7 @@ fn test_resolve_type_of_this_in_object() {
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1155,7 +1155,7 @@ fn test_resolve_type_of_this_in_class_wrong_scope() {
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1196,7 +1196,7 @@ fn test_resolve_promise_export() {
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1226,7 +1226,7 @@ export { A, B };
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1249,7 +1249,7 @@ export type Foo = Foo.Bar;
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1318,7 +1318,7 @@ export const codes: {
     );
 
     let added_paths = [BiomePath::new("/node_modules/@types/iso-3166-2/index.d.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1497,7 +1497,7 @@ export = vfile
     );
 
     let added_paths = [BiomePath::new("/node_modules/vfile/types/index.d.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1526,7 +1526,7 @@ fn test_resolve_react_types() {
         BiomePath::new("/node_modules/@types/react/index.d.ts"),
         BiomePath::new("/src/index.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let project_layout = ProjectLayout::default();
     project_layout.insert_node_manifest(
@@ -1581,7 +1581,7 @@ fn test_resolve_redis_commander_types() {
         BiomePath::new("/RedisCommander.d.ts"),
         BiomePath::new("/index.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1639,7 +1639,7 @@ fn test_resolve_single_reexport() {
         BiomePath::new("/src/index.ts"),
         BiomePath::new("/src/reexport.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1703,7 +1703,7 @@ fn test_resolve_type_of_union_from_imported_module() {
         BiomePath::new("/src/reexport.ts"),
         BiomePath::new("/node_modules/react.d.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1769,7 +1769,7 @@ fn test_resolve_multiple_reexports() {
         BiomePath::new("/src/index.ts"),
         BiomePath::new("/src/reexports.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1821,7 +1821,7 @@ fn test_resolve_export_type_referencing_imported_type() {
         BiomePath::new("/src/index.ts"),
         BiomePath::new("/src/promisedResult.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1861,7 +1861,7 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
         BiomePath::new("/src/promisedResult.ts"),
         BiomePath::new("/src/returnPromiseResult.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1925,7 +1925,7 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
         BiomePath::new("/src/reexport.ts"),
         BiomePath::new("/src/returnPromiseResult.ts"),
     ];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -1980,7 +1980,7 @@ const { mutate } = useSWRConfig();
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -2041,7 +2041,7 @@ type Intersection = Foo & Bar;"#,
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
@@ -2112,7 +2112,7 @@ fn test_resolve_swr_types() {
     }) {
         added_paths.push(BiomePath::new(path));
     }
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
@@ -2181,7 +2181,7 @@ function f() {
     );
 
     let added_paths = [BiomePath::new("index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
 
@@ -2218,7 +2218,7 @@ function g() {
     );
 
     let added_paths = [BiomePath::new("index.ts")];
-    let added_paths = get_added_paths(&fs, &added_paths);
+    let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
 

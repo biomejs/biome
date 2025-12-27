@@ -79,7 +79,7 @@
 			"type": "object",
 			"properties": {
 				"noAccessKey": {
-					"description": "Enforce that the accessKey attribute is not used on any HTML element.\nSee <https://biomejs.dev/linter/rules/no-access-key>",
+					"description": "Enforce that the accesskey attribute is not used on any HTML element.\nSee <https://biomejs.dev/linter/rules/no-access-key>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoAccessKeyConfiguration" },
 						{ "type": "null" }
@@ -162,7 +162,7 @@
 					]
 				},
 				"noPositiveTabindex": {
-					"description": "Prevent the usage of positive integers on tabIndex property.\nSee <https://biomejs.dev/linter/rules/no-positive-tabindex>",
+					"description": "Prevent the usage of positive integers on tabindex attribute.\nSee <https://biomejs.dev/linter/rules/no-positive-tabindex>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoPositiveTabindexConfiguration" },
 						{ "type": "null" }
@@ -238,7 +238,7 @@
 					]
 				},
 				"useButtonType": {
-					"description": "Enforces the usage of the attribute type for the element button.\nSee <https://biomejs.dev/linter/rules/use-button-type>",
+					"description": "Enforces the usage and validity of the attribute type for the element button.\nSee <https://biomejs.dev/linter/rules/use-button-type>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseButtonTypeConfiguration" },
 						{ "type": "null" }
@@ -1350,7 +1350,7 @@
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
-					"description": "Enables parsing of CSS Modules specific features.",
+					"description": "Enables parsing of CSS Modules specific features. Enable this feature only\nwhen your files don't end in `.module.css`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"tailwindDirectives": {
@@ -1998,6 +1998,10 @@
 						{ "$ref": "#/$defs/JsAssistConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"experimentalEmbeddedSnippetsEnabled": {
+					"description": "Enables support for embedding snippets.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"formatter": {
 					"description": "Formatting options",
@@ -6042,6 +6046,14 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseSortedAttributesOptions" }
+			},
+			"required": ["level", "options"]
+		},
+		"RuleAssistWithUseSortedInterfaceMembersOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedInterfaceMembersOptions" }
 			},
 			"required": ["level", "options"]
 		},
@@ -10130,6 +10142,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSortedInterfaceMembers": {
+					"description": "Sort interface members by key.\nSee <https://biomejs.dev/assist/actions/use-sorted-interface-members>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedInterfaceMembersConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedKeys": {
 					"description": "Sort the keys of a JSON object in natural order.\nSee <https://biomejs.dev/assist/actions/use-sorted-keys>",
 					"anyOf": [
@@ -10357,7 +10376,7 @@
 					]
 				},
 				"noValueAtRule": {
-					"description": "Disallow use of @value rule in css modules.\nSee <https://biomejs.dev/linter/rules/no-value-at-rule>",
+					"description": "Disallow use of @value rule in CSS modules.\nSee <https://biomejs.dev/linter/rules/no-value-at-rule>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoValueAtRuleConfiguration" },
 						{ "type": "null" }
@@ -12111,6 +12130,11 @@
 		"UseImportExtensionsOptions": {
 			"type": "object",
 			"properties": {
+				"extensionMappings": {
+					"description": "A map of file extensions to their suggested replacements.\nFor example, `{\"ts\": \"js\"}` would suggest `.js` extensions for TypeScript imports.",
+					"type": ["object", "null"],
+					"additionalProperties": { "type": "string" }
+				},
 				"forceJsExtensions": {
 					"description": "If `true`, the suggested extension is always `.js` regardless of what\nextension the source file has in your project.",
 					"type": ["boolean", "null"]
@@ -12613,6 +12637,16 @@
 			},
 			"additionalProperties": false
 		},
+		"UseSortedInterfaceMembersConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedInterfaceMembersOptions" }
+			]
+		},
+		"UseSortedInterfaceMembersOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseSortedKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
@@ -12622,6 +12656,10 @@
 		"UseSortedKeysOptions": {
 			"type": "object",
 			"properties": {
+				"groupByNesting": {
+					"description": "When enabled, groups object keys by their value's nesting depth before sorting.\nSimple values (primitives, single-line arrays, single-line objects) are sorted first,\nfollowed by nested values (multi-line objects, multi-line arrays).",
+					"type": ["boolean", "null"]
+				},
 				"sortOrder": {
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				}
@@ -12727,6 +12765,16 @@
 		},
 		"UseUnifiedTypeSignaturesOptions": {
 			"type": "object",
+			"properties": {
+				"ignoreDifferentJsDoc": {
+					"description": "Whether to ignore overloads with different JSDoc comments.",
+					"type": ["boolean", "null"]
+				},
+				"ignoreDifferentlyNamedParameters": {
+					"description": "Whether to ignore overloads with differently named parameters.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseUniqueElementIdsConfiguration": {

@@ -183,6 +183,7 @@ pub(crate) mod trivia;
 mod verbatim;
 
 use biome_formatter::format_element::tag::Label;
+use biome_formatter::prelude::Tag::{EndEmbedded, StartEmbedded};
 use biome_formatter::prelude::*;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
@@ -355,7 +356,7 @@ pub(crate) type JsFormatter<'buf> = Formatter<'buf, JsFormatContext>;
 /// Rule for formatting a JavaScript [AstNode].
 pub(crate) trait FormatNodeRule<N>
 where
-    N: AstNode<Language = JsLanguage>,
+    N: AstNode<Language = JsLanguage> + std::fmt::Debug,
 {
     fn fmt(&self, node: &N, f: &mut JsFormatter) -> FormatResult<()> {
         if self.is_suppressed(node, f) {
@@ -376,7 +377,21 @@ where
             write!(f, [token("(")])?;
         }
 
-        self.fmt_fields(node, f)?;
+        if let Some(range) = self.embedded_node_range(node, f) {
+            // Tokens that belong to embedded nodes are formatted later on,
+            // so we track them, even though they aren't formatted now during this pass.
+            let state = f.state_mut();
+            for token in node.syntax().tokens() {
+                state.track_token(&token);
+            }
+
+            f.write_elements(vec![
+                FormatElement::Tag(StartEmbedded(range)),
+                FormatElement::Tag(EndEmbedded),
+            ])?;
+        } else {
+            self.fmt_fields(node, f)?;
+        }
 
         if needs_parentheses {
             write!(f, [token(")")])?;
@@ -426,6 +441,12 @@ where
     /// inside of the `fmt_fields` method or customize the formatting of the trailing comments.
     fn fmt_trailing_comments(&self, node: &N, f: &mut JsFormatter) -> FormatResult<()> {
         format_trailing_comments(node.syntax()).fmt(f)
+    }
+
+    /// Whether this node contains content that needs to be formatted by an external formatter.
+    /// If so, the function must return the range of the nodes that will be formatted in the second phase.
+    fn embedded_node_range(&self, _node: &N, _f: &mut JsFormatter) -> Option<TextRange> {
+        None
     }
 }
 
@@ -528,10 +549,14 @@ impl FormatLanguage for JsFormatLanguage {
         self,
         root: &JsSyntaxNode,
         source_map: Option<TransformSourceMap>,
-        _delegate_fmt_embedded_nodes: bool,
+        delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &JsCommentStyle, source_map.as_ref());
-        JsFormatContext::new(self.options, comments).with_source_map(source_map)
+        let mut ctx = JsFormatContext::new(self.options, comments).with_source_map(source_map);
+        if delegate_fmt_embedded_nodes {
+            ctx = ctx.with_fmt_embedded_nodes();
+        }
+        ctx
     }
 }
 
@@ -560,8 +585,13 @@ pub fn format_range(
 pub fn format_node(
     options: JsFormatOptions,
     root: &JsSyntaxNode,
+    delegate_fmt_embedded_nodes: bool,
 ) -> FormatResult<Formatted<JsFormatContext>> {
-    biome_formatter::format_node(root, JsFormatLanguage::new(options), false)
+    biome_formatter::format_node(
+        root,
+        JsFormatLanguage::new(options),
+        delegate_fmt_embedded_nodes,
+    )
 }
 
 /// Formats a JavaScript (and its super languages) file based on its features.

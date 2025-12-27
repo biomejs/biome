@@ -52,6 +52,7 @@ fn close_file_through_watcher_before_client() {
             },
             document_file_source: None,
             persist_node_cache: true,
+            inline_config: None,
         })
         .expect("can also open from client");
 
@@ -116,6 +117,7 @@ fn close_file_from_client_before_watcher() {
             },
             document_file_source: None,
             persist_node_cache: true,
+            inline_config: None,
         })
         .expect("can open from client");
 

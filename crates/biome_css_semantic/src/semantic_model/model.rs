@@ -1,8 +1,8 @@
 use biome_css_syntax::{
-    CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector, CssContainerAtRule,
-    CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList, CssIdentifier,
-    CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssRoot, CssStartingStyleAtRule,
-    CssSupportsAtRule,
+    AnyCssRoot, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
+    CssContainerAtRule, CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList,
+    CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule,
+    CssStartingStyleAtRule, CssSupportsAtRule,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstPtr, SendNode, SyntaxNodeText, SyntaxResult, TextRange, TextSize,
@@ -31,8 +31,8 @@ impl SemanticModel {
         }
     }
 
-    pub fn root(&self) -> CssRoot {
-        self.root.to_language_root::<CssRoot>()
+    pub fn root(&self) -> AnyCssRoot {
+        self.root.to_language_root::<AnyCssRoot>()
     }
 
     /// Returns a slice of all rules in the CSS document.
@@ -140,11 +140,11 @@ impl Rule {
         self.id
     }
 
-    pub fn node(&self, css_root: &CssRoot) -> AnyRuleStart {
+    pub fn node(&self, css_root: &AnyCssRoot) -> AnyRuleStart {
         self.node.to_node(css_root.syntax())
     }
 
-    pub fn range(&self, css_root: &CssRoot) -> TextRange {
+    pub fn range(&self, css_root: &AnyCssRoot) -> TextRange {
         self.node
             .to_node(css_root.syntax())
             .syntax()
@@ -224,15 +224,15 @@ pub struct Selector {
 }
 
 impl Selector {
-    pub fn node(&self, root: &CssRoot) -> AnyCssSelectorLike {
+    pub fn node(&self, root: &AnyCssRoot) -> AnyCssSelectorLike {
         self.node.to_node(root.syntax())
     }
 
-    pub fn text(&self, root: &CssRoot) -> SyntaxNodeText {
+    pub fn text(&self, root: &AnyCssRoot) -> SyntaxNodeText {
         self.node.to_node(root.syntax()).syntax().text_trimmed()
     }
 
-    pub fn range(&self, root: &CssRoot) -> TextRange {
+    pub fn range(&self, root: &AnyCssRoot) -> TextRange {
         self.node
             .to_node(root.syntax())
             .syntax()
@@ -307,11 +307,11 @@ pub struct CssModelDeclaration {
 }
 
 impl CssModelDeclaration {
-    pub fn declaration(&self, root: &CssRoot) -> CssDeclaration {
+    pub fn declaration(&self, root: &AnyCssRoot) -> CssDeclaration {
         self.declaration.to_node(root.syntax())
     }
 
-    pub fn property(&self, root: &CssRoot) -> CssProperty {
+    pub fn property(&self, root: &AnyCssRoot) -> CssProperty {
         self.property.to_node(root.syntax())
     }
 

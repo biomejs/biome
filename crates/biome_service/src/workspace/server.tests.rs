@@ -38,6 +38,7 @@ fn commonjs_file_rejects_import_statement() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -91,6 +92,7 @@ fn store_embedded_nodes_with_current_ranges() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -152,6 +154,7 @@ fn format_html_with_scripts_and_css() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -159,6 +162,7 @@ fn format_html_with_scripts_and_css() {
         .format_file(FormatFileParams {
             path: Utf8PathBuf::from("/project/file.html").into(),
             project_key,
+            inline_config: None,
         })
         .unwrap();
 
@@ -259,6 +263,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -269,6 +274,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -292,6 +298,7 @@ function Foo({cond}) {
     match workspace.format_file(FormatFileParams {
         project_key,
         path: BiomePath::new("/project/a.js"),
+        inline_config: None,
     }) {
         Ok(printed) => {
             insta::assert_snapshot!(printed.as_code(), @r###"
@@ -372,6 +379,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -382,6 +390,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -405,6 +414,7 @@ function Foo({cond}) {
     match workspace.format_file(FormatFileParams {
         project_key,
         path: BiomePath::new("/project/a.jsx"),
+        inline_config: None,
     }) {
         Ok(printed) => {
             insta::assert_snapshot!(printed.as_code(), @r###"
@@ -447,6 +457,7 @@ fn pull_diagnostics_and_actions_for_js_file() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -458,6 +469,7 @@ fn pull_diagnostics_and_actions_for_js_file() {
             enabled_rules: vec![],
             project_key,
             categories: Default::default(),
+            inline_config: None,
         })
         .unwrap();
 
@@ -470,4 +482,148 @@ fn pull_diagnostics_and_actions_for_js_file() {
     );
 
     insta::assert_debug_snapshot!(result)
+}
+
+#[test]
+fn format_js_with_embedded_css() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Foo = styled.div`
+  display:
+    flex;
+  color : red ;
+`;
+
+const Bar = styled(Component)`
+  display:
+    flex;
+  color : red ;
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r"
+    const Foo = styled.div`
+    	display: flex;
+    	color: red;
+    `;
+
+    const Bar = styled(Component)`
+    	display: flex;
+    	color: red;
+    `;
+    ");
+}
+
+#[test]
+fn format_js_with_embedded_graphql() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Foo = gql`
+  query PeopleCount {
+  people(
+       id: $peopleId){
+       totalCount
+       }}
+`;
+
+const Bar = graphql(`
+  query PeopleCount {
+  people(
+       id: $peopleId){
+       totalCount
+       }}
+`);"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r"
+    const Foo = gql`
+    	query PeopleCount {
+    		people(id: $peopleId) {
+    			totalCount
+    		}
+    	}
+    `;
+
+    const Bar = graphql(`
+    	query PeopleCount {
+    		people(id: $peopleId) {
+    			totalCount
+    		}
+    	}
+    `);
+    ");
 }

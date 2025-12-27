@@ -1,0 +1,335 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<span role="checkbox"></span>
+<span role="combobox" aria-controls="true"></span>
+<span role="heading"></span>
+<span role="menuitemcheckbox"></span>
+<span role="menuitemradio"></span>
+<span role="meter"></span>
+<span role="radio"></span>
+<span role="scrollbar" aria-valuemin="0"></span>
+<span role="scrollbar" aria-controls="123"></span>
+<span role="scrollbar" aria-valuemin="0" aria-valuenow="100"></span>
+<span
+	role="scrollbar"
+	aria-valuemin="0"
+	aria-valuemax="100"
+	aria-orientation="horizontal"
+></span>
+<span role="separator"></span>
+<span role="slider" aria-valuemin="0"></span>
+<span role="slider" aria-valuemax="100"></span>
+<span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
+<span role="switch"></span>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the checkbox ARIA role does not have the required ARIA attributes.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <span role="checkbox"></span>
+      │       ^^^^^^^^^^^^^^^
+    3 │ <span role="combobox" aria-controls="true"></span>
+    4 │ <span role="heading"></span>
+  
+  i Missing ARIA prop(s):
+  
+  - aria-checked
+  
+
+```
+
+```
+invalid.html:3:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the combobox ARIA role does not have the required ARIA attributes.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <span role="checkbox"></span>
+  > 3 │ <span role="combobox" aria-controls="true"></span>
+      │       ^^^^^^^^^^^^^^^
+    4 │ <span role="heading"></span>
+    5 │ <span role="menuitemcheckbox"></span>
+  
+  i Missing ARIA prop(s):
+  
+  - aria-expanded
+  
+
+```
+
+```
+invalid.html:4:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the heading ARIA role does not have the required ARIA attributes.
+  
+    2 │ <span role="checkbox"></span>
+    3 │ <span role="combobox" aria-controls="true"></span>
+  > 4 │ <span role="heading"></span>
+      │       ^^^^^^^^^^^^^^
+    5 │ <span role="menuitemcheckbox"></span>
+    6 │ <span role="menuitemradio"></span>
+  
+  i Missing ARIA prop(s):
+  
+  - aria-level
+  
+
+```
+
+```
+invalid.html:5:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the menuitemcheckbox ARIA role does not have the required ARIA attributes.
+  
+    3 │ <span role="combobox" aria-controls="true"></span>
+    4 │ <span role="heading"></span>
+  > 5 │ <span role="menuitemcheckbox"></span>
+      │       ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <span role="menuitemradio"></span>
+    7 │ <span role="meter"></span>
+  
+  i Missing ARIA prop(s):
+  
+  - aria-checked
+  
+
+```
+
+```
+invalid.html:6:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the menuitemradio ARIA role does not have the required ARIA attributes.
+  
+    4 │ <span role="heading"></span>
+    5 │ <span role="menuitemcheckbox"></span>
+  > 6 │ <span role="menuitemradio"></span>
+      │       ^^^^^^^^^^^^^^^^^^^^
+    7 │ <span role="meter"></span>
+    8 │ <span role="radio"></span>
+  
+  i Missing ARIA prop(s):
+  
+  - aria-checked
+  
+
+```
+
+```
+invalid.html:7:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the meter ARIA role does not have the required ARIA attributes.
+  
+    5 │ <span role="menuitemcheckbox"></span>
+    6 │ <span role="menuitemradio"></span>
+  > 7 │ <span role="meter"></span>
+      │       ^^^^^^^^^^^^
+    8 │ <span role="radio"></span>
+    9 │ <span role="scrollbar" aria-valuemin="0"></span>
+  
+  i Missing ARIA prop(s):
+  
+  - aria-valuenow
+  
+
+```
+
+```
+invalid.html:8:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the radio ARIA role does not have the required ARIA attributes.
+  
+     6 │ <span role="menuitemradio"></span>
+     7 │ <span role="meter"></span>
+   > 8 │ <span role="radio"></span>
+       │       ^^^^^^^^^^^^
+     9 │ <span role="scrollbar" aria-valuemin="0"></span>
+    10 │ <span role="scrollbar" aria-controls="123"></span>
+  
+  i Missing ARIA prop(s):
+  
+  - aria-checked
+  
+
+```
+
+```
+invalid.html:9:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the scrollbar ARIA role does not have the required ARIA attributes.
+  
+     7 │ <span role="meter"></span>
+     8 │ <span role="radio"></span>
+   > 9 │ <span role="scrollbar" aria-valuemin="0"></span>
+       │       ^^^^^^^^^^^^^^^^
+    10 │ <span role="scrollbar" aria-controls="123"></span>
+    11 │ <span role="scrollbar" aria-valuemin="0" aria-valuenow="100"></span>
+  
+  i Missing ARIA prop(s):
+  
+  - aria-controls
+  - aria-valuenow
+  
+
+```
+
+```
+invalid.html:10:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the scrollbar ARIA role does not have the required ARIA attributes.
+  
+     8 │ <span role="radio"></span>
+     9 │ <span role="scrollbar" aria-valuemin="0"></span>
+  > 10 │ <span role="scrollbar" aria-controls="123"></span>
+       │       ^^^^^^^^^^^^^^^^
+    11 │ <span role="scrollbar" aria-valuemin="0" aria-valuenow="100"></span>
+    12 │ <span
+  
+  i Missing ARIA prop(s):
+  
+  - aria-valuenow
+  
+
+```
+
+```
+invalid.html:11:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the scrollbar ARIA role does not have the required ARIA attributes.
+  
+     9 │ <span role="scrollbar" aria-valuemin="0"></span>
+    10 │ <span role="scrollbar" aria-controls="123"></span>
+  > 11 │ <span role="scrollbar" aria-valuemin="0" aria-valuenow="100"></span>
+       │       ^^^^^^^^^^^^^^^^
+    12 │ <span
+    13 │ 	role="scrollbar"
+  
+  i Missing ARIA prop(s):
+  
+  - aria-controls
+  
+
+```
+
+```
+invalid.html:13:2 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the scrollbar ARIA role does not have the required ARIA attributes.
+  
+    11 │ <span role="scrollbar" aria-valuemin="0" aria-valuenow="100"></span>
+    12 │ <span
+  > 13 │ 	role="scrollbar"
+       │ 	^^^^^^^^^^^^^^^^
+    14 │ 	aria-valuemin="0"
+    15 │ 	aria-valuemax="100"
+  
+  i Missing ARIA prop(s):
+  
+  - aria-controls
+  - aria-valuenow
+  
+
+```
+
+```
+invalid.html:18:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the separator ARIA role does not have the required ARIA attributes.
+  
+    16 │ 	aria-orientation="horizontal"
+    17 │ ></span>
+  > 18 │ <span role="separator"></span>
+       │       ^^^^^^^^^^^^^^^^
+    19 │ <span role="slider" aria-valuemin="0"></span>
+    20 │ <span role="slider" aria-valuemax="100"></span>
+  
+  i Missing ARIA prop(s):
+  
+  - aria-valuenow
+  
+
+```
+
+```
+invalid.html:19:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the slider ARIA role does not have the required ARIA attributes.
+  
+    17 │ ></span>
+    18 │ <span role="separator"></span>
+  > 19 │ <span role="slider" aria-valuemin="0"></span>
+       │       ^^^^^^^^^^^^^
+    20 │ <span role="slider" aria-valuemax="100"></span>
+    21 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
+  
+  i Missing ARIA prop(s):
+  
+  - aria-valuenow
+  
+
+```
+
+```
+invalid.html:20:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the slider ARIA role does not have the required ARIA attributes.
+  
+    18 │ <span role="separator"></span>
+    19 │ <span role="slider" aria-valuemin="0"></span>
+  > 20 │ <span role="slider" aria-valuemax="100"></span>
+       │       ^^^^^^^^^^^^^
+    21 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
+    22 │ <span role="switch"></span>
+  
+  i Missing ARIA prop(s):
+  
+  - aria-valuenow
+  
+
+```
+
+```
+invalid.html:21:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the slider ARIA role does not have the required ARIA attributes.
+  
+    19 │ <span role="slider" aria-valuemin="0"></span>
+    20 │ <span role="slider" aria-valuemax="100"></span>
+  > 21 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
+       │       ^^^^^^^^^^^^^
+    22 │ <span role="switch"></span>
+    23 │ 
+  
+  i Missing ARIA prop(s):
+  
+  - aria-valuenow
+  
+
+```
+
+```
+invalid.html:22:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the switch ARIA role does not have the required ARIA attributes.
+  
+    20 │ <span role="slider" aria-valuemax="100"></span>
+    21 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
+  > 22 │ <span role="switch"></span>
+       │       ^^^^^^^^^^^^^
+    23 │ 
+  
+  i Missing ARIA prop(s):
+  
+  - aria-checked
+  
+
+```

@@ -39,6 +39,12 @@ schema + sure();
 .class {
 	background: red;
 }
+:slotted(div) {
+	color: red;
+}
+:global(div) {
+	color: red;
+}
 </style>
 
 ```
@@ -57,6 +63,23 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+file.vue:9:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a lang attribute when using the html element.
+  
+     7 │ </script>
+     8 │ 
+   > 9 │ <html><head><title>Svelte</title></head><body></body></html>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ <style>
+  
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
+  
+
+```
+
+```block
 file.vue:12:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
@@ -64,8 +87,8 @@ file.vue:12:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━�
     11 │ <style>
   > 12 │ #id { font-family: comic-sans } .class { background: red}
        │                    ^^^^^^^^^^
-    13 │ </style>
-    14 │ 
+    13 │ :slotted(div) {
+    14 │   color: red;
   
   i Consider adding a generic font family as a fallback.
   
@@ -81,5 +104,5 @@ file.vue:12:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. Fixed 1 file.
-Found 1 error.
+Found 2 errors.
 ```

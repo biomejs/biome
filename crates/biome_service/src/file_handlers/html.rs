@@ -5,7 +5,9 @@ use super::{
     ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
 };
 use crate::configuration::to_analyzer_rules;
-use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
+use crate::settings::{
+    OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
+};
 use crate::workspace::{CodeAction, CssDocumentServices, DocumentServices, EmbeddedSnippet};
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
@@ -18,7 +20,7 @@ use biome_configuration::html::{
     HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration, HtmlFormatterEnabled,
     HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParserConfiguration,
 };
-use biome_css_parser::parse_css_with_offset_and_cache;
+use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_formatter::format_element::{Interned, LineMode};
 use biome_formatter::prelude::{Document, Tag};
@@ -356,19 +358,19 @@ impl ExtensionHandler for HtmlFileHandler {
     }
 }
 
-fn formatter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn formatter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.formatter_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
-fn linter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn linter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.linter_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
-fn assist_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.assist_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
-fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
+fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
@@ -376,7 +378,7 @@ fn parse(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let options = settings.parse_options::<HtmlLanguage>(biome_path, &file_source);
@@ -392,7 +394,7 @@ fn parse_embedded_nodes(
     root: &AnyParse,
     biome_path: &BiomePath,
     file_source: &DocumentFileSource,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseEmbedResult {
     let mut nodes = Vec::new();
@@ -435,7 +437,8 @@ fn parse_embedded_nodes(
                 }
             }
         } else if element.is_style_tag() {
-            let result = parse_embedded_style(element.clone(), cache, biome_path, settings);
+            let result =
+                parse_embedded_style(element.clone(), cache, biome_path, file_source, settings);
             if let Some((content, services, file_source)) = result {
                 nodes.push(((content, services).into(), file_source));
             }
@@ -448,7 +451,7 @@ pub(crate) fn parse_astro_embedded_script(
     element: AstroEmbeddedContent,
     cache: &mut NodeCache,
     path: &BiomePath,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
     let content = element.content_token()?;
     let file_source =
@@ -479,7 +482,7 @@ pub(crate) fn parse_embedded_script(
     cache: &mut NodeCache,
     path: &BiomePath,
     html_file_source: &DocumentFileSource,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
     let html_file_source = html_file_source.to_html_file_source()?;
     if element.is_javascript_tag() {
@@ -550,12 +553,14 @@ pub(crate) fn parse_embedded_style(
     element: HtmlElement,
     cache: &mut NodeCache,
     biome_path: &BiomePath,
-    settings: &Settings,
+    html_file_source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
 ) -> Option<(
     EmbeddedSnippet<CssLanguage>,
     DocumentServices,
     DocumentFileSource,
 )> {
+    let html_file_source = html_file_source.to_html_file_source()?;
     if element.is_style_tag() {
         // This is probably an error
         if element.children().len() > 1 {
@@ -567,23 +572,34 @@ pub(crate) fn parse_embedded_style(
             return None;
         }
 
-        let file_source = DocumentFileSource::Css(CssFileSource::css());
+        let file_source = if html_file_source.is_html() {
+            DocumentFileSource::Css(CssFileSource::css())
+        } else {
+            DocumentFileSource::Css(CssFileSource::new_css_modules())
+        };
         let (snippet, services) = element.children().iter().next().and_then(|child| {
             let child = child.as_any_html_content()?;
             let child = child.as_html_embedded_content()?;
-            let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+            let mut options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+            if html_file_source.is_vue() {
+                options.css_modules = CssModulesKind::Vue
+            } else if !html_file_source.is_html() {
+                options.css_modules = CssModulesKind::Classic
+            }
             let content = child.value_token().ok()?;
             let parse = parse_css_with_offset_and_cache(
                 content.text(),
+                file_source.to_css_file_source().unwrap_or_default(),
                 content.text_range().start(),
                 cache,
                 options,
             );
 
             let mut services = CssDocumentServices::default();
-            if settings.is_linter_enabled() || settings.is_assist_enabled() {
+            if settings.as_ref().is_linter_enabled() || settings.as_ref().is_assist_enabled() {
                 services = services.with_css_semantic_model(&parse.tree())
             }
+
             Some((
                 EmbeddedSnippet::new(
                     parse.into(),
@@ -604,7 +620,7 @@ pub(crate) fn parse_embedded_json(
     element: HtmlElement,
     cache: &mut NodeCache,
     biome_path: &BiomePath,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Option<(EmbeddedSnippet<JsonLanguage>, DocumentFileSource)> {
     // This is probably an error
     if element.children().len() > 1 {
@@ -647,7 +663,7 @@ fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<HtmlLanguage>(path, document_file_source);
 
@@ -663,7 +679,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
 
@@ -680,7 +696,7 @@ fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     embedded_nodes: Vec<FormatEmbedNode>,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
@@ -760,7 +776,7 @@ fn lint(params: LintParams) -> LintResults {
     let tree = params.parse.tree();
 
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(params.only)
             .with_skip(params.skip)
             .with_path(params.path.as_path())
@@ -820,7 +836,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         settings.analyzer_options::<HtmlLanguage>(path, &language, suppression_reason.as_deref());
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
             .with_only(only)
             .with_skip(skip)
             .with_path(path.as_path())
@@ -858,14 +874,17 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut tree: HtmlRoot = params.parse.tree();
 
     // Compute final rules (taking `overrides` into account)
-    let rules = params.settings.as_linter_rules(params.biome_path.as_path());
+    let rules = params
+        .settings
+        .as_ref()
+        .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<HtmlLanguage>(
         params.biome_path,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(params.only)
             .with_skip(params.skip)
             .with_path(params.biome_path.as_path())

@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 137
+expression: invalidWithExtensionMappings.ts
+---
+# Input
+```ts
+import "./foo";
+import "./bar.ts";
+
+```
+
+# Diagnostics
+```
+invalidWithExtensionMappings.ts:1:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+  > 1 │ import "./foo";
+      │        ^^^^^^^
+    2 │ import "./bar.ts";
+    3 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    1   │ - import·"./foo";
+      1 │ + import·"./foo.js";
+    2 2 │   import "./bar.ts";
+    3 3 │   
+  
+
+```
+
+```
+invalidWithExtensionMappings.ts:2:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    1 │ import "./foo";
+  > 2 │ import "./bar.ts";
+      │        ^^^^^^^^^^
+    3 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    1 1 │   import "./foo";
+    2   │ - import·"./bar.ts";
+      2 │ + import·"./bar.js";
+    3 3 │   
+  
+
+```

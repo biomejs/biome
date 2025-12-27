@@ -73,7 +73,7 @@ pub(crate) fn parse_regular_dimension(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_nth_at_unit(p: &mut CssParser, n: usize) -> bool {
+pub(crate) fn is_nth_at_unit(p: &mut CssParser, n: usize) -> bool {
     is_nth_at_length_unit(p, n)
         || is_nth_at_container_lengths_unit(p, n)
         || is_nth_at_angle_unit(p, n)

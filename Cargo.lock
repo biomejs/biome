@@ -762,6 +762,7 @@ name = "biome_html_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_aria_metadata",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -1076,6 +1077,7 @@ name = "biome_jsdoc_comment"
 version = "0.0.1"
 dependencies = [
  "biome_formatter",
+ "biome_js_parser",
  "biome_js_syntax",
  "biome_js_type_info",
  "biome_rowan",
@@ -1227,6 +1229,7 @@ dependencies = [
  "tower",
  "tower-lsp-server",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -1558,6 +1561,7 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "boxcar",
+ "bpaf",
  "camino",
  "crossbeam",
  "either",
@@ -1735,6 +1739,21 @@ version = "0.0.1"
 dependencies = [
  "biome_rowan",
  "biome_yaml_syntax",
+]
+
+[[package]]
+name = "biome_yaml_formatter"
+version = "0.1.0"
+dependencies = [
+ "biome_deserialize",
+ "biome_diagnostics",
+ "biome_formatter",
+ "biome_rowan",
+ "biome_suppression",
+ "biome_yaml_parser",
+ "biome_yaml_syntax",
+ "schemars",
+ "serde",
 ]
 
 [[package]]
