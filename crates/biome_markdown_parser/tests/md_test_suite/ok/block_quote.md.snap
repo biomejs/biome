@@ -1,0 +1,87 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```
+> This is a quote
+> It continues here
+
+> Another quote block
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            any_md_block: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@0..1 ">" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..17 " This is a quote" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@17..19 ">" [Newline("\n")] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@19..37 " It continues here" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+        },
+        MdQuote {
+            any_md_block: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@37..40 ">" [Newline("\n"), Newline("\n")] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@40..60 " Another quote block" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@60..61 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..61
+  0: (empty)
+  1: MD_BLOCK_LIST@0..60
+    0: MD_QUOTE@0..37
+      0: MD_PARAGRAPH@0..37
+        0: MD_INLINE_ITEM_LIST@0..37
+          0: MD_TEXTUAL@0..1
+            0: MD_TEXTUAL_LITERAL@0..1 ">" [] []
+          1: MD_TEXTUAL@1..17
+            0: MD_TEXTUAL_LITERAL@1..17 " This is a quote" [] []
+          2: MD_TEXTUAL@17..19
+            0: MD_TEXTUAL_LITERAL@17..19 ">" [Newline("\n")] []
+          3: MD_TEXTUAL@19..37
+            0: MD_TEXTUAL_LITERAL@19..37 " It continues here" [] []
+        1: (empty)
+    1: MD_QUOTE@37..60
+      0: MD_PARAGRAPH@37..60
+        0: MD_INLINE_ITEM_LIST@37..60
+          0: MD_TEXTUAL@37..40
+            0: MD_TEXTUAL_LITERAL@37..40 ">" [Newline("\n"), Newline("\n")] []
+          1: MD_TEXTUAL@40..60
+            0: MD_TEXTUAL_LITERAL@40..60 " Another quote block" [] []
+        1: (empty)
+  2: EOF@60..61 "" [Newline("\n")] []
+
+```

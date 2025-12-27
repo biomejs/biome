@@ -1,6 +1,6 @@
 // Markdown Un-Grammar.
 //
-// This grammar specifies the structure of Rust's concrete syntax tree.
+// This grammar specifies the structure of Markdown's concrete syntax tree.
 // It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
 // Tokens are processed -- contextual keywords are recognised, compound operators glued.
 //
@@ -94,28 +94,25 @@ AnyCodeBlock =
 //     code
 // ^^^^^^^^
 // The space before "code" is intentional.
+// Indentation is tracked in trivia, so we use MdInlineItemList for content.
 MdIndentCodeBlock =
-	lines: MdIndentedCodeLineList
-
-MdIndentedCodeLineList = MdIndentedCodeLine*
-
-MdIndentedCodeLine =
-	indentation: MdIndent
-	content: MdTextual
+	content: MdInlineItemList
 
 
 // ```shell
 //
 // ```
+// or
+// ~~~shell
+//
+// ~~~
 MdFencedCodeBlock =
-	l_fence: '```'
+	l_fence: ('```' | '~~~')
 	code_list: MdCodeNameList
-	l_hard_line: MdHardLine
-	content: MdTextual
-	r_hard_line: MdHardLine
-	r_fence: '```'
+	content: MdInlineItemList
+	r_fence: ('```' | '~~~')
 
-MdCodeNameList = (MdTextual (',' MdTextual)*)
+MdCodeNameList = MdTextual*
 
 // html block
 MdHtmlBlock = MdTextual
@@ -134,8 +131,7 @@ MdBulletList = MdBullet*
 // - Hey!
 // ^^^^^^
 MdBullet =
-	bullet: ('-' | '*')
-	space: 'md_textual_literal'
+	bullet: ('-' | '*' | '+')
 	content: MdInlineItemList
 
 MdOrderList = AnyCodeBlock*
@@ -145,7 +141,7 @@ MdOrderList = AnyCodeBlock*
 // Another block paragraph
 MdParagraph =
 	list: MdInlineItemList
-	hard_line: MdHardLine
+	hard_line: MdHardLine?
 
 MdInlineItemList = AnyMdInline*
 
@@ -194,35 +190,15 @@ MdInlineLink =
 	source: MdInlineItemList
 	')'
 
-// [![alt](image)](link)
-// ^^^^^^^^^^^^^^^^^^^^^
+// ![alt](image)
+// ^^^^^^^^^^^^^^
 MdInlineImage =
-	'['
 	'!'
-	alt: MdInlineImageAlt
-	source: MdInlineImageSource
-	']'
-  link: MdInlineImageLink?
-
-// [![alt](image)](link)
-//   ^^^^^
-MdInlineImageAlt =
 	'['
-	content: MdInlineItemList
+	alt: MdInlineItemList
 	']'
-
-// [![alt](image)](link)
-//        ^^^^^^^
-MdInlineImageSource =
 	'('
-	content: MdInlineItemList
-	')'
-
-// [![alt](image)](link)
-//                ^^^^^^
-MdInlineImageLink =
-	'('
-	content: MdInlineItemList
+	source: MdInlineItemList
 	')'
 
 // ***

@@ -31,6 +31,27 @@ impl<'source> MarkdownParser<'source> {
         self.source.before_whitespace_count()
     }
 
+    /// Returns the current trivia position, used for tracking paragraph boundaries.
+    pub fn trivia_position(&self) -> usize {
+        self.source.trivia_len()
+    }
+
+    /// Returns true if there is a blank line in the trivia added since the given position.
+    pub fn has_blank_line_since(&self, since_pos: usize) -> bool {
+        self.source.has_blank_line_since(since_pos)
+    }
+
+    /// Returns true if there is any newline in the trivia since the given position.
+    pub fn has_newline_since(&self, since_pos: usize) -> bool {
+        self.source.has_newline_since(since_pos)
+    }
+
+    /// Returns true if the parser is at the start of input (no trivia has been collected yet).
+    /// This is used for detecting block-level constructs at the start of a document.
+    pub fn at_start_of_input(&self) -> bool {
+        self.source.trivia_len() == 0
+    }
+
     pub fn rewind(&mut self, checkpoint: MarkdownParserCheckpoint) {
         let MarkdownParserCheckpoint { context, source } = checkpoint;
 

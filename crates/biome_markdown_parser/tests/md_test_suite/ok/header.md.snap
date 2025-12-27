@@ -1,0 +1,455 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```
+# Heading 1
+
+## Heading 2
+
+### Heading 3
+
+#### Heading 4
+
+##### Heading 5
+
+###### Heading 6
+
+# Trailing hash #
+
+## Multiple trailing ##
+
+### Mixed # content ## with ### trailing ####
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@0..1 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..11 " Heading 1" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@11..14 "#" [Newline("\n"), Newline("\n")] [],
+                },
+                MdHash {
+                    hash_token: HASH@14..15 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@15..25 " Heading 2" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@25..28 "#" [Newline("\n"), Newline("\n")] [],
+                },
+                MdHash {
+                    hash_token: HASH@28..29 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@29..30 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@30..40 " Heading 3" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@40..43 "#" [Newline("\n"), Newline("\n")] [],
+                },
+                MdHash {
+                    hash_token: HASH@43..44 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@44..45 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@45..46 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@46..56 " Heading 4" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@56..59 "#" [Newline("\n"), Newline("\n")] [],
+                },
+                MdHash {
+                    hash_token: HASH@59..60 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@60..61 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@61..62 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@62..63 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@63..73 " Heading 5" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@73..76 "#" [Newline("\n"), Newline("\n")] [],
+                },
+                MdHash {
+                    hash_token: HASH@76..77 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@77..78 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@78..79 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@79..80 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@80..81 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@81..91 " Heading 6" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@91..94 "#" [Newline("\n"), Newline("\n")] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@94..109 " Trailing hash " [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [
+                MdHash {
+                    hash_token: HASH@109..110 "#" [] [],
+                },
+            ],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@110..113 "#" [Newline("\n"), Newline("\n")] [],
+                },
+                MdHash {
+                    hash_token: HASH@113..114 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@114..133 " Multiple trailing " [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [
+                MdHash {
+                    hash_token: HASH@133..134 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@134..135 "#" [] [],
+                },
+            ],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@135..138 "#" [Newline("\n"), Newline("\n")] [],
+                },
+                MdHash {
+                    hash_token: HASH@138..139 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@139..140 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@140..147 " Mixed " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@147..148 "#" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@148..157 " content " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@157..158 "#" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@158..159 "#" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@159..165 " with " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@165..166 "#" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@166..167 "#" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@167..168 "#" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@168..178 " trailing " [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [
+                MdHash {
+                    hash_token: HASH@178..179 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@179..180 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@180..181 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@181..182 "#" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@182..183 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..183
+  0: (empty)
+  1: MD_BLOCK_LIST@0..182
+    0: MD_HEADER@0..11
+      0: MD_HASH_LIST@0..1
+        0: MD_HASH@0..1
+          0: HASH@0..1 "#" [] []
+      1: MD_PARAGRAPH@1..11
+        0: MD_INLINE_ITEM_LIST@1..11
+          0: MD_TEXTUAL@1..11
+            0: MD_TEXTUAL_LITERAL@1..11 " Heading 1" [] []
+        1: (empty)
+      2: MD_HASH_LIST@11..11
+    1: MD_HEADER@11..25
+      0: MD_HASH_LIST@11..15
+        0: MD_HASH@11..14
+          0: HASH@11..14 "#" [Newline("\n"), Newline("\n")] []
+        1: MD_HASH@14..15
+          0: HASH@14..15 "#" [] []
+      1: MD_PARAGRAPH@15..25
+        0: MD_INLINE_ITEM_LIST@15..25
+          0: MD_TEXTUAL@15..25
+            0: MD_TEXTUAL_LITERAL@15..25 " Heading 2" [] []
+        1: (empty)
+      2: MD_HASH_LIST@25..25
+    2: MD_HEADER@25..40
+      0: MD_HASH_LIST@25..30
+        0: MD_HASH@25..28
+          0: HASH@25..28 "#" [Newline("\n"), Newline("\n")] []
+        1: MD_HASH@28..29
+          0: HASH@28..29 "#" [] []
+        2: MD_HASH@29..30
+          0: HASH@29..30 "#" [] []
+      1: MD_PARAGRAPH@30..40
+        0: MD_INLINE_ITEM_LIST@30..40
+          0: MD_TEXTUAL@30..40
+            0: MD_TEXTUAL_LITERAL@30..40 " Heading 3" [] []
+        1: (empty)
+      2: MD_HASH_LIST@40..40
+    3: MD_HEADER@40..56
+      0: MD_HASH_LIST@40..46
+        0: MD_HASH@40..43
+          0: HASH@40..43 "#" [Newline("\n"), Newline("\n")] []
+        1: MD_HASH@43..44
+          0: HASH@43..44 "#" [] []
+        2: MD_HASH@44..45
+          0: HASH@44..45 "#" [] []
+        3: MD_HASH@45..46
+          0: HASH@45..46 "#" [] []
+      1: MD_PARAGRAPH@46..56
+        0: MD_INLINE_ITEM_LIST@46..56
+          0: MD_TEXTUAL@46..56
+            0: MD_TEXTUAL_LITERAL@46..56 " Heading 4" [] []
+        1: (empty)
+      2: MD_HASH_LIST@56..56
+    4: MD_HEADER@56..73
+      0: MD_HASH_LIST@56..63
+        0: MD_HASH@56..59
+          0: HASH@56..59 "#" [Newline("\n"), Newline("\n")] []
+        1: MD_HASH@59..60
+          0: HASH@59..60 "#" [] []
+        2: MD_HASH@60..61
+          0: HASH@60..61 "#" [] []
+        3: MD_HASH@61..62
+          0: HASH@61..62 "#" [] []
+        4: MD_HASH@62..63
+          0: HASH@62..63 "#" [] []
+      1: MD_PARAGRAPH@63..73
+        0: MD_INLINE_ITEM_LIST@63..73
+          0: MD_TEXTUAL@63..73
+            0: MD_TEXTUAL_LITERAL@63..73 " Heading 5" [] []
+        1: (empty)
+      2: MD_HASH_LIST@73..73
+    5: MD_HEADER@73..91
+      0: MD_HASH_LIST@73..81
+        0: MD_HASH@73..76
+          0: HASH@73..76 "#" [Newline("\n"), Newline("\n")] []
+        1: MD_HASH@76..77
+          0: HASH@76..77 "#" [] []
+        2: MD_HASH@77..78
+          0: HASH@77..78 "#" [] []
+        3: MD_HASH@78..79
+          0: HASH@78..79 "#" [] []
+        4: MD_HASH@79..80
+          0: HASH@79..80 "#" [] []
+        5: MD_HASH@80..81
+          0: HASH@80..81 "#" [] []
+      1: MD_PARAGRAPH@81..91
+        0: MD_INLINE_ITEM_LIST@81..91
+          0: MD_TEXTUAL@81..91
+            0: MD_TEXTUAL_LITERAL@81..91 " Heading 6" [] []
+        1: (empty)
+      2: MD_HASH_LIST@91..91
+    6: MD_HEADER@91..110
+      0: MD_HASH_LIST@91..94
+        0: MD_HASH@91..94
+          0: HASH@91..94 "#" [Newline("\n"), Newline("\n")] []
+      1: MD_PARAGRAPH@94..109
+        0: MD_INLINE_ITEM_LIST@94..109
+          0: MD_TEXTUAL@94..109
+            0: MD_TEXTUAL_LITERAL@94..109 " Trailing hash " [] []
+        1: (empty)
+      2: MD_HASH_LIST@109..110
+        0: MD_HASH@109..110
+          0: HASH@109..110 "#" [] []
+    7: MD_HEADER@110..135
+      0: MD_HASH_LIST@110..114
+        0: MD_HASH@110..113
+          0: HASH@110..113 "#" [Newline("\n"), Newline("\n")] []
+        1: MD_HASH@113..114
+          0: HASH@113..114 "#" [] []
+      1: MD_PARAGRAPH@114..133
+        0: MD_INLINE_ITEM_LIST@114..133
+          0: MD_TEXTUAL@114..133
+            0: MD_TEXTUAL_LITERAL@114..133 " Multiple trailing " [] []
+        1: (empty)
+      2: MD_HASH_LIST@133..135
+        0: MD_HASH@133..134
+          0: HASH@133..134 "#" [] []
+        1: MD_HASH@134..135
+          0: HASH@134..135 "#" [] []
+    8: MD_HEADER@135..182
+      0: MD_HASH_LIST@135..140
+        0: MD_HASH@135..138
+          0: HASH@135..138 "#" [Newline("\n"), Newline("\n")] []
+        1: MD_HASH@138..139
+          0: HASH@138..139 "#" [] []
+        2: MD_HASH@139..140
+          0: HASH@139..140 "#" [] []
+      1: MD_PARAGRAPH@140..178
+        0: MD_INLINE_ITEM_LIST@140..178
+          0: MD_TEXTUAL@140..147
+            0: MD_TEXTUAL_LITERAL@140..147 " Mixed " [] []
+          1: MD_TEXTUAL@147..148
+            0: MD_TEXTUAL_LITERAL@147..148 "#" [] []
+          2: MD_TEXTUAL@148..157
+            0: MD_TEXTUAL_LITERAL@148..157 " content " [] []
+          3: MD_TEXTUAL@157..158
+            0: MD_TEXTUAL_LITERAL@157..158 "#" [] []
+          4: MD_TEXTUAL@158..159
+            0: MD_TEXTUAL_LITERAL@158..159 "#" [] []
+          5: MD_TEXTUAL@159..165
+            0: MD_TEXTUAL_LITERAL@159..165 " with " [] []
+          6: MD_TEXTUAL@165..166
+            0: MD_TEXTUAL_LITERAL@165..166 "#" [] []
+          7: MD_TEXTUAL@166..167
+            0: MD_TEXTUAL_LITERAL@166..167 "#" [] []
+          8: MD_TEXTUAL@167..168
+            0: MD_TEXTUAL_LITERAL@167..168 "#" [] []
+          9: MD_TEXTUAL@168..178
+            0: MD_TEXTUAL_LITERAL@168..178 " trailing " [] []
+        1: (empty)
+      2: MD_HASH_LIST@178..182
+        0: MD_HASH@178..179
+          0: HASH@178..179 "#" [] []
+        1: MD_HASH@179..180
+          0: HASH@179..180 "#" [] []
+        2: MD_HASH@180..181
+          0: HASH@180..181 "#" [] []
+        3: MD_HASH@181..182
+          0: HASH@181..182 "#" [] []
+  2: EOF@182..183 "" [Newline("\n")] []
+
+```

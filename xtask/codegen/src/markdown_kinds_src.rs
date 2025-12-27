@@ -13,10 +13,12 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         ("!", "BANG"),
         ("-", "MINUS"),
         ("*", "STAR"),
+        ("+", "PLUS"),
         ("**", "DOUBLE_STAR"),
         ("`", "BACKTICK"),
         ("```", "TRIPLE_BACKTICK"),
         ("~", "TILDE"),
+        ("~~~", "TRIPLE_TILDE"),
         ("   ", "WHITESPACE3"),
         ("_", "UNDERSCORE"),
         ("__", "DOUBLE_UNDERSCORE"),
@@ -38,6 +40,7 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         // Bogus nodes
         "BOGUS",
         "MD_BOGUS",
+        "MD_BOGUS_BULLET",
         // node
         "MD_DOCUMENT",
         "MD_BLOCK_LIST",

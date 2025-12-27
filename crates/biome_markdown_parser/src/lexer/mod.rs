@@ -1,4 +1,4 @@
-//! An extremely fast, lookup table based, JSON lexer which yields SyntaxKind tokens used by the rome-json parser.
+//! An extremely fast, lookup table based, Markdown lexer which yields SyntaxKind tokens used by the biome-markdown parser.
 
 #[rustfmt::skip]
 mod tests;
@@ -10,7 +10,8 @@ use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
 use biome_rowan::{SyntaxKind, TextSize};
-use biome_unicode_table::{Dispatch::*, lookup_byte};
+use biome_unicode_table::Dispatch::{self, *};
+use biome_unicode_table::lookup_byte;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum MarkdownLexContext {
@@ -166,7 +167,8 @@ impl<'src> MarkdownLexer<'src> {
     pub fn from_str(source: &'src str) -> Self {
         Self {
             source,
-            after_newline: false,
+            // Start of document is treated as start of line for indentation purposes
+            after_newline: true,
             unicode_bom_length: 0,
             current_kind: TOMBSTONE,
             current_start: TextSize::from(0),
@@ -179,10 +181,84 @@ impl<'src> MarkdownLexer<'src> {
     pub(crate) fn consume_token(&mut self, current: u8) -> MarkdownSyntaxKind {
         let dispatched = lookup_byte(current);
         match dispatched {
-            WHS => self.consume_newline_or_whitespace(),
-            MUL | MIN | IDT => self.consume_thematic_break_literal(),
+            // Whitespace handling depends on context:
+            // - At start of line (after_newline): whitespace is significant for indentation
+            //   detection (e.g., 4+ spaces = code block), so emit as separate tokens
+            // - In middle of line: whitespace is just text content, include in textual token
+            WHS => {
+                if self.after_newline || current == b'\n' || current == b'\r' {
+                    self.consume_newline_or_whitespace()
+                } else {
+                    self.consume_textual()
+                }
+            }
+            MUL | MIN | IDT => self.consume_thematic_break_or_emphasis(dispatched),
+            PLS => self.consume_byte(PLUS),
+            HAS => self.consume_hash(),
+            TPL => self.consume_backtick(),
+            TLD => self.consume_tilde(),
+            MOR => self.consume_byte(R_ANGLE),
+            EXL => self.consume_byte(BANG),
+            BTO => self.consume_byte(L_BRACK),
+            BTC => self.consume_byte(R_BRACK),
+            PNO => self.consume_byte(L_PAREN),
+            PNC => self.consume_byte(R_PAREN),
+            BSL => self.consume_escape(),
             _ => self.consume_textual(),
         }
+    }
+
+    /// Consume a backslash escape sequence.
+    /// Per CommonMark spec, a backslash before ASCII punctuation makes it literal.
+    /// Escapable: !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+    fn consume_escape(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        // Consume the backslash
+        self.advance(1);
+
+        // Check if next character is escapable ASCII punctuation
+        if let Some(next) = self.current_byte()
+            && matches!(
+                next,
+                b'!' | b'"'
+                    | b'#'
+                    | b'$'
+                    | b'%'
+                    | b'&'
+                    | b'\''
+                    | b'('
+                    | b')'
+                    | b'*'
+                    | b'+'
+                    | b','
+                    | b'-'
+                    | b'.'
+                    | b'/'
+                    | b':'
+                    | b';'
+                    | b'<'
+                    | b'='
+                    | b'>'
+                    | b'?'
+                    | b'@'
+                    | b'['
+                    | b'\\'
+                    | b']'
+                    | b'^'
+                    | b'_'
+                    | b'`'
+                    | b'{'
+                    | b'|'
+                    | b'}'
+                    | b'~'
+            )
+        {
+            // Consume the escaped character too
+            self.advance(1);
+        }
+
+        MD_TEXTUAL_LITERAL
     }
 
     fn text_position(&self) -> TextSize {
@@ -269,31 +345,106 @@ impl<'src> MarkdownLexer<'src> {
         TAB
     }
 
-    fn consume_thematic_break_literal(&mut self) -> MarkdownSyntaxKind {
+    /// Consumes thematic break literal or returns emphasis marker tokens.
+    /// Called when we see *, -, or _.
+    fn consume_thematic_break_or_emphasis(&mut self, dispatched: Dispatch) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
-        let start_char = match self.current_byte() {
-            Some(b'-') => b'-',
-            Some(b'*') => b'*',
-            Some(b'_') => b'_',
+        let start_char = match dispatched {
+            MUL => b'*',
+            MIN => b'-',
+            IDT => {
+                // IDT can match letters (A-Z, a-z) or underscore
+                // Only underscore should be treated as emphasis marker
+                match self.current_byte() {
+                    Some(b'_') => b'_',
+                    _ => return self.consume_textual(),
+                }
+            }
             _ => return self.consume_textual(),
         };
 
+        // Save position to restore if not a thematic break
+        let start_position = self.position;
+
         let mut count = 0;
         loop {
-            self.consume_whitespace();
+            // Count only the marker characters, skip whitespace
             if matches!(self.current_byte(), Some(ch) if ch == start_char) {
                 self.advance(1);
                 count += 1;
+            } else if matches!(self.current_byte(), Some(b' ')) {
+                self.advance(1);
             } else {
                 break;
             }
         }
-        // until next newline or eof
+
+        // Check if this is a valid thematic break: 3+ of same char, only whitespace between,
+        // and followed by newline or EOF
         if matches!(self.current_byte(), Some(b'\n' | b'\r') | None) && count >= 3 {
             return MD_THEMATIC_BREAK_LITERAL;
         }
-        ERROR_TOKEN
+
+        // Not a thematic break - restore position and consume as emphasis marker
+        self.position = start_position;
+
+        // Check for double emphasis markers (**, __)
+        // Note: -- is not valid markdown emphasis, so we don't check for it
+        if start_char != b'-' && self.peek_byte() == Some(start_char) {
+            self.advance(2);
+            return match start_char {
+                b'*' => DOUBLE_STAR,
+                b'_' => DOUBLE_UNDERSCORE,
+                _ => unreachable!(),
+            };
+        }
+
+        // Single marker
+        self.advance(1);
+        match start_char {
+            b'*' => STAR,
+            b'_' => UNDERSCORE,
+            b'-' => MINUS,
+            _ => unreachable!(),
+        }
+    }
+
+    /// Consume a single hash character for ATX headers
+    fn consume_hash(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+        self.advance(1);
+        HASH
+    }
+
+    /// Consume backtick(s) - either single for inline code or triple for fenced code blocks
+    fn consume_backtick(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        // Check for triple backtick
+        if self.peek_byte() == Some(b'`') && self.byte_at(2) == Some(b'`') {
+            self.advance(3);
+            return TRIPLE_BACKTICK;
+        }
+
+        // Single backtick
+        self.advance(1);
+        BACKTICK
+    }
+
+    /// Consume tilde(s) - either single for other uses or triple for fenced code blocks
+    fn consume_tilde(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        // Check for triple tilde
+        if self.peek_byte() == Some(b'~') && self.byte_at(2) == Some(b'~') {
+            self.advance(3);
+            return TRIPLE_TILDE;
+        }
+
+        // Single tilde
+        self.advance(1);
+        TILDE
     }
 
     /// Get the UTF8 char which starts at the current byte
@@ -350,18 +501,67 @@ impl<'src> MarkdownLexer<'src> {
         self.position >= self.source.len()
     }
 
+    /// Consume consecutive textual characters until we hit a special markdown character.
+    /// This groups multiple characters into a single MD_TEXTUAL_LITERAL token for efficiency.
+    /// Spaces and tabs are included in the text token (treated as regular text content),
+    /// but newlines end the token since they have semantic meaning as block separators.
     #[inline]
     fn consume_textual(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
+        // Consume at least one character
         let char = self.current_char_unchecked();
         self.advance(char.len_utf8());
+
+        // Continue consuming characters until we hit a special markdown character
+        // or end of file. Special characters are those that could start inline elements
+        // or block structures: * - _ + # ` ~ > ! [ ] ( ) \ and newlines.
+        // Spaces and tabs are now included as regular text content.
+        while let Some(byte) = self.current_byte() {
+            let dispatched = lookup_byte(byte);
+            match dispatched {
+                // Include spaces and tabs in text tokens
+                WHS => {
+                    if byte == b' ' || byte == b'\t' {
+                        self.advance(1);
+                    } else {
+                        // Stop at newlines (\n, \r)
+                        break;
+                    }
+                }
+                // Stop at characters that could be markdown syntax
+                MUL  // *
+                | MIN  // -
+                | PLS  // +
+                | HAS  // #
+                | TPL  // `
+                | TLD  // ~
+                | MOR  // >
+                | EXL  // !
+                | BTO  // [
+                | BTC  // ]
+                | PNO  // (
+                | PNC  // )
+                | BSL  // \
+                => break,
+                // IDT includes A-Z, a-z, and _ - only _ is special for markdown
+                IDT => {
+                    if byte == b'_' {
+                        break;
+                    }
+                    self.advance_char_unchecked();
+                }
+                // All other characters are regular text
+                _ => {
+                    self.advance_char_unchecked();
+                }
+            }
+        }
 
         MD_TEXTUAL_LITERAL
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
-    #[expect(dead_code)]
     fn consume_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
         self.advance(1);
         tok

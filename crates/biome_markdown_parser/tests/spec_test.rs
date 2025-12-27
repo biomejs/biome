@@ -135,8 +135,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"
-your test code
+    let code = r#"    function hello() {
+        console.log("indented");
+    }
 "#;
 
     let root = parse_markdown(code);
