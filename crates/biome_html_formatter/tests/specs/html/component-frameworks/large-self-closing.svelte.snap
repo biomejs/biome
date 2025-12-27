@@ -1,12 +1,16 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: vue/issue-8174.vue
+info: component-frameworks/large-self-closing.svelte
 ---
 # Input
 
-```vue
-<Component v-if="operation" :property="123" />
-<Component v-else :property="123" />
+```svelte
+<Button
+	label="test button"
+	variant="primary"
+	size="lg"
+	class="text-2xl bg-amber-600 font-bold"
+/>
 
 ```
 
@@ -29,7 +33,11 @@ Indent script and style: false
 Self close void elements: never
 -----
 
-```vue
-<Component v-if="operation" :property="123" />
-<Component v-else :property="123" />
+```svelte
+<Button
+	label="test button"
+	variant="primary"
+	size="lg"
+	class="text-2xl bg-amber-600 font-bold"
+/>
 ```

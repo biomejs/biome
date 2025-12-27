@@ -29,5 +29,5 @@ Self close void elements: never
 -----
 
 ```vue
-<Foo @update:modelValue="onUpdate"/>
+<Foo @update:modelValue="onUpdate" />
 ```
