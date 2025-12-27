@@ -5561,6 +5561,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useUniqueVariableNames": {
+					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/use-unique-variable-names>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUniqueVariableNamesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueConsistentDefinePropsDeclaration": {
 					"description": "Enforce consistent defineProps declaration style.\nSee <https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration>",
 					"anyOf": [
@@ -9732,6 +9739,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseUniqueVariableNamesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUniqueVariableNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseValidAnchorOptions": {
 			"type": "object",
 			"properties": {
@@ -12754,6 +12770,16 @@
 			]
 		},
 		"UseUniqueGraphqlOperationNameOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseUniqueVariableNamesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUniqueVariableNamesOptions" }
+			]
+		},
+		"UseUniqueVariableNamesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
