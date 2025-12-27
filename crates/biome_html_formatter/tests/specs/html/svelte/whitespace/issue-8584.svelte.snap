@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/whitespace/issue-8584.svelte
+---
+# Input
+
+```svelte
+<script>
+	const framework = "Astro";
+</script>
+
+<h1>Hello, {framework} and Svelte!</h1>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```svelte
+<script>
+	const framework = "Astro";
+</script>
+
+<h1>Hello, {framework} and Svelte!</h1>
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"\n\tconst framework = \"Astro\";\n" => 8..37
