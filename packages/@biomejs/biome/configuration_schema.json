@@ -5599,6 +5599,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useUniqueEnumValueNames": {
+					"description": "Require all enum value names to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-enum-value-names>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUniqueEnumValueNamesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUniqueFieldDefinitionNames": {
 					"description": "Require all fields of a type to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-field-definition-names>",
 					"anyOf": [
@@ -9874,6 +9881,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseUniqueEnumValueNamesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUniqueEnumValueNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseUniqueFieldDefinitionNamesOptions": {
 			"type": "object",
 			"properties": {
@@ -13012,6 +13028,16 @@
 					"uniqueItems": true
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseUniqueEnumValueNamesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUniqueEnumValueNamesOptions" }
+			]
+		},
+		"UseUniqueEnumValueNamesOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseUniqueFieldDefinitionNamesConfiguration": {
