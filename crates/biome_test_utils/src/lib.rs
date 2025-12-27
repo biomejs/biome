@@ -1,14 +1,15 @@
 #![deny(clippy::use_self)]
 
-use std::ffi::c_int;
-use std::fmt::Write;
-use std::sync::{Arc, Once};
+mod bench_case;
 
+pub use bench_case::BenchCase;
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
 use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
+use biome_css_parser::CssParserOptions;
+use biome_css_syntax::AnyCssRoot;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
@@ -19,6 +20,8 @@ use biome_module_graph::ModuleGraph;
 use biome_package::{Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
+use biome_service::WorkspaceError;
+use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
 use biome_service::settings::{ServiceLanguage, Settings, SettingsHandle};
@@ -26,14 +29,9 @@ use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
-
-mod bench_case;
-
-pub use bench_case::BenchCase;
-use biome_css_parser::CssParserOptions;
-use biome_css_syntax::CssRoot;
-use biome_service::WorkspaceError;
-use biome_service::configuration::{LoadedConfiguration, load_configuration};
+use std::ffi::c_int;
+use std::fmt::Write;
+use std::sync::{Arc, Once};
 
 pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
     if extension == "json" || extension == "jsonc" {
@@ -291,12 +289,18 @@ pub fn get_added_js_paths<'a>(
 pub fn get_css_added_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
-) -> Vec<(&'a BiomePath, CssRoot)> {
+) -> Vec<(&'a BiomePath, AnyCssRoot)> {
     paths
         .iter()
         .filter_map(|path| {
+            let DocumentFileSource::Css(file_source) =
+                DocumentFileSource::from_path(path.as_path(), false)
+            else {
+                return None;
+            };
             let root = fs.read_file_from_path(path).ok().map(|content| {
-                let parsed = biome_css_parser::parse_css(&content, CssParserOptions::default());
+                let parsed =
+                    biome_css_parser::parse_css(&content, file_source, CssParserOptions::default());
                 let diagnostics = parsed.diagnostics();
                 assert!(
                     diagnostics.is_empty(),

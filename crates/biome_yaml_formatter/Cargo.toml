@@ -1,17 +1,21 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's YAML formatter"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_yaml_formatter"
-publish              = true
-repository.workspace = true
 version              = "0.1.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's YAML formatter"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+# cargo-workspaces metadata
+[package.metadata.workspaces]
+independent = true
 
 [dependencies]
 biome_deserialize = { workspace = true }
@@ -26,10 +30,6 @@ serde             = { workspace = true, features = ["derive"], optional = true }
 [dev-dependencies]
 biome_formatter   = { workspace = true, features = ["countme"] }
 biome_yaml_parser = { path = "../biome_yaml_parser" }
-
-# cargo-workspaces metadata
-[package.metadata.workspaces]
-independent = true
 
 [features]
 schema = ["dep:schemars", "serde"]
