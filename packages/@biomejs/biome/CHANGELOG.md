@@ -1,5 +1,111 @@
 # @biomejs/biome
 
+## 2.3.11
+
+### Patch Changes
+
+- [#8498](https://github.com/biomejs/biome/pull/8498) [`d80fa41`](https://github.com/biomejs/biome/commit/d80fa41f1321cf504fef478467ba3445e69a3841) Thanks [@tt-a1i](https://github.com/tt-a1i)! - Fixed [#8494](https://github.com/biomejs/biome/issues/8494). Extended [`noUndeclaredEnvVars`](https://biomejs.dev/linter/rules/no-undeclared-env-vars/) to support bracket notation (`process.env["VAR"]`, `import.meta.env["VAR"]`), Bun runtime (`Bun.env.VAR`, `Bun.env["VAR"]`), and Deno runtime (`Deno.env.get("VAR")`).
+
+- [#8509](https://github.com/biomejs/biome/pull/8509) [`574a909`](https://github.com/biomejs/biome/commit/574a9098c47e6f06cecd31d2bfbdf6d2dfc7b073) Thanks [@ematipico](https://github.com/ematipico)! - Added support for parsing and formatting the Svelte `{#await}` syntax, when `html.experimentalFullSupportEnabled` is set to `true`.
+
+  ```diff
+  -{#await promise  then name }
+  +{#await promise then name}
+
+  -{:catch    name}
+  +{:catch name}
+
+  {/await}
+  ```
+
+- [#8316](https://github.com/biomejs/biome/pull/8316) [`d64e92d`](https://github.com/biomejs/biome/commit/d64e92d485e9f19ac77c4e00e2f3d6366079dadd) Thanks [@washbin](https://github.com/washbin)! - Added the new nursery rule [`noMultiAssign`](https://biomejs.dev/linter/rules/no-multi-assign). This rule helps to prevent multiple chained assignments.
+
+  For example, the following code triggers because there are two assignment expressions in the same statement.
+
+  ```js
+  const a = (b = 0);
+  ```
+
+- [#8511](https://github.com/biomejs/biome/pull/8511) [`16a9036`](https://github.com/biomejs/biome/commit/16a903664d4af3e920f11f575ccd6c67838220b3) Thanks [@ematipico](https://github.com/ematipico)! - Improved the diagnostics of the rules `useSortedClasses` and `noUnnecessaryConditions`. The diagnostics now state that these rules are a work in progress and link to the relevant GitHub issue.
+
+- [#8521](https://github.com/biomejs/biome/pull/8521) [`a704be9`](https://github.com/biomejs/biome/commit/a704be99f627960b3c96c4a99dfa2525f086160c) Thanks [@ToBinio](https://github.com/ToBinio)! - Added the nursery rule [`useVueConsistentDefinePropsDeclaration`](https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration/), which enforces consistent `defineProps` declaration style.
+
+  ### Invalid
+
+  ```vue,expect_diagnostic
+  <script setup lang="ts">
+  const props = defineProps({
+    kind: { type: String },
+  });
+  </script>
+  ```
+
+  ### Valid
+
+  ```vue
+  <script setup lang="ts">
+  const props = defineProps<{
+    kind: string;
+  }>();
+  </script>
+  ```
+
+- [#8495](https://github.com/biomejs/biome/pull/8495) [`b573d14`](https://github.com/biomejs/biome/commit/b573d14a5c3cdf2e23888c975df1b9b581b82dc3) Thanks [@taga3s](https://github.com/taga3s)! - Fixed [#8405](https://github.com/biomejs/biome/issues/8405): [`noMisusedPromises`](https://biomejs.dev/linter/rules/no-misused-promises/) now emits warnings/errors when a function returns union types such as `T | Promise<T>` which is used in conditionals.
+
+  ```ts
+  const a = (): boolean | Promise<boolean> => Promise.resolve(true);
+  if (a()) {
+  } // Now correctly flagged
+  ```
+
+- [#8493](https://github.com/biomejs/biome/pull/8493) [`5fc24f4`](https://github.com/biomejs/biome/commit/5fc24f4c67a6de9105d460a59c8f613d14d58c4d) Thanks [@ematipico](https://github.com/ematipico)! - Added support for parsing and formatting the Svelte `{#each}` syntax, when `html.experimentalFullSupportEnabled` is set to `true`.
+
+  ```diff
+  - {#each items   as item  }
+  + {#each items as item}
+
+  {/each}
+  ```
+
+- [#8546](https://github.com/biomejs/biome/pull/8546) [`0196c0e`](https://github.com/biomejs/biome/commit/0196c0e6f4cdcfb9fcbbb1e54590f3a84938475c) Thanks [@Zaczero](https://github.com/Zaczero)! - Hardened union static-member type flattening in edge cases (e.g. unions containing `unknown` or inferred expression types). This keeps inference conservative and avoids unstable type growth in `node = node.parent`-style loops.
+
+- [#8569](https://github.com/biomejs/biome/pull/8569) [`1022c76`](https://github.com/biomejs/biome/commit/1022c766e25d2be100b236f5933b9d266dcc3b2a) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where the Biome HTML parser would emit a parse error when certain keywords are inside the text of HTML tags.
+
+- [#8523](https://github.com/biomejs/biome/pull/8523) [`5f22f1c`](https://github.com/biomejs/biome/commit/5f22f1c131f88a38d0d5206c47fa160b096a7e7b) Thanks [@ematipico](https://github.com/ematipico)! - Improved the diagnostics of nursery rules. Added a message to diagnostics emitted by nursery rules, so that users are aware of nature of nursery rules.
+
+- [#8571](https://github.com/biomejs/biome/pull/8571) [`03666fd`](https://github.com/biomejs/biome/commit/03666fdc29d0c9c40c6e3e0d8c9ec7a59424b1ec) Thanks [@dyc3](https://github.com/dyc3)! - Improved the performance of `noRedeclare` by eliminating string allocations
+
+- [#8521](https://github.com/biomejs/biome/pull/8521) [`a704be9`](https://github.com/biomejs/biome/commit/a704be99f627960b3c96c4a99dfa2525f086160c) Thanks [@ToBinio](https://github.com/ToBinio)! - Update [useVueDefineMacrosOrder](https://biomejs.dev/linter/rules/use-vue-define-macros-order/) to only run on <script setup> blocks.
+
+- [#8344](https://github.com/biomejs/biome/pull/8344) [`7b982ba`](https://github.com/biomejs/biome/commit/7b982ba06be253c9b38e480db0428a15df2ad37b) Thanks [@ematipico](https://github.com/ematipico)! - Reduced the system calls when running the CLI. The performances might be noticable in big projects that have multiple libraries and enable project rules.
+
+- [#8588](https://github.com/biomejs/biome/pull/8588) [`958e24b`](https://github.com/biomejs/biome/commit/958e24bc79fce3ff0c1756459e5e892252803794) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`useUniqueVariableNames`](https://biomejs.dev/linter/rules/use-unique-variable-names/). Enforce unique variable names for GraphQL operations.
+
+- [#8529](https://github.com/biomejs/biome/pull/8529) [`8794883`](https://github.com/biomejs/biome/commit/879488324acb8c49214f97d22a904d6ef6ff4c26) Thanks [@mdevils](https://github.com/mdevils)! - Fixed #8499: `useExhaustiveDependencies` properly handles aliased destructured object keys when using `stableResult` configuration.
+
+- [#8509](https://github.com/biomejs/biome/pull/8509) [`574a909`](https://github.com/biomejs/biome/commit/574a9098c47e6f06cecd31d2bfbdf6d2dfc7b073) Thanks [@ematipico](https://github.com/ematipico)! - Added support for parsing and formatting the Svelte `{#snippet}` syntax, when `html.experimentalFullSupportEnabled` is set to `true`.
+
+  ```diff
+  -{#snippet    foo() }
+  +{#snippet foo()}
+
+  {/snippe}
+  ```
+
+- [#8248](https://github.com/biomejs/biome/pull/8248) [`1231a5c`](https://github.com/biomejs/biome/commit/1231a5cefd15d5c6879c381da04162fe548f57e7) Thanks [@emilyinure](https://github.com/emilyinure)! - Added new nursery rule [`noReturnAssign`](https://biomejs.dev/linter/rules/no-return-assign), which disallows assignments inside return statements.
+
+  **Invalid:**
+
+  ```js
+  function f(a) {
+    return (a = 1);
+  }
+  ```
+
+- [#8531](https://github.com/biomejs/biome/pull/8531) [`6b09620`](https://github.com/biomejs/biome/commit/6b09620edbbe384adbcb7d2fbb945a88246ba6e3) Thanks [@taga3s](https://github.com/taga3s)! - Fixed [#8472](https://github.com/biomejs/biome/issues/8472): The CSS parser can now accept multiple comma separated parameters in `:active-view-transition-type`.
+
+- [#8536](https://github.com/biomejs/biome/pull/8536) [`efbfbe2`](https://github.com/biomejs/biome/commit/efbfbe2c6ea3a932e1601f3e98844fc20fee2f18) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8527](https://github.com/biomejs/biome/issues/8527): Improved type inference where analyzing code with repeated object property access and assignments (e.g. `node = node.parent`, a pattern common when traversing trees in a while loop) could hit an internal type limit. Biome now handles these cases without exceeding the type limit.
+
 ## 2.3.10
 
 ### Patch Changes
