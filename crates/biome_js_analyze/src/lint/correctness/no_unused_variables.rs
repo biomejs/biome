@@ -8,9 +8,10 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression,
-    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    TsConditionalType, TsDeclarationModule, TsInferType,
+    AnyJsExpression, JsClassExpression, JsExport, JsFileSource, JsForStatement,
+    JsFunctionExpression, JsIdentifierExpression, JsImport, JsModule, JsModuleItemList,
+    JsSequenceExpression, JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule,
+    TsInferType,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
@@ -62,6 +63,15 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### Valid
+    /// 
+    /// Top-level interfaces and namespaces in script files (files without
+    /// imports or exports) are not reported, as they may augment global types:
+    ///
+    /// ```ts
+    /// interface Array<T> {
+    ///     customMethod: (a: T) => void;
+    /// }
+    /// ```
     ///
     /// ```js
     /// function foo(b) {
@@ -305,6 +315,12 @@ impl Rule for NoUnusedVariables {
             }
         }
 
+        // Top-level interfaces/namespaces in a script file are exempt
+        let is_script_by_source = ctx.source_type::<JsFileSource>().is_script();
+        if is_script_declaration(binding, is_script_by_source) {
+            return None;
+        }
+
         // Ignore name prefixed with `_`
         let is_underscore_prefixed = binding.name_token().ok()?.text_trimmed().starts_with('_');
         if !is_underscore_prefixed && is_unused(model, binding) {
@@ -402,6 +418,48 @@ impl Rule for NoUnusedVariables {
             }
         }
     }
+}
+
+/// Returns `true` if the file is considered a script
+/// and the binding is an interface or namespace
+fn is_script_declaration(binding: &AnyJsIdentifierBinding, is_script_by_source: bool) -> bool {
+    let Some(decl) = binding.declaration() else {
+        return false;
+    };
+
+    let is_interface_or_namespace = matches!(
+        decl,
+        AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+            | AnyJsBindingDeclaration::TsModuleDeclaration(_)
+    );
+
+    // If the file is already classified as a script, interfaces and namespaces are allowed
+    if is_script_by_source {
+        return is_interface_or_namespace;
+    }
+
+    if !is_interface_or_namespace {
+        return false;
+    }
+
+    // JsFileSource::is_script() is extension-based (.cjs) and returns false for
+    // files that still behave like scripts. In those cases determine script-ness
+    // by checking for the absence of top-level imports/exports
+    binding
+        .syntax()
+        .ancestors()
+        .find_map(JsModuleItemList::cast)
+        .is_some_and(|module_list| {
+            let is_top_level = module_list.parent::<JsModule>().is_some();
+            if !is_top_level {
+                return false;
+            }
+
+            !module_list.into_iter().any(|item| {
+                let kind = item.syntax().kind();
+                JsImport::can_cast(kind) || JsExport::can_cast(kind)
+            })
+        })
 }
 
 /// Returns `true` if `binding` is considered as unused.
