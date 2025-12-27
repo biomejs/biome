@@ -2137,7 +2137,7 @@ See <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name>
 	 */
 	useUniqueGraphqlOperationName?: UseUniqueGraphqlOperationNameConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Require all variable definitions to be unique.
 See <https://biomejs.dev/linter/rules/use-unique-variable-names> 
 	 */
 	useUniqueVariableNames?: UseUniqueVariableNamesConfiguration;

@@ -5562,7 +5562,7 @@
 					]
 				},
 				"useUniqueVariableNames": {
-					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/use-unique-variable-names>",
+					"description": "Require all variable definitions to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-variable-names>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseUniqueVariableNamesConfiguration" },
 						{ "type": "null" }
