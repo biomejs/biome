@@ -2107,6 +2107,11 @@ See <https://biomejs.dev/linter/rules/use-find>
 	 */
 	useFind?: UseFindConfiguration;
 	/**
+	* Require mutation argument to be always called “input” and input type to be called Mutation name + “Input”.
+See <https://biomejs.dev/linter/rules/use-input-name> 
+	 */
+	useInputName?: UseInputNameConfiguration;
+	/**
 	* Enforce a maximum number of parameters in function definitions.
 See <https://biomejs.dev/linter/rules/use-max-params> 
 	 */
@@ -3822,6 +3827,9 @@ export type UseExplicitTypeConfiguration =
 export type UseFindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFindOptions;
+export type UseInputNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseInputNameOptions;
 export type UseMaxParamsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMaxParamsOptions;
@@ -5342,6 +5350,10 @@ export interface RuleWithUseFindOptions {
 	level: RulePlainConfiguration;
 	options?: UseFindOptions;
 }
+export interface RuleWithUseInputNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseInputNameOptions;
+}
 export interface RuleWithUseMaxParamsOptions {
 	level: RulePlainConfiguration;
 	options?: UseMaxParamsOptions;
@@ -6683,6 +6695,7 @@ export type UseDestructuringOptions = {};
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
+export type UseInputNameOptions = {};
 export interface UseMaxParamsOptions {
 	/**
 	 * Maximum number of parameters allowed (default: 4)
@@ -7544,6 +7557,7 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useInputName"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikMethodUsage"

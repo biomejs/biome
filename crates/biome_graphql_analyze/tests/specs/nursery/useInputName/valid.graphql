@@ -1,0 +1,15 @@
+# should not generate diagnostics
+type Mutation { SetMessage(input: SetMessageInput): String }
+
+type Mutation { CreateMessage(input: CreateMessageInput): String DeleteMessage(input: DeleteMessageInput): Boolean }
+
+type Mutation { CreateMessage(input: CreateMessageInput!): String }
+
+type Mutation { CreateMessage(input: [CreateMessageInput]): String }
+
+type Mutation { userCreate(input: userCreateInput): String }
+
+type Mutation { CreateMessage(input: String): String }
+extend type Mutation { CreateMessage(input: String): String }
+type Query { message(id: ID): Message }
+extend type Query { message(id: ID): Message }
