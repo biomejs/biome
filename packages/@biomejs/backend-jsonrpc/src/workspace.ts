@@ -2132,7 +2132,7 @@ See <https://biomejs.dev/linter/rules/use-spread>
 	 */
 	useSpread?: UseSpreadConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Require all fields of a type to be unique.
 See <https://biomejs.dev/linter/rules/use-unique-field-definition-names> 
 	 */
 	useUniqueFieldDefinitionNames?: UseUniqueFieldDefinitionNamesConfiguration;

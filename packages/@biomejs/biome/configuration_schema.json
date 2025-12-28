@@ -5555,7 +5555,7 @@
 					]
 				},
 				"useUniqueFieldDefinitionNames": {
-					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/use-unique-field-definition-names>",
+					"description": "Require all fields of a type to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-field-definition-names>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseUniqueFieldDefinitionNamesConfiguration" },
 						{ "type": "null" }
