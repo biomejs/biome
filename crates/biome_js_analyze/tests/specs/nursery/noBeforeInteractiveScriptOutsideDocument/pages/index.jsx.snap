@@ -4,6 +4,7 @@ expression: index.jsx
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 import Script from 'next/script'
 
 export default function Index() {
@@ -21,20 +22,20 @@ export default function Index() {
 
 # Diagnostics
 ```
-index.jsx:6:7 lint/nursery/noBeforeInteractiveScriptOutsideDocument ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.jsx:7:7 lint/nursery/noBeforeInteractiveScriptOutsideDocument ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use next/script component with the `beforeInteractive` strategy outside of pages/_document.js.
   
-     4 │   return (
-     5 │     <div>
-   > 6 │       <Script
+     5 │   return (
+     6 │     <div>
+   > 7 │       <Script
        │       ^^^^^^^
-   > 7 │         src="https://example.com/script.js"
-   > 8 │         strategy="beforeInteractive"
-   > 9 │       ></Script>
+   > 8 │         src="https://example.com/script.js"
+   > 9 │         strategy="beforeInteractive"
+  > 10 │       ></Script>
        │       ^
-    10 │     </div>
-    11 │   )
+    11 │     </div>
+    12 │   )
   
   i See the Next.js docs for more details.
   
