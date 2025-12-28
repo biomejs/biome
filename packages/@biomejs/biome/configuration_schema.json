@@ -5554,6 +5554,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useUniqueArgumentNames": {
+					"description": "Require all argument names for fields & directives to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-argument-names>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUniqueArgumentNamesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUniqueFieldDefinitionNames": {
 					"description": "Require all fields of a type to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-field-definition-names>",
 					"anyOf": [
@@ -9735,6 +9742,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseUniqueArgumentNamesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUniqueArgumentNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseUniqueElementIdsOptions": {
 			"type": "object",
 			"properties": {
@@ -12774,6 +12790,16 @@
 			]
 		},
 		"UseUnifiedTypeSignaturesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseUniqueArgumentNamesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUniqueArgumentNamesOptions" }
+			]
+		},
+		"UseUniqueArgumentNamesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
