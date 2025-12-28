@@ -5575,10 +5575,31 @@
 						{ "type": "null" }
 					]
 				},
+				"useUniqueArgumentNames": {
+					"description": "Require all argument names for fields & directives to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-argument-names>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUniqueArgumentNamesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useUniqueFieldDefinitionNames": {
+					"description": "Require all fields of a type to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-field-definition-names>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUniqueFieldDefinitionNamesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUniqueGraphqlOperationName": {
 					"description": "Enforce unique operation names across a GraphQL document.\nSee <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseUniqueGraphqlOperationNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useUniqueInputFieldNames": {
+					"description": "Require fields within an input object to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-input-field-names>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUniqueInputFieldNamesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9753,6 +9774,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseUniqueArgumentNamesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUniqueArgumentNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseUniqueElementIdsOptions": {
 			"type": "object",
 			"properties": {
@@ -9762,11 +9792,29 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseUniqueFieldDefinitionNamesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUniqueFieldDefinitionNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseUniqueGraphqlOperationNameOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseUniqueGraphqlOperationNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseUniqueInputFieldNamesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUniqueInputFieldNamesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12777,6 +12825,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseUniqueArgumentNamesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUniqueArgumentNamesOptions" }
+			]
+		},
+		"UseUniqueArgumentNamesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseUniqueElementIdsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12795,6 +12853,16 @@
 			},
 			"additionalProperties": false
 		},
+		"UseUniqueFieldDefinitionNamesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUniqueFieldDefinitionNamesOptions" }
+			]
+		},
+		"UseUniqueFieldDefinitionNamesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseUniqueGraphqlOperationNameConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12802,6 +12870,16 @@
 			]
 		},
 		"UseUniqueGraphqlOperationNameOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseUniqueInputFieldNamesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUniqueInputFieldNamesOptions" }
+			]
+		},
+		"UseUniqueInputFieldNamesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

@@ -4,55 +4,54 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_graphql_syntax::GraphqlVariableDefinitions;
+use biome_graphql_syntax::GraphqlObjectValue;
 use biome_rowan::{AstNode, TokenText};
-use biome_rule_options::use_unique_variable_names::UseUniqueVariableNamesOptions;
+use biome_rule_options::use_unique_input_field_names::UseUniqueInputFieldNamesOptions;
 
 declare_lint_rule! {
-    /// Require all variable definitions to be unique.
+    /// Require fields within an input object to be unique.
     ///
-    /// A GraphQL operation is only valid if all its variables are uniquely named.
+    /// A GraphQL input object value is only valid if all supplied fields are uniquely named.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```graphql,expect_diagnostic
-    /// query ($x: Int, $x: Int) {
-    ///   field
+    /// query {
+    ///   field(arg: { f1: "value", f1: "value" })
     /// }
     /// ```
     ///
     /// ### Valid
     ///
     /// ```graphql
-    /// query ($x: Int, $y: Int) {
-    ///   field
+    /// query {
+    ///   field(arg: { f1: "value", f2: "value" })
     /// }
     /// ```
     ///
-    pub UseUniqueVariableNames {
+    pub UseUniqueInputFieldNames {
         version: "next",
-        name: "useUniqueVariableNames",
+        name: "useUniqueInputFieldNames",
         language: "graphql",
         recommended: false,
-        sources: &[RuleSource::EslintGraphql("unique-variable-names").same()],
+        sources: &[RuleSource::EslintGraphql("unique-input-field-names").same()],
     }
 }
 
-impl Rule for UseUniqueVariableNames {
-    type Query = Ast<GraphqlVariableDefinitions>;
+impl Rule for UseUniqueInputFieldNames {
+    type Query = Ast<GraphqlObjectValue>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = UseUniqueVariableNamesOptions;
+    type Options = UseUniqueInputFieldNamesOptions;
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let mut found: HashSet<TokenText> = HashSet::new();
 
-        for element in node.elements() {
-            if let Some(variable) = element.variable().ok()
-                && let Some(name) = variable.name().ok()
+        for element in node.members() {
+            if let Some(name) = element.name().ok()
                 && let Some(value_token) = name.value_token().ok()
             {
                 let string = value_token.token_text();
@@ -74,11 +73,11 @@ impl Rule for UseUniqueVariableNames {
                 rule_category!(),
                 span,
                 markup! {
-                    "Duplicate variable name."
+                    "Duplicate input field name."
                 },
             )
             .note(markup! {
-                "A GraphQL operation is only valid if all its variables are uniquely named. Make sure to name every variable differently."
+                "A GraphQL input object value is only valid if all supplied fields are uniquely named. Make sure to name every input field differently."
             }),
         )
     }

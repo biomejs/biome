@@ -2137,10 +2137,25 @@ See <https://biomejs.dev/linter/rules/use-spread>
 	 */
 	useSpread?: UseSpreadConfiguration;
 	/**
+	* Require all argument names for fields & directives to be unique.
+See <https://biomejs.dev/linter/rules/use-unique-argument-names> 
+	 */
+	useUniqueArgumentNames?: UseUniqueArgumentNamesConfiguration;
+	/**
+	* Require all fields of a type to be unique.
+See <https://biomejs.dev/linter/rules/use-unique-field-definition-names> 
+	 */
+	useUniqueFieldDefinitionNames?: UseUniqueFieldDefinitionNamesConfiguration;
+	/**
 	* Enforce unique operation names across a GraphQL document.
 See <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name> 
 	 */
 	useUniqueGraphqlOperationName?: UseUniqueGraphqlOperationNameConfiguration;
+	/**
+	* Require fields within an input object to be unique.
+See <https://biomejs.dev/linter/rules/use-unique-input-field-names> 
+	 */
+	useUniqueInputFieldNames?: UseUniqueInputFieldNamesConfiguration;
 	/**
 	* Require all variable definitions to be unique.
 See <https://biomejs.dev/linter/rules/use-unique-variable-names> 
@@ -3790,9 +3805,18 @@ export type UseSortedClassesConfiguration =
 export type UseSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSpreadOptions;
+export type UseUniqueArgumentNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueArgumentNamesOptions;
+export type UseUniqueFieldDefinitionNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueFieldDefinitionNamesOptions;
 export type UseUniqueGraphqlOperationNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueGraphqlOperationNameOptions;
+export type UseUniqueInputFieldNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueInputFieldNamesOptions;
 export type UseUniqueVariableNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueVariableNamesOptions;
@@ -5288,9 +5312,21 @@ export interface RuleWithUseSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: UseSpreadOptions;
 }
+export interface RuleWithUseUniqueArgumentNamesOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueArgumentNamesOptions;
+}
+export interface RuleWithUseUniqueFieldDefinitionNamesOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueFieldDefinitionNamesOptions;
+}
 export interface RuleWithUseUniqueGraphqlOperationNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueGraphqlOperationNameOptions;
+}
+export interface RuleWithUseUniqueInputFieldNamesOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueInputFieldNamesOptions;
 }
 export interface RuleWithUseUniqueVariableNamesOptions {
 	level: RulePlainConfiguration;
@@ -6582,7 +6618,10 @@ export interface UseSortedClassesOptions {
 	functions?: string[];
 }
 export type UseSpreadOptions = {};
+export type UseUniqueArgumentNamesOptions = {};
+export type UseUniqueFieldDefinitionNamesOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
+export type UseUniqueInputFieldNamesOptions = {};
 export type UseUniqueVariableNamesOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
@@ -7401,7 +7440,10 @@ export type Category =
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
+	| "lint/nursery/useUniqueArgumentNames"
+	| "lint/nursery/useUniqueFieldDefinitionNames"
 	| "lint/nursery/useUniqueGraphqlOperationName"
+	| "lint/nursery/useUniqueInputFieldNames"
 	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueDefineMacrosOrder"
