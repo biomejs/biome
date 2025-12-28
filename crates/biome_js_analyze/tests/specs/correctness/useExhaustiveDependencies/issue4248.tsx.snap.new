@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: issue4248.tsx
+---
+# Input
+```tsx
+import React from "react";
+
+type ExampleProps = {
+    getData: () => string;
+};
+
+const ExampleComponent: React.FC<ExampleProps> = ({ getData }) => {
+    // Incorrect diagnostic reported: getData should be removed from deps
+    const data = React.useMemo(getData, [getData]);
+    return <span>{data}</span>;
+};
+
+```
+
+# Diagnostics
+```
+issue4248.tsx:9:24 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: getData.
+  
+     7 │ const ExampleComponent: React.FC<ExampleProps> = ({ getData }) => {
+     8 │     // Incorrect diagnostic reported: getData should be removed from deps
+   > 9 │     const data = React.useMemo(getData, [getData]);
+       │                        ^^^^^^^
+    10 │     return <span>{data}</span>;
+    11 │ };
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+     7 │ const ExampleComponent: React.FC<ExampleProps> = ({ getData }) => {
+     8 │     // Incorrect diagnostic reported: getData should be removed from deps
+   > 9 │     const data = React.useMemo(getData, [getData]);
+       │                                          ^^^^^^^
+    10 │     return <span>{data}</span>;
+    11 │ };
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    9 │ ····const·data·=·React.useMemo(getData,·[getData]);
+      │                                          -------   
+
+```

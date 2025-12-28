@@ -1,0 +1,95 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: issue3080.ts
+---
+# Input
+```ts
+import { useEffect } from 'react';
+
+function ReactComponent({ foo, bar }: { foo: string; bar: number }) {
+    // Properly generates diagnostics: foo and bar are missing from deps.
+    useEffect(() => {
+        console.log('foo', foo);
+        console.log('bar', bar);
+    }, []);
+
+    function myEffect() {
+        console.log('foo', foo);
+        console.log('bar', bar);
+    }
+
+    // Missing diagnostics reported: foo and bar are missing from deps.
+    useEffect(myEffect, []);
+}
+
+```
+
+# Diagnostics
+```
+issue3080.ts:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on bar.
+  
+    3 │ function ReactComponent({ foo, bar }: { foo: string; bar: number }) {
+    4 │     // Properly generates diagnostics: foo and bar are missing from deps.
+  > 5 │     useEffect(() => {
+      │     ^^^^^^^^^
+    6 │         console.log('foo', foo);
+    7 │         console.log('bar', bar);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    5 │     useEffect(() => {
+    6 │         console.log('foo', foo);
+  > 7 │         console.log('bar', bar);
+      │                            ^^^
+    8 │     }, []);
+    9 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    8 │ ····},·[bar]);
+      │         +++   
+
+```
+
+```
+issue3080.ts:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on foo.
+  
+    3 │ function ReactComponent({ foo, bar }: { foo: string; bar: number }) {
+    4 │     // Properly generates diagnostics: foo and bar are missing from deps.
+  > 5 │     useEffect(() => {
+      │     ^^^^^^^^^
+    6 │         console.log('foo', foo);
+    7 │         console.log('bar', bar);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    4 │     // Properly generates diagnostics: foo and bar are missing from deps.
+    5 │     useEffect(() => {
+  > 6 │         console.log('foo', foo);
+      │                            ^^^
+    7 │         console.log('bar', bar);
+    8 │     }, []);
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    8 │ ····},·[foo]);
+      │         +++   
+
+```

@@ -1,13 +1,10 @@
 use crate::react::{ReactLibrary, is_react_call_api};
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
-use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
+use biome_js_syntax::JsSyntaxToken;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsMemberExpression, AnyJsObjectBindingPatternMember, JsArrayBindingPattern,
-    JsArrayBindingPatternElementList, JsArrowFunctionExpression, JsCallExpression,
-    JsFunctionExpression, JsObjectBindingPattern, JsObjectBindingPatternPropertyList, TextRange,
-    binding_ext::AnyJsIdentifierBinding, static_value::StaticValue,
+    AnyJsExpression, AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression,
+    JsFunctionExpression, TextRange, static_value::StaticValue,
 };
-use biome_js_syntax::{JsArrayBindingPatternElement, JsSyntaxToken};
 use biome_rowan::AstNode;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
@@ -244,7 +241,14 @@ impl StableReactHookConfiguration {
     }
 }
 
-/// Checks if the binding is bound to a stable React hook
+/// Represents a potentially stable React hook result member.
+#[derive(Clone)]
+pub enum ReactHookResultMember {
+    Key(String),
+    Index(u8),
+}
+
+/// Checks if the call expression is bound to a stable React hook
 /// return value. Stable returns do not need to be specified
 /// as dependencies.
 ///
@@ -258,78 +262,13 @@ impl StableReactHookConfiguration {
 ///     console.log(setName("a"));
 /// }, [name]);
 /// ```
-pub fn is_binding_react_stable(
-    binding: &AnyJsIdentifierBinding,
+pub fn is_react_hook_call_stable(
+    call_expression: &JsCallExpression,
+    member: Option<ReactHookResultMember>,
     model: &SemanticModel,
     stable_config: &FxHashSet<StableReactHookConfiguration>,
 ) -> bool {
-    let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) = binding
-        .declaration()
-        .map(|decl| decl.parent_binding_pattern_declaration().unwrap_or(decl))
-    else {
-        return false;
-    };
-    let Ok(id_syntax) = declarator.id().map(|id| id.syntax().clone()) else {
-        return false;
-    };
-    let (top_level_index, top_level_key) = (if let Some(array_pattern_element) =
-        binding.parent::<JsArrayBindingPatternElement>()
-    {
-        if array_pattern_element
-            .parent::<JsArrayBindingPatternElementList>()
-            .and_then(|element_list| element_list.parent::<JsArrayBindingPattern>())
-            .filter(|array_pattern| array_pattern.syntax().eq(&id_syntax))
-            .is_none()
-        {
-            // Return None for non-top-level array elements.
-            None
-        } else {
-            (array_pattern_element.syntax().index() / 2)
-                .try_into()
-                .ok()
-                .map(|index| (Some(index), None))
-        }
-    } else if let Some(object_property) = binding.parent::<AnyJsObjectBindingPatternMember>() {
-        if object_property
-            .parent::<JsObjectBindingPatternPropertyList>()
-            .and_then(|property_list| property_list.parent::<JsObjectBindingPattern>())
-            .filter(|object_pattern| object_pattern.syntax().eq(&id_syntax))
-            .is_none()
-        {
-            // Return None for non-top-level object properties.
-            None
-        } else {
-            match object_property {
-                AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
-                    object_shorthand_property,
-                ) => object_shorthand_property
-                    .identifier()
-                    .ok()
-                    .and_then(|identifier| {
-                        identifier
-                            .as_js_identifier_binding()
-                            .and_then(|identifier_binding| identifier_binding.name_token().ok())
-                            .map(|name_token| (None, Some(name_token.text_trimmed().to_string())))
-                    }),
-                AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
-                    object_aliased_property,
-                ) => object_aliased_property
-                    .member()
-                    .ok()
-                    .and_then(|member| member.name())
-                    .map(|name_token| (None, Some(name_token.to_string()))),
-                _ => None,
-            }
-        }
-    } else {
-        None
-    })
-    .unwrap_or((None, None));
-    let Some(callee) = declarator
-        .initializer()
-        .and_then(|initializer| initializer.expression().ok())
-        .and_then(|initializer| unwrap_to_call_expression(initializer)?.callee().ok())
-    else {
+    let Ok(callee) = call_expression.callee() else {
         return false;
     };
     let Some(function_name) = callee.get_callee_member_name() else {
@@ -347,26 +286,15 @@ pub fn is_binding_react_stable(
             return false;
         }
 
-        match (&config.result, top_level_index, &top_level_key) {
-            (StableHookResult::Identity, None, None) => true,
-            (StableHookResult::Indices(indices), Some(i), _) => indices.contains(&i),
-            (StableHookResult::Keys(keys), _, Some(k)) => keys.contains(k),
+        match (&config.result, &member) {
+            (StableHookResult::Identity, None) => true,
+            (StableHookResult::Indices(indices), Some(ReactHookResultMember::Index(i))) => {
+                indices.contains(i)
+            }
+            (StableHookResult::Keys(keys), Some(ReactHookResultMember::Key(k))) => keys.contains(k),
             _ => false,
         }
     })
-}
-
-/// Unwrap the expression to a call expression without changing the result of the expression,
-/// such as type assertions.
-fn unwrap_to_call_expression(mut expression: AnyJsExpression) -> Option<JsCallExpression> {
-    loop {
-        expression = expression.inner_expression()?;
-        match expression {
-            AnyJsExpression::JsCallExpression(expr) => return Some(expr),
-            AnyJsExpression::JsSequenceExpression(expr) => expression = expr.right().ok()?,
-            _ => return None,
-        }
-    }
 }
 
 #[cfg(test)]
@@ -411,63 +339,74 @@ mod test {
         }
     }
 
-    #[test]
-    pub fn ok_react_stable_captures() {
-        let r = biome_js_parser::parse(
-            r#"
+    mod is_react_hook_call_stable {
+        use super::*;
+
+        #[test]
+        pub fn test_with_named_import() {
+            let r = biome_js_parser::parse(
+                r#"
                 import { useRef } from "react";
                 const ref = useRef();
             "#,
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        );
-        let node = r
-            .syntax()
-            .descendants()
-            .filter(|x| x.text_trimmed() == "ref")
-            .last()
-            .unwrap();
-        let set_name = AnyJsIdentifierBinding::cast(node).unwrap();
+                JsFileSource::js_module(),
+                JsParserOptions::default(),
+            );
 
-        let config = FxHashSet::from_iter([
-            StableReactHookConfiguration::new("useRef", StableHookResult::Identity, true),
-            StableReactHookConfiguration::new("useState", StableHookResult::Indices(vec![1]), true),
-        ]);
+            let call_expression = r
+                .syntax()
+                .descendants()
+                .find_map(|node| JsCallExpression::cast(node))
+                .unwrap();
 
-        assert!(is_binding_react_stable(
-            &set_name,
-            &semantic_model(&r.ok().unwrap(), SemanticModelOptions::default()),
-            &config
-        ));
-    }
+            let config = FxHashSet::from_iter([
+                StableReactHookConfiguration::new("useRef", StableHookResult::Identity, true),
+                StableReactHookConfiguration::new(
+                    "useState",
+                    StableHookResult::Indices(vec![1]),
+                    true,
+                ),
+            ]);
 
-    #[test]
-    pub fn ok_react_stable_captures_with_default_import() {
-        let r = biome_js_parser::parse(
-            r#"
+            assert!(is_react_hook_call_stable(
+                &call_expression,
+                None,
+                &semantic_model(&r.ok().unwrap(), SemanticModelOptions::default()),
+                &config
+            ));
+        }
+
+        #[test]
+        pub fn test_with_default_import() {
+            let r = biome_js_parser::parse(
+                r#"
                 import * as React from "react";
                 const ref = React.useRef();
             "#,
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        );
-        let node = r
-            .syntax()
-            .descendants()
-            .filter(|x| x.text_trimmed() == "ref")
-            .last()
-            .unwrap();
-        let set_name = AnyJsIdentifierBinding::cast(node).unwrap();
+                JsFileSource::js_module(),
+                JsParserOptions::default(),
+            );
+            let call_expression = r
+                .syntax()
+                .descendants()
+                .find_map(|node| JsCallExpression::cast(node))
+                .unwrap();
 
-        let config = FxHashSet::from_iter([
-            StableReactHookConfiguration::new("useRef", StableHookResult::Identity, true),
-            StableReactHookConfiguration::new("useState", StableHookResult::Indices(vec![1]), true),
-        ]);
+            let config = FxHashSet::from_iter([
+                StableReactHookConfiguration::new("useRef", StableHookResult::Identity, true),
+                StableReactHookConfiguration::new(
+                    "useState",
+                    StableHookResult::Indices(vec![1]),
+                    true,
+                ),
+            ]);
 
-        assert!(is_binding_react_stable(
-            &set_name,
-            &semantic_model(&r.ok().unwrap(), SemanticModelOptions::default()),
-            &config
-        ));
+            assert!(is_react_hook_call_stable(
+                &call_expression,
+                None,
+                &semantic_model(&r.ok().unwrap(), SemanticModelOptions::default()),
+                &config
+            ));
+        }
     }
 }
