@@ -7,5 +7,8 @@ Added the nursery rule [`useUniqueEnumValueNames`](https://biomejs.dev/linter/ru
 **Invalid:**
 
 ```graphql
-enum A { TEST TesT }
+enum A {
+  TEST
+  TesT
+}
 ```

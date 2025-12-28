@@ -19,13 +19,18 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```graphql,expect_diagnostic
-    /// enum A { TEST TesT }
+    /// enum A {
+    ///   TEST
+    ///   TesT
+    /// }
     /// ```
     ///
     /// ### Valid
     ///
     /// ```graphql
-    /// enum A { TEST }
+    /// enum A {
+    ///   TEST
+    /// }
     /// ```
     ///
     pub UseUniqueEnumValueNames {
@@ -52,12 +57,12 @@ impl Rule for UseUniqueEnumValueNames {
             if let Some(name) = element.value().ok()
                 && let Some(value_token) = name.value_token().ok()
             {
-                let value_token = value_token.token_text();
-                let lowercase_text = value_token.to_lowercase_cow();
+                let token_text = value_token.token_text();
+                let lowercase_text = token_text.to_lowercase_cow();
                 if found.contains(&lowercase_text) {
                     return Some(());
                 } else {
-                    found.insert(lowercase_text.into_owned().into());
+                    found.insert(lowercase_text);
                 }
             }
         }
