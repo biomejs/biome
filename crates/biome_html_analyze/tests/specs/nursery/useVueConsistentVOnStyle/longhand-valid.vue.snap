@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: longhand-valid.vue
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<template>
+  <div v-on:click="onClick" />
+</template>
+
+```
