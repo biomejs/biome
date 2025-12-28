@@ -5561,6 +5561,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useUniqueInputFieldNames": {
+					"description": "Require fields within an input object to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-input-field-names>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUniqueInputFieldNamesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUniqueVariableNames": {
 					"description": "Require all variable definitions to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-variable-names>",
 					"anyOf": [
@@ -9739,6 +9746,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseUniqueInputFieldNamesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUniqueInputFieldNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseUniqueVariableNamesOptions": {
 			"type": "object",
 			"properties": {
@@ -12770,6 +12786,16 @@
 			]
 		},
 		"UseUniqueGraphqlOperationNameOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseUniqueInputFieldNamesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUniqueInputFieldNamesOptions" }
+			]
+		},
+		"UseUniqueInputFieldNamesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
