@@ -383,6 +383,7 @@ pub mod use_top_level_regex;
 pub mod use_trim_start_end;
 pub mod use_unified_type_signatures;
 pub mod use_unique_element_ids;
+pub mod use_unique_field_definition_names;
 pub mod use_unique_graphql_operation_name;
 pub mod use_unique_input_field_names;
 pub mod use_unique_variable_names;
