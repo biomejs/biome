@@ -2604,6 +2604,18 @@
 			]
 		},
 		"NoBarrelFileOptions": { "type": "object", "additionalProperties": false },
+		"NoBeforeInteractiveScriptOutsideDocumentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{
+					"$ref": "#/$defs/RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions"
+				}
+			]
+		},
+		"NoBeforeInteractiveScriptOutsideDocumentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoBiomeFirstExceptionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5179,6 +5191,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noBeforeInteractiveScriptOutsideDocument": {
+					"description": "Prevent usage of next/script's beforeInteractive strategy outside of pages/_document.js in a Next.js project.\nSee <https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document>",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoBeforeInteractiveScriptOutsideDocumentConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noContinue": {
 					"description": "Disallow continue statements.\nSee <https://biomejs.dev/linter/rules/no-continue>",
 					"anyOf": [
@@ -6331,6 +6352,17 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoBarrelFileOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoBeforeInteractiveScriptOutsideDocumentOptions"
+				}
 			},
 			"additionalProperties": false,
 			"required": ["level"]
