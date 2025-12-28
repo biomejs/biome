@@ -222,7 +222,7 @@ impl Rule for {rule_name_upper_camel} {{
                 }},
             )
             .note(markup! {{
-                    "This note will give you more information."
+                "This note will give you more information."
             }}),
         )
     }}
@@ -299,7 +299,7 @@ impl Rule for {rule_name_upper_camel} {{
                 }},
             )
             .note(markup! {{
-                    "This note will give you more information."
+                "This note will give you more information."
             }}),
         )
     }}
@@ -373,7 +373,7 @@ impl Rule for {rule_name_upper_camel} {{
                 }},
             )
             .note(markup! {{
-                    "This note will give you more information."
+                "This note will give you more information."
             }}),
         )
     }}
@@ -447,7 +447,7 @@ impl Rule for {rule_name_upper_camel} {{
                 }},
             )
             .note(markup! {{
-                    "This note will give you more information."
+                "This note will give you more information."
             }}),
         )
     }}
@@ -519,7 +519,7 @@ impl Rule for {rule_name_upper_camel} {{
                 }},
             )
             .note(markup! {{
-                    "This note will give you more information."
+                "This note will give you more information."
             }}),
         )
     }}

@@ -1,0 +1,97 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+type SomeObject {
+	foo: String
+	bar: String
+	foo: String
+}
+
+interface SomeInterface {
+	foo: String
+	bar: String
+	foo: String
+}
+
+input SomeInputObject {
+	foo: String
+	bar: String
+	foo: String
+}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:2:1 lint/nursery/useUniqueFieldDefinitionNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate field name.
+  
+    1 │ # should generate diagnostics
+  > 2 │ type SomeObject {
+      │ ^^^^^^^^^^^^^^^^^
+  > 3 │ 	foo: String
+  > 4 │ 	bar: String
+  > 5 │ 	foo: String
+  > 6 │ }
+      │ ^
+    7 │ 
+    8 │ interface SomeInterface {
+  
+  i A GraphQL complex type is only valid if all its fields are uniquely named. Make sure to name every field differently.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:8:1 lint/nursery/useUniqueFieldDefinitionNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate field name.
+  
+     6 │ }
+     7 │ 
+   > 8 │ interface SomeInterface {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 9 │ 	foo: String
+  > 10 │ 	bar: String
+  > 11 │ 	foo: String
+  > 12 │ }
+       │ ^
+    13 │ 
+    14 │ input SomeInputObject {
+  
+  i A GraphQL complex type is only valid if all its fields are uniquely named. Make sure to name every field differently.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:14:1 lint/nursery/useUniqueFieldDefinitionNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate field name.
+  
+    12 │ }
+    13 │ 
+  > 14 │ input SomeInputObject {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+  > 15 │ 	foo: String
+  > 16 │ 	bar: String
+  > 17 │ 	foo: String
+  > 18 │ }
+       │ ^
+    19 │ 
+  
+  i A GraphQL complex type is only valid if all its fields are uniquely named. Make sure to name every field differently.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
