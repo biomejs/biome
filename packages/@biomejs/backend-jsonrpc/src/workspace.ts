@@ -2142,6 +2142,11 @@ See <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name>
 	 */
 	useUniqueGraphqlOperationName?: UseUniqueGraphqlOperationNameConfiguration;
 	/**
+	* Require all variable definitions to be unique.
+See <https://biomejs.dev/linter/rules/use-unique-variable-names> 
+	 */
+	useUniqueVariableNames?: UseUniqueVariableNamesConfiguration;
+	/**
 	* Enforce consistent defineProps declaration style.
 See <https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration> 
 	 */
@@ -3788,6 +3793,9 @@ export type UseSpreadConfiguration =
 export type UseUniqueGraphqlOperationNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueGraphqlOperationNameOptions;
+export type UseUniqueVariableNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueVariableNamesOptions;
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
@@ -5284,6 +5292,10 @@ export interface RuleWithUseUniqueGraphqlOperationNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueGraphqlOperationNameOptions;
 }
+export interface RuleWithUseUniqueVariableNamesOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueVariableNamesOptions;
+}
 export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentDefinePropsDeclarationOptions;
@@ -6571,6 +6583,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
+export type UseUniqueVariableNamesOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
 }
@@ -7389,6 +7402,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"
+	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
