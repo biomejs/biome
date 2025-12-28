@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::{borrow::Cow, collections::HashSet};
 
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -45,18 +45,19 @@ impl Rule for UseUniqueEnumValueNames {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let mut found: HashSet<String> = HashSet::new();
+        let mut found: HashSet<Cow<'_, str>> = HashSet::new();
 
         let enum_values = node.enum_values()?;
         for element in enum_values.values() {
             if let Some(name) = element.value().ok()
                 && let Some(value_token) = name.value_token().ok()
             {
-                let string = value_token.token_text().to_lowercase_cow().to_string();
-                if found.contains(&string) {
+                let value_token = value_token.token_text();
+                let lowercase_text = value_token.to_lowercase_cow();
+                if found.contains(&lowercase_text) {
                     return Some(());
                 } else {
-                    found.insert(string);
+                    found.insert(lowercase_text.into_owned().into());
                 }
             }
         }
