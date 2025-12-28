@@ -385,6 +385,7 @@ pub mod use_unified_type_signatures;
 pub mod use_unique_element_ids;
 pub mod use_unique_field_definition_names;
 pub mod use_unique_graphql_operation_name;
+pub mod use_unique_input_field_names;
 pub mod use_unique_variable_names;
 pub mod use_valid_anchor;
 pub mod use_valid_aria_props;

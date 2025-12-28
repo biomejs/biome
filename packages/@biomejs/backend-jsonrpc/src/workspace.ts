@@ -2142,6 +2142,11 @@ See <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name>
 	 */
 	useUniqueGraphqlOperationName?: UseUniqueGraphqlOperationNameConfiguration;
 	/**
+	* Require fields within an input object to be unique.
+See <https://biomejs.dev/linter/rules/use-unique-input-field-names> 
+	 */
+	useUniqueInputFieldNames?: UseUniqueInputFieldNamesConfiguration;
+	/**
 	* Require all variable definitions to be unique.
 See <https://biomejs.dev/linter/rules/use-unique-variable-names> 
 	 */
@@ -3793,6 +3798,9 @@ export type UseUniqueFieldDefinitionNamesConfiguration =
 export type UseUniqueGraphqlOperationNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueGraphqlOperationNameOptions;
+export type UseUniqueInputFieldNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueInputFieldNamesOptions;
 export type UseUniqueVariableNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueVariableNamesOptions;
@@ -5292,6 +5300,10 @@ export interface RuleWithUseUniqueGraphqlOperationNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueGraphqlOperationNameOptions;
 }
+export interface RuleWithUseUniqueInputFieldNamesOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueInputFieldNamesOptions;
+}
 export interface RuleWithUseUniqueVariableNamesOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueVariableNamesOptions;
@@ -6583,6 +6595,7 @@ export interface UseSortedClassesOptions {
 export type UseSpreadOptions = {};
 export type UseUniqueFieldDefinitionNamesOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
+export type UseUniqueInputFieldNamesOptions = {};
 export type UseUniqueVariableNamesOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
@@ -7402,6 +7415,7 @@ export type Category =
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
 	| "lint/nursery/useUniqueGraphqlOperationName"
+	| "lint/nursery/useUniqueInputFieldNames"
 	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueDefineMacrosOrder"
