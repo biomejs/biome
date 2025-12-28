@@ -132,18 +132,4 @@ br-with-end.html:1:39 parse ━━━━━━━━━━━━━━━━━�
       │                                       ^^
     2 │ 
   
-br-with-end.html:1:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a matching closing tag but instead found '</br>'.
-  
-  > 1 │ <span>foo<br>This text is inside br.</br>bar</span>
-      │                                     ^^^^^
-    2 │ 
-  
-  i Expected a matching closing tag here.
-  
-  > 1 │ <span>foo<br>This text is inside br.</br>bar</span>
-      │                                     ^^^^^
-    2 │ 
-  
 ```
