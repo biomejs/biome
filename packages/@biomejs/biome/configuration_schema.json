@@ -5620,14 +5620,14 @@
 					]
 				},
 				"useVueConsistentVBindStyle": {
-					"description": "Enforce a consistent style for v-bind in Vue templates. Prefer either shorthand (:prop=\"...\") or longhand (v-bind:prop=\"...\").\nSee <https://biomejs.dev/linter/rules/use-vue-consistent-v-bind-style>",
+					"description": "Enforce a consistent style for v-bind in Vue templates.\nSee <https://biomejs.dev/linter/rules/use-vue-consistent-v-bind-style>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueConsistentVBindStyleConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useVueConsistentVOnStyle": {
-					"description": "Enforce a consistent style for v-on in Vue templates. Prefer either shorthand (@event=\"...\") or longhand (v-on:event=\"...\").\nSee <https://biomejs.dev/linter/rules/use-vue-consistent-v-on-style>",
+					"description": "Enforce a consistent style for v-on in Vue templates.\nSee <https://biomejs.dev/linter/rules/use-vue-consistent-v-on-style>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueConsistentVOnStyleConfiguration" },
 						{ "type": "null" }

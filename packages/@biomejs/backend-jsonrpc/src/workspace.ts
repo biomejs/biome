@@ -2167,12 +2167,12 @@ See <https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaratio
 	 */
 	useVueConsistentDefinePropsDeclaration?: UseVueConsistentDefinePropsDeclarationConfiguration;
 	/**
-	* Enforce a consistent style for v-bind in Vue templates. Prefer either shorthand (:prop="...") or longhand (v-bind:prop="...").
+	* Enforce a consistent style for v-bind in Vue templates.
 See <https://biomejs.dev/linter/rules/use-vue-consistent-v-bind-style> 
 	 */
 	useVueConsistentVBindStyle?: UseVueConsistentVBindStyleConfiguration;
 	/**
-	* Enforce a consistent style for v-on in Vue templates. Prefer either shorthand (@event="...") or longhand (v-on:event="...").
+	* Enforce a consistent style for v-on in Vue templates.
 See <https://biomejs.dev/linter/rules/use-vue-consistent-v-on-style> 
 	 */
 	useVueConsistentVOnStyle?: UseVueConsistentVOnStyleConfiguration;
