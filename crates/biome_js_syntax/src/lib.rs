@@ -47,7 +47,7 @@ pub use syntax_node::*;
 pub use unescape::*;
 
 use crate::JsSyntaxKind::*;
-use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, SyntaxResult};
+use biome_rowan::{AstNode, AstSeparatedList, RawSyntaxKind, SyntaxKind, SyntaxResult};
 
 impl From<u16> for JsSyntaxKind {
     fn from(d: u16) -> Self {
@@ -319,4 +319,77 @@ pub fn is_test_call_argument(maybe_argument: &JsSyntaxNode) -> SyntaxResult<bool
         .and_then(JsCallExpression::cast);
 
     call_expression.map_or(Ok(false), |call| call.is_test_call_expression())
+}
+
+/// Checks whether a node is imported by a certain specifier.
+pub fn is_node_imported_by_specifiers(
+    node: &JsSyntaxNode,
+    specifiers: &[&str],
+) -> SyntaxResult<bool> {
+    let import = node.ancestors().find_map(JsImport::cast);
+    if let Some(import) = import {
+        let source = match import.import_clause()? {
+            AnyJsImportClause::JsImportBareClause(_) => return Ok(false),
+            AnyJsImportClause::JsImportCombinedClause(node) => node.source(),
+            AnyJsImportClause::JsImportDefaultClause(node) => node.source(),
+            AnyJsImportClause::JsImportNamedClause(node) => node.source(),
+            AnyJsImportClause::JsImportNamespaceClause(node) => node.source(),
+        }?;
+
+        return Ok(match source {
+            AnyJsModuleSource::JsMetavariable(node) => {
+                specifiers.contains(&node.value_token()?.text_trimmed())
+            }
+            AnyJsModuleSource::JsModuleSource(node) => {
+                specifiers.contains(&node.inner_string_text()?.text())
+            }
+        });
+    }
+
+    let variable_declarator = node.ancestors().find_map(JsVariableDeclarator::cast);
+
+    let Some(variable_declarator) = variable_declarator else {
+        return Ok(false);
+    };
+    let import_like = variable_declarator
+        .initializer()
+        .and_then(|init| init.expression().ok())
+        .and_then(|any_expression| AnyJsImportLike::cast_ref(any_expression.syntax()));
+
+    let is_require = import_like
+        .as_ref()
+        .and_then(|expression| expression.)
+        .and_then(|callee| callee.as_js_identifier_expression().cloned())
+        .and_then(|identifier| identifier.name().ok())
+        .and_then(|name| name.value_token().ok())
+        .map(|name| name.text_trimmed() == "require")
+        .unwrap_or_default();
+    if is_require {
+        return Ok(import_like
+            .and_then(|call| call.arguments())
+            .map(|arguments| {
+                if arguments.args().len() > 1 {
+                    false
+                } else {
+                    // SAFETY: the if statement makes sure that we have at least one item
+                    let arg = arguments.args().first().unwrap().ok();
+                    if let Some(AnyJsCallArgument::AnyJsExpression(
+                        AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsStringLiteralExpression(expression),
+                        ),
+                    )) = arg
+                    {
+                        return expression
+                            .inner_string_text()
+                            .ok()
+                            .is_some_and(|token| specifiers.contains(&token.text()));
+                    }
+
+                    false
+                }
+            })
+            .unwrap_or_default());
+    }
+
+    Ok(false)
 }

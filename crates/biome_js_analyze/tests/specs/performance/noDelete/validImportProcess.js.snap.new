@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 103
+expression: validImportProcess.js
+---
+# Input
+```js
+import { env } from "node:process";
+
+delete env.NODE_ENV;
+
+```

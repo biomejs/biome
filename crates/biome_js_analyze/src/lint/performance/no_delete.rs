@@ -1,15 +1,17 @@
-use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use crate::JsRuleAction;
+use crate::services::semantic::Semantic;
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, JsComputedMemberExpressionFields,
-    JsStaticMemberExpressionFields, JsUnaryExpression, JsUnaryOperator, T,
+    JsStaticMemberExpression, JsStaticMemberExpressionFields, JsUnaryExpression, JsUnaryOperator,
+    T, global_identifier, is_node_imported_by_specifiers,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_delete::NoDeleteOptions;
-
-use crate::JsRuleAction;
 
 declare_lint_rule! {
     /// Disallow the use of the `delete` operator.
@@ -23,6 +25,8 @@ declare_lint_rule! {
     /// The only legitimate use of `delete` is on an object that behaves like a _map_.
     /// To allow this pattern, this rule does not report `delete` on computed properties that are not literal values.
     /// Consider using [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) instead of an object.
+    ///
+    /// The rule isn't applied to `process.env`, because the `delete` operator is the recommended way by Node.js to remove environment variables from the process.
     ///
     /// ## Examples
     ///
@@ -57,6 +61,15 @@ declare_lint_rule! {
     /// delete f(); // uncovered by this rule.
     ///```
     ///
+    /// ```js
+    /// delete process.env.TEST_ENV;
+    ///```
+    ///
+    /// ```js
+    /// import { env } from "node:process";
+    /// delete env.TEST_ENV;
+    ///```
+    ///
     pub NoDelete {
         version: "1.0.0",
         name: "noDelete",
@@ -67,13 +80,14 @@ declare_lint_rule! {
 }
 
 impl Rule for NoDelete {
-    type Query = Ast<JsUnaryExpression>;
+    type Query = Semantic<JsUnaryExpression>;
     type State = AnyJsExpression;
     type Signals = Option<Self::State>;
     type Options = NoDeleteOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let model = ctx.model();
         let op = node.operator().ok()?;
         if op != JsUnaryOperator::Delete {
             return None;
@@ -89,7 +103,14 @@ impl Rule for NoDelete {
                 .is_some()
         } else {
             let static_member_expression = argument.as_js_static_member_expression();
+
             if let Some(static_member_expression) = static_member_expression {
+                if is_check_env_process(&static_member_expression, model)
+                    || is_global_process(&static_member_expression, model)
+                {
+                    return None;
+                }
+
                 if let AnyJsExpression::JsStaticMemberExpression(static_expression) =
                     static_member_expression.object().ok()?
                 {
@@ -175,4 +196,55 @@ fn to_assignment(expr: &AnyJsExpression) -> Result<AnyJsAssignment, ()> {
         }
         _ => Err(()),
     }
+}
+
+/// Checks if static member expression is `process.`
+fn is_global_process(
+    static_member_expression: &JsStaticMemberExpression,
+    model: &SemanticModel,
+) -> bool {
+    static_member_expression
+        .identifier()
+        .is_some_and(|identifier| {
+            let is_global_identifier =
+                global_identifier(&AnyJsExpression::JsIdentifierExpression(identifier.clone()));
+
+            if let Some((identifier, value)) = is_global_identifier {
+                if value.text() == "process" {
+                    if model.binding(&identifier).is_none() {
+                        return true;
+                    }
+                }
+            }
+
+            false
+        })
+}
+
+/// Checks if the current static member expression is called `env` and it's imported from
+/// `env` on `node:env`
+fn is_check_env_process(
+    static_member_expression: &JsStaticMemberExpression,
+    model: &SemanticModel,
+) -> bool {
+    static_member_expression
+        .identifier()
+        .is_some_and(|identifier| {
+            let Ok(identifier) = identifier.name() else {
+                return false;
+            };
+            let Ok(member_name) = identifier.value_token() else {
+                return false;
+            };
+            if member_name.text_trimmed() == "env" {
+                if let Some(binding) = model.binding(&identifier) {
+                    let syntax = binding.syntax();
+                    return is_node_imported_by_specifiers(syntax, &["process", "node:process"])
+                        .ok()
+                        .unwrap_or_default();
+                }
+            }
+
+            false
+        })
 }
