@@ -122,6 +122,7 @@ pub mod no_invalid_position_at_import_rule;
 pub mod no_invalid_use_before_declaration;
 pub mod no_irregular_whitespace;
 pub mod no_jsx_literals;
+pub mod no_jsx_props_bind;
 pub mod no_label_var;
 pub mod no_label_without_control;
 pub mod no_leaked_render;

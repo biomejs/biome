@@ -179,6 +179,7 @@ define_categories! {
     "lint/nursery/noImportCycles": "https://biomejs.dev/linter/rules/no-import-cycles",
     "lint/nursery/noIncrementDecrement": "https://biomejs.dev/linter/rules/no-increment-decrement",
     "lint/nursery/noJsxLiterals": "https://biomejs.dev/linter/rules/no-jsx-literals",
+    "lint/nursery/noJsxPropsBind": "https://biomejs.dev/linter/rules/no-jsx-props-bind",
     "lint/nursery/noLeakedRender": "https://biomejs.dev/linter/rules/no-leaked-render",
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",
     "lint/nursery/noMisusedPromises": "https://biomejs.dev/linter/rules/no-misused-promises",

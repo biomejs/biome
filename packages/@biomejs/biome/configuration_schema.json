@@ -3700,6 +3700,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoJsxPropsBindConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoJsxPropsBindOptions" }
+			]
+		},
+		"NoJsxPropsBindOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoLabelVarConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5274,6 +5284,13 @@
 					"description": "Disallow string literals inside JSX elements.\nSee <https://biomejs.dev/linter/rules/no-jsx-literals>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoJsxLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noJsxPropsBind": {
+					"description": "Disallow .bind(), arrow functions, or function expressions in JSX props.\nSee <https://biomejs.dev/linter/rules/no-jsx-props-bind>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoJsxPropsBindConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7370,6 +7387,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoJsxLiteralsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoJsxPropsBindOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoJsxPropsBindOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
