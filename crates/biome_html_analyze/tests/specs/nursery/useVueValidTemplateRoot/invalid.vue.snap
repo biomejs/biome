@@ -1,0 +1,36 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<template src="./foo.html">content</template>
+<template></template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:2:1 lint/nursery/useVueValidTemplateRoot  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The root `<template>` with a src attribute must be empty.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <template src="./foo.html">content</template>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <template></template>
+    4 │ 
+  
+  i The src attribute indicates that the content is loaded from an external file.
+  
+  i Remove content when using the src attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove inline content from `<template>`.
+  
+    2 │ <template·src="./foo.html">content</template>
+      │                            -------           
+
+```

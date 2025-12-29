@@ -1,15 +1,23 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's JavaScript parser"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_js_parser"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's JavaScript parser"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
+
+# cargo-workspaces metadata
+[package.metadata.workspaces]
+independent = true
+
+[[bench]]
+harness = false
+name    = "js_parser"
 
 [dependencies]
 biome_console       = { workspace = true }
@@ -42,25 +50,16 @@ quickcheck          = { workspace = true }
 quickcheck_macros   = { workspace = true }
 tests_macros        = { path = "../tests_macros" }
 
-[target.'cfg(target_os = "windows")'.dev-dependencies]
-mimalloc = { workspace = true }
-
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
 
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [features]
 schema = ["dep:schemars", "serde"]
-serde  = ["dep:serde", "biome_js_syntax/schema"]
+serde  = ["biome_js_syntax/schema", "dep:serde"]
 tests  = []
-
-# cargo-workspaces metadata
-[package.metadata.workspaces]
-independent = true
 
 [lints]
 workspace = true
-
-[[bench]]
-harness = false
-name    = "js_parser"

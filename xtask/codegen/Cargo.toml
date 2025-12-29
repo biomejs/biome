@@ -1,20 +1,11 @@
 [package]
-edition = "2024"
 name    = "xtask_codegen"
-publish = false
 version = "0.0.0"
+edition = "2024"
+publish = false
 
 [dependencies]
-anyhow         = { workspace = true }
-bpaf           = { workspace = true, features = ["derive"] }
-git2           = { version = "0.20.2", default-features = false }
-proc-macro2    = { workspace = true, features = ["span-locations"] }
-pulldown-cmark = { version = "0.13.0", default-features = false, optional = true }
-quote          = "1.0.36"
-serde          = { workspace = true, optional = true }
-ureq           = "3.1.4"
-xtask_glue     = { workspace = true }
-
+anyhow                = { workspace = true }
 biome_analyze         = { workspace = true, features = ["schema"], optional = true }
 biome_cli             = { workspace = true, optional = true }
 biome_configuration   = { workspace = true, features = ["schema"], optional = true }
@@ -34,48 +25,56 @@ biome_js_parser       = { workspace = true, optional = true }
 biome_js_syntax       = { workspace = true, optional = true }
 # HACK: This is a path dependency and not a workspace dependency because
 # `default-features` is not allowed to override the workspace default, for whatever reason.
-biome_json_analyze   = { path = "../../crates/biome_json_analyze", optional = true, default-features = false }
-biome_json_formatter = { workspace = true, optional = true }
-biome_json_parser    = { workspace = true, optional = true }
-biome_json_syntax    = { workspace = true, optional = true }
-biome_rowan          = { workspace = true, optional = true }
-biome_service        = { workspace = true, features = ["schema"], optional = true }
-biome_string_case    = { workspace = true }
-biome_ungrammar      = { workspace = true }
-schemars             = { workspace = true, optional = true }
-serde_json           = { workspace = true, optional = true }
+biome_json_analyze    = { path = "../../crates/biome_json_analyze", default-features = false, optional = true }
+biome_json_formatter  = { workspace = true, optional = true }
+biome_json_parser     = { workspace = true, optional = true }
+biome_json_syntax     = { workspace = true, optional = true }
+biome_rowan           = { workspace = true, optional = true }
+biome_service         = { workspace = true, features = ["schema"], optional = true }
+biome_string_case     = { workspace = true }
+biome_ungrammar       = { workspace = true }
+bpaf                  = { workspace = true, features = ["derive"] }
+git2                  = { version = "0.20.2", default-features = false }
+proc-macro2           = { workspace = true, features = ["span-locations"] }
+pulldown-cmark        = { version = "0.13.0", default-features = false, optional = true }
+quote                 = "1.0.36"
+schemars              = { workspace = true, optional = true }
+serde                 = { workspace = true, optional = true }
+serde_json            = { workspace = true, optional = true }
+ureq                  = "3.1.4"
+xtask_glue            = { workspace = true }
 
 [features]
 configuration = [
   "biome_analyze",
-  "biome_js_analyze",
-  "biome_js_syntax",
-  "biome_json_analyze",
-  "biome_json_syntax",
   "biome_css_analyze",
   "biome_css_syntax",
+  "biome_diagnostics",
   "biome_graphql_analyze",
   "biome_graphql_syntax",
   "biome_html_analyze",
   "biome_html_syntax",
+  "biome_js_analyze",
+  "biome_js_syntax",
+  "biome_json_analyze",
+  "biome_json_syntax",
   "biome_rowan",
   "pulldown-cmark",
-  "biome_diagnostics",
 ]
-license = ["ureq/default", "ureq/json", "serde", "serde_json"]
-schema = [
-  "schemars",
-  "serde_json",
+license       = ["serde", "serde_json", "ureq/default", "ureq/json"]
+schema        = [
   "biome_analyze",
-  "biome_rowan",
-  "biome_service",
-  "biome_js_syntax",
+  "biome_configuration",
+  "biome_diagnostics",
   "biome_js_factory",
   "biome_js_formatter",
+  "biome_js_syntax",
   "biome_json_formatter",
   "biome_json_parser",
-  "biome_diagnostics",
-  "biome_configuration",
+  "biome_rowan",
+  "biome_service",
+  "schemars",
+  "serde_json",
 ]
 
 [lints]

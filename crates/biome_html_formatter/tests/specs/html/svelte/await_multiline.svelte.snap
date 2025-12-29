@@ -1,0 +1,71 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/await_multiline.svelte
+---
+# Input
+
+```svelte
+{#await promise}
+<div class="loading">
+<span class="spinner"></span>
+<p>Please wait while we load your data...</p>
+</div>
+{:then data}
+<div class="success">
+<h2>Success!</h2>
+<pre>{JSON.stringify(data, null, 2)}</pre>
+</div>
+{:catch error}
+<div class="error">
+<h2>Error</h2>
+<p>{error.message}</p>
+<button on:click={retry}>Retry</button>
+</div>
+{/await}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```svelte
+{#await promise}
+	<div class="loading">
+		<span class="spinner"></span>
+		<p>Please wait while we load your data...</p>
+	</div>
+{:then data}
+	<div class="success">
+		<h2>Success!</h2>
+		<pre>{JSON.stringify(data, null, 2)}</pre>
+	</div>
+{:catch error}
+	<div class="error">
+		<h2>Error</h2>
+		<p>{error.message}</p>
+		<button on:click={retry}>Retry</button>
+	</div>
+{/await}
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"{JSON.stringify(data, null, 2)}" => 191..222

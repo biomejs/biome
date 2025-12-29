@@ -5,9 +5,9 @@ use crate::token_source::{
     TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::{
-    AS_KW, ATTACH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, EACH_KW, ELSE_KW, EOF, ERROR_TOKEN,
-    HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, IDENT, IF_KW, KEY_KW, NEWLINE, RENDER_KW,
-    TOMBSTONE, UNICODE_BOM, WHITESPACE,
+    AS_KW, ATTACH_KW, AWAIT_KW, CATCH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, EACH_KW,
+    ELSE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, IDENT, IF_KW, KEY_KW,
+    NEWLINE, RENDER_KW, SNIPPET_KW, THEN_KW, TOMBSTONE, UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -339,6 +339,8 @@ impl<'src> HtmlLexer<'src> {
     /// Consumes a restricted single text expression that stops at specific keywords
     /// (e.g., 'as' in Svelte #each blocks). Tracks nested brackets and stops when
     /// encountering a keyword at the top level.
+    ///
+    /// Finding a `{` at the top level will emit an error token.
     fn consume_restricted_single_text_expression(
         &mut self,
         kind: RestrictedExpressionStopAt,
@@ -346,29 +348,29 @@ impl<'src> HtmlLexer<'src> {
         let start_pos = self.position;
         let mut brackets_stack = 0;
 
+        let is_opening_paren = |byte: u8| byte == b'(' || byte == b'[' || byte == b'{';
+        let is_closing_paren = |byte: u8| byte == b')' || byte == b']' || byte == b'}';
+
         while let Some(current) = self.current_byte() {
             match current {
-                b'}' => {
+                // That's usually the case where we find a tag
+                _ if current == b'<' && brackets_stack == 0 => break,
+                _ if is_opening_paren(current) && !kind.matches_punct(current) => {
+                    brackets_stack += 1;
+                    self.advance(1)
+                }
+                _ if is_closing_paren(current) && !kind.matches_punct(current) => {
                     if brackets_stack == 0 {
                         // Reached the closing brace
                         break;
                     } else {
                         brackets_stack -= 1;
-                        self.advance(1);
+                        self.advance(1)
                     }
                 }
-                b'{' => {
-                    brackets_stack += 1;
-                    self.advance(1);
-                }
+
                 _ if brackets_stack == 0 && !is_at_start_identifier(current) => {
-                    let should_stop = match kind {
-                        RestrictedExpressionStopAt::AsOrComma => current == b',',
-                        RestrictedExpressionStopAt::OpeningParenOrComma => {
-                            current == b'(' || current == b','
-                        }
-                        RestrictedExpressionStopAt::ClosingParen => current == b')',
-                    };
+                    let should_stop = kind.matches_punct(current);
                     if should_stop {
                         break;
                     }
@@ -377,13 +379,11 @@ impl<'src> HtmlLexer<'src> {
                 _ if brackets_stack == 0 && is_at_start_identifier(current) => {
                     // Check if we're at a stop keyword
                     let checkpoint_pos = self.position;
+                    let prev_byte = self.prev_byte();
                     if let Some(keyword_kind) = self.consume_language_identifier(current) {
                         // Check if this keyword is in our stop list
-                        let should_stop = match kind {
-                            RestrictedExpressionStopAt::AsOrComma => keyword_kind == AS_KW,
-                            RestrictedExpressionStopAt::OpeningParenOrComma => false,
-                            RestrictedExpressionStopAt::ClosingParen => false,
-                        };
+                        let should_stop =
+                            kind.matches_keyword(keyword_kind) && prev_byte == Some(b' ');
 
                         if should_stop {
                             // Rewind - don't consume the keyword
@@ -559,6 +559,10 @@ impl<'src> HtmlLexer<'src> {
             b"else" => ELSE_KW,
             b"each" => EACH_KW,
             b"as" => AS_KW,
+            b"await" => AWAIT_KW,
+            b"then" => THEN_KW,
+            b"catch" => CATCH_KW,
+            b"snippet" => SNIPPET_KW,
             _ => {
                 self.position = starting_position;
                 return None;

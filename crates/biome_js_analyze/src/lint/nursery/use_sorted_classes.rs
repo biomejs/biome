@@ -156,6 +156,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         fix_kind: FixKind::Unsafe,
+        issue_number: Some("1274"),
     }
 }
 

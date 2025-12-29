@@ -200,6 +200,8 @@ AnySvelteBlock =
 	| SvelteConstBlock
 	| SvelteIfBlock
 	| SvelteEachBlock
+	| SvelteAwaitBlock
+	| SvelteSnippetBlock
 	| SvelteBogusBlock
 
 // {@debug}
@@ -369,6 +371,91 @@ SvelteEachClosingBlock =
 	'each'
 	'}'
 
+// {#await ...} {:then} {:catch} {/await}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteAwaitBlock =
+	opening_block: SvelteAwaitOpeningBlock
+	clauses: SvelteAwaitClausesList
+	closing_block: SvelteAwaitClosingBlock
+
+
+// {#await ... } {:then} {:catch} {/await}
+// ^^^^^^^^^^^^^
+SvelteAwaitOpeningBlock =
+	'{#'
+	'await'
+	expression: HtmlTextExpression
+	then_clause: SvelteAwaitThenClause?
+	catch_clause: SvelteAwaitCatchClause?
+	'}'
+	children: HtmlElementList
+
+SvelteAwaitClausesList = AnySvelteAwaitClauses*
+
+AnySvelteAwaitClauses =
+	SvelteAwaitThenBlock
+	| SvelteAwaitCatchBlock
+	| SvelteBogusBlock
+
+// {#await ... then value}
+//             ^^^^^^^^^^
+SvelteAwaitThenClause =
+	'then'
+	name: HtmlTextExpression
+
+// {#await ... catch value}
+//             ^^^^^^^^^^^
+SvelteAwaitCatchClause =
+	'catch'
+	name: HtmlTextExpression
+
+// {#await ... } {:then name} .. {:catch} {/await}
+//               ^^^^^^^^^^^^^^^
+SvelteAwaitThenBlock =
+	'{:'
+	'then'
+	name: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+
+// {#await ... } {:then} .. {:catch name} .. {/await}
+//                          ^^^^^^^^^^^^^^^^
+SvelteAwaitCatchBlock =
+	'{:'
+	'catch'
+	name: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+// {#await ... } {:then} {:catch} {/await}
+//                                ^^^^^^^^
+SvelteAwaitClosingBlock =
+	'{/'
+	'await'
+	'}'
+
+// {#snippet f()} ... {/snippet}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteSnippetBlock =
+	opening_block: SvelteSnippetOpeningBlock
+	closing_block: SvelteSnippetClosingBlock
+
+// {#snippet f()} ... {/snippet}
+// ^^^^^^^^^^^^^^^^^
+SvelteSnippetOpeningBlock =
+	'{#'
+	'snippet'
+	expression: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+// {#snippet f()} ... {/snippet}
+//                   ^^^^^^^^^^
+SvelteSnippetClosingBlock =
+	'{/'
+	'snippet'
+	'}'
 
 // Keep it different just for svelte
 SvelteName = 'ident'

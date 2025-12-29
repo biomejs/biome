@@ -718,7 +718,7 @@ pub fn css_font_face_at_rule_declarator(
         [Some(SyntaxElement::Token(font_face_token))],
     ))
 }
-pub fn css_font_family_name(names: CssCustomIdentifierList) -> CssFontFamilyName {
+pub fn css_font_family_name(names: CssCustomIdentifierSpaceSeparatedList) -> CssFontFamilyName {
     CssFontFamilyName::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_FONT_FAMILY_NAME,
         [Some(SyntaxElement::Node(names.into_syntax()))],
@@ -1683,7 +1683,7 @@ pub fn css_pseudo_class_function_custom_identifier(
 pub fn css_pseudo_class_function_custom_identifier_list(
     name: CssIdentifier,
     l_paren_token: SyntaxToken,
-    items: CssCustomIdentifierList,
+    items: CssCustomIdentifierCommaSeparatedList,
     r_paren_token: SyntaxToken,
 ) -> CssPseudoClassFunctionCustomIdentifierList {
     CssPseudoClassFunctionCustomIdentifierList::unwrap_cast(SyntaxNode::new_detached(
@@ -2983,13 +2983,39 @@ where
         }),
     ))
 }
-pub fn css_custom_identifier_list<I>(items: I) -> CssCustomIdentifierList
+pub fn css_custom_identifier_comma_separated_list<I, S>(
+    items: I,
+    separators: S,
+) -> CssCustomIdentifierCommaSeparatedList
+where
+    I: IntoIterator<Item = AnyCssCustomIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssCustomIdentifierCommaSeparatedList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_IDENTIFIER_COMMA_SEPARATED_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn css_custom_identifier_space_separated_list<I>(
+    items: I,
+) -> CssCustomIdentifierSpaceSeparatedList
 where
     I: IntoIterator<Item = AnyCssCustomIdentifier>,
     I::IntoIter: ExactSizeIterator,
 {
-    CssCustomIdentifierList::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_CUSTOM_IDENTIFIER_LIST,
+    CssCustomIdentifierSpaceSeparatedList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

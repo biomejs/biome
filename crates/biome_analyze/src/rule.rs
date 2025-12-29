@@ -44,6 +44,9 @@ pub struct RuleMetadata {
     pub severity: Severity,
     /// Domains applied by this rule
     pub domains: &'static [RuleDomain],
+    /// Use this field to tag the rule as being worked, which means the rule is still far from being completed.
+    /// Possible bugs should be reported in that issue.
+    pub issue_number: Option<&'static str>,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -609,6 +612,7 @@ impl RuleMetadata {
             sources: &[],
             severity: Severity::Information,
             domains: &[],
+            issue_number: None,
         }
     }
 
@@ -644,6 +648,11 @@ impl RuleMetadata {
 
     pub const fn domains(mut self, domains: &'static [RuleDomain]) -> Self {
         self.domains = domains;
+        self
+    }
+
+    pub const fn issue_number(mut self, issue_number: Option<&'static str>) -> Self {
+        self.issue_number = issue_number;
         self
     }
 

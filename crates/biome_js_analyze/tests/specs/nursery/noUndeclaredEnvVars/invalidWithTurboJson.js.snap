@@ -30,6 +30,8 @@ invalidWithTurboJson.js:4:23 lint/nursery/noUndeclaredEnvVars ━━━━━━
     5 │ const anotherUndeclared = process.env.ANOTHER_UNDECLARED;
     6 │ 
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -45,6 +47,8 @@ invalidWithTurboJson.js:5:27 lint/nursery/noUndeclaredEnvVars ━━━━━━
     6 │ 
     7 │ // This doesn't match the FOO_* pattern (it's BAR_*)
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -59,6 +63,8 @@ invalidWithTurboJson.js:8:17 lint/nursery/noUndeclaredEnvVars ━━━━━━
      9 │ 
     10 │ // Also invalid with import.meta.env
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -71,6 +77,8 @@ invalidWithTurboJson.js:11:24 lint/nursery/noUndeclaredEnvVars ━━━━━�
   > 11 │ const undeclaredMeta = import.meta.env.UNDECLARED_META;
        │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

@@ -363,6 +363,146 @@ pub fn svelte_attach_attribute(
         ],
     ))
 }
+pub fn svelte_await_block(
+    opening_block: SvelteAwaitOpeningBlock,
+    clauses: SvelteAwaitClausesList,
+    closing_block: SvelteAwaitClosingBlock,
+) -> SvelteAwaitBlock {
+    SvelteAwaitBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_BLOCK,
+        [
+            Some(SyntaxElement::Node(opening_block.into_syntax())),
+            Some(SyntaxElement::Node(clauses.into_syntax())),
+            Some(SyntaxElement::Node(closing_block.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_await_catch_block(
+    sv_curly_colon_token: SyntaxToken,
+    catch_token: SyntaxToken,
+    name: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+) -> SvelteAwaitCatchBlock {
+    SvelteAwaitCatchBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_CATCH_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_colon_token)),
+            Some(SyntaxElement::Token(catch_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_await_catch_clause(
+    catch_token: SyntaxToken,
+    name: HtmlTextExpression,
+) -> SvelteAwaitCatchClause {
+    SvelteAwaitCatchClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_CATCH_CLAUSE,
+        [
+            Some(SyntaxElement::Token(catch_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_await_closing_block(
+    sv_curly_slash_token: SyntaxToken,
+    await_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> SvelteAwaitClosingBlock {
+    SvelteAwaitClosingBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_CLOSING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_slash_token)),
+            Some(SyntaxElement::Token(await_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_await_opening_block(
+    sv_curly_hash_token: SyntaxToken,
+    await_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+) -> SvelteAwaitOpeningBlockBuilder {
+    SvelteAwaitOpeningBlockBuilder {
+        sv_curly_hash_token,
+        await_token,
+        expression,
+        r_curly_token,
+        children,
+        then_clause: None,
+        catch_clause: None,
+    }
+}
+pub struct SvelteAwaitOpeningBlockBuilder {
+    sv_curly_hash_token: SyntaxToken,
+    await_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+    then_clause: Option<SvelteAwaitThenClause>,
+    catch_clause: Option<SvelteAwaitCatchClause>,
+}
+impl SvelteAwaitOpeningBlockBuilder {
+    pub fn with_then_clause(mut self, then_clause: SvelteAwaitThenClause) -> Self {
+        self.then_clause = Some(then_clause);
+        self
+    }
+    pub fn with_catch_clause(mut self, catch_clause: SvelteAwaitCatchClause) -> Self {
+        self.catch_clause = Some(catch_clause);
+        self
+    }
+    pub fn build(self) -> SvelteAwaitOpeningBlock {
+        SvelteAwaitOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_AWAIT_OPENING_BLOCK,
+            [
+                Some(SyntaxElement::Token(self.sv_curly_hash_token)),
+                Some(SyntaxElement::Token(self.await_token)),
+                Some(SyntaxElement::Node(self.expression.into_syntax())),
+                self.then_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.catch_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn svelte_await_then_block(
+    sv_curly_colon_token: SyntaxToken,
+    then_token: SyntaxToken,
+    name: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+) -> SvelteAwaitThenBlock {
+    SvelteAwaitThenBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_THEN_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_colon_token)),
+            Some(SyntaxElement::Token(then_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_await_then_clause(
+    then_token: SyntaxToken,
+    name: HtmlTextExpression,
+) -> SvelteAwaitThenClause {
+    SvelteAwaitThenClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_THEN_CLAUSE,
+        [
+            Some(SyntaxElement::Token(then_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
 pub fn svelte_const_block(
     sv_curly_at_token: SyntaxToken,
     const_token: SyntaxToken,
@@ -754,6 +894,50 @@ pub fn svelte_render_block(
         ],
     ))
 }
+pub fn svelte_snippet_block(
+    opening_block: SvelteSnippetOpeningBlock,
+    closing_block: SvelteSnippetClosingBlock,
+) -> SvelteSnippetBlock {
+    SvelteSnippetBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_SNIPPET_BLOCK,
+        [
+            Some(SyntaxElement::Node(opening_block.into_syntax())),
+            Some(SyntaxElement::Node(closing_block.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_snippet_closing_block(
+    sv_curly_slash_token: SyntaxToken,
+    snippet_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> SvelteSnippetClosingBlock {
+    SvelteSnippetClosingBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_SNIPPET_CLOSING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_slash_token)),
+            Some(SyntaxElement::Token(snippet_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_snippet_opening_block(
+    sv_curly_hash_token: SyntaxToken,
+    snippet_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+) -> SvelteSnippetOpeningBlock {
+    SvelteSnippetOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_SNIPPET_OPENING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_hash_token)),
+            Some(SyntaxElement::Token(snippet_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
 pub fn vue_directive(name_token: SyntaxToken, modifiers: VueModifierList) -> VueDirectiveBuilder {
     VueDirectiveBuilder {
         name_token,
@@ -955,6 +1139,18 @@ where
 {
     HtmlElementList::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_ELEMENT_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn svelte_await_clauses_list<I>(items: I) -> SvelteAwaitClausesList
+where
+    I: IntoIterator<Item = AnySvelteAwaitClauses>,
+    I::IntoIter: ExactSizeIterator,
+{
+    SvelteAwaitClausesList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_CLAUSES_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

@@ -1,0 +1,97 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#await import('./Component.svelte') then { default: Component }}
+  <Component />
+{/await}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                await_token: AWAIT_KW@2..7 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@7..37 " import('./Component.svelte') " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@37..41 "then" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@41..64 " { default: Component }" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@64..65 "}" [] [],
+                children: HtmlElementList [
+                    HtmlSelfClosingElement {
+                        l_angle_token: L_ANGLE@65..69 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@69..79 "Component" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [],
+                        slash_token: SLASH@79..80 "/" [] [],
+                        r_angle_token: R_ANGLE@80..81 ">" [] [],
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@81..84 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@84..89 "await" [] [],
+                r_curly_token: R_CURLY@89..90 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@90..91 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..91
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..90
+    0: SVELTE_AWAIT_BLOCK@0..90
+      0: SVELTE_AWAIT_OPENING_BLOCK@0..81
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: AWAIT_KW@2..7 "await" [] []
+        2: HTML_TEXT_EXPRESSION@7..37
+          0: HTML_LITERAL@7..37 " import('./Component.svelte') " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@37..64
+          0: THEN_KW@37..41 "then" [] []
+          1: HTML_TEXT_EXPRESSION@41..64
+            0: HTML_LITERAL@41..64 " { default: Component }" [] []
+        4: (empty)
+        5: R_CURLY@64..65 "}" [] []
+        6: HTML_ELEMENT_LIST@65..81
+          0: HTML_SELF_CLOSING_ELEMENT@65..81
+            0: L_ANGLE@65..69 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@69..79
+              0: HTML_LITERAL@69..79 "Component" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@79..79
+            3: SLASH@79..80 "/" [] []
+            4: R_ANGLE@80..81 ">" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@81..81
+      2: SVELTE_AWAIT_CLOSING_BLOCK@81..90
+        0: SV_CURLY_SLASH@81..84 "{/" [Newline("\n")] []
+        1: AWAIT_KW@84..89 "await" [] []
+        2: R_CURLY@89..90 "}" [] []
+  4: EOF@90..91 "" [Newline("\n")] []
+
+```

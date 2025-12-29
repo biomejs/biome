@@ -30,8 +30,28 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         (")", "R_PAREN"),
     ],
     keywords: &[
-        "null", "true", "false", "doctype", "html", // Svelte keywords
-        "debug", "key", "render", "const", "attach", "else", "if", "as", "each",
+        "null",
+        "true",
+        "false",
+        "doctype",
+        "html",
+        // rustfmt is weird and it goes on newline only if it sees
+        // a doc comment
+        #[expect(unused_doc_comments)]
+        /// Svelte keywords
+        "debug",
+        "key",
+        "render",
+        "const",
+        "attach",
+        "else",
+        "if",
+        "as",
+        "each",
+        "then",
+        "await",
+        "catch",
+        "snippet",
     ],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
     tokens: &["ERROR_TOKEN", "NEWLINE", "WHITESPACE", "IDENT"],
@@ -84,6 +104,17 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "SVELTE_EACH_INDEX",
         "SVELTE_EACH_KEY",
         "SVELTE_EACH_CLOSING_BLOCK",
+        "SVELTE_AWAIT_BLOCK",
+        "SVELTE_AWAIT_OPENING_BLOCK",
+        "SVELTE_AWAIT_THEN_BLOCK",
+        "SVELTE_AWAIT_CLAUSES_LIST",
+        "SVELTE_AWAIT_CATCH_BLOCK",
+        "SVELTE_AWAIT_CLOSING_BLOCK",
+        "SVELTE_AWAIT_THEN_CLAUSE",
+        "SVELTE_AWAIT_CATCH_CLAUSE",
+        "SVELTE_SNIPPET_BLOCK",
+        "SVELTE_SNIPPET_OPENING_BLOCK",
+        "SVELTE_SNIPPET_CLOSING_BLOCK",
         // Vue nodes
         "VUE_DIRECTIVE",
         "VUE_DIRECTIVE_ARGUMENT",

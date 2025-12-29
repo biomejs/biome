@@ -45,17 +45,17 @@ fn debug_control_flow() {
     block_0[\"<b>block_0</b><br/>Return(JS_RETURN_STATEMENT 19..26)<br/>Return\"]\n\n";
 
     let (workspace, project_key) = create_server();
-    let file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("file.js"),
             content: FileContent::from_client(SOURCE),
             document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
             persist_node_cache: false,
-        },
-    )
-    .unwrap();
+        })
+        .unwrap();
+
+    let file = FileGuard::new(workspace.as_ref(), project_key, BiomePath::new("file.js")).unwrap();
 
     let cfg = file.get_control_flow_graph(TextSize::from(20)).unwrap();
 
@@ -66,18 +66,19 @@ fn debug_control_flow() {
 fn recognize_typescript_definition_file() {
     let (workspace, project_key) = create_server();
 
-    let file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("file.d.ts"),
             // the following code snippet can be correctly parsed in .d.ts file but not in .ts file
             content: FileContent::from_client("export const foo: number"),
             document_file_source: None,
             persist_node_cache: false,
-        },
-    )
-    .unwrap();
+        })
+        .unwrap();
+
+    let file =
+        FileGuard::new(workspace.as_ref(), project_key, BiomePath::new("file.d.ts")).unwrap();
 
     assert!(file.format_file().is_ok());
 }
@@ -87,113 +88,133 @@ fn correctly_handle_json_files() {
     let (workspace, project_key) = create_server();
 
     // ".json" file
-    let json_file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("a.json"),
             content: FileContent::from_client(r#"{"a": 42}"#),
             document_file_source: None,
             persist_node_cache: false,
-        },
-    )
-    .unwrap();
+        })
+        .unwrap();
+
+    let json_file =
+        FileGuard::new(workspace.as_ref(), project_key, BiomePath::new("a.json")).unwrap();
     assert!(json_file.format_file().is_ok());
 
     // ".json" file doesn't allow comments
-    let json_file_with_comments = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("b.json"),
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
-        },
-    )
-    .unwrap();
+        })
+        .unwrap();
+
+    let json_file_with_comments =
+        FileGuard::new(workspace.as_ref(), project_key, BiomePath::new("b.json")).unwrap();
     assert!(json_file_with_comments.format_file().is_err());
 
     // ".json" file doesn't allow trailing commas
-    let json_file_with_trailing_commas = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("c.json"),
             content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
-        },
-    )
-    .unwrap();
+        })
+        .unwrap();
+
+    let json_file_with_trailing_commas =
+        FileGuard::new(workspace.as_ref(), project_key, BiomePath::new("c.json")).unwrap();
     assert!(json_file_with_trailing_commas.format_file().is_err());
 
     // ".jsonc" file allows comments
-    let jsonc_file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("d.jsonc"),
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
-        },
-    )
-    .unwrap();
+        })
+        .unwrap();
+
+    let jsonc_file =
+        FileGuard::new(workspace.as_ref(), project_key, BiomePath::new("d.jsonc")).unwrap();
     assert!(jsonc_file.format_file().is_ok());
 
     // ".jsonc" file allow trailing commas
-    let jsonc_file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("e.jsonc"),
             content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
-        },
-    )
-    .unwrap();
+        })
+        .unwrap();
+
+    let jsonc_file =
+        FileGuard::new(workspace.as_ref(), project_key, BiomePath::new("e.jsonc")).unwrap();
     assert!(jsonc_file.format_file().is_ok());
 
     // well-known json-with-comments file allows comments
-    let well_known_json_with_comments_file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new(".eslintrc.json"),
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
-        },
+        })
+        .unwrap();
+
+    let well_known_json_with_comments_file = FileGuard::new(
+        workspace.as_ref(),
+        project_key,
+        BiomePath::new(".eslintrc.json"),
     )
     .unwrap();
     assert!(well_known_json_with_comments_file.format_file().is_ok());
 
     // well-known json-with-comments file allows comments
-    let well_known_json_with_comments_file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("project/.vscode/settings.json"),
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
-        },
+        })
+        .unwrap();
+
+    let well_known_json_with_comments_file = FileGuard::new(
+        workspace.as_ref(),
+        project_key,
+        BiomePath::new("project/.vscode/settings.json"),
     )
     .unwrap();
     assert!(well_known_json_with_comments_file.format_file().is_ok());
 
     // well-known json-with-comments file doesn't allow trailing commas
-    let well_known_json_with_comments_file_with_trailing_commas = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("dir/.eslintrc.json"),
             content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
-        },
+        })
+        .unwrap();
+
+    let well_known_json_with_comments_file_with_trailing_commas = FileGuard::new(
+        workspace.as_ref(),
+        project_key,
+        BiomePath::new("dir/.eslintrc.json"),
     )
     .unwrap();
     assert!(
@@ -203,15 +224,20 @@ fn correctly_handle_json_files() {
     );
 
     // well-known json-with-comments-and-trailing-commas file allows comments and trailing commas
-    let well_known_json_with_comments_and_trailing_commas_file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("tsconfig.json"),
             content: FileContent::from_client(r#"{"a": 42,}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
-        },
+        })
+        .unwrap();
+
+    let well_known_json_with_comments_and_trailing_commas_file = FileGuard::new(
+        workspace.as_ref(),
+        project_key,
+        BiomePath::new("tsconfig.json"),
     )
     .unwrap();
     assert!(
@@ -225,9 +251,8 @@ fn correctly_handle_json_files() {
 fn correctly_parses_graphql_files() {
     let (workspace, project_key) = create_server();
 
-    let graphql_file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("file.graphql"),
             content: FileContent::from_client(
@@ -242,7 +267,13 @@ type User {
             ),
             document_file_source: None,
             persist_node_cache: false,
-        },
+        })
+        .unwrap();
+
+    let graphql_file = FileGuard::new(
+        workspace.as_ref(),
+        project_key,
+        BiomePath::new("file.graphql"),
     )
     .unwrap();
     let result = graphql_file.get_syntax_tree();
@@ -256,9 +287,8 @@ type User {
 fn correctly_pulls_lint_diagnostics() {
     let (workspace, project_key) = create_server();
 
-    let graphql_file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("file.graphql"),
             content: FileContent::from_client(
@@ -268,7 +298,13 @@ fn correctly_pulls_lint_diagnostics() {
             ),
             document_file_source: None,
             persist_node_cache: false,
-        },
+        })
+        .unwrap();
+
+    let graphql_file = FileGuard::new(
+        workspace.as_ref(),
+        project_key,
+        BiomePath::new("file.graphql"),
     )
     .unwrap();
     let result = graphql_file.pull_diagnostics(
@@ -286,9 +322,8 @@ fn correctly_pulls_lint_diagnostics() {
 fn pull_grit_debug_info() {
     let (workspace, project_key) = create_server();
 
-    let grit_file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("file.grit"),
             content: FileContent::from_client(
@@ -298,9 +333,11 @@ fn pull_grit_debug_info() {
             ),
             document_file_source: None,
             persist_node_cache: false,
-        },
-    )
-    .unwrap();
+        })
+        .unwrap();
+
+    let grit_file =
+        FileGuard::new(workspace.as_ref(), project_key, BiomePath::new("file.grit")).unwrap();
     let result = grit_file.get_syntax_tree();
     assert!(result.is_ok());
     let syntax = result.unwrap().ast;
@@ -345,7 +382,11 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
                 module_graph
                     .data
                     .get("/project/a.ts")
-                    .map(|module_info| module_info.static_import_paths.clone()),
+                    .map(|module_info| module_info
+                        .as_js_module_info()
+                        .unwrap()
+                        .static_import_paths
+                        .clone()),
                 Some(BTreeMap::from([(
                     "./b.ts".to_string(),
                     "/project/b.ts".replace('/', std::path::MAIN_SEPARATOR_STR),
@@ -782,9 +823,8 @@ fn test_order() {
 fn debug_type_info() {
     let (workspace, project_key) = create_server();
 
-    let file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("file.ts"),
             content: FileContent::from_client(
@@ -804,9 +844,10 @@ class Person {
             ),
             document_file_source: None,
             persist_node_cache: false,
-        },
-    )
-    .unwrap();
+        })
+        .unwrap();
+
+    let file = FileGuard::new(workspace.as_ref(), project_key, BiomePath::new("file.ts")).unwrap();
     let result = file.get_type_info();
     assert!(result.is_ok());
     assert_snapshot!(result.unwrap());
@@ -816,9 +857,8 @@ class Person {
 fn debug_registered_types() {
     let (workspace, project_key) = create_server();
 
-    let file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("file.ts"),
             content: FileContent::from_client(
@@ -838,9 +878,10 @@ class Person {
             ),
             document_file_source: None,
             persist_node_cache: false,
-        },
-    )
-    .unwrap();
+        })
+        .unwrap();
+
+    let file = FileGuard::new(workspace.as_ref(), project_key, BiomePath::new("file.ts")).unwrap();
     let result = file.get_registered_types();
     assert!(result.is_ok());
     assert_snapshot!(result.unwrap());
@@ -850,9 +891,8 @@ class Person {
 fn debug_semantic_model() {
     let (workspace, project_key) = create_server();
 
-    let file = FileGuard::open(
-        workspace.as_ref(),
-        OpenFileParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new("file.ts"),
             content: FileContent::from_client(
@@ -872,9 +912,10 @@ class Person {
             ),
             document_file_source: None,
             persist_node_cache: false,
-        },
-    )
-    .unwrap();
+        })
+        .unwrap();
+
+    let file = FileGuard::new(workspace.as_ref(), project_key, BiomePath::new("file.ts")).unwrap();
     let result = file.get_semantic_model();
     assert!(result.is_ok());
     assert_snapshot!(result.unwrap());

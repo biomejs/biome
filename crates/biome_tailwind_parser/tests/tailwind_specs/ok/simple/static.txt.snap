@@ -20,12 +20,12 @@ TwRoot {
             variants: TwVariantList [],
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@0..10 "underline" [] [Newline("\n")],
+                base_token: TW_BASE@0..9 "underline" [] [],
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@10..10 "" [] [],
+    eof_token: EOF@9..10 "" [Newline("\n")] [],
 }
 ```
 
@@ -34,13 +34,13 @@ TwRoot {
 ```
 0: TW_ROOT@0..10
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..10
-    0: TW_FULL_CANDIDATE@0..10
+  1: TW_CANDIDATE_LIST@0..9
+    0: TW_FULL_CANDIDATE@0..9
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_STATIC_CANDIDATE@0..10
-        0: TW_BASE@0..10 "underline" [] [Newline("\n")]
+      2: TW_STATIC_CANDIDATE@0..9
+        0: TW_BASE@0..9 "underline" [] []
       3: (empty)
-  2: EOF@10..10 "" [] []
+  2: EOF@9..10 "" [Newline("\n")] []
 
 ```

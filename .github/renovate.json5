@@ -43,7 +43,9 @@
         "grit-pattern-matcher",
         "grit-util",
         "getrandom",
-        "rand"
+        "rand",
+      	// Needs to be updated manually
+        "wasm-bindgen-cli"
       ]
     },
     {

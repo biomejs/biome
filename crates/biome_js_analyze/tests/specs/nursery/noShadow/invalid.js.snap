@@ -50,6 +50,8 @@ invalid.js:3:11 lint/nursery/noShadow ━━━━━━━━━━━━━━
   
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -72,6 +74,8 @@ invalid.js:7:11 lint/nursery/noShadow ━━━━━━━━━━━━━━
     3 │     const a = 10;
   
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -97,6 +101,8 @@ invalid.js:10:12 lint/nursery/noShadow ━━━━━━━━━━━━━�
   
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -119,6 +125,8 @@ invalid.js:16:11 lint/nursery/noShadow ━━━━━━━━━━━━━�
     3 │     const a = 10;
   
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -146,6 +154,8 @@ invalid.js:19:20 lint/nursery/noShadow ━━━━━━━━━━━━━�
   
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -169,6 +179,8 @@ invalid.js:21:33 lint/nursery/noShadow ━━━━━━━━━━━━━�
     22 │ 
   
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

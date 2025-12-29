@@ -33,6 +33,8 @@ invalid.ts:2:1 lint/nursery/useArraySortCompare ━━━━━━━━━━�
   
   i Add a compare function to prevent unexpected sorting.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -51,6 +53,8 @@ invalid.ts:3:1 lint/nursery/useArraySortCompare ━━━━━━━━━━�
   i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
   
   i Add a compare function to prevent unexpected sorting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -71,6 +75,8 @@ invalid.ts:5:1 lint/nursery/useArraySortCompare ━━━━━━━━━━�
   
   i Add a compare function to prevent unexpected sorting.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -88,6 +94,8 @@ invalid.ts:6:1 lint/nursery/useArraySortCompare ━━━━━━━━━━�
   i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
   
   i Add a compare function to prevent unexpected sorting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -107,6 +115,8 @@ invalid.ts:9:1 lint/nursery/useArraySortCompare ━━━━━━━━━━�
   
   i Add a compare function to prevent unexpected sorting.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -124,6 +134,8 @@ invalid.ts:10:1 lint/nursery/useArraySortCompare ━━━━━━━━━━�
   i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
   
   i Add a compare function to prevent unexpected sorting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

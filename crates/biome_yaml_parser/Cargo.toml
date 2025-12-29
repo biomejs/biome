@@ -1,18 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's YAML parser"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_yaml_parser"
-publish              = false
-repository.workspace = true
 version              = "0.0.1"
-
-[lints]
-workspace = true
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's YAML parser"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
 
 [dependencies]
 biome_console       = { workspace = true }
@@ -24,10 +21,12 @@ biome_yaml_factory  = { workspace = true }
 biome_yaml_syntax   = { workspace = true }
 tracing             = { workspace = true }
 
-
 [dev-dependencies]
 biome_test_utils  = { workspace = true }
 insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { workspace = true }
+
+[lints]
+workspace = true

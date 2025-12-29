@@ -73,6 +73,8 @@ multiline.invalid.js:1:26 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━
     4 │ 
     5 │ const multipleChainedMethods = (arr) =>
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Add braces to the arrow function body.
   
      1  1 │   const chainedOnNewLine = (l) =>
@@ -104,6 +106,8 @@ multiline.invalid.js:5:32 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━
      9 │ 
     10 │ const objectWithMultipleProperties = () =>
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Add braces to the arrow function body.
   
      4  4 │   
@@ -133,6 +137,8 @@ multiline.invalid.js:7:13 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━
     8 │     .map(x => x * 2)
     9 │ 
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Add braces to the arrow function body.
   
      5  5 │   const multipleChainedMethods = (arr) =>
@@ -158,6 +164,8 @@ multiline.invalid.js:8:10 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━
        │          ^^^^^^^^^^
      9 │ 
     10 │ const objectWithMultipleProperties = () =>
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Add braces to the arrow function body.
   
@@ -189,6 +197,8 @@ multiline.invalid.js:10:38 lint/nursery/useConsistentArrowReturn  FIXABLE  ━�
        │   ^^
     15 │ 
     16 │ const arrayWithMultipleElements = () =>
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Add braces to the arrow function body.
   
@@ -226,6 +236,8 @@ multiline.invalid.js:16:35 lint/nursery/useConsistentArrowReturn  FIXABLE  ━�
     22 │ 
     23 │ const nested = () =>
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Add braces to the arrow function body.
   
     15 15 │   
@@ -262,6 +274,8 @@ multiline.invalid.js:23:16 lint/nursery/useConsistentArrowReturn  FIXABLE  ━�
     28 │ 
     29 │ const withInlineComment = (l) =>
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Add braces to the arrow function body.
   
     22 22 │   
@@ -291,6 +305,8 @@ multiline.invalid.js:37:13 lint/nursery/useConsistentArrowReturn  FIXABLE  ━�
        │             ^^^^^^^^^^
     38 │ 
     39 │ const withCommentInObject = () =>
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Add braces to the arrow function body.
   

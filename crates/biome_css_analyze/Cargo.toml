@@ -1,17 +1,21 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's CSS linter"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_css_analyze"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's CSS linter"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bench]]
+harness = false
+name    = "css_analyzer"
 
 [dependencies]
 biome_analyze            = { workspace = true }
@@ -42,19 +46,14 @@ criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }
 
-[target.'cfg(target_os = "windows")'.dev-dependencies]
-mimalloc = { workspace = true }
-
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [features]
 schema = ["schemars"]
 
 [lints]
 workspace = true
-
-
-[[bench]]
-harness = false
-name    = "css_analyzer"

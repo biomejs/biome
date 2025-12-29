@@ -1,14 +1,14 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's HTML linter"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_html_analyze"
-repository.workspace = true
 version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's HTML linter"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
 
 [dependencies]
 biome_analyze            = { workspace = true }

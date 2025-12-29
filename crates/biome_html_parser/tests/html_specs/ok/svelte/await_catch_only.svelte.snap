@@ -1,0 +1,132 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#await promise catch error}
+  <p>Error: {error.message}</p>
+{/await}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                await_token: AWAIT_KW@2..7 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@7..16 " promise " [] [],
+                },
+                then_clause: missing (optional),
+                catch_clause: SvelteAwaitCatchClause {
+                    catch_token: CATCH_KW@16..21 "catch" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@21..27 " error" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@27..28 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@28..32 "<" [Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@32..33 "p" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@33..34 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@34..41 "Error:" [] [Whitespace(" ")],
+                            },
+                            HtmlSingleTextExpression {
+                                l_curly_token: L_CURLY@41..42 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@42..55 "error.message" [] [],
+                                },
+                                r_curly_token: R_CURLY@55..56 "}" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@56..57 "<" [] [],
+                            slash_token: SLASH@57..58 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@58..59 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@59..60 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@60..63 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@63..68 "await" [] [],
+                r_curly_token: R_CURLY@68..69 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@69..70 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..70
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..69
+    0: SVELTE_AWAIT_BLOCK@0..69
+      0: SVELTE_AWAIT_OPENING_BLOCK@0..60
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: AWAIT_KW@2..7 "await" [] []
+        2: HTML_TEXT_EXPRESSION@7..16
+          0: HTML_LITERAL@7..16 " promise " [] []
+        3: (empty)
+        4: SVELTE_AWAIT_CATCH_CLAUSE@16..27
+          0: CATCH_KW@16..21 "catch" [] []
+          1: HTML_TEXT_EXPRESSION@21..27
+            0: HTML_LITERAL@21..27 " error" [] []
+        5: R_CURLY@27..28 "}" [] []
+        6: HTML_ELEMENT_LIST@28..60
+          0: HTML_ELEMENT@28..60
+            0: HTML_OPENING_ELEMENT@28..34
+              0: L_ANGLE@28..32 "<" [Newline("\n"), Whitespace("  ")] []
+              1: HTML_TAG_NAME@32..33
+                0: HTML_LITERAL@32..33 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@33..33
+              3: R_ANGLE@33..34 ">" [] []
+            1: HTML_ELEMENT_LIST@34..56
+              0: HTML_CONTENT@34..41
+                0: HTML_LITERAL@34..41 "Error:" [] [Whitespace(" ")]
+              1: HTML_SINGLE_TEXT_EXPRESSION@41..56
+                0: L_CURLY@41..42 "{" [] []
+                1: HTML_TEXT_EXPRESSION@42..55
+                  0: HTML_LITERAL@42..55 "error.message" [] []
+                2: R_CURLY@55..56 "}" [] []
+            2: HTML_CLOSING_ELEMENT@56..60
+              0: L_ANGLE@56..57 "<" [] []
+              1: SLASH@57..58 "/" [] []
+              2: HTML_TAG_NAME@58..59
+                0: HTML_LITERAL@58..59 "p" [] []
+              3: R_ANGLE@59..60 ">" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@60..60
+      2: SVELTE_AWAIT_CLOSING_BLOCK@60..69
+        0: SV_CURLY_SLASH@60..63 "{/" [Newline("\n")] []
+        1: AWAIT_KW@63..68 "await" [] []
+        2: R_CURLY@68..69 "}" [] []
+  4: EOF@69..70 "" [Newline("\n")] []
+
+```

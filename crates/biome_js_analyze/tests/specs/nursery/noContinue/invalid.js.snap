@@ -24,6 +24,8 @@ invalid.js:1:58 lint/nursery/noContinue ━━━━━━━━━━━━━�
   
   i The continue statement terminates execution of the statements in the current iteration, when used incorrectly it makes code less testable, less readable and less maintainable. Structured control flow statements such as if should be used instead.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -39,6 +41,8 @@ invalid.js:2:67 lint/nursery/noContinue ━━━━━━━━━━━━━�
     4 │ var sum = 0, i = 0; myLabel: while (i < 10) { if (i <= 5) { i++; continue myLabel; } sum += i; i++; }
   
   i The continue statement terminates execution of the statements in the current iteration, when used incorrectly it makes code less testable, less readable and less maintainable. Structured control flow statements such as if should be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -57,6 +61,8 @@ invalid.js:3:57 lint/nursery/noContinue ━━━━━━━━━━━━━�
   
   i The continue statement terminates execution of the statements in the current iteration, when used incorrectly it makes code less testable, less readable and less maintainable. Structured control flow statements such as if should be used instead.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -72,6 +78,8 @@ invalid.js:4:66 lint/nursery/noContinue ━━━━━━━━━━━━━�
     5 │ 
   
   i The continue statement terminates execution of the statements in the current iteration, when used incorrectly it makes code less testable, less readable and less maintainable. Structured control flow statements such as if should be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

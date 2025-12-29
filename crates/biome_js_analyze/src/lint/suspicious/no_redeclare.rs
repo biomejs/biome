@@ -6,7 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::Scope;
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{JsSyntaxKind, TextRange};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_redeclare::NoRedeclareOptions;
 use rustc_hash::FxHashMap;
 
@@ -75,7 +75,7 @@ declare_lint_rule! {
 
 #[derive(Debug)]
 pub struct Redeclaration {
-    name: Box<str>,
+    name: TokenText,
     declaration: TextRange,
     redeclaration: TextRange,
 }
@@ -118,7 +118,7 @@ impl Rule for NoRedeclare {
 }
 
 fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<Redeclaration>) {
-    let mut declarations = FxHashMap::<Box<str>, (TextRange, AnyJsBindingDeclaration)>::default();
+    let mut declarations = FxHashMap::<TokenText, (TextRange, AnyJsBindingDeclaration)>::default();
     if scope.syntax().kind() == JsSyntaxKind::JS_FUNCTION_BODY {
         // Handle cases where a variable/type redeclares a parameter or type parameter.
         // For example:
@@ -146,9 +146,11 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                 if let Some(decl) = id_binding.declaration() {
                     // Ignore the function itself.
                     if !matches!(decl, AnyJsBindingDeclaration::JsFunctionExpression(_)) {
-                        let name = id_binding.to_trimmed_text();
+                        let Ok(name) = id_binding.name_token() else {
+                            continue;
+                        };
                         declarations.insert(
-                            name.text().into(),
+                            name.token_text_trimmed(),
                             (id_binding.syntax().text_trimmed_range(), decl),
                         );
                     }
@@ -162,7 +164,10 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
         // We consider only binding of a declaration
         // This allows to skip function parameters, methods, ...
         if let Some(decl) = id_binding.declaration() {
-            let name = id_binding.to_trimmed_text();
+            let Ok(name) = id_binding.name_token() else {
+                continue;
+            };
+            let name = name.token_text_trimmed();
             if let Some((first_text_range, first_decl)) = declarations.get(name.text()) {
                 // Do not report:
                 // - mergeable declarations.
@@ -181,16 +186,13 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                     || first_decl.is_infer_type() && decl.is_infer_type())
                 {
                     redeclarations.push(Redeclaration {
-                        name: name.text().into(),
+                        name,
                         declaration: *first_text_range,
                         redeclaration: id_binding.syntax().text_trimmed_range(),
                     })
                 }
             } else {
-                declarations.insert(
-                    name.text().into(),
-                    (id_binding.syntax().text_trimmed_range(), decl),
-                );
+                declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
             }
         }
     }
