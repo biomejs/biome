@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-02.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+import Script from 'next/script'
+
+export default function Page() {
+  return (
+    <>
+      <Script dangerouslySetInnerHTML={{ __html: `console.log('Hello world!');` }}></Script>
+    </>
+  )
+}
+
+```
+
+# Diagnostics
+```
+invalid-02.jsx:7:7 lint/nursery/useInlineScriptId ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! next/script components with inline content or `dangerouslySetInnerHTML` must specify id attribute.
+  
+    5 │   return (
+    6 │     <>
+  > 7 │       <Script dangerouslySetInnerHTML={{ __html: `console.log('Hello world!');` }}></Script>
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │     </>
+    9 │   )
+  
+  i See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
