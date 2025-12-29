@@ -15,7 +15,7 @@ use crate::{
 declare_lint_rule! {
     /// Prevent usage of `next/script`'s `beforeInteractive` strategy outside of `pages/_document.js` in a Next.js project.
     ///
-    /// Next.js provides a `<Script>` component from `next/script` to optimize the loading of third-party scripts. Using the `beforeInteractive`
+    /// Next.js provides a `next/script` component to optimize the loading of third-party scripts. Using the `beforeInteractive`
     /// strategy allows scripts to be preloaded before any first-party code. `beforeInteractive` scripts must be placed in `pages/_document.js`.
     ///
     /// This rule checks for any usage of the `beforeInteractive` scripts outside of these files.
@@ -92,10 +92,6 @@ impl Rule for NoBeforeInteractiveScriptOutsideDocument {
         }
 
         let jsx_element = ctx.query();
-        let element_name = jsx_element.name().ok()?.name_value_token().ok()?;
-        if element_name.text_trimmed() != "Script" {
-            return None;
-        }
 
         let semantic_model = ctx.model();
         let reference = jsx_element.name().ok()?;
