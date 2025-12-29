@@ -129,7 +129,7 @@ mimalloc                     = "0.1.48"
 papaya                       = "0.2.3"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 proc-macro-error2            = { version = "2.0.1", default-features = false }
-proc-macro2                  = "1.0.103"
+proc-macro2                  = "1.0.104"
 quickcheck                   = "1.0.3"
 quickcheck_macros            = "1.1.0"
 quote                        = "1.0.42"
