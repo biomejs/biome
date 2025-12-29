@@ -31,7 +31,5 @@ Self close void elements: never
 -----
 
 ```html
-<p>
-	<span>Foo</span> Bar
-</p>
+<p><span>Foo</span> Bar</p>
 ```

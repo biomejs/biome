@@ -397,7 +397,9 @@ where
                 builder.entry(HtmlChild::NonText(child.clone()));
             }
 
-            // Check for trailing whitespace on embedded content elements (e.g., after `}` in `{framework} `)
+            // Check for trailing whitespace, and preserve it if
+            // - its embedded expression content
+            // - its an element
             // This preserves spaces between expressions/elements and following text content.
             if matches!(
                 &child,

@@ -52,8 +52,6 @@ Self close void elements: never
 {/each}
 
 {#each matrix as row}
-	{#each row as cell}
-		<span>{cell}</span>
-	{/each}
+	{#each row as cell}<span>{cell}</span>{/each}
 {/each}
 ```
