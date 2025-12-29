@@ -2158,6 +2158,11 @@ See <https://biomejs.dev/linter/rules/use-find>
 	 */
 	useFind?: UseFindConfiguration;
 	/**
+	* Disallow anonymous operations when more than one operation specified in document.
+See <https://biomejs.dev/linter/rules/use-lone-anonymous-operation> 
+	 */
+	useLoneAnonymousOperation?: UseLoneAnonymousOperationConfiguration;
+	/**
 	* Require queries, mutations, subscriptions or fragments each to be located in separate files.
 See <https://biomejs.dev/linter/rules/use-lone-executable-definition> 
 	 */
@@ -3893,6 +3898,9 @@ export type UseExplicitTypeConfiguration =
 export type UseFindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFindOptions;
+export type UseLoneAnonymousOperationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLoneAnonymousOperationOptions;
 export type UseLoneExecutableDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneExecutableDefinitionOptions;
@@ -5447,6 +5455,10 @@ export interface RuleWithUseFindOptions {
 	level: RulePlainConfiguration;
 	options?: UseFindOptions;
 }
+export interface RuleWithUseLoneAnonymousOperationOptions {
+	level: RulePlainConfiguration;
+	options?: UseLoneAnonymousOperationOptions;
+}
 export interface RuleWithUseLoneExecutableDefinitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneExecutableDefinitionOptions;
@@ -6814,6 +6826,7 @@ export interface UseErrorCauseOptions {
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
+export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
 export interface UseMaxParamsOptions {
 	/**
@@ -7677,6 +7690,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useMaxParams"
+	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"

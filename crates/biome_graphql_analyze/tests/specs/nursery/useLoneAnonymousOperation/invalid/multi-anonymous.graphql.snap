@@ -1,0 +1,63 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: multi-anonymous.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+query {
+	fieldA
+}
+query {
+  fieldB
+}
+
+```
+
+# Diagnostics
+```
+multi-anonymous.graphql:2:1 lint/nursery/useLoneAnonymousOperation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Document contains (multiple) anonymous operations.
+  
+    1 │ # should generate diagnostics
+  > 2 │ query {
+      │ ^^^^^^^
+  > 3 │ 	fieldA
+  > 4 │ }
+  > 5 │ query {
+  > 6 │   fieldB
+  > 7 │ }
+      │ ^
+    8 │ 
+  
+  i This anonymous operation must be the only defined operation in this document.
+  
+    1 │ # should generate diagnostics
+  > 2 │ query {
+      │ ^^^^^^^
+  > 3 │ 	fieldA
+  > 4 │ }
+      │ ^
+    5 │ query {
+    6 │   fieldB
+  
+  i This anonymous operation must be the only defined operation in this document.
+  
+    3 │ 	fieldA
+    4 │ }
+  > 5 │ query {
+      │ ^^^^^^^
+  > 6 │   fieldB
+  > 7 │ }
+      │ ^
+    8 │ 
+  
+  i A GraphQL document that contains an anonymous operation (the query short-hand) is only valid if it contains only that one operation definition.
+  
+  i Isolate the anonymous operation in a separate document or turn into a named operation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

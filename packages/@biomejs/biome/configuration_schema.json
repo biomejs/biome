@@ -5723,6 +5723,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useLoneAnonymousOperation": {
+					"description": "Disallow anonymous operations when more than one operation specified in document.\nSee <https://biomejs.dev/linter/rules/use-lone-anonymous-operation>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseLoneAnonymousOperationConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useLoneExecutableDefinition": {
 					"description": "Require queries, mutations, subscriptions or fragments each to be located in separate files.\nSee <https://biomejs.dev/linter/rules/use-lone-executable-definition>",
 					"anyOf": [
@@ -9701,6 +9708,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseLoneAnonymousOperationOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseLoneAnonymousOperationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseLoneExecutableDefinitionOptions": {
 			"type": "object",
 			"properties": {
@@ -12717,6 +12733,16 @@
 			]
 		},
 		"UseLiteralKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseLoneAnonymousOperationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseLoneAnonymousOperationOptions" }
+			]
+		},
+		"UseLoneAnonymousOperationOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
