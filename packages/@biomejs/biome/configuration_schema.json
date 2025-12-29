@@ -5543,6 +5543,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useLoneAnonymousOperation": {
+					"description": "Disallow anonymous operations when more than one operation specified in document.\nSee <https://biomejs.dev/linter/rules/use-lone-anonymous-operation>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseLoneAnonymousOperationConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useMaxParams": {
 					"description": "Enforce a maximum number of parameters in function definitions.\nSee <https://biomejs.dev/linter/rules/use-max-params>",
 					"anyOf": [
@@ -9459,6 +9466,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseLoneAnonymousOperationOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseLoneAnonymousOperationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseMaxParamsOptions": {
 			"type": "object",
 			"properties": {
@@ -12493,6 +12509,16 @@
 			]
 		},
 		"UseLiteralKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseLoneAnonymousOperationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseLoneAnonymousOperationOptions" }
+			]
+		},
+		"UseLoneAnonymousOperationOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

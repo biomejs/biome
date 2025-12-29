@@ -1,0 +1,7 @@
+# should generate diagnostics
+query {
+  fieldA
+}
+subscription Foo {
+  fieldB
+}
