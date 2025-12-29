@@ -21,8 +21,9 @@ function Foo() {
 }
 
 <>
-	<Foo onClick={this.handleClick}></Foo>;<Foo onClick={bind()}></Foo>;
-</>;
+	<Foo onClick={this.handleClick}></Foo>
+	<Foo onClick={bind()}></Foo>
+</>
 
 function Foo() {
 	const onClick = useCallback(() => {}, []);
