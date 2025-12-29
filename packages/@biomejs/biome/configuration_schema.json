@@ -5543,6 +5543,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useLoneExecutableDefinition": {
+					"description": "Require queries, mutations, subscriptions or fragments to be located in separate files.\nSee <https://biomejs.dev/linter/rules/use-lone-executable-definition>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseLoneExecutableDefinitionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useMaxParams": {
 					"description": "Enforce a maximum number of parameters in function definitions.\nSee <https://biomejs.dev/linter/rules/use-max-params>",
 					"anyOf": [
@@ -9459,6 +9466,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseLoneExecutableDefinitionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseLoneExecutableDefinitionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseMaxParamsOptions": {
 			"type": "object",
 			"properties": {
@@ -12493,6 +12509,16 @@
 			]
 		},
 		"UseLiteralKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseLoneExecutableDefinitionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseLoneExecutableDefinitionOptions" }
+			]
+		},
+		"UseLoneExecutableDefinitionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
