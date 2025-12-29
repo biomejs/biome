@@ -815,7 +815,7 @@ impl JsModuleInfoCollector {
 
             let mut i = 0;
             while i < self.types.len() {
-                if let Err(diagnostic) = reached_too_many_types(i) {
+                if let Err(diagnostic) = reached_too_many_types(self.types.len()) {
                     self.diagnostics.push(diagnostic);
                     return;
                 }
