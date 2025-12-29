@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: index.jsx
+expression: invalid-01.jsx
 ---
 # Input
 ```jsx
@@ -22,7 +22,7 @@ export default function Index() {
 
 # Diagnostics
 ```
-index.jsx:7:7 lint/nursery/noBeforeInteractiveScriptOutsideDocument ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-01.jsx:7:7 lint/nursery/noBeforeInteractiveScriptOutsideDocument ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use next/script component with the `beforeInteractive` strategy outside of pages/_document.js.
   
