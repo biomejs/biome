@@ -396,6 +396,31 @@ where
             } else {
                 builder.entry(HtmlChild::NonText(child.clone()));
             }
+
+            // Check for trailing whitespace, and preserve it if
+            // - its embedded expression content
+            // - its an element
+            // This preserves spaces between expressions/elements and following text content.
+            if matches!(
+                &child,
+                AnyHtmlElement::AnyHtmlContent(_)
+                    | AnyHtmlElement::HtmlElement(_)
+                    | AnyHtmlElement::HtmlSelfClosingElement(_)
+            ) && let Some(last_token) = child.syntax().last_token()
+                && last_token.has_trailing_whitespace()
+            {
+                // Check if trailing trivia contains a newline
+                let has_newline = last_token
+                    .trailing_trivia()
+                    .pieces()
+                    .any(|piece| piece.is_newline());
+                if has_newline {
+                    builder.entry(HtmlChild::Newline);
+                } else {
+                    builder.entry(HtmlChild::Whitespace);
+                }
+            }
+
             prev_child_was_content = false;
         }
     }

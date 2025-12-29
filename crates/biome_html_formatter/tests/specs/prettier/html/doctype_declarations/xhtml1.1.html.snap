@@ -45,7 +45,7 @@ info: html/doctype_declarations/xhtml1.1.html
      <br />
      <h2 align="center">Sample XHTML page</h2>
      <br />
-@@ -17,13 +17,18 @@
+@@ -17,10 +17,13 @@
          vspace="20"
        />
      </div>
@@ -62,13 +62,7 @@ info: html/doctype_declarations/xhtml1.1.html
 +      <br />
        Foo
      </p>
--    <p align="center"><em>String</em></p>
-+    <p align="center">
-+      <em>String</em>
-+    </p>
-     <br />
-     <hr />
-   </body>
+     <p align="center"><em>String</em></p>
 ```
 
 # Output
@@ -102,9 +96,7 @@ info: html/doctype_declarations/xhtml1.1.html
       <br />
       Foo
     </p>
-    <p align="center">
-      <em>String</em>
-    </p>
+    <p align="center"><em>String</em></p>
     <br />
     <hr />
   </body>
