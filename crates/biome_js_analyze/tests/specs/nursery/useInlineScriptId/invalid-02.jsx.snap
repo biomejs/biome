@@ -9,9 +9,7 @@ import Script from 'next/script'
 
 export default function Page() {
   return (
-    <>
-      <Script dangerouslySetInnerHTML={{ __html: `console.log('Hello world!');` }}></Script>
-    </>
+    <Script dangerouslySetInnerHTML={{ __html: `console.log('Hello world!');` }} />
   )
 }
 
@@ -19,16 +17,16 @@ export default function Page() {
 
 # Diagnostics
 ```
-invalid-02.jsx:7:7 lint/nursery/useInlineScriptId ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-02.jsx:6:5 lint/nursery/useInlineScriptId ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! next/script components with inline content or `dangerouslySetInnerHTML` must specify id attribute.
   
+    4 │ export default function Page() {
     5 │   return (
-    6 │     <>
-  > 7 │       <Script dangerouslySetInnerHTML={{ __html: `console.log('Hello world!');` }}></Script>
-      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │     </>
-    9 │   )
+  > 6 │     <Script dangerouslySetInnerHTML={{ __html: `console.log('Hello world!');` }} />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   )
+    8 │ }
   
   i See the Next.js docs for more details.
   

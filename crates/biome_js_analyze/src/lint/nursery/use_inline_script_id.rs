@@ -25,7 +25,7 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// import Script from 'next/script'
     ///
     /// export default function Page() {
@@ -35,7 +35,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// import Script from 'next/script'
     ///
     /// export default function Page() {
@@ -46,7 +46,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### Valid
-    /// ```js
+    /// ```jsx
     /// import Script from 'next/script'
     ///
     /// export default function Page() {
@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js
+    /// ```jsx
     /// import Script from 'next/script'
     ///
     /// export default function Page() {
@@ -107,7 +107,6 @@ impl Rule for UseInlineScriptId {
                     match argument {
                         AnyJsExpression::JsObjectExpression(obj_expr) => {
                             collect_property_names(&obj_expr, &mut attribute_names)?;
-                            continue;
                         }
                         AnyJsExpression::JsIdentifierExpression(ident_expr) => {
                             let reference = ident_expr.name().ok()?;
@@ -121,25 +120,24 @@ impl Rule for UseInlineScriptId {
                             if let AnyJsExpression::JsObjectExpression(obj_expr) = expression {
                                 collect_property_names(&obj_expr, &mut attribute_names)?;
                             }
-                            continue;
                         }
-                        _ => {
-                            continue;
-                        }
+                        _ => {}
                     }
                 }
-                _ => continue,
+                _ => {}
             }
         }
 
-        let has_children = !jsx_element.parent::<JsxElement>()?.children().is_empty();
-        if has_children || attribute_names.contains("dangerouslySetInnerHTML") {
-            if !attribute_names.contains("id") {
-                return Some(jsx_element.syntax().text_range_with_trivia());
-            }
+        let has_children = jsx_element
+            .parent::<JsxElement>()
+            .is_some_and(|parent| !parent.children().is_empty());
+        if (has_children || attribute_names.contains("dangerouslySetInnerHTML"))
+            && !attribute_names.contains("id")
+        {
+            return Some(jsx_element.syntax().text_range_with_trivia());
         }
 
-        return None;
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -165,9 +163,15 @@ fn collect_property_names(
 ) -> Option<()> {
     for member in obj_expr.members() {
         let member = member.ok()?;
-        let property_member = member.as_js_property_object_member()?;
-        let name = property_member.name().ok()?.name()?;
-        set.insert(name.to_string());
+        if let Some(property_member) = member.as_js_property_object_member()
+            && let Some(name) = property_member.name().ok().and_then(|n| n.name())
+        {
+            set.insert(name.to_string());
+        } else if let Some(shorthand) = member.as_js_shorthand_property_object_member()
+            && let Some(name) = shorthand.name().ok().and_then(|n| n.name().ok())
+        {
+            set.insert(name.to_string());
+        }
     }
     Some(())
 }
