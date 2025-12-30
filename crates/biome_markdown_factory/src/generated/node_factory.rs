@@ -6,16 +6,25 @@ use biome_markdown_syntax::{
     MarkdownSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
-pub fn md_bullet(
-    bullet_token: SyntaxToken,
-    space_token: SyntaxToken,
-    content: MdInlineItemList,
-) -> MdBullet {
+pub fn md_autolink(
+    l_angle_token: SyntaxToken,
+    value: MdInlineItemList,
+    r_angle_token: SyntaxToken,
+) -> MdAutolink {
+    MdAutolink::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_AUTOLINK,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
+}
+pub fn md_bullet(bullet_token: SyntaxToken, content: MdBlockList) -> MdBullet {
     MdBullet::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_BULLET,
         [
             Some(SyntaxElement::Token(bullet_token)),
-            Some(SyntaxElement::Token(space_token)),
             Some(SyntaxElement::Node(content.into_syntax())),
         ],
     ))
@@ -54,12 +63,16 @@ impl MdDocumentBuilder {
         ))
     }
 }
+pub fn md_entity_reference(value_token: SyntaxToken) -> MdEntityReference {
+    MdEntityReference::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_ENTITY_REFERENCE,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn md_fenced_code_block(
     l_fence_token: SyntaxToken,
     code_list: MdCodeNameList,
-    l_hard_line: MdHardLine,
-    content: MdTextual,
-    r_hard_line: MdHardLine,
+    content: MdInlineItemList,
     r_fence_token: SyntaxToken,
 ) -> MdFencedCodeBlock {
     MdFencedCodeBlock::unwrap_cast(SyntaxNode::new_detached(
@@ -67,9 +80,7 @@ pub fn md_fenced_code_block(
         [
             Some(SyntaxElement::Token(l_fence_token)),
             Some(SyntaxElement::Node(code_list.into_syntax())),
-            Some(SyntaxElement::Node(l_hard_line.into_syntax())),
             Some(SyntaxElement::Node(content.into_syntax())),
-            Some(SyntaxElement::Node(r_hard_line.into_syntax())),
             Some(SyntaxElement::Token(r_fence_token)),
         ],
     ))
@@ -115,10 +126,10 @@ impl MdHeaderBuilder {
         ))
     }
 }
-pub fn md_html_block(md_textual: MdTextual) -> MdHtmlBlock {
+pub fn md_html_block(content: MdInlineItemList) -> MdHtmlBlock {
     MdHtmlBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_HTML_BLOCK,
-        [Some(SyntaxElement::Node(md_textual.into_syntax()))],
+        [Some(SyntaxElement::Node(content.into_syntax()))],
     ))
 }
 pub fn md_indent(value_token: SyntaxToken) -> MdIndent {
@@ -127,19 +138,10 @@ pub fn md_indent(value_token: SyntaxToken) -> MdIndent {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn md_indent_code_block(lines: MdIndentedCodeLineList) -> MdIndentCodeBlock {
+pub fn md_indent_code_block(content: MdInlineItemList) -> MdIndentCodeBlock {
     MdIndentCodeBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_INDENT_CODE_BLOCK,
-        [Some(SyntaxElement::Node(lines.into_syntax()))],
-    ))
-}
-pub fn md_indented_code_line(indentation: MdIndent, content: MdTextual) -> MdIndentedCodeLine {
-    MdIndentedCodeLine::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INDENTED_CODE_LINE,
-        [
-            Some(SyntaxElement::Node(indentation.into_syntax())),
-            Some(SyntaxElement::Node(content.into_syntax())),
-        ],
+        [Some(SyntaxElement::Node(content.into_syntax()))],
     ))
 }
 pub fn md_inline_code(
@@ -170,91 +172,63 @@ pub fn md_inline_emphasis(
         ],
     ))
 }
+pub fn md_inline_html(value: MdInlineItemList) -> MdInlineHtml {
+    MdInlineHtml::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_INLINE_HTML,
+        [Some(SyntaxElement::Node(value.into_syntax()))],
+    ))
+}
 pub fn md_inline_image(
-    l_brack_token: SyntaxToken,
     excl_token: SyntaxToken,
-    alt: MdInlineImageAlt,
-    source: MdInlineImageSource,
+    l_brack_token: SyntaxToken,
+    alt: MdInlineItemList,
     r_brack_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    destination: MdInlineItemList,
+    r_paren_token: SyntaxToken,
 ) -> MdInlineImageBuilder {
     MdInlineImageBuilder {
-        l_brack_token,
         excl_token,
+        l_brack_token,
         alt,
-        source,
         r_brack_token,
-        link: None,
+        l_paren_token,
+        destination,
+        r_paren_token,
+        title: None,
     }
 }
 pub struct MdInlineImageBuilder {
-    l_brack_token: SyntaxToken,
     excl_token: SyntaxToken,
-    alt: MdInlineImageAlt,
-    source: MdInlineImageSource,
+    l_brack_token: SyntaxToken,
+    alt: MdInlineItemList,
     r_brack_token: SyntaxToken,
-    link: Option<MdInlineImageLink>,
+    l_paren_token: SyntaxToken,
+    destination: MdInlineItemList,
+    r_paren_token: SyntaxToken,
+    title: Option<MdLinkTitle>,
 }
 impl MdInlineImageBuilder {
-    pub fn with_link(mut self, link: MdInlineImageLink) -> Self {
-        self.link = Some(link);
+    pub fn with_title(mut self, title: MdLinkTitle) -> Self {
+        self.title = Some(title);
         self
     }
     pub fn build(self) -> MdInlineImage {
         MdInlineImage::unwrap_cast(SyntaxNode::new_detached(
             MarkdownSyntaxKind::MD_INLINE_IMAGE,
             [
-                Some(SyntaxElement::Token(self.l_brack_token)),
                 Some(SyntaxElement::Token(self.excl_token)),
+                Some(SyntaxElement::Token(self.l_brack_token)),
                 Some(SyntaxElement::Node(self.alt.into_syntax())),
-                Some(SyntaxElement::Node(self.source.into_syntax())),
                 Some(SyntaxElement::Token(self.r_brack_token)),
-                self.link
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.destination.into_syntax())),
+                self.title
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
             ],
         ))
     }
-}
-pub fn md_inline_image_alt(
-    l_brack_token: SyntaxToken,
-    content: MdInlineItemList,
-    r_brack_token: SyntaxToken,
-) -> MdInlineImageAlt {
-    MdInlineImageAlt::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INLINE_IMAGE_ALT,
-        [
-            Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Node(content.into_syntax())),
-            Some(SyntaxElement::Token(r_brack_token)),
-        ],
-    ))
-}
-pub fn md_inline_image_link(
-    l_paren_token: SyntaxToken,
-    content: MdInlineItemList,
-    r_paren_token: SyntaxToken,
-) -> MdInlineImageLink {
-    MdInlineImageLink::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INLINE_IMAGE_LINK,
-        [
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(content.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
-}
-pub fn md_inline_image_source(
-    l_paren_token: SyntaxToken,
-    content: MdInlineItemList,
-    r_paren_token: SyntaxToken,
-) -> MdInlineImageSource {
-    MdInlineImageSource::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INLINE_IMAGE_SOURCE,
-        [
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(content.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
 }
 pub fn md_inline_italic(
     l_fence_token: SyntaxToken,
@@ -275,20 +249,48 @@ pub fn md_inline_link(
     text: MdInlineItemList,
     r_brack_token: SyntaxToken,
     l_paren_token: SyntaxToken,
-    source: MdInlineItemList,
+    destination: MdInlineItemList,
     r_paren_token: SyntaxToken,
-) -> MdInlineLink {
-    MdInlineLink::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INLINE_LINK,
-        [
-            Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Node(text.into_syntax())),
-            Some(SyntaxElement::Token(r_brack_token)),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(source.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
+) -> MdInlineLinkBuilder {
+    MdInlineLinkBuilder {
+        l_brack_token,
+        text,
+        r_brack_token,
+        l_paren_token,
+        destination,
+        r_paren_token,
+        title: None,
+    }
+}
+pub struct MdInlineLinkBuilder {
+    l_brack_token: SyntaxToken,
+    text: MdInlineItemList,
+    r_brack_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    destination: MdInlineItemList,
+    r_paren_token: SyntaxToken,
+    title: Option<MdLinkTitle>,
+}
+impl MdInlineLinkBuilder {
+    pub fn with_title(mut self, title: MdLinkTitle) -> Self {
+        self.title = Some(title);
+        self
+    }
+    pub fn build(self) -> MdInlineLink {
+        MdInlineLink::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_INLINE_LINK,
+            [
+                Some(SyntaxElement::Token(self.l_brack_token)),
+                Some(SyntaxElement::Node(self.text.into_syntax())),
+                Some(SyntaxElement::Token(self.r_brack_token)),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.destination.into_syntax())),
+                self.title
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
 }
 pub fn md_link_block(label: MdTextual, url: MdTextual) -> MdLinkBlockBuilder {
     MdLinkBlockBuilder {
@@ -319,31 +321,212 @@ impl MdLinkBlockBuilder {
         ))
     }
 }
-pub fn md_order_list_item(md_bullet_list: MdBulletList) -> MdOrderListItem {
-    MdOrderListItem::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_ORDER_LIST_ITEM,
+pub fn md_link_destination(content: MdInlineItemList) -> MdLinkDestination {
+    MdLinkDestination::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_LINK_DESTINATION,
+        [Some(SyntaxElement::Node(content.into_syntax()))],
+    ))
+}
+pub fn md_link_label(content: MdInlineItemList) -> MdLinkLabel {
+    MdLinkLabel::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_LINK_LABEL,
+        [Some(SyntaxElement::Node(content.into_syntax()))],
+    ))
+}
+pub fn md_link_reference_definition(
+    l_brack_token: SyntaxToken,
+    label: MdLinkLabel,
+    r_brack_token: SyntaxToken,
+    colon_token: SyntaxToken,
+    destination: MdLinkDestination,
+) -> MdLinkReferenceDefinitionBuilder {
+    MdLinkReferenceDefinitionBuilder {
+        l_brack_token,
+        label,
+        r_brack_token,
+        colon_token,
+        destination,
+        title: None,
+    }
+}
+pub struct MdLinkReferenceDefinitionBuilder {
+    l_brack_token: SyntaxToken,
+    label: MdLinkLabel,
+    r_brack_token: SyntaxToken,
+    colon_token: SyntaxToken,
+    destination: MdLinkDestination,
+    title: Option<MdLinkTitle>,
+}
+impl MdLinkReferenceDefinitionBuilder {
+    pub fn with_title(mut self, title: MdLinkTitle) -> Self {
+        self.title = Some(title);
+        self
+    }
+    pub fn build(self) -> MdLinkReferenceDefinition {
+        MdLinkReferenceDefinition::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_LINK_REFERENCE_DEFINITION,
+            [
+                Some(SyntaxElement::Token(self.l_brack_token)),
+                Some(SyntaxElement::Node(self.label.into_syntax())),
+                Some(SyntaxElement::Token(self.r_brack_token)),
+                Some(SyntaxElement::Token(self.colon_token)),
+                Some(SyntaxElement::Node(self.destination.into_syntax())),
+                self.title
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn md_link_title(content: MdInlineItemList) -> MdLinkTitle {
+    MdLinkTitle::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_LINK_TITLE,
+        [Some(SyntaxElement::Node(content.into_syntax()))],
+    ))
+}
+pub fn md_newline(value_token: SyntaxToken) -> MdNewline {
+    MdNewline::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_NEWLINE,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn md_ordered_list_item(md_bullet_list: MdBulletList) -> MdOrderedListItem {
+    MdOrderedListItem::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_ORDERED_LIST_ITEM,
         [Some(SyntaxElement::Node(md_bullet_list.into_syntax()))],
     ))
 }
-pub fn md_paragraph(list: MdInlineItemList, hard_line: MdHardLine) -> MdParagraph {
-    MdParagraph::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_PARAGRAPH,
+pub fn md_paragraph(list: MdInlineItemList) -> MdParagraphBuilder {
+    MdParagraphBuilder {
+        list,
+        hard_line: None,
+    }
+}
+pub struct MdParagraphBuilder {
+    list: MdInlineItemList,
+    hard_line: Option<MdHardLine>,
+}
+impl MdParagraphBuilder {
+    pub fn with_hard_line(mut self, hard_line: MdHardLine) -> Self {
+        self.hard_line = Some(hard_line);
+        self
+    }
+    pub fn build(self) -> MdParagraph {
+        MdParagraph::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_PARAGRAPH,
+            [
+                Some(SyntaxElement::Node(self.list.into_syntax())),
+                self.hard_line
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn md_quote(marker_token: SyntaxToken, content: MdBlockList) -> MdQuote {
+    MdQuote::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_QUOTE,
         [
-            Some(SyntaxElement::Node(list.into_syntax())),
-            Some(SyntaxElement::Node(hard_line.into_syntax())),
+            Some(SyntaxElement::Token(marker_token)),
+            Some(SyntaxElement::Node(content.into_syntax())),
         ],
     ))
 }
-pub fn md_quote(any_md_block: AnyMdBlock) -> MdQuote {
-    MdQuote::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_QUOTE,
-        [Some(SyntaxElement::Node(any_md_block.into_syntax()))],
+pub fn md_reference_image(
+    excl_token: SyntaxToken,
+    l_brack_token: SyntaxToken,
+    alt: MdInlineItemList,
+    r_brack_token: SyntaxToken,
+) -> MdReferenceImageBuilder {
+    MdReferenceImageBuilder {
+        excl_token,
+        l_brack_token,
+        alt,
+        r_brack_token,
+        label: None,
+    }
+}
+pub struct MdReferenceImageBuilder {
+    excl_token: SyntaxToken,
+    l_brack_token: SyntaxToken,
+    alt: MdInlineItemList,
+    r_brack_token: SyntaxToken,
+    label: Option<MdReferenceLinkLabel>,
+}
+impl MdReferenceImageBuilder {
+    pub fn with_label(mut self, label: MdReferenceLinkLabel) -> Self {
+        self.label = Some(label);
+        self
+    }
+    pub fn build(self) -> MdReferenceImage {
+        MdReferenceImage::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_REFERENCE_IMAGE,
+            [
+                Some(SyntaxElement::Token(self.excl_token)),
+                Some(SyntaxElement::Token(self.l_brack_token)),
+                Some(SyntaxElement::Node(self.alt.into_syntax())),
+                Some(SyntaxElement::Token(self.r_brack_token)),
+                self.label
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn md_reference_link(
+    l_brack_token: SyntaxToken,
+    text: MdInlineItemList,
+    r_brack_token: SyntaxToken,
+) -> MdReferenceLinkBuilder {
+    MdReferenceLinkBuilder {
+        l_brack_token,
+        text,
+        r_brack_token,
+        label: None,
+    }
+}
+pub struct MdReferenceLinkBuilder {
+    l_brack_token: SyntaxToken,
+    text: MdInlineItemList,
+    r_brack_token: SyntaxToken,
+    label: Option<MdReferenceLinkLabel>,
+}
+impl MdReferenceLinkBuilder {
+    pub fn with_label(mut self, label: MdReferenceLinkLabel) -> Self {
+        self.label = Some(label);
+        self
+    }
+    pub fn build(self) -> MdReferenceLink {
+        MdReferenceLink::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_REFERENCE_LINK,
+            [
+                Some(SyntaxElement::Token(self.l_brack_token)),
+                Some(SyntaxElement::Node(self.text.into_syntax())),
+                Some(SyntaxElement::Token(self.r_brack_token)),
+                self.label
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn md_reference_link_label(
+    l_brack_token: SyntaxToken,
+    label: MdInlineItemList,
+    r_brack_token: SyntaxToken,
+) -> MdReferenceLinkLabel {
+    MdReferenceLinkLabel::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_REFERENCE_LINK_LABEL,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(label.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
     ))
 }
-pub fn md_setext_header(md_paragraph: MdParagraph) -> MdSetextHeader {
+pub fn md_setext_header(content: MdInlineItemList, underline_token: SyntaxToken) -> MdSetextHeader {
     MdSetextHeader::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_SETEXT_HEADER,
-        [Some(SyntaxElement::Node(md_paragraph.into_syntax()))],
+        [
+            Some(SyntaxElement::Node(content.into_syntax())),
+            Some(SyntaxElement::Token(underline_token)),
+        ],
     ))
 }
 pub fn md_soft_break(value_token: SyntaxToken) -> MdSoftBreak {
@@ -388,25 +571,16 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
-pub fn md_code_name_list<I, S>(items: I, separators: S) -> MdCodeNameList
+pub fn md_code_name_list<I>(items: I) -> MdCodeNameList
 where
     I: IntoIterator<Item = MdTextual>,
     I::IntoIter: ExactSizeIterator,
-    S: IntoIterator<Item = MarkdownSyntaxToken>,
-    S::IntoIter: ExactSizeIterator,
 {
-    let mut items = items.into_iter();
-    let mut separators = separators.into_iter();
-    let length = items.len() + separators.len();
     MdCodeNameList::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_CODE_NAME_LIST,
-        (0..length).map(|index| {
-            if index % 2 == 0 {
-                Some(items.next()?.into_syntax().into())
-            } else {
-                Some(separators.next()?.into())
-            }
-        }),
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn md_hash_list<I>(items: I) -> MdHashList
@@ -421,18 +595,6 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
-pub fn md_indented_code_line_list<I>(items: I) -> MdIndentedCodeLineList
-where
-    I: IntoIterator<Item = MdIndentedCodeLine>,
-    I::IntoIter: ExactSizeIterator,
-{
-    MdIndentedCodeLineList::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INDENTED_CODE_LINE_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
-    ))
-}
 pub fn md_inline_item_list<I>(items: I) -> MdInlineItemList
 where
     I: IntoIterator<Item = AnyMdInline>,
@@ -440,18 +602,6 @@ where
 {
     MdInlineItemList::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_INLINE_ITEM_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
-    ))
-}
-pub fn md_order_list<I>(items: I) -> MdOrderList
-where
-    I: IntoIterator<Item = AnyCodeBlock>,
-    I::IntoIter: ExactSizeIterator,
-{
-    MdOrderList::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_ORDER_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

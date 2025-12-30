@@ -1,0 +1,88 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```
+This has [unclosed link
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..9 "This has " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@9..10 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@10..23 "unclosed link" [] [],
+                        },
+                    ],
+                    r_brack_token: missing (required),
+                    label: missing (optional),
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@23..24 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@24..24 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..24
+  0: (empty)
+  1: MD_BLOCK_LIST@0..24
+    0: MD_PARAGRAPH@0..24
+      0: MD_INLINE_ITEM_LIST@0..24
+        0: MD_TEXTUAL@0..9
+          0: MD_TEXTUAL_LITERAL@0..9 "This has " [] []
+        1: MD_REFERENCE_LINK@9..23
+          0: L_BRACK@9..10 "[" [] []
+          1: MD_INLINE_ITEM_LIST@10..23
+            0: MD_TEXTUAL@10..23
+              0: MD_TEXTUAL_LITERAL@10..23 "unclosed link" [] []
+          2: (empty)
+          3: (empty)
+        2: MD_TEXTUAL@23..24
+          0: MD_TEXTUAL_LITERAL@23..24 "\n" [] []
+      1: (empty)
+  2: EOF@24..24 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unclosed_link.md:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unclosed link, expected `]` to close link text.
+  
+  > 1 │ This has [unclosed link
+      │          ^
+    2 │ 
+  
+  i link started here
+  
+  > 1 │ This has [unclosed link
+      │          ^
+    2 │ 
+  
+  i Format: [link text](url)
+  
+```

@@ -1,0 +1,351 @@
+//! Block quote parsing for Markdown (CommonMark §5.1).
+//!
+//! A block quote begins with `>` at the start of a line and can contain
+//! nested block elements. Multiple consecutive `>` lines form a single quote.
+//! Nested quotes are created with `>>`, `>>>`, etc.
+//!
+//! # CommonMark §5.1 Block Quotes
+//!
+//! A block quote marker consists of 0-3 spaces of indentation, `>`, and an
+//! optional space. The contents of the block quote are the result of parsing
+//! the remainder of the line (after the `>` and optional space) as blocks.
+//!
+//! ## Depth Limits
+//!
+//! To prevent stack overflow from pathological input (e.g., hundreds of `>`),
+//! nesting depth is limited to 100 levels. Deeper nesting emits a diagnostic
+//! and treats additional `>` as content.
+//!
+//! ## Lazy Continuation (§5.1)
+//!
+//! A block quote can contain "lazy continuation lines" — paragraph content
+//! that continues without requiring `>` on each line. For example:
+//!
+//! ```markdown
+//! > This is a quote
+//! that continues here without >
+//! ```
+//!
+//! Both lines belong to the same block quote. Lazy continuation stops at:
+//! - A blank line
+//! - A line that starts another block-level construct (header, code, list, etc.)
+
+use biome_markdown_syntax::T;
+use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
+use biome_parser::Parser;
+use biome_parser::prelude::ParsedSyntax::{self, *};
+
+use super::parse_error::{MAX_NESTING_DEPTH, quote_nesting_too_deep};
+use crate::MarkdownParser;
+
+/// Check if we're at the start of a block quote (`>`).
+pub(crate) fn at_quote(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        let at_virtual_line_start = p.state().virtual_line_start == Some(p.cur_range().start());
+        if !p.at_line_start() && !p.at_start_of_input() && !at_virtual_line_start {
+            return false;
+        }
+        let mut indent = p.line_start_leading_indent();
+        if at_virtual_line_start && indent > 0 {
+            // Treat virtual line start as column 0.
+            indent = 0;
+        }
+        if indent > 3 {
+            return false;
+        }
+        p.skip_line_indent(3);
+        p.at(T![>])
+    })
+}
+
+/// Parse a block quote.
+///
+/// Grammar: MdQuote = marker: '>' content: AnyMdBlock
+///
+/// A block quote starts with `>` at line start and contains block content.
+/// Multi-line quotes: consecutive `>` lines continue the same quote's content.
+/// Nested quotes: `>>` creates a nested quote inside the outer quote.
+///
+/// Nesting is limited to `MAX_NESTING_DEPTH` to prevent stack overflow.
+pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
+    if !at_quote(p) {
+        return Absent;
+    }
+
+    if p.state().block_quote_depth >= MAX_NESTING_DEPTH {
+        let range = p.cur_range();
+        p.error(quote_nesting_too_deep(p, range));
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.skip_line_indent(3);
+
+    // Increment quote depth
+    p.state_mut().block_quote_depth += 1;
+
+    // Bump the `>` marker token
+    p.bump(T![>]);
+
+    let has_indented_code = at_quote_indented_code_start(p);
+    let marker_space = skip_optional_marker_space(p, has_indented_code);
+    p.set_virtual_line_start();
+
+    parse_quote_block_list(p);
+
+    // Decrement quote depth
+    p.state_mut().block_quote_depth -= 1;
+
+    let completed = m.complete(p, MD_QUOTE);
+    let range = completed.range(p);
+    let indent = 1 + if marker_space { 1 } else { 0 };
+    p.record_quote_indent(range, indent);
+    Present(completed)
+}
+
+fn parse_quote_block_list(p: &mut MarkdownParser) {
+    let m = p.start();
+    let mut first_line = true;
+    let depth = p.state().block_quote_depth;
+    let mut last_block_was_paragraph = false;
+
+    loop {
+        if p.at(T![EOF]) {
+            break;
+        }
+
+        let mut line_started_with_prefix = first_line;
+        if !first_line && !p.at(NEWLINE) && (p.at_line_start() || p.has_preceding_line_break()) {
+            if has_quote_prefix(p, depth) {
+                consume_quote_prefix(p, depth);
+                line_started_with_prefix = true;
+            } else {
+                break;
+            }
+        }
+        first_line = false;
+
+        if p.at(NEWLINE) {
+            if !line_started_with_prefix && line_has_quote_prefix_at_current(p, depth) {
+                line_started_with_prefix = true;
+            }
+            if p.at_blank_line() && !line_started_with_prefix {
+                break;
+            }
+            if has_empty_line_before(p) && !line_started_with_prefix {
+                break;
+            }
+            if last_block_was_paragraph && !line_started_with_prefix {
+                break;
+            }
+            if !line_started_with_prefix {
+                let has_next_prefix = p.lookahead(|p| {
+                    p.bump(NEWLINE);
+                    has_quote_prefix(p, depth)
+                });
+                if !has_next_prefix {
+                    break;
+                }
+            }
+            let text_m = p.start();
+            p.bump(NEWLINE);
+            text_m.complete(p, MD_NEWLINE);
+            continue;
+        }
+
+        if at_quote_indented_code_start(p) {
+            parse_quote_indented_code_block(p, depth);
+            last_block_was_paragraph = false;
+            continue;
+        }
+
+        let parsed_kind = super::parse_any_block_with_indent_code_policy(p, true);
+        last_block_was_paragraph = parsed_kind == super::ParsedBlockKind::Paragraph;
+    }
+
+    m.complete(p, MD_BLOCK_LIST);
+}
+
+fn line_has_quote_prefix_at_current(p: &MarkdownParser, depth: usize) -> bool {
+    if depth == 0 {
+        return false;
+    }
+
+    let source = p.source().source_text();
+    let start: usize = p.cur_range().start().into();
+    let line_start = source[..start].rfind('\n').map_or(0, |idx| idx + 1);
+
+    let mut idx = line_start;
+    let mut indent = 0usize;
+    while idx < start {
+        match source.as_bytes()[idx] {
+            b' ' => {
+                indent += 1;
+                idx += 1;
+            }
+            b'\t' => {
+                indent += 4;
+                idx += 1;
+            }
+            _ => break,
+        }
+        if indent > 3 {
+            return false;
+        }
+    }
+
+    for _ in 0..depth {
+        if idx >= start || source.as_bytes()[idx] != b'>' {
+            return false;
+        }
+        idx += 1;
+        if idx < start {
+            let c = source.as_bytes()[idx];
+            if c == b' ' || c == b'\t' {
+                idx += 1;
+            }
+        }
+    }
+
+    true
+}
+
+fn has_empty_line_before(p: &MarkdownParser) -> bool {
+    let start: usize = p.cur_range().start().into();
+    if start == 0 {
+        return false;
+    }
+    let source = p.source().source_text().as_bytes();
+    matches!(source.get(start - 1), Some(b'\n' | b'\r'))
+}
+
+fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
+    let mut column = 0usize;
+
+    for c in p.source_after_current().chars() {
+        match c {
+            ' ' => column += 1,
+            '\t' => column += 4 - (column % 4),
+            _ => break,
+        }
+    }
+
+    column >= 4
+}
+
+fn parse_quote_indented_code_block(p: &mut MarkdownParser, depth: usize) {
+    let m = p.start();
+    let content = p.start();
+
+    loop {
+        if p.at(T![EOF]) {
+            break;
+        }
+
+        if p.at(NEWLINE) {
+            let text_m = p.start();
+            p.bump_remap(MD_TEXTUAL_LITERAL);
+            text_m.complete(p, MD_TEXTUAL);
+
+            if p.at(T![EOF]) {
+                break;
+            }
+
+            if !has_quote_prefix(p, depth) {
+                break;
+            }
+            consume_quote_prefix(p, depth);
+
+            if p.at(NEWLINE) {
+                continue;
+            }
+            if !at_quote_indented_code_start(p) {
+                break;
+            }
+            continue;
+        }
+
+        let text_m = p.start();
+        p.bump_remap(MD_TEXTUAL_LITERAL);
+        text_m.complete(p, MD_TEXTUAL);
+    }
+
+    content.complete(p, MD_INLINE_ITEM_LIST);
+    m.complete(p, MD_INDENT_CODE_BLOCK);
+}
+
+fn skip_optional_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bool {
+    if !p.at(MD_TEXTUAL_LITERAL) {
+        return false;
+    }
+
+    let text = p.cur_text();
+    if text == " " {
+        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+        return true;
+    }
+    if text == "\t" {
+        if !preserve_tab {
+            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+        }
+        return true;
+    }
+    false
+}
+
+pub(crate) fn has_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {
+    if depth == 0 {
+        return false;
+    }
+
+    p.lookahead(|p| consume_quote_prefix_impl(p, depth, false))
+}
+
+pub(crate) fn consume_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {
+    if depth == 0 || !has_quote_prefix(p, depth) {
+        return false;
+    }
+
+    consume_quote_prefix_impl(p, depth, true)
+}
+
+pub(crate) fn consume_quote_prefix_without_virtual(p: &mut MarkdownParser, depth: usize) -> bool {
+    if depth == 0 || !has_quote_prefix(p, depth) {
+        return false;
+    }
+
+    consume_quote_prefix_impl(p, depth, false)
+}
+
+fn consume_quote_prefix_impl(
+    p: &mut MarkdownParser,
+    depth: usize,
+    set_virtual_line_start: bool,
+) -> bool {
+    if !p.at_line_start() && !p.at_start_of_input() && !p.has_preceding_line_break() {
+        return false;
+    }
+
+    for _ in 0..depth {
+        let prev_virtual = p.state().virtual_line_start;
+        p.state_mut().virtual_line_start = Some(p.cur_range().start());
+        p.skip_line_indent(3);
+        p.state_mut().virtual_line_start = prev_virtual;
+        if p.at(T![>]) {
+            p.parse_as_skipped_trivia_tokens(|p| p.bump(T![>]));
+        } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
+            p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![>]));
+        } else {
+            return false;
+        }
+        let has_indented_code = at_quote_indented_code_start(p);
+        skip_optional_marker_space(p, has_indented_code);
+    }
+
+    if set_virtual_line_start {
+        p.set_virtual_line_start();
+    }
+
+    true
+}
