@@ -19,6 +19,7 @@ use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
 
+#[derive(Debug, Clone)]
 pub struct DiagnosticsPayload {
     pub diagnostics: Vec<Error>,
     pub diagnostic_level: Severity,

@@ -9,6 +9,7 @@
 //! becomes available in stable Rust, we can switch to that.
 
 use std::ops::Deref;
+use std::sync::Arc;
 use std::{
     fmt::{Debug, Formatter},
     io,
@@ -23,8 +24,9 @@ use crate::{
 
 /// The `Error` struct wraps any type implementing [Diagnostic] into a single
 /// dynamic type.
+#[derive(Clone)]
 pub struct Error {
-    inner: Box<Box<dyn Diagnostic + Send + Sync + 'static>>,
+    inner: Arc<dyn Diagnostic + Send + Sync + 'static>,
 }
 
 /// Implement the [Diagnostic] trait as inherent methods on the [Error] type.
@@ -83,7 +85,7 @@ where
 {
     fn from(diag: T) -> Self {
         Self {
-            inner: Box::new(Box::new(diag)),
+            inner: Arc::new(diag),
         }
     }
 }
@@ -92,7 +94,7 @@ impl AsDiagnostic for Error {
     type Diagnostic = dyn Diagnostic;
 
     fn as_diagnostic(&self) -> &Self::Diagnostic {
-        &**self.inner
+        &*self.inner
     }
 
     fn as_dyn(&self) -> &dyn Diagnostic {
@@ -163,11 +165,11 @@ mod tests {
 
     #[test]
     fn test_error_size() {
-        assert_eq!(size_of::<Error>(), size_of::<usize>());
+        assert_eq!(size_of::<Error>(), size_of::<u128>());
     }
 
     #[test]
     fn test_result_size() {
-        assert_eq!(size_of::<Result<()>>(), size_of::<usize>());
+        assert_eq!(size_of::<Result<()>>(), size_of::<u128>());
     }
 }

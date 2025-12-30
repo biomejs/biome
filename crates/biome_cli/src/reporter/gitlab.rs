@@ -18,7 +18,7 @@ use std::{
 
 pub struct GitLabReporter<'a> {
     pub(crate) execution: &'a dyn Execution,
-    pub(crate) diagnostics: DiagnosticsPayload,
+    pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) verbose: bool,
     pub(crate) working_directory: Option<Utf8PathBuf>,
 }
@@ -27,7 +27,7 @@ impl Reporter for GitLabReporter<'_> {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
         visitor.report_diagnostics(
             self.execution,
-            self.diagnostics,
+            self.diagnostics_payload,
             self.verbose,
             self.working_directory.as_deref(),
         )?;

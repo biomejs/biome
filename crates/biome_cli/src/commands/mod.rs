@@ -696,11 +696,11 @@ impl BiomeCommand {
         }
     }
 
-    pub const fn get_color(&self) -> Option<&ColorsArg> {
+    pub fn get_color(&self) -> Option<&ColorsArg> {
         match self.cli_options() {
             Some(cli_options) => {
                 // To properly display GitHub annotations we need to disable colors
-                if matches!(cli_options.reporter, CliReporter::GitHub) {
+                if cli_options.reporter.contains(&CliReporter::GitHub) {
                     return Some(&ColorsArg::Off);
                 }
                 // We want force colors in CI, to give e better UX experience

@@ -55,9 +55,10 @@ pub struct CliOptions {
     #[bpaf(
         long("reporter"),
         argument("json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif"),
-        fallback(CliReporter::default())
+        fallback(CliReporter::default()),
+        many
     )]
-    pub reporter: CliReporter,
+    pub reporter: Vec<CliReporter>,
 
     /// The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
     #[bpaf(
