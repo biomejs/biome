@@ -1138,8 +1138,8 @@ impl MdQuote {
     pub fn marker_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn content(&self) -> MdBlockList {
-        support::list(&self.syntax, 1usize)
+    pub fn content(&self) -> SyntaxResult<AnyMdBlock> {
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for MdQuote {
@@ -1153,7 +1153,7 @@ impl Serialize for MdQuote {
 #[derive(Serialize)]
 pub struct MdQuoteFields {
     pub marker_token: SyntaxResult<SyntaxToken>,
-    pub content: MdBlockList,
+    pub content: SyntaxResult<AnyMdBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdReferenceImage {
@@ -3042,7 +3042,7 @@ impl std::fmt::Debug for MdQuote {
                     "marker_token",
                     &support::DebugSyntaxResult(self.marker_token()),
                 )
-                .field("content", &self.content())
+                .field("content", &support::DebugSyntaxResult(self.content()))
                 .finish()
         } else {
             f.debug_struct("MdQuote").finish()
