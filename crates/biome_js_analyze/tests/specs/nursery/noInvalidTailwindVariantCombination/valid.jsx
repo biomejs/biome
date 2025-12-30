@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+// Valid - single variants
+<div class="hover:bg-red-500" />;
+<div class="focus:text-white" />;
+
+// Valid - separate responsive variants
+<div class="sm:flex md:block" />;
+
+// Valid - combining different types of variants
+<div class="hover:focus:bg-red-500" />;
+<div class="sm:hover:flex" />;
+<div class="group-hover:text-white" />;
+<div class="group-hover:peer-focus:text-white" />;

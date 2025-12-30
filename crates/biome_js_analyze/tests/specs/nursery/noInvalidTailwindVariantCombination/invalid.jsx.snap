@@ -1,0 +1,130 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// Invalid - duplicate variants
+<div class="hover:hover:bg-red-500" />;
+<div class="focus:focus:text-white" />;
+
+// Invalid - conflicting responsive variants
+<div class="sm:md:flex" />;
+<div class="lg:xl:hidden" />;
+
+// Invalid - mutually exclusive positional variants
+<div class="first:last:text-bold" />;
+<div class="odd:even:bg-gray-100" />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:12 lint/nursery/noInvalidTailwindVariantCombination ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invalid Tailwind CSS variant combination detected.
+  
+    1 │ // Invalid - duplicate variants
+  > 2 │ <div class="hover:hover:bg-red-500" />;
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <div class="focus:focus:text-white" />;
+    4 │ 
+  
+  i `hover:hover:bg-red-500`: duplicate variant `hover`
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:3:12 lint/nursery/noInvalidTailwindVariantCombination ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invalid Tailwind CSS variant combination detected.
+  
+    1 │ // Invalid - duplicate variants
+    2 │ <div class="hover:hover:bg-red-500" />;
+  > 3 │ <div class="focus:focus:text-white" />;
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ // Invalid - conflicting responsive variants
+  
+  i `focus:focus:text-white`: duplicate variant `focus`
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:12 lint/nursery/noInvalidTailwindVariantCombination ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invalid Tailwind CSS variant combination detected.
+  
+    5 │ // Invalid - conflicting responsive variants
+  > 6 │ <div class="sm:md:flex" />;
+      │            ^^^^^^^^^^^^
+    7 │ <div class="lg:xl:hidden" />;
+    8 │ 
+  
+  i `sm:md:flex`: conflicting responsive variants `sm` and `md`
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:12 lint/nursery/noInvalidTailwindVariantCombination ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invalid Tailwind CSS variant combination detected.
+  
+    5 │ // Invalid - conflicting responsive variants
+    6 │ <div class="sm:md:flex" />;
+  > 7 │ <div class="lg:xl:hidden" />;
+      │            ^^^^^^^^^^^^^^
+    8 │ 
+    9 │ // Invalid - mutually exclusive positional variants
+  
+  i `lg:xl:hidden`: conflicting responsive variants `lg` and `xl`
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:12 lint/nursery/noInvalidTailwindVariantCombination ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invalid Tailwind CSS variant combination detected.
+  
+     9 │ // Invalid - mutually exclusive positional variants
+  > 10 │ <div class="first:last:text-bold" />;
+       │            ^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <div class="odd:even:bg-gray-100" />;
+    12 │ 
+  
+  i `first:last:text-bold`: mutually exclusive variants `first` and `last`
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:12 lint/nursery/noInvalidTailwindVariantCombination ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invalid Tailwind CSS variant combination detected.
+  
+     9 │ // Invalid - mutually exclusive positional variants
+    10 │ <div class="first:last:text-bold" />;
+  > 11 │ <div class="odd:even:bg-gray-100" />;
+       │            ^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+  i `odd:even:bg-gray-100`: mutually exclusive variants `odd` and `even`
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

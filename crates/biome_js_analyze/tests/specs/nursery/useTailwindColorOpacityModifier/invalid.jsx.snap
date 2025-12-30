@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// Invalid - separate opacity utilities should use modifier syntax
+<div class="bg-red-500 bg-opacity-50" />;
+<div class="text-blue-600 text-opacity-75" />;
+<div class="border-green-400 border-opacity-25" />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:12 lint/nursery/useTailwindColorOpacityModifier  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the opacity modifier syntax instead of separate opacity utilities.
+  
+    1 │ // Invalid - separate opacity utilities should use modifier syntax
+  > 2 │ <div class="bg-red-500 bg-opacity-50" />;
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <div class="text-blue-600 text-opacity-75" />;
+    4 │ <div class="border-green-400 border-opacity-25" />;
+  
+  i Transformations: `bg-red-500` + `bg-opacity-50` → `bg-red-500/50`
+  
+  i The opacity modifier syntax (e.g., bg-red-500/50) is more concise and the preferred approach in modern Tailwind CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use opacity modifier syntax
+  
+    1 1 │   // Invalid - separate opacity utilities should use modifier syntax
+    2   │ - <div·class="bg-red-500·bg-opacity-50"·/>;
+      2 │ + <div·class="bg-red-500/50"·/>;
+    3 3 │   <div class="text-blue-600 text-opacity-75" />;
+    4 4 │   <div class="border-green-400 border-opacity-25" />;
+  
+
+```
+
+```
+invalid.jsx:3:12 lint/nursery/useTailwindColorOpacityModifier  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the opacity modifier syntax instead of separate opacity utilities.
+  
+    1 │ // Invalid - separate opacity utilities should use modifier syntax
+    2 │ <div class="bg-red-500 bg-opacity-50" />;
+  > 3 │ <div class="text-blue-600 text-opacity-75" />;
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <div class="border-green-400 border-opacity-25" />;
+    5 │ 
+  
+  i Transformations: `text-blue-600` + `text-opacity-75` → `text-blue-600/75`
+  
+  i The opacity modifier syntax (e.g., bg-red-500/50) is more concise and the preferred approach in modern Tailwind CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use opacity modifier syntax
+  
+    1 1 │   // Invalid - separate opacity utilities should use modifier syntax
+    2 2 │   <div class="bg-red-500 bg-opacity-50" />;
+    3   │ - <div·class="text-blue-600·text-opacity-75"·/>;
+      3 │ + <div·class="text-blue-600/75"·/>;
+    4 4 │   <div class="border-green-400 border-opacity-25" />;
+    5 5 │   
+  
+
+```
+
+```
+invalid.jsx:4:12 lint/nursery/useTailwindColorOpacityModifier  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the opacity modifier syntax instead of separate opacity utilities.
+  
+    2 │ <div class="bg-red-500 bg-opacity-50" />;
+    3 │ <div class="text-blue-600 text-opacity-75" />;
+  > 4 │ <div class="border-green-400 border-opacity-25" />;
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Transformations: `border-green-400` + `border-opacity-25` → `border-green-400/25`
+  
+  i The opacity modifier syntax (e.g., bg-red-500/50) is more concise and the preferred approach in modern Tailwind CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use opacity modifier syntax
+  
+    2 2 │   <div class="bg-red-500 bg-opacity-50" />;
+    3 3 │   <div class="text-blue-600 text-opacity-75" />;
+    4   │ - <div·class="border-green-400·border-opacity-25"·/>;
+      4 │ + <div·class="border-green-400/25"·/>;
+    5 5 │   
+  
+
+```

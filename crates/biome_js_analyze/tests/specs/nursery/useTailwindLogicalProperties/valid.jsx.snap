@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+// Valid - logical padding properties
+<div class="ps-4" />;
+<div class="pe-2" />;
+
+// Valid - logical margin properties
+<div class="ms-4" />;
+<div class="me-2 ms-4" />;
+
+// Valid - logical positioning
+<div class="start-0 end-4" />;
+
+// Valid - logical text alignment
+<div class="text-start" />;
+<div class="text-end" />;
+
+// Valid - logical border radius
+<div class="rounded-s-lg" />;
+<div class="rounded-e-lg" />;
+
+// Valid - vertical properties (not affected)
+<div class="pt-4 pb-2" />;
+<div class="mt-4 mb-2" />;
+<div class="top-0 bottom-4" />;
+
+```
