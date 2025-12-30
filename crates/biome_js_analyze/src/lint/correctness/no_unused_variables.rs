@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::JsRuleAction;
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::RuleSource;
@@ -13,8 +15,10 @@ use biome_js_syntax::{
     JsSequenceExpression, JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule,
     TsInferType,
 };
+use biome_package::{PackageJson, PackageType};
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
+use camino::Utf8PathBuf;
 
 declare_lint_rule! {
     /// Disallow unused variables.
@@ -63,7 +67,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### Valid
-    /// 
+    ///
     /// Top-level interfaces and namespaces in script files (files without
     /// imports or exports) are not reported, as they may augment global types:
     ///
@@ -315,9 +319,12 @@ impl Rule for NoUnusedVariables {
             }
         }
 
-        // Top-level interfaces/namespaces in a script file are exempt
-        let is_script_by_source = ctx.source_type::<JsFileSource>().is_script();
-        if is_script_declaration(binding, is_script_by_source) {
+        // Top-level interfaces/namespaces in script files are allowed
+        let is_module_type = ctx
+            .get_service::<Option<(Utf8PathBuf, Arc<PackageJson>)>>()
+            .and_then(|manifest| manifest.as_ref().map(|(_, package_json)| package_json))
+            .is_some_and(|package_json| package_json.r#type == Some(PackageType::Module));
+        if !is_module_type && is_script_declaration(binding) {
             return None;
         }
 
@@ -422,7 +429,7 @@ impl Rule for NoUnusedVariables {
 
 /// Returns `true` if the file is considered a script
 /// and the binding is an interface or namespace
-fn is_script_declaration(binding: &AnyJsIdentifierBinding, is_script_by_source: bool) -> bool {
+fn is_script_declaration(binding: &AnyJsIdentifierBinding) -> bool {
     let Some(decl) = binding.declaration() else {
         return false;
     };
@@ -433,18 +440,11 @@ fn is_script_declaration(binding: &AnyJsIdentifierBinding, is_script_by_source: 
             | AnyJsBindingDeclaration::TsModuleDeclaration(_)
     );
 
-    // If the file is already classified as a script, interfaces and namespaces are allowed
-    if is_script_by_source {
-        return is_interface_or_namespace;
-    }
-
     if !is_interface_or_namespace {
         return false;
     }
 
-    // JsFileSource::is_script() is extension-based (.cjs) and returns false for
-    // files that still behave like scripts. In those cases determine script-ness
-    // by checking for the absence of top-level imports/exports
+    // Check for absence of top-level imports/exports
     binding
         .syntax()
         .ancestors()
