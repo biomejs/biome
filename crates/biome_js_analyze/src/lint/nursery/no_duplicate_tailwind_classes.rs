@@ -103,26 +103,25 @@ impl Rule for NoDuplicateTailwindClasses {
 
         // Split by whitespace and track duplicates
         let mut seen: FxHashSet<&str> = FxHashSet::default();
-        let mut duplicates: Vec<Box<str>> = Vec::new();
+        let mut duplicate_set: FxHashSet<&str> = FxHashSet::default();
         let mut deduplicated_parts: Vec<&str> = Vec::new();
 
         for class in value_str.split_whitespace() {
             if seen.contains(class) {
-                // Found a duplicate
-                if !duplicates.iter().any(|d| d.as_ref() == class) {
-                    duplicates.push(class.into());
-                }
+                // Found a duplicate - track it (HashSet ensures uniqueness)
+                duplicate_set.insert(class);
             } else {
                 seen.insert(class);
                 deduplicated_parts.push(class);
             }
         }
 
-        if duplicates.is_empty() {
+        if duplicate_set.is_empty() {
             return None;
         }
 
         let deduplicated = deduplicated_parts.join(" ");
+        let duplicates: Vec<Box<str>> = duplicate_set.into_iter().map(Into::into).collect();
 
         Some(DuplicateClassesState {
             deduplicated: deduplicated.into(),
