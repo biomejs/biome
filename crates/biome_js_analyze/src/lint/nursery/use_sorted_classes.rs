@@ -1,4 +1,4 @@
-mod any_class_string_like;
+pub mod any_class_string_like;
 mod class_info;
 pub mod class_lexer;
 mod presets;

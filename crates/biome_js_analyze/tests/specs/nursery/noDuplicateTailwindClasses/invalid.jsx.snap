@@ -1,0 +1,180 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// Invalid: exact duplicates
+<div class="flex flex" />;
+<div class="p-4 text-red-500 p-4 bg-white" />;
+<div className="hover:bg-blue-500 hover:bg-blue-500" />;
+
+// Invalid: multiple duplicates
+<div class="flex p-4 flex m-2 p-4" />;
+
+// Invalid: duplicates with complex classes
+<div class="hover:focus:m-2 foo hover:focus:m-2" />;
+
+// Invalid: duplicates in the middle
+<div class="text-lg text-center text-lg font-bold" />;
+
+// Invalid: duplicates with arbitrary values
+<div class="w-[100px] p-4 w-[100px]" />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS utility class detected: `flex`
+  
+    1 │ // Invalid: exact duplicates
+  > 2 │ <div class="flex flex" />;
+      │            ^^^^^^^^^^^
+    3 │ <div class="p-4 text-red-500 p-4 bg-white" />;
+    4 │ <div className="hover:bg-blue-500 hover:bg-blue-500" />;
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    2 │ <div·class="flex·flex"·/>;
+      │                 -----     
+
+```
+
+```
+invalid.jsx:3:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS utility class detected: `p-4`
+  
+    1 │ // Invalid: exact duplicates
+    2 │ <div class="flex flex" />;
+  > 3 │ <div class="p-4 text-red-500 p-4 bg-white" />;
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <div className="hover:bg-blue-500 hover:bg-blue-500" />;
+    5 │ 
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    3 │ <div·class="p-4·text-red-500·p-4·bg-white"·/>;
+      │                              ----             
+
+```
+
+```
+invalid.jsx:4:16 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS utility class detected: `hover:bg-blue-500`
+  
+    2 │ <div class="flex flex" />;
+    3 │ <div class="p-4 text-red-500 p-4 bg-white" />;
+  > 4 │ <div className="hover:bg-blue-500 hover:bg-blue-500" />;
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // Invalid: multiple duplicates
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    4 │ <div·className="hover:bg-blue-500·hover:bg-blue-500"·/>;
+      │                                  ------------------     
+
+```
+
+```
+invalid.jsx:7:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS utility classes detected: `flex`, `p-4`
+  
+    6 │ // Invalid: multiple duplicates
+  > 7 │ <div class="flex p-4 flex m-2 p-4" />;
+      │            ^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ // Invalid: duplicates with complex classes
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    7 │ <div·class="flex·p-4·flex·m-2·p-4"·/>;
+      │                      -----   ----     
+
+```
+
+```
+invalid.jsx:10:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS utility class detected: `hover:focus:m-2`
+  
+     9 │ // Invalid: duplicates with complex classes
+  > 10 │ <div class="hover:focus:m-2 foo hover:focus:m-2" />;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // Invalid: duplicates in the middle
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    10 │ <div·class="hover:focus:m-2·foo·hover:focus:m-2"·/>;
+       │                                ----------------     
+
+```
+
+```
+invalid.jsx:13:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS utility class detected: `text-lg`
+  
+    12 │ // Invalid: duplicates in the middle
+  > 13 │ <div class="text-lg text-center text-lg font-bold" />;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // Invalid: duplicates with arbitrary values
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    13 │ <div·class="text-lg·text-center·text-lg·font-bold"·/>;
+       │                                 --------              
+
+```
+
+```
+invalid.jsx:16:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS utility class detected: `w-[100px]`
+  
+    15 │ // Invalid: duplicates with arbitrary values
+  > 16 │ <div class="w-[100px] p-4 w-[100px]" />;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    16 │ <div·class="w-[100px]·p-4·w-[100px]"·/>;
+       │                          ----------     
+
+```

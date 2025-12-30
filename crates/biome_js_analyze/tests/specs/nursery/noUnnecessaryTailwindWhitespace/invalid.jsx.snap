@@ -1,0 +1,175 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// Invalid: leading whitespace
+<div class="  flex p-4" />;
+
+// Invalid: trailing whitespace
+<div class="flex p-4  " />;
+
+// Invalid: multiple consecutive spaces
+<div class="flex    p-4" />;
+
+// Invalid: leading, trailing and multiple spaces
+<div class="  flex    p-4   bg-white  " />;
+
+// Invalid: only whitespace differences
+<div className="  hover:bg-blue-500   " />;
+
+// Invalid: newlines and tabs (should be normalized)
+<div class="flex
+    p-4" />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:12 lint/nursery/noUnnecessaryTailwindWhitespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary whitespace in CSS class string: leading whitespace, multiple consecutive spaces.
+  
+    1 │ // Invalid: leading whitespace
+  > 2 │ <div class="  flex p-4" />;
+      │            ^^^^^^^^^^^^
+    3 │ 
+    4 │ // Invalid: trailing whitespace
+  
+  i Remove unnecessary whitespace for cleaner code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove unnecessary whitespace.
+  
+    2 │ <div·class="··flex·p-4"·/>;
+      │             --             
+
+```
+
+```
+invalid.jsx:5:12 lint/nursery/noUnnecessaryTailwindWhitespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary whitespace in CSS class string: trailing whitespace, multiple consecutive spaces.
+  
+    4 │ // Invalid: trailing whitespace
+  > 5 │ <div class="flex p-4  " />;
+      │            ^^^^^^^^^^^^
+    6 │ 
+    7 │ // Invalid: multiple consecutive spaces
+  
+  i Remove unnecessary whitespace for cleaner code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove unnecessary whitespace.
+  
+    5 │ <div·class="flex·p-4··"·/>;
+      │                     --     
+
+```
+
+```
+invalid.jsx:8:12 lint/nursery/noUnnecessaryTailwindWhitespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary whitespace in CSS class string: multiple consecutive spaces.
+  
+     7 │ // Invalid: multiple consecutive spaces
+   > 8 │ <div class="flex    p-4" />;
+       │            ^^^^^^^^^^^^^
+     9 │ 
+    10 │ // Invalid: leading, trailing and multiple spaces
+  
+  i Remove unnecessary whitespace for cleaner code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove unnecessary whitespace.
+  
+     6  6 │   
+     7  7 │   // Invalid: multiple consecutive spaces
+     8    │ - <div·class="flex····p-4"·/>;
+        8 │ + <div·class="flex·p-4"·/>;
+     9  9 │   
+    10 10 │   // Invalid: leading, trailing and multiple spaces
+  
+
+```
+
+```
+invalid.jsx:11:12 lint/nursery/noUnnecessaryTailwindWhitespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary whitespace in CSS class string: leading whitespace, trailing whitespace, multiple consecutive spaces.
+  
+    10 │ // Invalid: leading, trailing and multiple spaces
+  > 11 │ <div class="  flex    p-4   bg-white  " />;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // Invalid: only whitespace differences
+  
+  i Remove unnecessary whitespace for cleaner code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove unnecessary whitespace.
+  
+     9  9 │   
+    10 10 │   // Invalid: leading, trailing and multiple spaces
+    11    │ - <div·class="··flex····p-4···bg-white··"·/>;
+       11 │ + <div·class="flex·p-4·bg-white"·/>;
+    12 12 │   
+    13 13 │   // Invalid: only whitespace differences
+  
+
+```
+
+```
+invalid.jsx:14:16 lint/nursery/noUnnecessaryTailwindWhitespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary whitespace in CSS class string: leading whitespace, trailing whitespace, multiple consecutive spaces.
+  
+    13 │ // Invalid: only whitespace differences
+  > 14 │ <div className="  hover:bg-blue-500   " />;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // Invalid: newlines and tabs (should be normalized)
+  
+  i Remove unnecessary whitespace for cleaner code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove unnecessary whitespace.
+  
+    14 │ <div·className="··hover:bg-blue-500···"·/>;
+       │                 --                 ---     
+
+```
+
+```
+invalid.jsx:17:12 lint/nursery/noUnnecessaryTailwindWhitespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary whitespace in CSS class string: multiple consecutive spaces.
+  
+    16 │ // Invalid: newlines and tabs (should be normalized)
+  > 17 │ <div class="flex
+       │            ^^^^^
+  > 18 │     p-4" />;
+       │     ^^^^
+    19 │ 
+  
+  i Remove unnecessary whitespace for cleaner code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove unnecessary whitespace.
+  
+    15 15 │   
+    16 16 │   // Invalid: newlines and tabs (should be normalized)
+    17    │ - <div·class="flex
+    18    │ - ····p-4"·/>;
+       17 │ + <div·class="flex·p-4"·/>;
+    19 18 │   
+  
+
+```
