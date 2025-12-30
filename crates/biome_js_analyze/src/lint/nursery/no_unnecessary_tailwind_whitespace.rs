@@ -56,6 +56,7 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         fix_kind: FixKind::Safe,
+        issue_number: Some("1274"),
     }
 }
 
@@ -79,9 +80,13 @@ impl Rule for NoUnnecessaryTailwindWhitespace {
         // Check for unnecessary whitespace
         let has_leading_whitespace = value_str.starts_with(char::is_whitespace);
         let has_trailing_whitespace = value_str.ends_with(char::is_whitespace);
-        let has_multiple_spaces = value_str.contains("  ");
+        // Check for multiple consecutive whitespace characters (spaces, tabs, newlines)
+        let has_multiple_whitespace = value_str
+            .as_bytes()
+            .windows(2)
+            .any(|w| w[0].is_ascii_whitespace() && w[1].is_ascii_whitespace());
 
-        if !has_leading_whitespace && !has_trailing_whitespace && !has_multiple_spaces {
+        if !has_leading_whitespace && !has_trailing_whitespace && !has_multiple_whitespace {
             return None;
         }
 
@@ -108,8 +113,13 @@ impl Rule for NoUnnecessaryTailwindWhitespace {
         if value_str.ends_with(char::is_whitespace) {
             issues.push("trailing whitespace");
         }
-        if value_str.contains("  ") {
-            issues.push("multiple consecutive spaces");
+        // Check for multiple consecutive whitespace characters
+        let has_multiple_whitespace = value_str
+            .as_bytes()
+            .windows(2)
+            .any(|w| w[0].is_ascii_whitespace() && w[1].is_ascii_whitespace());
+        if has_multiple_whitespace {
+            issues.push("multiple consecutive whitespace characters");
         }
 
         let issues_str = issues.join(", ");
