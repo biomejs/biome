@@ -56,7 +56,7 @@ pub struct CliOptions {
     /// Allows to change how diagnostics and summary are reported.
     #[bpaf(
         long("reporter"),
-        argument("json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson"),
+        argument("json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif"),
         fallback(CliReporter::default())
     )]
     pub reporter: CliReporter,
@@ -169,6 +169,8 @@ pub enum CliReporter {
     Checkstyle,
     /// Reports diagnostics using the [Reviewdog JSON format](https://deepwiki.com/reviewdog/reviewdog/3.2-reviewdog-diagnostic-format)
     RdJson,
+    /// Reports diagnostics using the SARIF format
+    Sarif,
 }
 
 impl CliReporter {
@@ -190,6 +192,7 @@ impl FromStr for CliReporter {
             "gitlab" => Ok(Self::GitLab),
             "checkstyle" => Ok(Self::Checkstyle),
             "rdjson" => Ok(Self::RdJson),
+            "sarif" => Ok(Self::Sarif),
             _ => Err(format!(
                 "value {s:?} is not valid for the --reporter argument"
             )),
@@ -209,6 +212,7 @@ impl Display for CliReporter {
             Self::GitLab => f.write_str("gitlab"),
             Self::Checkstyle => f.write_str("checkstyle"),
             Self::RdJson => f.write_str("rdjson"),
+            Self::Sarif => f.write_str("sarif"),
         }
     }
 }

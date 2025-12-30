@@ -15,6 +15,7 @@ use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
 use crate::reporter::rdjson::{RdJsonReporter, RdJsonReporterVisitor};
+use crate::reporter::sarif::{SarifReporter, SarifReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{
@@ -252,6 +253,8 @@ pub enum ReportMode {
     Checkstyle,
     /// Reports information in [reviewdog JSON format](https://deepwiki.com/reviewdog/reviewdog/3.2-reviewdog-diagnostic-format)
     RdJson,
+    /// Reports diagnostics using the SARIF format
+    Sarif,
 }
 
 impl Default for ReportMode {
@@ -276,6 +279,7 @@ impl From<CliReporter> for ReportMode {
             CliReporter::GitLab => Self::GitLab {},
             CliReporter::Checkstyle => Self::Checkstyle,
             CliReporter::RdJson => Self::RdJson,
+            CliReporter::Sarif => Self::Sarif,
         }
     }
 }
@@ -730,6 +734,15 @@ pub fn execute_mode(
                 working_directory: fs.working_directory().clone(),
             };
             reporter.write(&mut RdJsonReporterVisitor(console))?;
+        }
+        ReportMode::Sarif => {
+            let reporter = SarifReporter {
+                diagnostics_payload,
+                execution: execution.clone(),
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+            };
+            reporter.write(&mut SarifReporterVisitor(console))?;
         }
     }
 
