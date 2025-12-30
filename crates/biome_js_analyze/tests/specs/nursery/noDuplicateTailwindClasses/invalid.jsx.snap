@@ -37,6 +37,8 @@ invalid.jsx:2:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━�
   
   i Remove duplicate classes to improve readability.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6502 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove duplicate classes.
@@ -59,6 +61,8 @@ invalid.jsx:3:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━�
     5 │ 
   
   i Remove duplicate classes to improve readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6502 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -83,6 +87,8 @@ invalid.jsx:4:16 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━�
   
   i Remove duplicate classes to improve readability.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6502 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove duplicate classes.
@@ -104,6 +110,8 @@ invalid.jsx:7:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━�
     9 │ // Invalid: duplicates with complex classes
   
   i Remove duplicate classes to improve readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6502 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -127,6 +135,8 @@ invalid.jsx:10:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━
   
   i Remove duplicate classes to improve readability.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6502 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove duplicate classes.
@@ -149,6 +159,8 @@ invalid.jsx:13:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━
   
   i Remove duplicate classes to improve readability.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6502 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove duplicate classes.
@@ -169,6 +181,8 @@ invalid.jsx:16:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━
     17 │ 
   
   i Remove duplicate classes to improve readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6502 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

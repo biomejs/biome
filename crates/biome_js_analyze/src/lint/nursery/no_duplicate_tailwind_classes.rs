@@ -69,6 +69,7 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         fix_kind: FixKind::Safe,
+        issue_number: Some("6502"),
     }
 }
 
