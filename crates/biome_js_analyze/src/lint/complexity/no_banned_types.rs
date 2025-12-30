@@ -47,8 +47,9 @@ declare_lint_rule! {
     ///    but can't be called directly
     ///
     /// ### Disallow the misleading empty object type `{}`
-    /// `{}`, also known as the "empty object" type, _doesn't_ actually represent an empty object (despite what many new to TypeScript may assume).
-    /// It actually accepts _any non-nullish value_, including non-object primitives like numbers and strings[^1]. \
+    /// `{}`, also known as the "empty object" type, _doesn't_ actually represent an empty object (despite what many new to TypeScript may assume). \
+    /// Due to TypeScript's type system being _structural_ instead of nominal, it actually accepts _any non-nullish value_,
+    // including non-object primitives like numbers and strings[^1]. \
     /// The following example is thus perfectly valid TypeScript:
     ///
     /// ```ts,ignore
@@ -82,7 +83,8 @@ declare_lint_rule! {
     /// In this last case, you can also use the `NonNullable` utility type to the same effect:
     ///
     /// ```ts
-    /// type NonNullableMyType = NonNullable<MyType>;
+    /// // equivalent to `{}`
+    /// type AnythingNotNullish = NonNullable<unknown>;
     /// ```
     ///
     /// ## Examples
@@ -152,10 +154,10 @@ declare_lint_rule! {
     /// type notNull<T> = T & {};
     /// ```
     ///
-    /// [^1]: For those curious, this occurs as a natural consequence of TypeScript's type system being _structural_ instead of nominal.
-    /// `{}`, instead of requiring compatible types have _exactly_ 0 properties, simply requires they have _0 or more_ properties.
-    /// This is the exact same mechanism that allows passing `{ foo: number, bar: string }`
-    /// to a function expecting `{ bar: string }` (albeit much more surprising).
+    /// [^1]: This is the exact same mechanism that allows passing `{ foo: number, bar: string }`
+    /// to a function expecting `{ bar: string }`.
+    /// Specifying `{}` doesn't restrict compatible types to ones with _exactly_ 0 properties;
+    /// it simply requires they have _at least_ 0 properties.
     /// [^2]: In this case, you'd write `declare const myUniqueInternalSymbol: unique symbol` somewhere in the same file.
     pub NoBannedTypes {
         version: "1.0.0",
@@ -331,12 +333,13 @@ impl BannedType {
             }
             Self::Object | Self::EmptyObject => {
                 markup! {
-                    "'"<Emphasis>{ self.to_string() }</Emphasis>"' accepts "<Emphasis>"any"</Emphasis>" non-nullable value, including non-object primitives like '123' and 'true'."
+                    "'"<Emphasis>{ self.to_string() }</Emphasis>"' accepts "<Emphasis>"any"</Emphasis>" non-nullish value, including non-object primitives like "
+                    "'"<Emphasis>"123"</Emphasis>"' and '"<Emphasis>"true"</Emphasis>"'."
                     "\n- If you want a type meaning \"any arbitrary object\", use '"<Emphasis>"object"</Emphasis>"' instead."
                     "\n- If you want a type meaning \"any value\", use '"<Emphasis>"unknown"</Emphasis>"' instead."
                     "\n- If you want a type meaning \"an object whose properties cannot be used\", use "
                     "'"<Emphasis>"{ [k: keyof any]: never }"</Emphasis>"' or '"<Emphasis>"Record<keyof any, never>"</Emphasis>"' instead."
-                    "\n- If you want a type meaning \"an object that cannot have any properties whatsoever\", use "
+                    "\n- If you want a type meaning \"an object that cannot contain any properties whatsoever\", use "
                     "'"<Emphasis>"{ [uniqueSymbol]?: never }"</Emphasis>"' with an unexported "<Emphasis>"unique symbol"</Emphasis>" in the same file."
                 }.to_owned()
             }
