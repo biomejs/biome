@@ -162,9 +162,10 @@ declare_lint_rule! {
         name: "noBannedTypes",
         language: "ts",
         sources: &[
-            RuleSource::EslintTypeScript("no-empty-object-type").same()
-            RuleSource::EslintTypeScript("no-wrapper-object-types").same()
-            RuleSource::EslintTypeScript("no-unsafe-function-type").same()
+            RuleSource::EslintTypeScript("ban-types").same(),
+            RuleSource::EslintTypeScript("no-empty-object-type").same(),
+            RuleSource::EslintTypeScript("no-wrapper-object-types").same(),
+            RuleSource::EslintTypeScript("no-unsafe-function-type").same(),
         ],
         recommended: true,
         severity: Severity::Warning,
@@ -333,8 +334,10 @@ impl BannedType {
                     "'"<Emphasis>{ self.to_string() }</Emphasis>"' accepts "<Emphasis>"any"</Emphasis>" non-nullable value, including non-object primitives like '123' and 'true'."
                     "\n- If you want a type meaning \"any arbitrary object\", use '"<Emphasis>"object"</Emphasis>"' instead."
                     "\n- If you want a type meaning \"any value\", use '"<Emphasis>"unknown"</Emphasis>"' instead."
-                    "\n- If you want a type meaning \"an object without any properties\", use "
-                    "'"<Emphasis>"{ [k: string]: never }"</Emphasis>"' or '"<Emphasis>"Record<string, never>"</Emphasis>"' instead."
+                    "\n- If you want a type meaning \"an object whose properties cannot be used\", use "
+                    "'"<Emphasis>"{ [k: keyof any]: never }"</Emphasis>"' or '"<Emphasis>"Record<keyof any, never>"</Emphasis>"' instead."
+                    "\n- If you want a type meaning \"an object that cannot have any properties whatsoever\", use "
+                    "'"<Emphasis>"{ [uniqueSymbol]?: never }"</Emphasis>"' with an unexported "<Emphasis>"unique symbol"</Emphasis>" in the same file."
                 }.to_owned()
             }
         }
