@@ -172,7 +172,11 @@ impl Rule for NoDuplicateTailwindClasses {
                 mutation.replace_node(string_literal.clone(), replacement);
             }
             AnyClassStringLike::JsLiteralMemberName(string_literal) => {
-                let replacement = js_literal_member_name(if ctx.preferred_quote().is_double() {
+                let is_double_quote = string_literal
+                    .value()
+                    .map(|token| token.text_trimmed().starts_with('"'))
+                    .unwrap_or(ctx.preferred_quote().is_double());
+                let replacement = js_literal_member_name(if is_double_quote {
                     js_string_literal(deduplicated)
                 } else {
                     js_string_literal_single_quotes(deduplicated)
