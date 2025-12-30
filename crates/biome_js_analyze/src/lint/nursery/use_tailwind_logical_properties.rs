@@ -250,8 +250,7 @@ fn convert_to_logical(class: &str) -> Option<String> {
 
     // Check prefix matches
     for (physical_prefix, logical_prefix) in PHYSICAL_TO_LOGICAL {
-        if utility.starts_with(physical_prefix) {
-            let rest = &utility[physical_prefix.len()..];
+        if let Some(rest) = utility.strip_prefix(physical_prefix) {
             let logical_utility = format!("{}{}", logical_prefix, rest);
             return Some(if let Some(v) = variants {
                 format!("{}:{}", v, logical_utility)
