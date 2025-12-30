@@ -1,0 +1,244 @@
+//! ATX and Setext heading parsing for Markdown (CommonMark §4.2-4.3).
+//!
+//! # ATX Headings (§4.2)
+//!
+//! An ATX heading consists of 1-6 `#` characters followed by a space and heading
+//! text. The number of `#` characters determines the heading level.
+//!
+//! ```markdown
+//! # Heading 1
+//! ## Heading 2
+//! ### Heading 3
+//! ```
+//!
+//! # Setext Headings (§4.3)
+//!
+//! A setext heading consists of one or more lines of text followed by an
+//! underline of `=` (level 1) or `-` (level 2) characters.
+//!
+//! ```markdown
+//! Heading 1
+//! =========
+//!
+//! Heading 2
+//! ---------
+//! ```
+
+use crate::parser::MarkdownParser;
+use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
+use biome_parser::{
+    Parser,
+    prelude::ParsedSyntax::{self, *},
+};
+
+use super::parse_any_inline;
+
+/// Maximum number of `#` characters allowed in an ATX heading (CommonMark §4.2).
+const MAX_HEADER_HASHES: usize = 6;
+
+/// Check if we might be at an ATX header.
+/// We only check if the current token is a HASH - full validation happens in parse_header.
+pub(crate) fn at_header(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        if !p.at_line_start() && !p.at_start_of_input() {
+            return false;
+        }
+        p.skip_line_indent(3);
+        p.at(T![#])
+    })
+}
+
+/// Parse an ATX header.
+///
+/// Grammar: MdHeader = before: MdHashList content: MdParagraph? after: MdHashList
+///
+/// ATX headers start with 1-6 `#` characters followed by space or end of line.
+/// More than 6 `#` characters is not a valid header.
+///
+/// Trailing hashes are optional and must be at the end of the line.
+pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
+    if !at_header(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.skip_line_indent(3);
+
+    // Parse opening hashes (MdHashList containing MdHash nodes)
+    let hash_count = parse_hash_list(p);
+
+    // Validate hash count (must be 1-6)
+    // Diagnostic for >6 hashes is emitted in parse_any_block before try_parse
+    if hash_count > MAX_HEADER_HASHES {
+        // Not a valid header - abandon and let it be parsed as paragraph
+        m.abandon(p);
+        return Absent;
+    }
+
+    // Per CommonMark §4.2: opening hashes must be followed by space, tab, or end of line.
+    // `#foo` is NOT a valid header; `# foo`, `#\tfoo`, or `#\n` are valid.
+    // Check if the next token has preceding whitespace or we're at EOL/EOF.
+    if !p.at_inline_end() {
+        // There's a token after hashes on the same line - check for whitespace
+        // In Markdown, whitespace is significant and included in token text,
+        // so we check if the token starts with a space or tab character.
+        let text = p.cur_text();
+        let token_starts_with_whitespace = text.starts_with(' ') || text.starts_with('\t');
+        if !token_starts_with_whitespace {
+            // No space/tab after hashes - not a valid header (e.g., "#foo")
+            m.abandon(p);
+            return Absent;
+        }
+    }
+
+    // Parse content (optional paragraph) - content goes until end of line
+    // The header ends at a single newline (not blank line)
+    parse_header_content(p);
+
+    // Parse trailing hashes (MdHashList)
+    // Trailing hashes are valid if they're at the end of the line
+    parse_trailing_hashes(p);
+
+    Present(m.complete(p, MD_HEADER))
+}
+
+/// Parse a list of hash tokens as MdHashList containing MdHash nodes.
+/// Returns the number of hashes parsed.
+fn parse_hash_list(p: &mut MarkdownParser) -> usize {
+    let m = p.start();
+    let mut count = 0;
+
+    while p.at(T![#]) {
+        let hash_m = p.start();
+        p.bump(T![#]);
+        hash_m.complete(p, MD_HASH);
+        count += 1;
+    }
+
+    m.complete(p, MD_HASH_LIST);
+    count
+}
+
+/// Parse header content - inline content for the header.
+///
+/// This stops at end of line (NEWLINE or EOF) or when trailing hashes are detected.
+/// Note: NEWLINE is an explicit token (not trivia), so we check `at_inline_end()`.
+fn parse_header_content(p: &mut MarkdownParser) {
+    // Check if there's any content (not at EOF or NEWLINE)
+    if p.at_inline_end() {
+        return;
+    }
+
+    // Parse content as a paragraph containing inline items
+    let m = p.start();
+    let inline_m = p.start();
+
+    loop {
+        if p.at(MD_HARD_LINE_LITERAL) {
+            // Trailing spaces before newline in ATX headings should be ignored.
+            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_HARD_LINE_LITERAL));
+            break;
+        }
+
+        // Check for end of line (EOF, NEWLINE, or preceding line break)
+        if p.at_inline_end() {
+            break;
+        }
+
+        // Check if we're at trailing hashes (optional whitespace + hashes + end of line)
+        if at_trailing_hashes_start(p) {
+            // Stop content parsing - trailing hashes will be parsed separately
+            break;
+        }
+
+        // Parse an inline element
+        if parse_any_inline(p).is_absent() {
+            break;
+        }
+    }
+
+    inline_m.complete(p, MD_INLINE_ITEM_LIST);
+    m.complete(p, MD_PARAGRAPH);
+}
+
+/// Check if the current position has a trailing hash sequence.
+/// A trailing hash sequence is one or more `#` characters followed by end of line
+/// (NEWLINE or EOF), and NOT preceded by a line break (which would
+/// indicate a new block, not trailing hashes).
+///
+/// Note: NEWLINE is an explicit token, so we check `at_inline_end()` after
+/// consuming hashes to see if we've reached end of line.
+fn is_trailing_hash_sequence(p: &mut MarkdownParser) -> bool {
+    if !p.at(T![#]) {
+        return false;
+    }
+
+    let checkpoint = p.checkpoint();
+
+    while p.at(T![#]) {
+        p.bump(T![#]);
+    }
+
+    while p.at(MD_TEXTUAL_LITERAL) {
+        let text = p.cur_text();
+        if text.chars().all(|c| c == ' ' || c == '\t') {
+            p.bump(MD_TEXTUAL_LITERAL);
+        } else {
+            break;
+        }
+    }
+
+    let at_end_of_line = p.at_inline_end();
+
+    p.rewind(checkpoint);
+
+    at_end_of_line
+}
+
+fn at_trailing_hashes_start(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        let mut saw_ws = false;
+
+        while p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text.chars().all(|c| c == ' ' || c == '\t') {
+                saw_ws = true;
+                p.bump(MD_TEXTUAL_LITERAL);
+            } else {
+                break;
+            }
+        }
+
+        saw_ws && is_trailing_hash_sequence(p)
+    })
+}
+
+/// Parse trailing hashes for ATX headers.
+///
+/// Per CommonMark spec, a closing sequence of `#` characters is optional.
+/// It must be at the end of the line, preceded by optional whitespace.
+fn parse_trailing_hashes(p: &mut MarkdownParser) {
+    let m = p.start();
+
+    if at_trailing_hashes_start(p) {
+        while p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text.chars().all(|c| c == ' ' || c == '\t') {
+                p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+            } else {
+                break;
+            }
+        }
+
+        // Only parse hashes that are on the same line
+        // Stop if we hit end of line (NEWLINE, EOF, or preceding line break)
+        while p.at(T![#]) && !p.at_inline_end() {
+            let hash_m = p.start();
+            p.bump(T![#]);
+            hash_m.complete(p, MD_HASH);
+        }
+    }
+
+    m.complete(p, MD_HASH_LIST);
+}

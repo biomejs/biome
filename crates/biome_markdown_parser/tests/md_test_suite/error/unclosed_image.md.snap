@@ -1,0 +1,90 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```
+This has ![unclosed image
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..9 "This has " [] [],
+                },
+                MdReferenceImage {
+                    excl_token: BANG@9..10 "!" [] [],
+                    l_brack_token: L_BRACK@10..11 "[" [] [],
+                    alt: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@11..25 "unclosed image" [] [],
+                        },
+                    ],
+                    r_brack_token: missing (required),
+                    label: missing (optional),
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@25..26 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@26..26 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..26
+  0: (empty)
+  1: MD_BLOCK_LIST@0..26
+    0: MD_PARAGRAPH@0..26
+      0: MD_INLINE_ITEM_LIST@0..26
+        0: MD_TEXTUAL@0..9
+          0: MD_TEXTUAL_LITERAL@0..9 "This has " [] []
+        1: MD_REFERENCE_IMAGE@9..25
+          0: BANG@9..10 "!" [] []
+          1: L_BRACK@10..11 "[" [] []
+          2: MD_INLINE_ITEM_LIST@11..25
+            0: MD_TEXTUAL@11..25
+              0: MD_TEXTUAL_LITERAL@11..25 "unclosed image" [] []
+          3: (empty)
+          4: (empty)
+        2: MD_TEXTUAL@25..26
+          0: MD_TEXTUAL_LITERAL@25..26 "\n" [] []
+      1: (empty)
+  2: EOF@26..26 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unclosed_image.md:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unclosed image, expected `]` to close alt text.
+  
+  > 1 │ This has ![unclosed image
+      │          ^
+    2 │ 
+  
+  i image started here
+  
+  > 1 │ This has ![unclosed image
+      │          ^
+    2 │ 
+  
+  i Format: ![alt text](image-url)
+  
+```

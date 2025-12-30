@@ -1,0 +1,405 @@
+//! Fenced code block parsing for Markdown (CommonMark §4.5).
+//!
+//! A fenced code block begins with a code fence: at least three consecutive
+//! backtick (`) or tilde (~) characters. It ends with a closing fence of at
+//! least as many characters of the same type, or at the end of the document.
+//!
+//! # Examples
+//!
+//! ````markdown
+//! ```rust
+//! fn main() {}
+//! ```
+//!
+//! ~~~python
+//! def hello():
+//!     pass
+//! ~~~
+//! ````
+//!
+//! # Info String
+//!
+//! The opening fence may be followed by an info string (language identifier)
+//! that can be used for syntax highlighting.
+
+use crate::parser::MarkdownParser;
+use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
+use biome_parser::{
+    Parser,
+    prelude::{
+        ParsedSyntax::{self, *},
+        TokenSource,
+    },
+};
+
+use super::parse_error::unterminated_fenced_code;
+use super::quote::{consume_quote_prefix, has_quote_prefix};
+
+/// Check if we're at a fenced code block (``` or ~~~).
+pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        if !p.at_start_of_input() && !is_line_start_within_indent(p, 3) {
+            return false;
+        }
+        p.skip_line_indent(3);
+
+        let rest = p.source_after_current();
+        let is_backtick_fence = rest.starts_with("```");
+        let is_tilde_fence = rest.starts_with("~~~");
+        if !is_backtick_fence && !is_tilde_fence {
+            return false;
+        }
+        if is_backtick_fence && info_string_has_backtick(p) {
+            return false;
+        }
+        true
+    })
+}
+
+/// Parse a fenced code block.
+///
+/// Grammar:
+/// MdFencedCodeBlock =
+///   l_fence: ('```' | '~~~')
+///   code_list: MdCodeNameList
+///   content: MdInlineItemList
+///   r_fence: ('```' | '~~~')
+pub(crate) fn parse_fenced_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
+    parse_fenced_code_block_impl(p, false)
+}
+
+pub(crate) fn parse_fenced_code_block_force(p: &mut MarkdownParser) -> ParsedSyntax {
+    parse_fenced_code_block_impl(p, true)
+}
+
+fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSyntax {
+    if !force && !at_fenced_code_block(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    let mut fence_indent = p.line_start_leading_indent();
+    if p.state().list_item_required_indent > 0
+        && p.state().virtual_line_start == Some(p.cur_range().start())
+    {
+        fence_indent += p.state().list_item_required_indent;
+    }
+    p.skip_line_indent(3);
+
+    // Track which fence type we opened with (must close with same type per CommonMark)
+    let text = p.cur_text();
+    let is_textual_tilde_fence = p.at(MD_TEXTUAL_LITERAL) && text.starts_with("~~~");
+    let is_tilde_fence =
+        p.at(TRIPLE_TILDE) || (p.at(TILDE) && p.cur_text().len() >= 3) || is_textual_tilde_fence;
+    let fence_type = if is_tilde_fence { "~~~" } else { "```" };
+    let fence_len = fence_prefix_len(p.cur_text(), if is_tilde_fence { '~' } else { '`' });
+
+    // Record opening fence range for diagnostic
+    let opening_range = p.cur_range();
+
+    // Opening fence (``` or ~~~)
+    if is_tilde_fence {
+        if p.at(TRIPLE_TILDE) {
+            p.bump(TRIPLE_TILDE);
+        } else {
+            p.bump_remap(TRIPLE_TILDE);
+        }
+    } else if p.at(T!["```"]) {
+        p.bump(T!["```"]);
+    } else {
+        p.bump_remap(T!["```"]);
+    }
+
+    // Optional language info string (MdCodeNameList)
+    parse_code_name_list(p);
+
+    // Content (everything until closing fence)
+    parse_code_content(p, is_tilde_fence, fence_len, fence_indent);
+
+    // Closing fence - emit specific diagnostic if missing
+    // Must match the opening fence type
+    let has_closing = at_closing_fence(p, is_tilde_fence, fence_len);
+
+    if has_closing {
+        if p.state().list_item_required_indent > 0 && p.at_line_start() {
+            p.skip_line_indent(p.state().list_item_required_indent);
+        }
+        p.skip_line_indent(3);
+        if is_tilde_fence {
+            if p.at(TRIPLE_TILDE) {
+                p.bump(TRIPLE_TILDE);
+            } else {
+                p.bump_remap(TRIPLE_TILDE);
+            }
+        } else if p.at(T!["```"]) {
+            p.bump(T!["```"]);
+        } else {
+            p.bump_remap(T!["```"]);
+        }
+    } else {
+        // Emit diagnostic for unterminated code block
+        p.error(unterminated_fenced_code(p, opening_range, fence_type));
+    }
+
+    Present(m.complete(p, MD_FENCED_CODE_BLOCK))
+}
+
+fn fence_prefix_len(text: &str, fence_char: char) -> usize {
+    text.chars().take_while(|c| *c == fence_char).count()
+}
+
+/// Parse the code name list (language info string).
+/// Grammar: MdCodeNameList = MdTextual*
+///
+/// The language name is on the same line as the opening fence.
+/// If the current token has a preceding line break or is NEWLINE, the code block has no language.
+fn parse_code_name_list(p: &mut MarkdownParser) {
+    let m = p.start();
+
+    // If the current token is already on a new line, there's no language name
+    if p.at_inline_end() {
+        m.complete(p, MD_CODE_NAME_LIST);
+        return;
+    }
+
+    // Parse language identifiers until we hit end of line
+    while !p.at_inline_end() {
+        // Parse each token as textual content
+        let text_m = p.start();
+        p.bump_remap(MD_TEXTUAL_LITERAL);
+        text_m.complete(p, MD_TEXTUAL);
+    }
+
+    m.complete(p, MD_CODE_NAME_LIST);
+}
+
+/// Parse the code content until we find a closing fence.
+/// Grammar: content: MdInlineItemList
+fn parse_code_content(
+    p: &mut MarkdownParser,
+    is_tilde_fence: bool,
+    fence_len: usize,
+    fence_indent: usize,
+) {
+    let m = p.start();
+    let quote_depth = p.state().block_quote_depth;
+
+    // Consume all tokens until we see the matching closing fence or EOF
+    while !p.at(T![EOF]) {
+        if quote_depth > 0 && (p.at_line_start() || p.has_preceding_line_break()) {
+            if !has_quote_prefix(p, quote_depth) {
+                break;
+            }
+            consume_quote_prefix(p, quote_depth);
+        }
+
+        if at_closing_fence(p, is_tilde_fence, fence_len) {
+            break;
+        }
+
+        if p.at_line_start() && fence_indent > 0 {
+            skip_fenced_content_indent(p, fence_indent);
+            if at_closing_fence_after_indent(p, is_tilde_fence, fence_len) {
+                break;
+            }
+        }
+
+        // Consume the token as code content (including NEWLINE tokens)
+        let text_m = p.start();
+        p.bump_remap(MD_TEXTUAL_LITERAL);
+        text_m.complete(p, MD_TEXTUAL);
+    }
+
+    m.complete(p, MD_INLINE_ITEM_LIST);
+}
+
+fn is_valid_closing_fence(p: &mut MarkdownParser, is_tilde_fence: bool, fence_len: usize) -> bool {
+    line_has_closing_fence(p, is_tilde_fence, fence_len)
+}
+
+fn info_string_has_backtick(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        if p.at(TRIPLE_TILDE) {
+            return false;
+        }
+
+        if p.at(T!["```"]) {
+            p.bump(T!["```"]);
+        } else if p.at(BACKTICK) {
+            p.bump(BACKTICK);
+        } else {
+            return false;
+        }
+
+        while !p.at_inline_end() {
+            if p.at(BACKTICK) {
+                return true;
+            }
+            p.bump(p.cur());
+        }
+
+        false
+    })
+}
+
+fn at_closing_fence(p: &mut MarkdownParser, is_tilde_fence: bool, fence_len: usize) -> bool {
+    p.lookahead(|p| is_valid_closing_fence(p, is_tilde_fence, fence_len))
+}
+
+fn at_closing_fence_after_indent(
+    p: &mut MarkdownParser,
+    is_tilde_fence: bool,
+    fence_len: usize,
+) -> bool {
+    p.lookahead(|p| is_valid_closing_fence(p, is_tilde_fence, fence_len))
+}
+
+fn skip_fenced_content_indent(p: &mut MarkdownParser, indent: usize) {
+    let mut consumed = 0usize;
+
+    while consumed < indent && p.at(MD_TEXTUAL_LITERAL) {
+        let text = p.cur_text();
+        if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
+            break;
+        }
+
+        let width = text
+            .chars()
+            .map(|c| if c == '\t' { 4 } else { 1 })
+            .sum::<usize>();
+
+        if consumed + width > indent {
+            break;
+        }
+
+        consumed += width;
+        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+    }
+}
+
+fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: usize) -> bool {
+    let start: usize = p.cur_range().start().into();
+    let source = p.source().text();
+    if start > source.len() {
+        return false;
+    }
+
+    let before = &source[..start];
+    let last_newline_pos = before.rfind(['\n', '\r']);
+    let line_start = match last_newline_pos {
+        Some(pos) => {
+            let bytes = before.as_bytes();
+            if bytes.get(pos) == Some(&b'\r') && bytes.get(pos + 1) == Some(&b'\n') {
+                pos + 2
+            } else {
+                pos + 1
+            }
+        }
+        None => 0,
+    };
+
+    let prefix = &source[line_start..start];
+    if !prefix.chars().all(|c| c == ' ' || c == '\t') {
+        return false;
+    }
+
+    let mut idx = line_start;
+    let mut column = 0usize;
+    let list_indent = p.state().list_item_required_indent;
+
+    while column < list_indent {
+        match source.as_bytes().get(idx).copied() {
+            Some(b' ') => {
+                column += 1;
+                idx += 1;
+            }
+            Some(b'\t') => {
+                column += 4 - (column % 4);
+                idx += 1;
+            }
+            _ => return false,
+        }
+    }
+
+    let mut extra = 0usize;
+    while extra < 3 {
+        match source.as_bytes().get(idx).copied() {
+            Some(b' ') => {
+                extra += 1;
+                idx += 1;
+            }
+            Some(b'\t') => {
+                extra += 4 - (extra % 4);
+                if extra > 3 {
+                    break;
+                }
+                idx += 1;
+            }
+            _ => break,
+        }
+    }
+
+    let fence_char = if is_tilde_fence { b'~' } else { b'`' };
+    let mut fence_count = 0usize;
+    while source.as_bytes().get(idx + fence_count) == Some(&fence_char) {
+        fence_count += 1;
+    }
+    if fence_count < fence_len {
+        return false;
+    }
+
+    let after_fence = &source[idx + fence_count..];
+    let line_rest = after_fence
+        .split_terminator(['\n', '\r'])
+        .next()
+        .unwrap_or("");
+
+    line_rest.chars().all(|c| c == ' ' || c == '\t')
+}
+
+fn is_line_start_within_indent(p: &MarkdownParser, max_indent: usize) -> bool {
+    if p.state().virtual_line_start == Some(p.cur_range().start()) {
+        return true;
+    }
+
+    let start: usize = p.cur_range().start().into();
+    let source = p.source().text();
+    if start > source.len() {
+        return false;
+    }
+
+    let virtual_start: usize = match p.state().virtual_line_start {
+        Some(virtual_start) => virtual_start.into(),
+        None => {
+            let before = &source[..start];
+            let last_newline_pos = before.rfind(['\n', '\r']);
+            match last_newline_pos {
+                Some(pos) => {
+                    let bytes = before.as_bytes();
+                    if bytes.get(pos) == Some(&b'\r') && bytes.get(pos + 1) == Some(&b'\n') {
+                        pos + 2
+                    } else {
+                        pos + 1
+                    }
+                }
+                None => 0,
+            }
+        }
+    };
+
+    let prefix = &source[virtual_start..start];
+    if !prefix.chars().all(|c| c == ' ' || c == '\t') {
+        return false;
+    }
+
+    let mut indent = prefix
+        .chars()
+        .fold(0usize, |count, c| count + if c == '\t' { 4 } else { 1 });
+
+    if p.state().virtual_line_start.is_none() && p.state().list_item_required_indent > 0 {
+        indent = indent.saturating_sub(p.state().list_item_required_indent);
+    }
+
+    indent <= max_indent
+}
