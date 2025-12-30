@@ -163,9 +163,9 @@ declare_lint_rule! {
         language: "ts",
         sources: &[
             RuleSource::EslintTypeScript("ban-types").same(),
-            RuleSource::EslintTypeScript("no-empty-object-type").same(),
-            RuleSource::EslintTypeScript("no-wrapper-object-types").same(),
-            RuleSource::EslintTypeScript("no-unsafe-function-type").same(),
+            RuleSource::EslintTypeScript("no-empty-object-type").inspired(),
+            RuleSource::EslintTypeScript("no-wrapper-object-types").inspired(),
+            RuleSource::EslintTypeScript("no-unsafe-function-type").inspired(),
         ],
         recommended: true,
         severity: Severity::Warning,
