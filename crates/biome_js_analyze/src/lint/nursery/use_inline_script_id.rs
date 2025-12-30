@@ -110,14 +110,14 @@ impl Rule for UseInlineScriptId {
                             collect_property_names(&obj_expr, &mut attribute_names)?;
                         }
                         AnyJsExpression::JsIdentifierExpression(ident_expr) => {
-                            if let Some(reference) = ident_expr.name().ok()
+                            if let Ok(reference) = ident_expr.name()
                                 && let Some(binding) = semantic_model.binding(&reference)
                                 && let Some(declarator) = binding
                                     .syntax()
                                     .ancestors()
                                     .find_map(JsVariableDeclarator::cast)
                                 && let Some(initializer) = declarator.initializer()
-                                && let Some(expression) = initializer.expression().ok()
+                                && let Ok(expression) = initializer.expression()
                                 && let AnyJsExpression::JsObjectExpression(obj_expr) = expression
                             {
                                 collect_property_names(&obj_expr, &mut attribute_names)?;
