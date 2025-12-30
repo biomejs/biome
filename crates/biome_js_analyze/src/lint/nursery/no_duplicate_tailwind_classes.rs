@@ -1,6 +1,8 @@
 use crate::JsRuleAction;
 use crate::lint::nursery::use_sorted_classes::any_class_string_like::AnyClassStringLike;
-use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
@@ -67,9 +69,9 @@ declare_lint_rule! {
         version: "next",
         name: "noDuplicateTailwindClasses",
         language: "jsx",
+        sources: &[RuleSource::EslintBetterTailwindcss("no-duplicate-classes").same()],
         recommended: false,
         fix_kind: FixKind::Safe,
-        issue_number: Some("6502"),
     }
 }
 
