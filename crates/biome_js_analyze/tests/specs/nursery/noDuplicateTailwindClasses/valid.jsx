@@ -14,3 +14,6 @@
 
 // Valid: single class
 <div class="flex" />;
+
+// Valid: single-quoted JSX strings
+<div class='flex p-4' />;

@@ -21,6 +21,9 @@ expression: invalid.jsx
 // Invalid: duplicates with arbitrary values
 <div class="w-[100px] p-4 w-[100px]" />;
 
+// Invalid: single-quoted JSX strings (should preserve quotes)
+<div class='mt-4 mt-4' />;
+
 ```
 
 # Diagnostics
@@ -167,6 +170,7 @@ invalid.jsx:16:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━
   > 16 │ <div class="w-[100px] p-4 w-[100px]" />;
        │            ^^^^^^^^^^^^^^^^^^^^^^^^^
     17 │ 
+    18 │ // Invalid: single-quoted JSX strings (should preserve quotes)
   
   i Remove duplicate classes to improve readability.
   
@@ -176,5 +180,26 @@ invalid.jsx:16:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━
   
     16 │ <div·class="w-[100px]·p-4·w-[100px]"·/>;
        │                          ----------     
+
+```
+
+```
+invalid.jsx:19:12 lint/nursery/noDuplicateTailwindClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS utility class detected: `mt-4`
+  
+    18 │ // Invalid: single-quoted JSX strings (should preserve quotes)
+  > 19 │ <div class='mt-4 mt-4' />;
+       │            ^^^^^^^^^^^
+    20 │ 
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    19 │ <div·class='mt-4·mt-4'·/>;
+       │                 -----     
 
 ```

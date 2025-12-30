@@ -14,3 +14,6 @@
 
 // Invalid: duplicates with arbitrary values
 <div class="w-[100px] p-4 w-[100px]" />;
+
+// Invalid: single-quoted JSX strings (should preserve quotes)
+<div class='mt-4 mt-4' />;
