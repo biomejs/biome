@@ -198,7 +198,6 @@ define_categories! {
     "lint/nursery/noUndeclaredEnvVars": "https://biomejs.dev/linter/rules/no-undeclared-env-vars",
     "lint/nursery/noUnknownAttribute": "https://biomejs.dev/linter/rules/no-unknown-attribute",
     "lint/nursery/noUnnecessaryConditions": "https://biomejs.dev/linter/rules/no-unnecessary-conditions",
-    "lint/nursery/noUnnecessaryTailwindWhitespace": "https://biomejs.dev/linter/rules/no-unnecessary-tailwind-whitespace",
     "lint/nursery/noUnresolvedImports": "https://biomejs.dev/linter/rules/no-unresolved-imports",
     "lint/nursery/noUnusedExpressions": "https://biomejs.dev/linter/rules/no-unused-expressions",
     "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
