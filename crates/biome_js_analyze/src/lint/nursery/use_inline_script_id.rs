@@ -98,9 +98,10 @@ impl Rule for UseInlineScriptId {
         for attribute in jsx_element.attributes() {
             match attribute {
                 AnyJsxAttribute::JsxAttribute(a) => {
-                    let name_value = a.name_value_token().ok()?;
-                    let name = name_value.token_text();
-                    attribute_names.insert(name.to_string());
+                    if let Ok(name_value) = a.name_value_token() {
+                        let name = name_value.token_text();
+                        attribute_names.insert(name.to_string());
+                    }
                 }
                 AnyJsxAttribute::JsxSpreadAttribute(spread) => {
                     let argument = spread.argument().ok()?;
@@ -109,15 +110,16 @@ impl Rule for UseInlineScriptId {
                             collect_property_names(&obj_expr, &mut attribute_names)?;
                         }
                         AnyJsExpression::JsIdentifierExpression(ident_expr) => {
-                            let reference = ident_expr.name().ok()?;
-                            let binding = semantic_model.binding(&reference)?;
-                            let declarator = binding
-                                .syntax()
-                                .ancestors()
-                                .find_map(JsVariableDeclarator::cast)?;
-                            let initializer = declarator.initializer()?;
-                            let expression = initializer.expression().ok()?;
-                            if let AnyJsExpression::JsObjectExpression(obj_expr) = expression {
+                            if let Some(reference) = ident_expr.name().ok()
+                                && let Some(binding) = semantic_model.binding(&reference)
+                                && let Some(declarator) = binding
+                                    .syntax()
+                                    .ancestors()
+                                    .find_map(JsVariableDeclarator::cast)
+                                && let Some(initializer) = declarator.initializer()
+                                && let Some(expression) = initializer.expression().ok()
+                                && let AnyJsExpression::JsObjectExpression(obj_expr) = expression
+                            {
                                 collect_property_names(&obj_expr, &mut attribute_names)?;
                             }
                         }
