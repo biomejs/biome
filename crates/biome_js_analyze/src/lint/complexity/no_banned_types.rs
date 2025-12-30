@@ -155,7 +155,7 @@ declare_lint_rule! {
     /// [^1]: For those curious, this occurs as a natural consequence of TypeScript's type system being _structural_ instead of nominal.
     /// `{}`, instead of requiring compatible types have _exactly_ 0 properties, simply requires they have _0 or more_ properties.
     /// This is the exact same mechanism that allows passing `{ foo: number, bar: string }`
-    /// to a function expecting `{ bar: number }` (albeit much more surprising).
+    /// to a function expecting `{ bar: string }` (albeit much more surprising).
     /// [^2]: In this case, you'd write `declare const myUniqueInternalSymbol: unique symbol` somewhere in the same file.
     pub NoBannedTypes {
         version: "1.0.0",
