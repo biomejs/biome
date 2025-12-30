@@ -2107,7 +2107,7 @@ See <https://biomejs.dev/linter/rules/use-find>
 	 */
 	useFind?: UseFindConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
 See <https://biomejs.dev/linter/rules/use-inline-script-id> 
 	 */
 	useInlineScriptId?: UseInlineScriptIdConfiguration;

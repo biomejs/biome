@@ -5544,7 +5544,7 @@
 					]
 				},
 				"useInlineScriptId": {
-					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/use-inline-script-id>",
+					"description": "Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.\nSee <https://biomejs.dev/linter/rules/use-inline-script-id>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseInlineScriptIdConfiguration" },
 						{ "type": "null" }
