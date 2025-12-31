@@ -1,12 +1,22 @@
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 
 use crate::reporter::{Reporter, ReporterVisitor};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
+use biome_analyze::{
+    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
+};
 use biome_console::{Console, ConsoleExt, markup};
+use biome_css_syntax::CssLanguage;
 use biome_diagnostics::{Error, Location, PrintDescription, Severity, display::SourceFile};
+use biome_graphql_syntax::GraphqlLanguage;
+use biome_html_syntax::HtmlLanguage;
+use biome_js_syntax::JsLanguage;
+use biome_json_syntax::JsonLanguage;
+use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
+
 pub(crate) struct SarifReporter<'a> {
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: &'a dyn Execution,
@@ -26,7 +36,88 @@ impl Reporter for SarifReporter<'_> {
     }
 }
 
-pub(crate) struct SarifReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
+pub(crate) struct SarifReporterVisitor<'a> {
+    console: &'a mut dyn Console,
+    rules_metadata: BTreeMap<&'static str, RuleMetadata>,
+}
+
+impl<'a> SarifReporterVisitor<'a> {
+    pub fn new(console: &'a mut dyn Console) -> Self {
+        let mut visitor = Self {
+            console,
+            rules_metadata: BTreeMap::new(),
+        };
+
+        biome_graphql_analyze::visit_registry(&mut visitor);
+        biome_html_analyze::visit_registry(&mut visitor);
+        biome_css_analyze::visit_registry(&mut visitor);
+        biome_json_analyze::visit_registry(&mut visitor);
+        biome_js_analyze::visit_registry(&mut visitor);
+
+        visitor
+    }
+
+    fn store_rule<R, L>(&mut self)
+    where
+        L: Language,
+        R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+    {
+        let category = <R::Group as RuleGroup>::Category::CATEGORY;
+        if matches!(category, RuleCategory::Lint | RuleCategory::Action) {
+            println!("🔴 saved {0}", R::METADATA.name);
+            self.rules_metadata.insert(R::METADATA.name, R::METADATA);
+        }
+    }
+}
+
+impl RegistryVisitor<JsLanguage> for SarifReporterVisitor<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+    {
+        self.store_rule::<R, JsLanguage>();
+    }
+}
+
+impl RegistryVisitor<JsonLanguage> for SarifReporterVisitor<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.store_rule::<R, JsonLanguage>();
+    }
+}
+
+impl RegistryVisitor<CssLanguage> for SarifReporterVisitor<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.store_rule::<R, CssLanguage>();
+    }
+}
+
+impl RegistryVisitor<GraphqlLanguage> for SarifReporterVisitor<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.store_rule::<R, GraphqlLanguage>();
+    }
+}
+
+impl RegistryVisitor<HtmlLanguage> for SarifReporterVisitor<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.store_rule::<R, HtmlLanguage>();
+    }
+}
 
 impl ReporterVisitor for SarifReporterVisitor<'_> {
     fn report_summary(
@@ -54,7 +145,9 @@ impl ReporterVisitor for SarifReporterVisitor<'_> {
                 if diagnostic.severity() >= payload.diagnostic_level {
                     if diagnostic.tags().is_verbose() {
                         if verbose {
-                            if let Some(driver_rule) = to_sarif_driver_rule(diagnostic) {
+                            if let Some(driver_rule) =
+                                to_sarif_driver_rule(diagnostic, &self.rules_metadata)
+                            {
                                 sarif_rules.insert(driver_rule);
                             }
                             to_sarif_result(diagnostic, working_directory)
@@ -62,7 +155,9 @@ impl ReporterVisitor for SarifReporterVisitor<'_> {
                             None
                         }
                     } else {
-                        if let Some(driver_rule) = to_sarif_driver_rule(diagnostic) {
+                        if let Some(driver_rule) =
+                            to_sarif_driver_rule(diagnostic, &self.rules_metadata)
+                        {
                             sarif_rules.insert(driver_rule);
                         }
                         to_sarif_result(diagnostic, working_directory)
@@ -95,7 +190,7 @@ impl ReporterVisitor for SarifReporterVisitor<'_> {
 
         let result = serde_json::to_string_pretty(&report)?;
 
-        self.0.log(markup! {
+        self.console.log(markup! {
             {result}
         });
 
@@ -130,26 +225,31 @@ fn to_sarif_result<'a>(
     })
 }
 
-fn to_sarif_driver_rule<'a>(diagnostic: &'a Error) -> Option<SarifDriverRule<'a>> {
+fn to_sarif_driver_rule<'a>(
+    diagnostic: &'a Error,
+    rules_metadata: &BTreeMap<&'static str, RuleMetadata>,
+) -> Option<SarifDriverRule<'a>> {
     let category = diagnostic.category()?;
 
     let name = category.name();
-    let link = category.link().unwrap_or_default();
+    let link = if name == "format" {
+        "https://biomejs.dev/formatter/"
+    } else {
+        category.link().unwrap_or_default()
+    };
+
+    let description: &'static str = if name == "format" {
+        "Follow a consistent style—handling things like spacing, indentation, line breaks, and punctuation to make code easier to read and maintain."
+    } else if let Some(metadata) = &rules_metadata.get(name.split('/').last().unwrap()) {
+        metadata.docs.lines().next().unwrap_or_default().trim()
+    } else {
+        ""
+    };
 
     Some(SarifDriverRule {
         id: name,
-        short_description: SarifDriverRuleDescription {
-            text: if name == "format" {
-                "Follow a consistent style—handling things like spacing, indentation, line breaks, and punctuation to make code easier to read and maintain."
-            } else {
-                ""
-            },
-        },
-        help_uri: if name == "format" {
-            "https://biomejs.dev/formatter/"
-        } else {
-            link
-        },
+        short_description: SarifDriverRuleDescription { text: description },
+        help_uri: link,
     })
 }
 
@@ -233,14 +333,14 @@ struct SarifDriver<'a> {
 struct SarifDriverRule<'a> {
     id: &'static str,
     #[serde(rename = "shortDescription")]
-    short_description: SarifDriverRuleDescription,
+    short_description: SarifDriverRuleDescription<'a>,
     #[serde(rename = "helpUri")]
     help_uri: &'a str,
 }
 
 #[derive(Serialize, Eq, PartialEq, Hash)]
-struct SarifDriverRuleDescription {
-    text: &'static str,
+struct SarifDriverRuleDescription<'a> {
+    text: &'a str,
 }
 
 #[derive(Serialize)]

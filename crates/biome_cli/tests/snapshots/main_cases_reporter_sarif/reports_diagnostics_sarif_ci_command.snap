@@ -57,7 +57,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "id": "assist/source/organizeImports",
               "shortDescription": {
-                "text": ""
+                "text": "Provides a code action to sort the imports and exports in the file using a built-in or custom order."
               },
               "helpUri": "https://biomejs.dev/assist/actions/organize-imports"
             },
@@ -71,42 +71,42 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "id": "lint/correctness/noUnusedImports",
               "shortDescription": {
-                "text": ""
+                "text": "Disallow unused imports."
               },
               "helpUri": "https://biomejs.dev/linter/rules/no-unused-imports"
             },
             {
               "id": "lint/correctness/noUnusedVariables",
               "shortDescription": {
-                "text": ""
+                "text": "Disallow unused variables."
               },
               "helpUri": "https://biomejs.dev/linter/rules/no-unused-variables"
             },
             {
               "id": "lint/suspicious/noDebugger",
               "shortDescription": {
-                "text": ""
+                "text": "Disallow the use of `debugger`"
               },
               "helpUri": "https://biomejs.dev/linter/rules/no-debugger"
             },
             {
               "id": "lint/suspicious/noDoubleEquals",
               "shortDescription": {
-                "text": ""
+                "text": "Require the use of `===` and `!==`."
               },
               "helpUri": "https://biomejs.dev/linter/rules/no-double-equals"
             },
             {
               "id": "lint/suspicious/noImplicitAnyLet",
               "shortDescription": {
-                "text": ""
+                "text": "Disallow use of implicit `any` type on variable declarations."
               },
               "helpUri": "https://biomejs.dev/linter/rules/no-implicit-any-let"
             },
             {
               "id": "lint/suspicious/noRedeclare",
               "shortDescription": {
-                "text": ""
+                "text": "Disallow variable, function, class, and type redeclarations in the same scope."
               },
               "helpUri": "https://biomejs.dev/linter/rules/no-redeclare"
             }

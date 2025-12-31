@@ -200,7 +200,7 @@ impl Finalizer for DefaultFinalizer {
                     verbose: cli_options.verbose,
                     working_directory: fs.working_directory().clone(),
                 };
-                reporter.write(&mut SarifReporterVisitor(console))?;
+                reporter.write(&mut SarifReporterVisitor::new(console))?;
             }
         }
 
