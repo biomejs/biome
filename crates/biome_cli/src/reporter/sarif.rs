@@ -114,7 +114,7 @@ fn to_sarif_result<'a>(
     };
 
     let location = diagnostic.location();
-    let location = to_sarif_result_location(location, working_directory);
+    let location = to_sarif_result_location(location, working_directory)?;
 
     Some(SarifResult {
         rule_id: category.name(),
@@ -138,7 +138,13 @@ fn to_sarif_driver_rule<'a>(diagnostic: &'a Error) -> Option<SarifDriverRule<'a>
 
     Some(SarifDriverRule {
         id: name,
-        short_description: SarifDriverRuleDescription { text: "" },
+        short_description: SarifDriverRuleDescription {
+            text: if name == "format" {
+                "Follow a consistent style—handling things like spacing, indentation, line breaks, and punctuation to make code easier to read and maintain."
+            } else {
+                ""
+            },
+        },
         help_uri: if name == "format" {
             "https://biomejs.dev/formatter/"
         } else {
@@ -150,72 +156,50 @@ fn to_sarif_driver_rule<'a>(diagnostic: &'a Error) -> Option<SarifDriverRule<'a>
 fn to_sarif_result_location(
     location: Location,
     working_directory: Option<&Utf8Path>,
-) -> SarifResultLocation {
-    SarifResultLocation {
+) -> Option<SarifResultLocation> {
+    let artifact_location =
+        to_sarif_result_location_artifact_location(location, working_directory)?;
+    let region = to_sarif_result_location_region(location);
+
+    Some(SarifResultLocation {
         physical_location: SarifResultLocationPhysicalLocation {
-            artifact_location: to_sarif_result_location_artifact_location(
-                location,
-                working_directory,
-            ),
-            region: to_sarif_result_location_region(location),
+            artifact_location,
+            region,
         },
-    }
+    })
 }
 
 fn to_sarif_result_location_artifact_location(
     location: Location,
     working_directory: Option<&Utf8Path>,
-) -> SarifResultLocationPhysicalLocationArtifactLocation {
-    if let Some(resource) = location.resource {
-        let Some(file) = resource.as_file() else {
-            return SarifResultLocationPhysicalLocationArtifactLocation::default();
-        };
-        let absolute_path = working_directory
-            .as_ref()
-            .map(|wd| wd.join(file))
-            .unwrap_or(file.into());
-        let absolute_path = format!("file://{}", absolute_path.as_str());
-        SarifResultLocationPhysicalLocationArtifactLocation { uri: absolute_path }
-    } else {
-        SarifResultLocationPhysicalLocationArtifactLocation::default()
-    }
+) -> Option<SarifResultLocationPhysicalLocationArtifactLocation> {
+    let resource = location.resource?;
+    let file = resource.as_file()?;
+    let absolute_path = working_directory
+        .as_ref()
+        .map(|wd| wd.join(file))
+        .unwrap_or(file.into());
+    let absolute_path = format!("file://{}", absolute_path.as_str());
+
+    Some(SarifResultLocationPhysicalLocationArtifactLocation { uri: absolute_path })
 }
 
 fn to_sarif_result_location_region(
     location: Location,
-) -> SarifResultLocationPhysicalLocationRegion {
-    let Some(source_code) = location.source_code else {
-        return SarifResultLocationPhysicalLocationRegion::default();
-    };
-    let Some(span) = location.span else {
-        return SarifResultLocationPhysicalLocationRegion::default();
-    };
-    let source = SourceFile::new(source_code);
-    let start = source.location(span.start()).ok();
-    let end = source.location(span.end()).ok();
+) -> Option<SarifResultLocationPhysicalLocationRegion> {
+    let source_code = location.source_code?;
+    let span = location.span?;
 
-    SarifResultLocationPhysicalLocationRegion {
-        start_line: if let Some(start) = start {
-            start.line_number.get()
-        } else {
-            0
-        },
-        start_column: if let Some(start) = start {
-            start.column_number.get()
-        } else {
-            0
-        },
-        end_line: if let Some(end) = end {
-            end.line_number.get()
-        } else {
-            0
-        },
-        end_column: if let Some(end) = end {
-            end.column_number.get()
-        } else {
-            0
-        },
-    }
+    let source = SourceFile::new(source_code);
+    let start = source.location(span.start()).ok()?;
+    let end = source.location(span.end()).ok()?;
+
+    Some(SarifResultLocationPhysicalLocationRegion {
+        start_line: start.line_number.get(),
+        start_column: start.column_number.get(),
+        end_line: end.line_number.get(),
+        end_column: end.column_number.get(),
+    })
 }
 
 #[derive(Serialize)]
@@ -273,25 +257,26 @@ struct SarifResultMessage {
     text: String,
 }
 
-#[derive(Default, Serialize)]
+#[derive(Serialize)]
 struct SarifResultLocation {
     #[serde(rename = "physicalLocation")]
     physical_location: SarifResultLocationPhysicalLocation,
 }
 
-#[derive(Default, Serialize)]
+#[derive(Serialize)]
 struct SarifResultLocationPhysicalLocation {
     #[serde(rename = "artifactLocation")]
     artifact_location: SarifResultLocationPhysicalLocationArtifactLocation,
-    region: SarifResultLocationPhysicalLocationRegion,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    region: Option<SarifResultLocationPhysicalLocationRegion>,
 }
 
-#[derive(Default, Serialize)]
+#[derive(Serialize)]
 struct SarifResultLocationPhysicalLocationArtifactLocation {
     uri: String,
 }
 
-#[derive(Default, Serialize)]
+#[derive(Serialize)]
 struct SarifResultLocationPhysicalLocationRegion {
     #[serde(rename = "startLine")]
     start_line: usize,

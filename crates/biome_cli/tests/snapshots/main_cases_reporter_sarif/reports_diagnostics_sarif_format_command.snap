@@ -57,7 +57,7 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "id": "format",
               "shortDescription": {
-                "text": ""
+                "text": "Follow a consistent style—handling things like spacing, indentation, line breaks, and punctuation to make code easier to read and maintain."
               },
               "helpUri": "https://biomejs.dev/formatter/"
             }
@@ -76,12 +76,6 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
               "physicalLocation": {
                 "artifactLocation": {
                   "uri": "file://index.ts"
-                },
-                "region": {
-                  "startLine": 0,
-                  "startColumn": 0,
-                  "endLine": 0,
-                  "endColumn": 0
                 }
               }
             }
@@ -98,12 +92,6 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
               "physicalLocation": {
                 "artifactLocation": {
                   "uri": "file://main.ts"
-                },
-                "region": {
-                  "startLine": 0,
-                  "startColumn": 0,
-                  "endLine": 0,
-                  "endColumn": 0
                 }
               }
             }
