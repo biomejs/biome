@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added the new nursery rule [`noExcessiveLinesPerFile`](https://biomejs.dev/linter/rules/no-excessive-lines-per-file/).
+Added the nursery lint rule [`noExcessiveLinesPerFile`](https://biomejs.dev/linter/rules/no-excessive-lines-per-file/).
 Biome now reports files that exceed a configurable line limit.
 
 ```js
