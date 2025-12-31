@@ -3246,6 +3246,19 @@
 		},
 		"NoExcessiveLinesPerFileOptions": {
 			"type": "object",
+			"properties": {
+				"maxLines": {
+					"description": "The maximum number of lines allowed in a file.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 1
+				},
+				"skipBlankLines": {
+					"description": "When this option is set to `true`, blank lines are not counted towards the maximum line limit.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoExcessiveLinesPerFunctionConfiguration": {
@@ -5263,7 +5276,7 @@
 					]
 				},
 				"noExcessiveLinesPerFile": {
-					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/no-excessive-lines-per-file>",
+					"description": "Restrict the number of lines in a file.\nSee <https://biomejs.dev/linter/rules/no-excessive-lines-per-file>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoExcessiveLinesPerFileConfiguration" },
 						{ "type": "null" }

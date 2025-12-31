@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsRoot, JsSyntaxKind};
-use biome_rowan::{AstNode, Direction};
+use biome_rowan::AstNode;
 use biome_rule_options::no_excessive_lines_per_file::NoExcessiveLinesPerFileOptions;
 
 declare_lint_rule! {
@@ -17,9 +17,16 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// The following example will show a diagnostic when you set the maxLines limit to 2, however the default value is 300.
+    /// The following example will show a diagnostic when `maxLines` is set to 2:
     ///
-    /// ```js
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "maxLines": 2
+    ///     }
+    /// }
+    /// ```
+    /// ```js,expect_diagnostic,use_options
     /// const a = 1;
     /// const b = 2;
     /// const c = 3;
@@ -97,6 +104,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[RuleSource::Eslint("max-lines").inspired()],
+        issue_number: Some("5557"),
     }
 }
 
@@ -112,7 +120,8 @@ impl Rule for NoExcessiveLinesPerFile {
 
         let file_lines_count = node
             .syntax()
-            .descendants_tokens(Direction::Next)
+            .descendants()
+            .flat_map(|descendant| descendant.tokens().collect::<Vec<_>>())
             .filter(|token| token.kind() != JsSyntaxKind::EOF)
             .fold(0, |acc, token| {
                 if options.skip_blank_lines() {
@@ -120,6 +129,7 @@ impl Rule for NoExcessiveLinesPerFile {
                 };
 
                 acc + token
+                    .trim_trailing_trivia()
                     .leading_trivia()
                     .pieces()
                     .filter(|piece| piece.is_newline())

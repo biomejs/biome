@@ -1899,7 +1899,7 @@ See <https://biomejs.dev/linter/rules/no-equals-to-null>
 	 */
 	noEqualsToNull?: NoEqualsToNullConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Restrict the number of lines in a file.
 See <https://biomejs.dev/linter/rules/no-excessive-lines-per-file> 
 	 */
 	noExcessiveLinesPerFile?: NoExcessiveLinesPerFileConfiguration;
@@ -6619,7 +6619,16 @@ export interface NoEmptySourceOptions {
 	allowComments?: boolean;
 }
 export type NoEqualsToNullOptions = {};
-export type NoExcessiveLinesPerFileOptions = {};
+export interface NoExcessiveLinesPerFileOptions {
+	/**
+	 * The maximum number of lines allowed in a file.
+	 */
+	maxLines?: number;
+	/**
+	 * When this option is set to `true`, blank lines are not counted towards the maximum line limit.
+	 */
+	skipBlankLines?: boolean;
+}
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export interface NoImportCyclesOptions {
