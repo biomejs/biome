@@ -140,17 +140,14 @@ impl Rule for NoDuplicateClasses {
             .collect::<Vec<_>>()
             .join(", ");
 
+        let message = if state.duplicates.len() > 1 {
+            format!("Duplicate CSS classes detected: {duplicates_str}")
+        } else {
+            format!("Duplicate CSS class detected: {duplicates_str}")
+        };
+
         Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "Duplicate CSS class"<Emphasis>{
-                        if state.duplicates.len() > 1 { "es" } else { "" }
-                    }</Emphasis>" detected: "{duplicates_str}
-                },
-            )
-            .note(markup! {
+            RuleDiagnostic::new(rule_category!(), node.range(), markup! {{message}}).note(markup! {
                 "Remove duplicate classes to improve readability."
             }),
         )

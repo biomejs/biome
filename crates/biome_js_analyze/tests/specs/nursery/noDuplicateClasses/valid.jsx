@@ -17,3 +17,7 @@
 
 // Valid: single-quoted JSX strings
 <div class='flex p-4' />;
+
+// Valid: template literals without duplicates
+<div className={`flex p-4 ${condition}`} />;
+<div className={`${prefix} p-4 m-2 ${suffix}`} />;
