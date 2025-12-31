@@ -1899,6 +1899,11 @@ See <https://biomejs.dev/linter/rules/no-equals-to-null>
 	 */
 	noEqualsToNull?: NoEqualsToNullConfiguration;
 	/**
+	* Succinct description of the rule.
+See <https://biomejs.dev/linter/rules/no-excessive-lines-per-file> 
+	 */
+	noExcessiveLinesPerFile?: NoExcessiveLinesPerFileConfiguration;
+	/**
 	* Require Promise-like statements to be handled appropriately.
 See <https://biomejs.dev/linter/rules/no-floating-promises> 
 	 */
@@ -3710,6 +3715,9 @@ export type NoEmptySourceConfiguration =
 export type NoEqualsToNullConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEqualsToNullOptions;
+export type NoExcessiveLinesPerFileConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveLinesPerFileOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
@@ -5186,6 +5194,10 @@ export interface RuleWithNoEqualsToNullOptions {
 	level: RulePlainConfiguration;
 	options?: NoEqualsToNullOptions;
 }
+export interface RuleWithNoExcessiveLinesPerFileOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveLinesPerFileOptions;
+}
 export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6607,6 +6619,7 @@ export interface NoEmptySourceOptions {
 	allowComments?: boolean;
 }
 export type NoEqualsToNullOptions = {};
+export type NoExcessiveLinesPerFileOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export interface NoImportCyclesOptions {
@@ -7522,6 +7535,7 @@ export type Category =
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"
+	| "lint/nursery/noExcessiveLinesPerFile"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noImplicitCoercion"

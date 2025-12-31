@@ -3238,6 +3238,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoExcessiveLinesPerFileConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExcessiveLinesPerFileOptions" }
+			]
+		},
+		"NoExcessiveLinesPerFileOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoExcessiveLinesPerFunctionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5252,6 +5262,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveLinesPerFile": {
+					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/no-excessive-lines-per-file>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveLinesPerFileConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFloatingPromises": {
 					"description": "Require Promise-like statements to be handled appropriately.\nSee <https://biomejs.dev/linter/rules/no-floating-promises>",
 					"anyOf": [
@@ -6995,6 +7012,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoExcessiveCognitiveComplexityOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoExcessiveLinesPerFileOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExcessiveLinesPerFileOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
