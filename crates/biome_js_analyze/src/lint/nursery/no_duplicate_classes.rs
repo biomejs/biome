@@ -8,6 +8,7 @@ use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
+use biome_js_syntax::JsTemplateElement;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
 use rustc_hash::FxHashSet;
@@ -121,7 +122,8 @@ impl Rule for NoDuplicateClasses {
         }
 
         let deduplicated = deduplicated_parts.join(" ");
-        let duplicates: Vec<Box<str>> = duplicate_set.into_iter().map(Into::into).collect();
+        let mut duplicates: Vec<Box<str>> = duplicate_set.into_iter().map(Into::into).collect();
+        duplicates.sort();
 
         Some(DuplicateClassesState {
             deduplicated: deduplicated.into(),
@@ -196,7 +198,32 @@ impl Rule for NoDuplicateClasses {
                 mutation.replace_node(jsx_string_node.clone(), replacement);
             }
             AnyClassStringLike::JsTemplateChunkElement(chunk) => {
-                let replacement = js_template_chunk_element(js_template_chunk(deduplicated));
+                // Preserve leading/trailing spaces for template expression boundaries
+                let token = chunk.template_chunk_token().ok()?;
+                let original = token.text_trimmed();
+                let syntax = chunk.syntax();
+
+                // Check if preceded by a template expression (e.g., `${var} classes`)
+                let has_leading_var = syntax
+                    .prev_sibling()
+                    .is_some_and(|s| JsTemplateElement::can_cast(s.kind()));
+                // Check if followed by a template expression (e.g., `classes ${var}`)
+                let has_trailing_var = syntax
+                    .next_sibling()
+                    .is_some_and(|s| JsTemplateElement::can_cast(s.kind()));
+
+                let mut result = deduplicated.to_string();
+
+                // Preserve leading space if there's a preceding variable and original had leading space
+                if has_leading_var && original.starts_with(' ') && !result.starts_with(' ') {
+                    result.insert(0, ' ');
+                }
+                // Preserve trailing space if there's a following variable and original had trailing space
+                if has_trailing_var && original.ends_with(' ') && !result.ends_with(' ') {
+                    result.push(' ');
+                }
+
+                let replacement = js_template_chunk_element(js_template_chunk(&result));
                 mutation.replace_node(chunk.clone(), replacement);
             }
         };
