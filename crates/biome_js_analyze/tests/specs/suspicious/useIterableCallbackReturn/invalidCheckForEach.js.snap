@@ -148,7 +148,7 @@ invalidCheckForEach.js:20:4 lint/suspicious/useIterableCallbackReturn ━━━�
     21 │ [].forEach((a) => {
     22 │     if (a) {
   
-  i Either remove this return or remove the returned value.
+  i Use a block body with no return, or wrap the expression with void.
   
     18 │ });
     19 │ // Implicit return (arrow expression body without return keyword)

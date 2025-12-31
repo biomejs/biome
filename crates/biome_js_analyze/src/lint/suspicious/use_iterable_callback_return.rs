@@ -193,15 +193,18 @@ impl Rule for UseIterableCallbackReturn {
 
         let mut problems: Vec<RuleProblemKind> = Vec::new();
         let member_range = member_expression.member().ok()?.range();
+        // Consider implicit return (arrow expression body) as a return with value
+        let has_return_with_value =
+            !returns_info.returns_with_value.is_empty() || returns_info.implicit_return.is_some();
         if method_config.return_value_required {
             if returns_info.has_paths_without_returns {
-                if returns_info.returns_with_value.is_empty() {
+                if !has_return_with_value {
                     problems.push(RuleProblemKind::MissingReturnWithValue);
                 } else {
                     problems.push(RuleProblemKind::NotAllPathsReturnValue);
                 }
             } else if !returns_info.returns_without_value.is_empty() {
-                if !returns_info.returns_with_value.is_empty() {
+                if has_return_with_value {
                     for return_range in returns_info.returns_without_value {
                         problems.push(RuleProblemKind::UnexpectedEmptyReturn(return_range));
                     }
@@ -210,6 +213,10 @@ impl Rule for UseIterableCallbackReturn {
                 }
             }
         } else {
+            // Handle implicit return (arrow expression body) separately
+            if let Some(implicit_range) = returns_info.implicit_return {
+                problems.push(RuleProblemKind::UnexpectedImplicitReturn(implicit_range));
+            }
             for return_range in returns_info.returns_with_value {
                 problems.push(RuleProblemKind::UnexpectedReturnWithValue(return_range));
             }
@@ -269,6 +276,14 @@ impl Rule for UseIterableCallbackReturn {
                         },
                     );
                 }
+                RuleProblemKind::UnexpectedImplicitReturn(return_range) => {
+                    diagnostic = diagnostic.detail(
+                        *return_range,
+                        markup! {
+                            "Use a block body with no return, or wrap the expression with "<Emphasis>"void"</Emphasis>"."
+                        },
+                    );
+                }
             }
         }
 
@@ -296,6 +311,8 @@ enum RuleProblemKind {
     UnexpectedEmptyReturn(TextRange),
     /// An unexpected `return` statement with value.
     UnexpectedReturnWithValue(TextRange),
+    /// An unexpected implicit return (arrow expression body).
+    UnexpectedImplicitReturn(TextRange),
 }
 
 /// This struct holds information about the return statements in a function.
@@ -308,6 +325,8 @@ struct FunctionReturnsInfo {
     returns_with_value: Vec<TextRange>,
     /// The ranges of return keywords that do not return a value.
     returns_without_value: Vec<TextRange>,
+    /// The range of an implicit return (arrow expression body), if any.
+    implicit_return: Option<TextRange>,
 }
 
 /// This function analyzes the control flow graph of a function and collects information about
@@ -318,6 +337,7 @@ fn get_function_returns_info(cfg: &JsControlFlowGraph) -> FunctionReturnsInfo {
         has_paths_without_returns: false,
         returns_with_value: Vec::new(),
         returns_without_value: Vec::new(),
+        implicit_return: None,
     };
 
     if let Some(arrow_expression) = JsArrowFunctionExpression::cast_ref(&cfg.node)
@@ -333,9 +353,8 @@ fn get_function_returns_info(cfg: &JsControlFlowGraph) -> FunctionReturnsInfo {
                 .returns_without_value
                 .push(expression.range())
         } else {
-            function_returns_info
-                .returns_with_value
-                .push(expression.range())
+            // Track implicit return separately from explicit return statements
+            function_returns_info.implicit_return = Some(expression.range());
         }
 
         return function_returns_info;
