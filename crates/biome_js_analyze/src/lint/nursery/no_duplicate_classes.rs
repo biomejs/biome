@@ -13,12 +13,12 @@ use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
-    /// Disallow duplicate CSS utility classes.
+    /// Disallow duplicate CSS classes.
     ///
-    /// Detects and removes duplicate CSS utility classes in JSX `class` and `className` attributes,
+    /// Detects and removes duplicate CSS classes in JSX `class` and `className` attributes,
     /// as well as in utility function calls like `clsx`, `cn`, `cva`, etc.
     ///
-    /// Duplicate classes are redundant and can make the code harder to read and maintain.
+    /// Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
     /// This rule helps keep your class strings clean by detecting and auto-fixing duplicates.
     ///
     /// ## Examples
@@ -65,9 +65,9 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub NoDuplicateTailwindClasses {
+    pub NoDuplicateClasses {
         version: "next",
-        name: "noDuplicateTailwindClasses",
+        name: "noDuplicateClasses",
         language: "jsx",
         sources: &[RuleSource::EslintBetterTailwindcss("no-duplicate-classes").same()],
         recommended: false,
@@ -84,7 +84,7 @@ pub struct DuplicateClassesState {
     pub duplicates: Box<[Box<str>]>,
 }
 
-impl Rule for NoDuplicateTailwindClasses {
+impl Rule for NoDuplicateClasses {
     type Query = Ast<AnyClassStringLike>;
     type State = DuplicateClassesState;
     type Signals = Option<Self::State>;
@@ -143,7 +143,7 @@ impl Rule for NoDuplicateTailwindClasses {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Duplicate CSS utility class"<Emphasis>{
+                    "Duplicate CSS class"<Emphasis>{
                         if state.duplicates.len() > 1 { "es" } else { "" }
                     }</Emphasis>" detected: "{duplicates_str}
                 },

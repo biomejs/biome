@@ -1,0 +1,15 @@
+<!-- Invalid: exact duplicates -->
+<div class="flex flex"></div>
+<div class="p-4 text-red-500 p-4 bg-white"></div>
+
+<!-- Invalid: multiple duplicates -->
+<div class="flex p-4 flex m-2 p-4"></div>
+
+<!-- Invalid: duplicates with complex classes -->
+<div class="hover:focus:m-2 foo hover:focus:m-2"></div>
+
+<!-- Invalid: duplicates in the middle -->
+<div class="text-lg text-center text-lg font-bold"></div>
+
+<!-- Invalid: single-quoted strings (should preserve quotes) -->
+<div class='mt-4 mt-4'></div>
