@@ -57,7 +57,10 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// The following code is invalid when `checkForEach` is `true`:
+    ///
+    /// ```js,ignore
+    /// // biome.json: { "linter": { "rules": { "suspicious": { "useIterableCallbackReturn": { "options": { "checkForEach": true } } } } } }
     /// [].forEach(() => {
     ///     return 1; // Should not return a value
     /// });
@@ -79,6 +82,42 @@ declare_lint_rule! {
     ///
     /// ```js
     /// [].forEach(() => void null); // Void return value, which doesn't trigger the rule
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### checkForEach
+    ///
+    /// By default, this rule does not check `forEach` callbacks. Set `checkForEach` to `true`
+    /// to enforce that `forEach` callbacks do not return a value.
+    ///
+    /// Default: `false`
+    ///
+    /// Example configuration:
+    ///
+    /// ```json
+    /// {
+    ///     "linter": {
+    ///         "rules": {
+    ///             "suspicious": {
+    ///                 "useIterableCallbackReturn": {
+    ///                     "level": "error",
+    ///                     "options": {
+    ///                         "checkForEach": true
+    ///                     }
+    ///                 }
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// When `checkForEach` is `true`, the following code is invalid:
+    ///
+    /// ```js,ignore
+    /// [].forEach(() => {
+    ///     return 1; // Should not return a value
+    /// });
     /// ```
     pub UseIterableCallbackReturn {
         version: "2.0.0",
@@ -129,6 +168,11 @@ impl Rule for UseIterableCallbackReturn {
             .and_then(|name| name.value_token().ok())?;
 
         let method_config = ITERABLE_METHOD_INFOS.get(member_name.text_trimmed())?;
+
+        // Skip forEach check if checkForEach option is false (default)
+        if method_config.method_name == "forEach" && !ctx.options().check_for_each {
+            return None;
+        }
 
         let arg_position = argument_list
             .elements()

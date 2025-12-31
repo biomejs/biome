@@ -6937,7 +6937,17 @@ export type UseGetterReturnOptions = {};
 export type UseGoogleFontDisplayOptions = {};
 export type UseGuardForInOptions = {};
 export type UseIsArrayOptions = {};
-export type UseIterableCallbackReturnOptions = {};
+/**
+ * Options for the `useIterableCallbackReturn` rule.
+ */
+export interface UseIterableCallbackReturnOptions {
+	/**
+	* If `true`, the rule will also check that `forEach` callbacks do not return a value.
+
+Default: `false` 
+	 */
+	checkForEach?: boolean;
+}
 export type UseNamespaceKeywordOptions = {};
 export type UseNumberToFixedDigitsArgumentOptions = {};
 export type UseStaticResponseMethodsOptions = {};
