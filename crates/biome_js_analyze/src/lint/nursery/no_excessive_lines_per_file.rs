@@ -98,13 +98,24 @@ declare_lint_rule! {
     /// const c = 3;
     /// ```
     ///
+    /// ## Suppressions
+    ///
+    /// If you need to exceed the line limit in a specific file, you can suppress this rule
+    /// at the top of the file:
+    ///
+    /// ```js
+    /// // biome-ignore lint/nursery/noExcessiveLinesPerFile: generated file
+    /// const a = 1;
+    /// const b = 2;
+    /// const c = 3;
+    /// ```
+    ///
     pub NoExcessiveLinesPerFile {
         version: "next",
         name: "noExcessiveLinesPerFile",
         language: "js",
         recommended: false,
         sources: &[RuleSource::Eslint("max-lines").inspired()],
-        issue_number: Some("8640"),
     }
 }
 
