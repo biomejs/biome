@@ -57,98 +57,58 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "id": "assist/source/organizeImports",
               "shortDescription": {
-                "text": "https://biomejs.dev/assist/actions/organize-imports"
+                "text": ""
               },
-              "fullDescription": {
-                "text": "https://biomejs.dev/assist/actions/organize-imports"
-              },
-              "help": {
-                "text": "https://biomejs.dev/assist/actions/organize-imports"
-              }
-            },
-            {
-              "id": "lint/correctness/noUnusedImports",
-              "shortDescription": {
-                "text": "https://biomejs.dev/linter/rules/no-unused-imports"
-              },
-              "fullDescription": {
-                "text": "https://biomejs.dev/linter/rules/no-unused-imports"
-              },
-              "help": {
-                "text": "https://biomejs.dev/linter/rules/no-unused-imports"
-              }
-            },
-            {
-              "id": "lint/suspicious/noDebugger",
-              "shortDescription": {
-                "text": "https://biomejs.dev/linter/rules/no-debugger"
-              },
-              "fullDescription": {
-                "text": "https://biomejs.dev/linter/rules/no-debugger"
-              },
-              "help": {
-                "text": "https://biomejs.dev/linter/rules/no-debugger"
-              }
-            },
-            {
-              "id": "lint/suspicious/noDoubleEquals",
-              "shortDescription": {
-                "text": "https://biomejs.dev/linter/rules/no-double-equals"
-              },
-              "fullDescription": {
-                "text": "https://biomejs.dev/linter/rules/no-double-equals"
-              },
-              "help": {
-                "text": "https://biomejs.dev/linter/rules/no-double-equals"
-              }
-            },
-            {
-              "id": "lint/suspicious/noImplicitAnyLet",
-              "shortDescription": {
-                "text": "https://biomejs.dev/linter/rules/no-implicit-any-let"
-              },
-              "fullDescription": {
-                "text": "https://biomejs.dev/linter/rules/no-implicit-any-let"
-              },
-              "help": {
-                "text": "https://biomejs.dev/linter/rules/no-implicit-any-let"
-              }
-            },
-            {
-              "id": "lint/suspicious/noRedeclare",
-              "shortDescription": {
-                "text": "https://biomejs.dev/linter/rules/no-redeclare"
-              },
-              "fullDescription": {
-                "text": "https://biomejs.dev/linter/rules/no-redeclare"
-              },
-              "help": {
-                "text": "https://biomejs.dev/linter/rules/no-redeclare"
-              }
+              "helpUri": "https://biomejs.dev/assist/actions/organize-imports"
             },
             {
               "id": "format",
               "shortDescription": {
                 "text": ""
               },
-              "fullDescription": {
+              "helpUri": "https://biomejs.dev/formatter/"
+            },
+            {
+              "id": "lint/correctness/noUnusedImports",
+              "shortDescription": {
                 "text": ""
               },
-              "help": {
-                "text": ""
-              }
+              "helpUri": "https://biomejs.dev/linter/rules/no-unused-imports"
             },
             {
               "id": "lint/correctness/noUnusedVariables",
               "shortDescription": {
-                "text": "https://biomejs.dev/linter/rules/no-unused-variables"
+                "text": ""
               },
-              "fullDescription": {
-                "text": "https://biomejs.dev/linter/rules/no-unused-variables"
+              "helpUri": "https://biomejs.dev/linter/rules/no-unused-variables"
+            },
+            {
+              "id": "lint/suspicious/noDebugger",
+              "shortDescription": {
+                "text": ""
               },
-              "help": {
-                "text": "https://biomejs.dev/linter/rules/no-unused-variables"
-              }
+              "helpUri": "https://biomejs.dev/linter/rules/no-debugger"
+            },
+            {
+              "id": "lint/suspicious/noDoubleEquals",
+              "shortDescription": {
+                "text": ""
+              },
+              "helpUri": "https://biomejs.dev/linter/rules/no-double-equals"
+            },
+            {
+              "id": "lint/suspicious/noImplicitAnyLet",
+              "shortDescription": {
+                "text": ""
+              },
+              "helpUri": "https://biomejs.dev/linter/rules/no-implicit-any-let"
+            },
+            {
+              "id": "lint/suspicious/noRedeclare",
+              "shortDescription": {
+                "text": ""
+              },
+              "helpUri": "https://biomejs.dev/linter/rules/no-redeclare"
             }
           ]
         }
@@ -164,7 +124,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "index.ts"
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 1,
@@ -186,7 +146,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "index.ts"
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 2,
@@ -208,7 +168,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "index.ts"
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 8,
@@ -230,7 +190,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "index.ts"
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 9,
@@ -252,7 +212,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "main.ts"
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 1,
@@ -274,7 +234,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "main.ts"
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 2,
@@ -296,7 +256,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "main.ts"
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 8,
@@ -318,7 +278,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "main.ts"
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 9,
@@ -340,7 +300,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "index.ts"
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 1,
@@ -362,7 +322,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "index.ts"
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 4,
@@ -384,7 +344,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "index.ts"
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 6,
@@ -406,7 +366,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "index.ts"
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 8,
@@ -428,7 +388,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "index.ts"
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 9,
@@ -450,7 +410,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "index.ts"
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 2,
@@ -472,7 +432,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "index.ts"
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 9,
@@ -494,7 +454,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": ""
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 0,
@@ -516,7 +476,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "main.ts"
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 1,
@@ -538,7 +498,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "main.ts"
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 4,
@@ -560,7 +520,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "main.ts"
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 6,
@@ -582,7 +542,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "main.ts"
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 8,
@@ -604,7 +564,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "main.ts"
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 9,
@@ -626,7 +586,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "main.ts"
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 2,
@@ -648,7 +608,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "main.ts"
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 9,
@@ -670,7 +630,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": ""
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 0,

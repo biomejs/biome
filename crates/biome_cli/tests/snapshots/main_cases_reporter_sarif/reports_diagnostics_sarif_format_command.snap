@@ -59,12 +59,7 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
               "shortDescription": {
                 "text": ""
               },
-              "fullDescription": {
-                "text": ""
-              },
-              "help": {
-                "text": ""
-              }
+              "helpUri": "https://biomejs.dev/formatter/"
             }
           ]
         }
@@ -80,7 +75,7 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": ""
+                  "uri": "file://index.ts"
                 },
                 "region": {
                   "startLine": 0,
@@ -102,7 +97,7 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": ""
+                  "uri": "file://main.ts"
                 },
                 "region": {
                   "startLine": 0,

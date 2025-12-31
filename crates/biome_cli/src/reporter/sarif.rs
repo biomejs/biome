@@ -4,12 +4,9 @@ use crate::reporter::{Reporter, ReporterVisitor};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::{Console, ConsoleExt, markup};
-use biome_diagnostics::{
-    Category, Error, Location, PrintDescription, Severity, display::SourceFile,
-};
+use biome_diagnostics::{Error, Location, PrintDescription, Severity, display::SourceFile};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
-
 pub(crate) struct SarifReporter<'a> {
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: &'a dyn Execution,
@@ -46,13 +43,9 @@ impl ReporterVisitor for SarifReporterVisitor<'_> {
         _execution: &dyn Execution,
         payload: DiagnosticsPayload,
         verbose: bool,
-        _working_directory: Option<&Utf8Path>,
+        working_directory: Option<&Utf8Path>,
     ) -> std::io::Result<()> {
-        let sarif_rules: HashSet<_> = payload
-            .diagnostics
-            .iter()
-            .filter_map(|diagnostic| diagnostic.category().map(category_to_sarif))
-            .collect::<HashSet<_>>();
+        let mut sarif_rules: HashSet<_> = HashSet::new();
 
         let sarif_results: Vec<_> = payload
             .diagnostics
@@ -61,12 +54,18 @@ impl ReporterVisitor for SarifReporterVisitor<'_> {
                 if diagnostic.severity() >= payload.diagnostic_level {
                     if diagnostic.tags().is_verbose() {
                         if verbose {
-                            diagnostic_to_sarif(diagnostic)
+                            if let Some(driver_rule) = to_sarif_driver_rule(diagnostic) {
+                                sarif_rules.insert(driver_rule);
+                            }
+                            to_sarif_result(diagnostic, working_directory)
                         } else {
                             None
                         }
                     } else {
-                        diagnostic_to_sarif(diagnostic)
+                        if let Some(driver_rule) = to_sarif_driver_rule(diagnostic) {
+                            sarif_rules.insert(driver_rule);
+                        }
+                        to_sarif_result(diagnostic, working_directory)
                     }
                 } else {
                     None
@@ -82,7 +81,12 @@ impl ReporterVisitor for SarifReporterVisitor<'_> {
                     driver: SarifDriver {
                         name: "Biome",
                         information_uri: "https://biomejs.dev",
-                        rules: sarif_rules,
+                        rules: {
+                            // Make to sure to maintain same order every run
+                            let mut sarif_rules_vec = sarif_rules.into_iter().collect::<Vec<_>>();
+                            sarif_rules_vec.sort_by(|a, b| a.id.cmp(b.id));
+                            sarif_rules_vec
+                        },
                     },
                 },
                 results: sarif_results,
@@ -99,18 +103,21 @@ impl ReporterVisitor for SarifReporterVisitor<'_> {
     }
 }
 
-fn diagnostic_to_sarif<'a>(diagnostic: &'a Error) -> Option<SarifResult<'a>> {
+fn to_sarif_result<'a>(
+    diagnostic: &'a Error,
+    working_directory: Option<&Utf8Path>,
+) -> Option<SarifResult<'a>> {
+    let category = diagnostic.category()?;
+
     let message = SarifResultMessage {
         text: PrintDescription(diagnostic).to_string(),
     };
+
     let location = diagnostic.location();
-    let location = to_sarif_result_location(location);
+    let location = to_sarif_result_location(location, working_directory);
 
     Some(SarifResult {
-        rule_id: diagnostic
-            .category()
-            .map(|category| category.name())
-            .unwrap_or_default(),
+        rule_id: category.name(),
         level: match diagnostic.severity() {
             Severity::Hint => "note",
             Severity::Information => "note",
@@ -123,49 +130,91 @@ fn diagnostic_to_sarif<'a>(diagnostic: &'a Error) -> Option<SarifResult<'a>> {
     })
 }
 
-fn category_to_sarif(category: &Category) -> SarifDriverRule {
+fn to_sarif_driver_rule<'a>(diagnostic: &'a Error) -> Option<SarifDriverRule<'a>> {
+    let category = diagnostic.category()?;
+
     let name = category.name();
     let link = category.link().unwrap_or_default();
 
-    SarifDriverRule {
+    Some(SarifDriverRule {
         id: name,
-        short_description: SarifDriverRuleDescription { text: link },
-        full_description: SarifDriverRuleDescription { text: link },
-        help: SarifDriverRuleDescription { text: link },
+        short_description: SarifDriverRuleDescription { text: "" },
+        help_uri: if name == "format" {
+            "https://biomejs.dev/formatter/"
+        } else {
+            link
+        },
+    })
+}
+
+fn to_sarif_result_location(
+    location: Location,
+    working_directory: Option<&Utf8Path>,
+) -> SarifResultLocation {
+    SarifResultLocation {
+        physical_location: SarifResultLocationPhysicalLocation {
+            artifact_location: to_sarif_result_location_artifact_location(
+                location,
+                working_directory,
+            ),
+            region: to_sarif_result_location_region(location),
+        },
     }
 }
 
-fn to_sarif_result_location(location: Location) -> SarifResultLocation {
-    if let (Some(span), Some(source_code), Some(resource)) =
-        (location.span, location.source_code, location.resource)
-    {
-        let source = SourceFile::new(source_code);
-        let Some(start) = source.location(span.start()).ok() else {
-            return SarifResultLocation::default();
+fn to_sarif_result_location_artifact_location(
+    location: Location,
+    working_directory: Option<&Utf8Path>,
+) -> SarifResultLocationPhysicalLocationArtifactLocation {
+    if let Some(resource) = location.resource {
+        let Some(file) = resource.as_file() else {
+            return SarifResultLocationPhysicalLocationArtifactLocation::default();
         };
-        let Some(end) = source.location(span.end()).ok() else {
-            return SarifResultLocation::default();
-        };
-
-        SarifResultLocation {
-            physical_location: SarifResultLocationPhysicalLocation {
-                artifact_location: SarifResultLocationPhysicalLocationArtifactLocation {
-                    uri: if let Some(uri) = resource.as_file() {
-                        uri.to_string()
-                    } else {
-                        String::new()
-                    },
-                },
-                region: SarifResultLocationPhysicalLocationRegion {
-                    start_line: start.line_number.get(),
-                    start_column: start.column_number.get(),
-                    end_line: end.line_number.get(),
-                    end_column: end.column_number.get(),
-                },
-            },
-        }
+        let absolute_path = working_directory
+            .as_ref()
+            .map(|wd| wd.join(file))
+            .unwrap_or(file.into());
+        let absolute_path = format!("file://{}", absolute_path.as_str());
+        SarifResultLocationPhysicalLocationArtifactLocation { uri: absolute_path }
     } else {
-        SarifResultLocation::default()
+        SarifResultLocationPhysicalLocationArtifactLocation::default()
+    }
+}
+
+fn to_sarif_result_location_region(
+    location: Location,
+) -> SarifResultLocationPhysicalLocationRegion {
+    let Some(source_code) = location.source_code else {
+        return SarifResultLocationPhysicalLocationRegion::default();
+    };
+    let Some(span) = location.span else {
+        return SarifResultLocationPhysicalLocationRegion::default();
+    };
+    let source = SourceFile::new(source_code);
+    let start = source.location(span.start()).ok();
+    let end = source.location(span.end()).ok();
+
+    SarifResultLocationPhysicalLocationRegion {
+        start_line: if let Some(start) = start {
+            start.line_number.get()
+        } else {
+            0
+        },
+        start_column: if let Some(start) = start {
+            start.column_number.get()
+        } else {
+            0
+        },
+        end_line: if let Some(end) = end {
+            end.line_number.get()
+        } else {
+            0
+        },
+        end_column: if let Some(end) = end {
+            end.column_number.get()
+        } else {
+            0
+        },
     }
 }
 
@@ -179,31 +228,30 @@ pub struct SarifReport<'a> {
 
 #[derive(Serialize)]
 struct SarifRun<'a> {
-    tool: SarifTool,
+    tool: SarifTool<'a>,
     results: Vec<SarifResult<'a>>,
 }
 
 #[derive(Serialize)]
-struct SarifTool {
-    driver: SarifDriver,
+struct SarifTool<'a> {
+    driver: SarifDriver<'a>,
 }
 
 #[derive(Serialize)]
-struct SarifDriver {
+struct SarifDriver<'a> {
     name: &'static str,
     #[serde(rename = "informationUri")]
     information_uri: &'static str,
-    rules: HashSet<SarifDriverRule>,
+    rules: Vec<SarifDriverRule<'a>>,
 }
 
 #[derive(Serialize, Eq, PartialEq, Hash)]
-struct SarifDriverRule {
+struct SarifDriverRule<'a> {
     id: &'static str,
     #[serde(rename = "shortDescription")]
     short_description: SarifDriverRuleDescription,
-    #[serde(rename = "fullDescription")]
-    full_description: SarifDriverRuleDescription,
-    help: SarifDriverRuleDescription,
+    #[serde(rename = "helpUri")]
+    help_uri: &'a str,
 }
 
 #[derive(Serialize, Eq, PartialEq, Hash)]
