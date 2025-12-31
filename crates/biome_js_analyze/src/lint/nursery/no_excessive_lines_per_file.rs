@@ -104,7 +104,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[RuleSource::Eslint("max-lines").inspired()],
-        issue_number: Some("5557"),
+        issue_number: Some("8640"),
     }
 }
 
