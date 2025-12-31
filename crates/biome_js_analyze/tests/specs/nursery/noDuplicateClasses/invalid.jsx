@@ -17,3 +17,7 @@
 
 // Invalid: single-quoted JSX strings (should preserve quotes)
 <div class='mt-4 mt-4' />;
+
+// Invalid: template literals (should preserve boundary spaces)
+<div className={`flex flex ${condition}`} />;
+<div className={`${prefix} p-4 p-4 ${suffix}`} />;

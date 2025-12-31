@@ -108,7 +108,8 @@ impl Rule for NoDuplicateClasses {
         }
 
         let deduplicated = deduplicated_parts.join(" ");
-        let duplicates: Vec<Box<str>> = duplicate_set.into_iter().map(Into::into).collect();
+        let mut duplicates: Vec<Box<str>> = duplicate_set.into_iter().map(Into::into).collect();
+        duplicates.sort();
 
         Some(DuplicateClassesState {
             deduplicated: deduplicated.into(),
