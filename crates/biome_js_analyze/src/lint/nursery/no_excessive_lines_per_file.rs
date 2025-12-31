@@ -103,7 +103,14 @@ declare_lint_rule! {
     /// If you need to exceed the line limit in a specific file, you can suppress this rule
     /// at the top of the file:
     ///
-    /// ```js
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "maxLines": 2
+    ///     }
+    /// }
+    /// ```
+    /// ```js,use_options
     /// // biome-ignore lint/nursery/noExcessiveLinesPerFile: generated file
     /// const a = 1;
     /// const b = 2;
