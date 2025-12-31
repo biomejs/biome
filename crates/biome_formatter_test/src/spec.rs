@@ -70,6 +70,7 @@ impl<'a> SpecTestFile<'a> {
                 project_key,
                 path: input_file.clone(),
                 features: FeaturesBuilder::new().with_formatter().build(),
+                skip_ignore_check: false,
             })
             .unwrap();
 

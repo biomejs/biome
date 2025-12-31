@@ -109,6 +109,10 @@ pub enum ServiceNotification {
     WatcherStopped,
 }
 
+fn is_false(value: &bool) -> bool {
+    !*value
+}
+
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
@@ -116,6 +120,9 @@ pub struct SupportsFeatureParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub features: FeatureName,
+
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub skip_ignore_check: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]

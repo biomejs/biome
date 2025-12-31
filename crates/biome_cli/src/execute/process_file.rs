@@ -136,6 +136,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
             project_key: ctx.project_key,
             path: biome_path.clone(),
             features: ctx.execution.to_feature(),
+            skip_ignore_check: false,
         })
         .with_file_path_and_code_and_tags(
             biome_path.to_string(),

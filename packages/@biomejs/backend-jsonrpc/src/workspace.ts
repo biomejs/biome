@@ -4,6 +4,7 @@ export interface SupportsFeatureParams {
 	features: FeatureName;
 	path: BiomePath;
 	projectKey: ProjectKey;
+	skipIgnoreCheck?: boolean;
 }
 export type FeatureName = FeatureKind[];
 export type BiomePath = string;
