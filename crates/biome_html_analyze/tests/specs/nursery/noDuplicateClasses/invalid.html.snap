@@ -1,0 +1,156 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- Invalid: exact duplicates -->
+<div class="flex flex"></div>
+<div class="p-4 text-red-500 p-4 bg-white"></div>
+
+<!-- Invalid: multiple duplicates -->
+<div class="flex p-4 flex m-2 p-4"></div>
+
+<!-- Invalid: duplicates with complex classes -->
+<div class="hover:focus:m-2 foo hover:focus:m-2"></div>
+
+<!-- Invalid: duplicates in the middle -->
+<div class="text-lg text-center text-lg font-bold"></div>
+
+<!-- Invalid: single-quoted strings (should preserve quotes) -->
+<div class='mt-4 mt-4'></div>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS class detected: `flex`
+  
+    1 │ <!-- Invalid: exact duplicates -->
+  > 2 │ <div class="flex flex"></div>
+      │      ^^^^^^^^^^^^^^^^^
+    3 │ <div class="p-4 text-red-500 p-4 bg-white"></div>
+    4 │ 
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    2 │ <div·class="flex·flex"></div>
+      │                 -----        
+
+```
+
+```
+invalid.html:3:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS class detected: `p-4`
+  
+    1 │ <!-- Invalid: exact duplicates -->
+    2 │ <div class="flex flex"></div>
+  > 3 │ <div class="p-4 text-red-500 p-4 bg-white"></div>
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ <!-- Invalid: multiple duplicates -->
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    3 │ <div·class="p-4·text-red-500·p-4·bg-white"></div>
+      │                              ----                
+
+```
+
+```
+invalid.html:6:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS classes detected: `flex`, `p-4`
+  
+    5 │ <!-- Invalid: multiple duplicates -->
+  > 6 │ <div class="flex p-4 flex m-2 p-4"></div>
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ <!-- Invalid: duplicates with complex classes -->
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    6 │ <div·class="flex·p-4·flex·m-2·p-4"></div>
+      │                      -----   ----        
+
+```
+
+```
+invalid.html:9:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS class detected: `hover:focus:m-2`
+  
+     8 │ <!-- Invalid: duplicates with complex classes -->
+   > 9 │ <div class="hover:focus:m-2 foo hover:focus:m-2"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ <!-- Invalid: duplicates in the middle -->
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    9 │ <div·class="hover:focus:m-2·foo·hover:focus:m-2"></div>
+      │                                ----------------        
+
+```
+
+```
+invalid.html:12:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS class detected: `text-lg`
+  
+    11 │ <!-- Invalid: duplicates in the middle -->
+  > 12 │ <div class="text-lg text-center text-lg font-bold"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ <!-- Invalid: single-quoted strings (should preserve quotes) -->
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    12 │ <div·class="text-lg·text-center·text-lg·font-bold"></div>
+       │                                 --------                 
+
+```
+
+```
+invalid.html:15:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate CSS class detected: `mt-4`
+  
+    14 │ <!-- Invalid: single-quoted strings (should preserve quotes) -->
+  > 15 │ <div class='mt-4 mt-4'></div>
+       │      ^^^^^^^^^^^^^^^^^
+    16 │ 
+  
+  i Remove duplicate classes to improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove duplicate classes.
+  
+    15 │ <div·class='mt-4·mt-4'></div>
+       │                 -----        
+
+```
