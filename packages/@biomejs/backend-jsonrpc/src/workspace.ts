@@ -1879,6 +1879,11 @@ See <https://biomejs.dev/linter/rules/no-deprecated-imports>
 	 */
 	noDeprecatedImports?: NoDeprecatedImportsConfiguration;
 	/**
+	* Disallow duplicate CSS classes.
+See <https://biomejs.dev/linter/rules/no-duplicate-classes> 
+	 */
+	noDuplicateClasses?: NoDuplicateClassesConfiguration;
+	/**
 	* Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
 See <https://biomejs.dev/linter/rules/no-duplicate-dependencies> 
 	 */
@@ -3698,6 +3703,9 @@ export type NoContinueConfiguration =
 export type NoDeprecatedImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDeprecatedImportsOptions;
+export type NoDuplicateClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateClassesOptions;
 export type NoDuplicateDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateDependenciesOptions;
@@ -5169,6 +5177,11 @@ export interface RuleWithNoDeprecatedImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDeprecatedImportsOptions;
 }
+export interface RuleWithNoDuplicateClassesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoDuplicateClassesOptions;
+}
 export interface RuleWithNoDuplicateDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateDependenciesOptions;
@@ -6598,6 +6611,7 @@ export interface NoAmbiguousAnchorTextOptions {
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
+export type NoDuplicateClassesOptions = {};
 export type NoDuplicateDependenciesOptions = {};
 export type NoDuplicatedSpreadPropsOptions = {};
 export interface NoEmptySourceOptions {
@@ -7520,6 +7534,7 @@ export type Category =
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noDuplicatedSpreadProps"
+	| "lint/nursery/noDuplicateClasses"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noFloatingPromises"

@@ -134,9 +134,11 @@ impl Rule for NoDuplicateClasses {
         };
 
         Some(
-            RuleDiagnostic::new(rule_category!(), node.range(), markup! {{message}}).note(markup! {
-                "Remove duplicate classes to improve readability."
-            }),
+            RuleDiagnostic::new(rule_category!(), node.range(), markup! {{message}}).note(
+                markup! {
+                    "Remove duplicate classes to improve readability."
+                },
+            ),
         )
     }
 
