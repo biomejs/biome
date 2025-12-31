@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 // These forEach cases should be invalid when checkForEach is true
 [].forEach((a) => {
     return a.fn();

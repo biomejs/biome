@@ -93,21 +93,10 @@ declare_lint_rule! {
     ///
     /// Default: `false`
     ///
-    /// Example configuration:
-    ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "linter": {
-    ///         "rules": {
-    ///             "suspicious": {
-    ///                 "useIterableCallbackReturn": {
-    ///                     "level": "error",
-    ///                     "options": {
-    ///                         "checkForEach": true
-    ///                     }
-    ///                 }
-    ///             }
-    ///         }
+    ///     "options": {
+    ///         "checkForEach": true
     ///     }
     /// }
     /// ```
@@ -170,7 +159,7 @@ impl Rule for UseIterableCallbackReturn {
         let method_config = ITERABLE_METHOD_INFOS.get(member_name.text_trimmed())?;
 
         // Skip forEach check if checkForEach option is false (default)
-        if method_config.method_name == "forEach" && !ctx.options().check_for_each {
+        if method_config.method_name == "forEach" && !ctx.options().check_for_each() {
             return None;
         }
 

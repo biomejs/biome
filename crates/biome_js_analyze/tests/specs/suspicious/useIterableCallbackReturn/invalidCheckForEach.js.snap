@@ -4,6 +4,7 @@ expression: invalidCheckForEach.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 // These forEach cases should be invalid when checkForEach is true
 [].forEach((a) => {
     return a.fn();
@@ -35,127 +36,105 @@ expression: invalidCheckForEach.js
 
 # Diagnostics
 ```
-invalidCheckForEach.js:2:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCheckForEach.js:3:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
-    1 │ // These forEach cases should be invalid when checkForEach is true
-  > 2 │ [].forEach((a) => {
+    1 │ /* should generate diagnostics */
+    2 │ // These forEach cases should be invalid when checkForEach is true
+  > 3 │ [].forEach((a) => {
       │    ^^^^^^^
-    3 │     return a.fn();
-    4 │ });
+    4 │     return a.fn();
+    5 │ });
   
   i Either remove this return or remove the returned value.
   
-    1 │ // These forEach cases should be invalid when checkForEach is true
-  > 2 │ [].forEach((a) => {
+    1 │ /* should generate diagnostics */
+    2 │ // These forEach cases should be invalid when checkForEach is true
+  > 3 │ [].forEach((a) => {
       │                    
-  > 3 │     return a.fn();
+  > 4 │     return a.fn();
       │     ^^^^^^^
-    4 │ });
-    5 │ [].forEach(function(a) {
+    5 │ });
+    6 │ [].forEach(function(a) {
   
 
 ```
 
 ```
-invalidCheckForEach.js:5:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCheckForEach.js:6:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
-    3 │     return a.fn();
-    4 │ });
-  > 5 │ [].forEach(function(a) {
+    4 │     return a.fn();
+    5 │ });
+  > 6 │ [].forEach(function(a) {
       │    ^^^^^^^
-    6 │     return a.fn();
-    7 │ });
+    7 │     return a.fn();
+    8 │ });
   
   i Either remove this return or remove the returned value.
   
-    3 │     return a.fn();
-    4 │ });
-  > 5 │ [].forEach(function(a) {
+    4 │     return a.fn();
+    5 │ });
+  > 6 │ [].forEach(function(a) {
       │                         
-  > 6 │     return a.fn();
+  > 7 │     return a.fn();
       │     ^^^^^^^
-    7 │ });
-    8 │ [].forEach((a) => {
+    8 │ });
+    9 │ [].forEach((a) => {
   
 
 ```
 
 ```
-invalidCheckForEach.js:8:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCheckForEach.js:9:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
-     6 │     return a.fn();
-     7 │ });
-   > 8 │ [].forEach((a) => {
+     7 │     return a.fn();
+     8 │ });
+   > 9 │ [].forEach((a) => {
        │    ^^^^^^^
-     9 │     if (a) {
-    10 │         return a.fn();
+    10 │     if (a) {
+    11 │         return a.fn();
   
   i Either remove this return or remove the returned value.
   
-     7 │ });
-     8 │ [].forEach((a) => {
-   > 9 │     if (a) {
+     8 │ });
+     9 │ [].forEach((a) => {
+  > 10 │     if (a) {
        │             
-  > 10 │         return a.fn();
+  > 11 │         return a.fn();
        │         ^^^^^^^
-    11 │     }
-    12 │ });
+    12 │     }
+    13 │ });
   
 
 ```
 
 ```
-invalidCheckForEach.js:13:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCheckForEach.js:14:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
-    11 │     }
-    12 │ });
-  > 13 │ [].forEach((a) => {
+    12 │     }
+    13 │ });
+  > 14 │ [].forEach((a) => {
        │    ^^^^^^^
-    14 │     if (a) {
-    15 │         return;
+    15 │     if (a) {
+    16 │         return;
   
   i Either remove this return or remove the returned value.
   
-    14 │     if (a) {
-    15 │         return;
-  > 16 │     }
+    15 │     if (a) {
+    16 │         return;
+  > 17 │     }
        │      
-  > 17 │     return a.fn();
+  > 18 │     return a.fn();
        │     ^^^^^^^
-    18 │ });
-    19 │ // Implicit return (arrow expression body without return keyword)
-  
-
-```
-
-```
-invalidCheckForEach.js:20:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This callback passed to forEach() iterable method should not return a value.
-  
-    18 │ });
-    19 │ // Implicit return (arrow expression body without return keyword)
-  > 20 │ [].forEach(a => a.fn());
-       │    ^^^^^^^
-    21 │ [].forEach((a) => {
-    22 │     if (a) {
-  
-  i Use a block body with no return, or wrap the expression with void.
-  
-    18 │ });
-    19 │ // Implicit return (arrow expression body without return keyword)
-  > 20 │ [].forEach(a => a.fn());
-       │                 ^^^^^^
-    21 │ [].forEach((a) => {
-    22 │     if (a) {
+    19 │ });
+    20 │ // Implicit return (arrow expression body without return keyword)
   
 
 ```
@@ -165,23 +144,47 @@ invalidCheckForEach.js:21:4 lint/suspicious/useIterableCallbackReturn ━━━�
 
   × This callback passed to forEach() iterable method should not return a value.
   
-    19 │ // Implicit return (arrow expression body without return keyword)
-    20 │ [].forEach(a => a.fn());
-  > 21 │ [].forEach((a) => {
+    19 │ });
+    20 │ // Implicit return (arrow expression body without return keyword)
+  > 21 │ [].forEach(a => a.fn());
        │    ^^^^^^^
-    22 │     if (a) {
-    23 │         throw new Error();
+    22 │ [].forEach((a) => {
+    23 │     if (a) {
+  
+  i Use a block body with no return, or wrap the expression with void.
+  
+    19 │ });
+    20 │ // Implicit return (arrow expression body without return keyword)
+  > 21 │ [].forEach(a => a.fn());
+       │                 ^^^^^^
+    22 │ [].forEach((a) => {
+    23 │     if (a) {
+  
+
+```
+
+```
+invalidCheckForEach.js:22:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    20 │ // Implicit return (arrow expression body without return keyword)
+    21 │ [].forEach(a => a.fn());
+  > 22 │ [].forEach((a) => {
+       │    ^^^^^^^
+    23 │     if (a) {
+    24 │         throw new Error();
   
   i Either remove this return or remove the returned value.
   
-    22 │     if (a) {
-    23 │         throw new Error();
-  > 24 │     }
+    23 │     if (a) {
+    24 │         throw new Error();
+  > 25 │     }
        │      
-  > 25 │     return a.fn();
+  > 26 │     return a.fn();
        │     ^^^^^^^
-    26 │ });
-    27 │ 
+    27 │ });
+    28 │ 
   
 
 ```
