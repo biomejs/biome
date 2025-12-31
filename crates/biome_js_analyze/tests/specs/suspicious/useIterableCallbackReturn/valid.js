@@ -24,6 +24,9 @@
 });
 [].forEach(() => void null);
 [].forEach((a) => void a.fn());
+// Default checkForEach=false should not report implicit returns in forEach
+[].forEach(() => 1);
+[].forEach(a => a.fn());
 Array.from([], (a) => {
     return a + 1;
 });

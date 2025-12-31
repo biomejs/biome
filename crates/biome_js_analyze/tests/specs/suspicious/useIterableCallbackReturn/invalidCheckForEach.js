@@ -16,12 +16,8 @@
     }
     return a.fn();
 });
-[].forEach((a) => {
-    if (a) {
-        return;
-    }
-    return a.fn();
-});
+// Implicit return (arrow expression body without return keyword)
+[].forEach(a => a.fn());
 [].forEach((a) => {
     if (a) {
         throw new Error();

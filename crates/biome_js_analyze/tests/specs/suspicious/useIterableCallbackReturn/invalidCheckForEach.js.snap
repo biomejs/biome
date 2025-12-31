@@ -22,12 +22,8 @@ expression: invalidCheckForEach.js
     }
     return a.fn();
 });
-[].forEach((a) => {
-    if (a) {
-        return;
-    }
-    return a.fn();
-});
+// Implicit return (arrow expression body without return keyword)
+[].forEach(a => a.fn());
 [].forEach((a) => {
     if (a) {
         throw new Error();
@@ -135,59 +131,57 @@ invalidCheckForEach.js:13:4 lint/suspicious/useIterableCallbackReturn ━━━�
   > 17 │     return a.fn();
        │     ^^^^^^^
     18 │ });
-    19 │ [].forEach((a) => {
+    19 │ // Implicit return (arrow expression body without return keyword)
   
 
 ```
 
 ```
-invalidCheckForEach.js:19:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCheckForEach.js:20:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
-    17 │     return a.fn();
     18 │ });
-  > 19 │ [].forEach((a) => {
+    19 │ // Implicit return (arrow expression body without return keyword)
+  > 20 │ [].forEach(a => a.fn());
        │    ^^^^^^^
-    20 │     if (a) {
-    21 │         return;
+    21 │ [].forEach((a) => {
+    22 │     if (a) {
   
   i Either remove this return or remove the returned value.
   
-    20 │     if (a) {
-    21 │         return;
-  > 22 │     }
-       │      
-  > 23 │     return a.fn();
-       │     ^^^^^^^
-    24 │ });
-    25 │ [].forEach((a) => {
+    18 │ });
+    19 │ // Implicit return (arrow expression body without return keyword)
+  > 20 │ [].forEach(a => a.fn());
+       │                 ^^^^^^
+    21 │ [].forEach((a) => {
+    22 │     if (a) {
   
 
 ```
 
 ```
-invalidCheckForEach.js:25:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCheckForEach.js:21:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
-    23 │     return a.fn();
-    24 │ });
-  > 25 │ [].forEach((a) => {
+    19 │ // Implicit return (arrow expression body without return keyword)
+    20 │ [].forEach(a => a.fn());
+  > 21 │ [].forEach((a) => {
        │    ^^^^^^^
-    26 │     if (a) {
-    27 │         throw new Error();
+    22 │     if (a) {
+    23 │         throw new Error();
   
   i Either remove this return or remove the returned value.
   
-    26 │     if (a) {
-    27 │         throw new Error();
-  > 28 │     }
+    22 │     if (a) {
+    23 │         throw new Error();
+  > 24 │     }
        │      
-  > 29 │     return a.fn();
+  > 25 │     return a.fn();
        │     ^^^^^^^
-    30 │ });
-    31 │ 
+    26 │ });
+    27 │ 
   
 
 ```
