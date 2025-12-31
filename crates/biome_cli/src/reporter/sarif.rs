@@ -64,7 +64,6 @@ impl<'a> SarifReporterVisitor<'a> {
     {
         let category = <R::Group as RuleGroup>::Category::CATEGORY;
         if matches!(category, RuleCategory::Lint | RuleCategory::Action) {
-            println!("🔴 saved {0}", R::METADATA.name);
             self.rules_metadata.insert(R::METADATA.name, R::METADATA);
         }
     }
@@ -240,7 +239,9 @@ fn to_sarif_driver_rule<'a>(
 
     let description: &'static str = if name == "format" {
         "Follow a consistent style—handling things like spacing, indentation, line breaks, and punctuation to make code easier to read and maintain."
-    } else if let Some(metadata) = &rules_metadata.get(name.split('/').last().unwrap()) {
+    } else if let Some(metadata) =
+        &rules_metadata.get(name.split('/').next_back().unwrap_or_default())
+    {
         metadata.docs.lines().next().unwrap_or_default().trim()
     } else {
         ""
