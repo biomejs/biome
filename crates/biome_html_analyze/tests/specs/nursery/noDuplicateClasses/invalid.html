@@ -21,3 +21,12 @@ foo"></div>
 
 <!-- Invalid: duplicates with tabs -->
 <div class="flex	p-4	flex"></div>
+
+<!-- Invalid: multiple spaces (should preserve spacing) -->
+<div class="flex  p-4  flex"></div>
+
+<!-- Invalid: leading/trailing whitespace (should preserve) -->
+<div class=" flex flex "></div>
+
+<!-- Invalid: triple duplicate -->
+<div class="flex flex flex"></div>
