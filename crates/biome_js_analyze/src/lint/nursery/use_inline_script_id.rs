@@ -136,18 +136,17 @@ impl Rule for UseInlineScriptId {
         if (has_children || attribute_names.contains("dangerouslySetInnerHTML"))
             && !attribute_names.contains("id")
         {
-            return Some(jsx_element.syntax().text_range_with_trivia());
+            return Some(jsx_element.range());
         }
 
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                state,
                 markup! {
                     ""<Emphasis>"next/script"</Emphasis>" components with inline content or `dangerouslySetInnerHTML` must specify "<Emphasis>"id"</Emphasis>" attribute."
                 },
