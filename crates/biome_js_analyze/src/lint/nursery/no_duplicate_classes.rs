@@ -66,6 +66,9 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// Note that this rule collapses all whitespace (including newlines) into single spaces,
+    /// consistent with [`useSortedClasses`](https://biomejs.dev/linter/rules/use-sorted-classes/).
+    ///
     pub NoDuplicateClasses {
         version: "next",
         name: "noDuplicateClasses",
@@ -122,6 +125,8 @@ impl Rule for NoDuplicateClasses {
         }
 
         let deduplicated = deduplicated_parts.join(" ");
+        // Sort duplicate names alphabetically for deterministic diagnostic messages.
+        // Note: This does NOT affect the fix output - class order is always preserved.
         let mut duplicates: Vec<Box<str>> = duplicate_set.into_iter().map(Into::into).collect();
         duplicates.sort();
 
@@ -133,26 +138,41 @@ impl Rule for NoDuplicateClasses {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let duplicates_str = state
-            .duplicates
-            .iter()
-            .map(|s| format!("`{}`", s))
-            .collect::<Vec<_>>()
-            .join(", ");
 
-        let message = if state.duplicates.len() > 1 {
-            format!("Duplicate CSS classes detected: {duplicates_str}")
+        let diagnostic = if state.duplicates.len() == 1 {
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "This class string contains a duplicate class."
+                },
+            )
+            .note(markup! {
+                "The class "<Emphasis>{&*state.duplicates[0]}</Emphasis>" appears multiple times."
+            })
         } else {
-            format!("Duplicate CSS class detected: {duplicates_str}")
+            let duplicates_list = state
+                .duplicates
+                .iter()
+                .map(|s| format!("{}", s))
+                .collect::<Vec<_>>()
+                .join(", ");
+
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "This class string contains duplicate classes."
+                },
+            )
+            .note(markup! {
+                "The classes "{duplicates_list}" appear multiple times."
+            })
         };
 
-        Some(
-            RuleDiagnostic::new(rule_category!(), node.range(), markup! {{message}}).note(
-                markup! {
-                    "Remove duplicate classes to improve readability."
-                },
-            ),
-        )
+        Some(diagnostic.note(markup! {
+            "Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
@@ -231,7 +251,7 @@ impl Rule for NoDuplicateClasses {
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
-                "Remove duplicate classes."
+                "Remove the duplicate classes."
             }
             .to_owned(),
             mutation,

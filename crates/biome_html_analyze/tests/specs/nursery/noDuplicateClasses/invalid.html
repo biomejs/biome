@@ -13,3 +13,11 @@
 
 <!-- Invalid: single-quoted strings (should preserve quotes) -->
 <div class='mt-4 mt-4'></div>
+
+<!-- Invalid: duplicates with newlines (should collapse whitespace) -->
+<div class="foo
+bar
+foo"></div>
+
+<!-- Invalid: duplicates with tabs -->
+<div class="flex	p-4	flex"></div>

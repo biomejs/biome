@@ -3,9 +3,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_html_factory::make;
-use biome_html_syntax::{HtmlAttribute, HtmlSyntaxKind, HtmlSyntaxToken, inner_string_text};
+use biome_html_syntax::{
+    HtmlAttribute, HtmlString, HtmlSyntaxKind, HtmlSyntaxToken, inner_string_text,
+};
 use biome_rowan::{AstNode, BatchMutationExt};
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 
 use crate::HtmlRuleAction;
 
@@ -16,6 +18,9 @@ declare_lint_rule! {
     ///
     /// Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
     /// This rule helps keep your class strings clean by detecting and auto-fixing duplicates.
+    ///
+    /// Note that this rule collapses all whitespace (including newlines) into single spaces,
+    /// consistent with [`useSortedClasses`](https://biomejs.dev/linter/rules/use-sorted-classes/).
     ///
     /// ## Examples
     ///
@@ -50,14 +55,15 @@ declare_lint_rule! {
 }
 
 /// State returned by the rule when duplicates are found.
-#[derive(Debug)]
 pub struct DuplicateClassesState {
+    /// The HtmlString node to replace.
+    html_string: HtmlString,
     /// The deduplicated class string.
-    pub deduplicated: Box<str>,
-    /// The list of duplicate class names found.
-    pub duplicates: Box<[Box<str>]>,
+    deduplicated: Box<str>,
+    /// The list of duplicate class names found (sorted for deterministic output).
+    duplicates: Box<[Box<str>]>,
     /// Whether the original string used single quotes.
-    pub is_single_quote: bool,
+    is_single_quote: bool,
 }
 
 impl Rule for NoDuplicateClasses {
@@ -79,19 +85,17 @@ impl Rule for NoDuplicateClasses {
         // Get the attribute value
         let initializer = attribute.initializer()?;
         let value = initializer.value().ok()?;
-        let html_string = value.as_html_string()?;
+        let html_string = value.as_html_string()?.clone();
         let value_token = html_string.value_token().ok()?;
         let value_text = value_token.text_trimmed();
 
         // Check if single-quoted
         let is_single_quote = value_text.starts_with('\'');
 
-        // Get the inner string (without quotes)
+        // Get the inner string (without quotes) and find duplicates
         let inner_text = inner_string_text(&value_token);
-
-        // Split by whitespace and track duplicates
-        let mut seen: HashSet<&str> = HashSet::default();
-        let mut duplicate_set: HashSet<&str> = HashSet::default();
+        let mut seen: FxHashSet<&str> = FxHashSet::default();
+        let mut duplicate_set: FxHashSet<&str> = FxHashSet::default();
         let mut deduplicated_parts: Vec<&str> = Vec::new();
 
         for class in inner_text.text().split_whitespace() {
@@ -108,10 +112,13 @@ impl Rule for NoDuplicateClasses {
         }
 
         let deduplicated = deduplicated_parts.join(" ");
+        // Sort duplicate names alphabetically for deterministic diagnostic messages.
+        // Note: This does NOT affect the fix output - class order is always preserved.
         let mut duplicates: Vec<Box<str>> = duplicate_set.into_iter().map(Into::into).collect();
         duplicates.sort();
 
         Some(DuplicateClassesState {
+            html_string,
             deduplicated: deduplicated.into(),
             duplicates: duplicates.into_boxed_slice(),
             is_single_quote,
@@ -120,53 +127,61 @@ impl Rule for NoDuplicateClasses {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let duplicates_str = state
-            .duplicates
-            .iter()
-            .map(|s| format!("`{}`", s))
-            .collect::<Vec<_>>()
-            .join(", ");
 
-        let message = if state.duplicates.len() > 1 {
-            format!("Duplicate CSS classes detected: {duplicates_str}")
+        let diagnostic = if state.duplicates.len() == 1 {
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "This "<Emphasis>"class"</Emphasis>" attribute contains a duplicate class."
+                },
+            )
+            .note(markup! {
+                "The class "<Emphasis>{&*state.duplicates[0]}</Emphasis>" appears multiple times."
+            })
         } else {
-            format!("Duplicate CSS class detected: {duplicates_str}")
+            let duplicates_list = state
+                .duplicates
+                .iter()
+                .map(|s| format!("{}", s))
+                .collect::<Vec<_>>()
+                .join(", ");
+
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "This "<Emphasis>"class"</Emphasis>" attribute contains duplicate classes."
+                },
+            )
+            .note(markup! {
+                "The classes "{duplicates_list}" appear multiple times."
+            })
         };
 
-        Some(
-            RuleDiagnostic::new(rule_category!(), node.range(), markup! {{message}}).note(
-                markup! {
-                    "Remove duplicate classes to improve readability."
-                },
-            ),
-        )
+        Some(diagnostic.note(markup! {
+            "Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<HtmlRuleAction> {
         let mut mutation = ctx.root().begin();
-        let attribute = ctx.query();
-        let deduplicated = &state.deduplicated;
-
-        // Get the initializer and value
-        let initializer = attribute.initializer()?;
-        let value = initializer.value().ok()?;
-        let html_string = value.as_html_string()?;
 
         // Create the new string token with proper quotes
         let new_token = if state.is_single_quote {
-            html_string_literal_single_quotes(deduplicated)
+            html_string_literal_single_quotes(&state.deduplicated)
         } else {
-            make::html_string_literal(deduplicated)
+            make::html_string_literal(&state.deduplicated)
         };
 
         let new_html_string = make::html_string(new_token);
-        mutation.replace_node(html_string.clone(), new_html_string);
+        mutation.replace_node(state.html_string.clone(), new_html_string);
 
         Some(HtmlRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
-                "Remove duplicate classes."
+                "Remove the duplicate classes."
             }
             .to_owned(),
             mutation,
