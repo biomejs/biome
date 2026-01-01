@@ -137,12 +137,11 @@ fn is_inside_allowed_context(attr: &HtmlAttribute) -> bool {
 
             // Check if element is a dialog
             if let Ok(opening) = element.opening_element() {
-                if let Ok(name) = opening.name() {
-                    if let Ok(token) = name.value_token() {
-                        if token.text_trimmed().eq_ignore_ascii_case("dialog") {
-                            return true;
-                        }
-                    }
+                if let Ok(name) = opening.name()
+                    && let Ok(token) = name.value_token()
+                    && token.text_trimmed().eq_ignore_ascii_case("dialog")
+                {
+                    return true;
                 }
                 // Check if element has popover attribute
                 if opening.find_attribute_by_name("popover").is_some() {
@@ -158,12 +157,11 @@ fn is_inside_allowed_context(attr: &HtmlAttribute) -> bool {
                 continue;
             }
 
-            if let Ok(name) = element.name() {
-                if let Ok(token) = name.value_token() {
-                    if token.text_trimmed().eq_ignore_ascii_case("dialog") {
-                        return true;
-                    }
-                }
+            if let Ok(name) = element.name()
+                && let Ok(token) = name.value_token()
+                && token.text_trimmed().eq_ignore_ascii_case("dialog")
+            {
+                return true;
             }
             // Check if element has popover attribute
             if element.find_attribute_by_name("popover").is_some() {
