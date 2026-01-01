@@ -548,11 +548,12 @@ impl SupportKind {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
-#[bitflags]
 #[repr(u8)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[bitflags]
+#[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[expect(clippy::use_self)] // false positive
 pub enum FeatureKind {
     Format,
     Lint,

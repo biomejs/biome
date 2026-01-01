@@ -95,7 +95,7 @@ fn transform_file_name(input: &str) -> String {
 
 #[derive(Default)]
 struct Modules {
-    modules: HashMap<String, Modules>,
+    modules: HashMap<String, Self>,
     tests: Vec<proc_macro2::TokenStream>,
 }
 
