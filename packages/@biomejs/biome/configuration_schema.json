@@ -12199,8 +12199,7 @@
 			"properties": {
 				"checkForEach": {
 					"description": "If `true`, the rule will also check that `forEach` callbacks do not return a value.\n\nDefault: `false`",
-					"type": "boolean",
-					"default": false
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
