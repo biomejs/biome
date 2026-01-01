@@ -20,7 +20,7 @@ expression: invalid.html
 <!-- Invalid: single-quoted strings (should preserve quotes) -->
 <div class='mt-4 mt-4'></div>
 
-<!-- Invalid: duplicates with newlines (should collapse whitespace) -->
+<!-- Invalid: duplicates with newlines (preserves original whitespace) -->
 <div class="foo
 bar
 foo"></div>
@@ -161,7 +161,7 @@ invalid.html:15:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   > 15 │ <div class='mt-4 mt-4'></div>
        │      ^^^^^^^^^^^^^^^^^
     16 │ 
-    17 │ <!-- Invalid: duplicates with newlines (should collapse whitespace) -->
+    17 │ <!-- Invalid: duplicates with newlines (preserves original whitespace) -->
   
   i The class mt-4 appears multiple times.
   
@@ -181,7 +181,7 @@ invalid.html:18:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 
   i This class attribute contains a duplicate class.
   
-    17 │ <!-- Invalid: duplicates with newlines (should collapse whitespace) -->
+    17 │ <!-- Invalid: duplicates with newlines (preserves original whitespace) -->
   > 18 │ <div class="foo
        │      ^^^^^^^^^^
   > 19 │ bar
@@ -198,14 +198,13 @@ invalid.html:18:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Safe fix: Remove the duplicate classes.
   
-    16 16 │   
-    17 17 │   <!-- Invalid: duplicates with newlines (should collapse whitespace) -->
-    18    │ - <div·class="foo
+    17 17 │   <!-- Invalid: duplicates with newlines (preserves original whitespace) -->
+    18 18 │   <div class="foo
     19    │ - bar
     20    │ - foo"></div>
-       18 │ + <div·class="foo·bar"></div>
-    21 19 │   
-    22 20 │   <!-- Invalid: duplicates with tabs -->
+       19 │ + bar"></div>
+    21 20 │   
+    22 21 │   <!-- Invalid: duplicates with tabs -->
   
 
 ```
@@ -228,11 +227,7 @@ invalid.html:23:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Safe fix: Remove the duplicate classes.
   
-    21 21 │   
-    22 22 │   <!-- Invalid: duplicates with tabs -->
-    23    │ - <div·class="flex→ p-4→ flex"></div>
-       23 │ + <div·class="flex·p-4"></div>
-    24 24 │   
-  
+    23 │ <div·class="flex→ p-4→ flex"></div>
+       │                      ------        
 
 ```
