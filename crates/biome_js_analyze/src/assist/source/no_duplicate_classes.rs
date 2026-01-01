@@ -24,7 +24,6 @@ declare_source_rule! {
     /// as well as in utility function calls like `clsx`, `cn`, `cva`, etc.
     ///
     /// Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
-    /// This action helps keep your class strings clean by detecting and auto-fixing duplicates.
     ///
     /// ## Examples
     ///
@@ -38,11 +37,10 @@ declare_source_rule! {
     ///
     /// ## Options
     ///
-    /// Use the same options as [`useSortedClasses`](/linter/rules/use-sorted-classes) to control
-    /// which attributes and functions are checked.
+    /// Uses the same options as [`useSortedClasses`](https://biomejs.dev/linter/rules/use-sorted-classes/)
+    /// to control which attributes and functions are checked.
     ///
-    /// Note that this action collapses all whitespace (including newlines) into single spaces,
-    /// consistent with [`useSortedClasses`](https://biomejs.dev/linter/rules/use-sorted-classes/).
+    /// Note: This action collapses all whitespace (including newlines) into single spaces.
     ///
     pub NoDuplicateClasses {
         version: "next",
