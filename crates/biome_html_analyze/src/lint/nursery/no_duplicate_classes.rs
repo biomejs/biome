@@ -17,7 +17,7 @@ declare_lint_rule! {
     /// Detects and removes duplicate CSS classes in HTML `class` attributes.
     ///
     /// Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
-    /// This rule helps keep your class strings clean by detecting and auto-fixing duplicates.
+    /// This rule helps keep your class strings clean by detecting and removing duplicates.
     ///
     /// Note that this rule collapses all whitespace (including newlines) into single spaces,
     /// consistent with [`useSortedClasses`](https://biomejs.dev/linter/rules/use-sorted-classes/).
