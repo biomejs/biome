@@ -189,7 +189,6 @@ dependencies = [
  "biome_grit_patterns",
  "biome_html_analyze",
  "biome_html_formatter",
- "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_formatter",
  "biome_js_syntax",
@@ -208,7 +207,6 @@ dependencies = [
  "camino",
  "crossbeam",
  "dashmap 6.1.0",
- "directories",
  "insta",
  "libc",
  "mimalloc",
@@ -234,6 +232,7 @@ name = "biome_configuration"
 version = "0.0.1"
 dependencies = [
  "biome_analyze",
+ "biome_configuration_macros",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -262,6 +261,27 @@ dependencies = [
  "serde",
  "tests_macros",
  "tikv-jemallocator",
+]
+
+[[package]]
+name = "biome_configuration_macros"
+version = "0.0.1"
+dependencies = [
+ "biome_analyze",
+ "biome_css_analyze",
+ "biome_css_syntax",
+ "biome_graphql_analyze",
+ "biome_graphql_syntax",
+ "biome_html_analyze",
+ "biome_html_syntax",
+ "biome_js_analyze",
+ "biome_js_syntax",
+ "biome_json_analyze",
+ "biome_json_syntax",
+ "biome_string_case",
+ "proc-macro2",
+ "pulldown-cmark",
+ "quote",
 ]
 
 [[package]]
@@ -679,7 +699,6 @@ name = "biome_grit_formatter"
 version = "0.0.0"
 dependencies = [
  "biome_configuration",
- "biome_diagnostics_categories",
  "biome_formatter",
  "biome_formatter_test",
  "biome_fs",
@@ -689,7 +708,6 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_service",
- "biome_suppression",
  "camino",
  "serde",
  "serde_json",
@@ -732,8 +750,6 @@ dependencies = [
  "biome_grit_syntax",
  "biome_js_parser",
  "biome_js_syntax",
- "biome_json_parser",
- "biome_json_syntax",
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
@@ -768,7 +784,6 @@ name = "biome_html_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
- "biome_aria_metadata",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -782,13 +797,11 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
- "codspeed-criterion-compat",
  "insta",
- "mimalloc",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "tests_macros",
- "tikv-jemallocator",
 ]
 
 [[package]]
@@ -1086,7 +1099,6 @@ name = "biome_jsdoc_comment"
 version = "0.0.1"
 dependencies = [
  "biome_formatter",
- "biome_js_parser",
  "biome_js_syntax",
  "biome_js_type_info",
  "biome_rowan",
@@ -1183,7 +1195,7 @@ dependencies = [
  "biome_rowan",
  "biome_string_case",
  "camino",
- "directories",
+ "dirs",
  "schemars",
  "serde",
 ]
@@ -1238,7 +1250,6 @@ dependencies = [
  "tower",
  "tower-lsp-server",
  "tracing",
- "uuid",
 ]
 
 [[package]]
@@ -1419,7 +1430,6 @@ dependencies = [
  "biome_js_runtime",
  "biome_js_syntax",
  "biome_json_parser",
- "biome_json_syntax",
  "biome_parser",
  "biome_resolver",
  "biome_rowan",
@@ -1571,7 +1581,6 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "boxcar",
- "bpaf",
  "camino",
  "crossbeam",
  "either",
@@ -1749,21 +1758,6 @@ version = "0.0.1"
 dependencies = [
  "biome_rowan",
  "biome_yaml_syntax",
-]
-
-[[package]]
-name = "biome_yaml_formatter"
-version = "0.1.0"
-dependencies = [
- "biome_deserialize",
- "biome_diagnostics",
- "biome_formatter",
- "biome_rowan",
- "biome_suppression",
- "biome_yaml_parser",
- "biome_yaml_syntax",
- "schemars",
- "serde",
 ]
 
 [[package]]
@@ -2570,6 +2564,15 @@ name = "directories"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "16f5094c54661b38d03bd7e50df373292118db60b585c08a411c6d840017fe7d"
+dependencies = [
+ "dirs-sys",
+]
+
+[[package]]
+name = "dirs"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3e8aa94d75141228480295a7d0e7feb620b1a5ad9f12bc40be62411e38cce4e"
 dependencies = [
  "dirs-sys",
 ]
