@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use biome_html_syntax::{AnySvelteBindingAssignmentBinding, SvelteBindingAssignmentBindingList};
+use biome_formatter::write;
+use biome_html_syntax::SvelteBindingAssignmentBindingList;
 use biome_rowan::AstSeparatedList;
 
 #[derive(Debug, Clone, Default)]
@@ -13,15 +14,22 @@ impl FormatRule<SvelteBindingAssignmentBindingList> for FormatSvelteBindingAssig
     ) -> FormatResult<()> {
         let mut join = f.join_nodes_with_space();
 
-        for binding_assignment in node.iter().flatten() {
-            match binding_assignment {
-                AnySvelteBindingAssignmentBinding::SvelteName(name) => {
-                    join.entry(name.syntax(), &name.format())
-                }
-                AnySvelteBindingAssignmentBinding::SvelteRestBinding(binding) => {
-                    join.entry(binding.syntax(), &binding.format())
-                }
-            }
+        for binding_assignment in node.elements() {
+            let node = binding_assignment.node()?;
+            let separator = binding_assignment.trailing_separator()?;
+
+            join.entry(
+                node.syntax(),
+                &format_with(|f| {
+                    write!(f, [node.format()])?;
+
+                    if let Some(separator) = separator {
+                        write!(f, [separator.format()])?;
+                    }
+
+                    Ok(())
+                }),
+            )
         }
 
         join.finish()
