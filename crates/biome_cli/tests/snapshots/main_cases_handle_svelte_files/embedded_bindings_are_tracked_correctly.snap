@@ -24,6 +24,7 @@ let array = [];
 
 <html>
     <span>{hello}</span>
+    <span>{notDefined}</span>
     {#each array as item}
     {/each}
     <Component />
@@ -31,8 +32,37 @@ let array = [];
 
 ```
 
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some warnings were emitted while running checks.
+  
+
+
+```
+
 # Emitted Messages
 
 ```block
+file.svelte:9:12 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable notDefined is unused.
+  
+     7 │ <html>
+     8 │     <span>{hello}</span>
+   > 9 │     <span>{notDefined}</span>
+       │            ^^^^^^^^^^
+    10 │     {#each array as item}
+    11 │     {/each}
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
 ```

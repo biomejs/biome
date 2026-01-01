@@ -41,8 +41,8 @@ use biome_html_formatter::{
 use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
-    AstroEmbeddedContent, HtmlElement, HtmlFileSource, HtmlLanguage, HtmlRoot, HtmlSyntaxNode,
-    HtmlTextExpression,
+    AstroEmbeddedContent, HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlLanguage,
+    HtmlRoot, HtmlSingleTextExpression, HtmlSyntaxNode,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
@@ -422,12 +422,22 @@ fn parse_embedded_nodes(
         }
 
         if file_source.is_svelte()
-            && let Some(text_expression) = HtmlTextExpression::cast_ref(&element)
+            && let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
         {
             let result = parse_svelte_text_expression(text_expression, cache, biome_path, settings);
             if let Some((content, file_source)) = result {
                 nodes.push((content.into(), file_source));
             }
+        }
+
+        if file_source.is_vue()
+            && let Some(_text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
+        {
+            // TODO: uncomment this once we have better parsing of Vue syntax where we have expressions VS names
+            // let result = parse_vue_text_expression(text_expression, cache, biome_path, settings);
+            // if let Some((content, file_source)) = result {
+            //     nodes.push((content.into(), file_source));
+            // }
         }
 
         if let Some(element) = HtmlElement::cast_ref(&element) {
@@ -486,7 +496,7 @@ pub(crate) fn parse_astro_embedded_script(
         options,
         cache,
     );
-    builder.visit_js_root(&parse.tree());
+    builder.visit_js_source_snippet(&parse.tree());
 
     Some((
         EmbeddedSnippet::new(
@@ -519,10 +529,12 @@ pub(crate) fn parse_embedded_script(
                 JsFileSource::js_module()
             };
             if html_file_source.is_svelte() {
-                file_source = file_source.with_embedding_kind(EmbeddingKind::Svelte);
+                file_source =
+                    file_source.with_embedding_kind(EmbeddingKind::Svelte { is_source: true });
             } else if html_file_source.is_vue() {
                 file_source = file_source.with_embedding_kind(EmbeddingKind::Vue {
                     setup: element.is_script_with_setup_attribute(),
+                    is_source: true,
                 });
             }
             file_source
@@ -557,8 +569,7 @@ pub(crate) fn parse_embedded_script(
                 cache,
             );
 
-            dbg!("visiting");
-            builder.visit_js_root(&parse.tree());
+            builder.visit_js_source_snippet(&parse.tree());
 
             Some(EmbeddedSnippet::new(
                 parse.into(),
@@ -674,22 +685,17 @@ pub(crate) fn parse_embedded_json(
     Some((script_children, file_source))
 }
 
+/// Parses Svelte single text expressions `{ expression }`
 pub(crate) fn parse_svelte_text_expression(
-    element: HtmlTextExpression,
+    element: HtmlSingleTextExpression,
     cache: &mut NodeCache,
     biome_path: &BiomePath,
     settings: &SettingsWithEditor,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
-    // let in_svelte_block = element
-    //     .syntax()
-    //     .ancestors()
-    //     .any(|element| AnySvelteBlock::can_cast(element.kind()));
-    // if !in_svelte_block {
-    //     return None;
-    // }
-
-    let content = element.html_literal_token().ok()?;
-    let file_source = JsFileSource::js_module();
+    let expression = element.expression().ok()?;
+    let content = expression.html_literal_token().ok()?;
+    let file_source =
+        JsFileSource::js_module().with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
     let document_file_source = DocumentFileSource::Js(file_source);
     let options = settings.parse_options::<JsLanguage>(biome_path, &document_file_source);
     let parse = parse_js_with_offset_and_cache(
@@ -701,7 +707,39 @@ pub(crate) fn parse_svelte_text_expression(
     );
     let snippet = EmbeddedSnippet::new(
         parse.into(),
-        element.range(),
+        expression.range(),
+        content.text_range(),
+        content.text_range().start(),
+    );
+    Some((snippet, document_file_source))
+}
+
+/// Parses Vue double text expressions `{{ expression }}`
+#[expect(unused)]
+pub(crate) fn parse_vue_text_expression(
+    element: HtmlDoubleTextExpression,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    let expression = element.expression().ok()?;
+    let content = expression.html_literal_token().ok()?;
+    let file_source = JsFileSource::js_module().with_embedding_kind(EmbeddingKind::Vue {
+        setup: false,
+        is_source: false,
+    });
+    let document_file_source = DocumentFileSource::Js(file_source);
+    let options = settings.parse_options::<JsLanguage>(biome_path, &document_file_source);
+    let parse = parse_js_with_offset_and_cache(
+        content.text(),
+        content.text_range().start(),
+        file_source,
+        options,
+        cache,
+    );
+    let snippet = EmbeddedSnippet::new(
+        parse.into(),
+        expression.range(),
         content.text_range(),
         content.text_range().start(),
     );

@@ -1079,7 +1079,7 @@ impl Features {
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro { .. } => self.astro.capabilities(),
                 EmbeddingKind::Vue { .. } => self.vue.capabilities(),
-                EmbeddingKind::Svelte => self.svelte.capabilities(),
+                EmbeddingKind::Svelte { .. } => self.svelte.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),

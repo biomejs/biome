@@ -13,6 +13,7 @@ pub struct EmbeddedExportedBindings {
 
 #[derive(Debug)]
 pub(crate) struct EmbeddedBuilder {
+    /// Bindings tracked inside JavaScript snippets.
     js_bindings: FxHashMap<TextRange, TokenText>,
 }
 
@@ -32,7 +33,8 @@ impl EmbeddedBuilder {
         }
     }
 
-    pub(crate) fn visit_js_root(&mut self, root: &AnyJsRoot) {
+    /// To call when visiting a source snippet, where bindings are defined.
+    pub(crate) fn visit_js_source_snippet(&mut self, root: &AnyJsRoot) {
         let preorder = root.syntax().preorder();
 
         for event in preorder {
@@ -210,7 +212,7 @@ mod tests {
     }
 
     fn visit_js_root(service: &mut EmbeddedBuilder, root: &AnyJsRoot) {
-        service.visit_js_root(root);
+        service.visit_js_source_snippet(root);
     }
 
     fn contains_binding(service: &EmbeddedExportedBindings, binding: &str) -> bool {

@@ -1711,7 +1711,7 @@ impl Workspace for WorkspaceServer {
                     pull_code_actions,
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
-                    document_services: &snippet_services,
+                    document_services: snippet_services,
                     embedded_exported_bindings: services.embedded_bindings(),
                 });
 

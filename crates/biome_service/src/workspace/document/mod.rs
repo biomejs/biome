@@ -11,8 +11,7 @@ use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, SyntaxNodeWithOffset, TextRange, TextSize, TokenText};
-use rustc_hash::FxHashMap;
+use biome_rowan::{AstNode, SyntaxNodeWithOffset, TextRange, TextSize};
 use std::marker::PhantomData;
 
 #[derive(Debug, Clone)]
@@ -297,9 +296,7 @@ impl DocumentServices {
     }
 
     pub fn embedded_bindings(&self) -> Option<EmbeddedExportedBindings> {
-        self.exported_bindings
-            .as_ref()
-            .map(|bindings| bindings.clone())
+        self.exported_bindings.clone()
     }
 }
 
