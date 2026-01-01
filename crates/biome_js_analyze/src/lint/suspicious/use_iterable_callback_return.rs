@@ -57,15 +57,6 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    /// The following code is invalid when `checkForEach` is `true`:
-    ///
-    /// ```js,ignore
-    /// // biome.json: { "linter": { "rules": { "suspicious": { "useIterableCallbackReturn": { "options": { "checkForEach": true } } } } } }
-    /// [].forEach(() => {
-    ///     return 1; // Should not return a value
-    /// });
-    /// ```
-    ///
     /// ### Valid
     ///
     /// ```js
@@ -103,7 +94,7 @@ declare_lint_rule! {
     ///
     /// When `checkForEach` is `true`, the following code is invalid:
     ///
-    /// ```js,ignore
+    /// ```js,expect_diagnostic,use_options
     /// [].forEach(() => {
     ///     return 1; // Should not return a value
     /// });
