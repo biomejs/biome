@@ -68,10 +68,10 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@61..62 "\n" [] [],
                 },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@62..63 "\n" [] [],
-                },
             ],
+        },
+        MdNewline {
+            value_token: NEWLINE@62..63 "\n" [] [],
         },
         MdParagraph {
             list: MdInlineItemList [
@@ -114,8 +114,8 @@ MdDocument {
 0: MD_DOCUMENT@0..121
   0: (empty)
   1: MD_BLOCK_LIST@0..121
-    0: MD_INDENT_CODE_BLOCK@0..63
-      0: MD_INLINE_ITEM_LIST@0..63
+    0: MD_INDENT_CODE_BLOCK@0..62
+      0: MD_INLINE_ITEM_LIST@0..62
         0: MD_TEXTUAL@0..18
           0: MD_TEXTUAL_LITERAL@0..18 "function hello" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
         1: MD_TEXTUAL@18..19
@@ -144,18 +144,18 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@56..61 "}" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
         13: MD_TEXTUAL@61..62
           0: MD_TEXTUAL_LITERAL@61..62 "\n" [] []
-        14: MD_TEXTUAL@62..63
-          0: MD_TEXTUAL_LITERAL@62..63 "\n" [] []
-    1: MD_PARAGRAPH@63..87
+    1: MD_NEWLINE@62..63
+      0: NEWLINE@62..63 "\n" [] []
+    2: MD_PARAGRAPH@63..87
       0: MD_INLINE_ITEM_LIST@63..87
         0: MD_TEXTUAL@63..86
           0: MD_TEXTUAL_LITERAL@63..86 "Regular paragraph here." [] []
         1: MD_TEXTUAL@86..87
           0: MD_TEXTUAL_LITERAL@86..87 "\n" [] []
       1: (empty)
-    2: MD_NEWLINE@87..88
+    3: MD_NEWLINE@87..88
       0: NEWLINE@87..88 "\n" [] []
-    3: MD_INDENT_CODE_BLOCK@88..121
+    4: MD_INDENT_CODE_BLOCK@88..121
       0: MD_INLINE_ITEM_LIST@88..121
         0: MD_TEXTUAL@88..101
           0: MD_TEXTUAL_LITERAL@88..101 "More code" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []

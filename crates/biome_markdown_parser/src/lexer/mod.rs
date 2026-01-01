@@ -9,7 +9,7 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
-use biome_rowan::{SyntaxKind, TextSize};
+use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use biome_unicode_table::Dispatch::{self, AMP, *};
 use biome_unicode_table::lookup_byte;
 
@@ -87,7 +87,10 @@ pub(crate) struct MarkdownLexer<'src> {
 
     diagnostics: Vec<ParseDiagnostic>,
     force_ordered_list_marker: bool,
+    input_too_large: bool,
 }
+
+const MAX_MARKDOWN_SOURCE_SIZE: usize = u32::MAX as usize;
 
 impl<'src> Lexer<'src> for MarkdownLexer<'src> {
     const NEWLINE: Self::Kind = NEWLINE;
@@ -118,6 +121,13 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
     }
 
     fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
+        if self.input_too_large {
+            self.current_start = TextSize::from(0);
+            self.current_flags = TokenFlags::empty();
+            self.current_kind = EOF;
+            return EOF;
+        }
+
         self.current_start = self.text_position();
         self.current_flags = TokenFlags::empty();
 
@@ -199,6 +209,18 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
 impl<'src> MarkdownLexer<'src> {
     /// Make a new lexer from a str, this is safe because strs are valid utf8
     pub fn from_str(source: &'src str) -> Self {
+        let input_too_large = source.len() > MAX_MARKDOWN_SOURCE_SIZE;
+        let mut diagnostics = vec![];
+        if input_too_large {
+            diagnostics.push(
+                ParseDiagnostic::new(
+                    "Markdown input exceeds the 4GB limit.",
+                    TextRange::empty(TextSize::from(0)),
+                )
+                .with_hint("Split the input into smaller files."),
+            );
+        }
+
         Self {
             source,
             // Start of document is treated as start of line for indentation purposes
@@ -208,8 +230,9 @@ impl<'src> MarkdownLexer<'src> {
             current_start: TextSize::from(0),
             current_flags: TokenFlags::empty(),
             position: 0,
-            diagnostics: vec![],
+            diagnostics,
             force_ordered_list_marker: false,
+            input_too_large,
         }
     }
 
@@ -940,10 +963,7 @@ impl<'src> MarkdownLexer<'src> {
         if let Some(chr) = string.chars().next() {
             chr
         } else {
-            // Safety: we always call this when we are at a valid char, so this branch is completely unreachable
-            unsafe {
-                core::hint::unreachable_unchecked();
-            }
+            unreachable!("lexer expected a valid UTF-8 character at current position");
         }
     }
 
@@ -1190,6 +1210,10 @@ impl<'src> MarkdownLexer<'src> {
 
 impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
     fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind {
+        if self.input_too_large {
+            return EOF;
+        }
+
         let old_position = self.position;
         self.position = u32::from(self.current_start) as usize;
 

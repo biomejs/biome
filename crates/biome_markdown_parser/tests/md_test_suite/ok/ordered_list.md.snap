@@ -1,5 +1,6 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 131
 expression: snapshot
 ---
 ## Input
@@ -74,6 +75,10 @@ MdDocument {
                         },
                     ],
                 },
+            ],
+        },
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
                 MdBullet {
                     bullet: MD_ORDERED_LIST_MARKER@44..46 "1)" [] [],
                     content: MdBlockList [
@@ -119,8 +124,8 @@ MdDocument {
 0: MD_DOCUMENT@0..81
   0: (empty)
   1: MD_BLOCK_LIST@0..81
-    0: MD_ORDERED_LIST_ITEM@0..81
-      0: MD_BULLET_LIST@0..81
+    0: MD_ORDERED_LIST_ITEM@0..44
+      0: MD_BULLET_LIST@0..44
         0: MD_BULLET@0..14
           0: MD_ORDERED_LIST_MARKER@0..2 "1." [] []
           1: MD_BLOCK_LIST@2..14
@@ -153,7 +158,9 @@ MdDocument {
               1: (empty)
             1: MD_NEWLINE@43..44
               0: NEWLINE@43..44 "\n" [] []
-        3: MD_BULLET@44..65
+    1: MD_ORDERED_LIST_ITEM@44..81
+      0: MD_BULLET_LIST@44..81
+        0: MD_BULLET@44..65
           0: MD_ORDERED_LIST_MARKER@44..46 "1)" [] []
           1: MD_BLOCK_LIST@46..65
             0: MD_PARAGRAPH@46..65
@@ -163,7 +170,7 @@ MdDocument {
                 1: MD_TEXTUAL@64..65
                   0: MD_TEXTUAL_LITERAL@64..65 "\n" [] []
               1: (empty)
-        4: MD_BULLET@65..81
+        1: MD_BULLET@65..81
           0: MD_ORDERED_LIST_MARKER@65..67 "2)" [] []
           1: MD_BLOCK_LIST@67..81
             0: MD_PARAGRAPH@67..81

@@ -22,8 +22,9 @@
 //! ## Depth Limits
 //!
 //! To prevent stack overflow from pathological input (deeply nested lists),
-//! nesting depth is limited to 100 levels. Deeper nesting emits a diagnostic
-//! and treats additional list markers as content.
+//! nesting depth is limited by `MarkdownParseOptions::max_nesting_depth`
+//! (default: 100). Deeper nesting emits a diagnostic and treats additional
+//! list markers as content.
 //!
 //! ## Current Limitations
 //!
@@ -43,7 +44,7 @@ use super::quote::{consume_quote_prefix, consume_quote_prefix_without_virtual, h
 use biome_rowan::TextRange;
 
 use super::fenced_code_block::parse_fenced_code_block;
-use super::parse_error::{MAX_NESTING_DEPTH, list_nesting_too_deep};
+use super::parse_error::list_nesting_too_deep;
 use super::{ParsedBlockKind, at_block_interrupt, at_indent_code_block};
 use crate::MarkdownParser;
 use crate::syntax::parse_any_block_with_indent_code_policy;
@@ -437,17 +438,39 @@ fn expected_bullet(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
 ///
 /// Parses consecutive bullet items into a single list.
 ///
-/// Nesting is limited to `MAX_NESTING_DEPTH` to prevent stack overflow.
+/// Nesting is limited to `MarkdownParseOptions::max_nesting_depth` to prevent stack overflow.
 pub(crate) fn parse_bullet_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
     if !at_bullet_list_item(p) {
         return Absent;
     }
 
     // Check depth limit before parsing
-    if p.state().list_nesting_depth >= MAX_NESTING_DEPTH {
+    let max_nesting_depth = p.options().max_nesting_depth;
+    if p.state().list_nesting_depth >= max_nesting_depth {
         // Emit diagnostic and treat as content
         let range = p.cur_range();
-        p.error(list_nesting_too_deep(p, range));
+        p.error(list_nesting_too_deep(p, range, max_nesting_depth));
+        skip_list_marker_indent(p);
+        if p.at(MD_SETEXT_UNDERLINE_LITERAL) {
+            p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![-]));
+        } else if p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text == "-" {
+                p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![-]));
+            } else if text == "*" {
+                p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![*]));
+            } else if text == "+" {
+                p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![+]));
+            }
+        } else if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
+            p.parse_as_skipped_trivia_tokens(|p| p.bump(p.cur()));
+        }
+        if p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text.starts_with(' ') || text.starts_with('\t') {
+                p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+            }
+        }
         return Absent;
     }
 
@@ -696,17 +719,28 @@ fn expected_ordered_item(p: &MarkdownParser, range: TextRange) -> ParseDiagnosti
 ///
 /// Parses consecutive ordered items into a single list.
 ///
-/// Nesting is limited to `MAX_NESTING_DEPTH` to prevent stack overflow.
+/// Nesting is limited to `MarkdownParseOptions::max_nesting_depth` to prevent stack overflow.
 pub(crate) fn parse_order_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
     if !at_order_list_item(p) {
         return Absent;
     }
 
     // Check depth limit before parsing
-    if p.state().list_nesting_depth >= MAX_NESTING_DEPTH {
+    let max_nesting_depth = p.options().max_nesting_depth;
+    if p.state().list_nesting_depth >= max_nesting_depth {
         // Emit diagnostic and treat as content
         let range = p.cur_range();
-        p.error(list_nesting_too_deep(p, range));
+        p.error(list_nesting_too_deep(p, range, max_nesting_depth));
+        skip_list_marker_indent(p);
+        if p.at(MD_ORDERED_LIST_MARKER) {
+            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_ORDERED_LIST_MARKER));
+        }
+        if p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text.starts_with(' ') || text.starts_with('\t') {
+                p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+            }
+        }
         return Absent;
     }
 
