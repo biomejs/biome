@@ -29,3 +29,19 @@ foo" />;
 
 // Invalid: duplicates with tabs
 <div class="flex	p-4	flex" />;
+
+// Invalid: utility function calls
+cn("flex flex");
+clsx("p-4 m-2 p-4");
+
+// Invalid: object member names in utility functions
+cn({ "flex flex": isActive });
+
+// Invalid: multiple spaces (should preserve spacing)
+<div class="flex  p-4  flex" />;
+
+// Invalid: leading/trailing whitespace (should preserve)
+<div class=" flex flex " />;
+
+// Invalid: triple duplicate
+<div class="flex flex flex" />;

@@ -36,6 +36,22 @@ foo" />;
 // Invalid: duplicates with tabs
 <div class="flex	p-4	flex" />;
 
+// Invalid: utility function calls
+cn("flex flex");
+clsx("p-4 m-2 p-4");
+
+// Invalid: object member names in utility functions
+cn({ "flex flex": isActive });
+
+// Invalid: multiple spaces (should preserve spacing)
+<div class="flex  p-4  flex" />;
+
+// Invalid: leading/trailing whitespace (should preserve)
+<div class=" flex flex " />;
+
+// Invalid: triple duplicate
+<div class="flex flex flex" />;
+
 ```
 
 # Diagnostics
@@ -302,6 +318,7 @@ invalid.jsx:31:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━�
   > 31 │ <div class="flex	p-4	flex" />;
        │            ^^^^^^^^^^^^^^^^^
     32 │ 
+    33 │ // Invalid: utility function calls
   
   i The class flex appears multiple times.
   
@@ -311,5 +328,70 @@ invalid.jsx:31:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━�
   
     31 │ <div·class="flex→ p-4→ flex"·/>;
        │                      ------     
+
+```
+
+```
+invalid.jsx:41:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    40 │ // Invalid: multiple spaces (should preserve spacing)
+  > 41 │ <div class="flex  p-4  flex" />;
+       │            ^^^^^^^^^^^^^^^^^
+    42 │ 
+    43 │ // Invalid: leading/trailing whitespace (should preserve)
+  
+  i The class flex appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    41 │ <div·class="flex··p-4··flex"·/>;
+       │                      ------     
+
+```
+
+```
+invalid.jsx:44:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    43 │ // Invalid: leading/trailing whitespace (should preserve)
+  > 44 │ <div class=" flex flex " />;
+       │            ^^^^^^^^^^^^^
+    45 │ 
+    46 │ // Invalid: triple duplicate
+  
+  i The class flex appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    44 │ <div·class="·flex·flex·"·/>;
+       │                   -----     
+
+```
+
+```
+invalid.jsx:47:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    46 │ // Invalid: triple duplicate
+  > 47 │ <div class="flex flex flex" />;
+       │            ^^^^^^^^^^^^^^^^
+    48 │ 
+  
+  i The class flex appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    47 │ <div·class="flex·flex·flex"·/>;
+       │                 ----------     
 
 ```

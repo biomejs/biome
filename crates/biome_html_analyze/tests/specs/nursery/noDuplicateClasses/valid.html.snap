@@ -21,4 +21,10 @@ expression: valid.html
 <!-- Valid: single-quoted strings -->
 <div class='flex p-4'></div>
 
+<!-- Valid: whitespace-only (no classes to duplicate) -->
+<div class="   "></div>
+
+<!-- Valid: case-sensitive (CSS classes are case-sensitive) -->
+<div class="Flex flex"></div>
+
 ```

@@ -28,4 +28,17 @@ expression: valid.jsx
 <div className={`flex p-4 ${condition}`} />;
 <div className={`${prefix} p-4 m-2 ${suffix}`} />;
 
+// Valid: utility function calls without duplicates
+cn("flex p-4 m-2");
+clsx("bg-red-500 text-white");
+
+// Valid: object member names without duplicates
+cn({ "flex p-4": isActive });
+
+// Valid: whitespace-only (no classes to duplicate)
+<div class="   " />;
+
+// Valid: case-sensitive (CSS classes are case-sensitive)
+<div class="Flex flex" />;
+
 ```
