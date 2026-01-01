@@ -218,7 +218,7 @@ fn is_valid_closing_fence(p: &mut MarkdownParser, is_tilde_fence: bool, fence_le
     line_has_closing_fence(p, is_tilde_fence, fence_len)
 }
 
-fn info_string_has_backtick(p: &mut MarkdownParser) -> bool {
+pub(crate) fn info_string_has_backtick(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
         if p.at(TRIPLE_TILDE) {
             return false;

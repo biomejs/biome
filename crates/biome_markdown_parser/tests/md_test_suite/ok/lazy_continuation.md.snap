@@ -1,5 +1,6 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 131
 expression: snapshot
 ---
 ## Input
@@ -180,8 +181,8 @@ MdDocument {
         MdQuote {
             marker_token: R_ANGLE@248..249 ">" [] [],
             content: MdBlockList [
-                MdSetextHeader {
-                    content: MdInlineItemList [
+                MdParagraph {
+                    list: MdInlineItemList [
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@249..285 "Quote interrupted by setext heading" [Skipped(" ")] [],
                         },
@@ -195,9 +196,12 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@300..301 "\n" [] [],
                         },
                     ],
-                    underline_token: MD_SETEXT_UNDERLINE_LITERAL@301..304 "---" [] [],
+                    hard_line: missing (optional),
                 },
             ],
+        },
+        MdThematicBreakBlock {
+            value_token: MD_THEMATIC_BREAK_LITERAL@301..304 "---" [] [],
         },
         MdNewline {
             value_token: NEWLINE@304..305 "\n" [] [],
@@ -285,8 +289,8 @@ MdDocument {
         MdQuote {
             marker_token: R_ANGLE@430..431 ">" [] [],
             content: MdBlockList [
-                MdSetextHeader {
-                    content: MdInlineItemList [
+                MdParagraph {
+                    list: MdInlineItemList [
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@431..467 "Quote interrupted by thematic break" [Skipped(" ")] [],
                         },
@@ -294,9 +298,12 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@467..468 "\n" [] [],
                         },
                     ],
-                    underline_token: MD_SETEXT_UNDERLINE_LITERAL@468..471 "---" [] [],
+                    hard_line: missing (optional),
                 },
             ],
+        },
+        MdThematicBreakBlock {
+            value_token: MD_THEMATIC_BREAK_LITERAL@468..471 "---" [] [],
         },
         MdNewline {
             value_token: NEWLINE@471..472 "\n" [] [],
@@ -316,19 +323,7 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@509..510 "\n" [] [],
                         },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@510..511 " " [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@511..512 " " [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@512..513 " " [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@513..514 " " [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@514..544 "This is an indented code block" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@510..544 "This is an indented code block" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@544..545 "\n" [] [],
@@ -433,10 +428,10 @@ MdDocument {
       0: NEWLINE@246..247 "\n" [] []
     9: MD_NEWLINE@247..248
       0: NEWLINE@247..248 "\n" [] []
-    10: MD_QUOTE@248..304
+    10: MD_QUOTE@248..301
       0: R_ANGLE@248..249 ">" [] []
-      1: MD_BLOCK_LIST@249..304
-        0: MD_SETEXT_HEADER@249..304
+      1: MD_BLOCK_LIST@249..301
+        0: MD_PARAGRAPH@249..301
           0: MD_INLINE_ITEM_LIST@249..301
             0: MD_TEXTUAL@249..285
               0: MD_TEXTUAL_LITERAL@249..285 "Quote interrupted by setext heading" [Skipped(" ")] []
@@ -446,12 +441,14 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@286..300 "Setext heading" [] []
             3: MD_TEXTUAL@300..301
               0: MD_TEXTUAL_LITERAL@300..301 "\n" [] []
-          1: MD_SETEXT_UNDERLINE_LITERAL@301..304 "---" [] []
-    11: MD_NEWLINE@304..305
+          1: (empty)
+    11: MD_THEMATIC_BREAK_BLOCK@301..304
+      0: MD_THEMATIC_BREAK_LITERAL@301..304 "---" [] []
+    12: MD_NEWLINE@304..305
       0: NEWLINE@304..305 "\n" [] []
-    12: MD_NEWLINE@305..306
+    13: MD_NEWLINE@305..306
       0: NEWLINE@305..306 "\n" [] []
-    13: MD_QUOTE@306..334
+    14: MD_QUOTE@306..334
       0: R_ANGLE@306..307 ">" [] []
       1: MD_BLOCK_LIST@307..334
         0: MD_PARAGRAPH@307..334
@@ -461,7 +458,7 @@ MdDocument {
             1: MD_TEXTUAL@333..334
               0: MD_TEXTUAL_LITERAL@333..334 "\n" [] []
           1: (empty)
-    14: MD_BULLET_LIST_ITEM@334..374
+    15: MD_BULLET_LIST_ITEM@334..374
       0: MD_BULLET_LIST@334..374
         0: MD_BULLET@334..374
           0: MINUS@334..335 "-" [] []
@@ -473,9 +470,9 @@ MdDocument {
                 1: MD_TEXTUAL@373..374
                   0: MD_TEXTUAL_LITERAL@373..374 "\n" [] []
               1: (empty)
-    15: MD_NEWLINE@374..375
+    16: MD_NEWLINE@374..375
       0: NEWLINE@374..375 "\n" [] []
-    16: MD_QUOTE@375..410
+    17: MD_QUOTE@375..410
       0: R_ANGLE@375..376 ">" [] []
       1: MD_BLOCK_LIST@376..410
         0: MD_PARAGRAPH@376..410
@@ -485,7 +482,7 @@ MdDocument {
             1: MD_TEXTUAL@409..410
               0: MD_TEXTUAL_LITERAL@409..410 "\n" [] []
           1: (empty)
-    17: MD_FENCED_CODE_BLOCK@410..428
+    18: MD_FENCED_CODE_BLOCK@410..428
       0: TRIPLE_BACKTICK@410..413 "```" [] []
       1: MD_CODE_NAME_LIST@413..413
       2: MD_INLINE_ITEM_LIST@413..425
@@ -496,25 +493,27 @@ MdDocument {
         2: MD_TEXTUAL@424..425
           0: MD_TEXTUAL_LITERAL@424..425 "\n" [] []
       3: TRIPLE_BACKTICK@425..428 "```" [] []
-    18: MD_NEWLINE@428..429
+    19: MD_NEWLINE@428..429
       0: NEWLINE@428..429 "\n" [] []
-    19: MD_NEWLINE@429..430
+    20: MD_NEWLINE@429..430
       0: NEWLINE@429..430 "\n" [] []
-    20: MD_QUOTE@430..471
+    21: MD_QUOTE@430..468
       0: R_ANGLE@430..431 ">" [] []
-      1: MD_BLOCK_LIST@431..471
-        0: MD_SETEXT_HEADER@431..471
+      1: MD_BLOCK_LIST@431..468
+        0: MD_PARAGRAPH@431..468
           0: MD_INLINE_ITEM_LIST@431..468
             0: MD_TEXTUAL@431..467
               0: MD_TEXTUAL_LITERAL@431..467 "Quote interrupted by thematic break" [Skipped(" ")] []
             1: MD_TEXTUAL@467..468
               0: MD_TEXTUAL_LITERAL@467..468 "\n" [] []
-          1: MD_SETEXT_UNDERLINE_LITERAL@468..471 "---" [] []
-    21: MD_NEWLINE@471..472
+          1: (empty)
+    22: MD_THEMATIC_BREAK_BLOCK@468..471
+      0: MD_THEMATIC_BREAK_LITERAL@468..471 "---" [] []
+    23: MD_NEWLINE@471..472
       0: NEWLINE@471..472 "\n" [] []
-    22: MD_NEWLINE@472..473
+    24: MD_NEWLINE@472..473
       0: NEWLINE@472..473 "\n" [] []
-    23: MD_QUOTE@473..545
+    25: MD_QUOTE@473..545
       0: R_ANGLE@473..474 ">" [] []
       1: MD_BLOCK_LIST@474..545
         0: MD_PARAGRAPH@474..545
@@ -523,17 +522,9 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@474..509 "Quote interrupted by indented code" [Skipped(" ")] []
             1: MD_TEXTUAL@509..510
               0: MD_TEXTUAL_LITERAL@509..510 "\n" [] []
-            2: MD_TEXTUAL@510..511
-              0: MD_TEXTUAL_LITERAL@510..511 " " [] []
-            3: MD_TEXTUAL@511..512
-              0: MD_TEXTUAL_LITERAL@511..512 " " [] []
-            4: MD_TEXTUAL@512..513
-              0: MD_TEXTUAL_LITERAL@512..513 " " [] []
-            5: MD_TEXTUAL@513..514
-              0: MD_TEXTUAL_LITERAL@513..514 " " [] []
-            6: MD_TEXTUAL@514..544
-              0: MD_TEXTUAL_LITERAL@514..544 "This is an indented code block" [] []
-            7: MD_TEXTUAL@544..545
+            2: MD_TEXTUAL@510..544
+              0: MD_TEXTUAL_LITERAL@510..544 "This is an indented code block" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+            3: MD_TEXTUAL@544..545
               0: MD_TEXTUAL_LITERAL@544..545 "\n" [] []
           1: (empty)
   2: EOF@545..545 "" [] []

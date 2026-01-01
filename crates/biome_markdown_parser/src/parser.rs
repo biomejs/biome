@@ -11,10 +11,21 @@ use crate::syntax::inline::EmphasisContext;
 use crate::token_source::{MarkdownTokenSource, MarkdownTokenSourceCheckpoint};
 
 /// Options for configuring the markdown parser.
-// ... (omitted for brevity, but I'll include enough context)
-#[derive(Default, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct MarkdownParseOptions {
+    /// Maximum nesting depth for block quotes and lists.
+    ///
+    /// This limits recursion on pathological input to avoid stack overflow.
+    pub max_nesting_depth: usize,
     // Reserved for future GFM options
+}
+
+impl Default for MarkdownParseOptions {
+    fn default() -> Self {
+        Self {
+            max_nesting_depth: crate::syntax::parse_error::DEFAULT_MAX_NESTING_DEPTH,
+        }
+    }
 }
 
 /// Internal parser state for tracking nesting and context.
@@ -61,6 +72,8 @@ pub(crate) struct MarkdownParserState {
     pub(crate) quote_indents: Vec<QuoteIndent>,
     /// Virtual line start override for container prefixes (e.g., block quotes).
     pub(crate) virtual_line_start: Option<TextSize>,
+    /// Flag to unwind quote parsing when nesting exceeds the maximum depth.
+    pub(crate) quote_depth_exceeded: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -111,7 +124,6 @@ impl<'source> MarkdownParser<'source> {
     }
 
     /// Returns parser options. Reserved for GFM extensions.
-    #[expect(dead_code)]
     pub(crate) fn options(&self) -> &MarkdownParseOptions {
         &self.options
     }

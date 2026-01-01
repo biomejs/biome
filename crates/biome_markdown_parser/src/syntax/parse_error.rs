@@ -5,8 +5,8 @@ use biome_parser::Parser;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::TextRange;
 
-/// Maximum nesting depth for block quotes and lists.
-pub(crate) const MAX_NESTING_DEPTH: usize = 100;
+/// Default maximum nesting depth for block quotes and lists.
+pub(crate) const DEFAULT_MAX_NESTING_DEPTH: usize = 100;
 
 /// Unclosed emphasis (bold/italic).
 ///
@@ -134,9 +134,13 @@ pub(crate) fn unterminated_fenced_code(
 /// >>>>>>>>...>>>>  (100+ levels)
 /// ^^^^^^^^^^^^^^^^ nesting too deep
 /// ```
-pub(crate) fn quote_nesting_too_deep(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
+pub(crate) fn quote_nesting_too_deep(
+    p: &MarkdownParser,
+    range: TextRange,
+    max_nesting_depth: usize,
+) -> ParseDiagnostic {
     p.err_builder(
-        format!("Block quote nesting exceeds maximum depth of {MAX_NESTING_DEPTH}."),
+        format!("Block quote nesting exceeds maximum depth of {max_nesting_depth}."),
         range,
     )
     .with_detail(range, "nesting limit reached here")
@@ -149,11 +153,22 @@ pub(crate) fn quote_nesting_too_deep(p: &MarkdownParser, range: TextRange) -> Pa
 /// - - - - ... - (100+ levels)
 /// ^^^^^^^^^^^^^^ nesting too deep
 /// ```
-pub(crate) fn list_nesting_too_deep(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
+pub(crate) fn list_nesting_too_deep(
+    p: &MarkdownParser,
+    range: TextRange,
+    max_nesting_depth: usize,
+) -> ParseDiagnostic {
     p.err_builder(
-        format!("List nesting exceeds maximum depth of {MAX_NESTING_DEPTH}."),
+        format!("List nesting exceeds maximum depth of {max_nesting_depth}."),
         range,
     )
     .with_detail(range, "nesting limit reached here")
     .with_hint("Reduce nesting depth. Additional levels will be treated as content.")
+}
+
+/// Parser made no progress while parsing a block.
+pub(crate) fn parse_any_block_no_progress(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Parser made no progress while parsing a block.", range)
+        .with_detail(range, "stuck token skipped")
+        .with_hint("This is likely a parser bug; the token was skipped to recover.")
 }

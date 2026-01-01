@@ -39,7 +39,8 @@ use biome_parser::{
 };
 use biome_rowan::TextSize;
 use fenced_code_block::{
-    at_fenced_code_block, parse_fenced_code_block, parse_fenced_code_block_force,
+    at_fenced_code_block, info_string_has_backtick, parse_fenced_code_block,
+    parse_fenced_code_block_force,
 };
 use header::{at_header, parse_header};
 use html_block::{at_html_block, at_html_block_interrupt, parse_html_block};
@@ -245,14 +246,21 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         ParsedBlockKind::Paragraph
     };
 
-    if start == p.cur_range().start() && std::env::var("CMARK_HANG_DEBUG").is_ok() {
-        eprintln!(
-            "parse_any_block stuck at {:?} {:?} => {:?}",
-            p.cur(),
-            p.cur_text(),
-            kind
-        );
-        panic!("parse_any_block made no progress");
+    if start == p.cur_range().start() {
+        let range = p.cur_range();
+        if std::env::var("CMARK_HANG_DEBUG").is_ok() {
+            eprintln!(
+                "parse_any_block made no progress at {:?} {:?} => {:?}",
+                p.cur(),
+                p.cur_text(),
+                kind
+            );
+        }
+        p.error(parse_error::parse_any_block_no_progress(p, range));
+        if !p.at(T![EOF]) {
+            p.bump_any();
+        }
+        return ParsedBlockKind::Other;
     }
 
     kind
@@ -925,30 +933,22 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
     })
 }
 
-fn line_starts_with_fence(p: &MarkdownParser) -> bool {
+fn line_starts_with_fence(p: &mut MarkdownParser) -> bool {
     if !p.at_line_start() {
         return false;
     }
 
-    let source = p.source_after_current();
-    let mut indent = 0usize;
-    let mut offset = 0usize;
-    for (idx, ch) in source.char_indices() {
-        match ch {
-            ' ' => indent += 1,
-            '\t' => indent += 4 - (indent % 4),
-            _ => {
-                offset = idx;
-                break;
-            }
-        }
-        if indent > 3 {
+    p.lookahead(|p| {
+        if p.line_start_leading_indent() > 3 {
             return false;
         }
-    }
-
-    let rest = &source[offset..];
-    rest.starts_with("```") || rest.starts_with("~~~")
+        p.skip_line_indent(3);
+        let rest = p.source_after_current();
+        if rest.starts_with("```") {
+            return !info_string_has_backtick(p);
+        }
+        rest.starts_with("~~~")
+    })
 }
 
 fn consume_partial_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {

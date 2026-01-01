@@ -1,5 +1,6 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 131
 expression: snapshot
 ---
 ## Input
@@ -77,6 +78,10 @@ MdDocument {
                         },
                     ],
                 },
+            ],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
                 MdBullet {
                     bullet: STAR@36..37 "*" [] [],
                     content: MdBlockList [
@@ -112,6 +117,10 @@ MdDocument {
                         },
                     ],
                 },
+            ],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
                 MdBullet {
                     bullet: PLUS@73..74 "+" [] [],
                     content: MdBlockList [
@@ -157,8 +166,8 @@ MdDocument {
 0: MD_DOCUMENT@0..107
   0: (empty)
   1: MD_BLOCK_LIST@0..107
-    0: MD_BULLET_LIST_ITEM@0..107
-      0: MD_BULLET_LIST@0..107
+    0: MD_BULLET_LIST_ITEM@0..36
+      0: MD_BULLET_LIST@0..36
         0: MD_BULLET@0..11
           0: MINUS@0..1 "-" [] []
           1: MD_BLOCK_LIST@1..11
@@ -191,7 +200,9 @@ MdDocument {
               1: (empty)
             1: MD_NEWLINE@35..36
               0: NEWLINE@35..36 "\n" [] []
-        3: MD_BULLET@36..57
+    1: MD_BULLET_LIST_ITEM@36..73
+      0: MD_BULLET_LIST@36..73
+        0: MD_BULLET@36..57
           0: STAR@36..37 "*" [] []
           1: MD_BLOCK_LIST@37..57
             0: MD_PARAGRAPH@37..57
@@ -201,7 +212,7 @@ MdDocument {
                 1: MD_TEXTUAL@56..57
                   0: MD_TEXTUAL_LITERAL@56..57 "\n" [] []
               1: (empty)
-        4: MD_BULLET@57..73
+        1: MD_BULLET@57..73
           0: STAR@57..58 "*" [] []
           1: MD_BLOCK_LIST@58..73
             0: MD_PARAGRAPH@58..72
@@ -213,7 +224,9 @@ MdDocument {
               1: (empty)
             1: MD_NEWLINE@72..73
               0: NEWLINE@72..73 "\n" [] []
-        5: MD_BULLET@73..87
+    2: MD_BULLET_LIST_ITEM@73..107
+      0: MD_BULLET_LIST@73..107
+        0: MD_BULLET@73..87
           0: PLUS@73..74 "+" [] []
           1: MD_BLOCK_LIST@74..87
             0: MD_PARAGRAPH@74..87
@@ -223,7 +236,7 @@ MdDocument {
                 1: MD_TEXTUAL@86..87
                   0: MD_TEXTUAL_LITERAL@86..87 "\n" [] []
               1: (empty)
-        6: MD_BULLET@87..107
+        1: MD_BULLET@87..107
           0: PLUS@87..88 "+" [] []
           1: MD_BLOCK_LIST@88..107
             0: MD_PARAGRAPH@88..107

@@ -167,10 +167,10 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@160..161 "\n" [] [],
                 },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@161..162 "\n" [] [],
-                },
             ],
+        },
+        MdNewline {
+            value_token: NEWLINE@161..162 "\n" [] [],
         },
         MdHeader {
             before: MdHashList [
@@ -228,19 +228,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@240..241 "\n" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@241..242 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@242..243 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@243..244 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@244..245 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@245..246 "#" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@241..246 "#" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@246..267 " not heading due to 4" [] [],
@@ -255,19 +243,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@275..276 "\n" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@276..277 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@277..278 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@278..279 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@279..280 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@280..281 "-" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@276..281 "-" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@281..299 " not list due to 4" [] [],
@@ -282,19 +258,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@307..308 "\n" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@308..309 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@309..310 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@310..311 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@311..312 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@312..313 ">" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@308..313 ">" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@313..332 " not quote due to 4" [] [],
@@ -371,55 +335,19 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@442..443 "\n" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@443..444 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@444..445 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@445..446 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@446..447 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@447..450 "```" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@443..450 "```" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@450..451 "\n" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@451..452 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@452..453 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@453..454 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@454..455 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@455..471 "not a code fence" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@451..471 "not a code fence" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@471..472 "\n" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@472..473 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@473..474 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@474..475 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@475..476 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@476..479 "```" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@472..479 "```" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@479..480 "\n" [] [],
@@ -498,8 +426,8 @@ MdDocument {
       1: (empty)
     7: MD_NEWLINE@101..102
       0: NEWLINE@101..102 "\n" [] []
-    8: MD_INDENT_CODE_BLOCK@102..162
-      0: MD_INLINE_ITEM_LIST@102..162
+    8: MD_INDENT_CODE_BLOCK@102..161
+      0: MD_INLINE_ITEM_LIST@102..161
         0: MD_TEXTUAL@102..107
           0: MD_TEXTUAL_LITERAL@102..107 "*" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
         1: MD_TEXTUAL@107..116
@@ -524,9 +452,9 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@156..160 " too" [] []
         11: MD_TEXTUAL@160..161
           0: MD_TEXTUAL_LITERAL@160..161 "\n" [] []
-        12: MD_TEXTUAL@161..162
-          0: MD_TEXTUAL_LITERAL@161..162 "\n" [] []
-    9: MD_HEADER@162..195
+    9: MD_NEWLINE@161..162
+      0: NEWLINE@161..162 "\n" [] []
+    10: MD_HEADER@162..195
       0: MD_HASH_LIST@162..163
         0: MD_HASH@162..163
           0: HASH@162..163 "#" [] []
@@ -536,11 +464,11 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@163..195 "\tTab after hash is valid heading" [] []
         1: (empty)
       2: MD_HASH_LIST@195..195
-    10: MD_NEWLINE@195..196
+    11: MD_NEWLINE@195..196
       0: NEWLINE@195..196 "\n" [] []
-    11: MD_NEWLINE@196..197
+    12: MD_NEWLINE@196..197
       0: NEWLINE@196..197 "\n" [] []
-    12: MD_HEADER@197..224
+    13: MD_HEADER@197..224
       0: MD_HASH_LIST@197..199
         0: MD_HASH@197..198
           0: HASH@197..198 "#" [] []
@@ -552,85 +480,61 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@199..224 "\tMultiple hashes with tab" [] []
         1: (empty)
       2: MD_HASH_LIST@224..224
-    13: MD_NEWLINE@224..225
+    14: MD_NEWLINE@224..225
       0: NEWLINE@224..225 "\n" [] []
-    14: MD_NEWLINE@225..226
+    15: MD_NEWLINE@225..226
       0: NEWLINE@225..226 "\n" [] []
-    15: MD_PARAGRAPH@226..364
+    16: MD_PARAGRAPH@226..364
       0: MD_INLINE_ITEM_LIST@226..364
         0: MD_TEXTUAL@226..240
           0: MD_TEXTUAL_LITERAL@226..240 "Paragraph here" [] []
         1: MD_TEXTUAL@240..241
           0: MD_TEXTUAL_LITERAL@240..241 "\n" [] []
-        2: MD_TEXTUAL@241..242
-          0: MD_TEXTUAL_LITERAL@241..242 " " [] []
-        3: MD_TEXTUAL@242..243
-          0: MD_TEXTUAL_LITERAL@242..243 " " [] []
-        4: MD_TEXTUAL@243..244
-          0: MD_TEXTUAL_LITERAL@243..244 " " [] []
-        5: MD_TEXTUAL@244..245
-          0: MD_TEXTUAL_LITERAL@244..245 " " [] []
-        6: MD_TEXTUAL@245..246
-          0: MD_TEXTUAL_LITERAL@245..246 "#" [] []
-        7: MD_TEXTUAL@246..267
+        2: MD_TEXTUAL@241..246
+          0: MD_TEXTUAL_LITERAL@241..246 "#" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+        3: MD_TEXTUAL@246..267
           0: MD_TEXTUAL_LITERAL@246..267 " not heading due to 4" [] []
-        8: MD_TEXTUAL@267..268
+        4: MD_TEXTUAL@267..268
           0: MD_TEXTUAL_LITERAL@267..268 "+" [] []
-        9: MD_TEXTUAL@268..275
+        5: MD_TEXTUAL@268..275
           0: MD_TEXTUAL_LITERAL@268..275 " spaces" [] []
-        10: MD_TEXTUAL@275..276
+        6: MD_TEXTUAL@275..276
           0: MD_TEXTUAL_LITERAL@275..276 "\n" [] []
-        11: MD_TEXTUAL@276..277
-          0: MD_TEXTUAL_LITERAL@276..277 " " [] []
-        12: MD_TEXTUAL@277..278
-          0: MD_TEXTUAL_LITERAL@277..278 " " [] []
-        13: MD_TEXTUAL@278..279
-          0: MD_TEXTUAL_LITERAL@278..279 " " [] []
-        14: MD_TEXTUAL@279..280
-          0: MD_TEXTUAL_LITERAL@279..280 " " [] []
-        15: MD_TEXTUAL@280..281
-          0: MD_TEXTUAL_LITERAL@280..281 "-" [] []
-        16: MD_TEXTUAL@281..299
+        7: MD_TEXTUAL@276..281
+          0: MD_TEXTUAL_LITERAL@276..281 "-" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+        8: MD_TEXTUAL@281..299
           0: MD_TEXTUAL_LITERAL@281..299 " not list due to 4" [] []
-        17: MD_TEXTUAL@299..300
+        9: MD_TEXTUAL@299..300
           0: MD_TEXTUAL_LITERAL@299..300 "+" [] []
-        18: MD_TEXTUAL@300..307
+        10: MD_TEXTUAL@300..307
           0: MD_TEXTUAL_LITERAL@300..307 " spaces" [] []
-        19: MD_TEXTUAL@307..308
+        11: MD_TEXTUAL@307..308
           0: MD_TEXTUAL_LITERAL@307..308 "\n" [] []
-        20: MD_TEXTUAL@308..309
-          0: MD_TEXTUAL_LITERAL@308..309 " " [] []
-        21: MD_TEXTUAL@309..310
-          0: MD_TEXTUAL_LITERAL@309..310 " " [] []
-        22: MD_TEXTUAL@310..311
-          0: MD_TEXTUAL_LITERAL@310..311 " " [] []
-        23: MD_TEXTUAL@311..312
-          0: MD_TEXTUAL_LITERAL@311..312 " " [] []
-        24: MD_TEXTUAL@312..313
-          0: MD_TEXTUAL_LITERAL@312..313 ">" [] []
-        25: MD_TEXTUAL@313..332
+        12: MD_TEXTUAL@308..313
+          0: MD_TEXTUAL_LITERAL@308..313 ">" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+        13: MD_TEXTUAL@313..332
           0: MD_TEXTUAL_LITERAL@313..332 " not quote due to 4" [] []
-        26: MD_TEXTUAL@332..333
+        14: MD_TEXTUAL@332..333
           0: MD_TEXTUAL_LITERAL@332..333 "+" [] []
-        27: MD_TEXTUAL@333..340
+        15: MD_TEXTUAL@333..340
           0: MD_TEXTUAL_LITERAL@333..340 " spaces" [] []
-        28: MD_TEXTUAL@340..341
+        16: MD_TEXTUAL@340..341
           0: MD_TEXTUAL_LITERAL@340..341 "\n" [] []
-        29: MD_TEXTUAL@341..363
+        17: MD_TEXTUAL@341..363
           0: MD_TEXTUAL_LITERAL@341..363 "continues as paragraph" [] []
-        30: MD_TEXTUAL@363..364
+        18: MD_TEXTUAL@363..364
           0: MD_TEXTUAL_LITERAL@363..364 "\n" [] []
       1: (empty)
-    16: MD_NEWLINE@364..365
+    17: MD_NEWLINE@364..365
       0: NEWLINE@364..365 "\n" [] []
-    17: MD_PARAGRAPH@365..378
+    18: MD_PARAGRAPH@365..378
       0: MD_INLINE_ITEM_LIST@365..378
         0: MD_TEXTUAL@365..377
           0: MD_TEXTUAL_LITERAL@365..377 "Another para" [] []
         1: MD_TEXTUAL@377..378
           0: MD_TEXTUAL_LITERAL@377..378 "\n" [] []
       1: (empty)
-    18: MD_HEADER@378..416
+    19: MD_HEADER@378..416
       0: MD_HASH_LIST@378..382
         0: MD_HASH@378..382
           0: HASH@378..382 "#" [Skipped(" "), Skipped(" "), Skipped(" ")] []
@@ -646,55 +550,31 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@415..416 ")" [] []
         1: (empty)
       2: MD_HASH_LIST@416..416
-    19: MD_NEWLINE@416..417
+    20: MD_NEWLINE@416..417
       0: NEWLINE@416..417 "\n" [] []
-    20: MD_NEWLINE@417..418
+    21: MD_NEWLINE@417..418
       0: NEWLINE@417..418 "\n" [] []
-    21: MD_PARAGRAPH@418..505
+    22: MD_PARAGRAPH@418..505
       0: MD_INLINE_ITEM_LIST@418..505
         0: MD_TEXTUAL@418..442
           0: MD_TEXTUAL_LITERAL@418..442 "Para with indented fence" [] []
         1: MD_TEXTUAL@442..443
           0: MD_TEXTUAL_LITERAL@442..443 "\n" [] []
-        2: MD_TEXTUAL@443..444
-          0: MD_TEXTUAL_LITERAL@443..444 " " [] []
-        3: MD_TEXTUAL@444..445
-          0: MD_TEXTUAL_LITERAL@444..445 " " [] []
-        4: MD_TEXTUAL@445..446
-          0: MD_TEXTUAL_LITERAL@445..446 " " [] []
-        5: MD_TEXTUAL@446..447
-          0: MD_TEXTUAL_LITERAL@446..447 " " [] []
-        6: MD_TEXTUAL@447..450
-          0: MD_TEXTUAL_LITERAL@447..450 "```" [] []
-        7: MD_TEXTUAL@450..451
+        2: MD_TEXTUAL@443..450
+          0: MD_TEXTUAL_LITERAL@443..450 "```" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+        3: MD_TEXTUAL@450..451
           0: MD_TEXTUAL_LITERAL@450..451 "\n" [] []
-        8: MD_TEXTUAL@451..452
-          0: MD_TEXTUAL_LITERAL@451..452 " " [] []
-        9: MD_TEXTUAL@452..453
-          0: MD_TEXTUAL_LITERAL@452..453 " " [] []
-        10: MD_TEXTUAL@453..454
-          0: MD_TEXTUAL_LITERAL@453..454 " " [] []
-        11: MD_TEXTUAL@454..455
-          0: MD_TEXTUAL_LITERAL@454..455 " " [] []
-        12: MD_TEXTUAL@455..471
-          0: MD_TEXTUAL_LITERAL@455..471 "not a code fence" [] []
-        13: MD_TEXTUAL@471..472
+        4: MD_TEXTUAL@451..471
+          0: MD_TEXTUAL_LITERAL@451..471 "not a code fence" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+        5: MD_TEXTUAL@471..472
           0: MD_TEXTUAL_LITERAL@471..472 "\n" [] []
-        14: MD_TEXTUAL@472..473
-          0: MD_TEXTUAL_LITERAL@472..473 " " [] []
-        15: MD_TEXTUAL@473..474
-          0: MD_TEXTUAL_LITERAL@473..474 " " [] []
-        16: MD_TEXTUAL@474..475
-          0: MD_TEXTUAL_LITERAL@474..475 " " [] []
-        17: MD_TEXTUAL@475..476
-          0: MD_TEXTUAL_LITERAL@475..476 " " [] []
-        18: MD_TEXTUAL@476..479
-          0: MD_TEXTUAL_LITERAL@476..479 "```" [] []
-        19: MD_TEXTUAL@479..480
+        6: MD_TEXTUAL@472..479
+          0: MD_TEXTUAL_LITERAL@472..479 "```" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+        7: MD_TEXTUAL@479..480
           0: MD_TEXTUAL_LITERAL@479..480 "\n" [] []
-        20: MD_TEXTUAL@480..504
+        8: MD_TEXTUAL@480..504
           0: MD_TEXTUAL_LITERAL@480..504 "still the same paragraph" [] []
-        21: MD_TEXTUAL@504..505
+        9: MD_TEXTUAL@504..505
           0: MD_TEXTUAL_LITERAL@504..505 "\n" [] []
       1: (empty)
   2: EOF@505..505 "" [] []

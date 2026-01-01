@@ -13,8 +13,9 @@
 //! ## Depth Limits
 //!
 //! To prevent stack overflow from pathological input (e.g., hundreds of `>`),
-//! nesting depth is limited to 100 levels. Deeper nesting emits a diagnostic
-//! and treats additional `>` as content.
+//! nesting depth is limited by `MarkdownParseOptions::max_nesting_depth`
+//! (default: 100). Deeper nesting emits a diagnostic and treats additional
+//! `>` as content.
 //!
 //! ## Lazy Continuation (§5.1)
 //!
@@ -35,7 +36,7 @@ use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 
-use super::parse_error::{MAX_NESTING_DEPTH, quote_nesting_too_deep};
+use super::parse_error::quote_nesting_too_deep;
 use crate::MarkdownParser;
 
 /// Check if we're at the start of a block quote (`>`).
@@ -66,15 +67,25 @@ pub(crate) fn at_quote(p: &mut MarkdownParser) -> bool {
 /// Multi-line quotes: consecutive `>` lines continue the same quote's content.
 /// Nested quotes: `>>` creates a nested quote inside the outer quote.
 ///
-/// Nesting is limited to `MAX_NESTING_DEPTH` to prevent stack overflow.
+/// Nesting is limited to `MarkdownParseOptions::max_nesting_depth` to prevent stack overflow.
 pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
     if !at_quote(p) {
         return Absent;
     }
 
-    if p.state().block_quote_depth >= MAX_NESTING_DEPTH {
+    let max_nesting_depth = p.options().max_nesting_depth;
+    if p.state().block_quote_depth >= max_nesting_depth {
         let range = p.cur_range();
-        p.error(quote_nesting_too_deep(p, range));
+        p.error(quote_nesting_too_deep(p, range, max_nesting_depth));
+        p.state_mut().quote_depth_exceeded = true;
+        p.skip_line_indent(3);
+        if p.at(T![>]) {
+            p.parse_as_skipped_trivia_tokens(|p| p.bump(T![>]));
+        } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
+            p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![>]));
+        }
+        let has_indented_code = at_quote_indented_code_start(p);
+        skip_optional_marker_space(p, has_indented_code);
         return Absent;
     }
 
@@ -111,6 +122,11 @@ fn parse_quote_block_list(p: &mut MarkdownParser) {
     let mut last_block_was_paragraph = false;
 
     loop {
+        if p.state().quote_depth_exceeded {
+            p.state_mut().quote_depth_exceeded = false;
+            break;
+        }
+
         if p.at(T![EOF]) {
             break;
         }
