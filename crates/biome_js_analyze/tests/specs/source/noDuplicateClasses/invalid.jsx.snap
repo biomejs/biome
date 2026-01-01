@@ -28,7 +28,7 @@ expression: invalid.jsx
 <div className={`flex flex ${condition}`} />;
 <div className={`${prefix} p-4 p-4 ${suffix}`} />;
 
-// Invalid: duplicates with newlines (should collapse whitespace)
+// Invalid: duplicates with newlines (preserves original whitespace)
 <div class="foo
 bar
 foo" />;
@@ -249,7 +249,7 @@ invalid.jsx:23:27 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━�
   > 23 │ <div className={`${prefix} p-4 p-4 ${suffix}`} />;
        │                           ^^^^^^^^^
     24 │ 
-    25 │ // Invalid: duplicates with newlines (should collapse whitespace)
+    25 │ // Invalid: duplicates with newlines (preserves original whitespace)
   
   i The class p-4 appears multiple times.
   
@@ -267,7 +267,7 @@ invalid.jsx:26:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━�
 
   i This class string contains a duplicate class.
   
-    25 │ // Invalid: duplicates with newlines (should collapse whitespace)
+    25 │ // Invalid: duplicates with newlines (preserves original whitespace)
   > 26 │ <div class="foo
        │            ^^^^
   > 27 │ bar
@@ -282,14 +282,13 @@ invalid.jsx:26:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Safe fix: Remove the duplicate classes.
   
-    24 24 │   
-    25 25 │   // Invalid: duplicates with newlines (should collapse whitespace)
-    26    │ - <div·class="foo
+    25 25 │   // Invalid: duplicates with newlines (preserves original whitespace)
+    26 26 │   <div class="foo
     27    │ - bar
     28    │ - foo"·/>;
-       26 │ + <div·class="foo·bar"·/>;
-    29 27 │   
-    30 28 │   // Invalid: duplicates with tabs
+       27 │ + bar"·/>;
+    29 28 │   
+    30 29 │   // Invalid: duplicates with tabs
   
 
 ```
@@ -310,11 +309,7 @@ invalid.jsx:31:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Safe fix: Remove the duplicate classes.
   
-    29 29 │   
-    30 30 │   // Invalid: duplicates with tabs
-    31    │ - <div·class="flex→ p-4→ flex"·/>;
-       31 │ + <div·class="flex·p-4"·/>;
-    32 32 │   
-  
+    31 │ <div·class="flex→ p-4→ flex"·/>;
+       │                      ------     
 
 ```

@@ -12,7 +12,6 @@ use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
-use biome_js_syntax::JsTemplateElement;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
 use rustc_hash::FxHashSet;
@@ -39,8 +38,6 @@ declare_source_rule! {
     ///
     /// Uses the same options as [`useSortedClasses`](https://biomejs.dev/linter/rules/use-sorted-classes/)
     /// to control which attributes and functions are checked.
-    ///
-    /// Note: This action collapses all whitespace (including newlines) into single spaces.
     ///
     pub NoDuplicateClasses {
         version: "next",
@@ -78,18 +75,61 @@ impl Rule for NoDuplicateClasses {
         let value = node.value()?;
         let value_str = value.text();
 
-        // Split by whitespace and track duplicates
+        // Parse the class string into tokens, preserving whitespace positions.
+        // Each token tracks: where its preceding whitespace starts, where the class ends,
+        // and the class name itself.
+        struct Token<'a> {
+            prefix_start: usize,
+            text_end: usize,
+            class: &'a str,
+        }
+
+        let mut tokens: Vec<Token<'_>> = Vec::new();
+        let mut pos = 0;
+
+        while pos < value_str.len() {
+            let prefix_start = pos;
+
+            // Skip whitespace
+            for c in value_str[pos..].chars() {
+                if !c.is_whitespace() {
+                    break;
+                }
+                pos += c.len_utf8();
+            }
+
+            if pos >= value_str.len() {
+                break;
+            }
+
+            let class_start = pos;
+
+            // Read class name
+            for c in value_str[pos..].chars() {
+                if c.is_whitespace() {
+                    break;
+                }
+                pos += c.len_utf8();
+            }
+
+            tokens.push(Token {
+                prefix_start,
+                text_end: pos,
+                class: &value_str[class_start..pos],
+            });
+        }
+
+        // Identify duplicates and track which tokens to keep
         let mut seen: FxHashSet<&str> = FxHashSet::default();
         let mut duplicate_set: FxHashSet<&str> = FxHashSet::default();
-        let mut deduplicated_parts: Vec<&str> = Vec::new();
+        let mut kept_indices: Vec<usize> = Vec::new();
 
-        for class in value_str.split_whitespace() {
-            if seen.contains(class) {
-                // Found a duplicate - track it (HashSet ensures uniqueness)
-                duplicate_set.insert(class);
+        for (idx, token) in tokens.iter().enumerate() {
+            if seen.contains(token.class) {
+                duplicate_set.insert(token.class);
             } else {
-                seen.insert(class);
-                deduplicated_parts.push(class);
+                seen.insert(token.class);
+                kept_indices.push(idx);
             }
         }
 
@@ -97,11 +137,19 @@ impl Rule for NoDuplicateClasses {
             return None;
         }
 
-        let deduplicated = deduplicated_parts.join(" ");
-        // Sort duplicate names alphabetically for deterministic diagnostic messages.
-        // Note: This does NOT affect the fix output - class order is always preserved.
-        let mut duplicates: Vec<Box<str>> = duplicate_set.into_iter().map(Into::into).collect();
-        duplicates.sort();
+        // Reconstruct the string, preserving original whitespace around kept classes
+        let mut deduplicated = String::new();
+        for &idx in &kept_indices {
+            let token = &tokens[idx];
+            deduplicated.push_str(&value_str[token.prefix_start..token.text_end]);
+        }
+
+        // Preserve trailing whitespace from the original string
+        if let Some(last) = tokens.last() {
+            deduplicated.push_str(&value_str[last.text_end..]);
+        }
+
+        let duplicates: Vec<Box<str>> = duplicate_set.into_iter().map(Into::into).collect();
 
         Some(DuplicateClassesState {
             deduplicated: deduplicated.into(),
@@ -190,32 +238,9 @@ impl Rule for NoDuplicateClasses {
                 mutation.replace_node(jsx_string_node.clone(), replacement);
             }
             AnyClassStringLike::JsTemplateChunkElement(chunk) => {
-                // Preserve leading/trailing spaces for template expression boundaries
-                let token = chunk.template_chunk_token().ok()?;
-                let original = token.text_trimmed();
-                let syntax = chunk.syntax();
-
-                // Check if preceded by a template expression (e.g., `${var} classes`)
-                let has_leading_var = syntax
-                    .prev_sibling()
-                    .is_some_and(|s| JsTemplateElement::can_cast(s.kind()));
-                // Check if followed by a template expression (e.g., `classes ${var}`)
-                let has_trailing_var = syntax
-                    .next_sibling()
-                    .is_some_and(|s| JsTemplateElement::can_cast(s.kind()));
-
-                let mut result = deduplicated.to_string();
-
-                // Preserve leading space if there's a preceding variable and original had leading space
-                if has_leading_var && original.starts_with(' ') && !result.starts_with(' ') {
-                    result.insert(0, ' ');
-                }
-                // Preserve trailing space if there's a following variable and original had trailing space
-                if has_trailing_var && original.ends_with(' ') && !result.ends_with(' ') {
-                    result.push(' ');
-                }
-
-                let replacement = js_template_chunk_element(js_template_chunk(&result));
+                // Whitespace is preserved by the deduplication logic, including
+                // leading/trailing spaces needed for template expression boundaries
+                let replacement = js_template_chunk_element(js_template_chunk(deduplicated));
                 mutation.replace_node(chunk.clone(), replacement);
             }
         };

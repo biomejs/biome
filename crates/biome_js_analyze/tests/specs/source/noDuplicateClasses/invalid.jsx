@@ -22,7 +22,7 @@
 <div className={`flex flex ${condition}`} />;
 <div className={`${prefix} p-4 p-4 ${suffix}`} />;
 
-// Invalid: duplicates with newlines (should collapse whitespace)
+// Invalid: duplicates with newlines (preserves original whitespace)
 <div class="foo
 bar
 foo" />;

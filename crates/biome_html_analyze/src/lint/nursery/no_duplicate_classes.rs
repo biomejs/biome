@@ -17,10 +17,6 @@ declare_lint_rule! {
     /// Detects and removes duplicate CSS classes in HTML `class` attributes.
     ///
     /// Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
-    /// This rule helps keep your class strings clean by detecting and removing duplicates.
-    ///
-    /// Note that this rule collapses all whitespace (including newlines) into single spaces,
-    /// consistent with [`useSortedClasses`](https://biomejs.dev/linter/rules/use-sorted-classes/).
     ///
     /// ## Examples
     ///
@@ -60,7 +56,7 @@ pub struct DuplicateClassesState {
     html_string: HtmlString,
     /// The deduplicated class string.
     deduplicated: Box<str>,
-    /// The list of duplicate class names found (sorted for deterministic output).
+    /// The list of duplicate class names found.
     duplicates: Box<[Box<str>]>,
     /// Whether the original string used single quotes.
     is_single_quote: bool,
@@ -92,18 +88,63 @@ impl Rule for NoDuplicateClasses {
         // Check if single-quoted
         let is_single_quote = value_text.starts_with('\'');
 
-        // Get the inner string (without quotes) and find duplicates
+        // Get the inner string (without quotes) and parse into tokens,
+        // preserving whitespace positions for minimal-change fixes.
         let inner_text = inner_string_text(&value_token);
+        let value_str = inner_text.text();
+
+        struct Token<'a> {
+            prefix_start: usize,
+            text_end: usize,
+            class: &'a str,
+        }
+
+        let mut tokens: Vec<Token<'_>> = Vec::new();
+        let mut pos = 0;
+
+        while pos < value_str.len() {
+            let prefix_start = pos;
+
+            // Skip whitespace
+            for c in value_str[pos..].chars() {
+                if !c.is_whitespace() {
+                    break;
+                }
+                pos += c.len_utf8();
+            }
+
+            if pos >= value_str.len() {
+                break;
+            }
+
+            let class_start = pos;
+
+            // Read class name
+            for c in value_str[pos..].chars() {
+                if c.is_whitespace() {
+                    break;
+                }
+                pos += c.len_utf8();
+            }
+
+            tokens.push(Token {
+                prefix_start,
+                text_end: pos,
+                class: &value_str[class_start..pos],
+            });
+        }
+
+        // Identify duplicates and track which tokens to keep
         let mut seen: FxHashSet<&str> = FxHashSet::default();
         let mut duplicate_set: FxHashSet<&str> = FxHashSet::default();
-        let mut deduplicated_parts: Vec<&str> = Vec::new();
+        let mut kept_indices: Vec<usize> = Vec::new();
 
-        for class in inner_text.text().split_whitespace() {
-            if seen.contains(class) {
-                duplicate_set.insert(class);
+        for (idx, token) in tokens.iter().enumerate() {
+            if seen.contains(token.class) {
+                duplicate_set.insert(token.class);
             } else {
-                seen.insert(class);
-                deduplicated_parts.push(class);
+                seen.insert(token.class);
+                kept_indices.push(idx);
             }
         }
 
@@ -111,11 +152,19 @@ impl Rule for NoDuplicateClasses {
             return None;
         }
 
-        let deduplicated = deduplicated_parts.join(" ");
-        // Sort duplicate names alphabetically for deterministic diagnostic messages.
-        // Note: This does NOT affect the fix output - class order is always preserved.
-        let mut duplicates: Vec<Box<str>> = duplicate_set.into_iter().map(Into::into).collect();
-        duplicates.sort();
+        // Reconstruct the string, preserving original whitespace around kept classes
+        let mut deduplicated = String::new();
+        for &idx in &kept_indices {
+            let token = &tokens[idx];
+            deduplicated.push_str(&value_str[token.prefix_start..token.text_end]);
+        }
+
+        // Preserve trailing whitespace from the original string
+        if let Some(last) = tokens.last() {
+            deduplicated.push_str(&value_str[last.text_end..]);
+        }
+
+        let duplicates: Vec<Box<str>> = duplicate_set.into_iter().map(Into::into).collect();
 
         Some(DuplicateClassesState {
             html_string,
