@@ -5543,6 +5543,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useInputName": {
+					"description": "Require mutation argument to be always called “input” and input type to be called Mutation name + “Input”.\nSee <https://biomejs.dev/linter/rules/use-input-name>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseInputNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useMaxParams": {
 					"description": "Enforce a maximum number of parameters in function definitions.\nSee <https://biomejs.dev/linter/rules/use-max-params>",
 					"anyOf": [
@@ -9360,6 +9367,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseInputNameOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseInputNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseIsArrayOptions": {
 			"type": "object",
 			"properties": {
@@ -12373,6 +12389,13 @@
 			]
 		},
 		"UseIndexOfOptions": { "type": "object", "additionalProperties": false },
+		"UseInputNameConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseInputNameOptions" }
+			]
+		},
+		"UseInputNameOptions": { "type": "object", "additionalProperties": false },
 		"UseIsArrayConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
