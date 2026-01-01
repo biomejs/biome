@@ -192,8 +192,8 @@ impl Rule for NoDuplicateClasses {
             let duplicates_list = state
                 .duplicates
                 .iter()
-                .map(|s| format!("{}", s))
-                .collect::<Vec<_>>()
+                .map(|s| s.as_ref())
+                .collect::<Vec<&str>>()
                 .join(", ");
 
             RuleDiagnostic::new(
