@@ -118,11 +118,23 @@ fn is_autofocus_attribute(node: &HtmlAttribute) -> bool {
 }
 
 /// Check if the element is inside an allowed context (dialog or popover)
+///
+/// Note: We skip the first element (the one containing the autofocus attribute)
+/// because we only want to check if it's *inside* a dialog/popover, not if
+/// it *is* the dialog/popover itself.
 fn is_inside_allowed_context(attr: &HtmlAttribute) -> bool {
+    let mut skip_first_element = true;
+
     // Walk up the ancestors to find if we're inside a dialog or popover
     for ancestor in attr.syntax().ancestors() {
         // Check for HtmlElement (has opening/closing tags)
         if let Some(element) = HtmlElement::cast_ref(&ancestor) {
+            // Skip the first element (the one containing the autofocus attribute)
+            if skip_first_element {
+                skip_first_element = false;
+                continue;
+            }
+
             // Check if element is a dialog
             if let Ok(opening) = element.opening_element() {
                 if let Ok(name) = opening.name() {
@@ -139,8 +151,13 @@ fn is_inside_allowed_context(attr: &HtmlAttribute) -> bool {
             }
         }
 
-        // Check for HtmlSelfClosingElement
+        // Check for HtmlSelfClosingElement (skip if it's the first element)
         if let Some(element) = HtmlSelfClosingElement::cast_ref(&ancestor) {
+            if skip_first_element {
+                skip_first_element = false;
+                continue;
+            }
+
             if let Ok(name) = element.name() {
                 if let Ok(token) = name.value_token() {
                     if token.text_trimmed().eq_ignore_ascii_case("dialog") {
