@@ -36,7 +36,7 @@ jobs:
         with:
           cache-target: release
           cache-base: main
-          bins: wasm-bindgen-cli@0.2.105, wasm-opt
+          bins: wasm-bindgen-cli@0.2.106, wasm-opt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build main binary
