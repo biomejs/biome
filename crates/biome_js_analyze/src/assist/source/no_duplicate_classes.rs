@@ -1,9 +1,13 @@
+use std::borrow::Cow;
+
 use crate::JsRuleAction;
 use crate::lint::nursery::use_sorted_classes::any_class_string_like::AnyClassStringLike;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
+    declare_source_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::{Applicability, category};
 use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
@@ -13,43 +17,23 @@ use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
 use rustc_hash::FxHashSet;
 
-declare_lint_rule! {
-    /// Disallow duplicate CSS classes.
+declare_source_rule! {
+    /// Remove duplicate CSS classes.
     ///
     /// Detects and removes duplicate CSS classes in JSX `class` and `className` attributes,
     /// as well as in utility function calls like `clsx`, `cn`, `cva`, etc.
     ///
     /// Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
-    /// This rule helps keep your class strings clean by detecting and auto-fixing duplicates.
+    /// This action helps keep your class strings clean by detecting and auto-fixing duplicates.
     ///
     /// ## Examples
     ///
-    /// ### Invalid
-    ///
-    /// ```jsx,expect_diagnostic
+    /// ```jsx,expect_diff
     /// <div class="flex flex" />;
     /// ```
     ///
-    /// ```jsx,expect_diagnostic
+    /// ```jsx,expect_diff
     /// <div class="p-4 text-red-500 p-4 bg-white" />;
-    /// ```
-    ///
-    /// ```jsx,expect_diagnostic
-    /// <div className="hover:bg-blue-500 hover:bg-blue-500" />;
-    /// ```
-    ///
-    /// ### Valid
-    ///
-    /// ```jsx
-    /// <div class="flex p-4" />;
-    /// ```
-    ///
-    /// ```jsx
-    /// <div class="p-4 text-red-500 bg-white" />;
-    /// ```
-    ///
-    /// ```jsx
-    /// <div className="hover:bg-blue-500 focus:bg-blue-500" />;
     /// ```
     ///
     /// ## Options
@@ -57,23 +41,14 @@ declare_lint_rule! {
     /// Use the same options as [`useSortedClasses`](/linter/rules/use-sorted-classes) to control
     /// which attributes and functions are checked.
     ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "attributes": ["classList"],
-    ///         "functions": ["clsx", "cva", "tw"]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// Note that this rule collapses all whitespace (including newlines) into single spaces,
+    /// Note that this action collapses all whitespace (including newlines) into single spaces,
     /// consistent with [`useSortedClasses`](https://biomejs.dev/linter/rules/use-sorted-classes/).
     ///
     pub NoDuplicateClasses {
         version: "next",
         name: "noDuplicateClasses",
         language: "jsx",
-        sources: &[RuleSource::EslintBetterTailwindcss("no-duplicate-classes").same()],
+        sources: &[RuleSource::EslintBetterTailwindcss("no-duplicate-classes").inspired()],
         recommended: false,
         fix_kind: FixKind::Safe,
     }
@@ -141,7 +116,7 @@ impl Rule for NoDuplicateClasses {
 
         let diagnostic = if state.duplicates.len() == 1 {
             RuleDiagnostic::new(
-                rule_category!(),
+                category!("assist/source/noDuplicateClasses"),
                 node.range(),
                 markup! {
                     "This class string contains a duplicate class."
@@ -159,7 +134,7 @@ impl Rule for NoDuplicateClasses {
                 .join(", ");
 
             RuleDiagnostic::new(
-                rule_category!(),
+                category!("assist/source/noDuplicateClasses"),
                 node.range(),
                 markup! {
                     "This class string contains duplicate classes."
@@ -247,9 +222,9 @@ impl Rule for NoDuplicateClasses {
             }
         };
 
-        Some(JsRuleAction::new(
-            ctx.metadata().action_category(ctx.category(), ctx.group()),
-            ctx.metadata().applicability(),
+        Some(RuleAction::new(
+            rule_action_category!(),
+            Applicability::Always,
             markup! {
                 "Remove the duplicate classes."
             }

@@ -40,7 +40,7 @@ foo" />;
 
 # Diagnostics
 ```
-invalid.jsx:2:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This class string contains a duplicate class.
   
@@ -54,8 +54,6 @@ invalid.jsx:2:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     2 │ <div·class="flex·flex"·/>;
@@ -64,7 +62,7 @@ invalid.jsx:2:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.jsx:3:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This class string contains a duplicate class.
   
@@ -79,8 +77,6 @@ invalid.jsx:3:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     3 │ <div·class="p-4·text-red-500·p-4·bg-white"·/>;
@@ -89,7 +85,7 @@ invalid.jsx:3:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.jsx:4:16 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:16 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This class string contains a duplicate class.
   
@@ -104,8 +100,6 @@ invalid.jsx:4:16 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     4 │ <div·className="hover:bg-blue-500·hover:bg-blue-500"·/>;
@@ -114,7 +108,7 @@ invalid.jsx:4:16 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.jsx:7:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This class string contains duplicate classes.
   
@@ -128,8 +122,6 @@ invalid.jsx:7:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     7 │ <div·class="flex·p-4·flex·m-2·p-4"·/>;
@@ -138,7 +130,7 @@ invalid.jsx:7:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.jsx:10:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:10:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This class string contains a duplicate class.
   
@@ -152,8 +144,6 @@ invalid.jsx:10:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     10 │ <div·class="hover:focus:m-2·foo·hover:focus:m-2"·/>;
@@ -162,7 +152,7 @@ invalid.jsx:10:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.jsx:13:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:13:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This class string contains a duplicate class.
   
@@ -176,8 +166,6 @@ invalid.jsx:13:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     13 │ <div·class="text-lg·text-center·text-lg·font-bold"·/>;
@@ -186,7 +174,7 @@ invalid.jsx:13:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.jsx:16:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:16:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This class string contains a duplicate class.
   
@@ -200,8 +188,6 @@ invalid.jsx:16:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     16 │ <div·class="w-[100px]·p-4·w-[100px]"·/>;
@@ -210,7 +196,7 @@ invalid.jsx:16:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.jsx:19:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:19:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This class string contains a duplicate class.
   
@@ -224,8 +210,6 @@ invalid.jsx:19:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     19 │ <div·class='mt-4·mt-4'·/>;
@@ -234,7 +218,7 @@ invalid.jsx:19:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.jsx:22:18 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:22:18 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This class string contains a duplicate class.
   
@@ -248,8 +232,6 @@ invalid.jsx:22:18 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     22 │ <div·className={`flex·flex·${condition}`}·/>;
@@ -258,7 +240,7 @@ invalid.jsx:22:18 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.jsx:23:27 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:27 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This class string contains a duplicate class.
   
@@ -273,8 +255,6 @@ invalid.jsx:23:27 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     23 │ <div·className={`${prefix}·p-4·p-4·${suffix}`}·/>;
@@ -283,7 +263,7 @@ invalid.jsx:23:27 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.jsx:26:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:26:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This class string contains a duplicate class.
   
@@ -300,8 +280,6 @@ invalid.jsx:26:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     24 24 │   
@@ -317,7 +295,7 @@ invalid.jsx:26:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.jsx:31:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:31:12 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This class string contains a duplicate class.
   
@@ -329,8 +307,6 @@ invalid.jsx:31:12 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   i The class flex appears multiple times.
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the duplicate classes.
   
