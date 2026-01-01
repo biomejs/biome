@@ -1104,7 +1104,7 @@ See <https://biomejs.dev/linter/rules/no-aria-unsupported-elements>
 	 */
 	noAriaUnsupportedElements?: NoAriaUnsupportedElementsConfiguration;
 	/**
-	* Enforce that autoFocus prop is not used on elements.
+	* Enforce that the autofocus attribute is not used on elements.
 See <https://biomejs.dev/linter/rules/no-autofocus> 
 	 */
 	noAutofocus?: NoAutofocusConfiguration;
