@@ -75,7 +75,7 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://index.ts"
+                  "uri": "index.ts"
                 }
               }
             }
@@ -91,7 +91,7 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://main.ts"
+                  "uri": "main.ts"
                 }
               }
             }

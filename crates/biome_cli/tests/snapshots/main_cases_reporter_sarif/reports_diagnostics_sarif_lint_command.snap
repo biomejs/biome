@@ -110,7 +110,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://index.ts"
+                  "uri": "index.ts"
                 },
                 "region": {
                   "startLine": 1,
@@ -132,7 +132,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://index.ts"
+                  "uri": "index.ts"
                 },
                 "region": {
                   "startLine": 2,
@@ -154,7 +154,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://index.ts"
+                  "uri": "index.ts"
                 },
                 "region": {
                   "startLine": 8,
@@ -176,7 +176,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://index.ts"
+                  "uri": "index.ts"
                 },
                 "region": {
                   "startLine": 9,
@@ -198,7 +198,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://main.ts"
+                  "uri": "main.ts"
                 },
                 "region": {
                   "startLine": 1,
@@ -220,7 +220,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://main.ts"
+                  "uri": "main.ts"
                 },
                 "region": {
                   "startLine": 2,
@@ -242,7 +242,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://main.ts"
+                  "uri": "main.ts"
                 },
                 "region": {
                   "startLine": 8,
@@ -264,7 +264,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://main.ts"
+                  "uri": "main.ts"
                 },
                 "region": {
                   "startLine": 9,
@@ -286,7 +286,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://index.ts"
+                  "uri": "index.ts"
                 },
                 "region": {
                   "startLine": 4,
@@ -308,7 +308,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://index.ts"
+                  "uri": "index.ts"
                 },
                 "region": {
                   "startLine": 6,
@@ -330,7 +330,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://index.ts"
+                  "uri": "index.ts"
                 },
                 "region": {
                   "startLine": 8,
@@ -352,7 +352,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://index.ts"
+                  "uri": "index.ts"
                 },
                 "region": {
                   "startLine": 9,
@@ -374,7 +374,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://index.ts"
+                  "uri": "index.ts"
                 },
                 "region": {
                   "startLine": 2,
@@ -396,7 +396,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://index.ts"
+                  "uri": "index.ts"
                 },
                 "region": {
                   "startLine": 9,
@@ -418,7 +418,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://main.ts"
+                  "uri": "main.ts"
                 },
                 "region": {
                   "startLine": 4,
@@ -440,7 +440,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://main.ts"
+                  "uri": "main.ts"
                 },
                 "region": {
                   "startLine": 6,
@@ -462,7 +462,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://main.ts"
+                  "uri": "main.ts"
                 },
                 "region": {
                   "startLine": 8,
@@ -484,7 +484,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://main.ts"
+                  "uri": "main.ts"
                 },
                 "region": {
                   "startLine": 9,
@@ -506,7 +506,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://main.ts"
+                  "uri": "main.ts"
                 },
                 "region": {
                   "startLine": 2,
@@ -528,7 +528,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file://main.ts"
+                  "uri": "main.ts"
                 },
                 "region": {
                   "startLine": 9,

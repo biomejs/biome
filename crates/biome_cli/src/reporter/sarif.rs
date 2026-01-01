@@ -280,9 +280,10 @@ fn to_sarif_result_location_artifact_location(
         .as_ref()
         .map(|wd| wd.join(file))
         .unwrap_or(file.into());
-    let absolute_path = format!("file://{}", absolute_path.as_str());
 
-    Some(SarifResultLocationPhysicalLocationArtifactLocation { uri: absolute_path })
+    Some(SarifResultLocationPhysicalLocationArtifactLocation {
+        uri: absolute_path.as_str().replace('\\', "/"),
+    })
 }
 
 fn to_sarif_result_location_region(
