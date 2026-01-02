@@ -5754,6 +5754,13 @@
 						{ "$ref": "#/$defs/UseVueValidVTextConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useVueVapor": {
+					"description": "Enforce opting in to Vue Vapor mode in \\<script setup> blocks.\nSee <https://biomejs.dev/linter/rules/use-vue-vapor>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueVaporConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10150,6 +10157,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueVaporOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueVaporOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseWhileOptions": {
 			"type": "object",
 			"properties": {
@@ -13369,6 +13386,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseVueVaporConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueVaporOptions" }
+			]
+		},
+		"UseVueVaporOptions": { "type": "object", "additionalProperties": false },
 		"UseWhileConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

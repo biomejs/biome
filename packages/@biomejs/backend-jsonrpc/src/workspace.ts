@@ -2257,6 +2257,11 @@ See <https://biomejs.dev/linter/rules/use-vue-valid-v-pre>
 See <https://biomejs.dev/linter/rules/use-vue-valid-v-text> 
 	 */
 	useVueValidVText?: UseVueValidVTextConfiguration;
+	/**
+	* Enforce opting in to Vue Vapor mode in \<script setup> blocks.
+See <https://biomejs.dev/linter/rules/use-vue-vapor> 
+	 */
+	useVueVapor?: UseVueVaporConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -3918,6 +3923,9 @@ export type UseVueValidVPreConfiguration =
 export type UseVueValidVTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVTextOptions;
+export type UseVueVaporConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueVaporOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
@@ -5481,6 +5489,11 @@ export interface RuleWithUseVueValidVTextOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVTextOptions;
 }
+export interface RuleWithUseVueVaporOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueVaporOptions;
+}
 export interface RuleWithNoAccumulatingSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: NoAccumulatingSpreadOptions;
@@ -6783,6 +6796,7 @@ export interface UseVueValidVOnOptions {
 export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
+export type UseVueVaporOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
 export type NoBarrelFileOptions = {};
@@ -7578,6 +7592,7 @@ export type Category =
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/nursery/useVueVForKey"
+	| "lint/nursery/useVueVapor"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"
 	| "lint/nursery/useVueValidVCloak"
