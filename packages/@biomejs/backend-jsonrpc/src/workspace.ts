@@ -209,7 +209,16 @@ match these patterns.
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
 	 */
 	trailingNewline?: TrailingNewline;
 	/**
@@ -431,7 +440,16 @@ export interface CssFormatterConfiguration {
 	 */
 	quoteStyle?: QuoteStyle;
 	/**
-	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
 	 */
 	trailingNewline?: TrailingNewline;
 }
@@ -522,7 +540,16 @@ export interface GraphqlFormatterConfiguration {
 	 */
 	quoteStyle?: QuoteStyle;
 	/**
-	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
 	 */
 	trailingNewline?: TrailingNewline;
 }
@@ -563,7 +590,16 @@ export interface GritFormatterConfiguration {
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
 	 */
 	trailingNewline?: TrailingNewline;
 }
@@ -623,7 +659,16 @@ export interface HtmlFormatterConfiguration {
 	 */
 	selfCloseVoidElements?: SelfCloseVoidElements;
 	/**
-	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
 	 */
 	trailingNewline?: TrailingNewline;
 	/**
@@ -732,7 +777,16 @@ When formatting `package.json`, Biome will use `always` unless configured otherw
 	 */
 	trailingCommas?: JsTrailingCommas;
 	/**
-	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
 	 */
 	trailingNewline?: TrailingNewline;
 }
@@ -819,7 +873,16 @@ When formatting `package.json`, Biome will use `always` unless configured otherw
 	 */
 	trailingCommas?: JsonTrailingCommas;
 	/**
-	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
 	 */
 	trailingNewline?: TrailingNewline;
 }
@@ -1083,7 +1146,16 @@ has syntax errors
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
 	 */
 	trailingNewline?: TrailingNewline;
 }
