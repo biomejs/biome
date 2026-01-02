@@ -60,7 +60,16 @@ pub struct GritFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
-    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    /// Whether to add a trailing newline at the end of the file.
+    ///
+    /// Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+    /// - <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+    /// - <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+    /// - <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+    ///
+    /// Disable the option at your own risk.
+    ///
+    /// Defaults to true.
     #[bpaf(
         long("grit-formatter-trailing-newline"),
         argument("true|false"),

@@ -32,6 +32,13 @@ Generic options applied to all files
                               line if it fits in the line. When formatting `package.json`, Biome
                               will use `always` unless configured otherwise. Defaults to "auto".
         --trailing-newline=<true|false>  Whether to add a trailing newline at the end of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
                               Defaults to true.
         --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
                               Configuration in `biome.json` will override `.editorconfig`
@@ -81,7 +88,15 @@ Formatting options specific to the JavaScript files
                               into multiple lines, whether to break them before or after the binary
                               operator. Defaults to "after".
         --javascript-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at
-                              the end of the file. Defaults to true.
+                              the end of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
 
 Options that changes how the JSON parser behaves
         --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
@@ -108,7 +123,15 @@ Options that changes how the GraphQL formatter behaves
         --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
                               Defaults to true.
         --graphql-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the
-                              end of the file. Defaults to true.
+                              end of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
 
 Options that changes how the CSS formatter behaves
         --css-formatter-enabled=<true|false>  Control the formatter for CSS (and its super
@@ -125,7 +148,15 @@ Options that changes how the CSS formatter behaves
         --css-formatter-quote-style=<double|single>  The type of quotes used in CSS code. Defaults
                               to double.
         --css-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
-                              of the file. Defaults to true.
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
 
 Options that changes how the HTML formatter behaves
         --html-formatter-enabled=<true|false>  Control the formatter for HTML (and its super
@@ -152,7 +183,15 @@ Options that changes how the HTML formatter behaves
         --html-formatter-self-close-void-elements=<always|never>  Whether void elements should be
                               self-closed. Defaults to never.
         --html-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
-                              of the file. Defaults to true.
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -252,7 +291,15 @@ Available options:
         --json-formatter-bracket-spacing=<true|false>  Whether to insert spaces around brackets in
                               object literals. Defaults to true.
         --json-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
-                              of the file. Defaults to true.
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension
