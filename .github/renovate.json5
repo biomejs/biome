@@ -61,6 +61,9 @@
       "matchDepTypes": [
         "engines"
       ],
+      "matchDepNames": [
+        "!pnpm"
+      ],
       "enabled": false
     }
   ],
