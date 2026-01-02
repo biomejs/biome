@@ -40,16 +40,16 @@ x => {
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,26 @@
--<!--interpolations in html should be treated as normal text-->
--<div>
+@@ -1,8 +1,35 @@
+ <!--interpolations in html should be treated as normal text-->
+ <div>
 -  Fuga magnam facilis. Voluptatem quaerat porro.{{ x => { const hello = 'world'
 -  return hello; } }} Magni consectetur in et molestias neque esse voluptatibus
 -  voluptas. {{ some_variable }} Eum quia nihil nulla esse. Dolorem asperiores
 -  vero est error {{ preserve invalid interpolation }} reprehenderit voluptates
 -  minus {{console.log( short_interpolation )}} nemo.
--</div>
-+<!--interpolations in html should be treated as normal text--><div>Fuga magnam facilis. Voluptatem quaerat porro.{{
++  Fuga magnam facilis. Voluptatem quaerat porro.
++  {{
 +
 +
 +x => {
@@ -59,14 +59,18 @@ x => {
 +
 +
 +
-+}} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{  
++}}
++  Magni consectetur in et molestias neque esse voluptatibus voluptas.
++  {{  
 +    
 +    
 +    some_variable 
 +
 +
 +
-+}} Eum quia nihil nulla esse. Dolorem asperiores vero est error {{
++}}
++  Eum quia nihil nulla esse. Dolorem asperiores vero est error
++  {{
 +
 +                    preserve
 +
@@ -74,13 +78,18 @@ x => {
 +                    
 +                    interpolation
 +
-+}} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
++}}
++  reprehenderit voluptates minus {{console.log(  short_interpolation )}}nemo.
+ </div>
 ```
 
 # Output
 
 ```html
-<!--interpolations in html should be treated as normal text--><div>Fuga magnam facilis. Voluptatem quaerat porro.{{
+<!--interpolations in html should be treated as normal text-->
+<div>
+  Fuga magnam facilis. Voluptatem quaerat porro.
+  {{
 
 
 x => {
@@ -90,14 +99,18 @@ x => {
 
 
 
-}} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{  
+}}
+  Magni consectetur in et molestias neque esse voluptatibus voluptas.
+  {{  
     
     
     some_variable 
 
 
 
-}} Eum quia nihil nulla esse. Dolorem asperiores vero est error {{
+}}
+  Eum quia nihil nulla esse. Dolorem asperiores vero est error
+  {{
 
                     preserve
 
@@ -105,7 +118,9 @@ x => {
                     
                     interpolation
 
-}} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
+}}
+  reprehenderit voluptates minus {{console.log(  short_interpolation )}}nemo.
+</div>
 ```
 
 # Errors
@@ -173,10 +188,4 @@ example.html:26:35 parse ━━━━━━━━━━━━━━━━━━�
   i Remove it or enable the parsing using the html.parser.interpolation option.
   
 
-```
-
-# Lines exceeding max width of 80 characters
-```
-    1: <!--interpolations in html should be treated as normal text--><div>Fuga magnam facilis. Voluptatem quaerat porro.{{
-   26: }} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
 ```
