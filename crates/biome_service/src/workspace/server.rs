@@ -530,8 +530,7 @@ impl WorkspaceServer {
                 .and_then(Result::ok)
                 .map(|node| node.unwrap_as_send_node())
         {
-            let (dependencies, diagnostics) = self
-                .update_service_data(
+            let (dependencies, diagnostics) = self.update_service_data(
                 &path,
                 UpdateKind::AddedOrChanged(reason, root, services),
                 project_key,
@@ -954,8 +953,7 @@ impl WorkspaceServer {
                         self.fs.as_ref(),
                         &self.project_layout,
                         &[(path, js_root)],
-                                    infer_types,
-
+                        infer_types,
                     )
                 } else if let (Some(css_root), Some(services)) = (
                     SendNode::into_language_root::<AnyCssRoot>(root.clone()),
