@@ -49,7 +49,7 @@ camino                   = { workspace = true }
 enumflags2               = { workspace = true }
 globset                  = { workspace = true }
 regex                    = { workspace = true }
-roaring                  = "0.11.2"
+roaring                  = "0.11.3"
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }

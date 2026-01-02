@@ -243,6 +243,8 @@ define_categories! {
     "lint/nursery/useVueDefineMacrosOrder": "https://biomejs.dev/linter/rules/use-vue-define-macros-order",
     "lint/nursery/useVueHyphenatedAttributes": "https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes",
     "lint/nursery/useVueMultiWordComponentNames": "https://biomejs.dev/linter/rules/use-vue-multi-word-component-names",
+    "lint/nursery/useVueVForKey": "https://biomejs.dev/linter/rules/use-vue-v-for-key",
+    "lint/nursery/useVueVapor": "https://biomejs.dev/linter/rules/use-vue-vapor",
     "lint/nursery/useVueValidTemplateRoot": "https://biomejs.dev/linter/rules/use-vue-valid-template-root",
     "lint/nursery/useVueValidVBind": "https://biomejs.dev/linter/rules/use-vue-valid-v-bind",
     "lint/nursery/useVueValidVCloak": "https://biomejs.dev/linter/rules/use-vue-valid-v-cloak",

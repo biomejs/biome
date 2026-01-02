@@ -151,8 +151,8 @@ tikv-jemallocator            = "0.6.1"
 tokio                        = "1.48.0"
 tower                        = "0.5.2"
 tower-lsp-server             = "0.23.0"
-tracing                      = { version = "0.1.41", default-features = false, features = ["attributes", "std"] }
-tracing-subscriber           = "0.3.20"
+tracing                      = { version = "0.1.44", default-features = false, features = ["attributes", "std"] }
+tracing-subscriber           = "0.3.22"
 unicode-bom                  = "2.0.3"
 unicode-width                = "0.1.12"
 ureq                         = "3.1.4"

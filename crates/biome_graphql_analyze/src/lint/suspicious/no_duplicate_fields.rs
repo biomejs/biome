@@ -22,7 +22,31 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```graphql,expect_diagnostic
-    /// query test($v: String, $t: String, $v: String) {
+    /// query {
+    ///   users {
+    ///     id
+    ///     name
+    ///     email
+    ///     name
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```graphql,expect_diagnostic
+    /// query {
+    ///   users(
+    ///     first: 100,
+    ///     after: 10,
+    ///     filter: "test",
+    ///     first: 50
+    ///   ) {
+    ///     id
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```graphql,expect_diagnostic
+    /// query ($v: String, $t: String, $v: String) {
     ///   id
     /// }
     /// ```
@@ -31,8 +55,10 @@ declare_lint_rule! {
     ///
     /// ```graphql
     /// query {
-    ///   user {
+    ///   users {
     ///     id
+    ///     name
+    ///     email
     ///   }
     /// }
     /// ```

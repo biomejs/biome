@@ -109,6 +109,10 @@ pub enum ServiceNotification {
     WatcherStopped,
 }
 
+fn is_false(value: &bool) -> bool {
+    !*value
+}
+
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
@@ -116,6 +120,9 @@ pub struct SupportsFeatureParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub features: FeatureName,
+
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub skip_ignore_check: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
@@ -541,11 +548,12 @@ impl SupportKind {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
-#[bitflags]
 #[repr(u8)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[bitflags]
+#[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[expect(clippy::use_self)] // false positive
 pub enum FeatureKind {
     Format,
     Lint,
