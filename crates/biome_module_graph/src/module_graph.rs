@@ -15,7 +15,7 @@ use crate::{
     JsExport, JsModuleInfo, JsOwnExport, ModuleDiagnostic, SerializedJsModuleInfo,
     js_module_info::JsModuleVisitor,
 };
-use biome_css_syntax::CssRoot;
+use biome_css_syntax::AnyCssRoot;
 use biome_fs::BiomePath;
 use biome_js_syntax::AnyJsRoot;
 use biome_js_type_info::ImportSymbol;
@@ -132,7 +132,7 @@ impl ModuleGraph {
         &self,
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
-        added_or_updated_paths: &[(&BiomePath, CssRoot)],
+        added_or_updated_paths: &[(&BiomePath, AnyCssRoot)],
         _semantic_model: Option<&biome_css_semantic::model::SemanticModel>,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         // Make sure all directories are registered for the added/updated paths.

@@ -1,5 +1,5 @@
 use crate::model::{Selector, SemanticModel, Specificity};
-use biome_css_syntax::CssRoot;
+use biome_css_syntax::AnyCssRoot;
 use biome_formatter::prelude::*;
 use biome_formatter::write;
 use biome_formatter::{
@@ -90,7 +90,7 @@ impl Format<FormatSemanticModelContext> for SemanticModel {
     }
 }
 
-struct SelectorWithRoot<'a>(&'a Selector, &'a CssRoot);
+struct SelectorWithRoot<'a>(&'a Selector, &'a AnyCssRoot);
 
 impl<'a> Format<FormatSemanticModelContext> for SelectorWithRoot<'a> {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
@@ -136,9 +136,9 @@ impl Format<FormatSemanticModelContext> for Specificity {
 
 #[cfg(test)]
 mod tests {
-
     use crate::semantic_model;
     use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_syntax::CssFileSource;
 
     #[ignore]
     #[test]
@@ -157,7 +157,7 @@ mod tests {
   }
 }"#;
 
-        let parsed = parse_css(source, CssParserOptions::default());
+        let parsed = parse_css(source, CssFileSource::css(), CssParserOptions::default());
         let model = semantic_model(&parsed.tree());
         eprintln!("{}", model);
     }

@@ -1,6 +1,6 @@
 use crate::WorkspaceError;
 use crate::file_handlers::Capabilities;
-use crate::settings::Settings;
+use crate::settings::{Settings, SettingsWithEditor};
 use crate::workspace::{
     DocumentFileSource, FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind,
 };
@@ -22,6 +22,7 @@ pub struct GetFileFeaturesParams<'a> {
     pub features: FeatureName,
     pub language: DocumentFileSource,
     pub capabilities: &'a Capabilities,
+    pub handle: &'a SettingsWithEditor<'a>,
     pub skip_ignore_check: bool,
 }
 
@@ -218,6 +219,7 @@ impl Projects {
             features,
             language,
             capabilities,
+            handle,
             skip_ignore_check,
         }: GetFileFeaturesParams<'_>,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
@@ -225,16 +227,10 @@ impl Projects {
         let project_data = data
             .get(&project_key)
             .ok_or_else(WorkspaceError::no_project)?;
-
-        let settings = project_data
-            .nested_settings
-            .iter()
-            .find(|(project_path, _)| path.starts_with(project_path))
-            .map_or(&project_data.root_settings, |(_, settings)| settings);
-
+        let settings = handle.as_ref();
         let mut file_features = FeaturesSupported::default();
         file_features = file_features.with_capabilities(capabilities);
-        file_features = file_features.with_settings_and_language(settings, path, capabilities);
+        file_features = file_features.with_settings_and_language(handle, path, capabilities);
         if settings.ignore_unknown_enabled() && language == DocumentFileSource::Unknown {
             file_features.ignore_not_supported();
         } else if path.file_name().is_some_and(|file_name| {

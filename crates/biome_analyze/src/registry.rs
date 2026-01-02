@@ -406,7 +406,8 @@ impl<L: Language + Default> RegistryRule<L> {
             let preferred_jsx_quote = params.options.preferred_jsx_quote();
             let preferred_indentation = params.options.preferred_indentation();
             let jsx_runtime = params.options.jsx_runtime();
-            let css_modules = params.options.css_modules();
+            let jsx_factory = params.options.jsx_factory();
+            let jsx_fragment_factory = params.options.jsx_fragment_factory();
             let options = params.options.rule_options::<R>().unwrap_or_default();
             let ctx = RuleContext::new(
                 &query_result,
@@ -419,7 +420,8 @@ impl<L: Language + Default> RegistryRule<L> {
                 preferred_jsx_quote,
                 preferred_indentation,
                 jsx_runtime,
-                css_modules,
+                jsx_factory,
+                jsx_fragment_factory,
             )?;
 
             for result in R::run(&ctx) {

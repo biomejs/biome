@@ -1,6 +1,7 @@
 use crate::reporter::terminal::ConsoleTraversalSummary;
-use crate::reporter::{EvaluatedPathsDiagnostic, FixedPathsDiagnostic};
-use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
+use crate::reporter::{EvaluatedPathsDiagnostic, FixedPathsDiagnostic, Reporter, ReporterVisitor};
+use crate::runner::execution::Execution;
+use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, MarkupBuf, markup};
 use biome_diagnostics::advice::ListAdvice;
@@ -15,19 +16,19 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Debug;
 use std::io;
 
-pub(crate) struct SummaryReporter {
+pub(crate) struct SummaryReporter<'a> {
     pub(crate) summary: TraversalSummary,
     pub(crate) diagnostics_payload: DiagnosticsPayload,
-    pub(crate) execution: Execution,
+    pub(crate) execution: &'a dyn Execution,
     pub(crate) evaluated_paths: BTreeSet<BiomePath>,
     pub(crate) working_directory: Option<Utf8PathBuf>,
     pub(crate) verbose: bool,
 }
 
-impl Reporter for SummaryReporter {
+impl Reporter for SummaryReporter<'_> {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
         visitor.report_diagnostics(
-            &self.execution,
+            self.execution,
             self.diagnostics_payload,
             self.verbose,
             self.working_directory.as_deref(),
@@ -36,7 +37,7 @@ impl Reporter for SummaryReporter {
             visitor
                 .report_handled_paths(self.evaluated_paths, self.working_directory.as_deref())?;
         }
-        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
+        visitor.report_summary(self.execution, self.summary, self.verbose)?;
         Ok(())
     }
 }
@@ -46,7 +47,7 @@ pub(crate) struct SummaryReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
 impl ReporterVisitor for SummaryReporterVisitor<'_> {
     fn report_summary(
         &mut self,
-        execution: &Execution,
+        execution: &dyn Execution,
         summary: TraversalSummary,
         verbose: bool,
     ) -> io::Result<()> {
@@ -65,79 +66,8 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
         }
 
         self.0.log(markup! {
-            {ConsoleTraversalSummary(execution.traversal_mode(), &summary, verbose)}
+            {ConsoleTraversalSummary(execution, &summary, verbose)}
         });
-
-        Ok(())
-    }
-
-    fn report_diagnostics(
-        &mut self,
-        execution: &Execution,
-        diagnostics_payload: DiagnosticsPayload,
-        verbose: bool,
-        working_directory: Option<&Utf8Path>,
-    ) -> io::Result<()> {
-        let mut files_to_diagnostics =
-            FileToDiagnostics::default().with_working_directory(working_directory);
-
-        let iter = diagnostics_payload.diagnostics.iter().rev();
-        for diagnostic in iter {
-            let location = diagnostic.location().resource.and_then(|r| match r {
-                Resource::File(p) => Some(p),
-                _ => None,
-            });
-            let Some(location) = location else {
-                continue;
-            };
-
-            let category = diagnostic.category();
-            let severity = &diagnostic.severity();
-
-            if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
-                if diagnostic.tags().is_verbose() {
-                    if verbose {
-                        if (execution.is_check() || execution.is_lint())
-                            && let Some(category) = category
-                            && category.name().starts_with("lint/")
-                        {
-                            files_to_diagnostics.insert_rule_for_file(
-                                category.name(),
-                                severity,
-                                location,
-                            );
-                        }
-                    } else {
-                        continue;
-                    }
-                }
-
-                if let Some(category) = category
-                    && category.name() == "parse"
-                {
-                    files_to_diagnostics.insert_parse(location);
-                }
-
-                if (execution.is_check() || execution.is_lint() || execution.is_ci())
-                    && let Some(category) = category
-                    && (category.name().starts_with("lint/")
-                        || category.name().starts_with("suppressions/")
-                        || category.name().starts_with("assist/")
-                        || category.name().starts_with("plugin"))
-                {
-                    files_to_diagnostics.insert_rule_for_file(category.name(), severity, location);
-                }
-
-                if (execution.is_check() || execution.is_format() || execution.is_ci())
-                    && let Some(category) = category
-                    && category.name() == "format"
-                {
-                    files_to_diagnostics.insert_format(location);
-                }
-            }
-        }
-
-        self.0.log(markup! {{files_to_diagnostics}});
 
         Ok(())
     }
@@ -193,6 +123,79 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
 
         Ok(())
     }
+
+    fn report_diagnostics(
+        &mut self,
+        execution: &dyn Execution,
+        diagnostics_payload: DiagnosticsPayload,
+        verbose: bool,
+        working_directory: Option<&Utf8Path>,
+    ) -> io::Result<()> {
+        let mut files_to_diagnostics =
+            FileToDiagnostics::default().with_working_directory(working_directory);
+
+        let iter = diagnostics_payload.diagnostics.iter().rev();
+        for diagnostic in iter {
+            let location = diagnostic.location().resource.and_then(|r| match r {
+                Resource::File(p) => Some(p),
+                _ => None,
+            });
+            let Some(location) = location else {
+                continue;
+            };
+
+            let category = diagnostic.category();
+            let severity = &diagnostic.severity();
+
+            if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
+                if diagnostic.tags().is_verbose() {
+                    if verbose {
+                        if let Some(category) = category
+                            && should_report_lint_diagnostic(category)
+                        {
+                            files_to_diagnostics.insert_rule_for_file(
+                                category.name(),
+                                severity,
+                                location,
+                            );
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+
+                if let Some(category) = category
+                    && category.name() == "parse"
+                {
+                    files_to_diagnostics.insert_parse(location);
+                }
+
+                if (execution.is_check() || execution.is_lint() || execution.is_ci())
+                    && let Some(category) = category
+                    && should_report_lint_diagnostic(category)
+                {
+                    files_to_diagnostics.insert_rule_for_file(category.name(), severity, location);
+                }
+
+                if let Some(category) = category
+                    && category.name() == "format"
+                {
+                    files_to_diagnostics.insert_format(location);
+                }
+            }
+        }
+
+        self.0.log(markup! {{files_to_diagnostics}});
+
+        Ok(())
+    }
+}
+
+fn should_report_lint_diagnostic(category: &Category) -> bool {
+    category.name().starts_with("lint/")
+        || category.name().starts_with("suppressions/")
+        || category.name().starts_with("assist/")
+        || category.name().starts_with("plugin")
 }
 
 #[derive(Debug, Default)]

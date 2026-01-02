@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssPseudoElement, CssPseudoElementSelector};
+use biome_css_syntax::{AnyCssPseudoElement, CssFileSource, CssPseudoElementSelector};
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 use biome_rule_options::no_unknown_pseudo_element::NoUnknownPseudoElementOptions;
@@ -70,22 +70,23 @@ impl Rule for NoUnknownPseudoElement {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node: &CssPseudoElementSelector = ctx.query();
         let pseudo_element = node.element().ok()?;
+        let file_source = ctx.source_type::<CssFileSource>();
 
         let should_not_trigger = match &pseudo_element {
             AnyCssPseudoElement::CssBogusPseudoElement(element) => {
-                should_not_trigger(element.to_trimmed_text().text())
+                should_not_trigger(element.to_trimmed_text().text(), file_source)
             }
             AnyCssPseudoElement::CssPseudoElementFunctionCustomIdentifier(ident) => {
-                should_not_trigger(ident.name().ok()?.to_trimmed_text().text())
+                should_not_trigger(ident.name().ok()?.to_trimmed_text().text(), file_source)
             }
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => {
-                should_not_trigger(selector.name().ok()?.to_trimmed_text().text())
+                should_not_trigger(selector.name().ok()?.to_trimmed_text().text(), file_source)
             }
             AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => {
-                should_not_trigger(ident.name().ok()?.to_trimmed_text().text())
+                should_not_trigger(ident.name().ok()?.to_trimmed_text().text(), file_source)
             }
             AnyCssPseudoElement::CssPseudoElementFunction(ident) => {
-                should_not_trigger(ident.name().ok()?.to_trimmed_text().text())
+                should_not_trigger(ident.name().ok()?.to_trimmed_text().text(), file_source)
             }
         };
 
@@ -120,7 +121,12 @@ impl Rule for NoUnknownPseudoElement {
 }
 
 /// It doesn't trigger the rule if the pseudo-element name isn't a vendor prefix or is a pseudo-element
-fn should_not_trigger(pseudo_element_name: &str) -> bool {
+fn should_not_trigger(pseudo_element_name: &str, file_source: &CssFileSource) -> bool {
+    if file_source.is_css_modules() {
+        return ["global", "local"]
+            .contains(&pseudo_element_name.to_ascii_lowercase_cow().as_ref());
+    }
+
     !vender_prefix(pseudo_element_name).is_empty()
         || is_pseudo_elements(pseudo_element_name.to_ascii_lowercase_cow().as_ref())
 }

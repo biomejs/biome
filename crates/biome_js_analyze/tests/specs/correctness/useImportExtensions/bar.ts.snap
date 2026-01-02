@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 137
+expression: bar.ts
+---
+# Input
+```ts
+export const bar = "bar";
+```

@@ -334,3 +334,12 @@ pub(crate) fn is_global_react_import(binding: &JsIdentifierBinding, lib: ReactLi
         .and_then(|import| import.source_text().ok())
         .is_some_and(|source| lib.import_names().contains(&source.text()))
 }
+
+/// Checks if `binding` matches a custom JSX factory identifier.
+/// This is used when `jsxRuntime` is `ReactClassic` and custom JSX factories are configured
+/// via tsconfig.json's `jsxFactory` or `jsxFragmentFactory` options.
+pub(crate) fn is_jsx_factory_import(binding: &JsIdentifierBinding, factory_name: &str) -> bool {
+    binding
+        .name_token()
+        .is_ok_and(|name| name.text_trimmed() == factory_name)
+}
