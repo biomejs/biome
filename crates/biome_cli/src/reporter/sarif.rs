@@ -3,9 +3,7 @@ use std::collections::{BTreeMap, HashSet};
 use crate::reporter::{Reporter, ReporterVisitor};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
-use biome_analyze::{
-    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
-};
+use biome_analyze::{GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup};
 use biome_console::{Console, ConsoleExt, markup};
 use biome_css_syntax::CssLanguage;
 use biome_diagnostics::{Error, Location, PrintDescription, Severity, display::SourceFile};
@@ -38,14 +36,14 @@ impl Reporter for SarifReporter<'_> {
 
 pub(crate) struct SarifReporterVisitor<'a> {
     console: &'a mut dyn Console,
-    rules_metadata: BTreeMap<&'static str, RuleMetadata>,
+    rule_descriptions: BTreeMap<&'static str, &'a str>,
 }
 
 impl<'a> SarifReporterVisitor<'a> {
     pub fn new(console: &'a mut dyn Console) -> Self {
         let mut visitor = Self {
             console,
-            rules_metadata: BTreeMap::new(),
+            rule_descriptions: BTreeMap::new(),
         };
 
         biome_graphql_analyze::visit_registry(&mut visitor);
@@ -63,8 +61,13 @@ impl<'a> SarifReporterVisitor<'a> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let category = <R::Group as RuleGroup>::Category::CATEGORY;
-        if matches!(category, RuleCategory::Lint | RuleCategory::Action) {
-            self.rules_metadata.insert(R::METADATA.name, R::METADATA);
+        if matches!(
+            category,
+            RuleCategory::Syntax | RuleCategory::Lint | RuleCategory::Action
+        ) {
+            let first_line: &'static str =
+                R::METADATA.docs.lines().next().unwrap_or_default().trim();
+            self.rule_descriptions.insert(R::METADATA.name, first_line);
         }
     }
 }
@@ -145,7 +148,7 @@ impl ReporterVisitor for SarifReporterVisitor<'_> {
                     if diagnostic.tags().is_verbose() {
                         if verbose {
                             if let Some(driver_rule) =
-                                to_sarif_driver_rule(diagnostic, &self.rules_metadata)
+                                to_sarif_driver_rule(diagnostic, &self.rule_descriptions)
                             {
                                 sarif_rules.insert(driver_rule);
                             }
@@ -155,7 +158,7 @@ impl ReporterVisitor for SarifReporterVisitor<'_> {
                         }
                     } else {
                         if let Some(driver_rule) =
-                            to_sarif_driver_rule(diagnostic, &self.rules_metadata)
+                            to_sarif_driver_rule(diagnostic, &self.rule_descriptions)
                         {
                             sarif_rules.insert(driver_rule);
                         }
@@ -176,7 +179,7 @@ impl ReporterVisitor for SarifReporterVisitor<'_> {
                         name: "Biome",
                         information_uri: "https://biomejs.dev",
                         rules: {
-                            // Make to sure to maintain same order every run
+                            // Make sure to maintain same order every run
                             let mut sarif_rules_vec = sarif_rules.into_iter().collect::<Vec<_>>();
                             sarif_rules_vec.sort_by(|a, b| a.id.cmp(b.id));
                             sarif_rules_vec
@@ -226,7 +229,7 @@ fn to_sarif_result<'a>(
 
 fn to_sarif_driver_rule<'a>(
     diagnostic: &'a Error,
-    rules_metadata: &BTreeMap<&'static str, RuleMetadata>,
+    rule_descriptions: &BTreeMap<&'static str, &'a str>,
 ) -> Option<SarifDriverRule<'a>> {
     let category = diagnostic.category()?;
 
@@ -237,12 +240,12 @@ fn to_sarif_driver_rule<'a>(
         category.link().unwrap_or_default()
     };
 
-    let description: &'static str = if name == "format" {
+    let description: &'a str = if name == "format" {
         "Follow a consistent style—handling things like spacing, indentation, line breaks, and punctuation to make code easier to read and maintain."
-    } else if let Some(metadata) =
-        &rules_metadata.get(name.split('/').next_back().unwrap_or_default())
+    } else if let Some(description) =
+        rule_descriptions.get(name.split('/').next_back().unwrap_or_default())
     {
-        metadata.docs.lines().next().unwrap_or_default().trim()
+        description
     } else {
         ""
     };
@@ -282,6 +285,7 @@ fn to_sarif_result_location_artifact_location(
         .unwrap_or(file.into());
 
     Some(SarifResultLocationPhysicalLocationArtifactLocation {
+        // Transform Windows' backslash paths to UNIX's forward slash (SARIF spec follows RFC 3986 for consistency)
         uri: absolute_path.as_str().replace('\\', "/"),
     })
 }
@@ -324,19 +328,18 @@ struct SarifTool<'a> {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct SarifDriver<'a> {
     name: &'static str,
-    #[serde(rename = "informationUri")]
     information_uri: &'static str,
     rules: Vec<SarifDriverRule<'a>>,
 }
 
 #[derive(Serialize, Eq, PartialEq, Hash)]
+#[serde(rename_all = "camelCase")]
 struct SarifDriverRule<'a> {
     id: &'static str,
-    #[serde(rename = "shortDescription")]
     short_description: SarifDriverRuleDescription<'a>,
-    #[serde(rename = "helpUri")]
     help_uri: &'a str,
 }
 
@@ -346,8 +349,8 @@ struct SarifDriverRuleDescription<'a> {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct SarifResult<'a> {
-    #[serde(rename = "ruleId")]
     rule_id: &'a str,
     level: &'a str,
     message: SarifResultMessage,
@@ -360,14 +363,14 @@ struct SarifResultMessage {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct SarifResultLocation {
-    #[serde(rename = "physicalLocation")]
     physical_location: SarifResultLocationPhysicalLocation,
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct SarifResultLocationPhysicalLocation {
-    #[serde(rename = "artifactLocation")]
     artifact_location: SarifResultLocationPhysicalLocationArtifactLocation,
     #[serde(skip_serializing_if = "Option::is_none")]
     region: Option<SarifResultLocationPhysicalLocationRegion>,
@@ -379,13 +382,10 @@ struct SarifResultLocationPhysicalLocationArtifactLocation {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct SarifResultLocationPhysicalLocationRegion {
-    #[serde(rename = "startLine")]
     start_line: usize,
-    #[serde(rename = "startColumn")]
     start_column: usize,
-    #[serde(rename = "endLine")]
     end_line: usize,
-    #[serde(rename = "endColumn")]
     end_column: usize,
 }
