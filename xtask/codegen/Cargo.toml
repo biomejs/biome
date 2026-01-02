@@ -34,7 +34,7 @@ biome_service         = { workspace = true, features = ["schema"], optional = tr
 biome_string_case     = { workspace = true }
 biome_ungrammar       = { workspace = true }
 bpaf                  = { workspace = true, features = ["derive"] }
-git2                  = { version = "0.20.2", default-features = false }
+git2                  = { version = "0.20.3", default-features = false }
 proc-macro2           = { workspace = true, features = ["span-locations"] }
 pulldown-cmark        = { version = "0.13.0", default-features = false, optional = true }
 quote                 = "1.0.36"

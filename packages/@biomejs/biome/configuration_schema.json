@@ -5671,6 +5671,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueVForKey": {
+					"description": "Enforce that elements using v-for also specify a unique key.\nSee <https://biomejs.dev/linter/rules/use-vue-v-for-key>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueVForKeyConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueValidTemplateRoot": {
 					"description": "Enforce valid Vue \\<template> root usage.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-template-root>",
 					"anyOf": [
@@ -5745,6 +5752,13 @@
 					"description": "Enforce valid v-text Vue directives.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-v-text>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueValidVTextConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueVapor": {
+					"description": "Enforce opting in to Vue Vapor mode in \\<script setup> blocks.\nSee <https://biomejs.dev/linter/rules/use-vue-vapor>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueVaporConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -10031,6 +10045,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueVForKeyOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueVForKeyOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidTemplateRootOptions": {
 			"type": "object",
 			"properties": {
@@ -10130,6 +10153,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueValidVTextOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueVaporOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueVaporOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13228,6 +13261,13 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueVForKeyConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueVForKeyOptions" }
+			]
+		},
+		"UseVueVForKeyOptions": { "type": "object", "additionalProperties": false },
 		"UseVueValidTemplateRootConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -13346,6 +13386,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseVueVaporConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueVaporOptions" }
+			]
+		},
+		"UseVueVaporOptions": { "type": "object", "additionalProperties": false },
 		"UseWhileConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

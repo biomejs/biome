@@ -174,6 +174,10 @@ Available options:
                               The file doesn't need to exist on disk, what matters is the extension
                               of the file. Based on the extension, Biome knows how to format the
                               code.
+                              The provided path may also affect whether the input is treated as
+                              ignored. If the path doesn't exist on disk (virtual path), Biome won't
+                              require it to be part of the project file set, and ignore checks
+                              (`files.includes` and VCS ignore rules) are skipped.
                               Example: ```shell echo 'let a;' | biome format
                               --stdin-file-path=file.js --write ```
         --write               Writes formatted files to a file system.

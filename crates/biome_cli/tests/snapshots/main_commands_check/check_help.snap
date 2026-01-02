@@ -262,6 +262,10 @@ Available options:
                               code.
                               Also, if you have overrides configured and/or nested configurations,
                               the path may determine the settings being applied.
+                              The provided path may also affect whether the input is treated as
+                              ignored. If the path doesn't exist on disk (virtual path), Biome won't
+                              require it to be part of the project file set, and ignore checks
+                              (`files.includes` and VCS ignore rules) are skipped.
                               Example: ```shell echo 'let a;' | biome check
                               --stdin-file-path=file.js --write ```
         --staged              When set to true, only the files that have been staged (the ones

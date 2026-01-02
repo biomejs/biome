@@ -15,6 +15,16 @@ use std::num::NonZeroUsize;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tracing::{debug, instrument};
 
+pub struct GetFileFeaturesParams<'a> {
+    pub fs: &'a dyn FileSystem,
+    pub project_key: ProjectKey,
+    pub path: &'a Utf8Path,
+    pub features: FeatureName,
+    pub language: DocumentFileSource,
+    pub capabilities: &'a Capabilities,
+    pub skip_ignore_check: bool,
+}
+
 /// The information tracked for each project.
 #[derive(Debug, Default)]
 struct ProjectData {
@@ -201,12 +211,15 @@ impl Projects {
     #[inline(always)]
     pub fn get_file_features(
         &self,
-        fs: &dyn FileSystem,
-        project_key: ProjectKey,
-        path: &Utf8Path,
-        features: FeatureName,
-        language: DocumentFileSource,
-        capabilities: &Capabilities,
+        GetFileFeaturesParams {
+            fs,
+            project_key,
+            path,
+            features,
+            language,
+            capabilities,
+            skip_ignore_check,
+        }: GetFileFeaturesParams<'_>,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let data = self.0.pin();
         let project_data = data
@@ -231,16 +244,34 @@ impl Projects {
             .is_some_and(|dir_path| dir_path == project_data.path)
         {
             // Never ignore Biome's top-level config file
-        } else if self.is_ignored(fs, project_key, path, features, IgnoreKind::Ancestors) {
-            file_features.set_ignored_for_all_features();
-        } else {
-            for feature in features.iter() {
-                if project_data
-                    .root_settings
-                    .is_path_ignored_for_feature(path, feature)
-                    || settings.is_path_ignored_for_feature(path, feature)
-                {
-                    file_features.set_ignored(feature);
+        } else if !skip_ignore_check {
+            let is_ignored = {
+                let is_ignored_by_top_level_config =
+                    is_ignored_by_top_level_config(fs, project_data, path, IgnoreKind::Ancestors);
+
+                // If there are specific features enabled, but all of them ignore the
+                // path, then we treat the path as ignored too.
+                let is_ignored_by_features = !features.is_empty()
+                    && features.iter().all(|feature| {
+                        project_data
+                            .root_settings
+                            .is_path_ignored_for_feature(path, feature)
+                    });
+
+                is_ignored_by_top_level_config || is_ignored_by_features
+            };
+
+            if is_ignored {
+                file_features.set_ignored_for_all_features();
+            } else {
+                for feature in features.iter() {
+                    if project_data
+                        .root_settings
+                        .is_path_ignored_for_feature(path, feature)
+                        || settings.is_path_ignored_for_feature(path, feature)
+                    {
+                        file_features.set_ignored(feature);
+                    }
                 }
             }
         }

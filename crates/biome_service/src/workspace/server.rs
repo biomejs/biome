@@ -10,7 +10,7 @@ use crate::file_handlers::{
     Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, Features,
     FixAllParams, FormatEmbedNode, LintParams, LintResults, ParseResult, UpdateSnippetsNodes,
 };
-use crate::projects::Projects;
+use crate::projects::{GetFileFeaturesParams, Projects};
 use crate::scanner::{
     IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
     WorkspaceScannerBridge,
@@ -1231,14 +1231,15 @@ impl Workspace for WorkspaceServer {
         );
         let capabilities = self.features.get_capabilities(language);
 
-        self.projects.get_file_features(
-            self.fs.as_ref(),
-            params.project_key,
-            &params.path,
-            params.features,
+        self.projects.get_file_features(GetFileFeaturesParams {
+            fs: self.fs.as_ref(),
+            project_key: params.project_key,
+            path: &params.path,
+            features: params.features,
             language,
-            &capabilities,
-        )
+            capabilities: &capabilities,
+            skip_ignore_check: params.skip_ignore_check,
+        })
     }
 
     fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError> {

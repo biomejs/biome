@@ -576,6 +576,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
             project_key: self.project_key,
             path: biome_path.clone(),
             features: self.execution.to_feature(),
+            skip_ignore_check: false,
         });
 
         let can_read = DocumentFileSource::can_read(biome_path);

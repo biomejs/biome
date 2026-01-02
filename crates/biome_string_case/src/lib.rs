@@ -37,31 +37,31 @@ pub enum Case {
     /// ASCII numbers
     Number = 1 << 0,
     /// Alphanumeric Characters that cannot be in lowercase or uppercase (numbers and syllabary)
-    Uni = Case::Number as u16 | (1 << 1),
+    Uni = Self::Number as u16 | (1 << 1),
     /// A, B1, C42
     NumberableCapital = 1 << 2,
     /// UPPERCASE
-    Upper = Case::NumberableCapital as u16 | (1 << 3),
+    Upper = Self::NumberableCapital as u16 | (1 << 3),
     // CONSTANT_CASE
-    Constant = Case::Upper as u16 | (1 << 4),
+    Constant = Self::Upper as u16 | (1 << 4),
     /// PascalCase
-    Pascal = Case::NumberableCapital as u16 | (1 << 5),
+    Pascal = Self::NumberableCapital as u16 | (1 << 5),
     /// lowercase
-    Lower = Case::Number as u16 | (1 << 6),
+    Lower = Self::Number as u16 | (1 << 6),
     /// snake_case
-    Snake = Case::Lower as u16 | (1 << 7),
+    Snake = Self::Lower as u16 | (1 << 7),
     /// kebab-case
-    Kebab = Case::Lower as u16 | (1 << 8),
+    Kebab = Self::Lower as u16 | (1 << 8),
     // camelCase
-    Camel = Case::Lower as u16 | (1 << 9),
+    Camel = Self::Lower as u16 | (1 << 9),
     /// Unknown case
     #[default]
-    Unknown = Case::Camel as u16
-        | Case::Kebab as u16
-        | Case::Snake as u16
-        | Case::Pascal as u16
-        | Case::Constant as u16
-        | Case::Uni as u16
+    Unknown = Self::Camel as u16
+        | Self::Kebab as u16
+        | Self::Snake as u16
+        | Self::Pascal as u16
+        | Self::Constant as u16
+        | Self::Uni as u16
         | (1 << 10),
 }
 
