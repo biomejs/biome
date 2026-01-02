@@ -1,4 +1,5 @@
 use std::{
+    backtrace::{Backtrace, BacktraceStatus},
     fmt::Write,
     panic::{PanicHookInfo, set_hook},
     thread,
@@ -37,6 +38,18 @@ fn panic_handler(info: &PanicHookInfo) {
         writeln!(error, "Message: {msg}").unwrap();
     } else if let Some(msg) = payload.downcast_ref::<String>() {
         writeln!(error, "Message: {msg}").unwrap();
+    }
+
+    let backtrace = Backtrace::capture();
+    if backtrace.status() == BacktraceStatus::Captured {
+        writeln!(error, "Stack Trace:").unwrap();
+        writeln!(error, "{}", backtrace).unwrap();
+    } else {
+        writeln!(
+            error,
+            "Stack Trace: Re-run with `RUST_BACKTRACE=1` to capture the stack trace"
+        )
+        .unwrap();
     }
 
     // Write the panic to stderr
