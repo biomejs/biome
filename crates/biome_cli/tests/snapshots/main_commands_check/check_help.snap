@@ -291,15 +291,16 @@ Available options:
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag and the `defaultBranch` is not set in your
                               `biome.json`
-        --only=<GROUP|RULE|DOMAIN>  Run only the given rule, group of rules or domain. If the
-                              severity level of a rule is `off`, then the severity level of the rule
-                              is set to `error` if it is a recommended rule or `warn` otherwise.
+        --only=<GROUP|RULE|DOMAIN>  Run only the given lint rule, assist action, group of rules and
+                              actions, or domain. If the severity level of a rule is `off`, then the
+                              severity level of the rule is set to `error` if it is a recommended
+                              rule or `warn` otherwise.
                               Example:
                               ```shell biome check --only=correctness/noUnusedVariables
                               --only=suspicious --only=test ```
-        --skip=<GROUP|RULE|DOMAIN>  Skip the given rule, group of rules or domain by setting the
-                              severity level of the rules to `off`. This option takes precedence
-                              over `--only`.
+        --skip=<GROUP|RULE|DOMAIN>  Skip the given lint rule, assist action, group of rules and
+                              actions, or domain by setting the severity level of the rules to
+                              `off`. This option takes precedence over `--only`.
                               Example:
                               ```shell biome check --skip=correctness/noUnusedVariables
                               --skip=suspicious --skip=project ```

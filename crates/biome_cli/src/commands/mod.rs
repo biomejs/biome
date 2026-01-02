@@ -181,7 +181,7 @@ pub enum BiomeCommand {
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
 
-        /// Run only the given rule, group of rules or domain.
+        /// Run only the given lint rule, assist action, group of rules and actions, or domain.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
         ///
@@ -193,7 +193,7 @@ pub enum BiomeCommand {
         #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
         only: Vec<AnalyzerSelector>,
 
-        /// Skip the given rule, group of rules or domain by setting the severity level of the rules to `off`.
+        /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
         /// This option takes precedence over `--only`.
         ///
         /// Example:
@@ -264,7 +264,7 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         log_options: LogOptions,
 
-        /// Run only the given rule, group of rules or domain.
+        /// Run only the given lint rule, assist action, group of rules and actions, or domain.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
         ///
@@ -276,7 +276,7 @@ pub enum BiomeCommand {
         #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
         only: Vec<AnalyzerSelector>,
 
-        /// Skip the given rule, group of rules or domain by setting the severity level of the rules to `off`.
+        /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
         /// This option takes precedence over `--only`.
         ///
         /// Example:
@@ -459,7 +459,7 @@ pub enum BiomeCommand {
         )]
         threads: Option<usize>,
 
-        /// Run only the given rule, group of rules or domain.
+        /// Run only the given lint rule, assist action, group of rules and actions, or domain.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
         ///
@@ -471,7 +471,7 @@ pub enum BiomeCommand {
         #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
         only: Vec<AnalyzerSelector>,
 
-        /// Skip the given rule, group of rules or domain by setting the severity level of the rules to `off`.
+        /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
         /// This option takes precedence over `--only`.
         ///
         /// Example:
