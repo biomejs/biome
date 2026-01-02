@@ -40,6 +40,7 @@ pub use analyzer::{
     LinterConfiguration, RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration,
     RuleWithFixOptions, RuleWithOptions, Rules, linter_configuration,
 };
+use biome_analyze::ExtendedConfigurationProvider;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{KeyValuePair, markup};
 use biome_deserialize::{
@@ -811,6 +812,17 @@ impl ConfigurationSource {
         self.source.as_ref().and_then(|source| {
             let (_, path) = source.clone();
             path.map(|p| p.as_path().to_path_buf())
+        })
+    }
+}
+
+impl ExtendedConfigurationProvider for ConfigurationSource {
+    fn any_extended_starts_with_catch_all(&self) -> bool {
+        self.extended_configurations().any(|c| {
+            c.files
+                .as_ref()
+                .and_then(|files| files.includes.as_deref())
+                .is_some_and(|globs| globs.first().is_some_and(|glob| glob.as_str() == "**"))
         })
     }
 }
