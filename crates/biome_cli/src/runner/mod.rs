@@ -291,6 +291,10 @@ pub(crate) trait CommandRunner {
                 content: stdin.as_content(),
                 cli_options,
                 console,
+                skip_ignore_check: Self::ProcessFile::should_skip_ignore_check(
+                    &biome_path,
+                    workspace,
+                ),
             });
         }
 
