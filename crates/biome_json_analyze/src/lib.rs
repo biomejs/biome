@@ -11,15 +11,12 @@ pub mod utils;
 pub use crate::registry::visit_registry;
 use crate::services::config_source::ConfigSource;
 use crate::suppression_action::JsonSuppressionAction;
+pub use biome_analyze::ExtendedConfigurationProvider;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
     LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
     to_analyzer_suppressions,
 };
-#[cfg(feature = "configuration")]
-use biome_configuration::ConfigurationSource;
-#[cfg(not(feature = "configuration"))]
-pub struct ConfigurationSource;
 use biome_diagnostics::Error;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, TextRange};
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
@@ -35,8 +32,8 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 });
 
 pub struct JsonAnalyzeServices {
-    /// The source of the configuration: the [biome_configuration::Configuration] (user one, or default).
-    pub configuration_source: Option<Arc<ConfigurationSource>>,
+    /// Provider for extended configuration information.
+    pub configuration_provider: Option<Arc<dyn ExtendedConfigurationProvider>>,
 
     /// The source file
     pub file_source: JsonFileSource,
@@ -125,7 +122,7 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    services.insert_service(json_services.configuration_source);
+    services.insert_service(json_services.configuration_provider);
     services.insert_service(json_services.file_source);
 
     (
@@ -178,7 +175,7 @@ mod tests {
         let options = AnalyzerOptions::default();
         let services = JsonAnalyzeServices {
             file_source: JsonFileSource::json(),
-            configuration_source: None,
+            configuration_provider: None,
         };
         analyze(
             &parsed.tree(),
