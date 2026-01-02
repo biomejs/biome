@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::{HtmlAttribute, HtmlElement, HtmlSelfClosingElement};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_autofocus::NoAutofocusOptions;
@@ -78,7 +79,7 @@ impl Rule for NoAutofocus {
         }
 
         // Check if element is inside a dialog or has popover attribute in ancestors
-        if is_inside_allowed_context(node) {
+        if is_inside_allowed_context(node).unwrap_or(false) {
             return None;
         }
 
@@ -119,55 +120,48 @@ fn is_autofocus_attribute(node: &HtmlAttribute) -> bool {
 
 /// Check if the element is inside an allowed context (dialog or popover)
 ///
-/// Note: We skip the first element (the one containing the autofocus attribute)
+/// Note: We skip the first [HtmlElement] (the one containing the autofocus attribute)
 /// because we only want to check if it's *inside* a dialog/popover, not if
 /// it *is* the dialog/popover itself.
-fn is_inside_allowed_context(attr: &HtmlAttribute) -> bool {
+fn is_inside_allowed_context(attr: &HtmlAttribute) -> Option<bool> {
     let mut skip_first_element = true;
 
     // Walk up the ancestors to find if we're inside a dialog or popover
     for ancestor in attr.syntax().ancestors() {
-        // Check for HtmlElement (has opening/closing tags)
-        if let Some(element) = HtmlElement::cast_ref(&ancestor) {
-            // Skip the first element (the one containing the autofocus attribute)
-            if skip_first_element {
-                skip_first_element = false;
-                continue;
-            }
+        let Some(tag_element) = get_tag_element(&ancestor) else {
+            continue;
+        };
 
-            // Check if element is a dialog
-            if let Ok(opening) = element.opening_element() {
-                if let Ok(name) = opening.name()
-                    && let Ok(token) = name.value_token()
-                    && token.text_trimmed().eq_ignore_ascii_case("dialog")
-                {
-                    return true;
-                }
-                // Check if element has popover attribute
-                if opening.find_attribute_by_name("popover").is_some() {
-                    return true;
-                }
-            }
+        if skip_first_element {
+            skip_first_element = false;
+            continue;
         }
 
-        // Check for HtmlSelfClosingElement (skip if it's the first element)
-        if let Some(element) = HtmlSelfClosingElement::cast_ref(&ancestor) {
-            if skip_first_element {
-                skip_first_element = false;
-                continue;
-            }
-
-            if let Ok(name) = element.name()
-                && let Ok(token) = name.value_token()
-                && token.text_trimmed().eq_ignore_ascii_case("dialog")
-            {
-                return true;
-            }
-            // Check if element has popover attribute
-            if element.find_attribute_by_name("popover").is_some() {
-                return true;
-            }
+        if is_dialog_or_popover(&tag_element) {
+            return Some(true);
         }
     }
-    false
+
+    Some(false)
+}
+
+/// Extract an [AnyHtmlTagElement] from an ancestor node
+fn get_tag_element(node: &biome_html_syntax::HtmlSyntaxNode) -> Option<AnyHtmlTagElement> {
+    HtmlElement::cast_ref(node)
+        .and_then(|e| e.opening_element().ok())
+        .map(AnyHtmlTagElement::from)
+        .or_else(|| {
+            HtmlSelfClosingElement::cast_ref(node).map(|e| AnyHtmlTagElement::from(e.clone()))
+        })
+}
+
+/// Check if the tag element is a dialog or has popover attribute
+fn is_dialog_or_popover(tag_element: &AnyHtmlTagElement) -> bool {
+    let is_dialog = tag_element
+        .name()
+        .ok()
+        .and_then(|n| n.value_token().ok())
+        .is_some_and(|token| token.text_trimmed().eq_ignore_ascii_case("dialog"));
+
+    is_dialog || tag_element.find_attribute_by_name("popover").is_some()
 }
