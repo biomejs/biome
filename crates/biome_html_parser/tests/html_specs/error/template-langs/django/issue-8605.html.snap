@@ -1,0 +1,65 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+{{ some_form }}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusElement {
+            items: [
+                L_DOUBLE_CURLY@0..2 "{{" [] [],
+                HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@2..13 " some_form " [] [],
+                },
+                R_DOUBLE_CURLY@13..15 "}}" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@15..16 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..16
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..15
+    0: HTML_BOGUS_ELEMENT@0..15
+      0: L_DOUBLE_CURLY@0..2 "{{" [] []
+      1: HTML_TEXT_EXPRESSION@2..13
+        0: HTML_LITERAL@2..13 " some_form " [] []
+      2: R_DOUBLE_CURLY@13..15 "}}" [] []
+  4: EOF@15..16 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+issue-8605.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+  > 1 │ {{ some_form }}
+      │ ^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+```

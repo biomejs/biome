@@ -558,7 +558,11 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
 
     if p.at(T!["}}"]) {
         p.expect_with_context(T!["}}"], context);
-        Present(m.complete(p, HTML_DOUBLE_TEXT_EXPRESSION))
+        if context == HtmlLexContext::InsideTag || context == HtmlLexContext::InsideTagVue {
+            Present(m.complete(p, HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION))
+        } else {
+            Present(m.complete(p, HTML_DOUBLE_TEXT_EXPRESSION))
+        }
     } else if p.at(T![<]) {
         let diagnostic = expected_closing_text_expression(p, p.cur_range(), opening_range);
         p.error(diagnostic);
@@ -605,7 +609,11 @@ pub(crate) fn parse_single_text_expression(
 
     if p.at(T!['}']) {
         p.bump_remap_with_context(T!['}'], context);
-        Present(m.complete(p, HTML_SINGLE_TEXT_EXPRESSION))
+        if context == HtmlLexContext::InsideTag || context == HtmlLexContext::InsideTagVue {
+            Present(m.complete(p, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION))
+        } else {
+            Present(m.complete(p, HTML_SINGLE_TEXT_EXPRESSION))
+        }
     } else if p.at(T![<]) {
         let diagnostic = expected_closing_text_expression(p, p.cur_range(), opening_range);
         p.error(diagnostic);
