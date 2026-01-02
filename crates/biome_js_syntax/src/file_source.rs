@@ -363,6 +363,7 @@ impl JsFileSource {
             "vue" => Ok(Self::vue()),
             // TODO: Remove once we have full support of svelte files
             "svelte" => Ok(Self::svelte()),
+            "gs" => Ok(Self::js_module()),
 
             _ => Err(FileSourceError::UnknownExtension),
         }
@@ -396,6 +397,7 @@ impl JsFileSource {
             "vue" | "vuejs" => Ok(Self::vue()),
             // TODO: Remove once we have full support of svelte files
             "svelte" => Ok(Self::svelte()),
+            "appsscript" => Ok(Self::js_module()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }
