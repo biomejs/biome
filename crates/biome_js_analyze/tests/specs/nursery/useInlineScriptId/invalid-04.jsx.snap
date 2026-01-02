@@ -19,7 +19,7 @@ export default function Page() {
 ```
 invalid-04.jsx:6:5 lint/nursery/useInlineScriptId ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! next/script components with inline content or `dangerouslySetInnerHTML` must specify id attribute.
+  × next/script components with inline content or `dangerouslySetInnerHTML` must specify id attribute.
   
     4 │ export default function Page() {
     5 │   return (

@@ -20,7 +20,7 @@ export default function Page() {
 ```
 invalid-03.jsx:7:5 lint/nursery/useInlineScriptId ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! next/script components with inline content or `dangerouslySetInnerHTML` must specify id attribute.
+  × next/script components with inline content or `dangerouslySetInnerHTML` must specify id attribute.
   
     5 │   const props = { strategy: "beforeInteractive" };
     6 │   return (
