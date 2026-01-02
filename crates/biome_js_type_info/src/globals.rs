@@ -484,7 +484,7 @@ impl Default for GlobalsResolver {
                 type_parameters: Default::default(),
                 name: None,
                 parameters: Default::default(),
-                return_type: ReturnType::Type(GLOBAL_INSTANCEOF_REGEXP_ID.into()),
+                return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
             })),
         );
 
