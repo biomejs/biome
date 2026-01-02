@@ -245,6 +245,9 @@ impl FormatHtmlElementList {
                             // Some(WordSeparator::Lines(2))
                         }
 
+                        // Don't add a newline before a bogus element as it may break the layout
+                        Some(HtmlChild::NonText(AnyHtmlElement::HtmlBogusElement(_))) => None,
+
                         // Last word or last word before an element without any whitespace in between
                         Some(HtmlChild::NonText(next_child)) => Some(WordSeparator::EndOfText {
                             is_soft_line_break: !matches!(

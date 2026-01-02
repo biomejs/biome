@@ -40,7 +40,7 @@ x => {
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,35 @@
+@@ -1,8 +1,31 @@
  <!--interpolations in html should be treated as normal text-->
  <div>
 -  Fuga magnam facilis. Voluptatem quaerat porro.{{ x => { const hello = 'world'
@@ -48,8 +48,7 @@ x => {
 -  voluptas. {{ some_variable }} Eum quia nihil nulla esse. Dolorem asperiores
 -  vero est error {{ preserve invalid interpolation }} reprehenderit voluptates
 -  minus {{console.log( short_interpolation )}} nemo.
-+  Fuga magnam facilis. Voluptatem quaerat porro.
-+  {{
++  Fuga magnam facilis. Voluptatem quaerat porro.{{
 +
 +
 +x => {
@@ -59,8 +58,7 @@ x => {
 +
 +
 +
-+}}
-+  Magni consectetur in et molestias neque esse voluptatibus voluptas.
++}} Magni consectetur in et molestias neque esse voluptatibus voluptas.
 +  {{  
 +    
 +    
@@ -68,8 +66,7 @@ x => {
 +
 +
 +
-+}}
-+  Eum quia nihil nulla esse. Dolorem asperiores vero est error
++}} Eum quia nihil nulla esse. Dolorem asperiores vero est error
 +  {{
 +
 +                    preserve
@@ -78,8 +75,7 @@ x => {
 +                    
 +                    interpolation
 +
-+}}
-+  reprehenderit voluptates minus {{console.log(  short_interpolation )}}nemo.
++}} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.
  </div>
 ```
 
@@ -88,8 +84,7 @@ x => {
 ```html
 <!--interpolations in html should be treated as normal text-->
 <div>
-  Fuga magnam facilis. Voluptatem quaerat porro.
-  {{
+  Fuga magnam facilis. Voluptatem quaerat porro.{{
 
 
 x => {
@@ -99,8 +94,7 @@ x => {
 
 
 
-}}
-  Magni consectetur in et molestias neque esse voluptatibus voluptas.
+}} Magni consectetur in et molestias neque esse voluptatibus voluptas.
   {{  
     
     
@@ -108,8 +102,7 @@ x => {
 
 
 
-}}
-  Eum quia nihil nulla esse. Dolorem asperiores vero est error
+}} Eum quia nihil nulla esse. Dolorem asperiores vero est error
   {{
 
                     preserve
@@ -118,8 +111,7 @@ x => {
                     
                     interpolation
 
-}}
-  reprehenderit voluptates minus {{console.log(  short_interpolation )}}nemo.
+}} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.
 </div>
 ```
 
