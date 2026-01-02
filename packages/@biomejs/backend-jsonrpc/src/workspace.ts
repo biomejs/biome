@@ -1879,6 +1879,11 @@ See <https://biomejs.dev/linter/rules/no-deprecated-imports>
 	 */
 	noDeprecatedImports?: NoDeprecatedImportsConfiguration;
 	/**
+	* Disallow duplication of attributes.
+See <https://biomejs.dev/linter/rules/no-duplicate-attributes> 
+	 */
+	noDuplicateAttributes?: NoDuplicateAttributesConfiguration;
+	/**
 	* Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
 See <https://biomejs.dev/linter/rules/no-duplicate-dependencies> 
 	 */
@@ -3698,6 +3703,9 @@ export type NoContinueConfiguration =
 export type NoDeprecatedImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDeprecatedImportsOptions;
+export type NoDuplicateAttributesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateAttributesOptions;
 export type NoDuplicateDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateDependenciesOptions;
@@ -5169,6 +5177,10 @@ export interface RuleWithNoDeprecatedImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDeprecatedImportsOptions;
 }
+export interface RuleWithNoDuplicateAttributesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateAttributesOptions;
+}
 export interface RuleWithNoDuplicateDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateDependenciesOptions;
@@ -6598,6 +6610,7 @@ export interface NoAmbiguousAnchorTextOptions {
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
+export type NoDuplicateAttributesOptions = {};
 export type NoDuplicateDependenciesOptions = {};
 export type NoDuplicatedSpreadPropsOptions = {};
 export interface NoEmptySourceOptions {
@@ -7518,6 +7531,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDuplicateAttributes"
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
