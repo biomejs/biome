@@ -14,14 +14,13 @@ use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::{
-    CssImport, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
-    JsModuleInfoDiagnostic, JsReexport, ModuleDiagnostic, ModuleGraph, ModuleResolver,
-    ResolvedPath,
+    ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase, JsModuleInfoDiagnostic,
+    JsReexport, ModuleDiagnostic, ModuleGraph, ModuleResolver, ResolvedPath,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
-use biome_test_utils::{get_added_js_paths, get_css_added_paths};
+use biome_test_utils::get_added_js_paths;
 use camino::{Utf8Path, Utf8PathBuf};
 use walkdir::WalkDir;
 
@@ -140,7 +139,7 @@ fn test_type_flattening_does_not_explode_on_recursive_parent_element_pattern() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
 
     let data = module_graph.data();
     let module = data.get(Utf8Path::new("/src/repro.ts")).unwrap();
@@ -295,7 +294,7 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths,  true);
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
 
     let imports = module_graph.data();
     let file_imports = imports
