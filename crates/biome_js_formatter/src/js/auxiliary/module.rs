@@ -33,7 +33,6 @@ impl FormatNodeRule<JsModule> for FormatJsModule {
 
         write!(f, [format_removed(&eof_token?)])?;
 
-        dbg!("trailing_newline", f.options().trailing_newline());
         if f.options().trailing_newline().value() {
             write!(f, [hard_line_break()])
         } else {

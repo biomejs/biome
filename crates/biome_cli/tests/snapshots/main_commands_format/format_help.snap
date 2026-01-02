@@ -90,6 +90,7 @@ Options that changes how the JSON parser behaves
 
 Options that changes how the CSS parser behaves
         --css-parse-css-modules=<true|false>  Enables parsing of CSS Modules specific features.
+                              Enable this feature only when your files don't end in `.module.css`.
         --css-parse-tailwind-directives=<true|false>  Enables parsing of Tailwind CSS 4.0 directives
                               and functions.
 

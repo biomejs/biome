@@ -6,8 +6,8 @@ use crate::prelude::tag::GroupMode;
 use crate::prelude::*;
 use crate::{
     BufferExtensions, Format, FormatContext, FormatElement, FormatOptions, FormatResult, Formatter,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, TrailingNewline,
-    TransformSourceMap,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, SourceMapGeneration,
+    TrailingNewline, TransformSourceMap,
 };
 use crate::{format, write};
 use biome_rowan::TextSize;
