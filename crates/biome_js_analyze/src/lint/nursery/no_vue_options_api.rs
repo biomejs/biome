@@ -2,7 +2,8 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsFileSource;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, TokenText};
+use biome_rule_options::no_vue_options_api::NoVueOptionsApiOptions;
 
 use crate::frameworks::vue::vue_component::{
     AnyVueComponent, VueComponent, VueComponentQuery, VueOptionsApiBasedComponent,
@@ -43,12 +44,66 @@ declare_lint_rule! {
     /// </script>
     /// ```
     ///
+    /// ```vue,expect_diagnostic
+    /// <script>
+    /// export default {
+    ///   computed: {
+    ///     doubled() {
+    ///       return this.count * 2
+    ///     }
+    ///   }
+    /// }
+    /// </script>
+    /// ```
+    ///
+    /// ```vue,expect_diagnostic
+    /// <script>
+    /// export default {
+    ///   mounted() {
+    ///     console.log('Component mounted')
+    ///   }
+    /// }
+    /// </script>
+    /// ```
+    ///
+    /// ```vue,expect_diagnostic
+    /// <script>
+    /// import { defineComponent } from 'vue'
+    ///
+    /// export default defineComponent({
+    ///   name: 'MyComponent',
+    ///   data() {
+    ///     return { count: 0 }
+    ///   }
+    /// })
+    /// </script>
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```vue
     /// <script setup>
     /// import { ref } from 'vue'
     /// const count = ref(0)
+    /// </script>
+    /// ```
+    ///
+    /// ```vue
+    /// <script setup>
+    /// import { ref, computed } from 'vue'
+    ///
+    /// const count = ref(0)
+    /// const doubled = computed(() => count.value * 2)
+    /// </script>
+    /// ```
+    ///
+    /// ```vue
+    /// <script setup>
+    /// import { onMounted } from 'vue'
+    ///
+    /// onMounted(() => {
+    ///   console.log('Component mounted')
+    /// })
     /// </script>
     /// ```
     ///
@@ -63,6 +118,11 @@ declare_lint_rule! {
     /// </script>
     /// ```
     ///
+    /// ## Resources
+    ///
+    /// - [Vue 3 Composition API](https://vuejs.org/api/composition-api-setup.html)
+    /// - [Options API vs Composition API](https://vuejs.org/guide/introduction.html#api-styles)
+    ///
     pub NoVueOptionsApi {
         version: "next",
         name: "noVueOptionsApi",
@@ -70,7 +130,6 @@ declare_lint_rule! {
         recommended: false,
         severity: Severity::Error,
         domains: &[RuleDomain::Vue],
-        sources: &[],
     }
 }
 
@@ -158,31 +217,27 @@ pub struct RuleState {
     /// The range of the detected Options API property
     range: TextRange,
     /// The name of the detected property
-    property_name: String,
+    property_name: TokenText,
 }
 
 impl Rule for NoVueOptionsApi {
     type Query = VueComponentQuery;
     type State = RuleState;
-    type Signals = Vec<Self::State>;
-    type Options = ();
+    type Signals = Option<Self::State>;
+    type Options = NoVueOptionsApiOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(component) = VueComponent::from_potential_component(
+        let component = VueComponent::from_potential_component(
             ctx.query(),
             ctx.model(),
             ctx.source_type::<JsFileSource>(),
             ctx.file_path(),
-        ) else {
-            return vec![];
-        };
+        )?;
 
         // <script setup> components are valid - skip
         if matches!(component.kind(), AnyVueComponent::Setup(_)) {
-            return vec![];
+            return None;
         }
-
-        let mut signals = vec![];
 
         // Use iter_declaration_groups() to detect Options API properties
         match component.kind() {
@@ -191,9 +246,9 @@ impl Rule for NoVueOptionsApi {
                     let name_text = name.text();
                     // Allow pure setup() - only flag if has other Options API props
                     if name_text != "setup" && OPTIONS_API_PROPERTIES.contains(&name_text) {
-                        signals.push(RuleState {
+                        return Some(RuleState {
                             range: member.range(),
-                            property_name: name_text.to_string(),
+                            property_name: name,
                         });
                     }
                 }
@@ -202,9 +257,9 @@ impl Rule for NoVueOptionsApi {
                 for (name, member) in dc.iter_declaration_groups() {
                     let name_text = name.text();
                     if name_text != "setup" && OPTIONS_API_PROPERTIES.contains(&name_text) {
-                        signals.push(RuleState {
+                        return Some(RuleState {
                             range: member.range(),
-                            property_name: name_text.to_string(),
+                            property_name: name,
                         });
                     }
                 }
@@ -213,9 +268,9 @@ impl Rule for NoVueOptionsApi {
                 for (name, member) in ca.iter_declaration_groups() {
                     let name_text = name.text();
                     if name_text != "setup" && OPTIONS_API_PROPERTIES.contains(&name_text) {
-                        signals.push(RuleState {
+                        return Some(RuleState {
                             range: member.range(),
-                            property_name: name_text.to_string(),
+                            property_name: name,
                         });
                     }
                 }
@@ -223,18 +278,19 @@ impl Rule for NoVueOptionsApi {
             _ => {}
         }
 
-        signals
+        None
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let alternative = get_composition_api_alternative(&state.property_name);
+        let property_name = state.property_name.text();
+        let alternative = get_composition_api_alternative(property_name);
 
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 state.range,
                 markup! {
-                    "Options API property "<Emphasis>{&state.property_name}</Emphasis>" is not supported in Vue Vapor Mode."
+                    "Options API property "<Emphasis>{property_name}</Emphasis>" is not supported in Vue Vapor Mode."
                 },
             )
             .note(markup! {
