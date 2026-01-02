@@ -53,6 +53,7 @@ pub mod no_document_import_in_page;
 pub mod no_done_callback;
 pub mod no_double_equals;
 pub mod no_duplicate_at_import_rules;
+pub mod no_duplicate_attributes;
 pub mod no_duplicate_case;
 pub mod no_duplicate_class_members;
 pub mod no_duplicate_custom_properties;
