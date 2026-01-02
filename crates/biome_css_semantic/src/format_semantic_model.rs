@@ -3,8 +3,8 @@ use biome_css_syntax::AnyCssRoot;
 use biome_formatter::prelude::*;
 use biome_formatter::write;
 use biome_formatter::{
-    FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline,
-    SourceMapGeneration, TransformSourceMap,
+    FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
+    SourceMapGeneration, TrailingNewline, TransformSourceMap,
 };
 use biome_rowan::{AstNode, TextSize};
 

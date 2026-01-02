@@ -9,8 +9,8 @@ use crate::{
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{
-    FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline,
-    SourceMapGeneration, TransformSourceMap,
+    FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
+    SourceMapGeneration, TrailingNewline, TransformSourceMap,
 };
 use biome_formatter::{format_args, write};
 use biome_js_syntax::TextSize;
