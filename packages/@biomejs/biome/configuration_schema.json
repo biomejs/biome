@@ -2989,16 +2989,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoDuplicateClassesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoDuplicateClassesOptions" }
-			]
-		},
-		"NoDuplicateClassesOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoDuplicateCustomPropertiesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5237,7 +5227,7 @@
 				"noDuplicateClasses": {
 					"description": "Disallow duplicate CSS classes.\nSee <https://biomejs.dev/linter/rules/no-duplicate-classes>",
 					"anyOf": [
-						{ "$ref": "#/$defs/NoDuplicateClassesConfiguration" },
+						{ "$ref": "#/$defs/UseSortedClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6184,6 +6174,14 @@
 			},
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseSortedClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedClassesOptions" }
+			},
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithUseSortedKeysOptions": {
 			"type": "object",
 			"properties": {
@@ -6792,16 +6790,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDuplicateClassMembersOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoDuplicateClassesOptions": {
-			"type": "object",
-			"properties": {
-				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoDuplicateClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10396,6 +10384,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noDuplicateClasses": {
+					"description": "Remove duplicate CSS classes.\nSee <https://biomejs.dev/assist/actions/no-duplicate-classes>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"organizeImports": {
 					"description": "Provides a code action to sort the imports and exports in the file using a built-in or custom order.\nSee <https://biomejs.dev/assist/actions/organize-imports>",
 					"anyOf": [

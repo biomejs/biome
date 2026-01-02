@@ -13,7 +13,7 @@ use biome_js_factory::make::{
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
+use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
 use rustc_hash::FxHashSet;
 
 declare_source_rule! {
@@ -62,7 +62,7 @@ impl Rule for NoDuplicateClasses {
     type Query = Ast<AnyClassStringLike>;
     type State = DuplicateClassesState;
     type Signals = Option<Self::State>;
-    type Options = UseSortedClassesOptions;
+    type Options = NoDuplicateClassesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let options = ctx.options();
@@ -119,21 +119,27 @@ impl Rule for NoDuplicateClasses {
             });
         }
 
-        // Identify duplicates and track which tokens to keep
+        // Identify duplicates and track which tokens to keep.
+        // Use a Vec to track duplicates in order of first occurrence for deterministic output,
+        // plus a HashSet for O(1) dedup checking.
         let mut seen: FxHashSet<&str> = FxHashSet::default();
         let mut duplicate_set: FxHashSet<&str> = FxHashSet::default();
+        let mut duplicates_in_order: Vec<&str> = Vec::new();
         let mut kept_indices: Vec<usize> = Vec::new();
 
         for (idx, token) in tokens.iter().enumerate() {
             if seen.contains(token.class) {
-                duplicate_set.insert(token.class);
+                // Only add to the ordered list if this is the first time we see it as a duplicate
+                if duplicate_set.insert(token.class) {
+                    duplicates_in_order.push(token.class);
+                }
             } else {
                 seen.insert(token.class);
                 kept_indices.push(idx);
             }
         }
 
-        if duplicate_set.is_empty() {
+        if duplicates_in_order.is_empty() {
             return None;
         }
 
@@ -149,7 +155,7 @@ impl Rule for NoDuplicateClasses {
             deduplicated.push_str(&value_str[last.text_end..]);
         }
 
-        let duplicates: Vec<Box<str>> = duplicate_set.into_iter().map(Into::into).collect();
+        let duplicates: Vec<Box<str>> = duplicates_in_order.into_iter().map(Into::into).collect();
 
         Some(DuplicateClassesState {
             deduplicated: deduplicated.into(),

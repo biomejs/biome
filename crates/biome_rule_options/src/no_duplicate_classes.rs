@@ -1,6 +1,7 @@
-use biome_deserialize_macros::{Deserializable, Merge};
-use serde::{Deserialize, Serialize};
-#[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoDuplicateClassesOptions {}
+use crate::use_sorted_classes::UseSortedClassesOptions;
+
+/// Options for the `noDuplicateClasses` rule.
+///
+/// This rule uses the same options as `useSortedClasses` to control which
+/// JSX attributes and utility functions are checked for duplicate classes.
+pub type NoDuplicateClassesOptions = UseSortedClassesOptions;
