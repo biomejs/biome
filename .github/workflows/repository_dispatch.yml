@@ -42,7 +42,7 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:
-          bins: wasm-bindgen-cli@0.2.105, wasm-opt
+          bins: wasm-bindgen-cli@0.2.106, wasm-opt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

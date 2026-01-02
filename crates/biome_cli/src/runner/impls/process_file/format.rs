@@ -138,6 +138,7 @@ impl ProcessFile for FormatProcessFile {
             path: biome_path.clone(),
             features: FeaturesBuilder::new().with_formatter().build(),
             inline_config: None,
+            skip_ignore_check: false,
         })?;
 
         if file_features.is_ignored() {

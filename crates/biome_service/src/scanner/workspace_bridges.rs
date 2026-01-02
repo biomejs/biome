@@ -102,7 +102,7 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
 
 /// Trait used to give access to workspace functionality required by the
 /// watcher.
-pub(crate) trait WorkspaceWatcherBridge {
+pub trait WorkspaceWatcherBridge {
     /// Returns a reference to the [`FileSystem`].
     fn fs(&self) -> &dyn FileSystem;
 

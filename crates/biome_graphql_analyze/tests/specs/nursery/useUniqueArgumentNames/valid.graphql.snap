@@ -1,0 +1,37 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+query A {
+	field
+}
+query B {
+	field @directive
+}
+query C {
+	field(arg: "value")
+}
+query D {
+	field @directive(arg: "value")
+}
+query E {
+	one: field(arg: "value")
+	two: field(arg: "value")
+}
+query F {
+	field(arg: "value") @directive(arg: "value")
+}
+query G {
+	field @directive1(arg: "value") @directive2(arg: "value")
+}
+query H {
+	field(arg1: "value", arg2: "value", arg3: "value")
+}
+query I {
+	field @directive(arg1: "value", arg2: "value", arg3: "value")
+}
+
+```

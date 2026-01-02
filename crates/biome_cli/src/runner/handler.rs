@@ -69,6 +69,7 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
             path: biome_path.clone(),
             features: execution.features(),
             inline_config: None,
+            skip_ignore_check: false,
         });
 
         let can_read = DocumentFileSource::can_read(biome_path);

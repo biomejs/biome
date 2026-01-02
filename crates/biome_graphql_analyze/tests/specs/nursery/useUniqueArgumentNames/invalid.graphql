@@ -1,0 +1,13 @@
+# should generate diagnostics
+query A {
+	field(arg1: "value", arg1: "value")
+}
+query B {
+	field(arg1: "value", arg1: "value", arg1: "value")
+}
+query C {
+	field @directive(arg1: "value", arg1: "value")
+}
+query D {
+	field @directive(arg1: "value", arg1: "value", arg1: "value")
+}

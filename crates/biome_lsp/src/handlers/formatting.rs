@@ -40,6 +40,7 @@ pub(crate) fn format(
         path: path.clone(),
         features,
         inline_config: session.inline_config(),
+        skip_ignore_check: false,
     })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);
@@ -111,6 +112,7 @@ pub(crate) fn format_range(
         path: path.clone(),
         features,
         inline_config: session.inline_config(),
+        skip_ignore_check: false,
     })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);
@@ -205,6 +207,7 @@ pub(crate) fn format_on_type(
         path: path.clone(),
         features,
         inline_config: session.inline_config(),
+        skip_ignore_check: false,
     })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);

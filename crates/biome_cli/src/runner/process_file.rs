@@ -141,6 +141,7 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
                 path: biome_path.clone(),
                 features: ctx.execution().features(),
                 inline_config: None,
+                skip_ignore_check: false,
             })
             .with_file_path_and_code_and_tags(
                 biome_path.to_string(),

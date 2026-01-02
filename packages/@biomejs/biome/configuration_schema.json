@@ -2608,6 +2608,18 @@
 			]
 		},
 		"NoBarrelFileOptions": { "type": "object", "additionalProperties": false },
+		"NoBeforeInteractiveScriptOutsideDocumentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{
+					"$ref": "#/$defs/RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions"
+				}
+			]
+		},
+		"NoBeforeInteractiveScriptOutsideDocumentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoBiomeFirstExceptionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3690,6 +3702,16 @@
 					"type": ["boolean", "null"]
 				}
 			},
+			"additionalProperties": false
+		},
+		"NoJsxPropsBindConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoJsxPropsBindOptions" }
+			]
+		},
+		"NoJsxPropsBindOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"NoLabelVarConfiguration": {
@@ -5183,6 +5205,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noBeforeInteractiveScriptOutsideDocument": {
+					"description": "Prevent usage of next/script's beforeInteractive strategy outside of pages/_document.js in a Next.js project.\nSee <https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document>",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoBeforeInteractiveScriptOutsideDocumentConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noContinue": {
 					"description": "Disallow continue statements.\nSee <https://biomejs.dev/linter/rules/no-continue>",
 					"anyOf": [
@@ -5257,6 +5288,13 @@
 					"description": "Disallow string literals inside JSX elements.\nSee <https://biomejs.dev/linter/rules/no-jsx-literals>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoJsxLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noJsxPropsBind": {
+					"description": "Disallow .bind(), arrow functions, or function expressions in JSX props.\nSee <https://biomejs.dev/linter/rules/no-jsx-props-bind>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoJsxPropsBindConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5558,10 +5596,38 @@
 						{ "type": "null" }
 					]
 				},
+				"useUniqueArgumentNames": {
+					"description": "Require all argument names for fields & directives to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-argument-names>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUniqueArgumentNamesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useUniqueFieldDefinitionNames": {
+					"description": "Require all fields of a type to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-field-definition-names>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUniqueFieldDefinitionNamesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUniqueGraphqlOperationName": {
 					"description": "Enforce unique operation names across a GraphQL document.\nSee <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseUniqueGraphqlOperationNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useUniqueInputFieldNames": {
+					"description": "Require fields within an input object to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-input-field-names>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUniqueInputFieldNamesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useUniqueVariableNames": {
+					"description": "Require all variable definitions to be unique.\nSee <https://biomejs.dev/linter/rules/use-unique-variable-names>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUniqueVariableNamesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5571,6 +5637,20 @@
 						{
 							"$ref": "#/$defs/UseVueConsistentDefinePropsDeclarationConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"useVueConsistentVBindStyle": {
+					"description": "Enforce a consistent style for v-bind in Vue templates.\nSee <https://biomejs.dev/linter/rules/use-vue-consistent-v-bind-style>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentVBindStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueConsistentVOnStyle": {
+					"description": "Enforce a consistent style for v-on in Vue templates.\nSee <https://biomejs.dev/linter/rules/use-vue-consistent-v-on-style>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentVOnStyleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5595,10 +5675,31 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueVForKey": {
+					"description": "Enforce that elements using v-for also specify a unique key.\nSee <https://biomejs.dev/linter/rules/use-vue-v-for-key>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueVForKeyConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidTemplateRoot": {
+					"description": "Enforce valid Vue \\<template> root usage.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-template-root>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidTemplateRootConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueValidVBind": {
 					"description": "Forbids v-bind directives with missing arguments or invalid modifiers.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-v-bind>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueValidVBindConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVCloak": {
+					"description": "Enforce valid v-cloak Vue directives.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-v-cloak>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVCloakConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5637,10 +5738,31 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueValidVOnce": {
+					"description": "Enforce valid v-once Vue directives.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-v-once>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVOnceConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVPre": {
+					"description": "Enforce valid v-pre Vue directives.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-v-pre>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVPreConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueValidVText": {
 					"description": "Enforce valid v-text Vue directives.\nSee <https://biomejs.dev/linter/rules/use-vue-valid-v-text>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueValidVTextConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueVapor": {
+					"description": "Enforce opting in to Vue Vapor mode in \\<script setup> blocks.\nSee <https://biomejs.dev/linter/rules/use-vue-vapor>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueVaporConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -6315,6 +6437,17 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoBarrelFileOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoBeforeInteractiveScriptOutsideDocumentOptions"
+				}
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -7280,6 +7413,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoJsxLiteralsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoJsxPropsBindOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoJsxPropsBindOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9726,6 +9868,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseUniqueArgumentNamesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUniqueArgumentNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseUniqueElementIdsOptions": {
 			"type": "object",
 			"properties": {
@@ -9735,11 +9886,38 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseUniqueFieldDefinitionNamesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUniqueFieldDefinitionNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseUniqueGraphqlOperationNameOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseUniqueGraphqlOperationNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseUniqueInputFieldNamesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUniqueInputFieldNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseUniqueVariableNamesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUniqueVariableNamesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9830,6 +10008,26 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueConsistentVBindStyleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentVBindStyleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueConsistentVOnStyleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentVOnStyleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueDefineMacrosOrderOptions": {
 			"type": "object",
 			"properties": {
@@ -9859,11 +10057,40 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueVForKeyOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueVForKeyOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueValidTemplateRootOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidTemplateRootOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidVBindOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueValidVBindOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueValidVCloakOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVCloakOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9913,11 +10140,41 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueValidVOnceOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVOnceOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueValidVPreOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVPreOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidVTextOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueValidVTextOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueVaporOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueVaporOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12777,6 +13034,16 @@
 			},
 			"additionalProperties": false
 		},
+		"UseUniqueArgumentNamesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUniqueArgumentNamesOptions" }
+			]
+		},
+		"UseUniqueArgumentNamesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseUniqueElementIdsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12795,6 +13062,16 @@
 			},
 			"additionalProperties": false
 		},
+		"UseUniqueFieldDefinitionNamesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUniqueFieldDefinitionNamesOptions" }
+			]
+		},
+		"UseUniqueFieldDefinitionNamesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseUniqueGraphqlOperationNameConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12802,6 +13079,26 @@
 			]
 		},
 		"UseUniqueGraphqlOperationNameOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseUniqueInputFieldNamesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUniqueInputFieldNamesOptions" }
+			]
+		},
+		"UseUniqueInputFieldNamesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseUniqueVariableNamesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUniqueVariableNamesOptions" }
+			]
+		},
+		"UseUniqueVariableNamesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -12917,6 +13214,41 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueConsistentVBindStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentVBindStyleOptions" }
+			]
+		},
+		"UseVueConsistentVBindStyleOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"description": "Preferred style for `v-bind` usage: \"shorthand\" or \"longhand\".\nIf omitted, shorthand is preferred.",
+					"anyOf": [{ "$ref": "#/$defs/VueDirectiveStyle" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseVueConsistentVOnStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentVOnStyleOptions" }
+			]
+		},
+		"UseVueConsistentVOnStyleOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"description": "Preferred style for `v-on` usage: \"shorthand\" or \"longhand\".\nIf omitted, shorthand is preferred.",
+					"anyOf": [
+						{ "$ref": "#/$defs/VueDirectiveStyle2" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseVueDefineMacrosOrderConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12977,6 +13309,23 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueVForKeyConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueVForKeyOptions" }
+			]
+		},
+		"UseVueVForKeyOptions": { "type": "object", "additionalProperties": false },
+		"UseVueValidTemplateRootConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidTemplateRootOptions" }
+			]
+		},
+		"UseVueValidTemplateRootOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueValidVBindConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12984,6 +13333,16 @@
 			]
 		},
 		"UseVueValidVBindOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVCloakConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVCloakOptions" }
+			]
+		},
+		"UseVueValidVCloakOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -13045,6 +13404,26 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueValidVOnceConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVOnceOptions" }
+			]
+		},
+		"UseVueValidVOnceOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVPreConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVPreOptions" }
+			]
+		},
+		"UseVueValidVPreOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueValidVTextConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -13055,6 +13434,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseVueVaporConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueVaporOptions" }
+			]
+		},
+		"UseVueVaporOptions": { "type": "object", "additionalProperties": false },
 		"UseWhileConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -13108,6 +13494,14 @@
 		"Visibility": {
 			"type": "string",
 			"enum": ["public", "package", "private"]
+		},
+		"VueDirectiveStyle": {
+			"type": "string",
+			"enum": ["shorthand", "longhand"]
+		},
+		"VueDirectiveStyle2": {
+			"type": "string",
+			"enum": ["shorthand", "longhand"]
 		},
 		"WhitespaceSensitivity": {
 			"description": "Whitespace sensitivity for HTML formatting.\n\nThe following two cases won't produce the same output:\n\n|                |      html      |    output    |\n| -------------- | :------------: | :----------: |\n| with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 |\n| without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |\n\nThis happens because whitespace is significant in inline elements.\n\nAs a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20):\n```html\n<span>really long content</span>\n```\nas this, where the content hugs the tags:\n```html\n<span\n   >really long content</span\n>\n```\n\nNote that this is only necessary for inline elements. Block elements do not have this restriction.",

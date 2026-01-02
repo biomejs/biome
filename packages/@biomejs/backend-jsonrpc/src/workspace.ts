@@ -5,6 +5,7 @@ export interface SupportsFeatureParams {
 	inlineConfig?: Configuration;
 	path: BiomePath;
 	projectKey: ProjectKey;
+	skipIgnoreCheck?: boolean;
 }
 export type FeatureName = FeatureKind[];
 /**
@@ -1861,6 +1862,11 @@ See <https://biomejs.dev/linter/rules/no-ambiguous-anchor-text>
 	 */
 	noAmbiguousAnchorText?: NoAmbiguousAnchorTextConfiguration;
 	/**
+	* Prevent usage of next/script's beforeInteractive strategy outside of pages/_document.js in a Next.js project.
+See <https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document> 
+	 */
+	noBeforeInteractiveScriptOutsideDocument?: NoBeforeInteractiveScriptOutsideDocumentConfiguration;
+	/**
 	* Disallow continue statements.
 See <https://biomejs.dev/linter/rules/no-continue> 
 	 */
@@ -1915,6 +1921,11 @@ See <https://biomejs.dev/linter/rules/no-increment-decrement>
 See <https://biomejs.dev/linter/rules/no-jsx-literals> 
 	 */
 	noJsxLiterals?: NoJsxLiteralsConfiguration;
+	/**
+	* Disallow .bind(), arrow functions, or function expressions in JSX props.
+See <https://biomejs.dev/linter/rules/no-jsx-props-bind> 
+	 */
+	noJsxPropsBind?: NoJsxPropsBindConfiguration;
 	/**
 	* Prevent problematic leaked values from being rendered.
 See <https://biomejs.dev/linter/rules/no-leaked-render> 
@@ -2130,15 +2141,45 @@ See <https://biomejs.dev/linter/rules/use-spread>
 	 */
 	useSpread?: UseSpreadConfiguration;
 	/**
+	* Require all argument names for fields & directives to be unique.
+See <https://biomejs.dev/linter/rules/use-unique-argument-names> 
+	 */
+	useUniqueArgumentNames?: UseUniqueArgumentNamesConfiguration;
+	/**
+	* Require all fields of a type to be unique.
+See <https://biomejs.dev/linter/rules/use-unique-field-definition-names> 
+	 */
+	useUniqueFieldDefinitionNames?: UseUniqueFieldDefinitionNamesConfiguration;
+	/**
 	* Enforce unique operation names across a GraphQL document.
 See <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name> 
 	 */
 	useUniqueGraphqlOperationName?: UseUniqueGraphqlOperationNameConfiguration;
 	/**
+	* Require fields within an input object to be unique.
+See <https://biomejs.dev/linter/rules/use-unique-input-field-names> 
+	 */
+	useUniqueInputFieldNames?: UseUniqueInputFieldNamesConfiguration;
+	/**
+	* Require all variable definitions to be unique.
+See <https://biomejs.dev/linter/rules/use-unique-variable-names> 
+	 */
+	useUniqueVariableNames?: UseUniqueVariableNamesConfiguration;
+	/**
 	* Enforce consistent defineProps declaration style.
 See <https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration> 
 	 */
 	useVueConsistentDefinePropsDeclaration?: UseVueConsistentDefinePropsDeclarationConfiguration;
+	/**
+	* Enforce a consistent style for v-bind in Vue templates.
+See <https://biomejs.dev/linter/rules/use-vue-consistent-v-bind-style> 
+	 */
+	useVueConsistentVBindStyle?: UseVueConsistentVBindStyleConfiguration;
+	/**
+	* Enforce a consistent style for v-on in Vue templates.
+See <https://biomejs.dev/linter/rules/use-vue-consistent-v-on-style> 
+	 */
+	useVueConsistentVOnStyle?: UseVueConsistentVOnStyleConfiguration;
 	/**
 	* Enforce specific order of Vue compiler macros.
 See <https://biomejs.dev/linter/rules/use-vue-define-macros-order> 
@@ -2155,10 +2196,25 @@ See <https://biomejs.dev/linter/rules/use-vue-multi-word-component-names>
 	 */
 	useVueMultiWordComponentNames?: UseVueMultiWordComponentNamesConfiguration;
 	/**
+	* Enforce that elements using v-for also specify a unique key.
+See <https://biomejs.dev/linter/rules/use-vue-v-for-key> 
+	 */
+	useVueVForKey?: UseVueVForKeyConfiguration;
+	/**
+	* Enforce valid Vue \<template> root usage.
+See <https://biomejs.dev/linter/rules/use-vue-valid-template-root> 
+	 */
+	useVueValidTemplateRoot?: UseVueValidTemplateRootConfiguration;
+	/**
 	* Forbids v-bind directives with missing arguments or invalid modifiers.
 See <https://biomejs.dev/linter/rules/use-vue-valid-v-bind> 
 	 */
 	useVueValidVBind?: UseVueValidVBindConfiguration;
+	/**
+	* Enforce valid v-cloak Vue directives.
+See <https://biomejs.dev/linter/rules/use-vue-valid-v-cloak> 
+	 */
+	useVueValidVCloak?: UseVueValidVCloakConfiguration;
 	/**
 	* Enforce valid usage of v-else.
 See <https://biomejs.dev/linter/rules/use-vue-valid-v-else> 
@@ -2185,10 +2241,25 @@ See <https://biomejs.dev/linter/rules/use-vue-valid-v-on>
 	 */
 	useVueValidVOn?: UseVueValidVOnConfiguration;
 	/**
+	* Enforce valid v-once Vue directives.
+See <https://biomejs.dev/linter/rules/use-vue-valid-v-once> 
+	 */
+	useVueValidVOnce?: UseVueValidVOnceConfiguration;
+	/**
+	* Enforce valid v-pre Vue directives.
+See <https://biomejs.dev/linter/rules/use-vue-valid-v-pre> 
+	 */
+	useVueValidVPre?: UseVueValidVPreConfiguration;
+	/**
 	* Enforce valid v-text Vue directives.
 See <https://biomejs.dev/linter/rules/use-vue-valid-v-text> 
 	 */
 	useVueValidVText?: UseVueValidVTextConfiguration;
+	/**
+	* Enforce opting in to Vue Vapor mode in \<script setup> blocks.
+See <https://biomejs.dev/linter/rules/use-vue-vapor> 
+	 */
+	useVueVapor?: UseVueVaporConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -3620,6 +3691,9 @@ export type UseYieldConfiguration =
 export type NoAmbiguousAnchorTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAmbiguousAnchorTextOptions;
+export type NoBeforeInteractiveScriptOutsideDocumentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions;
 export type NoContinueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoContinueOptions;
@@ -3653,6 +3727,9 @@ export type NoIncrementDecrementConfiguration =
 export type NoJsxLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxLiteralsOptions;
+export type NoJsxPropsBindConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJsxPropsBindOptions;
 export type NoLeakedRenderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoLeakedRenderOptions;
@@ -3779,12 +3856,30 @@ export type UseSortedClassesConfiguration =
 export type UseSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSpreadOptions;
+export type UseUniqueArgumentNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueArgumentNamesOptions;
+export type UseUniqueFieldDefinitionNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueFieldDefinitionNamesOptions;
 export type UseUniqueGraphqlOperationNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueGraphqlOperationNameOptions;
+export type UseUniqueInputFieldNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueInputFieldNamesOptions;
+export type UseUniqueVariableNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueVariableNamesOptions;
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
+export type UseVueConsistentVBindStyleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentVBindStyleOptions;
+export type UseVueConsistentVOnStyleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentVOnStyleOptions;
 export type UseVueDefineMacrosOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefineMacrosOrderOptions;
@@ -3794,9 +3889,18 @@ export type UseVueHyphenatedAttributesConfiguration =
 export type UseVueMultiWordComponentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMultiWordComponentNamesOptions;
+export type UseVueVForKeyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueVForKeyOptions;
+export type UseVueValidTemplateRootConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidTemplateRootOptions;
 export type UseVueValidVBindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVBindOptions;
+export type UseVueValidVCloakConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVCloakOptions;
 export type UseVueValidVElseConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVElseOptions;
@@ -3812,9 +3916,18 @@ export type UseVueValidVIfConfiguration =
 export type UseVueValidVOnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVOnOptions;
+export type UseVueValidVOnceConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVOnceOptions;
+export type UseVueValidVPreConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVPreOptions;
 export type UseVueValidVTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVTextOptions;
+export type UseVueVaporConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueVaporOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
@@ -5053,6 +5166,10 @@ export interface RuleWithNoAmbiguousAnchorTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoAmbiguousAnchorTextOptions;
 }
+export interface RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions {
+	level: RulePlainConfiguration;
+	options?: NoBeforeInteractiveScriptOutsideDocumentOptions;
+}
 export interface RuleWithNoContinueOptions {
 	level: RulePlainConfiguration;
 	options?: NoContinueOptions;
@@ -5098,6 +5215,10 @@ export interface RuleWithNoIncrementDecrementOptions {
 export interface RuleWithNoJsxLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxLiteralsOptions;
+}
+export interface RuleWithNoJsxPropsBindOptions {
+	level: RulePlainConfiguration;
+	options?: NoJsxPropsBindOptions;
 }
 export interface RuleWithNoLeakedRenderOptions {
 	level: RulePlainConfiguration;
@@ -5277,13 +5398,39 @@ export interface RuleWithUseSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: UseSpreadOptions;
 }
+export interface RuleWithUseUniqueArgumentNamesOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueArgumentNamesOptions;
+}
+export interface RuleWithUseUniqueFieldDefinitionNamesOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueFieldDefinitionNamesOptions;
+}
 export interface RuleWithUseUniqueGraphqlOperationNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueGraphqlOperationNameOptions;
 }
+export interface RuleWithUseUniqueInputFieldNamesOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueInputFieldNamesOptions;
+}
+export interface RuleWithUseUniqueVariableNamesOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueVariableNamesOptions;
+}
 export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentDefinePropsDeclarationOptions;
+}
+export interface RuleWithUseVueConsistentVBindStyleOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentVBindStyleOptions;
+}
+export interface RuleWithUseVueConsistentVOnStyleOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentVOnStyleOptions;
 }
 export interface RuleWithUseVueDefineMacrosOrderOptions {
 	fix?: FixKind;
@@ -5299,9 +5446,23 @@ export interface RuleWithUseVueMultiWordComponentNamesOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMultiWordComponentNamesOptions;
 }
+export interface RuleWithUseVueVForKeyOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueVForKeyOptions;
+}
+export interface RuleWithUseVueValidTemplateRootOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueValidTemplateRootOptions;
+}
 export interface RuleWithUseVueValidVBindOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVBindOptions;
+}
+export interface RuleWithUseVueValidVCloakOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueValidVCloakOptions;
 }
 export interface RuleWithUseVueValidVElseOptions {
 	level: RulePlainConfiguration;
@@ -5323,9 +5484,24 @@ export interface RuleWithUseVueValidVOnOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVOnOptions;
 }
+export interface RuleWithUseVueValidVOnceOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueValidVOnceOptions;
+}
+export interface RuleWithUseVueValidVPreOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueValidVPreOptions;
+}
 export interface RuleWithUseVueValidVTextOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVTextOptions;
+}
+export interface RuleWithUseVueVaporOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueVaporOptions;
 }
 export interface RuleWithNoAccumulatingSpreadOptions {
 	level: RulePlainConfiguration;
@@ -6433,6 +6609,7 @@ export interface NoAmbiguousAnchorTextOptions {
 	 */
 	words?: string[];
 }
+export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
 export type NoDuplicateDependenciesOptions = {};
@@ -6475,6 +6652,7 @@ export interface NoJsxLiteralsOptions {
 	 */
 	noStrings?: boolean;
 }
+export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoMultiAssignOptions = {};
@@ -6571,9 +6749,27 @@ export interface UseSortedClassesOptions {
 	functions?: string[];
 }
 export type UseSpreadOptions = {};
+export type UseUniqueArgumentNamesOptions = {};
+export type UseUniqueFieldDefinitionNamesOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
+export type UseUniqueInputFieldNamesOptions = {};
+export type UseUniqueVariableNamesOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
+}
+export interface UseVueConsistentVBindStyleOptions {
+	/**
+	* Preferred style for `v-bind` usage: "shorthand" or "longhand".
+If omitted, shorthand is preferred. 
+	 */
+	style?: VueDirectiveStyle;
+}
+export interface UseVueConsistentVOnStyleOptions {
+	/**
+	* Preferred style for `v-on` usage: "shorthand" or "longhand".
+If omitted, shorthand is preferred. 
+	 */
+	style?: VueDirectiveStyle2;
 }
 export interface UseVueDefineMacrosOrderOptions {
 	/**
@@ -6597,7 +6793,10 @@ export interface UseVueMultiWordComponentNamesOptions {
 	 */
 	ignores?: string[];
 }
+export type UseVueVForKeyOptions = {};
+export type UseVueValidTemplateRootOptions = {};
 export type UseVueValidVBindOptions = {};
+export type UseVueValidVCloakOptions = {};
 export type UseVueValidVElseOptions = {};
 export type UseVueValidVElseIfOptions = {};
 export type UseVueValidVHtmlOptions = {};
@@ -6608,7 +6807,10 @@ export interface UseVueValidVOnOptions {
 	 */
 	modifiers?: string[];
 }
+export type UseVueValidVOnceOptions = {};
+export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
+export type UseVueVaporOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
 export type NoBarrelFileOptions = {};
@@ -6985,6 +7187,8 @@ export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
 export type DeclarationStyle = "type" | "runtime";
+export type VueDirectiveStyle = "shorthand" | "longhand";
+export type VueDirectiveStyle2 = "shorthand" | "longhand";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
@@ -7349,6 +7553,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAmbiguousAnchorText"
+	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
@@ -7362,6 +7567,7 @@ export type Category =
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxLiterals"
+	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
@@ -7371,8 +7577,8 @@ export type Category =
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
-	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noReturnAssign"
+	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
@@ -7413,12 +7619,22 @@ export type Category =
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
+	| "lint/nursery/useUniqueArgumentNames"
+	| "lint/nursery/useUniqueFieldDefinitionNames"
 	| "lint/nursery/useUniqueGraphqlOperationName"
+	| "lint/nursery/useUniqueInputFieldNames"
+	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
+	| "lint/nursery/useVueConsistentVBindStyle"
+	| "lint/nursery/useVueConsistentVOnStyle"
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
+	| "lint/nursery/useVueVForKey"
+	| "lint/nursery/useVueVapor"
+	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"
+	| "lint/nursery/useVueValidVCloak"
 	| "lint/nursery/useVueValidVElse"
 	| "lint/nursery/useVueValidVElseIf"
 	| "lint/nursery/useVueValidVFor"
@@ -7426,6 +7642,8 @@ export type Category =
 	| "lint/nursery/useVueValidVIf"
 	| "lint/nursery/useVueValidVModel"
 	| "lint/nursery/useVueValidVOn"
+	| "lint/nursery/useVueValidVOnce"
+	| "lint/nursery/useVueValidVPre"
 	| "lint/nursery/useVueValidVText"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"

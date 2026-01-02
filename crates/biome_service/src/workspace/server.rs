@@ -1251,6 +1251,7 @@ impl Workspace for WorkspaceServer {
             language,
             capabilities: &capabilities,
             handle: &settings,
+            skip_ignore_check: params.skip_ignore_check,
         })
     }
 

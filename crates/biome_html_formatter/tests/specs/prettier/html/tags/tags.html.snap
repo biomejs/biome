@@ -183,7 +183,7 @@ info: html/tags/tags.html
          </div>
        </div>
      </div>
-@@ -113,43 +123,57 @@
+@@ -113,42 +123,50 @@
    <div>string</div>
  </div>
  <ul>
@@ -194,17 +194,11 @@ info: html/tags/tags.html
 -  789
 +  123<li class="foo" id="bar">First</li>456<li class="baz">Second</li>789
  </ul>
--<span>*<b>200</b></span>
-+<span
-+  >*<b>200</b></span
-+>
+ <span>*<b>200</b></span>
  <img
    src="longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
 -/>123
 -<div>123<meta attr />456</div>
--<p>x<span a="b"></span></p>
--<p>x<meta a /></p>
--<p>x<meta /></p>
 +/>
 +123
 +<div>
@@ -212,9 +206,9 @@ info: html/tags/tags.html
 +  <meta attr />
 +  456
 +</div>
-+<p>
-+  x<span a="b"></span>
-+</p>
+ <p>x<span a="b"></span></p>
+-<p>x<meta a /></p>
+-<p>x<meta /></p>
 +<p>
 +  x<meta a />
 +</p>
@@ -250,16 +244,12 @@ info: html/tags/tags.html
    Disabled Cancel
  </button>
 -<br /><br />
--<p>"<span [innerHTML]="title"></span>" is the <i>property bound</i> title.</p>
 +<br />
 +<br />
-+<p>
-+  "<span [innerHTML]="title"></span>" is the <i>property bound</i>title.
-+</p>
+ <p>"<span [innerHTML]="title"></span>" is the <i>property bound</i> title.</p>
  <li>
    12345678901234567890123456789012345678901234567890123456789012345678901234567890
- </li>
-@@ -166,12 +190,13 @@
+@@ -166,12 +184,13 @@
    <router-outlet></router-outlet>
    <app-footer [input]="something"></app-footer>
  </div>
@@ -278,22 +268,19 @@ info: html/tags/tags.html
  </div>
  <div>
    Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-@@ -190,8 +215,14 @@
+@@ -190,8 +209,12 @@
  <div>Should not insert empty line before this div</div>
  
  <!-- self-closing -->
 -<span><input type="checkbox" /> </span>
  <span
 -  ><span><input type="checkbox" /></span
--></span>
--<span><input type="checkbox" /></span>
 +  ><input type="checkbox" />
 +</span>
-+<span
-+  ><span
-+    ><input type="checkbox" /></span
-+  ></span
-+>
++<span><span
++  ><input type="checkbox" /></span
+ ></span>
+-<span><input type="checkbox" /></span>
 +<span
 +  ><input type="checkbox" /></span
 +>
@@ -429,9 +416,7 @@ info: html/tags/tags.html
 <ul>
   123<li class="foo" id="bar">First</li>456<li class="baz">Second</li>789
 </ul>
-<span
-  >*<b>200</b></span
->
+<span>*<b>200</b></span>
 <img
   src="longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
 />
@@ -441,9 +426,7 @@ info: html/tags/tags.html
   <meta attr />
   456
 </div>
-<p>
-  x<span a="b"></span>
-</p>
+<p>x<span a="b"></span></p>
 <p>
   x<meta a />
 </p>
@@ -475,9 +458,7 @@ info: html/tags/tags.html
 </button>
 <br />
 <br />
-<p>
-  "<span [innerHTML]="title"></span>" is the <i>property bound</i>title.
-</p>
+<p>"<span [innerHTML]="title"></span>" is the <i>property bound</i> title.</p>
 <li>
   12345678901234567890123456789012345678901234567890123456789012345678901234567890
 </li>
@@ -522,11 +503,9 @@ info: html/tags/tags.html
 <span
   ><input type="checkbox" />
 </span>
-<span
-  ><span
-    ><input type="checkbox" /></span
-  ></span
->
+<span><span
+  ><input type="checkbox" /></span
+></span>
 <span
   ><input type="checkbox" /></span
 >
@@ -540,6 +519,6 @@ info: html/tags/tags.html
    31:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-attribute
    36:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-attribute="value"
    41:   attribute="very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value"
-  132:   src="longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
-  178:   12345678901234567890123456789012345678901234567890123456789012345678901234567890
+  130:   src="longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
+  172:   12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```

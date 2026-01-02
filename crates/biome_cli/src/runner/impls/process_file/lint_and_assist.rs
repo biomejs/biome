@@ -200,6 +200,7 @@ impl ProcessFile for LintAssistProcessFile {
                 .with_formatter()
                 .build(),
             inline_config: None,
+            skip_ignore_check: false,
         })?;
 
         if file_features.is_ignored() {
