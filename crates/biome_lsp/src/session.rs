@@ -425,6 +425,7 @@ impl Session {
             features: FeaturesBuilder::new().with_linter().with_assist().build(),
             path: biome_path.clone(),
             inline_config: self.inline_config(),
+            skip_ignore_check: false,
         })?;
 
         if !file_features.supports_lint() && !file_features.supports_assist() {

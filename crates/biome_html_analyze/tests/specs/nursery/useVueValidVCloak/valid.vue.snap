@@ -1,0 +1,10 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```html
+<!-- valid v-cloak cases -->
+<div v-cloak></div>
+
+```

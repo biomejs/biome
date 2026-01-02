@@ -1,0 +1,185 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: invalid.jsx
+---
+# Input
+```jsx
+<>
+	<Foo
+		onClick={function () {
+			alert("1337");
+		}}
+	/>
+	<Foo onClick={handleClick.bind(this)} />
+	<Foo onClick={this._handleClick.bind(this)} />
+	<Foo onClick={() => console.log("Hello!")} />
+</>;
+
+function Foo() {
+	function onClick() {}
+	return <Bar onClick={onClick}></Bar>;
+}
+
+function Foo() {
+	const onClick = () => {};
+	return <Bar onClick={onClick}></Bar>;
+}
+
+function Foo() {
+	const onClick = function () {};
+	return <Bar onClick={onClick}></Bar>;
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:12 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  
+    1 │ <>
+    2 │ 	<Foo
+  > 3 │ 		onClick={function () {
+      │ 		         ^^^^^^^^^^^^^
+  > 4 │ 			alert("1337");
+  > 5 │ 		}}
+      │ 		^
+    6 │ 	/>
+    7 │ 	<Foo onClick={handleClick.bind(this)} />
+  
+  i JSX props should not use function expressions
+  
+  i Consider extracting the function or wrapping it in useCallback
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  
+    5 │ 		}}
+    6 │ 	/>
+  > 7 │ 	<Foo onClick={handleClick.bind(this)} />
+      │ 	              ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	<Foo onClick={this._handleClick.bind(this)} />
+    9 │ 	<Foo onClick={() => console.log("Hello!")} />
+  
+  i JSX props should not use .bind()
+  
+  i Consider extracting the function or wrapping it in useCallback
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  
+     6 │ 	/>
+     7 │ 	<Foo onClick={handleClick.bind(this)} />
+   > 8 │ 	<Foo onClick={this._handleClick.bind(this)} />
+       │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	<Foo onClick={() => console.log("Hello!")} />
+    10 │ </>;
+  
+  i JSX props should not use .bind()
+  
+  i Consider extracting the function or wrapping it in useCallback
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  
+     7 │ 	<Foo onClick={handleClick.bind(this)} />
+     8 │ 	<Foo onClick={this._handleClick.bind(this)} />
+   > 9 │ 	<Foo onClick={() => console.log("Hello!")} />
+       │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ </>;
+    11 │ 
+  
+  i JSX props should not use arrow functions
+  
+  i Consider extracting the function or wrapping it in useCallback
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:14:23 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  
+    12 │ function Foo() {
+    13 │ 	function onClick() {}
+  > 14 │ 	return <Bar onClick={onClick}></Bar>;
+       │ 	                     ^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i JSX props should not use function expressions
+  
+  i Consider extracting the function or wrapping it in useCallback
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:19:23 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  
+    17 │ function Foo() {
+    18 │ 	const onClick = () => {};
+  > 19 │ 	return <Bar onClick={onClick}></Bar>;
+       │ 	                     ^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i JSX props should not use function expressions
+  
+  i Consider extracting the function or wrapping it in useCallback
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:24:23 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  
+    22 │ function Foo() {
+    23 │ 	const onClick = function () {};
+  > 24 │ 	return <Bar onClick={onClick}></Bar>;
+       │ 	                     ^^^^^^^
+    25 │ }
+    26 │ 
+  
+  i JSX props should not use function expressions
+  
+  i Consider extracting the function or wrapping it in useCallback
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

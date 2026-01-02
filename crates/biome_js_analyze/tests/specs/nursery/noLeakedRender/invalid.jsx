@@ -4,6 +4,11 @@ const Example1 = () => {
 	return (
 		<>
 			{0 && <Something />}
+			{0.0 && <Something />}
+			{-0 && <Something />}
+			{-0.0 && <Something />}
+			{0n && <Something />}
+			{-0n && <Something />}
 			{'' && <Something />}
 			{NaN && <Something />}
 		</>
@@ -67,3 +72,15 @@ const MyComponent5 = ({ data }) => {
 const MyComponent6 = ({ value }) => {
 	return <div>{(((value))) && <Item />}</div>;
 };
+
+const isNaN = NaN;
+const isZero = 0;
+const emptyStr = '';
+const MyComponent7 = () => {
+	return <>
+		<div> {isNan && 'NaN'} </div>
+		<div> {isZero && 'Zero'} </div>
+		<div>{emptyStr && "Empty String"}</div>
+	</>
+}
+

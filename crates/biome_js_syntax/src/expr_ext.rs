@@ -12,7 +12,7 @@ use crate::{
     JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsReferenceIdentifier,
     JsRegexLiteralExpression, JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind,
     JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression,
-    JsWhileStatement, OperatorPrecedence, T, TsStringLiteralType, inner_string_text,
+    JsWhileStatement, OperatorPrecedence, TsStringLiteralType, inner_string_text,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxNodeCast, SyntaxResult, TextRange,

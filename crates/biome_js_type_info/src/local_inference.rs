@@ -2688,7 +2688,7 @@ fn split_regex_literal(token: SyntaxResult<JsSyntaxToken>) -> Option<RegexpLiter
     let literal = token.ok()?.token_text_trimmed();
     let open_index: usize = literal.find('/')? + 1;
     let close_index: usize = literal.rfind('/')?;
-    if open_index == close_index {
+    if open_index >= close_index {
         return None;
     }
 

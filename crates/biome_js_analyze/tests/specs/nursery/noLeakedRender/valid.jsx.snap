@@ -79,4 +79,24 @@ const Component15 = () => {
 	return <Popover open={isOpen2 && items.length > 0} />;
 };
 
+const errorCount = 1;
+const Component16 = () => {
+	return <div>{errorCount && 'Error'}</div>;
+};
+
+const isErr = errorCount > 0;
+const Component17 = () => {
+	return <div>{isErr && 'Error'}</div>;
+};
+
+const someCondition = !!x;
+const Component18 = () => {
+	return <div> {someCondition && 'hello'} </div>;
+};
+
+const isEqual = a == b;
+const Component19 = () => {
+	return <div>{isEqual && 'Equal'}</div>;
+};
+
 ```

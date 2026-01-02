@@ -174,6 +174,7 @@ impl ProcessFile for LintAssistProcessFile {
             console,
             cli_options,
             execution,
+            skip_ignore_check,
         } = payload;
 
         let mut new_content = Cow::Borrowed(content);
@@ -200,6 +201,7 @@ impl ProcessFile for LintAssistProcessFile {
                 .with_formatter()
                 .build(),
             inline_config: None,
+            skip_ignore_check,
         })?;
 
         if file_features.is_ignored() {

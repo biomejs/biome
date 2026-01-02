@@ -809,6 +809,22 @@ pub(crate) fn is_inline_element(tag_name: &HtmlTagName) -> bool {
         .any(|tag| tag_name.text_trimmed().eq_ignore_ascii_case(tag))
 }
 
+/// Checks if an element is an inline element based on its tag name.
+pub(crate) fn is_inline_element_from_element(element: &AnyHtmlElement) -> bool {
+    let name = match element {
+        AnyHtmlElement::HtmlElement(element) => {
+            element.opening_element().and_then(|element| element.name())
+        }
+        AnyHtmlElement::HtmlSelfClosingElement(element) => element.name(),
+        _ => return false,
+    };
+    let Ok(name) = name else {
+        return false;
+    };
+
+    is_inline_element(&name)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

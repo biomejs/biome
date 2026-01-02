@@ -70,7 +70,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@b9c5db3aef04caffaf95a1d03931de10fb2a140f # v2.65.1
+        uses: taiki-e/install-action@28a9d316db64b78a951f3f8587a5d08cc97ad8eb # v2.65.6
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -124,7 +124,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.91.1-bullseye@sha256:f02c249a0dd84eda8a3403b6fb1a4a59fee86157f1657cb1f8baaf3d89fe2d88
+      image: rust:1.92.0-bullseye@sha256:182c38f1049c4348a0286392d817d400a6cdb51eebb479d446cd6286bbe6e758
 
     env:
       version: ${{ needs.version.outputs.version }}
@@ -177,7 +177,7 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:
-          bins: wasm-bindgen-cli@0.2.105, wasm-opt
+          bins: wasm-bindgen-cli@0.2.106, wasm-opt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

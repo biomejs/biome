@@ -130,6 +130,7 @@ impl ProcessFile for FormatProcessFile {
             console,
             cli_options,
             execution: _,
+            skip_ignore_check,
         } = payload;
         let FileFeaturesResult {
             features_supported: file_features,
@@ -138,6 +139,7 @@ impl ProcessFile for FormatProcessFile {
             path: biome_path.clone(),
             features: FeaturesBuilder::new().with_formatter().build(),
             inline_config: None,
+            skip_ignore_check,
         })?;
 
         if file_features.is_ignored() {

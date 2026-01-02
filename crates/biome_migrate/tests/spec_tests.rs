@@ -12,7 +12,7 @@ use biome_test_utils::{
 use camino::Utf8Path;
 use std::fs::read_to_string;
 use std::path::PathBuf;
-use std::{env, slice};
+use std::slice;
 
 tests_macros::gen_tests! {"tests/specs/**/*.{json,jsonc}", crate::run_test, "module"}
 

@@ -32,6 +32,6 @@ Self close void elements: never
 
 ```svelte
 {#await import('./Component.svelte') then { default: Component }}
-	<Component/>
+	<Component />
 {/await}
 ```

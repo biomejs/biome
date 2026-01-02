@@ -1,0 +1,80 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- invalid v-cloak cases -->
+<div v-cloak:arg></div>
+<div v-cloak.mod></div>
+<div v-cloak="value"></div>
+
+```
+
+# Diagnostics
+```
+invalid.vue:2:13 lint/nursery/useVueValidVCloak  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-cloak directive must not have an argument.
+  
+    1 │ <!-- invalid v-cloak cases -->
+  > 2 │ <div v-cloak:arg></div>
+      │             ^^^^
+    3 │ <div v-cloak.mod></div>
+    4 │ <div v-cloak="value"></div>
+  
+  i Use v-cloak without arguments, e.g. v-cloak.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the argument.
+  
+    2 │ <div·v-cloak:arg></div>
+      │             ----       
+
+```
+
+```
+invalid.vue:3:13 lint/nursery/useVueValidVCloak  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-cloak directive does not support modifiers.
+  
+    1 │ <!-- invalid v-cloak cases -->
+    2 │ <div v-cloak:arg></div>
+  > 3 │ <div v-cloak.mod></div>
+      │             ^^^^
+    4 │ <div v-cloak="value"></div>
+    5 │ 
+  
+  i Remove the modifier; v-cloak is a stand-alone control directive.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the modifier.
+  
+    3 │ <div·v-cloak.mod></div>
+      │             ----       
+
+```
+
+```
+invalid.vue:4:13 lint/nursery/useVueValidVCloak  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-cloak directive must not have a value.
+  
+    2 │ <div v-cloak:arg></div>
+    3 │ <div v-cloak.mod></div>
+  > 4 │ <div v-cloak="value"></div>
+      │             ^^^^^^^^
+    5 │ 
+  
+  i v-cloak is a boolean-like directive and should be used without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    4 │ <div·v-cloak="value"></div>
+      │             --------       
+
+```

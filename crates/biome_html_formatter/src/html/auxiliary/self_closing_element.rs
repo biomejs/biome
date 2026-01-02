@@ -56,9 +56,9 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                     // To resolve this, these tokens either need to be passed to or deferred to sibling text elements when
                     // whitespace sensitivity would require it.
                     if slash_token.is_some() {
-                        write!(f, [slash_token.format()])?;
+                        write!(f, [if_group_fits_on_line(&space()), slash_token.format()])?;
                     } else {
-                        write!(f, [token("/")])?;
+                        write!(f, [if_group_fits_on_line(&space()), token("/")])?;
                     }
                 }
                 // We remove the slash only from void elements
@@ -67,6 +67,10 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                         write!(f, [format_removed(slash_token)])?;
                     }
                 } else {
+                    if slash_token.is_some() {
+                        // only add a space before the slash if it exists.
+                        write!(f, [space()])?;
+                    }
                     write!(f, [slash_token.format()])?;
                 }
 

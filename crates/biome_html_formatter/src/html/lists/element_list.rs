@@ -10,7 +10,7 @@ use crate::{
             HtmlChild, HtmlChildrenIterator, HtmlSpace, html_split_children,
             is_meaningful_html_text,
         },
-        metadata::is_element_whitespace_sensitive_from_element,
+        metadata::{is_element_whitespace_sensitive_from_element, is_inline_element_from_element},
     },
 };
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, GroupId, best_fitting, prelude::*};
@@ -505,7 +505,14 @@ impl FormatHtmlElementList {
                     } else {
                         let mut memoized = non_text.format().memoized();
 
-                        force_multiline = memoized.inspect(f)?.will_break();
+                        // Only set force_multiline based on will_break() for non-inline elements.
+                        // Inline elements (like <a>, <b>, <span>) may have expanded variants that
+                        // contain hard breaks, but we don't want to force the parent to multiline
+                        // just because they could potentially break - they should flow with text.
+                        let is_inline = is_inline_element_from_element(non_text);
+                        if !is_inline {
+                            force_multiline = memoized.inspect(f)?.will_break();
+                        }
                         flat.write(&format_args![memoized, format_separator], f);
 
                         if let Some(format_separator) = format_separator {
@@ -560,7 +567,12 @@ impl FormatHtmlElementList {
         for child in list {
             match child {
                 AnyHtmlElement::HtmlElement(_) | AnyHtmlElement::HtmlSelfClosingElement(_) => {
-                    meta.any_tag = true
+                    // Only consider block-level elements (non-inline) as "any_tag" for the
+                    // purpose of forcing multiline layout. Inline elements like <a>, <b>, <span>
+                    // should flow with the text and not force line breaks.
+                    if !is_inline_element_from_element(&child) {
+                        meta.any_tag = true;
+                    }
                 }
                 AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(text)) => {
                     meta.meaningful_text = meta.meaningful_text

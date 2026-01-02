@@ -115,6 +115,7 @@ pub(crate) struct ProcessStdinFilePayload<'a> {
     pub(crate) console: &'a mut dyn Console,
     pub(crate) cli_options: &'a CliOptions,
     pub(crate) execution: &'a dyn Execution,
+    pub(crate) skip_ignore_check: bool,
 }
 
 pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
@@ -141,6 +142,7 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
                 path: biome_path.clone(),
                 features: ctx.execution().features(),
                 inline_config: None,
+                skip_ignore_check: false,
             })
             .with_file_path_and_code_and_tags(
                 biome_path.to_string(),
@@ -189,6 +191,10 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
         }
 
         Self::process_file(ctx, &mut workspace_file, &file_features)
+    }
+
+    fn should_skip_ignore_check(biome_path: &BiomePath, workspace: &dyn Workspace) -> bool {
+        !workspace.fs().path_exists(biome_path.as_path())
     }
 }
 
