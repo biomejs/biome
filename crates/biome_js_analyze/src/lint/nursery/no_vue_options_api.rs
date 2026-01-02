@@ -1,10 +1,11 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::JsFileSource;
-use biome_rowan::{AstNode, TextRange, TokenText};
+use biome_js_syntax::{AnyJsExpression, JsFileSource};
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_vue_options_api::NoVueOptionsApiOptions;
 
+use crate::frameworks::vue::vue_call::is_vue_api_reference;
 use crate::frameworks::vue::vue_component::{
     AnyVueComponent, VueComponent, VueComponentQuery, VueOptionsApiBasedComponent,
 };
@@ -66,17 +67,15 @@ declare_lint_rule! {
     /// </script>
     /// ```
     ///
-    /// ```vue,expect_diagnostic
-    /// <script>
+    /// ```js,expect_diagnostic
     /// import { defineComponent } from 'vue'
     ///
-    /// export default defineComponent({
+    /// defineComponent({
     ///   name: 'MyComponent',
     ///   data() {
     ///     return { count: 0 }
     ///   }
     /// })
-    /// </script>
     /// ```
     ///
     /// ### Valid
@@ -107,16 +106,9 @@ declare_lint_rule! {
     /// </script>
     /// ```
     ///
-    /// ```vue
-    /// <script>
-    /// export default {
-    ///   setup() {
-    ///     const count = ref(0)
-    ///     return { count }
-    ///   }
-    /// }
-    /// </script>
-    /// ```
+    /// ## Related Rules
+    ///
+    /// - [useVueVapor](https://biomejs.dev/linter/rules/use-vue-vapor): Enforces the use of Vapor mode in Vue components
     ///
     /// ## Resources
     ///
@@ -133,91 +125,36 @@ declare_lint_rule! {
     }
 }
 
-/// Options API properties that should be flagged
-const OPTIONS_API_PROPERTIES: &[&str] = &[
-    // State
-    "data",
-    "props",
-    "propsData",
-    "emits",
-    "computed",
-    "watch",
-    // Methods & Components
-    "methods",
-    "components",
-    "directives",
-    "mixins",
-    "extends",
-    // Component Identity
-    "name",
-    "inheritAttrs",
-    // Lifecycle hooks (Vue 3)
-    "beforeCreate",
-    "created",
-    "beforeMount",
-    "mounted",
-    "beforeUpdate",
-    "updated",
-    "beforeUnmount",
-    "unmounted",
-    "errorCaptured",
-    "renderTracked",
-    "renderTriggered",
-    "activated",
-    "deactivated",
-    "serverPrefetch",
-    // Deprecated lifecycle hooks (Vue 2)
-    "beforeDestroy",
-    "destroyed",
-];
-
-/// Get the Composition API alternative for a given Options API property
-fn get_composition_api_alternative(property_name: &str) -> &'static str {
-    match property_name {
-        // State
-        "data" => "ref() or reactive()",
-        "props" => "defineProps()",
-        "propsData" => "defineProps()",
-        "emits" => "defineEmits()",
-        "computed" => "computed()",
-        "watch" => "watch() or watchEffect()",
-        // Methods & Components
-        "methods" => "regular functions",
-        "components" => "direct imports in <script setup>",
-        "directives" => "direct imports in <script setup>",
-        "mixins" => "composables (reusable functions)",
-        "extends" => "composables (reusable functions)",
-        // Component Identity
-        "name" => "defineOptions({ name })",
-        "inheritAttrs" => "defineOptions({ inheritAttrs })",
-        // Lifecycle hooks (Vue 3)
-        "beforeCreate" => "<script setup> (runs before creation)",
-        "created" => "<script setup> (runs at creation)",
-        "beforeMount" => "onBeforeMount()",
-        "mounted" => "onMounted()",
-        "beforeUpdate" => "onBeforeUpdate()",
-        "updated" => "onUpdated()",
-        "beforeUnmount" => "onBeforeUnmount()",
-        "unmounted" => "onUnmounted()",
-        "errorCaptured" => "onErrorCaptured()",
-        "renderTracked" => "onRenderTracked()",
-        "renderTriggered" => "onRenderTriggered()",
-        "activated" => "onActivated()",
-        "deactivated" => "onDeactivated()",
-        "serverPrefetch" => "onServerPrefetch()",
-        // Deprecated lifecycle hooks (Vue 2)
-        "beforeDestroy" => "onBeforeUnmount()",
-        "destroyed" => "onUnmounted()",
-        _ => "Composition API equivalents",
-    }
+/// State for detected Options API component
+pub struct RuleState {
+    /// The range of the detected Options API component
+    range: TextRange,
 }
 
-/// State for each detected Options API property
-pub struct RuleState {
-    /// The range of the detected Options API property
-    range: TextRange,
-    /// The name of the detected property
-    property_name: TokenText,
+/// Checks if the expression is a defineComponent or createApp call.
+/// Used to avoid duplicate diagnostics when `export default defineComponent({...})` is used.
+fn is_define_component_or_create_app(
+    expr: &AnyJsExpression,
+    model: &biome_js_semantic::SemanticModel,
+) -> bool {
+    let Some(call_expr) = expr.as_js_call_expression() else {
+        return false;
+    };
+    let Some(callee) = call_expr.callee().ok().and_then(|c| c.inner_expression()) else {
+        return false;
+    };
+    is_vue_api_reference(&callee, model, "defineComponent")
+        || is_vue_api_reference(&callee, model, "createApp")
+}
+
+/// Extracts the range for a component definition.
+/// Falls back to query range if definition expression is not available.
+fn extract_component_range(
+    query_range: TextRange,
+    definition_expr: Option<AnyJsExpression>,
+) -> RuleState {
+    let range = definition_expr.map_or(query_range, |expr| expr.range());
+    RuleState { range }
 }
 
 impl Rule for NoVueOptionsApi {
@@ -234,70 +171,42 @@ impl Rule for NoVueOptionsApi {
             ctx.file_path(),
         )?;
 
-        // <script setup> components are valid - skip
-        if matches!(component.kind(), AnyVueComponent::Setup(_)) {
-            return None;
-        }
-
-        // Use iter_declaration_groups() to detect Options API properties
+        // Only <script setup> is valid for Vapor Mode
         match component.kind() {
+            AnyVueComponent::Setup(_) => None,
             AnyVueComponent::OptionsApi(opts) => {
-                for (name, member) in opts.iter_declaration_groups() {
-                    let name_text = name.text();
-                    // Allow pure setup() - only flag if has other Options API props
-                    if name_text != "setup" && OPTIONS_API_PROPERTIES.contains(&name_text) {
-                        return Some(RuleState {
-                            range: member.range(),
-                            property_name: name,
-                        });
-                    }
+                let expr = opts.definition_expression()?;
+                // Skip if the expression is a defineComponent or createApp call
+                // to avoid duplicate diagnostics (they will be caught by their own cases)
+                if is_define_component_or_create_app(&expr, ctx.model()) {
+                    return None;
                 }
+                Some(RuleState {
+                    range: expr.range(),
+                })
             }
-            AnyVueComponent::DefineComponent(dc) => {
-                for (name, member) in dc.iter_declaration_groups() {
-                    let name_text = name.text();
-                    if name_text != "setup" && OPTIONS_API_PROPERTIES.contains(&name_text) {
-                        return Some(RuleState {
-                            range: member.range(),
-                            property_name: name,
-                        });
-                    }
-                }
-            }
-            AnyVueComponent::CreateApp(ca) => {
-                for (name, member) in ca.iter_declaration_groups() {
-                    let name_text = name.text();
-                    if name_text != "setup" && OPTIONS_API_PROPERTIES.contains(&name_text) {
-                        return Some(RuleState {
-                            range: member.range(),
-                            property_name: name,
-                        });
-                    }
-                }
-            }
-            _ => {}
+            AnyVueComponent::DefineComponent(dc) => Some(extract_component_range(
+                ctx.query().range(),
+                dc.definition_expression(),
+            )),
+            AnyVueComponent::CreateApp(ca) => Some(extract_component_range(
+                ctx.query().range(),
+                ca.definition_expression(),
+            )),
         }
-
-        None
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let property_name = state.property_name.text();
-        let alternative = get_composition_api_alternative(property_name);
-
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 state.range,
                 markup! {
-                    "Options API property "<Emphasis>{property_name}</Emphasis>" is not supported in Vue Vapor Mode."
+                    "Options API is not supported in Vue Vapor Mode."
                 },
             )
             .note(markup! {
-                "Vue 3.6's Vapor Mode requires the Composition API with "<Emphasis>"<script setup>"</Emphasis>" syntax."
-            })
-            .note(markup! {
-                "Use "<Emphasis>{alternative}</Emphasis>" from the Composition API instead."
+                "Use "<Emphasis>"<script setup>"</Emphasis>" with the Composition API instead."
             }),
         )
     }
