@@ -167,6 +167,7 @@ pub mod no_react_prop_assignments;
 pub mod no_react_specific_props;
 pub mod no_redeclare;
 pub mod no_redundant_alt;
+pub mod no_redundant_default_export;
 pub mod no_redundant_roles;
 pub mod no_redundant_use_strict;
 pub mod no_render_return_value;
