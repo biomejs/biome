@@ -41,18 +41,9 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// The rule supports the following options:
+    /// The following options are available:
     ///
-    /// ```json
-    /// {
-    ///     "options": {
-    ///        "maxLines": 300,
-    ///        "skipBlankLines": false
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// ### maxLines
+    /// ### `maxLines`
     ///
     /// This option sets the maximum number of lines allowed in a file.
     /// If the file exceeds this limit, a diagnostic will be reported.
@@ -73,7 +64,7 @@ declare_lint_rule! {
     /// const c = 3;
     /// ```
     ///
-    /// ### skipBlankLines
+    /// ### `skipBlankLines`
     ///
     /// When this option is set to `true`, blank lines are not counted towards the maximum line limit.
     /// This means that only lines with actual code or comments will be counted.
@@ -128,7 +119,7 @@ declare_lint_rule! {
 
 impl Rule for NoExcessiveLinesPerFile {
     type Query = Ast<AnyJsRoot>;
-    type State = State;
+    type State = usize;
     type Signals = Option<Self::State>;
     type Options = NoExcessiveLinesPerFileOptions;
 
@@ -156,7 +147,7 @@ impl Rule for NoExcessiveLinesPerFile {
             + 1; // Add 1 for the first line
 
         if file_lines_count > options.max_lines().get().into() {
-            return Some(State { file_lines_count });
+            return Some(file_lines_count);
         }
 
         None
@@ -171,7 +162,7 @@ impl Rule for NoExcessiveLinesPerFile {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "This file has too many lines ("{state.file_lines_count}"). Maximum allowed is "{options.max_lines().to_string()}"."
+                    "This file has too many lines ("{state}"). Maximum allowed is "{options.max_lines().to_string()}"."
                 },
             )
             .note(markup! {
@@ -179,8 +170,4 @@ impl Rule for NoExcessiveLinesPerFile {
             }),
         )
     }
-}
-
-pub struct State {
-    file_lines_count: usize,
 }
