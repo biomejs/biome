@@ -20,7 +20,7 @@ export default function Page() {
 ```
 invalid-03.jsx:7:5 lint/nursery/useInlineScriptId ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × next/script components with inline content or `dangerouslySetInnerHTML` must specify id attribute.
+  × next/script components have inline content or `dangerouslySetInnerHTML` without id attribute.
   
     5 │   const props = { strategy: "beforeInteractive" };
     6 │   return (
@@ -29,7 +29,7 @@ invalid-03.jsx:7:5 lint/nursery/useInlineScriptId ━━━━━━━━━━
     8 │   )
     9 │ }
   
-  i Without id attribute, Next.js cannot correctly track inline scripts and this can cause performance issues.
+  i Next.js requires id attribute to track and optimize inline scripts. Without it, performance issues may occur.
   
   i See the Next.js docs for more details.
   

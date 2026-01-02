@@ -150,11 +150,11 @@ impl Rule for UseInlineScriptId {
                 rule_category!(),
                 state,
                 markup! {
-                    ""<Emphasis>"next/script"</Emphasis>" components with inline content or `dangerouslySetInnerHTML` must specify "<Emphasis>"id"</Emphasis>" attribute."
+                    ""<Emphasis>"next/script"</Emphasis>" components have inline content or `dangerouslySetInnerHTML` without "<Emphasis>"id"</Emphasis>" attribute."
                 },
             )
             .note(markup!(
-                "Without id attribute, Next.js cannot correctly track inline scripts and this can cause performance issues."
+                "Next.js requires "<Emphasis>"id"</Emphasis>" attribute to track and optimize inline scripts. Without it, performance issues may occur."
             ))
             .note(markup! {
                 "See the "<Hyperlink href="https://nextjs.org/docs/messages/inline-script-id">"Next.js docs"</Hyperlink>" for more details."
