@@ -2052,7 +2052,6 @@ impl TypeMember {
                 .ok()
                 .and_then(|name| match name {
                     AnyJsObjectMemberName::JsComputedMemberName(name) => {
-                        dbg!(&name);
                         name.expression().ok().map(|expr| {
                             TypeMemberKind::IndexSignature(TypeReference::from_any_js_expression(
                                 resolver, scope_id, &expr,

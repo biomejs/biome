@@ -2093,6 +2093,11 @@ See <https://biomejs.dev/linter/rules/use-destructuring>
 	 */
 	useDestructuring?: UseDestructuringConfiguration;
 	/**
+	* Detects a disposable object assigned to a variable without using or await using syntax.
+See <https://biomejs.dev/linter/rules/use-disposables> 
+	 */
+	useDisposables?: UseDisposablesConfiguration;
+	/**
 	* Require switch-case statements to be exhaustive.
 See <https://biomejs.dev/linter/rules/use-exhaustive-switch-cases> 
 	 */
@@ -3824,6 +3829,9 @@ export type UseDeprecatedDateConfiguration =
 export type UseDestructuringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDestructuringOptions;
+export type UseDisposablesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseDisposablesOptions;
 export type UseExhaustiveSwitchCasesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExhaustiveSwitchCasesOptions;
@@ -5346,6 +5354,11 @@ export interface RuleWithUseDestructuringOptions {
 	level: RulePlainConfiguration;
 	options?: UseDestructuringOptions;
 }
+export interface RuleWithUseDisposablesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseDisposablesOptions;
+}
 export interface RuleWithUseExhaustiveSwitchCasesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6706,6 +6719,7 @@ export interface UseDeprecatedDateOptions {
 	argumentName?: string;
 }
 export type UseDestructuringOptions = {};
+export type UseDisposablesOptions = {};
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
@@ -7567,6 +7581,7 @@ export type Category =
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useDestructuring"
+	| "lint/nursery/useDisposables"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
@@ -7592,7 +7607,6 @@ export type Category =
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/nursery/useVueVForKey"
-	| "lint/nursery/useVueVapor"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"
 	| "lint/nursery/useVueValidVCloak"
@@ -7606,6 +7620,7 @@ export type Category =
 	| "lint/nursery/useVueValidVOnce"
 	| "lint/nursery/useVueValidVPre"
 	| "lint/nursery/useVueValidVText"
+	| "lint/nursery/useVueVapor"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
