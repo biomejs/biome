@@ -1434,6 +1434,39 @@ impl TypeReferenceQualifier {
         self.path.is_identifier("RegExp")
     }
 
+    /// Checks whether this type qualifier references the `Symbol` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Symbol`, without considering whether another symbol named `Symbol` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Symbol` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_symbol(&self) -> bool {
+        self.path.is_identifier("Symbol")
+    }
+
+    /// Checks whether this type qualifier references the `Disposable` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Disposable`, without considering whether another symbol named `Disposable` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Disposable` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_disposable(&self) -> bool {
+        self.path.is_identifier("Disposable")
+    }
+
+    /// Checks whether this type qualifier references the `AsyncDisposable` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `AsyncDisposable`, without considering whether another symbol named `AsyncDisposable` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `AsyncDisposable` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_async_disposable(&self) -> bool {
+        self.path.is_identifier("AsyncDisposable")
+    }
+
     pub fn with_excluded_binding_id(mut self, binding_id: BindingId) -> Self {
         self.excluded_binding_id = Some(binding_id);
         self
