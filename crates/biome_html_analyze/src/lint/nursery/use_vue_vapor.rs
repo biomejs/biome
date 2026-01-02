@@ -17,8 +17,6 @@ declare_lint_rule! {
     ///
     /// Vapor mode only works for Vue Single File Components (SFCs) using `<script setup>`.
     ///
-    /// For more information, see: <https://github.com/vuejs/core-vapor>.
-    ///
     /// This rule reports `<script setup>` opening tags that are missing the `vapor` attribute.
     ///
     /// ## Examples
