@@ -5249,6 +5249,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueOptionsApiConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueOptionsApiOptions" }
+			]
+		},
+		"NoVueOptionsApiOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5635,6 +5645,13 @@
 					"description": "Disallow duplicate keys in Vue component data, methods, computed properties, and other options.\nSee https://biomejs.dev/linter/rules/no-vue-duplicate-keys",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDuplicateKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueOptionsApi": {
+					"description": "Disallow the use of Vue Options API.\nSee https://biomejs.dev/linter/rules/no-vue-options-api",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueOptionsApiConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8944,6 +8961,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDuplicateKeysOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueOptionsApiOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueOptionsApiOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-empty-object.vue
+---
+# Input
+```ts
+/* should not generate diagnostics */
+// Empty component object is valid
+export default {}
+
+```

@@ -1,0 +1,203 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-full-options-api.vue
+---
+# Input
+```ts
+// Full Options API component with multiple properties - all should be flagged
+export default {
+  name: 'MyComponent',
+  props: ['message'],
+  data() {
+    return { count: 0 }
+  },
+  computed: {
+    doubleCount() {
+      return this.count * 2
+    }
+  },
+  watch: {
+    count(newVal) {
+      console.log('changed')
+    }
+  },
+  methods: {
+    increment() {
+      this.count++
+    }
+  },
+  mounted() {
+    console.log('mounted')
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid-full-options-api.vue:3:3 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Options API property name is not supported in Vue Vapor Mode.
+  
+    1 │ // Full Options API component with multiple properties - all should be flagged
+    2 │ export default {
+  > 3 │   name: 'MyComponent',
+      │   ^^^^^^^^^^^^^^^^^^^
+    4 │   props: ['message'],
+    5 │   data() {
+  
+  i Vue 3.6's Vapor Mode requires the Composition API with <script setup> syntax.
+  
+  i Use defineOptions({ name }) from the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-full-options-api.vue:4:3 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Options API property props is not supported in Vue Vapor Mode.
+  
+    2 │ export default {
+    3 │   name: 'MyComponent',
+  > 4 │   props: ['message'],
+      │   ^^^^^^^^^^^^^^^^^^
+    5 │   data() {
+    6 │     return { count: 0 }
+  
+  i Vue 3.6's Vapor Mode requires the Composition API with <script setup> syntax.
+  
+  i Use defineProps() from the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-full-options-api.vue:5:3 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Options API property data is not supported in Vue Vapor Mode.
+  
+    3 │   name: 'MyComponent',
+    4 │   props: ['message'],
+  > 5 │   data() {
+      │   ^^^^^^^^
+  > 6 │     return { count: 0 }
+  > 7 │   },
+      │   ^
+    8 │   computed: {
+    9 │     doubleCount() {
+  
+  i Vue 3.6's Vapor Mode requires the Composition API with <script setup> syntax.
+  
+  i Use ref() or reactive() from the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-full-options-api.vue:8:3 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Options API property computed is not supported in Vue Vapor Mode.
+  
+     6 │     return { count: 0 }
+     7 │   },
+   > 8 │   computed: {
+       │   ^^^^^^^^^^^
+   > 9 │     doubleCount() {
+  > 10 │       return this.count * 2
+  > 11 │     }
+  > 12 │   },
+       │   ^
+    13 │   watch: {
+    14 │     count(newVal) {
+  
+  i Vue 3.6's Vapor Mode requires the Composition API with <script setup> syntax.
+  
+  i Use computed() from the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-full-options-api.vue:13:3 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Options API property watch is not supported in Vue Vapor Mode.
+  
+    11 │     }
+    12 │   },
+  > 13 │   watch: {
+       │   ^^^^^^^^
+  > 14 │     count(newVal) {
+  > 15 │       console.log('changed')
+  > 16 │     }
+  > 17 │   },
+       │   ^
+    18 │   methods: {
+    19 │     increment() {
+  
+  i Vue 3.6's Vapor Mode requires the Composition API with <script setup> syntax.
+  
+  i Use watch() or watchEffect() from the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-full-options-api.vue:18:3 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Options API property methods is not supported in Vue Vapor Mode.
+  
+    16 │     }
+    17 │   },
+  > 18 │   methods: {
+       │   ^^^^^^^^^^
+  > 19 │     increment() {
+  > 20 │       this.count++
+  > 21 │     }
+  > 22 │   },
+       │   ^
+    23 │   mounted() {
+    24 │     console.log('mounted')
+  
+  i Vue 3.6's Vapor Mode requires the Composition API with <script setup> syntax.
+  
+  i Use regular functions from the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-full-options-api.vue:23:3 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Options API property mounted is not supported in Vue Vapor Mode.
+  
+    21 │     }
+    22 │   },
+  > 23 │   mounted() {
+       │   ^^^^^^^^^^^
+  > 24 │     console.log('mounted')
+  > 25 │   }
+       │   ^
+    26 │ }
+    27 │ 
+  
+  i Vue 3.6's Vapor Mode requires the Composition API with <script setup> syntax.
+  
+  i Use onMounted() from the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

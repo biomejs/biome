@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-export-default-methods.vue
+---
+# Input
+```ts
+// Options API: methods is not supported in Vapor Mode
+export default {
+  methods: {
+    increment() {
+      this.count++
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid-export-default-methods.vue:3:3 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Options API property methods is not supported in Vue Vapor Mode.
+  
+    1 │ // Options API: methods is not supported in Vapor Mode
+    2 │ export default {
+  > 3 │   methods: {
+      │   ^^^^^^^^^^
+  > 4 │     increment() {
+  > 5 │       this.count++
+  > 6 │     }
+  > 7 │   }
+      │   ^
+    8 │ }
+    9 │ 
+  
+  i Vue 3.6's Vapor Mode requires the Composition API with <script setup> syntax.
+  
+  i Use regular functions from the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

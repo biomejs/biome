@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-script-setup.vue
+---
+# Input
+```ts
+<script setup>
+import { ref } from 'vue'
+
+const count = ref(0)
+
+function increment() {
+  count.value++
+}
+
+```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._
