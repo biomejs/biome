@@ -140,6 +140,51 @@ pub struct HtmlAttributeFields {
     pub initializer: Option<HtmlAttributeInitializerClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlAttributeDoubleTextExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlAttributeDoubleTextExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlAttributeDoubleTextExpressionFields {
+        HtmlAttributeDoubleTextExpressionFields {
+            l_double_curly_token: self.l_double_curly_token(),
+            expression: self.expression(),
+            r_double_curly_token: self.r_double_curly_token(),
+        }
+    }
+    pub fn l_double_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_double_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for HtmlAttributeDoubleTextExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlAttributeDoubleTextExpressionFields {
+    pub l_double_curly_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+    pub r_double_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlAttributeInitializerClause {
     pub(crate) syntax: SyntaxNode,
 }
@@ -213,6 +258,51 @@ impl Serialize for HtmlAttributeName {
 #[derive(Serialize)]
 pub struct HtmlAttributeNameFields {
     pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlAttributeSingleTextExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlAttributeSingleTextExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlAttributeSingleTextExpressionFields {
+        HtmlAttributeSingleTextExpressionFields {
+            l_curly_token: self.l_curly_token(),
+            expression: self.expression(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for HtmlAttributeSingleTextExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlAttributeSingleTextExpressionFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlCdataSection {
@@ -2717,9 +2807,9 @@ impl AnyAstroFrontmatterElement {
 pub enum AnyHtmlAttribute {
     AnyVueDirective(AnyVueDirective),
     HtmlAttribute(HtmlAttribute),
+    HtmlAttributeDoubleTextExpression(HtmlAttributeDoubleTextExpression),
+    HtmlAttributeSingleTextExpression(HtmlAttributeSingleTextExpression),
     HtmlBogusAttribute(HtmlBogusAttribute),
-    HtmlDoubleTextExpression(HtmlDoubleTextExpression),
-    HtmlSingleTextExpression(HtmlSingleTextExpression),
     SvelteAttachAttribute(SvelteAttachAttribute),
 }
 impl AnyHtmlAttribute {
@@ -2735,21 +2825,25 @@ impl AnyHtmlAttribute {
             _ => None,
         }
     }
+    pub fn as_html_attribute_double_text_expression(
+        &self,
+    ) -> Option<&HtmlAttributeDoubleTextExpression> {
+        match &self {
+            Self::HtmlAttributeDoubleTextExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_attribute_single_text_expression(
+        &self,
+    ) -> Option<&HtmlAttributeSingleTextExpression> {
+        match &self {
+            Self::HtmlAttributeSingleTextExpression(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_html_bogus_attribute(&self) -> Option<&HtmlBogusAttribute> {
         match &self {
             Self::HtmlBogusAttribute(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_html_double_text_expression(&self) -> Option<&HtmlDoubleTextExpression> {
-        match &self {
-            Self::HtmlDoubleTextExpression(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_html_single_text_expression(&self) -> Option<&HtmlSingleTextExpression> {
-        match &self {
-            Self::HtmlSingleTextExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -2762,13 +2856,15 @@ impl AnyHtmlAttribute {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlAttributeInitializer {
-    HtmlSingleTextExpression(HtmlSingleTextExpression),
+    HtmlAttributeSingleTextExpression(HtmlAttributeSingleTextExpression),
     HtmlString(HtmlString),
 }
 impl AnyHtmlAttributeInitializer {
-    pub fn as_html_single_text_expression(&self) -> Option<&HtmlSingleTextExpression> {
+    pub fn as_html_attribute_single_text_expression(
+        &self,
+    ) -> Option<&HtmlAttributeSingleTextExpression> {
         match &self {
-            Self::HtmlSingleTextExpression(item) => Some(item),
+            Self::HtmlAttributeSingleTextExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -3220,6 +3316,61 @@ impl From<HtmlAttribute> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for HtmlAttributeDoubleTextExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlAttributeDoubleTextExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlAttributeDoubleTextExpression")
+                .field(
+                    "l_double_curly_token",
+                    &support::DebugSyntaxResult(self.l_double_curly_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_double_curly_token",
+                    &support::DebugSyntaxResult(self.r_double_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlAttributeDoubleTextExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlAttributeDoubleTextExpression> for SyntaxNode {
+    fn from(n: HtmlAttributeDoubleTextExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlAttributeDoubleTextExpression> for SyntaxElement {
+    fn from(n: HtmlAttributeDoubleTextExpression) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for HtmlAttributeInitializerClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -3315,6 +3466,61 @@ impl From<HtmlAttributeName> for SyntaxNode {
 }
 impl From<HtmlAttributeName> for SyntaxElement {
     fn from(n: HtmlAttributeName) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for HtmlAttributeSingleTextExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlAttributeSingleTextExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlAttributeSingleTextExpression")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlAttributeSingleTextExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlAttributeSingleTextExpression> for SyntaxNode {
+    fn from(n: HtmlAttributeSingleTextExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlAttributeSingleTextExpression> for SyntaxElement {
+    fn from(n: HtmlAttributeSingleTextExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -6321,19 +6527,19 @@ impl From<HtmlAttribute> for AnyHtmlAttribute {
         Self::HtmlAttribute(node)
     }
 }
+impl From<HtmlAttributeDoubleTextExpression> for AnyHtmlAttribute {
+    fn from(node: HtmlAttributeDoubleTextExpression) -> Self {
+        Self::HtmlAttributeDoubleTextExpression(node)
+    }
+}
+impl From<HtmlAttributeSingleTextExpression> for AnyHtmlAttribute {
+    fn from(node: HtmlAttributeSingleTextExpression) -> Self {
+        Self::HtmlAttributeSingleTextExpression(node)
+    }
+}
 impl From<HtmlBogusAttribute> for AnyHtmlAttribute {
     fn from(node: HtmlBogusAttribute) -> Self {
         Self::HtmlBogusAttribute(node)
-    }
-}
-impl From<HtmlDoubleTextExpression> for AnyHtmlAttribute {
-    fn from(node: HtmlDoubleTextExpression) -> Self {
-        Self::HtmlDoubleTextExpression(node)
-    }
-}
-impl From<HtmlSingleTextExpression> for AnyHtmlAttribute {
-    fn from(node: HtmlSingleTextExpression) -> Self {
-        Self::HtmlSingleTextExpression(node)
     }
 }
 impl From<SvelteAttachAttribute> for AnyHtmlAttribute {
@@ -6345,16 +6551,16 @@ impl AstNode for AnyHtmlAttribute {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyVueDirective::KIND_SET
         .union(HtmlAttribute::KIND_SET)
+        .union(HtmlAttributeDoubleTextExpression::KIND_SET)
+        .union(HtmlAttributeSingleTextExpression::KIND_SET)
         .union(HtmlBogusAttribute::KIND_SET)
-        .union(HtmlDoubleTextExpression::KIND_SET)
-        .union(HtmlSingleTextExpression::KIND_SET)
         .union(SvelteAttachAttribute::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             HTML_ATTRIBUTE
+            | HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION
+            | HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION
             | HTML_BOGUS_ATTRIBUTE
-            | HTML_DOUBLE_TEXT_EXPRESSION
-            | HTML_SINGLE_TEXT_EXPRESSION
             | SVELTE_ATTACH_ATTRIBUTE => true,
             k if AnyVueDirective::can_cast(k) => true,
             _ => false,
@@ -6363,13 +6569,17 @@ impl AstNode for AnyHtmlAttribute {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             HTML_ATTRIBUTE => Self::HtmlAttribute(HtmlAttribute { syntax }),
+            HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION => {
+                Self::HtmlAttributeDoubleTextExpression(HtmlAttributeDoubleTextExpression {
+                    syntax,
+                })
+            }
+            HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION => {
+                Self::HtmlAttributeSingleTextExpression(HtmlAttributeSingleTextExpression {
+                    syntax,
+                })
+            }
             HTML_BOGUS_ATTRIBUTE => Self::HtmlBogusAttribute(HtmlBogusAttribute { syntax }),
-            HTML_DOUBLE_TEXT_EXPRESSION => {
-                Self::HtmlDoubleTextExpression(HtmlDoubleTextExpression { syntax })
-            }
-            HTML_SINGLE_TEXT_EXPRESSION => {
-                Self::HtmlSingleTextExpression(HtmlSingleTextExpression { syntax })
-            }
             SVELTE_ATTACH_ATTRIBUTE => {
                 Self::SvelteAttachAttribute(SvelteAttachAttribute { syntax })
             }
@@ -6385,9 +6595,9 @@ impl AstNode for AnyHtmlAttribute {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::HtmlAttribute(it) => it.syntax(),
+            Self::HtmlAttributeDoubleTextExpression(it) => it.syntax(),
+            Self::HtmlAttributeSingleTextExpression(it) => it.syntax(),
             Self::HtmlBogusAttribute(it) => it.syntax(),
-            Self::HtmlDoubleTextExpression(it) => it.syntax(),
-            Self::HtmlSingleTextExpression(it) => it.syntax(),
             Self::SvelteAttachAttribute(it) => it.syntax(),
             Self::AnyVueDirective(it) => it.syntax(),
         }
@@ -6395,9 +6605,9 @@ impl AstNode for AnyHtmlAttribute {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::HtmlAttribute(it) => it.into_syntax(),
+            Self::HtmlAttributeDoubleTextExpression(it) => it.into_syntax(),
+            Self::HtmlAttributeSingleTextExpression(it) => it.into_syntax(),
             Self::HtmlBogusAttribute(it) => it.into_syntax(),
-            Self::HtmlDoubleTextExpression(it) => it.into_syntax(),
-            Self::HtmlSingleTextExpression(it) => it.into_syntax(),
             Self::SvelteAttachAttribute(it) => it.into_syntax(),
             Self::AnyVueDirective(it) => it.into_syntax(),
         }
@@ -6408,9 +6618,9 @@ impl std::fmt::Debug for AnyHtmlAttribute {
         match self {
             Self::AnyVueDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlAttribute(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlAttributeDoubleTextExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlAttributeSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusAttribute(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlDoubleTextExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteAttachAttribute(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -6420,9 +6630,9 @@ impl From<AnyHtmlAttribute> for SyntaxNode {
         match n {
             AnyHtmlAttribute::AnyVueDirective(it) => it.into_syntax(),
             AnyHtmlAttribute::HtmlAttribute(it) => it.into_syntax(),
+            AnyHtmlAttribute::HtmlAttributeDoubleTextExpression(it) => it.into_syntax(),
+            AnyHtmlAttribute::HtmlAttributeSingleTextExpression(it) => it.into_syntax(),
             AnyHtmlAttribute::HtmlBogusAttribute(it) => it.into_syntax(),
-            AnyHtmlAttribute::HtmlDoubleTextExpression(it) => it.into_syntax(),
-            AnyHtmlAttribute::HtmlSingleTextExpression(it) => it.into_syntax(),
             AnyHtmlAttribute::SvelteAttachAttribute(it) => it.into_syntax(),
         }
     }
@@ -6433,9 +6643,9 @@ impl From<AnyHtmlAttribute> for SyntaxElement {
         node.into()
     }
 }
-impl From<HtmlSingleTextExpression> for AnyHtmlAttributeInitializer {
-    fn from(node: HtmlSingleTextExpression) -> Self {
-        Self::HtmlSingleTextExpression(node)
+impl From<HtmlAttributeSingleTextExpression> for AnyHtmlAttributeInitializer {
+    fn from(node: HtmlAttributeSingleTextExpression) -> Self {
+        Self::HtmlAttributeSingleTextExpression(node)
     }
 }
 impl From<HtmlString> for AnyHtmlAttributeInitializer {
@@ -6446,14 +6656,16 @@ impl From<HtmlString> for AnyHtmlAttributeInitializer {
 impl AstNode for AnyHtmlAttributeInitializer {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        HtmlSingleTextExpression::KIND_SET.union(HtmlString::KIND_SET);
+        HtmlAttributeSingleTextExpression::KIND_SET.union(HtmlString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, HTML_SINGLE_TEXT_EXPRESSION | HTML_STRING)
+        matches!(kind, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION | HTML_STRING)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            HTML_SINGLE_TEXT_EXPRESSION => {
-                Self::HtmlSingleTextExpression(HtmlSingleTextExpression { syntax })
+            HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION => {
+                Self::HtmlAttributeSingleTextExpression(HtmlAttributeSingleTextExpression {
+                    syntax,
+                })
             }
             HTML_STRING => Self::HtmlString(HtmlString { syntax }),
             _ => return None,
@@ -6462,13 +6674,13 @@ impl AstNode for AnyHtmlAttributeInitializer {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::HtmlSingleTextExpression(it) => it.syntax(),
+            Self::HtmlAttributeSingleTextExpression(it) => it.syntax(),
             Self::HtmlString(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::HtmlSingleTextExpression(it) => it.into_syntax(),
+            Self::HtmlAttributeSingleTextExpression(it) => it.into_syntax(),
             Self::HtmlString(it) => it.into_syntax(),
         }
     }
@@ -6476,7 +6688,7 @@ impl AstNode for AnyHtmlAttributeInitializer {
 impl std::fmt::Debug for AnyHtmlAttributeInitializer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::HtmlSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlAttributeSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlString(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -6484,7 +6696,7 @@ impl std::fmt::Debug for AnyHtmlAttributeInitializer {
 impl From<AnyHtmlAttributeInitializer> for SyntaxNode {
     fn from(n: AnyHtmlAttributeInitializer) -> Self {
         match n {
-            AnyHtmlAttributeInitializer::HtmlSingleTextExpression(it) => it.into_syntax(),
+            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(it) => it.into_syntax(),
             AnyHtmlAttributeInitializer::HtmlString(it) => it.into_syntax(),
         }
     }
@@ -7312,12 +7524,22 @@ impl std::fmt::Display for HtmlAttribute {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for HtmlAttributeDoubleTextExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for HtmlAttributeInitializerClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for HtmlAttributeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlAttributeSingleTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

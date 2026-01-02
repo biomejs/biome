@@ -1,8 +1,10 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 pub(crate) mod attribute;
+pub(crate) mod attribute_double_text_expression;
 pub(crate) mod attribute_initializer_clause;
 pub(crate) mod attribute_name;
+pub(crate) mod attribute_single_text_expression;
 pub(crate) mod cdata_section;
 pub(crate) mod closing_element;
 pub(crate) mod content;
