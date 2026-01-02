@@ -94,6 +94,11 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
     ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -168,6 +173,11 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     /// Try to stay consistent with the descriptions of implemented rules.
     ///
     /// Add a link to the corresponding stylelint rule (if any):
+    ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
     ///
     /// ## Examples
     ///
@@ -246,6 +256,11 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
     ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -323,6 +338,11 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
     ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -397,6 +417,11 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
     ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -470,6 +495,11 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
+    ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
     ///
     /// ## Examples
     ///
