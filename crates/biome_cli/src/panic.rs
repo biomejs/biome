@@ -1,4 +1,5 @@
 use std::{
+    backtrace::{Backtrace, BacktraceStatus},
     fmt::Write,
     panic::{PanicHookInfo, set_hook},
     thread,
@@ -11,33 +12,7 @@ pub fn setup_panic_handler() {
 }
 
 fn panic_handler(info: &PanicHookInfo) {
-    // Buffer the error message to a string before printing it at once
-    // to prevent it from getting mixed with other errors if multiple threads
-    // panic at the same time
-    let mut error = String::new();
-
-    writeln!(error, "Biome encountered an unexpected error").unwrap();
-    writeln!(error).unwrap();
-
-    writeln!(error, "This is a bug in Biome, not an error in your code, and we would appreciate it if you could report it to https://github.com/biomejs/biome/issues/ along with the following information to help us fixing the issue.").unwrap();
-    writeln!(error).unwrap();
-    writeln!(error, "When opening the issue, please provide a minimal reproduction, or identify and share the file/code that triggers it. Without a way to reproduce the error, the error can't be fixed:").unwrap();
-    writeln!(error).unwrap();
-
-    if let Some(location) = info.location() {
-        writeln!(error, "Source Location: {location}").unwrap();
-    }
-
-    if let Some(thread) = thread::current().name() {
-        writeln!(error, "Thread Name: {thread}").unwrap();
-    }
-
-    let payload = info.payload();
-    if let Some(msg) = payload.downcast_ref::<&'static str>() {
-        writeln!(error, "Message: {msg}").unwrap();
-    } else if let Some(msg) = payload.downcast_ref::<String>() {
-        writeln!(error, "Message: {msg}").unwrap();
-    }
+    let error = write_error(info).expect("To write into buffer");
 
     // Write the panic to stderr
     eprintln!("{error}");
@@ -46,4 +21,59 @@ fn panic_handler(info: &PanicHookInfo) {
     // infrastructure could panic a second time and abort the process, so we
     // want to ensure the error has at least been logged to stderr beforehand
     tracing::error!("{error}");
+}
+
+fn write_error(info: &PanicHookInfo) -> Result<String, std::fmt::Error> {
+    // Buffer the error message to a string before printing it at once
+    // to prevent it from getting mixed with other errors if multiple threads
+    // panic at the same time
+    let mut error = String::new();
+
+    writeln!(error, "Biome encountered an unexpected error")?;
+    writeln!(error)?;
+
+    writeln!(
+        error,
+        "This is a bug in Biome, not an error in your code, and we would appreciate it if you could report it to https://github.com/biomejs/biome/issues/ along with the following information to help us fixing the issue."
+    )?;
+    writeln!(error)?;
+    writeln!(
+        error,
+        "When opening the issue, please provide a minimal reproduction, or identify and share the file/code that triggers it. Without a way to reproduce the error, the error can't be fixed:"
+    )?;
+    writeln!(error)?;
+
+    if let Some(location) = info.location() {
+        writeln!(error, "Source Location: {location}")?;
+    }
+
+    if let Some(thread) = thread::current().name() {
+        writeln!(error, "Thread Name: {thread}")?;
+    }
+
+    let payload = info.payload();
+    if let Some(msg) = payload.downcast_ref::<&'static str>() {
+        writeln!(error, "Message: {msg}")?;
+    } else if let Some(msg) = payload.downcast_ref::<String>() {
+        writeln!(error, "Message: {msg}")?;
+    }
+
+    let backtrace = Backtrace::capture();
+    match backtrace.status() {
+        BacktraceStatus::Captured => {
+            writeln!(error, "Stack Trace:")?;
+            writeln!(error, "{}", backtrace)?;
+        }
+        BacktraceStatus::Disabled => {
+            writeln!(
+                error,
+                "Stack Trace: Re-run with `RUST_BACKTRACE=1` to capture the stack trace"
+            )?;
+        }
+        _ => {
+            writeln!(error, "Stack Trace: Not Supported")?;
+        }
+    }
+
+    Ok(error)
 }
