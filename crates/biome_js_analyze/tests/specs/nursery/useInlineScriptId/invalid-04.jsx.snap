@@ -28,6 +28,8 @@ invalid-04.jsx:6:5 lint/nursery/useInlineScriptId ━━━━━━━━━━
     7 │   )
     8 │ }
   
+  i Without id attribute, Next.js cannot correctly track inline scripts and this can cause performance issues.
+  
   i See the Next.js docs for more details.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.

@@ -7,7 +7,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsxAttribute, JsObjectExpression, JsVariableDeclarator, JsxElement,
     jsx_ext::AnyJsxElement,
 };
-use biome_rowan::{AstNode, AstNodeList, TextRange};
+use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
 use biome_rule_options::use_inline_script_id::UseInlineScriptIdOptions;
 use rustc_hash::FxHashSet;
 
@@ -71,8 +71,8 @@ declare_lint_rule! {
         name: "useInlineScriptId",
         language: "jsx",
         sources: &[RuleSource::EslintNext("inline-script-id").same()],
-        recommended: false,
-        severity: Severity::Warning,
+        recommended: true,
+        severity: Severity::Error,
         domains: &[RuleDomain::Next],
     }
 }
@@ -100,30 +100,32 @@ impl Rule for UseInlineScriptId {
                 AnyJsxAttribute::JsxAttribute(a) => {
                     if let Ok(name_value) = a.name_value_token() {
                         let name = name_value.token_text();
-                        attribute_names.insert(name.to_string());
+                        attribute_names.insert(name);
                     }
                 }
                 AnyJsxAttribute::JsxSpreadAttribute(spread) => {
-                    let argument = spread.argument().ok()?;
-                    match argument {
-                        AnyJsExpression::JsObjectExpression(obj_expr) => {
-                            collect_property_names(&obj_expr, &mut attribute_names)?;
-                        }
-                        AnyJsExpression::JsIdentifierExpression(ident_expr) => {
-                            if let Ok(reference) = ident_expr.name()
-                                && let Some(binding) = semantic_model.binding(&reference)
-                                && let Some(declarator) = binding
-                                    .syntax()
-                                    .ancestors()
-                                    .find_map(JsVariableDeclarator::cast)
-                                && let Some(initializer) = declarator.initializer()
-                                && let Ok(expression) = initializer.expression()
-                                && let AnyJsExpression::JsObjectExpression(obj_expr) = expression
-                            {
+                    if let Ok(argument) = spread.argument() {
+                        match argument {
+                            AnyJsExpression::JsObjectExpression(obj_expr) => {
                                 collect_property_names(&obj_expr, &mut attribute_names)?;
                             }
+                            AnyJsExpression::JsIdentifierExpression(ident_expr) => {
+                                if let Ok(reference) = ident_expr.name()
+                                    && let Some(binding) = semantic_model.binding(&reference)
+                                    && let Some(declarator) = binding
+                                        .syntax()
+                                        .ancestors()
+                                        .find_map(JsVariableDeclarator::cast)
+                                    && let Some(initializer) = declarator.initializer()
+                                    && let Ok(expression) = initializer.expression()
+                                    && let AnyJsExpression::JsObjectExpression(obj_expr) =
+                                        expression
+                                {
+                                    collect_property_names(&obj_expr, &mut attribute_names)?;
+                                }
+                            }
+                            _ => {}
                         }
-                        _ => {}
                     }
                 }
                 _ => {}
@@ -151,6 +153,9 @@ impl Rule for UseInlineScriptId {
                     ""<Emphasis>"next/script"</Emphasis>" components with inline content or `dangerouslySetInnerHTML` must specify "<Emphasis>"id"</Emphasis>" attribute."
                 },
             )
+            .note(markup!(
+                "Without id attribute, Next.js cannot correctly track inline scripts and this can cause performance issues."
+            ))
             .note(markup! {
                 "See the "<Hyperlink href="https://nextjs.org/docs/messages/inline-script-id">"Next.js docs"</Hyperlink>" for more details."
             })
@@ -160,18 +165,18 @@ impl Rule for UseInlineScriptId {
 
 fn collect_property_names(
     obj_expr: &JsObjectExpression,
-    set: &mut FxHashSet<String>,
+    set: &mut FxHashSet<TokenText>,
 ) -> Option<()> {
     for member in obj_expr.members() {
         let member = member.ok()?;
         if let Some(property_member) = member.as_js_property_object_member()
             && let Some(name) = property_member.name().ok().and_then(|n| n.name())
         {
-            set.insert(name.to_string());
+            set.insert(name);
         } else if let Some(shorthand) = member.as_js_shorthand_property_object_member()
             && let Some(name) = shorthand.name().ok().and_then(|n| n.name().ok())
         {
-            set.insert(name.to_string());
+            set.insert(name);
         }
     }
     Some(())
