@@ -40,7 +40,7 @@ declare_source_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```json,expect_diagnostic
+    /// ```json,expect_diagnostic,file=package.json
     /// {
     ///   "dependencies": {
     ///     "lodash": "^4.0.0"
@@ -52,7 +52,7 @@ declare_source_rule! {
     ///
     /// ### Valid
     ///
-    /// ```json
+    /// ```json,file=package.json
     /// {
     ///   "name": "my-package",
     ///   "version": "1.0.0",
