@@ -590,6 +590,37 @@ where
     pub fn is_empty(&self) -> bool {
         self.changes.is_empty()
     }
+
+    /// Merge another mutation's changes into this one.
+    ///
+    /// Both mutations should operate on trees with the same structure for
+    /// correct results. The changes from the other mutation are added to this
+    /// mutation's change queue.
+    ///
+    /// This is useful for batching multiple non-overlapping fixes into a single
+    /// commit operation, which can significantly improve performance by reducing
+    /// the number of tree rebuilds needed.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let mut batch1 = tree.begin();
+    /// batch1.replace_node(node_a, new_a);
+    ///
+    /// let mut batch2 = tree.begin();
+    /// batch2.replace_node(node_b, new_b);
+    ///
+    /// // Merge batch2 into batch1
+    /// batch1.merge(batch2);
+    ///
+    /// // Commit all changes at once
+    /// let new_tree = batch1.commit();
+    /// ```
+    pub fn merge(&mut self, other: BatchMutation<L>) {
+        for change in other.changes {
+            self.changes.push(change);
+        }
+    }
 }
 
 #[cfg(test)]
@@ -698,6 +729,53 @@ pub mod test {
         batch.replace_node(a, c);
         batch.replace_node(b, d);
         let after = batch.commit();
+
+        assert_eq!(expected_debug, format!("{after:#?}"));
+    }
+
+    #[test]
+    pub fn ok_batch_mutation_merge_two_mutations() {
+        let (before, _) = tree_two("a", "b");
+        let (expected, expected_debug) = tree_two("c", "d");
+
+        let a = find(&before, "a");
+        let b = find(&before, "b");
+        let c = clone_detach(&expected, "c");
+        let d = clone_detach(&expected, "d");
+
+        // Create two separate mutations
+        let mut batch1 = before.clone().begin();
+        batch1.replace_node(a, c);
+
+        let mut batch2 = before.begin();
+        batch2.replace_node(b, d);
+
+        // Merge batch2 into batch1
+        batch1.merge(batch2);
+        let after = batch1.commit();
+
+        // Result should be the same as applying both changes together
+        assert_eq!(expected_debug, format!("{after:#?}"));
+    }
+
+    #[test]
+    pub fn ok_batch_mutation_merge_empty_mutation() {
+        let (before, _) = tree_one("a");
+        let (expected, expected_debug) = tree_one("b");
+
+        let a = find(&before, "a");
+        let b = clone_detach(&expected, "b");
+
+        let mut batch1 = before.clone().begin();
+        batch1.replace_node(a, b);
+
+        // Create an empty mutation
+        let batch2 = before.begin();
+        assert!(batch2.is_empty());
+
+        // Merge empty mutation should not change anything
+        batch1.merge(batch2);
+        let after = batch1.commit();
 
         assert_eq!(expected_debug, format!("{after:#?}"));
     }
