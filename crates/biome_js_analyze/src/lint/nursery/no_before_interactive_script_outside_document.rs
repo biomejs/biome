@@ -65,7 +65,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoBeforeInteractiveScriptOutsideDocument {
-        version: "next",
+        version: "2.3.11",
         name: "noBeforeInteractiveScriptOutsideDocument",
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-before-interactive-script-outside-document").same()],

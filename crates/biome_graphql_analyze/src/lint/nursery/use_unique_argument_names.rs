@@ -32,7 +32,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseUniqueArgumentNames {
-        version: "next",
+        version: "2.3.11",
         name: "useUniqueArgumentNames",
         language: "graphql",
         recommended: false,
