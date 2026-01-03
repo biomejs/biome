@@ -1,18 +1,19 @@
-use crate::utils::is_package_json;
 use crate::JsonRuleAction;
+use crate::utils::is_package_json;
 use biome_analyze::{
-    context::RuleContext, declare_source_rule, Ast, FixKind, Rule, RuleAction, RuleDiagnostic,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_json_factory::make;
-use biome_json_syntax::{JsonMember, JsonMemberList, JsonRoot, T};
+use biome_json_syntax::{AnyJsonValue, JsonMember, JsonMemberList, JsonRoot, T};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use std::collections::HashMap;
 
 mod field_order;
+mod sorters;
 
-use field_order::{get_field_index, is_private_field};
+use field_order::{FieldTransformer, get_field_index, get_field_transformer};
 
 declare_source_rule! {
     /// Organize package.json fields according to established conventions.
@@ -68,7 +69,6 @@ impl Rule for OrganizePackageJson {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        // Only run on package.json files
         let path = ctx.file_path();
         if !is_package_json(path) {
             return None;
@@ -79,7 +79,6 @@ impl Rule for OrganizePackageJson {
         let object = value.as_json_object_value()?;
         let members = object.json_member_list();
 
-        // Check if already organized
         if is_organized(&members) {
             return None;
         }
@@ -124,7 +123,6 @@ impl Rule for OrganizePackageJson {
     }
 }
 
-/// Check if members are already in the correct order
 fn is_organized(members: &JsonMemberList) -> bool {
     let field_names: Vec<String> = members
         .iter()
@@ -143,16 +141,160 @@ fn is_organized(members: &JsonMemberList) -> bool {
         return true;
     }
 
-    // Get the sorted order
     let sorted_names = get_sorted_field_order(&field_names);
+    if field_names != sorted_names {
+        return false;
+    }
 
-    // Compare with current order
-    field_names == sorted_names
+    for member in members.iter().filter_map(|m| m.ok()) {
+        if let Ok(name) = member.name().and_then(|n| n.inner_string_text()) {
+            let field_name = name.text();
+            let transformer = get_field_transformer(field_name);
+
+            if transformer != FieldTransformer::None {
+                if needs_transformation(&member, transformer) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    true
 }
 
-/// Organize members according to package.json conventions
+fn needs_transformation(member: &JsonMember, transformer: FieldTransformer) -> bool {
+    let Ok(value) = member.value() else {
+        return false;
+    };
+
+    match transformer {
+        FieldTransformer::None => false,
+
+        FieldTransformer::SortObject
+        | FieldTransformer::SortPeopleObject
+        | FieldTransformer::SortURLObject
+        | FieldTransformer::SortBugsObject
+        | FieldTransformer::SortDirectories
+        | FieldTransformer::SortVolta
+        | FieldTransformer::SortBinary
+        | FieldTransformer::SortGitHooks
+        | FieldTransformer::SortVSCodeBadgeObject => {
+            if let Some(obj) = value.as_json_object_value() {
+                let members = obj.json_member_list();
+                let current_keys: Vec<String> = members
+                    .iter()
+                    .filter_map(|m| {
+                        m.ok()?
+                            .name()
+                            .ok()?
+                            .inner_string_text()
+                            .ok()
+                            .map(|t| t.text().to_string())
+                    })
+                    .collect();
+
+                let sorted_keys = get_expected_sorted_keys(&current_keys, transformer);
+                current_keys != sorted_keys
+            } else {
+                false
+            }
+        }
+
+        FieldTransformer::UniqArray | FieldTransformer::UniqAndSortArray => false,
+    }
+}
+
+fn get_expected_sorted_keys(keys: &[String], transformer: FieldTransformer) -> Vec<String> {
+    let mut sorted = keys.to_vec();
+
+    match transformer {
+        FieldTransformer::SortObject => {
+            sorted.sort();
+        }
+        FieldTransformer::SortPeopleObject => {
+            sort_by_key_order(&mut sorted, &["name", "email", "url"]);
+        }
+        FieldTransformer::SortURLObject => {
+            sort_by_key_order(&mut sorted, &["type", "url"]);
+        }
+        FieldTransformer::SortBugsObject => {
+            sort_by_key_order(&mut sorted, &["url", "email"]);
+        }
+        FieldTransformer::SortDirectories => {
+            sort_by_key_order(
+                &mut sorted,
+                &["lib", "bin", "man", "doc", "example", "test"],
+            );
+        }
+        FieldTransformer::SortVolta => {
+            sort_by_key_order(&mut sorted, &["node", "npm", "yarn"]);
+        }
+        FieldTransformer::SortBinary => {
+            sort_by_key_order(
+                &mut sorted,
+                &[
+                    "module_name",
+                    "module_path",
+                    "remote_path",
+                    "package_name",
+                    "host",
+                ],
+            );
+        }
+        FieldTransformer::SortGitHooks => {
+            const GIT_HOOKS_ORDER: &[&str] = &[
+                "applypatch-msg",
+                "pre-applypatch",
+                "post-applypatch",
+                "pre-commit",
+                "pre-merge-commit",
+                "prepare-commit-msg",
+                "commit-msg",
+                "post-commit",
+                "pre-rebase",
+                "post-checkout",
+                "post-merge",
+                "pre-push",
+                "pre-receive",
+                "update",
+                "proc-receive",
+                "post-receive",
+                "post-update",
+                "reference-transaction",
+                "push-to-checkout",
+                "pre-auto-gc",
+                "post-rewrite",
+                "sendemail-validate",
+                "fsmonitor-watchman",
+                "p4-changelist",
+                "p4-prepare-changelist",
+                "p4-post-changelist",
+                "p4-pre-submit",
+                "post-index-change",
+            ];
+            sort_by_key_order(&mut sorted, GIT_HOOKS_ORDER);
+        }
+        _ => {}
+    }
+
+    sorted
+}
+
+fn sort_by_key_order(keys: &mut Vec<String>, order: &[&str]) {
+    keys.sort_by(|a, b| {
+        let a_idx = order.iter().position(|&k| k == a);
+        let b_idx = order.iter().position(|&k| k == b);
+
+        match (a_idx, b_idx) {
+            (Some(a_i), Some(b_i)) => a_i.cmp(&b_i),
+            (Some(_), None) => std::cmp::Ordering::Less,
+            (None, Some(_)) => std::cmp::Ordering::Greater,
+            (None, None) => a.cmp(b),
+        }
+    });
+}
+
 fn organize_members(members: &JsonMemberList) -> Option<JsonMemberList> {
-    // Extract all members into a map
     let member_map: HashMap<String, JsonMember> = members
         .iter()
         .filter_map(|member| {
@@ -172,40 +314,143 @@ fn organize_members(members: &JsonMemberList) -> Option<JsonMemberList> {
         return None;
     }
 
-    // Get field names
     let field_names: Vec<String> = member_map.keys().cloned().collect();
-
-    // Get sorted order
     let sorted_names = get_sorted_field_order(&field_names);
 
-    // Build new member list in sorted order
     let mut elements = Vec::new();
     let mut separators = Vec::new();
 
     for (i, field_name) in sorted_names.iter().enumerate() {
         if let Some(member) = member_map.get(field_name) {
-            elements.push(member.clone());
+            let transformed_member = apply_field_transformer(member, field_name);
+            elements.push(transformed_member);
 
-            // Add comma separator (except for last element)
             if i < sorted_names.len() - 1 {
                 separators.push(make::token(T![,]));
             }
         }
     }
 
-    // Create new member list
     Some(make::json_member_list(elements, separators))
 }
 
-/// Get the sorted field order for given field names
+fn apply_field_transformer(member: &JsonMember, field_name: &str) -> JsonMember {
+    let transformer = get_field_transformer(field_name);
+
+    if transformer == FieldTransformer::None {
+        return member.clone();
+    }
+
+    let Ok(value) = member.value() else {
+        return member.clone();
+    };
+
+    let transformed_value = match transformer {
+        FieldTransformer::None => return member.clone(),
+
+        FieldTransformer::SortObject => {
+            if let Some(obj) = value.as_json_object_value() {
+                sorters::sort_alphabetically(obj)
+                    .map(|sorted| AnyJsonValue::from(sorted))
+                    .unwrap_or_else(|| value.clone())
+            } else {
+                value.clone()
+            }
+        }
+
+        FieldTransformer::SortPeopleObject => {
+            if let Some(obj) = value.as_json_object_value() {
+                sorters::sort_people_object(obj)
+                    .map(|sorted| AnyJsonValue::from(sorted))
+                    .unwrap_or_else(|| value.clone())
+            } else {
+                value.clone()
+            }
+        }
+
+        FieldTransformer::SortURLObject => {
+            if let Some(obj) = value.as_json_object_value() {
+                sorters::sort_url_object(obj)
+                    .map(|sorted| AnyJsonValue::from(sorted))
+                    .unwrap_or_else(|| value.clone())
+            } else {
+                value.clone()
+            }
+        }
+
+        FieldTransformer::SortBugsObject => {
+            if let Some(obj) = value.as_json_object_value() {
+                sorters::sort_bugs_object(obj)
+                    .map(|sorted| AnyJsonValue::from(sorted))
+                    .unwrap_or_else(|| value.clone())
+            } else {
+                value.clone()
+            }
+        }
+
+        FieldTransformer::SortDirectories => {
+            if let Some(obj) = value.as_json_object_value() {
+                sorters::sort_directories(obj)
+                    .map(|sorted| AnyJsonValue::from(sorted))
+                    .unwrap_or_else(|| value.clone())
+            } else {
+                value.clone()
+            }
+        }
+
+        FieldTransformer::SortVolta => {
+            if let Some(obj) = value.as_json_object_value() {
+                sorters::sort_volta(obj)
+                    .map(|sorted| AnyJsonValue::from(sorted))
+                    .unwrap_or_else(|| value.clone())
+            } else {
+                value.clone()
+            }
+        }
+
+        FieldTransformer::SortBinary => {
+            if let Some(obj) = value.as_json_object_value() {
+                sorters::sort_binary(obj)
+                    .map(|sorted| AnyJsonValue::from(sorted))
+                    .unwrap_or_else(|| value.clone())
+            } else {
+                value.clone()
+            }
+        }
+
+        FieldTransformer::SortGitHooks => {
+            if let Some(obj) = value.as_json_object_value() {
+                sorters::sort_git_hooks(obj)
+                    .map(|sorted| AnyJsonValue::from(sorted))
+                    .unwrap_or_else(|| value.clone())
+            } else {
+                value.clone()
+            }
+        }
+
+        FieldTransformer::SortVSCodeBadgeObject => {
+            if let Some(obj) = value.as_json_object_value() {
+                sorters::sort_vscode_badge_object(obj)
+                    .map(|sorted| AnyJsonValue::from(sorted))
+                    .unwrap_or_else(|| value.clone())
+            } else {
+                value.clone()
+            }
+        }
+
+        FieldTransformer::UniqArray | FieldTransformer::UniqAndSortArray => value.clone(),
+    };
+
+    member.clone().with_value(transformed_value)
+}
+
 fn get_sorted_field_order(field_names: &[String]) -> Vec<String> {
-    // Categorize fields
     let mut known_fields = Vec::new();
     let mut unknown_fields = Vec::new();
     let mut private_fields = Vec::new();
 
     for name in field_names {
-        if is_private_field(name) {
+        if name.starts_with('_') {
             private_fields.push(name.clone());
         } else if get_field_index(name).is_some() {
             known_fields.push(name.clone());
@@ -214,14 +459,10 @@ fn get_sorted_field_order(field_names: &[String]) -> Vec<String> {
         }
     }
 
-    // Sort known fields by predefined order
     known_fields.sort_by_key(|name| get_field_index(name).unwrap_or(usize::MAX));
-
-    // Sort unknown and private fields alphabetically
     unknown_fields.sort();
     private_fields.sort();
 
-    // Combine: known → unknown → private
     let mut result = Vec::new();
     result.extend(known_fields);
     result.extend(unknown_fields);

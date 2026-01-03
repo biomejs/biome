@@ -1,0 +1,8 @@
+{
+  "name": "test-package",
+  "bugs": {
+    "email": "bugs@example.com",
+    "url": "https://github.com/user/repo/issues"
+  },
+  "version": "1.0.0"
+}

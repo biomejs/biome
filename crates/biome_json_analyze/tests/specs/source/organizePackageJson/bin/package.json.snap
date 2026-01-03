@@ -1,0 +1,52 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "name": "test-package",
+  "version": "1.0.0",
+  "bin": {
+    "zzz": "./bin/zzz.js",
+    "aaa": "./bin/aaa.js",
+    "mmm": "./bin/mmm.js"
+  }
+}
+
+```
+
+# Diagnostics
+```
+package.json:1:1 assist/source/organizePackageJson  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i package.json fields can be organized.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "name": "test-package",
+   > 3 │   "version": "1.0.0",
+   > 4 │   "bin": {
+   > 5 │     "zzz": "./bin/zzz.js",
+   > 6 │     "aaa": "./bin/aaa.js",
+   > 7 │     "mmm": "./bin/mmm.js"
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i Safe fix: Organize package.json fields.
+  
+     3  3 │     "version": "1.0.0",
+     4  4 │     "bin": {
+     5    │ - ····"zzz":·"./bin/zzz.js",
+     6    │ - ····"aaa":·"./bin/aaa.js",
+     7    │ - ····"mmm":·"./bin/mmm.js"
+        5 │ + ····"aaa":·"./bin/aaa.js",
+        6 │ + ····"mmm":·"./bin/mmm.js",
+        7 │ + ····"zzz":·"./bin/zzz.js"
+     8  8 │     }
+     9  9 │   }
+  
+
+```
