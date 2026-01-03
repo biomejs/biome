@@ -1,5 +1,5 @@
 {
-	"image": "mcr.microsoft.com/devcontainers/universal:3",
+	"image": "mcr.microsoft.com/devcontainers/universal:5",
 	"features": {
 		"ghcr.io/devcontainers/features/rust:1": {
 			"version": "latest",
