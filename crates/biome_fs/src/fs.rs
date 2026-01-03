@@ -267,9 +267,6 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
             }),
         }
     }
-
-    // fn create_dir(&self, path: &Utf8Path) -> Result<(), FileSystemDiagnostic>;
-
     /// Returns the resolution of a symbolic link.
     fn read_link(&self, path: &Utf8Path) -> io::Result<Utf8PathBuf>;
 
