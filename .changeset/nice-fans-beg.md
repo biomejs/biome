@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Enabled rules via dependencies in `package.json` file when setting `domains` in configuration file.
+When the `domains` field is set in the configuration file, domains is now automatically enabled when Biome detects certain dependencies in `package.json`.
