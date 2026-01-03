@@ -151,6 +151,61 @@ function Component2() {
 }
 
 #[test]
+fn enables_rules_via_dependencies_but_disable_domain_from_config() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("enables_rules_via_dependencies_but_disable_domain_from_config");
+    fs.create_file(
+        "package.json",
+        r#"{
+    "dependencies": {
+        "react": "^18.0.0"
+    }
+}
+"#,
+    );
+
+    let content = r#"
+import { useEffect, useState } from "react";
+
+function Component2() {
+    const [local, setLocal] = useState(0);
+    useEffect(() => {
+      console.log(local);
+    }, []);
+}
+    "#;
+    fs.create_file("test.jsx", content);
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "linter": {
+        "domains": {
+            "react": "none"
+        }
+    }
+}
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "enables_rules_via_dependencies_but_disable_domain_from_config",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn enables_rules_via_dependencies_when_setting_domains_in_config() {
     let mut console = BufferConsole::default();
     let mut fs = TemporaryFs::new("enables_rules_via_dependencies_when_setting_domains_in_config");
