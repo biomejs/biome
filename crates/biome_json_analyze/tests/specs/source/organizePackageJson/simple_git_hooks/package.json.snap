@@ -1,0 +1,51 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "name": "test-package",
+  "version": "1.0.0",
+  "simple-git-hooks": {
+    "pre-push": "npm test",
+    "commit-msg": "commitlint",
+    "pre-commit": "lint-staged"
+  }
+}
+
+```
+
+# Diagnostics
+```
+package.json:1:1 assist/source/organizePackageJson  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i package.json fields can be organized.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "name": "test-package",
+   > 3 │   "version": "1.0.0",
+   > 4 │   "simple-git-hooks": {
+   > 5 │     "pre-push": "npm test",
+   > 6 │     "commit-msg": "commitlint",
+   > 7 │     "pre-commit": "lint-staged"
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i Safe fix: Organize package.json fields.
+  
+     3  3 │     "version": "1.0.0",
+     4  4 │     "simple-git-hooks": {
+     5    │ - ····"pre-push":·"npm·test",
+        5 │ + ····"pre-commit":·"lint-staged",
+     6  6 │       "commit-msg": "commitlint",
+     7    │ - ····"pre-commit":·"lint-staged"
+        7 │ + ····"pre-push":·"npm·test"
+     8  8 │     }
+     9  9 │   }
+  
+
+```

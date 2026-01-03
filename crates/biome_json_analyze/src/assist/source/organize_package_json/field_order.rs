@@ -1,149 +1,496 @@
-/// The 110 predefined package.json fields in their canonical order.
-/// Based on https://github.com/keithamus/sort-package-json/blob/main/defaultRules.md
-pub const PACKAGE_JSON_FIELD_ORDER: &[&str] = &[
-    // Core metadata
-    "$schema",
-    "name",
-    "displayName", // VSCode
-    "version",
-    "stableVersion", // Yarn
-    "private",
-    "description",
-    "categories", // VSCode
-    "keywords",
-    "homepage",
-    // Contact & licensing
-    "bugs",
-    "repository",
-    "funding",
-    "license",
-    "qna", // VSCode
-    "author",
-    "maintainers",
-    "contributors",
-    "publisher", // VSCode
-    // Module configuration
-    "sideEffects",
-    "type",
-    "imports",
-    "exports",
-    // Entry points
-    "main",
-    "svelte",
-    "umd:main",
-    "jsdelivr",
-    "unpkg",
-    "module",
-    "source",
-    "jsnext:main",
-    "browser",
-    "react-native",
-    // TypeScript
-    "types",
-    "typesVersions",
-    "typings",
-    // Assets
-    "style",
-    "example",
-    "examplestyle",
-    "assets",
-    // Binary & files
-    "bin",
-    "man",
-    "directories",
-    "files",
-    "workspaces",
-    "binary",
-    // Scripts
-    "scripts",
-    "betterScripts",
-    // VSCode extensions
-    "l10n",             // VSCode
-    "contributes",      // VSCode
-    "activationEvents", // VSCode
-    // Git hooks & linting
-    "husky",
-    "simple-git-hooks",
-    "pre-commit",
-    "commitlint",
-    "lint-staged",
-    "nano-staged",
-    // Configuration tools
-    "config",
-    "nodemonConfig",
-    "browserify",
-    "babel",
-    "browserslist",
-    "xo",
-    "prettier",
-    "eslintConfig",
-    "eslintIgnore",
-    "npmpkgjsonlint",
-    "npmPackageJsonLintConfig",
-    "npmpackagejsonlint",
-    // Testing & coverage
-    "release",
-    "remarkConfig",
-    "stylelint",
-    "ava",
-    "jest",
-    "jest-junit",
-    "jest-stare",
-    "mocha",
-    "nyc",
-    "c8",
-    "tap",
-    // CLI tools
-    "oclif",
-    // Dependencies
-    "resolutions",
-    "overrides",
-    "dependencies",
-    "devDependencies",
-    "dependenciesMeta",
-    "peerDependencies",
-    "peerDependenciesMeta",
-    "optionalDependencies",
-    "bundledDependencies",
-    "bundleDependencies",
-    "extensionPack",         // VSCode
-    "extensionDependencies", // VSCode
-    // Package manager
-    "flat",
-    "packageManager",
-    // Engines
-    "engines",
-    "engineStrict",
-    "devEngines",
-    "volta",
-    // Platform
-    "languageName",
-    "os",
-    "cpu",
-    // Publishing
-    "preferGlobal",
-    "publishConfig",
-    // VSCode metadata
-    "icon",          // VSCode
-    "badges",        // VSCode
-    "galleryBanner", // VSCode
-    "preview",       // VSCode
-    "markdown",      // VSCode
-    // pnpm
-    "pnpm",
-];
-
-/// Get the index of a field in the canonical order.
-/// Returns None if the field is not in the predefined list.
-pub fn get_field_index(field_name: &str) -> Option<usize> {
-    PACKAGE_JSON_FIELD_ORDER
-        .iter()
-        .position(|&name| name == field_name)
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FieldTransformer {
+    None,
+    SortObject,
+    SortPeopleObject,
+    SortURLObject,
+    SortBugsObject,
+    SortDirectories,
+    SortVolta,
+    SortBinary,
+    SortGitHooks,
+    UniqArray,
+    UniqAndSortArray,
+    SortVSCodeBadgeObject,
 }
 
-/// Check if a field is a private field (starts with underscore).
-pub fn is_private_field(field_name: &str) -> bool {
-    field_name.starts_with('_')
+#[derive(Debug, Clone, Copy)]
+pub struct FieldMetadata {
+    pub key: &'static str,
+    pub transformer: FieldTransformer,
+}
+
+/// Based on https://github.com/keithamus/sort-package-json/blob/main/defaultRules.md
+pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
+    FieldMetadata {
+        key: "$schema",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "name",
+        transformer: FieldTransformer::None,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "displayName",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "version",
+        transformer: FieldTransformer::None,
+    },
+    /* yarn */
+    FieldMetadata {
+        key: "stableVersion",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "private",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "description",
+        transformer: FieldTransformer::None,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "categories",
+        transformer: FieldTransformer::UniqArray,
+    },
+    FieldMetadata {
+        key: "keywords",
+        transformer: FieldTransformer::UniqArray,
+    },
+    FieldMetadata {
+        key: "homepage",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "bugs",
+        transformer: FieldTransformer::SortBugsObject,
+    },
+    FieldMetadata {
+        key: "repository",
+        transformer: FieldTransformer::SortURLObject,
+    },
+    FieldMetadata {
+        key: "funding",
+        transformer: FieldTransformer::SortURLObject,
+    },
+    FieldMetadata {
+        key: "license",
+        transformer: FieldTransformer::SortURLObject,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "qna",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "author",
+        transformer: FieldTransformer::SortPeopleObject,
+    },
+    FieldMetadata {
+        key: "maintainers",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "contributors",
+        transformer: FieldTransformer::None,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "publisher",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "sideEffects",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "type",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "imports",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "exports",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "main",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "svelte",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "umd:main",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "jsdelivr",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "unpkg",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "module",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "source",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "jsnext:main",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "browser",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "react-native",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "types",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "typesVersions",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "typings",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "style",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "example",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "examplestyle",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "assets",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "bin",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "man",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "directories",
+        transformer: FieldTransformer::SortDirectories,
+    },
+    FieldMetadata {
+        key: "files",
+        transformer: FieldTransformer::UniqArray,
+    },
+    FieldMetadata {
+        key: "workspaces",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "binary",
+        transformer: FieldTransformer::SortBinary,
+    },
+    FieldMetadata {
+        key: "scripts",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "betterScripts",
+        transformer: FieldTransformer::None,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "l10n",
+        transformer: FieldTransformer::None,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "contributes",
+        transformer: FieldTransformer::SortObject,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "activationEvents",
+        transformer: FieldTransformer::UniqArray,
+    },
+    FieldMetadata {
+        key: "husky",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "simple-git-hooks",
+        transformer: FieldTransformer::SortGitHooks,
+    },
+    FieldMetadata {
+        key: "pre-commit",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "commitlint",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "lint-staged",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "nano-staged",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "config",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "nodemonConfig",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "browserify",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "babel",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "browserslist",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "xo",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "prettier",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "eslintConfig",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "eslintIgnore",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "npmpkgjsonlint",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "npmPackageJsonLintConfig",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "npmpackagejsonlint",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "release",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "remarkConfig",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "stylelint",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "ava",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "jest",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "jest-junit",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "jest-stare",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "mocha",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "nyc",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "c8",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "tap",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "oclif",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "resolutions",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "overrides",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "dependencies",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "devDependencies",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "dependenciesMeta",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "peerDependencies",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "peerDependenciesMeta",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "optionalDependencies",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "bundledDependencies",
+        transformer: FieldTransformer::UniqAndSortArray,
+    },
+    FieldMetadata {
+        key: "bundleDependencies",
+        transformer: FieldTransformer::UniqAndSortArray,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "extensionPack",
+        transformer: FieldTransformer::UniqAndSortArray,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "extensionDependencies",
+        transformer: FieldTransformer::UniqAndSortArray,
+    },
+    FieldMetadata {
+        key: "flat",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "packageManager",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "engines",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "engineStrict",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "devEngines",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "volta",
+        transformer: FieldTransformer::SortVolta,
+    },
+    FieldMetadata {
+        key: "languageName",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "os",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "cpu",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "preferGlobal",
+        transformer: FieldTransformer::SortObject,
+    },
+    FieldMetadata {
+        key: "publishConfig",
+        transformer: FieldTransformer::SortObject,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "icon",
+        transformer: FieldTransformer::None,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "badges",
+        transformer: FieldTransformer::None,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "galleryBanner",
+        transformer: FieldTransformer::SortObject,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "preview",
+        transformer: FieldTransformer::None,
+    },
+    /* vscode */
+    FieldMetadata {
+        key: "markdown",
+        transformer: FieldTransformer::None,
+    },
+    FieldMetadata {
+        key: "pnpm",
+        transformer: FieldTransformer::None,
+    },
+];
+
+pub fn get_field_index(field_name: &str) -> Option<usize> {
+    PACKAGE_JSON_FIELDS
+        .iter()
+        .position(|metadata| metadata.key == field_name)
+}
+
+pub fn get_field_transformer(field_name: &str) -> FieldTransformer {
+    PACKAGE_JSON_FIELDS
+        .iter()
+        .find(|metadata| metadata.key == field_name)
+        .map(|metadata| metadata.transformer)
+        .unwrap_or(FieldTransformer::None)
 }
 
 #[cfg(test)]
@@ -152,8 +499,6 @@ mod tests {
 
     #[test]
     fn test_field_ordering() {
-        // Test that commonly used fields are in the correct relative order
-        // This test is resilient to adding/removing fields
         let schema_idx = get_field_index("$schema").unwrap();
         let name_idx = get_field_index("name").unwrap();
         let version_idx = get_field_index("version").unwrap();
@@ -163,30 +508,13 @@ mod tests {
         let dev_dependencies_idx = get_field_index("devDependencies").unwrap();
         let engines_idx = get_field_index("engines").unwrap();
 
-        // Core metadata comes first
         assert!(schema_idx < name_idx);
         assert!(name_idx < version_idx);
         assert!(version_idx < description_idx);
-
-        // Scripts come before dependencies
         assert!(scripts_idx < dependencies_idx);
-
-        // Dependencies are grouped together
         assert!(dependencies_idx < dev_dependencies_idx);
-
-        // Engines come after dependencies
         assert!(dev_dependencies_idx < engines_idx);
-
-        // Unknown fields should return None
         assert_eq!(get_field_index("unknown-field"), None);
         assert_eq!(get_field_index("custom-field"), None);
-    }
-
-    #[test]
-    fn test_private_fields() {
-        assert!(is_private_field("_internal"));
-        assert!(is_private_field("_privateKey"));
-        assert!(!is_private_field("name"));
-        assert!(!is_private_field("version"));
     }
 }

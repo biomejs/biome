@@ -1,5 +1,5 @@
-use crate::utils::is_package_json;
 use crate::JsonRuleAction;
+use crate::utils::is_package_json;
 use biome_analyze::utils::{is_separated_list_sorted_by, sorted_separated_list_by};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule,

@@ -1,0 +1,57 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "name": "test-package",
+  "author": {
+    "url": "https://example.com",
+    "name": "John Doe",
+    "email": "john@example.com"
+  },
+  "version": "1.0.0"
+}
+
+```
+
+# Diagnostics
+```
+package.json:1:1 assist/source/organizePackageJson  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i package.json fields can be organized.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "name": "test-package",
+   > 3 │   "author": {
+   > 4 │     "url": "https://example.com",
+   > 5 │     "name": "John Doe",
+   > 6 │     "email": "john@example.com"
+   > 7 │   },
+   > 8 │   "version": "1.0.0"
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i Safe fix: Organize package.json fields.
+  
+     1  1 │   {
+     2  2 │     "name": "test-package",
+     3    │ - ··"author":·{
+     4    │ - ····"url":·"https://example.com",
+        3 │ + ··"version":·"1.0.0",
+        4 │ + ··"author":·{
+     5  5 │       "name": "John Doe",
+     6    │ - ····"email":·"john@example.com"
+     7    │ - ··},
+     8    │ - ··"version":·"1.0.0"
+        6 │ + ····"email":·"john@example.com",
+        7 │ + ····"url":·"https://example.com"
+        8 │ + ··}
+     9  9 │   }
+    10 10 │   
+  
+
+```

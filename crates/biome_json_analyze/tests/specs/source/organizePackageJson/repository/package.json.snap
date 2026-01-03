@@ -1,0 +1,54 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "name": "test-package",
+  "repository": {
+    "url": "https://github.com/user/repo",
+    "type": "git"
+  },
+  "version": "1.0.0"
+}
+
+```
+
+# Diagnostics
+```
+package.json:1:1 assist/source/organizePackageJson  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i package.json fields can be organized.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "name": "test-package",
+  > 3 │   "repository": {
+  > 4 │     "url": "https://github.com/user/repo",
+  > 5 │     "type": "git"
+  > 6 │   },
+  > 7 │   "version": "1.0.0"
+  > 8 │ }
+      │ ^
+    9 │ 
+  
+  i Safe fix: Organize package.json fields.
+  
+    1 1 │   {
+    2 2 │     "name": "test-package",
+    3   │ - ··"repository":·{
+    4   │ - ····"url":·"https://github.com/user/repo",
+    5   │ - ····"type":·"git"
+    6   │ - ··},
+    7   │ - ··"version":·"1.0.0"
+      3 │ + ··"version":·"1.0.0",
+      4 │ + ··"repository":·{
+      5 │ + ····"type":·"git",
+      6 │ + ····"url":·"https://github.com/user/repo"
+      7 │ + ··}
+    8 8 │   }
+    9 9 │   
+  
+
+```
