@@ -1,0 +1,10 @@
+{
+  "name": "test-package",
+  "version": "1.0.0",
+  "exports": {
+    "unknown": "./unknown.js",
+    "./path": "./path.js",
+    "default": "./default.js",
+    "types": "./types.d.ts"
+  }
+}
