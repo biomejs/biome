@@ -2340,13 +2340,26 @@ impl WorkspaceScannerBridge for WorkspaceServer {
             .filter(|config_path| project_path != config_path.parent().unwrap().as_std_path());
 
         for filtered_path in filtered_paths {
-            let config = read_config(
+            let config_payload = read_config(
                 self.fs.as_ref(),
                 ConfigurationPathHint::FromWorkspace(filtered_path.as_path().to_path_buf()),
                 false,
             )?;
+
+            let (root_was_explicit, root_is_explicit_true, extends_was_explicit) = config_payload
+                .as_ref()
+                .and_then(|payload| payload.deserialized.deserialized.as_ref())
+                .map(|config| {
+                    (
+                        config.root.is_some(),
+                        config.root.is_some_and(|root| root.value()),
+                        config.extends.is_some(),
+                    )
+                })
+                .unwrap_or_default();
+
             let loaded_nested_configuration =
-                LoadedConfiguration::try_from_payload(config, self.fs.as_ref())?;
+                LoadedConfiguration::try_from_payload(config_payload, self.fs.as_ref())?;
 
             let LoadedConfiguration {
                 directory_path: nested_directory_path,
@@ -2366,7 +2379,10 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 continue;
             }
 
-            if nested_configuration.is_root() {
+            // Only report an error if the nested config explicitly declares "root": true.
+            // Otherwise, this config is treated as a nested configuration (even though top-level
+            // configs default to `root: true` when the field is omitted).
+            if root_is_explicit_true {
                 returned_diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
                     BiomeDiagnostic::root_in_root(
                         filtered_path.to_string(),
@@ -2376,23 +2392,38 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 continue;
             }
 
-            let nested_configuration = if nested_configuration.extends_root() {
-                let root_settings = self
-                    .projects
-                    .get_root_settings(project_key)
-                    .ok_or_else(WorkspaceError::no_project)?;
-                let mut root_configuration = root_settings
-                    .source()
-                    .ok_or_else(WorkspaceError::no_project)?;
+            let mut nested_configuration = nested_configuration;
 
-                root_configuration.merge_with(nested_configuration);
-                // We need to be careful that our merge doesn't leave
-                // `root: true` from the root config.
-                root_configuration.root = Some(Bool(false));
-                root_configuration
-            } else {
-                nested_configuration
-            };
+            // If `root` wasn't explicitly set, force this configuration to be treated as nested.
+            // Without this, `Configuration::is_root()` would consider it a root by default and
+            // we would end up overwriting the project root settings.
+            if !root_was_explicit {
+                nested_configuration.root = Some(Bool(false));
+            }
+
+            // If neither `root` nor `extends` are explicitly set, implicitly extend from the
+            // project root configuration. This makes nested `biome.json` files behave like
+            // overrides in monorepos without requiring boilerplate.
+            let extends_root_implicitly = !root_was_explicit && !extends_was_explicit;
+
+            let nested_configuration =
+                if nested_configuration.extends_root() || extends_root_implicitly {
+                    let root_settings = self
+                        .projects
+                        .get_root_settings(project_key)
+                        .ok_or_else(WorkspaceError::no_project)?;
+                    let mut root_configuration = root_settings
+                        .source()
+                        .ok_or_else(WorkspaceError::no_project)?;
+
+                    root_configuration.merge_with(nested_configuration);
+                    // We need to be careful that our merge doesn't leave
+                    // `root: true` from the root config.
+                    root_configuration.root = Some(Bool(false));
+                    root_configuration
+                } else {
+                    nested_configuration
+                };
 
             let result = self.update_settings(UpdateSettingsParams {
                 project_key,

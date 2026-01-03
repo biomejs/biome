@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 432
 expression: redactor(content)
 ---
 ## `biome.json`
@@ -29,9 +30,9 @@ expression: redactor(content)
 # Termination Message
 
 ```block
-configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome exited because the configuration resulted in errors. Please fix them.
+  × Some errors were emitted while running checks.
   
 
 
@@ -40,15 +41,30 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-<TEMP_DIR>/errors_on_ignored_nested_biome_json/nested/biome.json configuration ━━━━━━━━━━━━━━━━━━━━
+a.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Found a nested root configuration, but there's already a root configuration.
+  × Formatter would have printed the following content:
   
-  i The other configuration was found in <TEMP_DIR>/errors_on_ignored_nested_biome_json.
-  
-  i Use the migration command from the root of the project to update the configuration.
-  
-  $ biome migrate --write
+    1   │ - ··statement(··)··
+      1 │ + statement();
+      2 │ + 
   
 
+```
+
+```block
+biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - {·"files":·{·"includes":·["**/*.js",·"!nested/biome.json"]·}·}
+      1 │ + {·"files":·{·"includes":·["**/*.js",·"!nested/biome.json"]·}·}
+      2 │ + 
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 2 errors.
 ```
