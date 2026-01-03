@@ -1,0 +1,10 @@
+{
+  "exports": {
+    "./deep": {
+      "unknown": "./unknown.js",
+      "./nested-path": {},
+      "types": "./types.d.ts",
+      "default": "./default.js"
+    }
+  }
+}

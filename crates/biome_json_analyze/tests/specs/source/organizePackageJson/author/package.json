@@ -1,9 +1,0 @@
-{
-  "name": "test-package",
-  "author": {
-    "url": "https://example.com",
-    "name": "John Doe",
-    "email": "john@example.com"
-  },
-  "version": "1.0.0"
-}

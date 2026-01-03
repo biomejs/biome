@@ -1,0 +1,20 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "scripts": {
+    "build": "tsc",
+    "posttest": "echo done",
+    "test": "jest",
+    "pretest": "echo starting",
+    "lint": "eslint .",
+    "postinstall": "echo installed",
+    "install": "node install.js",
+    "preinstall": "echo installing"
+  }
+}
+
+```

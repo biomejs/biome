@@ -1,9 +1,0 @@
-{
-  "name": "test-package",
-  "version": "1.0.0",
-  "simple-git-hooks": {
-    "pre-push": "npm test",
-    "commit-msg": "commitlint",
-    "pre-commit": "lint-staged"
-  }
-}

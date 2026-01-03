@@ -1,0 +1,12 @@
+{
+  "eslintConfig": {
+    "rules": {
+      "z-rule": "error",
+      "unknown-plugin/rule/nested": "warn",
+      "other-plugin/rule": "error",
+      "no-console": "warn",
+      "prefer-const": "error",
+      "a-rule": "error"
+    }
+  }
+}

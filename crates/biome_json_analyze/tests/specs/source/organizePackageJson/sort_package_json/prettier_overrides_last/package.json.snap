@@ -1,0 +1,16 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "prettier": {
+    "overrides": [],
+    "trailingComma": "all",
+    "semi": false,
+    "singleQuote": true
+  }
+}
+
+```
