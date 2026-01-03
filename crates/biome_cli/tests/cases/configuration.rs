@@ -82,7 +82,7 @@ fn can_read_configuration_from_user_home() {
     let file_path = Utf8Path::new("src/index.js");
     fs.insert(file_path.into(), "a['b']  =  42;".as_bytes());
 
-    let config_dir = fs.user_config_dir().expect("config dire to exist");
+    let config_dir = fs.user_config_dir().expect("config dir to exist");
     let config_file = config_dir.join("biome.json");
     fs.insert(
         config_file,
