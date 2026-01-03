@@ -21,6 +21,9 @@ pub fn transform(value: &AnyJsonValue) -> Option<AnyJsonValue> {
         }
     }
 
+    // Sort paths alphabetically
+    paths.sort_by(|a, b| a.0.cmp(&b.0));
+
     let sorted_conditions = sort_conditions(conditions);
 
     let mut all_members = Vec::new();
@@ -127,5 +130,26 @@ mod tests {
         }
 
         assert_eq!(keys, vec!["./path", "types", "default"]);
+    }
+
+    #[test]
+    fn test_paths_sorted_alphabetically() {
+        let obj = parse_object(
+            r#"{"./z": {}, "./a": {}, "./m": {}, "types": "./types.d.ts"}"#,
+        );
+        let result = transform(&AnyJsonValue::from(obj.clone())).unwrap();
+        let result_obj = result.as_json_object_value().unwrap();
+
+        let mut keys = Vec::new();
+        for m in &result_obj.json_member_list() {
+            if let Ok(member) = m
+                && let Ok(name) = member.name()
+                && let Ok(text) = name.inner_string_text()
+            {
+                keys.push(text.text().to_string());
+            }
+        }
+
+        assert_eq!(keys, vec!["./a", "./m", "./z", "types"]);
     }
 }
