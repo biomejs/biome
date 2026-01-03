@@ -12,6 +12,7 @@ use std::collections::HashMap;
 
 mod field_order;
 mod sort_dependencies;
+mod sort_dependencies_meta;
 mod sort_eslint_config;
 mod sort_exports;
 mod sort_pnpm_config;
@@ -203,6 +204,7 @@ fn needs_transformation(member: &JsonMember, transformer: FieldTransformer) -> b
         }
 
         FieldTransformer::SortDependencies
+        | FieldTransformer::SortDependenciesMeta
         | FieldTransformer::SortScripts
         | FieldTransformer::SortExports
         | FieldTransformer::SortEslintConfig
@@ -290,6 +292,7 @@ fn get_expected_sorted_keys(keys: &[String], transformer: FieldTransformer) -> V
             sort_by_key_order(&mut sorted, GIT_HOOKS_ORDER);
         }
         FieldTransformer::SortDependencies
+        | FieldTransformer::SortDependenciesMeta
         | FieldTransformer::SortScripts
         | FieldTransformer::SortExports
         | FieldTransformer::SortEslintConfig
@@ -386,6 +389,10 @@ fn apply_field_transformer(
 
         FieldTransformer::SortDependencies => {
             sort_dependencies::transform(&value, root_object).unwrap_or_else(|| value.clone())
+        }
+
+        FieldTransformer::SortDependenciesMeta => {
+            sort_dependencies_meta::transform(&value).unwrap_or_else(|| value.clone())
         }
 
         FieldTransformer::SortScripts => {

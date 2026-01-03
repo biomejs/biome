@@ -10,6 +10,7 @@ pub enum FieldTransformer {
     SortBinary,
     SortGitHooks,
     SortDependencies,
+    SortDependenciesMeta,
     SortScripts,
     SortExports,
     SortEslintConfig,
@@ -385,7 +386,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "dependenciesMeta",
-        transformer: FieldTransformer::SortObjectDeep,
+        transformer: FieldTransformer::SortDependenciesMeta,
     },
     FieldMetadata {
         key: "peerDependencies",
