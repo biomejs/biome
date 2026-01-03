@@ -20,7 +20,7 @@ use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_parser::HtmlParseOptions;
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
+use biome_html_syntax::HtmlLanguage;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
 use biome_json_analyze::JsonAnalyzeServices;
@@ -508,28 +508,22 @@ fn assert_lint(
 
                 let options = test.create_analyzer_options::<HtmlLanguage>(config)?;
 
-                biome_html_analyze::analyze(
-                    &root,
-                    filter,
-                    &options,
-                    HtmlFileSource::html(),
-                    |signal| {
-                        if let Some(mut diag) = signal.diagnostic() {
-                            for action in signal.actions() {
-                                if !action.is_suppression() {
-                                    diag = diag.add_code_suggestion(action.into());
-                                }
+                biome_html_analyze::analyze(&root, filter, &options, source, |signal| {
+                    if let Some(mut diag) = signal.diagnostic() {
+                        for action in signal.actions() {
+                            if !action.is_suppression() {
+                                diag = diag.add_code_suggestion(action.into());
                             }
-
-                            let error = diag
-                                .with_file_path(test.file_path())
-                                .with_file_source_code(code);
-                            diagnostics.write_diagnostic(error);
                         }
 
-                        ControlFlow::<()>::Continue(())
-                    },
-                );
+                        let error = diag
+                            .with_file_path(test.file_path())
+                            .with_file_source_code(code);
+                        diagnostics.write_diagnostic(error);
+                    }
+
+                    ControlFlow::<()>::Continue(())
+                });
             }
         }
         DocumentFileSource::Grit(..) => todo!("Grit analysis is not yet supported"),
