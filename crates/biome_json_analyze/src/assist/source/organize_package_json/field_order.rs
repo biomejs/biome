@@ -151,17 +151,35 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_field_count() {
-        assert_eq!(PACKAGE_JSON_FIELD_ORDER.len(), 110);
-    }
+    fn test_field_ordering() {
+        // Test that commonly used fields are in the correct relative order
+        // This test is resilient to adding/removing fields
+        let schema_idx = get_field_index("$schema").unwrap();
+        let name_idx = get_field_index("name").unwrap();
+        let version_idx = get_field_index("version").unwrap();
+        let description_idx = get_field_index("description").unwrap();
+        let scripts_idx = get_field_index("scripts").unwrap();
+        let dependencies_idx = get_field_index("dependencies").unwrap();
+        let dev_dependencies_idx = get_field_index("devDependencies").unwrap();
+        let engines_idx = get_field_index("engines").unwrap();
 
-    #[test]
-    fn test_field_order() {
-        assert_eq!(get_field_index("$schema"), Some(0));
-        assert_eq!(get_field_index("name"), Some(1));
-        assert_eq!(get_field_index("version"), Some(3));
-        assert_eq!(get_field_index("pnpm"), Some(109));
+        // Core metadata comes first
+        assert!(schema_idx < name_idx);
+        assert!(name_idx < version_idx);
+        assert!(version_idx < description_idx);
+
+        // Scripts come before dependencies
+        assert!(scripts_idx < dependencies_idx);
+
+        // Dependencies are grouped together
+        assert!(dependencies_idx < dev_dependencies_idx);
+
+        // Engines come after dependencies
+        assert!(dev_dependencies_idx < engines_idx);
+
+        // Unknown fields should return None
         assert_eq!(get_field_index("unknown-field"), None);
+        assert_eq!(get_field_index("custom-field"), None);
     }
 
     #[test]
