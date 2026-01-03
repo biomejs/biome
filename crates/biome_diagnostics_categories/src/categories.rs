@@ -446,10 +446,11 @@ define_categories! {
     "lint/suspicious/useStrictMode": "https://biomejs.dev/linter/rules/use-strict-mode",
     // end lint rules
     // start assist actions
+    "assist/source/organizeImports": "https://biomejs.dev/assist/actions/organize-imports",
+    "assist/source/organizePackageJson": "https://biomejs.dev/assist/actions/organize-package-json",
+    "assist/source/useSortedAttributes": "https://biomejs.dev/assist/actions/use-sorted-attributes",
     "assist/source/useSortedKeys": "https://biomejs.dev/assist/actions/use-sorted-keys",
     "assist/source/useSortedProperties": "https://biomejs.dev/assist/actions/use-sorted-properties",
-    "assist/source/useSortedAttributes": "https://biomejs.dev/assist/actions/use-sorted-attributes",
-    "assist/source/organizeImports": "https://biomejs.dev/assist/actions/organize-imports",
     // end assist actions
     ; // start syntax rules
     "syntax/correctness/noTypeOnlyImportAttributes",
