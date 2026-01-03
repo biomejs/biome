@@ -7141,8 +7141,8 @@ export type UseGuardForInOptions = {};
 export type UseIsArrayOptions = {};
 export interface UseIterableCallbackReturnOptions {
 	/**
-	* When `true`, the rule reports `forEach` callbacks that return a value.
-When `false` or unset, such callbacks are ignored (default behaviour). 
+	* When `true`, the rule reports `forEach` callbacks that return a value (default behaviour).
+When `false` or unset, such callbacks are ignored. 
 	 */
 	checkForEach?: boolean;
 }
