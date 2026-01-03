@@ -99,7 +99,7 @@ impl Rule for UseLoneAnonymousOperation {
             rule_category!(),
             state.first()?,
             markup! {
-                "Document contains (multiple) anonymous operations. This anonymous operation must be the only defined operation in this document or turn into a named operation."
+                "Document contains an anonymous operation while defining more than one operation. This anonymous operation must be the only defined operation in this document or turned into a named operation."
             },
         );
 

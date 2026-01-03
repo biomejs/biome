@@ -18,7 +18,7 @@ query {
 ```
 one-shorthand-one-anonymous.graphql:2:1 lint/nursery/useLoneAnonymousOperation ━━━━━━━━━━━━━━━━━━━━━
 
-  i Document contains (multiple) anonymous operations. This anonymous operation must be the only defined operation in this document or turn into a named operation.
+  i Document contains an anonymous operation while defining more than one operation. This anonymous operation must be the only defined operation in this document or turned into a named operation.
   
     1 │ # should generate diagnostics
   > 2 │ {
