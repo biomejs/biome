@@ -794,9 +794,10 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
 
     let source_type = params.language.to_html_file_source().unwrap_or_default();
-    let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-        process_lint.process_signal(signal)
-    });
+    let (_, analyze_diagnostics) =
+        analyze(&tree, filter, &analyzer_options, source_type, |signal| {
+            process_lint.process_signal(signal)
+        });
 
     process_lint.into_result(
         params
