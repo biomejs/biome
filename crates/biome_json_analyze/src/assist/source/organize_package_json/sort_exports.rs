@@ -134,9 +134,7 @@ mod tests {
 
     #[test]
     fn test_paths_sorted_alphabetically() {
-        let obj = parse_object(
-            r#"{"./z": {}, "./a": {}, "./m": {}, "types": "./types.d.ts"}"#,
-        );
+        let obj = parse_object(r#"{"./z": {}, "./a": {}, "./m": {}, "types": "./types.d.ts"}"#);
         let result = transform(&AnyJsonValue::from(obj.clone())).unwrap();
         let result_obj = result.as_json_object_value().unwrap();
 

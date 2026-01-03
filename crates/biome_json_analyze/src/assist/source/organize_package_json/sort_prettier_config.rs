@@ -21,6 +21,10 @@ pub fn transform(value: &AnyJsonValue) -> Option<AnyJsonValue> {
         }
     }
 
+    if keys_with_members.len() < 2 && overrides_member.is_none() {
+        return None;
+    }
+
     keys_with_members.sort_by(|a, b| a.0.cmp(&b.0));
 
     let mut elements = Vec::new();

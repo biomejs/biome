@@ -432,7 +432,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "engineStrict",
-        transformer: FieldTransformer::SortObject,
+        transformer: FieldTransformer::None,
     },
     FieldMetadata {
         key: "devEngines",

@@ -71,8 +71,10 @@ fn should_sort_dependencies_like_npm(package_json: &JsonObjectValue) -> bool {
 
 fn find_member_value(members: &JsonMemberList, key: &str) -> Option<AnyJsonValue> {
     for member in members {
-        let member = member.ok()?;
-        let name = member.name().ok()?.inner_string_text().ok()?;
+        let Ok(member) = member else { continue };
+        let Ok(name) = member.name().and_then(|n| n.inner_string_text()) else {
+            continue;
+        };
         if name.text() == key {
             return member.value().ok();
         }

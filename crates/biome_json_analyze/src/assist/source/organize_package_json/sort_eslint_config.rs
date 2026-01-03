@@ -88,6 +88,10 @@ fn sort_eslint_rules(object: &JsonObjectValue) -> Option<JsonObjectValue> {
         member_vec.push(m.clone());
     }
 
+    if member_vec.len() < 2 {
+        return None;
+    }
+
     member_vec.sort_by(|a, b| {
         let a_name = a
             .name()

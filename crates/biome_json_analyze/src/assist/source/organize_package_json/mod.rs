@@ -182,13 +182,13 @@ fn needs_transformation(member: &JsonMember, transformer: FieldTransformer) -> b
         | FieldTransformer::SortDirectories
         | FieldTransformer::SortVolta
         | FieldTransformer::SortBinary
-        | FieldTransformer::SortGitHooks => check_object_keys_sorted(&value, transformer),
+        | FieldTransformer::SortGitHooks => needs_key_sorting(&value, transformer),
 
         // Object sorters with simple top-level key checking
         FieldTransformer::SortDependencies
         | FieldTransformer::SortDependenciesMeta
         | FieldTransformer::SortScripts
-        | FieldTransformer::SortObjectDeep => check_object_keys_sorted(&value, transformer),
+        | FieldTransformer::SortObjectDeep => needs_key_sorting(&value, transformer),
 
         // Complex nested transformers - skip deep checks for performance
         // These involve recursive transformations, conditional logic, or nested field ordering
@@ -209,7 +209,8 @@ fn needs_transformation(member: &JsonMember, transformer: FieldTransformer) -> b
     }
 }
 
-fn check_object_keys_sorted(value: &AnyJsonValue, transformer: FieldTransformer) -> bool {
+/// Checks if object keys need sorting. Returns true when keys are NOT in the expected order.
+fn needs_key_sorting(value: &AnyJsonValue, transformer: FieldTransformer) -> bool {
     if let Some(obj) = value.as_json_object_value() {
         let members = obj.json_member_list();
         let current_keys: Vec<String> = members
@@ -286,37 +287,7 @@ fn get_expected_sorted_keys(keys: &[String], transformer: FieldTransformer) -> V
             );
         }
         FieldTransformer::SortGitHooks => {
-            const GIT_HOOKS_ORDER: &[&str] = &[
-                "applypatch-msg",
-                "pre-applypatch",
-                "post-applypatch",
-                "pre-commit",
-                "pre-merge-commit",
-                "prepare-commit-msg",
-                "commit-msg",
-                "post-commit",
-                "pre-rebase",
-                "post-checkout",
-                "post-merge",
-                "pre-push",
-                "pre-receive",
-                "update",
-                "proc-receive",
-                "post-receive",
-                "post-update",
-                "reference-transaction",
-                "push-to-checkout",
-                "pre-auto-gc",
-                "post-rewrite",
-                "sendemail-validate",
-                "fsmonitor-watchman",
-                "p4-changelist",
-                "p4-prepare-changelist",
-                "p4-post-changelist",
-                "p4-pre-submit",
-                "post-index-change",
-            ];
-            sort_by_key_order(&mut sorted, GIT_HOOKS_ORDER);
+            sort_by_key_order(&mut sorted, sorters::GIT_HOOKS_ORDER);
         }
         FieldTransformer::SortDependencies
         | FieldTransformer::SortDependenciesMeta
@@ -489,7 +460,7 @@ fn apply_field_transformer(
         }
 
         FieldTransformer::SortWorkspaces => {
-            sort_workspaces::transform(&value, root_object).unwrap_or_else(|| value.clone())
+            sort_workspaces::transform(&value).unwrap_or_else(|| value.clone())
         }
 
         FieldTransformer::SortPnpmConfig => {
@@ -560,7 +531,11 @@ fn apply_field_transformer(
             }
         }
 
-        FieldTransformer::UniqArray | FieldTransformer::UniqAndSortArray => value.clone(),
+        FieldTransformer::UniqArray => sorters::uniq_array(&value).unwrap_or_else(|| value.clone()),
+
+        FieldTransformer::UniqAndSortArray => {
+            sorters::uniq_and_sort_array(&value).unwrap_or_else(|| value.clone())
+        }
     };
 
     member.clone().with_value(transformed_value)

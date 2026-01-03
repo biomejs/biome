@@ -159,39 +159,40 @@ pub fn sort_vscode_badge_object(object: &JsonObjectValue) -> Option<JsonObjectVa
     sort_object_by_key_order(object, &["description", "url", "href"])
 }
 
+/// Git hooks in execution order, based on git-hooks-list package
+pub(super) const GIT_HOOKS_ORDER: &[&str] = &[
+    "applypatch-msg",
+    "pre-applypatch",
+    "post-applypatch",
+    "pre-commit",
+    "pre-merge-commit",
+    "prepare-commit-msg",
+    "commit-msg",
+    "post-commit",
+    "pre-rebase",
+    "post-checkout",
+    "post-merge",
+    "pre-push",
+    "pre-receive",
+    "update",
+    "proc-receive",
+    "post-receive",
+    "post-update",
+    "reference-transaction",
+    "push-to-checkout",
+    "pre-auto-gc",
+    "post-rewrite",
+    "sendemail-validate",
+    "fsmonitor-watchman",
+    "p4-changelist",
+    "p4-prepare-changelist",
+    "p4-post-changelist",
+    "p4-pre-submit",
+    "post-index-change",
+];
+
 /// Based on git-hooks-list package
 pub fn sort_git_hooks(object: &JsonObjectValue) -> Option<JsonObjectValue> {
-    const GIT_HOOKS_ORDER: &[&str] = &[
-        "applypatch-msg",
-        "pre-applypatch",
-        "post-applypatch",
-        "pre-commit",
-        "pre-merge-commit",
-        "prepare-commit-msg",
-        "commit-msg",
-        "post-commit",
-        "pre-rebase",
-        "post-checkout",
-        "post-merge",
-        "pre-push",
-        "pre-receive",
-        "update",
-        "proc-receive",
-        "post-receive",
-        "post-update",
-        "reference-transaction",
-        "push-to-checkout",
-        "pre-auto-gc",
-        "post-rewrite",
-        "sendemail-validate",
-        "fsmonitor-watchman",
-        "p4-changelist",
-        "p4-prepare-changelist",
-        "p4-post-changelist",
-        "p4-pre-submit",
-        "post-index-change",
-    ];
-
     sort_object_by_key_order(object, GIT_HOOKS_ORDER)
 }
 
@@ -306,6 +307,107 @@ where
 
     let new_members = make::json_member_list(elements, separators);
     Some(object.clone().with_json_member_list(new_members))
+}
+
+/// Remove duplicate string values from an array
+pub fn uniq_array(array: &AnyJsonValue) -> Option<AnyJsonValue> {
+    let array_value = array.as_json_array_value()?;
+    let elements = array_value.elements();
+
+    let mut seen = std::collections::HashSet::new();
+    let mut unique_elements = Vec::new();
+    let mut has_changes = false;
+
+    for element in (&elements).into_iter().flatten() {
+        if let Some(string_val) = element.as_json_string_value()
+            && let Ok(text) = string_val.inner_string_text()
+        {
+            let content = text.text().to_string();
+            if seen.insert(content) {
+                unique_elements.push(element.clone());
+            } else {
+                has_changes = true;
+            }
+        } else {
+            unique_elements.push(element.clone());
+        }
+    }
+
+    if !has_changes {
+        return None;
+    }
+
+    rebuild_array(array_value, unique_elements)
+}
+
+/// Remove duplicates and sort array alphabetically
+pub fn uniq_and_sort_array(array: &AnyJsonValue) -> Option<AnyJsonValue> {
+    let array_value = array.as_json_array_value()?;
+    let elements = array_value.elements();
+
+    let mut string_values = Vec::new();
+    let mut non_string_elements = Vec::new();
+
+    for element in (&elements).into_iter().flatten() {
+        if let Some(string_val) = element.as_json_string_value()
+            && let Ok(text) = string_val.inner_string_text()
+        {
+            string_values.push((text.text().to_string(), element.clone()));
+        } else {
+            non_string_elements.push(element.clone());
+        }
+    }
+
+    // Remove duplicates and sort
+    let mut seen = std::collections::HashSet::new();
+    let mut unique_sorted: Vec<_> = string_values
+        .into_iter()
+        .filter(|(s, _)| seen.insert(s.clone()))
+        .collect();
+    unique_sorted.sort_by(|a, b| a.0.cmp(&b.0));
+
+    let original_count = elements.iter().count();
+    let new_count = unique_sorted.len() + non_string_elements.len();
+
+    // Check if order changed
+    let current_strings: Vec<String> = elements
+        .iter()
+        .filter_map(|e| {
+            e.ok()?
+                .as_json_string_value()?
+                .inner_string_text()
+                .ok()
+                .map(|t| t.text().to_string())
+        })
+        .collect();
+    let sorted_strings: Vec<String> = unique_sorted.iter().map(|(s, _)| s.clone()).collect();
+
+    if original_count == new_count && current_strings == sorted_strings {
+        return None;
+    }
+
+    let mut final_elements = Vec::new();
+    for (_, elem) in unique_sorted {
+        final_elements.push(elem);
+    }
+    final_elements.extend(non_string_elements);
+
+    rebuild_array(array_value, final_elements)
+}
+
+fn rebuild_array(
+    array_value: &biome_json_syntax::JsonArrayValue,
+    elements: Vec<AnyJsonValue>,
+) -> Option<AnyJsonValue> {
+    let mut separators = Vec::new();
+    for _ in 0..(elements.len().saturating_sub(1)) {
+        separators.push(make::token(T![,]));
+    }
+
+    let new_elements = make::json_array_element_list(elements, separators);
+    let new_array = array_value.clone().with_elements(new_elements);
+
+    Some(AnyJsonValue::from(new_array))
 }
 
 #[cfg(test)]
