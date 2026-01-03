@@ -45,7 +45,15 @@ declare_lint_rule! {
     /// - `toSorted`
     /// — `from` (when called on `Array`)
     ///
-    /// A return value is disallowed in the method `forEach`.
+    /// When `checkForEach` is enabled, a return value is disallowed in the method `forEach`.
+    ///
+    /// ## Options
+    ///
+    /// ### checkForEach
+    ///
+    /// If `true`, also check that callbacks to `forEach` do not return a value.
+    ///
+    /// Default: `false`
     ///
     /// ## Examples
     ///
@@ -54,12 +62,6 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic
     /// [].map(() => {
     ///     // Missing return value
-    /// });
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// [].forEach(() => {
-    ///     return 1; // Should not return a value
     /// });
     /// ```
     ///
@@ -72,13 +74,10 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js
+    /// // By default, forEach callbacks may return a value
     /// [].forEach(() => {
-    ///     // No return value, which is correct
+    ///     return 1;
     /// });
-    /// ```
-    ///
-    /// ```js
-    /// [].forEach(() => void null); // Void return value, which doesn't trigger the rule
     /// ```
     pub UseIterableCallbackReturn {
         version: "2.0.0",
@@ -129,6 +128,11 @@ impl Rule for UseIterableCallbackReturn {
             .and_then(|name| name.value_token().ok())?;
 
         let method_config = ITERABLE_METHOD_INFOS.get(member_name.text_trimmed())?;
+
+        // Skip forEach checks if checkForEach option is false
+        if member_name.text_trimmed() == "forEach" && !ctx.options().check_for_each() {
+            return None;
+        }
 
         let arg_position = argument_list
             .elements()
