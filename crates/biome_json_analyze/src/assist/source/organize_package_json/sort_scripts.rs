@@ -163,19 +163,18 @@ fn sort_script_names(names: Vec<String>, prefix: &str) -> Vec<String> {
     let mut group_map: HashMap<String, Vec<String>> = HashMap::new();
 
     for key in &names {
+        // Safely extract the rest after prefix
         let rest = if prefix.is_empty() {
             key.as_str()
         } else {
-            &key[prefix.len() + 1..]
+            let prefix_with_colon = format!("{}:", prefix);
+            key.strip_prefix(&prefix_with_colon).unwrap_or(key.as_str())
         };
 
         if let Some(idx) = rest.find(':') {
-            let base_len = if prefix.is_empty() {
-                0
-            } else {
-                prefix.len() + 1
-            };
-            let base = &key[..base_len + idx];
+            // Safely compute base by finding where rest starts in key
+            let rest_offset = key.len() - rest.len();
+            let base = &key[..rest_offset + idx];
             group_map
                 .entry(base.to_string())
                 .or_default()

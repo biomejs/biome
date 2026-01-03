@@ -1,9 +1,13 @@
 use biome_json_syntax::{AnyJsonValue, JsonMemberList, JsonObjectValue};
+use biome_string_case::StrOnlyExtension;
 
 use super::sorters::{sort_alphabetically, sort_object_by_comparator};
 
 /// Sort dependencies alphabetically, detecting package manager to use the appropriate comparison.
 /// npm uses locale-aware comparison, yarn and pnpm use simple string comparison.
+///
+/// npm sorting uses English locale-aware comparison (similar to JavaScript's localeCompare).
+/// This is approximated using case-insensitive comparison.
 pub fn transform(
     value: &AnyJsonValue,
     package_json_root: &JsonObjectValue,
@@ -12,9 +16,13 @@ pub fn transform(
 
     // Sort like npm CLI does (via @npmcli/package-json)
     // https://github.com/npm/package-json/blob/b6465f44c727d6513db6898c7cbe41dd355cebe8/lib/update-dependencies.js#L8-L21
+    // npm uses a.localeCompare(b, 'en') which is locale-aware (case-insensitive)
     let sorted = if should_sort_dependencies_like_npm(package_json_root) {
-        sort_object_by_comparator(object, |a, b| a.cmp(b))?
+        sort_object_by_comparator(object, |a, b| {
+            a.to_lowercase_cow().cmp(&b.to_lowercase_cow())
+        })?
     } else {
+        // yarn/pnpm use simple string comparison
         sort_alphabetically(object)?
     };
 
