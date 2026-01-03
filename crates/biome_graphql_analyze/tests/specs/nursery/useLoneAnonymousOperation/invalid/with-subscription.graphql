@@ -1,7 +1,7 @@
 # should generate diagnostics
 query {
-  fieldA
+	fieldA
 }
 subscription Foo {
-  fieldB
+	fieldB
 }
