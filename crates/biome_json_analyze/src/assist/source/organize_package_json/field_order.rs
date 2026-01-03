@@ -15,9 +15,14 @@ pub enum FieldTransformer {
     SortEslintConfig,
     SortPrettierConfig,
     SortPeopleArray,
+    SortBadgesArray,
+    SortObjectDeep,
+    SortHusky,
+    SortDevEngines,
+    SortWorkspaces,
+    SortPnpmConfig,
     UniqArray,
     UniqAndSortArray,
-    SortVSCodeBadgeObject,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -212,7 +217,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "workspaces",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortWorkspaces,
     },
     // node-pre-gyp https://www.npmjs.com/package/node-pre-gyp#1-add-new-entries-to-your-packagejson
     FieldMetadata {
@@ -244,7 +249,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "husky",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortHusky,
     },
     FieldMetadata {
         key: "simple-git-hooks",
@@ -360,7 +365,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "oclif",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortObjectDeep,
     },
     FieldMetadata {
         key: "resolutions",
@@ -380,7 +385,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "dependenciesMeta",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortObjectDeep,
     },
     FieldMetadata {
         key: "peerDependencies",
@@ -388,7 +393,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "peerDependenciesMeta",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortObjectDeep,
     },
     FieldMetadata {
         key: "optionalDependencies",
@@ -430,7 +435,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "devEngines",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortDevEngines,
     },
     FieldMetadata {
         key: "volta",
@@ -464,7 +469,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     /* vscode */
     FieldMetadata {
         key: "badges",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortBadgesArray,
     },
     /* vscode */
     FieldMetadata {
@@ -483,7 +488,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "pnpm",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortPnpmConfig,
     },
 ];
 

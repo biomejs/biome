@@ -14,8 +14,10 @@ mod field_order;
 mod sort_dependencies;
 mod sort_eslint_config;
 mod sort_exports;
+mod sort_pnpm_config;
 mod sort_prettier_config;
 mod sort_scripts;
+mod sort_workspaces;
 mod sorters;
 
 use field_order::{FieldTransformer, get_field_index, get_field_transformer};
@@ -178,8 +180,7 @@ fn needs_transformation(member: &JsonMember, transformer: FieldTransformer) -> b
         | FieldTransformer::SortDirectories
         | FieldTransformer::SortVolta
         | FieldTransformer::SortBinary
-        | FieldTransformer::SortGitHooks
-        | FieldTransformer::SortVSCodeBadgeObject => {
+        | FieldTransformer::SortGitHooks => {
             if let Some(obj) = value.as_json_object_value() {
                 let members = obj.json_member_list();
                 let current_keys: Vec<String> = members
@@ -206,7 +207,13 @@ fn needs_transformation(member: &JsonMember, transformer: FieldTransformer) -> b
         | FieldTransformer::SortExports
         | FieldTransformer::SortEslintConfig
         | FieldTransformer::SortPrettierConfig
-        | FieldTransformer::SortPeopleArray => false,
+        | FieldTransformer::SortPeopleArray
+        | FieldTransformer::SortBadgesArray
+        | FieldTransformer::SortObjectDeep
+        | FieldTransformer::SortHusky
+        | FieldTransformer::SortDevEngines
+        | FieldTransformer::SortWorkspaces
+        | FieldTransformer::SortPnpmConfig => false,
 
         FieldTransformer::UniqArray | FieldTransformer::UniqAndSortArray => false,
     }
@@ -287,7 +294,13 @@ fn get_expected_sorted_keys(keys: &[String], transformer: FieldTransformer) -> V
         | FieldTransformer::SortExports
         | FieldTransformer::SortEslintConfig
         | FieldTransformer::SortPrettierConfig
-        | FieldTransformer::SortPeopleArray => {
+        | FieldTransformer::SortPeopleArray
+        | FieldTransformer::SortBadgesArray
+        | FieldTransformer::SortObjectDeep
+        | FieldTransformer::SortHusky
+        | FieldTransformer::SortDevEngines
+        | FieldTransformer::SortWorkspaces
+        | FieldTransformer::SortPnpmConfig => {
             sorted.sort();
         }
         _ => {}
@@ -395,6 +408,60 @@ fn apply_field_transformer(
             sorters::transform_people_array(&value).unwrap_or_else(|| value.clone())
         }
 
+        FieldTransformer::SortBadgesArray => {
+            sorters::transform_badges_array(&value).unwrap_or_else(|| value.clone())
+        }
+
+        FieldTransformer::SortObjectDeep => {
+            if let Some(obj) = value.as_json_object_value() {
+                sorters::sort_alphabetically_deep(obj)
+                    .map_or_else(|| value.clone(), AnyJsonValue::from)
+            } else {
+                value.clone()
+            }
+        }
+
+        FieldTransformer::SortHusky => {
+            if let Some(obj) = value.as_json_object_value() {
+                sorters::transform_nested_property(obj, "hooks", |hooks_value| {
+                    hooks_value
+                        .as_json_object_value()
+                        .and_then(sorters::sort_git_hooks)
+                        .map(AnyJsonValue::from)
+                })
+                .map_or_else(|| value.clone(), AnyJsonValue::from)
+            } else {
+                value.clone()
+            }
+        }
+
+        FieldTransformer::SortDevEngines => {
+            if let Some(obj) = value.as_json_object_value() {
+                sorters::transform_nested_property(obj, "packageManager", |pm_value| {
+                    pm_value
+                        .as_json_object_value()
+                        .and_then(|pm_obj| {
+                            sorters::sort_object_by_key_order(
+                                pm_obj,
+                                &["name", "version", "onFail"],
+                            )
+                        })
+                        .map(AnyJsonValue::from)
+                })
+                .map_or_else(|| value.clone(), AnyJsonValue::from)
+            } else {
+                value.clone()
+            }
+        }
+
+        FieldTransformer::SortWorkspaces => {
+            sort_workspaces::transform(&value, root_object).unwrap_or_else(|| value.clone())
+        }
+
+        FieldTransformer::SortPnpmConfig => {
+            sort_pnpm_config::transform(&value).unwrap_or_else(|| value.clone())
+        }
+
         FieldTransformer::SortObject => {
             if let Some(obj) = value.as_json_object_value() {
                 sorters::sort_alphabetically(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
@@ -454,15 +521,6 @@ fn apply_field_transformer(
         FieldTransformer::SortGitHooks => {
             if let Some(obj) = value.as_json_object_value() {
                 sorters::sort_git_hooks(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
-            } else {
-                value.clone()
-            }
-        }
-
-        FieldTransformer::SortVSCodeBadgeObject => {
-            if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_vscode_badge_object(obj)
-                    .map_or_else(|| value.clone(), AnyJsonValue::from)
             } else {
                 value.clone()
             }

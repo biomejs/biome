@@ -7,6 +7,42 @@ pub fn sort_alphabetically(object: &JsonObjectValue) -> Option<JsonObjectValue> 
     sort_object_by_comparator(object, |a, b| a.cmp(b))
 }
 
+pub fn sort_alphabetically_deep(object: &JsonObjectValue) -> Option<JsonObjectValue> {
+    let sorted = sort_object_by_comparator(object, |a, b| a.cmp(b))?;
+    deep_sort_all_nested_objects(&sorted)
+}
+
+fn deep_sort_all_nested_objects(object: &JsonObjectValue) -> Option<JsonObjectValue> {
+    let members = object.json_member_list();
+    let mut elements = Vec::new();
+    let mut has_changes = false;
+
+    for m in (&members).into_iter().flatten() {
+        let transformed_member = if let Ok(value) = m.value()
+            && let Some(obj) = value.as_json_object_value()
+            && let Some(deep_sorted) = sort_alphabetically_deep(obj)
+        {
+            has_changes = true;
+            m.clone().with_value(AnyJsonValue::from(deep_sorted))
+        } else {
+            m.clone()
+        };
+        elements.push(transformed_member);
+    }
+
+    if !has_changes {
+        return Some(object.clone());
+    }
+
+    let mut separators = Vec::new();
+    for _ in 0..(elements.len().saturating_sub(1)) {
+        separators.push(make::token(T![,]));
+    }
+
+    let new_members = make::json_member_list(elements, separators);
+    Some(object.clone().with_json_member_list(new_members))
+}
+
 /// Generic object sorter that accepts a custom comparator function
 pub fn sort_object_by_comparator<F>(
     object: &JsonObjectValue,
@@ -184,22 +220,92 @@ fn rebuild_object_from_members(
 }
 
 pub fn transform_people_array(array: &AnyJsonValue) -> Option<AnyJsonValue> {
+    transform_array_with(array, |obj| sort_people_object(obj).map(AnyJsonValue::from))
+}
+
+pub fn transform_badges_array(array: &AnyJsonValue) -> Option<AnyJsonValue> {
+    transform_array_with(array, |obj| {
+        sort_vscode_badge_object(obj).map(AnyJsonValue::from)
+    })
+}
+
+fn transform_array_with<F>(array: &AnyJsonValue, transform_fn: F) -> Option<AnyJsonValue>
+where
+    F: Fn(&JsonObjectValue) -> Option<AnyJsonValue>,
+{
     let array_value = array.as_json_array_value()?;
     let elements = array_value.elements();
 
-    let _transformed_elements: Vec<_> = elements
-        .iter()
-        .filter_map(|elem| {
-            let elem = elem.ok()?;
-            if let Some(obj) = elem.as_json_object_value() {
-                sort_people_object(obj).map(|sorted| sorted.into())
-            } else {
-                Some(elem)
-            }
-        })
-        .collect();
+    let mut transformed_elements = Vec::new();
+    let mut has_changes = false;
 
-    Some(array.clone())
+    for element in (&elements).into_iter().flatten() {
+        if let Some(obj) = element.as_json_object_value()
+            && let Some(transformed) = transform_fn(obj)
+        {
+            transformed_elements.push(transformed);
+            has_changes = true;
+        } else {
+            transformed_elements.push(element.clone());
+        }
+    }
+
+    if !has_changes {
+        return None;
+    }
+
+    let mut array_elements = Vec::new();
+    let mut separators = Vec::new();
+
+    for (i, elem) in transformed_elements.iter().enumerate() {
+        array_elements.push(elem.clone());
+        if i < transformed_elements.len() - 1 {
+            separators.push(make::token(T![,]));
+        }
+    }
+
+    let new_elements = make::json_array_element_list(array_elements, separators);
+    let new_array = array_value.clone().with_elements(new_elements);
+
+    Some(AnyJsonValue::from(new_array))
+}
+
+pub fn transform_nested_property<F>(
+    object: &JsonObjectValue,
+    property_name: &str,
+    transform_fn: F,
+) -> Option<JsonObjectValue>
+where
+    F: Fn(&AnyJsonValue) -> Option<AnyJsonValue>,
+{
+    let members = object.json_member_list();
+    let mut elements = Vec::new();
+    let mut has_changes = false;
+
+    for m in (&members).into_iter().flatten() {
+        if let Ok(name) = m.name().and_then(|n| n.inner_string_text())
+            && name.text() == property_name
+            && let Ok(value) = m.value()
+            && let Some(transformed_value) = transform_fn(&value)
+        {
+            elements.push(m.clone().with_value(transformed_value));
+            has_changes = true;
+            continue;
+        }
+        elements.push(m.clone());
+    }
+
+    if !has_changes {
+        return None;
+    }
+
+    let mut separators = Vec::new();
+    for _ in 0..(elements.len().saturating_sub(1)) {
+        separators.push(make::token(T![,]));
+    }
+
+    let new_members = make::json_member_list(elements, separators);
+    Some(object.clone().with_json_member_list(new_members))
 }
 
 #[cfg(test)]
