@@ -1,0 +1,13 @@
+@media print {
+	.page {
+		width: 8in;
+
+		@at-root (without: media) {
+			color: #111;
+		}
+
+		@at-root (with: rule) {
+			font-size: 1.2em;
+		}
+	}
+}
