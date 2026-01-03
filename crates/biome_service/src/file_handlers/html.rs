@@ -793,7 +793,8 @@ fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
 
-    let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {
+    let source_type = params.language.to_html_file_source().unwrap_or_default();
+    let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
         process_lint.process_signal(signal)
     });
 
@@ -826,7 +827,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();
     let _ = trace_span!("Parsed file", tree =? tree).entered();
-    let Some(_) = language.to_html_file_source() else {
+    let Some(source_type) = language.to_html_file_source() else {
         error!("Could not determine the HTML file source of the file");
         return PullActionsResult {
             actions: Vec::new(),
@@ -851,7 +852,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    analyze(&tree, filter, &analyzer_options, |signal| {
+    analyze(&tree, filter, &analyzer_options, source_type, |signal| {
         actions.extend(signal.actions().into_code_action_iter().map(|item| {
             CodeAction {
                 category: item.category.clone(),
@@ -905,8 +906,12 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         tree.syntax().text_range_with_trivia().len().into(),
     );
 
+    let source_type = params
+        .document_file_source
+        .to_html_file_source()
+        .unwrap_or_default();
     loop {
-        let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
+        let (action, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
             process_fix_all.process_signal(signal)
         });
 

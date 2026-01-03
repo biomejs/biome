@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::{fmt::Display, fmt::Formatter, markup};
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlElement;
+use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_alt_text::UseAltTextOptions;
 
@@ -112,10 +112,10 @@ impl Rule for UseAltText {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let file_extension = ctx.file_path().extension()?;
+        let file_source = ctx.source_type::<HtmlFileSource>();
 
         let element_name = element.name()?;
-        let is_html_file = file_extension == "html";
+        let is_html_file = file_source.is_html();
 
         let has_alt = has_valid_alt_text(element);
         let has_aria_label = has_valid_label(element, "aria-label");
