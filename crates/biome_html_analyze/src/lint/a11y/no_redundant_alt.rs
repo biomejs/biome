@@ -57,9 +57,9 @@ impl Rule for NoRedundantAlt {
         let file_source = ctx.source_type::<HtmlFileSource>();
 
         let name = node.name().ok()?.value_token().ok()?;
-        if file_source.is_html() && !name.text_trimmed().eq_ignore_ascii_case("img") {
-            return None;
-        } else if !file_source.is_html() && name.text_trimmed() != "img" {
+        if (file_source.is_html() && !name.text_trimmed().eq_ignore_ascii_case("img"))
+            || (!file_source.is_html() && name.text_trimmed() != "img")
+        {
             return None;
         }
 
