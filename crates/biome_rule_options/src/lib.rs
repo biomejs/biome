@@ -265,6 +265,7 @@ pub mod no_vue_v_if_with_v_for;
 pub mod no_with;
 pub mod no_yoda_expression;
 pub mod organize_imports;
+pub mod organize_package_json;
 pub mod use_adjacent_overload_signatures;
 pub mod use_alt_text;
 pub mod use_anchor_content;

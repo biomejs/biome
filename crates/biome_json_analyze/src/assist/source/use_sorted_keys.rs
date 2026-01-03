@@ -1,3 +1,4 @@
+use crate::utils::is_package_json;
 use crate::JsonRuleAction;
 use biome_analyze::utils::{is_separated_list_sorted_by, sorted_separated_list_by};
 use biome_analyze::{
@@ -158,6 +159,12 @@ impl Rule for UseSortedKeys {
     type Options = UseSortedKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        // Skip package.json files - they have specialized sorting via organizePackageJson
+        let path = ctx.file_path();
+        if is_package_json(path) {
+            return None;
+        }
+
         let options = ctx.options();
         let sort_order = options.sort_order.unwrap_or_default();
         let comparator = match sort_order {
