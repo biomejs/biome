@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added `noDuplicateClasses` to detect and remove duplicate CSS classes.
+Added the new nursery rule [`noDuplicateClasses`](https://biomejs.dev/linter/rules/no-duplicate-classes/) to detect and remove duplicate CSS classes.
 
 **For JSX files:** Available as an assist action at [`assist.source.noDuplicateClasses`](https://biomejs.dev/assist/actions/no-duplicate-classes/). Supports `class`, `className` attributes and utility functions like `clsx`, `cn`, `cva`.
 
