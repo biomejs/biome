@@ -49,7 +49,9 @@ pub use crate::rule::{
     RuleDomain, RuleGroup, RuleMeta, RuleMetadata, RuleSource, RuleSourceKind, RuleSourceWithKind,
     SuppressAction,
 };
-pub use crate::services::{FromServices, ServiceBag, ServicesDiagnostic};
+pub use crate::services::{
+    ExtendedConfigurationProvider, FromServices, ServiceBag, ServicesDiagnostic,
+};
 pub use crate::signals::{
     AnalyzerAction, AnalyzerSignal, AnalyzerTransformation, DiagnosticSignal,
 };

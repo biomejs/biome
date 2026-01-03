@@ -63,7 +63,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                         b.iter(|| {
                             let json_services = JsonAnalyzeServices {
                                 file_source,
-                                configuration_source: None,
+                                configuration_provider: None,
                             };
 
                             biome_json_analyze::analyze(

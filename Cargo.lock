@@ -232,6 +232,7 @@ name = "biome_configuration"
 version = "0.0.1"
 dependencies = [
  "biome_analyze",
+ "biome_configuration_macros",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -260,6 +261,27 @@ dependencies = [
  "serde",
  "tests_macros",
  "tikv-jemallocator",
+]
+
+[[package]]
+name = "biome_configuration_macros"
+version = "0.0.1"
+dependencies = [
+ "biome_analyze",
+ "biome_css_analyze",
+ "biome_css_syntax",
+ "biome_graphql_analyze",
+ "biome_graphql_syntax",
+ "biome_html_analyze",
+ "biome_html_syntax",
+ "biome_js_analyze",
+ "biome_js_syntax",
+ "biome_json_analyze",
+ "biome_json_syntax",
+ "biome_string_case",
+ "proc-macro2",
+ "pulldown-cmark",
+ "quote",
 ]
 
 [[package]]

@@ -1,7 +1,7 @@
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_configuration::{ConfigurationSource, ExtendedConfigurations};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_json_analyze::JsonAnalyzeServices;
+use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices};
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_rowan::AstNode;
@@ -168,11 +168,11 @@ pub(crate) fn analyze_and_snap(
     let options = create_analyzer_options::<JsonLanguage>(input_file, &mut diagnostics);
     let services = JsonAnalyzeServices {
         file_source,
-        configuration_source: configuration_source.map(|(config, list)| {
+        configuration_provider: configuration_source.map(|(config, list)| {
             Arc::new(ConfigurationSource {
                 source: Some((config, Some(input_file.to_path_buf()))),
                 extended_configurations: ExtendedConfigurations::from(list),
-            })
+            }) as Arc<dyn ExtendedConfigurationProvider>
         }),
     };
     let (_, errors) = biome_json_analyze::analyze(&root, filter, &options, services, |event| {

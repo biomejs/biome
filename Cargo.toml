@@ -23,6 +23,7 @@ biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version 
 # not publish
 biome_cli                    = { path = "./crates/biome_cli" }
 biome_configuration          = { path = "./crates/biome_configuration" }
+biome_configuration_macros   = { path = "./crates/biome_configuration_macros" }
 biome_console                = { path = "./crates/biome_console", version = "0.5.7" }
 biome_control_flow           = { path = "./crates/biome_control_flow", version = "0.5.7" }
 biome_css_analyze            = { path = "./crates/biome_css_analyze", version = "0.5.7" }
