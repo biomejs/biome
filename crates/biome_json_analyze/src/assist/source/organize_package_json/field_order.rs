@@ -10,6 +10,7 @@ pub enum FieldTransformer {
     SortBinary,
     SortGitHooks,
     SortDependencies,
+    SortScripts,
     UniqArray,
     UniqAndSortArray,
     SortVSCodeBadgeObject,
@@ -216,11 +217,11 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "scripts",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortScripts,
     },
     FieldMetadata {
         key: "betterScripts",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortScripts,
     },
     /* vscode */
     FieldMetadata {
