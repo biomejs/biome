@@ -80,6 +80,21 @@ declare_lint_rule! {
     /// ```js
     /// [].forEach(() => void null); // Void return value, which doesn't trigger the rule
     /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### checkForEach
+    ///
+    /// If set to `true`, the rule will also check `forEach` callbacks for unexpected return values.
+    /// Default is `false`, matching ESLint's `array-callback-return` rule behavior.
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "checkForEach": true
+    ///     }
+    /// }
+    /// ```
     pub UseIterableCallbackReturn {
         version: "2.0.0",
         name: "useIterableCallbackReturn",
@@ -129,6 +144,11 @@ impl Rule for UseIterableCallbackReturn {
             .and_then(|name| name.value_token().ok())?;
 
         let method_config = ITERABLE_METHOD_INFOS.get(member_name.text_trimmed())?;
+
+        // Skip forEach checks if checkForEach option is false (default)
+        if method_config.method_name == "forEach" && !ctx.options().check_for_each() {
+            return None;
+        }
 
         let arg_position = argument_list
             .elements()

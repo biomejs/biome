@@ -1,0 +1,164 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCheckForEach.js
+---
+# Input
+```js
+// These should trigger errors when checkForEach: true
+
+[].forEach((a) => {
+    return a.fn();
+});
+[].forEach(function(a) {
+    return a.fn();
+});
+[].forEach((a) => {
+    if (a) {
+        return a.fn();
+    }
+});
+[].forEach((a) => {
+    if (a) {
+        return;
+    }
+    return a.fn();
+});
+[].forEach((a) => {
+    if (a) {
+        throw new Error();
+    }
+    return a.fn();
+});
+
+```
+
+# Diagnostics
+```
+invalidCheckForEach.js:3:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    1 │ // These should trigger errors when checkForEach: true
+    2 │ 
+  > 3 │ [].forEach((a) => {
+      │    ^^^^^^^
+    4 │     return a.fn();
+    5 │ });
+  
+  i Either remove this return or remove the returned value.
+  
+    1 │ // These should trigger errors when checkForEach: true
+    2 │ 
+  > 3 │ [].forEach((a) => {
+      │                    
+  > 4 │     return a.fn();
+      │     ^^^^^^^
+    5 │ });
+    6 │ [].forEach(function(a) {
+  
+
+```
+
+```
+invalidCheckForEach.js:6:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    4 │     return a.fn();
+    5 │ });
+  > 6 │ [].forEach(function(a) {
+      │    ^^^^^^^
+    7 │     return a.fn();
+    8 │ });
+  
+  i Either remove this return or remove the returned value.
+  
+    4 │     return a.fn();
+    5 │ });
+  > 6 │ [].forEach(function(a) {
+      │                         
+  > 7 │     return a.fn();
+      │     ^^^^^^^
+    8 │ });
+    9 │ [].forEach((a) => {
+  
+
+```
+
+```
+invalidCheckForEach.js:9:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+     7 │     return a.fn();
+     8 │ });
+   > 9 │ [].forEach((a) => {
+       │    ^^^^^^^
+    10 │     if (a) {
+    11 │         return a.fn();
+  
+  i Either remove this return or remove the returned value.
+  
+     8 │ });
+     9 │ [].forEach((a) => {
+  > 10 │     if (a) {
+       │             
+  > 11 │         return a.fn();
+       │         ^^^^^^^
+    12 │     }
+    13 │ });
+  
+
+```
+
+```
+invalidCheckForEach.js:14:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    12 │     }
+    13 │ });
+  > 14 │ [].forEach((a) => {
+       │    ^^^^^^^
+    15 │     if (a) {
+    16 │         return;
+  
+  i Either remove this return or remove the returned value.
+  
+    15 │     if (a) {
+    16 │         return;
+  > 17 │     }
+       │      
+  > 18 │     return a.fn();
+       │     ^^^^^^^
+    19 │ });
+    20 │ [].forEach((a) => {
+  
+
+```
+
+```
+invalidCheckForEach.js:20:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    18 │     return a.fn();
+    19 │ });
+  > 20 │ [].forEach((a) => {
+       │    ^^^^^^^
+    21 │     if (a) {
+    22 │         throw new Error();
+  
+  i Either remove this return or remove the returned value.
+  
+    21 │     if (a) {
+    22 │         throw new Error();
+  > 23 │     }
+       │      
+  > 24 │     return a.fn();
+       │     ^^^^^^^
+    25 │ });
+    26 │ 
+  
+
+```

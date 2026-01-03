@@ -1,0 +1,27 @@
+/* should not generate diagnostics */
+
+// These should NOT trigger errors because checkForEach defaults to false
+
+[].forEach((a) => {
+    return a.fn();
+});
+[].forEach(function(a) {
+    return a.fn();
+});
+[].forEach((a) => {
+    if (a) {
+        return a.fn();
+    }
+});
+[].forEach((a) => {
+    if (a) {
+        return;
+    }
+    return a.fn();
+});
+[].forEach((a) => {
+    if (a) {
+        throw new Error();
+    }
+    return a.fn();
+});
