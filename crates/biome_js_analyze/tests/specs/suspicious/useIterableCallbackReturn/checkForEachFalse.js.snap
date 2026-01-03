@@ -1,82 +1,13 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 151
 expression: checkForEachFalse.js
 ---
 # Input
 ```js
-// When checkForEach is false (default), forEach callbacks that return values should NOT be reported
-// This tests the default behavior where checkForEach = false
+// should not generate diagnostics
 
-// Valid: forEach with return value (not reported when checkForEach is false)
 [1, 2, 3].forEach(function(el) {
     return el * 2;
 });
-
-// Valid: forEach with arrow function returning value (not reported when checkForEach is false)
-[1, 2, 3].forEach(el => el * 2);
-
-// Invalid: other array methods still require proper returns
-[1, 2, 3].map(function(el) {
-    console.log(el);
-});
-
-[1, 2, 3].filter(function(el) {
-    console.log(el);
-});
-
-[1, 2, 3].every(function(el) {
-    console.log(el);
-});
-```
-
-# Diagnostics
-```
-checkForEachFalse.js:13:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This callback passed to map() iterable method should always return a value.
-  
-    12 │ // Invalid: other array methods still require proper returns
-  > 13 │ [1, 2, 3].map(function(el) {
-       │           ^^^
-    14 │     console.log(el);
-    15 │ });
-  
-  i Add a return with a value to this callback.
-  
-
-```
-
-```
-checkForEachFalse.js:17:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This callback passed to filter() iterable method should always return a value.
-  
-    15 │ });
-    16 │ 
-  > 17 │ [1, 2, 3].filter(function(el) {
-       │           ^^^^^^
-    18 │     console.log(el);
-    19 │ });
-  
-  i Add a return with a value to this callback.
-  
-
-```
-
-```
-checkForEachFalse.js:21:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This callback passed to every() iterable method should always return a value.
-  
-    19 │ });
-    20 │ 
-  > 21 │ [1, 2, 3].every(function(el) {
-       │           ^^^^^
-    22 │     console.log(el);
-    23 │ });
-  
-  i Add a return with a value to this callback.
-  
 
 ```

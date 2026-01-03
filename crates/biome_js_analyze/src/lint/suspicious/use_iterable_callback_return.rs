@@ -57,6 +57,12 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
+    /// ```js
+    /// [].forEach(() => {
+    ///     // No return value, which is correct
+    /// });
+    /// ```
+    ///
     /// ```js,expect_diagnostic
     /// [].filter(() => {
     ///     // Missing required return value
@@ -72,12 +78,6 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js
-    /// [].forEach(() => {
-    ///     // No return value, which is correct
-    /// });
-    /// ```
-    ///
-    /// ```js
     /// [].forEach(() => void null); // Void return value, which doesn't trigger the rule
     /// ```
     ///
@@ -85,24 +85,23 @@ declare_lint_rule! {
     ///
     /// ### `checkForEach`
     ///
-    /// Default: `false`
+    /// **Since `v2.4.0**
     ///
-    /// When set to `true` (non-default), the rule will also check `forEach` callbacks that return a value.
-    /// By default (false), `forEach` callbacks are not checked as returning values from them is a common pattern.
+    /// Default: `true`
+    ///
+    /// When set to `false`, the rule will skip `forEach` callbacks that return a value.
     ///
     /// ### Examples
-    ///
-    /// When `checkForEach` is set to `true`, the following will trigger a diagnostic:
     ///
     /// ```json,options
     /// {
     ///     "options": {
-    ///         "checkForEach": true
+    ///         "checkForEach": false
     ///     }
     /// }
     /// ```
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```js,use_options
     /// [1, 2, 3].forEach((el) => {
     ///     return el * 2;
     /// });

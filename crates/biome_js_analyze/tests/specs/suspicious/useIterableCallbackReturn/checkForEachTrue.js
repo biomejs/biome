@@ -1,6 +1,5 @@
-// When checkForEach is true, forEach callbacks that return values should be reported
+// should generate diagnostics
 
-// Invalid: forEach with explicit return
 [1, 2, 3].forEach(function(el) {
     return el * 2;
 });
