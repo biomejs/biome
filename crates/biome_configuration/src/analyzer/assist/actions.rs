@@ -194,6 +194,13 @@ pub struct Source {
     pub organize_imports: Option<
         RuleAssistConfiguration<biome_rule_options::organize_imports::OrganizeImportsOptions>,
     >,
+    #[doc = "Organize package.json fields according to established conventions.\nSee <https://biomejs.dev/assist/actions/organize-package-json>"]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organize_package_json: Option<
+        RuleAssistConfiguration<
+            biome_rule_options::organize_package_json::OrganizePackageJsonOptions,
+        >,
+    >,
     #[doc = "Enforce attribute sorting in JSX elements.\nSee <https://biomejs.dev/assist/actions/use-sorted-attributes>"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_attributes: Option<
@@ -224,6 +231,7 @@ impl Source {
     const GROUP_NAME: &'static str = "source";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "organizeImports",
+        "organizePackageJson",
         "useSortedAttributes",
         "useSortedInterfaceMembers",
         "useSortedKeys",
@@ -248,25 +256,30 @@ impl Source {
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
         }
-        if let Some(rule) = self.use_sorted_attributes.as_ref()
+        if let Some(rule) = self.organize_package_json.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
         }
-        if let Some(rule) = self.use_sorted_interface_members.as_ref()
+        if let Some(rule) = self.use_sorted_attributes.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
         }
-        if let Some(rule) = self.use_sorted_keys.as_ref()
+        if let Some(rule) = self.use_sorted_interface_members.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
         }
-        if let Some(rule) = self.use_sorted_properties.as_ref()
+        if let Some(rule) = self.use_sorted_keys.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
+        }
+        if let Some(rule) = self.use_sorted_properties.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
         }
         index_set
     }
@@ -277,25 +290,30 @@ impl Source {
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
         }
-        if let Some(rule) = self.use_sorted_attributes.as_ref()
+        if let Some(rule) = self.organize_package_json.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
         }
-        if let Some(rule) = self.use_sorted_interface_members.as_ref()
+        if let Some(rule) = self.use_sorted_attributes.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
         }
-        if let Some(rule) = self.use_sorted_keys.as_ref()
+        if let Some(rule) = self.use_sorted_interface_members.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
         }
-        if let Some(rule) = self.use_sorted_properties.as_ref()
+        if let Some(rule) = self.use_sorted_keys.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
+        }
+        if let Some(rule) = self.use_sorted_properties.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
         }
         index_set
     }
@@ -320,6 +338,10 @@ impl Source {
         match rule_name {
             "organizeImports" => self
                 .organize_imports
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "organizePackageJson" => self
+                .organize_package_json
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useSortedAttributes" => self
