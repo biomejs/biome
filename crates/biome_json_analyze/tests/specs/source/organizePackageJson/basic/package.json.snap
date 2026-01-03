@@ -46,15 +46,15 @@ package.json:1:1 assist/source/organizePackageJson  FIXABLE  ━━━━━━�
         2 │ + ··"name":·"my-package",
      6  3 │     "version": "1.0.0",
      7  4 │     "scripts": {
-     8  5 │       "test": "jest",
-     9  6 │       "build": "tsc"
-    10    │ - ··}
+     8    │ - ····"test":·"jest",
+     9    │ - ····"build":·"tsc"
+        5 │ + ····"build":·"tsc",
+        6 │ + ····"test":·"jest"
         7 │ + ··},
         8 │ + ··"dependencies":·{
         9 │ + ····"lodash":·"^4.0.0"
-       10 │ + ··}
+    10 10 │     }
     11 11 │   }
-    12 12 │   
   
 
 ```

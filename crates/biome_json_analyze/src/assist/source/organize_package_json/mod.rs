@@ -12,6 +12,7 @@ use std::collections::HashMap;
 
 mod field_order;
 mod sort_dependencies;
+mod sort_scripts;
 mod sorters;
 
 use field_order::{FieldTransformer, get_field_index, get_field_transformer};
@@ -150,10 +151,9 @@ fn is_organized(members: &JsonMemberList) -> bool {
             let field_name = name.text();
             let transformer = get_field_transformer(field_name);
 
-            if transformer != FieldTransformer::None
-                && needs_transformation(&member, transformer) {
-                    return false;
-                }
+            if transformer != FieldTransformer::None && needs_transformation(&member, transformer) {
+                return false;
+            }
         }
     }
 
@@ -198,7 +198,7 @@ fn needs_transformation(member: &JsonMember, transformer: FieldTransformer) -> b
             }
         }
 
-        FieldTransformer::SortDependencies => false,
+        FieldTransformer::SortDependencies | FieldTransformer::SortScripts => false,
 
         FieldTransformer::UniqArray | FieldTransformer::UniqAndSortArray => false,
     }
@@ -283,7 +283,7 @@ fn get_expected_sorted_keys(keys: &[String], transformer: FieldTransformer) -> V
     sorted
 }
 
-fn sort_by_key_order(keys: &mut Vec<String>, order: &[&str]) {
+fn sort_by_key_order(keys: &mut [String], order: &[&str]) {
     keys.sort_by(|a, b| {
         let a_idx = order.iter().position(|&k| k == a);
         let b_idx = order.iter().position(|&k| k == b);
@@ -428,10 +428,15 @@ fn apply_field_transformer(
 
         FieldTransformer::SortVSCodeBadgeObject => {
             if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_vscode_badge_object(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
+                sorters::sort_vscode_badge_object(obj)
+                    .map_or_else(|| value.clone(), AnyJsonValue::from)
             } else {
                 value.clone()
             }
+        }
+
+        FieldTransformer::SortScripts => {
+            sort_scripts::transform(&value, root_object).unwrap_or_else(|| value.clone())
         }
 
         FieldTransformer::UniqArray | FieldTransformer::UniqAndSortArray => value.clone(),
