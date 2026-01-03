@@ -9,6 +9,7 @@ pub enum FieldTransformer {
     SortVolta,
     SortBinary,
     SortGitHooks,
+    SortDependencies,
     UniqArray,
     UniqAndSortArray,
     SortVSCodeBadgeObject,
@@ -20,6 +21,7 @@ pub struct FieldMetadata {
     pub transformer: FieldTransformer,
 }
 
+/// VSCode extension manifest fields: https://code.visualstudio.com/api/references/extension-manifest
 /// Based on https://github.com/keithamus/sort-package-json/blob/main/defaultRules.md
 pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     FieldMetadata {
@@ -207,6 +209,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
         key: "workspaces",
         transformer: FieldTransformer::None,
     },
+    // node-pre-gyp https://www.npmjs.com/package/node-pre-gyp#1-add-new-entries-to-your-packagejson
     FieldMetadata {
         key: "binary",
         transformer: FieldTransformer::SortBinary,
@@ -360,15 +363,15 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "overrides",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortDependencies,
     },
     FieldMetadata {
         key: "dependencies",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortDependencies,
     },
     FieldMetadata {
         key: "devDependencies",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortDependencies,
     },
     FieldMetadata {
         key: "dependenciesMeta",
@@ -376,7 +379,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "peerDependencies",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortDependencies,
     },
     FieldMetadata {
         key: "peerDependenciesMeta",
@@ -384,7 +387,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "optionalDependencies",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortDependencies,
     },
     FieldMetadata {
         key: "bundledDependencies",
@@ -489,8 +492,7 @@ pub fn get_field_transformer(field_name: &str) -> FieldTransformer {
     PACKAGE_JSON_FIELDS
         .iter()
         .find(|metadata| metadata.key == field_name)
-        .map(|metadata| metadata.transformer)
-        .unwrap_or(FieldTransformer::None)
+        .map_or(FieldTransformer::None, |metadata| metadata.transformer)
 }
 
 #[cfg(test)]

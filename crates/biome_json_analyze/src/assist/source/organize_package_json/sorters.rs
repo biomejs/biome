@@ -4,6 +4,17 @@ use biome_rowan::AstSeparatedList;
 use std::cmp::Ordering;
 
 pub fn sort_alphabetically(object: &JsonObjectValue) -> Option<JsonObjectValue> {
+    sort_object_by_comparator(object, |a, b| a.cmp(b))
+}
+
+/// Generic object sorter that accepts a custom comparator function
+pub fn sort_object_by_comparator<F>(
+    object: &JsonObjectValue,
+    comparator: F,
+) -> Option<JsonObjectValue>
+where
+    F: Fn(&String, &String) -> Ordering,
+{
     let members = object.json_member_list();
     let mut member_vec: Vec<JsonMember> = members.iter().filter_map(|m| m.ok()).collect();
 
@@ -24,7 +35,7 @@ pub fn sort_alphabetically(object: &JsonObjectValue) -> Option<JsonObjectValue> 
             .map(|t| t.text().to_string());
 
         match (a_name, b_name) {
-            (Some(a), Some(b)) => a.cmp(&b),
+            (Some(ref a), Some(ref b)) => comparator(a, b),
             _ => Ordering::Equal,
         }
     });
@@ -74,6 +85,7 @@ pub fn sort_object_by_key_order(
     rebuild_object_from_members(object, member_vec)
 }
 
+/// https://docs.npmjs.com/cli/v10/configuring-npm/package-json#people-fields-author-contributors
 pub fn sort_people_object(object: &JsonObjectValue) -> Option<JsonObjectValue> {
     sort_object_by_key_order(object, &["name", "email", "url"])
 }
@@ -111,6 +123,7 @@ pub fn sort_vscode_badge_object(object: &JsonObjectValue) -> Option<JsonObjectVa
     sort_object_by_key_order(object, &["description", "url", "href"])
 }
 
+/// Based on git-hooks-list package
 pub fn sort_git_hooks(object: &JsonObjectValue) -> Option<JsonObjectValue> {
     const GIT_HOOKS_ORDER: &[&str] = &[
         "applypatch-msg",
@@ -170,7 +183,6 @@ fn rebuild_object_from_members(
     Some(original.clone().with_json_member_list(new_members))
 }
 
-#[allow(dead_code)]
 pub fn transform_people_array(array: &AnyJsonValue) -> Option<AnyJsonValue> {
     let array_value = array.as_json_array_value()?;
     let elements = array_value.elements();

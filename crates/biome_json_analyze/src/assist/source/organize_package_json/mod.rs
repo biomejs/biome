@@ -6,11 +6,12 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_json_factory::make;
-use biome_json_syntax::{AnyJsonValue, JsonMember, JsonMemberList, JsonRoot, T};
+use biome_json_syntax::{AnyJsonValue, JsonMember, JsonMemberList, JsonObjectValue, JsonRoot, T};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use std::collections::HashMap;
 
 mod field_order;
+mod sort_dependencies;
 mod sorters;
 
 use field_order::{FieldTransformer, get_field_index, get_field_transformer};
@@ -18,16 +19,15 @@ use field_order::{FieldTransformer, get_field_index, get_field_transformer};
 declare_source_rule! {
     /// Organize package.json fields according to established conventions.
     ///
-    /// This assist action sorts package.json fields following the same conventions
-    /// as the popular [sort-package-json](https://github.com/keithamus/sort-package-json) tool.
+    /// Sorts fields following the same conventions as the popular
+    /// [sort-package-json](https://github.com/keithamus/sort-package-json) tool.
     ///
-    /// Fields are organized in priority order:
-    /// 1. 110 predefined fields (e.g., name, version, description, scripts, dependencies)
-    /// 2. Unknown fields (alphabetically)
-    /// 3. Private fields starting with `_` (alphabetically)
+    /// Field organization:
+    /// - 110 predefined fields in conventional order
+    /// - Unknown fields alphabetically after
+    /// - Private fields (starting with `_`) alphabetically at end
     ///
-    /// For complete sorting rules, see:
-    /// https://github.com/keithamus/sort-package-json/blob/main/defaultRules.md
+    /// See https://github.com/keithamus/sort-package-json/blob/main/defaultRules.md
     ///
     /// ## Examples
     ///
@@ -106,8 +106,7 @@ impl Rule for OrganizePackageJson {
         let object = value.as_json_object_value()?;
         let members = object.json_member_list();
 
-        // Organize the members
-        let organized_members = organize_members(&members)?;
+        let organized_members = organize_members(&members, object)?;
 
         let mut mutation = ctx.root().begin();
         mutation.replace_node_discard_trivia(members, organized_members);
@@ -200,6 +199,8 @@ fn needs_transformation(member: &JsonMember, transformer: FieldTransformer) -> b
             }
         }
 
+        FieldTransformer::SortDependencies => false,
+
         FieldTransformer::UniqArray | FieldTransformer::UniqAndSortArray => false,
     }
 }
@@ -274,6 +275,9 @@ fn get_expected_sorted_keys(keys: &[String], transformer: FieldTransformer) -> V
             ];
             sort_by_key_order(&mut sorted, GIT_HOOKS_ORDER);
         }
+        FieldTransformer::SortDependencies => {
+            sorted.sort();
+        }
         _ => {}
     }
 
@@ -294,7 +298,10 @@ fn sort_by_key_order(keys: &mut Vec<String>, order: &[&str]) {
     });
 }
 
-fn organize_members(members: &JsonMemberList) -> Option<JsonMemberList> {
+fn organize_members(
+    members: &JsonMemberList,
+    root_object: &JsonObjectValue,
+) -> Option<JsonMemberList> {
     let member_map: HashMap<String, JsonMember> = members
         .iter()
         .filter_map(|member| {
@@ -322,7 +329,7 @@ fn organize_members(members: &JsonMemberList) -> Option<JsonMemberList> {
 
     for (i, field_name) in sorted_names.iter().enumerate() {
         if let Some(member) = member_map.get(field_name) {
-            let transformed_member = apply_field_transformer(member, field_name);
+            let transformed_member = apply_field_transformer(member, field_name, root_object);
             elements.push(transformed_member);
 
             if i < sorted_names.len() - 1 {
@@ -334,7 +341,11 @@ fn organize_members(members: &JsonMemberList) -> Option<JsonMemberList> {
     Some(make::json_member_list(elements, separators))
 }
 
-fn apply_field_transformer(member: &JsonMember, field_name: &str) -> JsonMember {
+fn apply_field_transformer(
+    member: &JsonMember,
+    field_name: &str,
+    root_object: &JsonObjectValue,
+) -> JsonMember {
     let transformer = get_field_transformer(field_name);
 
     if transformer == FieldTransformer::None {
@@ -347,6 +358,10 @@ fn apply_field_transformer(member: &JsonMember, field_name: &str) -> JsonMember 
 
     let transformed_value = match transformer {
         FieldTransformer::None => return member.clone(),
+
+        FieldTransformer::SortDependencies => {
+            sort_dependencies::transform(&value, root_object).unwrap_or_else(|| value.clone())
+        }
 
         FieldTransformer::SortObject => {
             if let Some(obj) = value.as_json_object_value() {
