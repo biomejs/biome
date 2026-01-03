@@ -1,0 +1,50 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "name": "test",
+  "_customPrivate": "value",
+  "_anotherPrivate": "value",
+  "version": "1.0.0",
+  "customField": "value"
+}
+
+```
+
+# Diagnostics
+```
+package.json:1:1 assist/source/organizePackageJson  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i package.json fields can be organized.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "name": "test",
+  > 3 │   "_customPrivate": "value",
+  > 4 │   "_anotherPrivate": "value",
+  > 5 │   "version": "1.0.0",
+  > 6 │   "customField": "value"
+  > 7 │ }
+      │ ^
+    8 │ 
+  
+  i Safe fix: Organize package.json fields.
+  
+    1 1 │   {
+    2 2 │     "name": "test",
+    3   │ - ··"_customPrivate":·"value",
+    4   │ - ··"_anotherPrivate":·"value",
+    5   │ - ··"version":·"1.0.0",
+    6   │ - ··"customField":·"value"
+      3 │ + ··"version":·"1.0.0",
+      4 │ + ··"customField":·"value",
+      5 │ + ··"_anotherPrivate":·"value",
+      6 │ + ··"_customPrivate":·"value"
+    7 7 │   }
+    8 8 │   
+  
+
+```

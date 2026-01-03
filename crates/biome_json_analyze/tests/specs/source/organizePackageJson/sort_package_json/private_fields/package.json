@@ -1,0 +1,7 @@
+{
+  "name": "test",
+  "_customPrivate": "value",
+  "_anotherPrivate": "value",
+  "version": "1.0.0",
+  "customField": "value"
+}

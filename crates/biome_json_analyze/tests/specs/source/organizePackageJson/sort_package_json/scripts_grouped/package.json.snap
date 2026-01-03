@@ -1,0 +1,18 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "scripts": {
+    "test:unit": "jest unit",
+    "build": "tsc",
+    "test": "jest",
+    "build:watch": "tsc --watch",
+    "test:integration": "jest integration",
+    "build:prod": "tsc --prod"
+  }
+}
+
+```

@@ -1,0 +1,23 @@
+{
+  "volta": "volta",
+  "name": "name",
+  "version": "version",
+  "description": "description",
+  "keywords": "keywords",
+  "homepage": "homepage",
+  "bugs": "bugs",
+  "repository": "repository",
+  "license": "license",
+  "author": "author",
+  "main": "main",
+  "browser": "browser",
+  "bin": "bin",
+  "man": "man",
+  "directories": "directories",
+  "scripts": "scripts",
+  "dependencies": "dependencies",
+  "devDependencies": "devDependencies",
+  "peerDependencies": "peerDependencies",
+  "optionalDependencies": "optionalDependencies",
+  "engines": "engines"
+}

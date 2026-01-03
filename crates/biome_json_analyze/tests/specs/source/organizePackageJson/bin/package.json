@@ -1,9 +1,0 @@
-{
-  "name": "test-package",
-  "version": "1.0.0",
-  "bin": {
-    "zzz": "./bin/zzz.js",
-    "aaa": "./bin/aaa.js",
-    "mmm": "./bin/mmm.js"
-  }
-}

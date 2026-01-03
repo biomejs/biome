@@ -1,8 +1,0 @@
-{
-  "name": "test-package",
-  "repository": {
-    "url": "https://github.com/user/repo",
-    "type": "git"
-  },
-  "version": "1.0.0"
-}

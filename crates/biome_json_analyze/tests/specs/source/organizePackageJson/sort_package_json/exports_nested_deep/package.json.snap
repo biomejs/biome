@@ -1,0 +1,18 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "exports": {
+    "./deep": {
+      "unknown": "./unknown.js",
+      "./nested-path": {},
+      "types": "./types.d.ts",
+      "default": "./default.js"
+    }
+  }
+}
+
+```

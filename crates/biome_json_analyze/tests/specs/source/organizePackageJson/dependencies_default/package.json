@@ -1,9 +1,0 @@
-{
-  "name": "test-package",
-  "version": "1.0.0",
-  "dependencies": {
-    "lodash": "^4.0.0",
-    "axios": "^1.0.0",
-    "react": "^18.0.0"
-  }
-}
