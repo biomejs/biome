@@ -30,9 +30,10 @@ pub fn transform(
     let mut script_names = Vec::new();
     for m in &members {
         if let Ok(member) = m
-            && let Ok(name) = member.name().and_then(|n| n.inner_string_text()) {
-                script_names.push(name.text().to_string());
-            }
+            && let Ok(name) = member.name().and_then(|n| n.inner_string_text())
+        {
+            script_names.push(name.text().to_string());
+        }
     }
 
     if has_sequential_script(package_json_root) {
@@ -70,18 +71,19 @@ fn has_dev_dependency(dep_name: &str, members: &biome_json_syntax::JsonMemberLis
     for member in members {
         if let Ok(m) = member
             && let Ok(name) = m.name().and_then(|n| n.inner_string_text())
-                && name.text() == "devDependencies"
-                    && let Ok(value) = m.value()
-                        && let Some(obj) = value.as_json_object_value() {
-                            for dep_member in obj.json_member_list() {
-                                if let Ok(dep) = dep_member
-                                    && let Ok(dep_name_token) =
-                                        dep.name().and_then(|n| n.inner_string_text())
-                                        && dep_name_token.text() == dep_name {
-                                            return true;
-                                        }
-                            }
-                        }
+            && name.text() == "devDependencies"
+            && let Ok(value) = m.value()
+            && let Some(obj) = value.as_json_object_value()
+        {
+            for dep_member in obj.json_member_list() {
+                if let Ok(dep) = dep_member
+                    && let Ok(dep_name_token) = dep.name().and_then(|n| n.inner_string_text())
+                    && dep_name_token.text() == dep_name
+                {
+                    return true;
+                }
+            }
+        }
     }
     false
 }
@@ -94,18 +96,20 @@ fn get_all_script_values(package_json: &JsonObjectValue) -> Vec<String> {
         for member in &members {
             if let Ok(m) = member
                 && let Ok(name) = m.name().and_then(|n| n.inner_string_text())
-                    && name.text() == field
-                        && let Ok(value) = m.value()
-                            && let Some(obj) = value.as_json_object_value() {
-                                for script_member in obj.json_member_list() {
-                                    if let Ok(sm) = script_member
-                                        && let Ok(sv) = sm.value()
-                                            && let Some(s) = sv.as_json_string_value()
-                                                && let Ok(text) = s.inner_string_text() {
-                                                    values.push(text.text().to_string());
-                                                }
-                                }
-                            }
+                && name.text() == field
+                && let Ok(value) = m.value()
+                && let Some(obj) = value.as_json_object_value()
+            {
+                for script_member in obj.json_member_list() {
+                    if let Ok(sm) = script_member
+                        && let Ok(sv) = sm.value()
+                        && let Some(s) = sv.as_json_string_value()
+                        && let Ok(text) = s.inner_string_text()
+                    {
+                        values.push(text.text().to_string());
+                    }
+                }
+            }
         }
     }
 
@@ -146,9 +150,10 @@ fn normalize_script_names(names: &[String]) -> Vec<String> {
             if let Some(stripped) = name
                 .strip_prefix("pre")
                 .or_else(|| name.strip_prefix("post"))
-                && prefixable.contains(stripped) {
-                    return stripped.to_string();
-                }
+                && prefixable.contains(stripped)
+            {
+                return stripped.to_string();
+            }
             name.clone()
         })
         .collect()

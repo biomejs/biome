@@ -11,6 +11,7 @@ pub enum FieldTransformer {
     SortGitHooks,
     SortDependencies,
     SortScripts,
+    SortExports,
     UniqArray,
     UniqAndSortArray,
     SortVSCodeBadgeObject,
@@ -120,7 +121,7 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "exports",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortExports,
     },
     FieldMetadata {
         key: "main",
