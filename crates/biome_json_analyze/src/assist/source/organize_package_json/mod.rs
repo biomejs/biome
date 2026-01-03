@@ -150,11 +150,10 @@ fn is_organized(members: &JsonMemberList) -> bool {
             let field_name = name.text();
             let transformer = get_field_transformer(field_name);
 
-            if transformer != FieldTransformer::None {
-                if needs_transformation(&member, transformer) {
+            if transformer != FieldTransformer::None
+                && needs_transformation(&member, transformer) {
                     return false;
                 }
-            }
         }
     }
 
@@ -365,9 +364,7 @@ fn apply_field_transformer(
 
         FieldTransformer::SortObject => {
             if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_alphabetically(obj)
-                    .map(|sorted| AnyJsonValue::from(sorted))
-                    .unwrap_or_else(|| value.clone())
+                sorters::sort_alphabetically(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
             } else {
                 value.clone()
             }
@@ -375,9 +372,7 @@ fn apply_field_transformer(
 
         FieldTransformer::SortPeopleObject => {
             if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_people_object(obj)
-                    .map(|sorted| AnyJsonValue::from(sorted))
-                    .unwrap_or_else(|| value.clone())
+                sorters::sort_people_object(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
             } else {
                 value.clone()
             }
@@ -385,9 +380,7 @@ fn apply_field_transformer(
 
         FieldTransformer::SortURLObject => {
             if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_url_object(obj)
-                    .map(|sorted| AnyJsonValue::from(sorted))
-                    .unwrap_or_else(|| value.clone())
+                sorters::sort_url_object(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
             } else {
                 value.clone()
             }
@@ -395,9 +388,7 @@ fn apply_field_transformer(
 
         FieldTransformer::SortBugsObject => {
             if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_bugs_object(obj)
-                    .map(|sorted| AnyJsonValue::from(sorted))
-                    .unwrap_or_else(|| value.clone())
+                sorters::sort_bugs_object(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
             } else {
                 value.clone()
             }
@@ -405,9 +396,7 @@ fn apply_field_transformer(
 
         FieldTransformer::SortDirectories => {
             if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_directories(obj)
-                    .map(|sorted| AnyJsonValue::from(sorted))
-                    .unwrap_or_else(|| value.clone())
+                sorters::sort_directories(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
             } else {
                 value.clone()
             }
@@ -415,9 +404,7 @@ fn apply_field_transformer(
 
         FieldTransformer::SortVolta => {
             if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_volta(obj)
-                    .map(|sorted| AnyJsonValue::from(sorted))
-                    .unwrap_or_else(|| value.clone())
+                sorters::sort_volta(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
             } else {
                 value.clone()
             }
@@ -425,9 +412,7 @@ fn apply_field_transformer(
 
         FieldTransformer::SortBinary => {
             if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_binary(obj)
-                    .map(|sorted| AnyJsonValue::from(sorted))
-                    .unwrap_or_else(|| value.clone())
+                sorters::sort_binary(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
             } else {
                 value.clone()
             }
@@ -435,9 +420,7 @@ fn apply_field_transformer(
 
         FieldTransformer::SortGitHooks => {
             if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_git_hooks(obj)
-                    .map(|sorted| AnyJsonValue::from(sorted))
-                    .unwrap_or_else(|| value.clone())
+                sorters::sort_git_hooks(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
             } else {
                 value.clone()
             }
@@ -445,9 +428,7 @@ fn apply_field_transformer(
 
         FieldTransformer::SortVSCodeBadgeObject => {
             if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_vscode_badge_object(obj)
-                    .map(|sorted| AnyJsonValue::from(sorted))
-                    .unwrap_or_else(|| value.clone())
+                sorters::sort_vscode_badge_object(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
             } else {
                 value.clone()
             }
