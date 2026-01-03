@@ -102,7 +102,7 @@ $args
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,39 +1,51 @@
+@@ -1,38 +1,50 @@
 -@function func($arg, $arg1, $arg2: 10, $args...) {
 +@function --func($arg, $arg1, $arg2: 10, $args...) {
    @return "Func";
@@ -135,7 +135,7 @@ $args
 +:
 +10,
 +  $args
-+...,
++...
 +) {
    @return "Func";
  }
@@ -152,7 +152,7 @@ $args
 +  $args
  
 -  $args...
-+...,
++...
  ) {
    @return "Func";
  }
@@ -162,12 +162,10 @@ $args
    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1,
 -  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
 -    10,
--  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...
 +  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
-+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...,
+   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...
  ) {
    @return "Func";
- }
 ```
 
 # Output
@@ -198,7 +196,7 @@ $args
 :
 10,
   $args
-...,
+...
 ) {
   @return "Func";
 }
@@ -212,7 +210,7 @@ $args
 10,
   $args
 
-...,
+...
 ) {
   @return "Func";
 }
@@ -220,7 +218,7 @@ $args
   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg,
   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1,
   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
-  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...,
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...
 ) {
   @return "Func";
 }
@@ -620,5 +618,5 @@ function.css:86:267 parse ━━━━━━━━━━━━━━━━━━
    45:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg,
    46:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1,
    47:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
-   48:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...,
+   48:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...
 ```

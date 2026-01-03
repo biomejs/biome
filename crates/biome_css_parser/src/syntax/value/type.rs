@@ -108,11 +108,7 @@ pub(crate) fn parse_type_function(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![type]);
     p.bump(T!['(']);
-
-    if parse_any_syntax(p).is_absent() {
-        p.error(expected_any_syntax(p, p.cur_range()));
-    }
-
+    parse_any_syntax(p).or_add_diagnostic(p, expected_any_syntax);
     p.expect(T![')']);
 
     Present(m.complete(p, CSS_TYPE_FUNCTION))
@@ -206,7 +202,7 @@ fn parse_syntax_multiplier(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_syntax_type(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_syntax_type(p: &mut CssParser) -> bool {
     p.at(T![<])
 }
 

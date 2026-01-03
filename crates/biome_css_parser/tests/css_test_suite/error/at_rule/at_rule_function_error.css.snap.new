@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 179
 expression: snapshot
 ---
 ## Input
@@ -135,21 +136,24 @@ CssRoot {
                     },
                     l_paren_token: L_PAREN@358..359 "(" [] [],
                     parameters: CssFunctionParameterList [
-                        CssFunctionParameter {
-                            name: CssDashedIdentifier {
-                                value_token: IDENT@359..367 "--param" [] [Whitespace(" ")],
-                            },
-                            ty: missing (optional),
-                            default_value: missing (optional),
-                        },
-                        missing separator,
                         CssBogusFunctionParameter {
                             items: [
-                                HASH@367..368 "#" [] [],
-                                HASH@368..369 "#" [] [],
-                                HASH@369..370 "#" [] [],
-                                COLON@370..372 ":" [] [Whitespace(" ")],
-                                REM_KW@372..375 "rem" [] [],
+                                CssDashedIdentifier {
+                                    value_token: IDENT@359..367 "--param" [] [Whitespace(" ")],
+                                },
+                                CssBogus {
+                                    items: [
+                                        HASH@367..368 "#" [] [],
+                                        HASH@368..369 "#" [] [],
+                                        HASH@369..370 "#" [] [],
+                                    ],
+                                },
+                                CssFunctionParameterDefaultValue {
+                                    colon_token: COLON@370..372 ":" [] [Whitespace(" ")],
+                                    value: CssIdentifier {
+                                        value_token: IDENT@372..375 "rem" [] [],
+                                    },
+                                },
                             ],
                         },
                     ],
@@ -173,19 +177,18 @@ CssRoot {
                     },
                     l_paren_token: L_PAREN@408..409 "(" [] [],
                     parameters: CssFunctionParameterList [
-                        CssFunctionParameter {
-                            name: CssDashedIdentifier {
-                                value_token: IDENT@409..417 "--param" [] [Whitespace(" ")],
-                            },
-                            ty: missing (optional),
-                            default_value: missing (optional),
-                        },
-                        missing separator,
                         CssBogusFunctionParameter {
                             items: [
-                                HASH@417..418 "#" [] [],
-                                HASH@418..419 "#" [] [],
-                                HASH@419..420 "#" [] [],
+                                CssDashedIdentifier {
+                                    value_token: IDENT@409..417 "--param" [] [Whitespace(" ")],
+                                },
+                                CssBogus {
+                                    items: [
+                                        HASH@417..418 "#" [] [],
+                                        HASH@418..419 "#" [] [],
+                                        HASH@419..420 "#" [] [],
+                                    ],
+                                },
                             ],
                         },
                         COMMA@420..422 "," [] [Whitespace(" ")],
@@ -202,29 +205,31 @@ CssRoot {
                             },
                         },
                         COMMA@435..437 "," [] [Whitespace(" ")],
-                        CssFunctionParameter {
-                            name: CssDashedIdentifier {
-                                value_token: IDENT@437..446 "--param3" [] [Whitespace(" ")],
-                            },
-                            ty: CssTypeFunction {
-                                name_token: TYPE_KW@446..450 "type" [] [],
-                                l_paren_token: L_PAREN@450..451 "(" [] [],
-                                ty: CssUniversalSyntax {
-                                    star_token: STAR@451..452 "*" [] [],
-                                },
-                                r_paren_token: R_PAREN@452..453 ")" [] [],
-                            },
-                            default_value: CssFunctionParameterDefaultValue {
-                                colon_token: COLON@453..455 ":" [] [Whitespace(" ")],
-                                value: missing (required),
-                            },
-                        },
-                        missing separator,
                         CssBogusFunctionParameter {
                             items: [
-                                BANG@455..456 "!" [] [],
-                                BANG@456..457 "!" [] [],
-                                BANG@457..458 "!" [] [],
+                                CssDashedIdentifier {
+                                    value_token: IDENT@437..446 "--param3" [] [Whitespace(" ")],
+                                },
+                                CssTypeFunction {
+                                    name_token: TYPE_KW@446..450 "type" [] [],
+                                    l_paren_token: L_PAREN@450..451 "(" [] [],
+                                    ty: CssUniversalSyntax {
+                                        star_token: STAR@451..452 "*" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@452..453 ")" [] [],
+                                },
+                                CssBogus {
+                                    items: [
+                                        COLON@453..455 ":" [] [Whitespace(" ")],
+                                        CssBogus {
+                                            items: [
+                                                BANG@455..456 "!" [] [],
+                                                BANG@456..457 "!" [] [],
+                                                BANG@457..458 "!" [] [],
+                                            ],
+                                        },
+                                    ],
+                                },
                             ],
                         },
                     ],
@@ -318,18 +323,17 @@ CssRoot {
             0: IDENT@340..358 "--bogus-param-type" [] []
           2: L_PAREN@358..359 "(" [] []
           3: CSS_FUNCTION_PARAMETER_LIST@359..375
-            0: CSS_FUNCTION_PARAMETER@359..367
+            0: CSS_BOGUS_FUNCTION_PARAMETER@359..375
               0: CSS_DASHED_IDENTIFIER@359..367
                 0: IDENT@359..367 "--param" [] [Whitespace(" ")]
-              1: (empty)
-              2: (empty)
-            1: (empty)
-            2: CSS_BOGUS_FUNCTION_PARAMETER@367..375
-              0: HASH@367..368 "#" [] []
-              1: HASH@368..369 "#" [] []
-              2: HASH@369..370 "#" [] []
-              3: COLON@370..372 ":" [] [Whitespace(" ")]
-              4: REM_KW@372..375 "rem" [] []
+              1: CSS_BOGUS@367..370
+                0: HASH@367..368 "#" [] []
+                1: HASH@368..369 "#" [] []
+                2: HASH@369..370 "#" [] []
+              2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@370..375
+                0: COLON@370..372 ":" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@372..375
+                  0: IDENT@372..375 "rem" [] []
           4: R_PAREN@375..377 ")" [] [Whitespace(" ")]
           5: (empty)
         1: CSS_DECLARATION_OR_AT_RULE_BLOCK@377..379
@@ -345,18 +349,15 @@ CssRoot {
             0: IDENT@390..408 "--bogus-param-type" [] []
           2: L_PAREN@408..409 "(" [] []
           3: CSS_FUNCTION_PARAMETER_LIST@409..458
-            0: CSS_FUNCTION_PARAMETER@409..417
+            0: CSS_BOGUS_FUNCTION_PARAMETER@409..420
               0: CSS_DASHED_IDENTIFIER@409..417
                 0: IDENT@409..417 "--param" [] [Whitespace(" ")]
-              1: (empty)
-              2: (empty)
-            1: (empty)
-            2: CSS_BOGUS_FUNCTION_PARAMETER@417..420
-              0: HASH@417..418 "#" [] []
-              1: HASH@418..419 "#" [] []
-              2: HASH@419..420 "#" [] []
-            3: COMMA@420..422 "," [] [Whitespace(" ")]
-            4: CSS_FUNCTION_PARAMETER@422..435
+              1: CSS_BOGUS@417..420
+                0: HASH@417..418 "#" [] []
+                1: HASH@418..419 "#" [] []
+                2: HASH@419..420 "#" [] []
+            1: COMMA@420..422 "," [] [Whitespace(" ")]
+            2: CSS_FUNCTION_PARAMETER@422..435
               0: CSS_DASHED_IDENTIFIER@422..430
                 0: IDENT@422..430 "--param2" [] []
               1: (empty)
@@ -364,8 +365,8 @@ CssRoot {
                 0: COLON@430..432 ":" [] [Whitespace(" ")]
                 1: CSS_IDENTIFIER@432..435
                   0: IDENT@432..435 "rem" [] []
-            5: COMMA@435..437 "," [] [Whitespace(" ")]
-            6: CSS_FUNCTION_PARAMETER@437..455
+            3: COMMA@435..437 "," [] [Whitespace(" ")]
+            4: CSS_BOGUS_FUNCTION_PARAMETER@437..458
               0: CSS_DASHED_IDENTIFIER@437..446
                 0: IDENT@437..446 "--param3" [] [Whitespace(" ")]
               1: CSS_TYPE_FUNCTION@446..453
@@ -374,14 +375,12 @@ CssRoot {
                 2: CSS_UNIVERSAL_SYNTAX@451..452
                   0: STAR@451..452 "*" [] []
                 3: R_PAREN@452..453 ")" [] []
-              2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@453..455
+              2: CSS_BOGUS@453..458
                 0: COLON@453..455 ":" [] [Whitespace(" ")]
-                1: (empty)
-            7: (empty)
-            8: CSS_BOGUS_FUNCTION_PARAMETER@455..458
-              0: BANG@455..456 "!" [] []
-              1: BANG@456..457 "!" [] []
-              2: BANG@457..458 "!" [] []
+                1: CSS_BOGUS@455..458
+                  0: BANG@455..456 "!" [] []
+                  1: BANG@456..457 "!" [] []
+                  2: BANG@457..458 "!" [] []
           4: R_PAREN@458..460 ")" [] [Whitespace(" ")]
           5: (empty)
         1: CSS_DECLARATION_OR_AT_RULE_BLOCK@460..462
@@ -473,12 +472,12 @@ at_rule_function_error.css:8:34 parse ━━━━━━━━━━━━━━
   
 at_rule_function_error.css:9:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a type function, or a syntax single component but instead found '#'.
+  × Expected a type function, or a syntax single component but instead found '###'.
   
      7 │ @function --missing-param-dashes(param-with-default: rem) {}
      8 │ @function --missing-param-dashes(param-with-type type(*)) {}
    > 9 │ @function --bogus-param-type(--param ###: rem) {}
-       │                                      ^
+       │                                      ^^^
     10 │ @function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
     11 │ 
   
@@ -487,18 +486,18 @@ at_rule_function_error.css:9:38 parse ━━━━━━━━━━━━━━
      7 │ @function --missing-param-dashes(param-with-default: rem) {}
      8 │ @function --missing-param-dashes(param-with-type type(*)) {}
    > 9 │ @function --bogus-param-type(--param ###: rem) {}
-       │                                      ^
+       │                                      ^^^
     10 │ @function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
     11 │ 
   
 at_rule_function_error.css:10:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a type function, or a syntax single component but instead found '#'.
+  × Expected a type function, or a syntax single component but instead found '###'.
   
      8 │ @function --missing-param-dashes(param-with-type type(*)) {}
      9 │ @function --bogus-param-type(--param ###: rem) {}
   > 10 │ @function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
-       │                                      ^
+       │                                      ^^^
     11 │ 
   
   i Expected a type function, or a syntax single component here.
@@ -506,7 +505,7 @@ at_rule_function_error.css:10:38 parse ━━━━━━━━━━━━━�
      8 │ @function --missing-param-dashes(param-with-type type(*)) {}
      9 │ @function --bogus-param-type(--param ###: rem) {}
   > 10 │ @function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
-       │                                      ^
+       │                                      ^^^
     11 │ 
   
 at_rule_function_error.css:10:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -529,14 +528,20 @@ at_rule_function_error.css:10:51 parse ━━━━━━━━━━━━━�
   
 at_rule_function_error.css:10:76 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `!`
+  × Expected a function parameter default value but instead found '!!!'.
   
      8 │ @function --missing-param-dashes(param-with-type type(*)) {}
      9 │ @function --bogus-param-type(--param ###: rem) {}
   > 10 │ @function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
-       │                                                                            ^
+       │                                                                            ^^^
     11 │ 
   
-  i Remove !
+  i Expected a function parameter default value here.
+  
+     8 │ @function --missing-param-dashes(param-with-type type(*)) {}
+     9 │ @function --bogus-param-type(--param ###: rem) {}
+  > 10 │ @function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
+       │                                                                            ^^^
+    11 │ 
   
 ```

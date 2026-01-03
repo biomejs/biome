@@ -1,1 +1,11 @@
-@function --test(--param1   <string>   : rem , --param2) returns <string> {}
+/* @function no-dash-name() {} */
+/* @function --bogus-param(###) {} */
+/* @function --missing-param-dashes(param) {} */
+/* @function --missing-param-dashes(param <string>) {} */
+
+@function no-dash-name() {}
+@function --missing-param-dashes(param-with-default: rem) {}
+@function --missing-param-dashes(param-with-type type(*)) {}
+@function --bogus-param-type(--param ###: rem) {}
+@function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
+

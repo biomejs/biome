@@ -2292,7 +2292,6 @@ CssSyntaxType =
 CssSyntaxMultiplier =
 	multiplier: ('#' | '+')
 
-
 // Tailwind
 
 // --value(--tab-size-*)

@@ -1,18 +1,18 @@
-use crate::syntax::at_rule::parse_error::expected_function_parameter;
-use crate::syntax::block::parse_declaration_or_at_rule_list_block;
-use crate::syntax::parse_error::{expected_component_value, expected_dashed_identifier};
-use crate::syntax::property::parse_generic_component_value;
-use crate::syntax::value::r#type::{
-    is_at_syntax_single_component, is_at_type_function, parse_any_syntax_component,
-    parse_type_function,
+use crate::syntax::at_rule::parse_error::{
+    expected_function_parameter, expected_parameter_default_value, expected_parameter_type,
 };
-use crate::syntax::{is_at_dashed_identifier, parse_any_value};
+use crate::syntax::block::parse_declaration_or_at_rule_list_block;
+use crate::syntax::parse_error::expected_dashed_identifier;
+use crate::syntax::value::r#type::{
+    is_at_syntax_single_component, is_at_syntax_type, is_at_type_function,
+    parse_any_syntax_component, parse_type_function,
+};
+use crate::syntax::{is_at_identifier, parse_any_value};
 use crate::{parser::CssParser, syntax::parse_dashed_identifier};
 use biome_css_syntax::{
     CssSyntaxKind::{self, *},
     T,
 };
-use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::token_set;
@@ -50,12 +50,10 @@ pub(crate) fn parse_function_at_rule_declarator(p: &mut CssParser) -> ParsedSynt
     let m = p.start();
     p.bump(T![function]);
 
-    // TODO: recover on type, default arg
     parse_dashed_identifier(p)
         .or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set![T!['('], T!['{']])
-                .enable_recovery_on_line_break(),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set![T!['('], T!['{']]),
             expected_dashed_identifier,
         )
         .ok();
@@ -71,23 +69,29 @@ pub(crate) fn parse_function_at_rule_declarator(p: &mut CssParser) -> ParsedSynt
 
 #[inline]
 fn parse_function_parameter(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_dashed_identifier(p) {
+    // expect identifier and not just dashed identifier
+    // to allow better recovery on invalid parameter names
+    if !is_at_identifier(p) {
         return Absent;
     }
 
     let m = p.start();
 
     parse_dashed_identifier(p)
-        .or_recover_with_token_set(
+        .or_recover(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set![T![,], T![')']])
-                .enable_recovery_on_line_break(),
+            &CssFunctionParameterNameParseRecovery,
             expected_dashed_identifier,
         )
         .ok();
 
-    // TODO: recover
-    parse_any_type(p).ok();
+    parse_any_type(p) //.or_add_diagnostic(p, expected_parameter_type);
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set![T![,], T![')'], T![:]]),
+            expected_parameter_type,
+        )
+        .ok();
 
     parse_function_parameter_default_value(p).ok();
 
@@ -121,7 +125,13 @@ fn parse_function_parameter_default_value(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![:]);
-    parse_any_value(p).ok();
+    parse_any_value(p)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set![T![,], T![')']]),
+            expected_parameter_default_value,
+        )
+        .ok();
 
     Present(m.complete(p, CSS_FUNCTION_PARAMETER_DEFAULT_VALUE))
 }
@@ -191,5 +201,17 @@ impl ParseSeparatedList for CssFunctionParameterList {
 
     fn allow_trailing_separating_element(&self) -> bool {
         true
+    }
+}
+
+struct CssFunctionParameterNameParseRecovery;
+
+impl ParseRecovery for CssFunctionParameterNameParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at_ts(token_set![T![,], T![')'], T![:]]) || is_at_type_function(p) || is_at_syntax_type(p)
     }
 }
