@@ -8,7 +8,7 @@ use biome_html_syntax::{
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
-use rustc_hash::FxHashSet;
+use std::collections::HashSet;
 
 use crate::HtmlRuleAction;
 
@@ -138,8 +138,8 @@ impl Rule for NoDuplicateClasses {
         // Identify duplicates and track which tokens to keep.
         // Use a Vec to track duplicates in order of first occurrence for deterministic output,
         // plus a HashSet for O(1) dedup checking.
-        let mut seen: FxHashSet<&str> = FxHashSet::default();
-        let mut duplicate_set: FxHashSet<&str> = FxHashSet::default();
+        let mut seen: HashSet<&str> = HashSet::new();
+        let mut duplicate_set: HashSet<&str> = HashSet::new();
         let mut duplicates_in_order: Vec<&str> = Vec::new();
         let mut kept_indices: Vec<usize> = Vec::new();
 
