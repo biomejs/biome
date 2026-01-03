@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: checkForEachEnabled.js
+expression: invalidCheckForEachEnabled.js
 ---
 # Input
 ```js
@@ -28,7 +28,7 @@ expression: checkForEachEnabled.js
 
 # Diagnostics
 ```
-checkForEachEnabled.js:2:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCheckForEachEnabled.js:2:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
@@ -52,7 +52,7 @@ checkForEachEnabled.js:2:4 lint/suspicious/useIterableCallbackReturn ━━━�
 ```
 
 ```
-checkForEachEnabled.js:5:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCheckForEachEnabled.js:5:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
@@ -78,7 +78,7 @@ checkForEachEnabled.js:5:4 lint/suspicious/useIterableCallbackReturn ━━━�
 ```
 
 ```
-checkForEachEnabled.js:8:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCheckForEachEnabled.js:8:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
@@ -104,7 +104,7 @@ checkForEachEnabled.js:8:4 lint/suspicious/useIterableCallbackReturn ━━━�
 ```
 
 ```
-checkForEachEnabled.js:13:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCheckForEachEnabled.js:13:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
@@ -130,7 +130,7 @@ checkForEachEnabled.js:13:4 lint/suspicious/useIterableCallbackReturn ━━━�
 ```
 
 ```
-checkForEachEnabled.js:19:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCheckForEachEnabled.js:19:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
