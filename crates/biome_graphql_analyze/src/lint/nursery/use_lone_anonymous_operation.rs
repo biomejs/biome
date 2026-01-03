@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_graphql_syntax::{AnyGraphqlDefinition, AnyGraphqlOperationDefinition, GraphqlRoot};
-use biome_rowan::{AstNode, AstNodeList, SyntaxNodeCast, TextRange};
+use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
 use biome_rule_options::use_lone_anonymous_operation::UseLoneAnonymousOperationOptions;
 
 declare_lint_rule! {
@@ -55,10 +55,11 @@ impl Rule for UseLoneAnonymousOperation {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let operations = node
-            .definitions()
-            .iter()
-            .filter_map(|def| match def {
+        let mut unnamed_operations = Vec::new();
+        let mut operation_count = 0;
+
+        for def in node.definitions() {
+            let operation = match def {
                 AnyGraphqlDefinition::GraphqlOperationDefinition(operation_definition) => {
                     operation_definition
                         .syntax()
@@ -69,52 +70,44 @@ impl Rule for UseLoneAnonymousOperation {
                     .syntax()
                     .clone()
                     .cast::<AnyGraphqlOperationDefinition>(),
-                _ => None,
-            })
-            .collect::<Vec<AnyGraphqlOperationDefinition>>();
+                _ => continue,
+            };
 
-        if operations.len() <= 1 {
-            return None;
-        }
+            let Some(operation) = operation else {
+                continue;
+            };
 
-        let unnamed_operations = operations
-            .iter()
-            .filter_map(|operation| match operation {
+            operation_count += 1;
+
+            match operation {
                 AnyGraphqlOperationDefinition::GraphqlOperationDefinition(operation_definition) => {
                     if operation_definition.name().is_none() {
-                        return Some(operation_definition.range());
+                        unnamed_operations.push(operation_definition.range());
                     }
-
-                    None
                 }
                 AnyGraphqlOperationDefinition::GraphqlSelectionSet(selection_set) => {
-                    Some(selection_set.range())
+                    unnamed_operations.push(selection_set.range());
                 }
-            })
-            .collect::<Vec<TextRange>>();
-
-        if unnamed_operations.is_empty() {
-            None
-        } else {
-            Some(unnamed_operations)
+            }
         }
+
+        (operation_count > 1 && !unnamed_operations.is_empty()).then_some(unnamed_operations)
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let span = ctx.root().range();
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let mut diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            span,
+            state.first()?,
             markup! {
-                "Document contains (multiple) anonymous operations."
+                "Document contains (multiple) anonymous operations. This anonymous operation must be the only defined operation in this document or turn into a named operation."
             },
         );
 
-        for range in state {
+        for range in &state[1..] {
             diagnostic = diagnostic.detail(
                 range,
                 markup! {
-                    "This anonymous operation must be the only defined operation in this document."
+                    "Another anonymous operation."
                 },
             );
         }
@@ -123,9 +116,6 @@ impl Rule for UseLoneAnonymousOperation {
             diagnostic
                 .note(markup! {
                     "A GraphQL document that contains an anonymous operation (the query short-hand) is only valid if it contains only that one operation definition."
-                })
-                .note(markup! {
-                    "Isolate the anonymous operation in a separate document or turn into a named operation."
                 })
         )
     }

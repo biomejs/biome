@@ -3,5 +3,5 @@ query {
 	fieldA
 }
 query {
-  fieldB
+	fieldB
 }

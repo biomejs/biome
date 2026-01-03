@@ -1,7 +1,7 @@
 # should generate diagnostics
 query {
-  fieldA
+	fieldA
 }
 mutation Foo {
-  fieldB
+	fieldB
 }
