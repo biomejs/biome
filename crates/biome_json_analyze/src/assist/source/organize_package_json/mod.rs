@@ -174,6 +174,7 @@ fn needs_transformation(member: &JsonMember, transformer: FieldTransformer) -> b
     match transformer {
         FieldTransformer::None => false,
 
+        // Simple object sorters - check key order
         FieldTransformer::SortObject
         | FieldTransformer::SortPeopleObject
         | FieldTransformer::SortURLObject
@@ -181,43 +182,69 @@ fn needs_transformation(member: &JsonMember, transformer: FieldTransformer) -> b
         | FieldTransformer::SortDirectories
         | FieldTransformer::SortVolta
         | FieldTransformer::SortBinary
-        | FieldTransformer::SortGitHooks => {
-            if let Some(obj) = value.as_json_object_value() {
-                let members = obj.json_member_list();
-                let current_keys: Vec<String> = members
-                    .iter()
-                    .filter_map(|m| {
-                        m.ok()?
-                            .name()
-                            .ok()?
-                            .inner_string_text()
-                            .ok()
-                            .map(|t| t.text().to_string())
-                    })
-                    .collect();
+        | FieldTransformer::SortGitHooks => check_object_keys_sorted(&value, transformer),
 
-                let sorted_keys = get_expected_sorted_keys(&current_keys, transformer);
-                current_keys != sorted_keys
-            } else {
-                false
-            }
-        }
-
+        // Object sorters with simple top-level key checking
         FieldTransformer::SortDependencies
         | FieldTransformer::SortDependenciesMeta
         | FieldTransformer::SortScripts
-        | FieldTransformer::SortExports
+        | FieldTransformer::SortObjectDeep => check_object_keys_sorted(&value, transformer),
+
+        // Complex nested transformers - skip deep checks for performance
+        // These involve recursive transformations, conditional logic, or nested field ordering
+        // that would be expensive to validate. The transformation applies correctly when run.
+        FieldTransformer::SortExports
         | FieldTransformer::SortEslintConfig
         | FieldTransformer::SortPrettierConfig
-        | FieldTransformer::SortPeopleArray
-        | FieldTransformer::SortBadgesArray
-        | FieldTransformer::SortObjectDeep
         | FieldTransformer::SortHusky
         | FieldTransformer::SortDevEngines
         | FieldTransformer::SortWorkspaces
         | FieldTransformer::SortPnpmConfig => false,
 
+        // Array transformers - skip checks (would require iterating all elements)
+        FieldTransformer::SortPeopleArray | FieldTransformer::SortBadgesArray => false,
+
+        // Array uniqueness - skip checks (would require element comparison)
         FieldTransformer::UniqArray | FieldTransformer::UniqAndSortArray => false,
+    }
+}
+
+fn check_object_keys_sorted(value: &AnyJsonValue, transformer: FieldTransformer) -> bool {
+    if let Some(obj) = value.as_json_object_value() {
+        let members = obj.json_member_list();
+        let current_keys: Vec<String> = members
+            .iter()
+            .filter_map(|m| {
+                m.ok()?
+                    .name()
+                    .ok()?
+                    .inner_string_text()
+                    .ok()
+                    .map(|t| t.text().to_string())
+            })
+            .collect();
+
+        if current_keys.len() < 2 {
+            return false;
+        }
+
+        // For complex transformers, just check if top-level keys are alphabetically sorted
+        // This is a lightweight check that catches most cases without expensive nested validation
+        let sorted_keys = match transformer {
+            FieldTransformer::SortDependencies
+            | FieldTransformer::SortDependenciesMeta
+            | FieldTransformer::SortScripts
+            | FieldTransformer::SortObjectDeep => {
+                let mut sorted = current_keys.clone();
+                sorted.sort();
+                sorted
+            }
+            _ => get_expected_sorted_keys(&current_keys, transformer),
+        };
+
+        current_keys != sorted_keys
+    } else {
+        false
     }
 }
 

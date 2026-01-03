@@ -16,3 +16,42 @@ expression: package.json
 }
 
 ```
+
+# Diagnostics
+```
+package.json:1:1 assist/source/organizePackageJson  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i package.json fields can be organized.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "scripts": {
+   > 3 │     "test:unit": "jest unit",
+   > 4 │     "build": "tsc",
+        ...
+   > 8 │     "build:prod": "tsc --prod"
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i Safe fix: Organize package.json fields.
+  
+     1  1 │   {
+     2  2 │     "scripts": {
+     3    │ - ····"test:unit":·"jest·unit",
+     4    │ - ····"build":·"tsc",
+     5    │ - ····"test":·"jest",
+     6    │ - ····"build:watch":·"tsc·--watch",
+        3 │ + ····"build":·"tsc",
+        4 │ + ····"build:prod":·"tsc·--prod",
+        5 │ + ····"build:watch":·"tsc·--watch",
+        6 │ + ····"test":·"jest",
+     7  7 │       "test:integration": "jest integration",
+     8    │ - ····"build:prod":·"tsc·--prod"
+        8 │ + ····"test:unit":·"jest·unit"
+     9  9 │     }
+    10 10 │   }
+  
+
+```

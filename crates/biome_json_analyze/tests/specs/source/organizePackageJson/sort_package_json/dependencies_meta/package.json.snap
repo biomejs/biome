@@ -14,3 +14,39 @@ expression: package.json
 }
 
 ```
+
+# Diagnostics
+```
+package.json:1:1 assist/source/organizePackageJson  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i package.json fields can be organized.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "dependenciesMeta": {
+  > 3 │     "package-b@2.0.0": {"optional": true},
+  > 4 │     "package-a@1.0.0": {"optional": true},
+  > 5 │     "@scope/pkg-z@3.0.0": {"optional": false},
+  > 6 │     "@scope/pkg-a@1.0.0": {"optional": false}
+  > 7 │   }
+  > 8 │ }
+      │ ^
+    9 │ 
+  
+  i Safe fix: Organize package.json fields.
+  
+    1 1 │   {
+    2 2 │     "dependenciesMeta": {
+    3   │ - ····"package-b@2.0.0":·{"optional":·true},
+    4   │ - ····"package-a@1.0.0":·{"optional":·true},
+    5   │ - ····"@scope/pkg-z@3.0.0":·{"optional":·false},
+    6   │ - ····"@scope/pkg-a@1.0.0":·{"optional":·false}
+      3 │ + ····"@scope/pkg-a@1.0.0":·{"optional":·false},
+      4 │ + ····"@scope/pkg-z@3.0.0":·{"optional":·false},
+      5 │ + ····"package-a@1.0.0":·{"optional":·true},
+      6 │ + ····"package-b@2.0.0":·{"optional":·true}
+    7 7 │     }
+    8 8 │   }
+  
+
+```
