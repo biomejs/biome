@@ -508,7 +508,7 @@ fn assert_lint(
 
                 let options = test.create_analyzer_options::<HtmlLanguage>(config)?;
 
-                biome_html_analyze::analyze(&root, filter, &options, |signal| {
+                biome_html_analyze::analyze(&root, filter, &options, source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         for action in signal.actions() {
                             if !action.is_suppression() {

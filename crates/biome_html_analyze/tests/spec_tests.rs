@@ -100,7 +100,7 @@ pub(crate) fn analyze_and_snap(
     let mut code_fixes = Vec::new();
     let options = create_analyzer_options::<HtmlLanguage>(input_file, &mut diagnostics);
 
-    let (_, errors) = biome_html_analyze::analyze(&root, filter, &options, |event| {
+    let (_, errors) = biome_html_analyze::analyze(&root, filter, &options, source_type, |event| {
         if let Some(mut diag) = event.diagnostic() {
             for action in event.actions() {
                 if check_action_type.is_suppression() {
