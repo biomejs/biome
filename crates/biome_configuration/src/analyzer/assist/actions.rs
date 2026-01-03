@@ -66,6 +66,7 @@ impl std::fmt::Display for RuleGroup {
 #[serde(rename_all = "camelCase")]
 pub enum ActionName {
     OrganizeImports,
+    OrganizePackageJson,
     UseSortedAttributes,
     UseSortedKeys,
     UseSortedProperties,
@@ -74,6 +75,7 @@ impl ActionName {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::OrganizeImports => "organizeImports",
+            Self::OrganizePackageJson => "organizePackageJson",
             Self::UseSortedAttributes => "useSortedAttributes",
             Self::UseSortedKeys => "useSortedKeys",
             Self::UseSortedProperties => "useSortedProperties",
@@ -82,6 +84,7 @@ impl ActionName {
     pub const fn group(self) -> RuleGroup {
         match self {
             Self::OrganizeImports => RuleGroup::Source,
+            Self::OrganizePackageJson => RuleGroup::Source,
             Self::UseSortedAttributes => RuleGroup::Source,
             Self::UseSortedKeys => RuleGroup::Source,
             Self::UseSortedProperties => RuleGroup::Source,
@@ -93,6 +96,7 @@ impl std::str::FromStr for ActionName {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "organizeImports" => Ok(Self::OrganizeImports),
+            "organizePackageJson" => Ok(Self::OrganizePackageJson),
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
             "useSortedKeys" => Ok(Self::UseSortedKeys),
             "useSortedProperties" => Ok(Self::UseSortedProperties),

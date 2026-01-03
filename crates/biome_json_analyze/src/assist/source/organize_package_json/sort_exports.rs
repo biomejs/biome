@@ -1,6 +1,5 @@
 use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonMember, T};
-use biome_rowan::AstSeparatedList;
 
 pub fn transform(value: &AnyJsonValue) -> Option<AnyJsonValue> {
     let object = value.as_json_object_value()?;
@@ -97,18 +96,15 @@ mod tests {
         let result = transform(&AnyJsonValue::from(obj.clone())).unwrap();
         let result_obj = result.as_json_object_value().unwrap();
 
-        let keys: Vec<String> = result_obj
-            .json_member_list()
-            .iter()
-            .filter_map(|m| {
-                m.ok()?
-                    .name()
-                    .ok()?
-                    .inner_string_text()
-                    .ok()
-                    .map(|t| t.text().to_string())
-            })
-            .collect();
+        let mut keys = Vec::new();
+        for m in &result_obj.json_member_list() {
+            if let Ok(member) = m
+                && let Ok(name) = member.name()
+                && let Ok(text) = name.inner_string_text()
+            {
+                keys.push(text.text().to_string());
+            }
+        }
 
         assert_eq!(keys, vec!["types", "unknown", "default"]);
     }
@@ -120,18 +116,15 @@ mod tests {
         let result = transform(&AnyJsonValue::from(obj.clone())).unwrap();
         let result_obj = result.as_json_object_value().unwrap();
 
-        let keys: Vec<String> = result_obj
-            .json_member_list()
-            .iter()
-            .filter_map(|m| {
-                m.ok()?
-                    .name()
-                    .ok()?
-                    .inner_string_text()
-                    .ok()
-                    .map(|t| t.text().to_string())
-            })
-            .collect();
+        let mut keys = Vec::new();
+        for m in &result_obj.json_member_list() {
+            if let Ok(member) = m
+                && let Ok(name) = member.name()
+                && let Ok(text) = name.inner_string_text()
+            {
+                keys.push(text.text().to_string());
+            }
+        }
 
         assert_eq!(keys, vec!["./path", "types", "default"]);
     }
