@@ -232,16 +232,11 @@ fn is_aria_hidden(element: &AnyHtmlElement) -> bool {
     element
         .find_attribute_by_name("aria-hidden")
         .is_some_and(|attribute| {
-            // aria-hidden without a value or with value "true" means hidden
-            let Some(initializer) = attribute.initializer() else {
-                // aria-hidden present without value - treat as true
-                return true;
-            };
-
-            initializer
-                .value()
-                .ok()
+            // Only aria-hidden="true" means hidden (must have initializer with value "true")
+            attribute
+                .initializer()
+                .and_then(|init| init.value().ok())
                 .and_then(|value| value.string_value())
-                .is_some_and(|value| value.eq_ignore_ascii_case("true"))
+                .is_some_and(|value| value == "true")
         })
 }

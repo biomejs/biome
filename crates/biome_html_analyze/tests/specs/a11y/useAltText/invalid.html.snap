@@ -4,6 +4,8 @@ expression: invalid.html
 ---
 # Input
 ```html
+<!-- should generate diagnostics -->
+
 <!-- img without alt -->
 <img src="image.png" />
 <img src="image.png" class="photo" />
@@ -24,15 +26,15 @@ expression: invalid.html
 
 # Diagnostics
 ```
-invalid.html:2:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:4:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
   
-    1 │ <!-- img without alt -->
-  > 2 │ <img src="image.png" />
+    3 │ <!-- img without alt -->
+  > 4 │ <img src="image.png" />
       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ <img src="image.png" class="photo" />
-    4 │ 
+    5 │ <img src="image.png" class="photo" />
+    6 │ 
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -42,16 +44,16 @@ invalid.html:2:1 lint/a11y/useAltText ━━━━━━━━━━━━━━
 ```
 
 ```
-invalid.html:3:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:5:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
   
-    1 │ <!-- img without alt -->
-    2 │ <img src="image.png" />
-  > 3 │ <img src="image.png" class="photo" />
+    3 │ <!-- img without alt -->
+    4 │ <img src="image.png" />
+  > 5 │ <img src="image.png" class="photo" />
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ 
-    5 │ <!-- area without alt -->
+    6 │ 
+    7 │ <!-- area without alt -->
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -61,15 +63,15 @@ invalid.html:3:1 lint/a11y/useAltText ━━━━━━━━━━━━━━
 ```
 
 ```
-invalid.html:6:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:8:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
   
-    5 │ <!-- area without alt -->
-  > 6 │ <area href="foo" />
-      │ ^^^^^^^^^^^^^^^^^^^
-    7 │ <map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
-    8 │ 
+     7 │ <!-- area without alt -->
+   > 8 │ <area href="foo" />
+       │ ^^^^^^^^^^^^^^^^^^^
+     9 │ <map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
+    10 │ 
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -79,16 +81,16 @@ invalid.html:6:1 lint/a11y/useAltText ━━━━━━━━━━━━━━
 ```
 
 ```
-invalid.html:7:17 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:9:17 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
   
-    5 │ <!-- area without alt -->
-    6 │ <area href="foo" />
-  > 7 │ <map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
-      │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ 
-    9 │ <!-- input type="image" without alt -->
+     7 │ <!-- area without alt -->
+     8 │ <area href="foo" />
+   > 9 │ <map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ <!-- input type="image" without alt -->
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -98,15 +100,15 @@ invalid.html:7:17 lint/a11y/useAltText ━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.html:10:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:12:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
   
-     9 │ <!-- input type="image" without alt -->
-  > 10 │ <input type="image" src="submit.png" />
+    11 │ <!-- input type="image" without alt -->
+  > 12 │ <input type="image" src="submit.png" />
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ <input type="image" src="button.png" name="submit" />
-    12 │ 
+    13 │ <input type="image" src="button.png" name="submit" />
+    14 │ 
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -116,16 +118,16 @@ invalid.html:10:1 lint/a11y/useAltText ━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.html:11:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:13:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
   
-     9 │ <!-- input type="image" without alt -->
-    10 │ <input type="image" src="submit.png" />
-  > 11 │ <input type="image" src="button.png" name="submit" />
+    11 │ <!-- input type="image" without alt -->
+    12 │ <input type="image" src="submit.png" />
+  > 13 │ <input type="image" src="button.png" name="submit" />
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ 
-    13 │ <!-- object without title -->
+    14 │ 
+    15 │ <!-- object without title -->
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -135,15 +137,15 @@ invalid.html:11:1 lint/a11y/useAltText ━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.html:14:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:16:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the title, aria-label, or aria-labelledby attribute.
   
-    13 │ <!-- object without title -->
-  > 14 │ <object data="movie.swf"></object>
+    15 │ <!-- object without title -->
+  > 16 │ <object data="movie.swf"></object>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    15 │ <object data="document.pdf" type="application/pdf"></object>
-    16 │ 
+    17 │ <object data="document.pdf" type="application/pdf"></object>
+    18 │ 
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -153,15 +155,15 @@ invalid.html:14:1 lint/a11y/useAltText ━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.html:15:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:17:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the title, aria-label, or aria-labelledby attribute.
   
-    13 │ <!-- object without title -->
-    14 │ <object data="movie.swf"></object>
-  > 15 │ <object data="document.pdf" type="application/pdf"></object>
+    15 │ <!-- object without title -->
+    16 │ <object data="movie.swf"></object>
+  > 17 │ <object data="document.pdf" type="application/pdf"></object>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    16 │ 
+    18 │ 
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
