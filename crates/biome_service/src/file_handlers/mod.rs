@@ -1375,7 +1375,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         let domains = self.settings.as_linter_domains(path);
         if let Some(manifest) = &self.package_json {
             for domain in R::METADATA.domains {
-                // handled in `record_rule_from_domains`
                 if domains
                     .as_ref()
                     .is_some_and(|domains| domains.contains_key(domain))
