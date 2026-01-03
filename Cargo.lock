@@ -207,6 +207,7 @@ dependencies = [
  "camino",
  "crossbeam",
  "dashmap 6.1.0",
+ "directories",
  "insta",
  "libc",
  "mimalloc",
@@ -1174,7 +1175,7 @@ dependencies = [
  "biome_rowan",
  "biome_string_case",
  "camino",
- "dirs",
+ "directories",
  "schemars",
  "serde",
 ]
@@ -2560,15 +2561,6 @@ name = "directories"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "16f5094c54661b38d03bd7e50df373292118db60b585c08a411c6d840017fe7d"
-dependencies = [
- "dirs-sys",
-]
-
-[[package]]
-name = "dirs"
-version = "6.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3e8aa94d75141228480295a7d0e7feb620b1a5ad9f12bc40be62411e38cce4e"
 dependencies = [
  "dirs-sys",
 ]

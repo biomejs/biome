@@ -265,11 +265,19 @@ pub fn read_config(
         is_found
     };
 
-    let Some(auto_search_result) = fs.auto_search_files_with_predicate(
-        &configuration_directory,
-        &[ConfigName::biome_json(), ConfigName::biome_jsonc()],
-        &mut predicate,
-    ) else {
+    let Some(auto_search_result) = fs
+        .auto_search_files_with_predicate(
+            &configuration_directory,
+            &ConfigName::file_names(),
+            &mut predicate,
+        )
+        .or_else(|| {
+            let user_config_dir = fs.user_config_dir()?;
+
+            let paths = ConfigName::file_names().map(|file_name| user_config_dir.join(file_name));
+            fs.read_file_from_paths_with_predicate(paths.as_slice(), &mut predicate)
+        })
+    else {
         return Ok(None);
     };
 
