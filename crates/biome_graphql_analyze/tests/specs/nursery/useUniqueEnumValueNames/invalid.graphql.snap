@@ -7,25 +7,39 @@ expression: invalid.graphql
 # should generate diagnostics
 enum A {
 	TEST
+	OTHER
 	TesT
+	ANOTHER
+	Test
 }
 
 ```
 
 # Diagnostics
 ```
-invalid.graphql:2:1 lint/nursery/useUniqueEnumValueNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:4:7 lint/nursery/useUniqueEnumValueNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate enum value name.
   
-    1 │ # should generate diagnostics
-  > 2 │ enum A {
-      │ ^^^^^^^^
-  > 3 │ 	TEST
-  > 4 │ 	TesT
-  > 5 │ }
-      │ ^
-    6 │ 
+    2 │ enum A {
+    3 │ 	TEST
+  > 4 │ 	OTHER
+      │ 	     
+  > 5 │ 	TesT
+      │ 	^^^^
+    6 │ 	ANOTHER
+    7 │ 	Test
+  
+  i Another duplicate enum value.
+  
+    4 │ 	OTHER
+    5 │ 	TesT
+  > 6 │ 	ANOTHER
+      │ 	       
+  > 7 │ 	Test
+      │ 	^^^^
+    8 │ }
+    9 │ 
   
   i A GraphQL enum type is only valid if all its values are uniquely named. Make sure to name every enum value differently.
   

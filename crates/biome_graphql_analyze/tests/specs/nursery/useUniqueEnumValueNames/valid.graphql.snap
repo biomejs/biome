@@ -7,6 +7,8 @@ expression: valid.graphql
 # should not generate diagnostics
 enum A {
 	TEST
+	OTHER
+	ANOTHER
 }
 
 ```
