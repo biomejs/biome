@@ -65,7 +65,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseUniqueFieldDefinitionNames {
-        version: "next",
+        version: "2.3.11",
         name: "useUniqueFieldDefinitionNames",
         language: "graphql",
         recommended: false,

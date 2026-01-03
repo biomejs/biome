@@ -35,7 +35,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueVForKey {
-        version: "next",
+        version: "2.3.11",
         name: "useVueVForKey",
         language: "html",
         recommended: true,
