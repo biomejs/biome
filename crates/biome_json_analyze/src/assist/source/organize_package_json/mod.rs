@@ -12,7 +12,9 @@ use std::collections::HashMap;
 
 mod field_order;
 mod sort_dependencies;
+mod sort_eslint_config;
 mod sort_exports;
+mod sort_prettier_config;
 mod sort_scripts;
 mod sorters;
 
@@ -201,7 +203,10 @@ fn needs_transformation(member: &JsonMember, transformer: FieldTransformer) -> b
 
         FieldTransformer::SortDependencies
         | FieldTransformer::SortScripts
-        | FieldTransformer::SortExports => false,
+        | FieldTransformer::SortExports
+        | FieldTransformer::SortEslintConfig
+        | FieldTransformer::SortPrettierConfig
+        | FieldTransformer::SortPeopleArray => false,
 
         FieldTransformer::UniqArray | FieldTransformer::UniqAndSortArray => false,
     }
@@ -279,7 +284,10 @@ fn get_expected_sorted_keys(keys: &[String], transformer: FieldTransformer) -> V
         }
         FieldTransformer::SortDependencies
         | FieldTransformer::SortScripts
-        | FieldTransformer::SortExports => {
+        | FieldTransformer::SortExports
+        | FieldTransformer::SortEslintConfig
+        | FieldTransformer::SortPrettierConfig
+        | FieldTransformer::SortPeopleArray => {
             sorted.sort();
         }
         _ => {}
@@ -373,6 +381,18 @@ fn apply_field_transformer(
 
         FieldTransformer::SortExports => {
             sort_exports::transform(&value).unwrap_or_else(|| value.clone())
+        }
+
+        FieldTransformer::SortEslintConfig => {
+            sort_eslint_config::transform(&value).unwrap_or_else(|| value.clone())
+        }
+
+        FieldTransformer::SortPrettierConfig => {
+            sort_prettier_config::transform(&value).unwrap_or_else(|| value.clone())
+        }
+
+        FieldTransformer::SortPeopleArray => {
+            sorters::transform_people_array(&value).unwrap_or_else(|| value.clone())
         }
 
         FieldTransformer::SortObject => {

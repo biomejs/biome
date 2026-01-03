@@ -12,6 +12,9 @@ pub enum FieldTransformer {
     SortDependencies,
     SortScripts,
     SortExports,
+    SortEslintConfig,
+    SortPrettierConfig,
+    SortPeopleArray,
     UniqArray,
     UniqAndSortArray,
     SortVSCodeBadgeObject,
@@ -96,11 +99,11 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "maintainers",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortPeopleArray,
     },
     FieldMetadata {
         key: "contributors",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortPeopleArray,
     },
     /* vscode */
     FieldMetadata {
@@ -289,11 +292,11 @@ pub const PACKAGE_JSON_FIELDS: &[FieldMetadata] = &[
     },
     FieldMetadata {
         key: "prettier",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortPrettierConfig,
     },
     FieldMetadata {
         key: "eslintConfig",
-        transformer: FieldTransformer::None,
+        transformer: FieldTransformer::SortEslintConfig,
     },
     FieldMetadata {
         key: "eslintIgnore",
