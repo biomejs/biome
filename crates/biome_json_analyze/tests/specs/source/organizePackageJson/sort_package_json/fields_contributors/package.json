@@ -1,0 +1,14 @@
+{
+  "contributors": [
+    {
+      "url": "http://example.com",
+      "name": "John Doe",
+      "email": "john@example.com"
+    },
+    {
+      "url": "http://example.org",
+      "email": "jane@example.org",
+      "name": "Jane Smith"
+    }
+  ]
+}

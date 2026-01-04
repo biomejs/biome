@@ -1,0 +1,9 @@
+{
+  "badges": [
+    {
+      "href": "https://example.com/badge.svg",
+      "description": "Build Status",
+      "url": "https://example.com/build"
+    }
+  ]
+}

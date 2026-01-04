@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "test:unit": "jest unit",
+    "build": "tsc",
+    "test": "jest",
+    "build:watch": "tsc --watch",
+    "test:integration": "jest integration",
+    "build:prod": "tsc --prod"
+  }
+}

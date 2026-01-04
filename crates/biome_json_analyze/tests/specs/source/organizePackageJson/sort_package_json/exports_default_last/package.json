@@ -1,0 +1,7 @@
+{
+  "exports": {
+    "unknown": "./unknown.js",
+    "./path": {},
+    "default": "./default.js"
+  }
+}

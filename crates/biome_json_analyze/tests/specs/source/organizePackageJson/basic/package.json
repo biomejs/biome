@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "lodash": "^4.0.0"
+  },
+  "name": "my-package",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc"
+  }
+}

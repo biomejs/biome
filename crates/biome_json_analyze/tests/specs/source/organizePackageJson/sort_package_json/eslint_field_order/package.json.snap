@@ -1,0 +1,26 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "eslintConfig": {
+    "z": "z",
+    "env": {"node": true},
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {"ecmaVersion": 2020},
+    "settings": {"react": {"version": "detect"}},
+    "plugins": ["@typescript-eslint"],
+    "extends": ["eslint:recommended"],
+    "rules": {"semi": "error"},
+    "overrides": [],
+    "globals": {"myGlobal": "readonly"},
+    "processor": "my-processor",
+    "noInlineConfig": false,
+    "reportUnusedDisableDirectives": true,
+    "a": "a"
+  }
+}
+
+```
