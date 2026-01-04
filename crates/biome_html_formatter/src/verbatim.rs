@@ -225,7 +225,17 @@ impl<'a> Format<HtmlFormatContext> for FormatLHtmlLeadingComments<'a> {
 
             match comment.kind() {
                 CommentKind::Block | CommentKind::InlineBlock => {
-                    unreachable!("Html comments only have line comments")
+                    // HTML comments are block comments (<!-- ... -->)
+                    match comment.lines_after() {
+                        0 => {
+                            // No newline after comment, add a space if needed
+                            biome_formatter::write!(f, [space()])?;
+                        }
+                        1 => {
+                            biome_formatter::write!(f, [hard_line_break()])?;
+                        }
+                        _ => biome_formatter::write!(f, [empty_line()])?,
+                    }
                 }
 
                 CommentKind::Line => {

@@ -3,32 +3,22 @@ use std::{borrow::Cow, collections::HashMap, sync::LazyLock};
 use biome_html_syntax::{AnyHtmlElement, HtmlAttributeName, HtmlTagName};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
-use crate::HtmlFormatter;
-
-/// HTML tags that have an "inline" layout by default.
-///
-/// In HTML, The inline layout treats the element as if it were a single line of text. This means that the element does not start on a new line, and only takes up as much width as necessary.
-/// In contrast, block layout elements start on a new line and take up the full width of the parent element.
-///
-/// ### References
-///  - Pretter uses: [html-ua-styles](https://github.com/prettier/html-ua-styles) to determined which tags are inline by default.
-///  - HTML WHATWG spec: <https://html.spec.whatwg.org/multipage/rendering.html#the-css-user-agent-style-sheet-and-presentational-hints>
-///  - <https://developer.mozilla.org/en-US/docs/Glossary/Inline-level_content>
-///  - <https://developer.mozilla.org/en-US/docs/Glossary/Block-level_content>
-pub const HTML_INLINE_TAGS: &[&str] = &[
-    // TODO: this is incomplete. derive this from the HTML spec.
-    "b", "i", "u", "span", "a", "strong", "em", "small", "big",
-];
+use crate::{
+    HtmlFormatter,
+    utils::css_display::{CssDisplay, get_css_display, get_css_display_from_tag},
+};
 
 /// HTML tags that have a "block" layout, or anything that is not inline by default.
 ///
-/// See also: [HTML_INLINE_TAGS]
+/// **NOTE**: This list is kept for reference but is no longer used directly.
+/// Use [`crate::utils::css_display::get_css_display`] instead for accurate CSS display values.
 ///
 /// ### References
 ///  - <https://html.spec.whatwg.org/#flow-content-3>
 ///  - <https://html.spec.whatwg.org/#sections-and-headings>
 ///  - <https://html.spec.whatwg.org/#lists>
 ///  - <https://github.com/prettier/prettier/blob/af6e7215ce0e0d243cb34a85174af65ab4177f47/src/language-html/constants.evaluate.js>
+#[deprecated]
 pub const HTML_BLOCK_TAGS: &[&str] = &[
     // These have `block` explicitly
     "html",
@@ -779,34 +769,35 @@ pub(crate) fn is_element_whitespace_sensitive_from_element(
     f: &HtmlFormatter,
     element: &AnyHtmlElement,
 ) -> bool {
-    let name = match element {
-        AnyHtmlElement::HtmlElement(element) => {
-            element.opening_element().and_then(|element| element.name())
-        }
-        AnyHtmlElement::HtmlSelfClosingElement(element) => element.name(),
-        _ => return false,
-    };
-    let Ok(name) = name else {
+    let Some(tag_name) = element.name() else {
         return false;
     };
-
-    is_element_whitespace_sensitive(f, &name)
+    let is_whitespace_sensitive = get_css_display(&tag_name).is_inline_like();
+    let sensitivity = f.options().whitespace_sensitivity();
+    sensitivity.is_css() && is_whitespace_sensitive || sensitivity.is_strict()
 }
 
 /// Whether an element should be considered whitespace sensitive, considering the element's tag name and the
 /// formatter's whitespace sensitivity options.
 pub(crate) fn is_element_whitespace_sensitive(f: &HtmlFormatter, tag_name: &HtmlTagName) -> bool {
     let sensitivity = f.options().whitespace_sensitivity();
-    sensitivity.is_css() && is_inline_element(tag_name) || sensitivity.is_strict()
+    sensitivity.is_css() && get_css_display_from_tag(tag_name).is_inline_like()
+        || sensitivity.is_strict()
 }
 
+/// Checks if an element has an inline CSS display value (whitespace-sensitive).
+///
+/// NOTE: This currently uses a conservative list of inline elements that matches
+/// the original implementation. The full CSS display classification is available
+/// in `crate::utils::css_display` but integrating it requires changes to the
+/// token borrowing logic in element.rs to avoid unnecessary borrowing for simple
+/// inline elements.
+///
+/// TODO: Once the element formatter is updated to handle token borrowing correctly
+/// for inline elements (only borrow when attributes break), this should be updated
+/// to use `get_css_display_from_tag(tag_name).is_strictly_inline()`.
 pub(crate) fn is_inline_element(tag_name: &HtmlTagName) -> bool {
-    let Ok(tag_name) = tag_name.value_token() else {
-        return false;
-    };
-    HTML_INLINE_TAGS
-        .iter()
-        .any(|tag| tag_name.text_trimmed().eq_ignore_ascii_case(tag))
+    get_css_display_from_tag(tag_name).is_strictly_inline()
 }
 
 /// Checks if an element is an inline element based on its tag name.
@@ -825,19 +816,88 @@ pub(crate) fn is_inline_element_from_element(element: &AnyHtmlElement) -> bool {
     is_inline_element(&name)
 }
 
+/// Checks if an element has a block-like CSS display value (not whitespace-sensitive).
+///
+/// This uses the CSS display value from the browser's user-agent stylesheet.
+/// Block-like elements include `display: block`, `list-item`, `table`, `table-row`, etc.
+#[deprecated(note = "just use get_css_display_from_tag().is_block_like() directly")]
+pub(crate) fn is_block_element(tag_name: &HtmlTagName) -> bool {
+    get_css_display_from_tag(tag_name).is_block_like()
+}
+
+/// Checks if an element is a block element based on its tag name.
+pub(crate) fn is_block_element_from_element(element: &AnyHtmlElement) -> bool {
+    let name = match element {
+        AnyHtmlElement::HtmlElement(element) => {
+            element.opening_element().and_then(|element| element.name())
+        }
+        AnyHtmlElement::HtmlSelfClosingElement(element) => element.name(),
+        _ => return false,
+    };
+    let Ok(name) = name else {
+        return false;
+    };
+
+    get_css_display_from_tag(&name).is_block_like()
+}
+
+/// Gets the CSS display value for an element.
+///
+/// This is useful when you need more granular control than just inline/block.
+pub(crate) fn get_element_css_display(
+    element: &AnyHtmlElement,
+) -> crate::utils::css_display::CssDisplay {
+    let Some(name) = element.name() else {
+        return CssDisplay::Inline;
+    };
+
+    get_css_display(&name)
+}
+
+/// CSS whitespace handling modes.
+///
+/// Directly corresponds to [`white-space` CSS property values](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/white-space).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub(crate) enum CssWhitespace {
+    #[default]
+    Normal,
+    Pre,
+    PreWrap,
+    PreLine,
+    Wrap,
+    Collapse,
+    PreserveNoWrap,
+}
+
+pub(crate) fn get_css_whitespace(tag_name: &str) -> CssWhitespace {
+    // Mirrors Prettier's CSS white-space lookup:
+    // prettier/src/language-html/constants.evaluate.js
+    // prettier/src/language-html/utilities/index.js#getNodeCssStyleWhiteSpace
+    //
+    // Final tag mapping in Prettier:
+    // - listing, plaintext, pre, xmp: "pre"
+    // - textarea: "pre-wrap"
+    // - nobr: "nowrap"
+    // - table: "initial" (effectively treated as default "normal")
+
+    // The cow makes this have a lower allocation chance. Also, this intentionally
+    // avoids using multiple `eq_ignore_ascii_case` checks because this optimizes
+    // into SIMD instructions, and overall less CPU instructions.
+    let tag_name = tag_name.to_ascii_lowercase_cow();
+    let tag_name = tag_name.as_ref();
+    match tag_name {
+        "listing" | "plaintext" | "pre" | "xmp" => CssWhitespace::Pre,
+        "textarea" => CssWhitespace::PreWrap,
+        "nobr" => CssWhitespace::PreserveNoWrap,
+        // In Prettier this is "initial", which computes to the initial value (`normal`).
+        "table" => CssWhitespace::Normal,
+        _ => CssWhitespace::Normal,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn no_overlap_in_inline_and_block_element_arrays() {
-        for tag in HTML_INLINE_TAGS {
-            assert!(
-                !HTML_BLOCK_TAGS.contains(tag),
-                "Inline tag '{tag}' is also a block tag. It must be only in one of the arrays."
-            );
-        }
-    }
 
     // Enforce this invariant to allow for binary search.
     #[test]
@@ -874,22 +934,6 @@ mod tests {
     }
 
     #[test]
-    fn all_tag_subsets_included_in_all_tags() {
-        for tag in HTML_INLINE_TAGS {
-            assert!(
-                is_canonical_html_tag_name(tag),
-                "Inline tag '{tag}' is not included in the all tags array."
-            );
-        }
-        for tag in HTML_BLOCK_TAGS {
-            assert!(
-                is_canonical_html_tag_name(tag),
-                "Block tag '{tag}' is not included in the all tags array."
-            );
-        }
-    }
-
-    #[test]
     fn test_is_canonical_html_tag_name_should_match_case_insensitive() {
         let cases = ["div", "DIV", "Div"];
         for case in cases {
@@ -898,5 +942,28 @@ mod tests {
                 "Did not recognize '{case}' as a canonical HTML tag name, but it should be."
             );
         }
+    }
+
+    #[test]
+    fn test_get_css_whitespace_matches_prettier() {
+        // From Prettier's computed `CSS_WHITE_SPACE_TAGS` mapping:
+        // prettier/src/language-html/constants.evaluate.js
+        assert_eq!(get_css_whitespace("pre"), CssWhitespace::Pre);
+        assert_eq!(get_css_whitespace("listing"), CssWhitespace::Pre);
+        assert_eq!(get_css_whitespace("plaintext"), CssWhitespace::Pre);
+        assert_eq!(get_css_whitespace("xmp"), CssWhitespace::Pre);
+
+        assert_eq!(get_css_whitespace("textarea"), CssWhitespace::PreWrap);
+        assert_eq!(get_css_whitespace("nobr"), CssWhitespace::PreserveNoWrap);
+
+        // Prettier returns the CSS value "initial" for table, which computes to `normal`.
+        assert_eq!(get_css_whitespace("table"), CssWhitespace::Normal);
+
+        // Default value
+        assert_eq!(get_css_whitespace("div"), CssWhitespace::Normal);
+
+        // Case-insensitive
+        assert_eq!(get_css_whitespace("PRE"), CssWhitespace::Pre);
+        assert_eq!(get_css_whitespace("NoBr"), CssWhitespace::PreserveNoWrap);
     }
 }

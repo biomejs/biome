@@ -55,7 +55,9 @@ impl CommentStyle for HtmlCommentStyle {
     }
 
     fn get_comment_kind(_comment: &SyntaxTriviaPieceComments<HtmlLanguage>) -> CommentKind {
-        CommentKind::Line
+        // HTML comments are block comments (<!-- ... -->), not line comments
+        // They don't extend to the end of the line like // comments do
+        CommentKind::Block
     }
 
     /// This allows us to override which comments are associated with which nodes.

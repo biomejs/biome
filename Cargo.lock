@@ -843,6 +843,7 @@ dependencies = [
  "camino",
  "codspeed-criterion-compat",
  "countme",
+ "enumflags2",
  "mimalloc",
  "schemars",
  "serde",

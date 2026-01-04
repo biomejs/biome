@@ -128,12 +128,18 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         } else if should_be_verbatim {
             write!(f, [&format_html_verbatim_node(children.syntax())])?;
         } else {
+            // Use BestFitting layout to allow the formatter to choose between
+            // flat and expanded versions. The `if_group_breaks`/`if_group_fits_on_line`
+            // logic below will handle breaking children when attributes break.
+            // The layout is only forced to Multiline when children contain block elements.
+            let layout = HtmlChildListLayout::BestFitting;
             let format_children = FormatHtmlElementList::default()
                 .with_options(FormatHtmlElementListOptions {
-                    layout: HtmlChildListLayout::BestFitting,
+                    layout,
                     is_element_whitespace_sensitive: is_whitespace_sensitive,
                     borrowed_r_angle,
                     borrowed_closing_tag,
+                    opening_tag_group: Some(attr_group_id),
                 })
                 .fmt_children(&children, f)?;
             match format_children {

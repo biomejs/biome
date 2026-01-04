@@ -37,7 +37,7 @@ alert(1)
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,15 +1,23 @@
+@@ -1,15 +1,21 @@
  <script type="text/babel" data-presets="react" data-type="module">
 -  import { h, render } from "https://unpkg.com/preact?module";
 -  render(<h1>Hello World!</h1>, document.body);
@@ -48,7 +48,7 @@ alert(1)
 +         document.body
 +);
  </script>
- 
+-
  <script type="text/jsx" data-presets="react" data-type="module">
 -  import { h, render } from "https://unpkg.com/preact?module";
 -  render(<h1>Hello World!</h1>, document.body);
@@ -59,7 +59,7 @@ alert(1)
 +         document.body
 +);
  </script>
- 
+-
  <script type="text/babel">
 -  <!--
 -  alert(1);
@@ -81,7 +81,6 @@ render(
          document.body
 );
 </script>
-
 <script type="text/jsx" data-presets="react" data-type="module">
 import { h, 
          render } from 'https://unpkg.com/preact?module';
@@ -90,7 +89,6 @@ render(
          document.body
 );
 </script>
-
 <script type="text/babel">
 <!--
 alert(1)
