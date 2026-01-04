@@ -20,7 +20,7 @@ YamlRoot {
             node: YamlFlowInBlockNode {
                 flow_start_token: FLOW_START@0..0 "" [] [],
                 flow: YamlFlowJsonNode {
-                    properties: missing (optional),
+                    properties: YamlPropertyList [],
                     content: YamlFlowMapping {
                         l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
                         entries: YamlFlowMapEntryList [
@@ -52,7 +52,7 @@ YamlRoot {
       3: YAML_FLOW_IN_BLOCK_NODE@0..5
         0: FLOW_START@0..0 "" [] []
         1: YAML_FLOW_JSON_NODE@0..5
-          0: (empty)
+          0: YAML_PROPERTY_LIST@0..0
           1: YAML_FLOW_MAPPING@0..5
             0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
             1: YAML_FLOW_MAP_ENTRY_LIST@2..4

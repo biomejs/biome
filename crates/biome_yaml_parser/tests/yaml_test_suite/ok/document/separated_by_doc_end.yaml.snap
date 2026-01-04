@@ -25,7 +25,7 @@ YamlRoot {
             node: YamlFlowInBlockNode {
                 flow_start_token: FLOW_START@0..0 "" [] [],
                 flow: YamlFlowJsonNode {
-                    properties: missing (optional),
+                    properties: YamlPropertyList [],
                     content: YamlDoubleQuotedScalar {
                         value_token: DOUBLE_QUOTED_LITERAL@0..5 "\"123\"" [] [],
                     },
@@ -38,31 +38,33 @@ YamlRoot {
             bom_token: missing (optional),
             directives: YamlDirectiveList [],
             dashdashdash_token: missing (optional),
-            node: YamlBlockMapping {
-                mapping_start_token: MAPPING_START@9..10 "" [Newline("\n")] [],
-                properties: missing (optional),
-                entries: YamlBlockMapEntryList [
-                    YamlBlockMapImplicitEntry {
-                        key: YamlFlowYamlNode {
-                            properties: missing (optional),
-                            content: YamlPlainScalar {
-                                value_token: PLAIN_LITERAL@10..13 "xyz" [] [],
-                            },
-                        },
-                        colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
-                        value: YamlFlowInBlockNode {
-                            flow_start_token: FLOW_START@15..15 "" [] [],
-                            flow: YamlFlowYamlNode {
-                                properties: missing (optional),
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockMapping {
+                    mapping_start_token: MAPPING_START@9..10 "" [Newline("\n")] [],
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
                                 content: YamlPlainScalar {
-                                    value_token: PLAIN_LITERAL@15..18 "123" [] [],
+                                    value_token: PLAIN_LITERAL@10..13 "xyz" [] [],
                                 },
                             },
-                            flow_end_token: FLOW_END@18..18 "" [] [],
+                            colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@15..15 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@15..18 "123" [] [],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@18..18 "" [] [],
+                            },
                         },
-                    },
-                ],
-                mapping_end_token: MAPPING_END@18..19 "" [Newline("\n")] [],
+                    ],
+                    mapping_end_token: MAPPING_END@18..19 "" [Newline("\n")] [],
+                },
             },
             dotdotdot_token: DOC_END@19..31 "..." [] [Whitespace(" "), Comments("# trivia")],
         },
@@ -80,7 +82,7 @@ YamlRoot {
             node: YamlFlowInBlockNode {
                 flow_start_token: FLOW_START@35..36 "" [Newline("\n")] [],
                 flow: YamlFlowYamlNode {
-                    properties: missing (optional),
+                    properties: YamlPropertyList [],
                     content: YamlPlainScalar {
                         value_token: PLAIN_LITERAL@36..40 "abc\n" [] [],
                     },
@@ -106,7 +108,7 @@ YamlRoot {
       3: YAML_FLOW_IN_BLOCK_NODE@0..5
         0: FLOW_START@0..0 "" [] []
         1: YAML_FLOW_JSON_NODE@0..5
-          0: (empty)
+          0: YAML_PROPERTY_LIST@0..0
           1: YAML_DOUBLE_QUOTED_SCALAR@0..5
             0: DOUBLE_QUOTED_LITERAL@0..5 "\"123\"" [] []
         2: FLOW_END@5..5 "" [] []
@@ -115,24 +117,25 @@ YamlRoot {
       0: (empty)
       1: YAML_DIRECTIVE_LIST@9..9
       2: (empty)
-      3: YAML_BLOCK_MAPPING@9..19
-        0: MAPPING_START@9..10 "" [Newline("\n")] []
-        1: (empty)
-        2: YAML_BLOCK_MAP_ENTRY_LIST@10..18
-          0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@10..18
-            0: YAML_FLOW_YAML_NODE@10..13
-              0: (empty)
-              1: YAML_PLAIN_SCALAR@10..13
-                0: PLAIN_LITERAL@10..13 "xyz" [] []
-            1: COLON@13..15 ":" [] [Whitespace(" ")]
-            2: YAML_FLOW_IN_BLOCK_NODE@15..18
-              0: FLOW_START@15..15 "" [] []
-              1: YAML_FLOW_YAML_NODE@15..18
-                0: (empty)
-                1: YAML_PLAIN_SCALAR@15..18
-                  0: PLAIN_LITERAL@15..18 "123" [] []
-              2: FLOW_END@18..18 "" [] []
-        3: MAPPING_END@18..19 "" [Newline("\n")] []
+      3: YAML_BLOCK_IN_BLOCK_NODE@9..19
+        0: YAML_PROPERTY_LIST@9..9
+        1: YAML_BLOCK_MAPPING@9..19
+          0: MAPPING_START@9..10 "" [Newline("\n")] []
+          1: YAML_BLOCK_MAP_ENTRY_LIST@10..18
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@10..18
+              0: YAML_FLOW_YAML_NODE@10..13
+                0: YAML_PROPERTY_LIST@10..10
+                1: YAML_PLAIN_SCALAR@10..13
+                  0: PLAIN_LITERAL@10..13 "xyz" [] []
+              1: COLON@13..15 ":" [] [Whitespace(" ")]
+              2: YAML_FLOW_IN_BLOCK_NODE@15..18
+                0: FLOW_START@15..15 "" [] []
+                1: YAML_FLOW_YAML_NODE@15..18
+                  0: YAML_PROPERTY_LIST@15..15
+                  1: YAML_PLAIN_SCALAR@15..18
+                    0: PLAIN_LITERAL@15..18 "123" [] []
+                2: FLOW_END@18..18 "" [] []
+          2: MAPPING_END@18..19 "" [Newline("\n")] []
       4: DOC_END@19..31 "..." [] [Whitespace(" "), Comments("# trivia")]
     2: YAML_DOCUMENT@31..35
       0: (empty)
@@ -147,7 +150,7 @@ YamlRoot {
       3: YAML_FLOW_IN_BLOCK_NODE@35..40
         0: FLOW_START@35..36 "" [Newline("\n")] []
         1: YAML_FLOW_YAML_NODE@36..40
-          0: (empty)
+          0: YAML_PROPERTY_LIST@36..36
           1: YAML_PLAIN_SCALAR@36..40
             0: PLAIN_LITERAL@36..40 "abc\n" [] []
         2: FLOW_END@40..40 "" [] []
