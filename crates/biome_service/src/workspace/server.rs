@@ -9,7 +9,7 @@ use crate::scanner::{
     IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
     WorkspaceScannerBridge,
 };
-use crate::settings::{SettingsHandle, SettingsWithEditor};
+use crate::settings::{ModuleGraphResolutionKind, SettingsHandle, SettingsWithEditor};
 use crate::workspace::document::services::embedded_bindings::{
     EmbeddedBuilder, EmbeddedExportedBindings,
 };
