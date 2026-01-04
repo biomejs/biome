@@ -2108,7 +2108,7 @@ See <https://biomejs.dev/linter/rules/use-find>
 	 */
 	useFind?: UseFindConfiguration;
 	/**
-	* Require queries, mutations, subscriptions or fragments to be located in separate files.
+	* Require queries, mutations, subscriptions or fragments each to be located in separate files.
 See <https://biomejs.dev/linter/rules/use-lone-executable-definition> 
 	 */
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;

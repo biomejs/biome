@@ -5544,7 +5544,7 @@
 					]
 				},
 				"useLoneExecutableDefinition": {
-					"description": "Require queries, mutations, subscriptions or fragments to be located in separate files.\nSee <https://biomejs.dev/linter/rules/use-lone-executable-definition>",
+					"description": "Require queries, mutations, subscriptions or fragments each to be located in separate files.\nSee <https://biomejs.dev/linter/rules/use-lone-executable-definition>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseLoneExecutableDefinitionConfiguration" },
 						{ "type": "null" }

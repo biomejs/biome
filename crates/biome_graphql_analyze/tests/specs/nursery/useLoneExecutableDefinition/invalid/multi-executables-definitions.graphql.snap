@@ -35,23 +35,9 @@ subscription Sub {
 
 # Diagnostics
 ```
-multi-executables-definitions.graphql:2:1 lint/nursery/useLoneExecutableDefinition ━━━━━━━━━━━━━━━━━
+multi-executables-definitions.graphql:5:1 lint/nursery/useLoneExecutableDefinition ━━━━━━━━━━━━━━━━━
 
-  i Document contains (multiple) definitions.
-  
-     1 │ # should generate diagnostics
-   > 2 │ query Valid {
-       │ ^^^^^^^^^^^^^
-   > 3 │ 	id
-   > 4 │ }
-        ...
-  > 24 │ subscription Sub {
-  > 25 │ 	id
-  > 26 │ }
-       │ ^
-    27 │ 
-  
-  i This definition should be in a separate file.
+  i Document contains multiple definitions. This definition should be in a separate file.
   
     3 │ 	id
     4 │ }
@@ -63,7 +49,7 @@ multi-executables-definitions.graphql:2:1 lint/nursery/useLoneExecutableDefiniti
     8 │ fragment Bar on Bar {
     9 │ 	id
   
-  i This definition should be in a separate file.
+  i This definition also should be in a separate file.
   
      6 │ 	id
      7 │ }
@@ -75,7 +61,7 @@ multi-executables-definitions.graphql:2:1 lint/nursery/useLoneExecutableDefiniti
     11 │ mutation ($name: String!) {
     12 │ 	createFoo {
   
-  i This definition should be in a separate file.
+  i This definition also should be in a separate file.
   
      9 │ 	id
     10 │ }
@@ -89,7 +75,7 @@ multi-executables-definitions.graphql:2:1 lint/nursery/useLoneExecutableDefiniti
     16 │ mutation Baz($name: String!) {
     17 │ 	createFoo {
   
-  i This definition should be in a separate file.
+  i This definition also should be in a separate file.
   
     14 │ 	}
     15 │ }
@@ -103,7 +89,7 @@ multi-executables-definitions.graphql:2:1 lint/nursery/useLoneExecutableDefiniti
     21 │ subscription {
     22 │ 	id
   
-  i This definition should be in a separate file.
+  i This definition also should be in a separate file.
   
     19 │ 	}
     20 │ }
@@ -115,7 +101,7 @@ multi-executables-definitions.graphql:2:1 lint/nursery/useLoneExecutableDefiniti
     24 │ subscription Sub {
     25 │ 	id
   
-  i This definition should be in a separate file.
+  i This definition also should be in a separate file.
   
     22 │ 	id
     23 │ }
@@ -126,7 +112,7 @@ multi-executables-definitions.graphql:2:1 lint/nursery/useLoneExecutableDefiniti
        │ ^
     27 │ 
   
-  i Require queries, mutations, subscriptions or fragments to be located in separate files. Separate definitions into separate files.
+  i Queries, mutations, subscriptions or fragments each must be defined in separate files.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

@@ -7,7 +7,10 @@ use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::use_lone_executable_definition::UseLoneExecutableDefinitionOptions;
 
 declare_lint_rule! {
-    /// Require queries, mutations, subscriptions or fragments to be located in separate files.
+    /// Require queries, mutations, subscriptions or fragments each to be located in separate files.
+    ///
+    /// This rule ensures that each GraphQL document only contains a single operation (query, mutation, or subscription) or fragment definition.
+    /// Having multiple executable definitions in a single file can make code harder to maintain, test, and understand.
     ///
     /// ## Examples
     ///
@@ -19,6 +22,28 @@ declare_lint_rule! {
     /// }
     ///
     /// fragment Bar on Baz {
+    ///   id
+    /// }
+    /// ```
+    ///
+    /// ```graphql,expect_diagnostic
+    /// query Foo {
+    ///   id
+    /// }
+    ///
+    /// mutation ($name: String!) {
+    ///   createUser {
+    ///     id
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```graphql,expect_diagnostic
+    /// query Foo {
+    ///   id
+    /// }
+    ///
+    /// query Bar {
     ///   id
     /// }
     /// ```
@@ -55,7 +80,7 @@ impl Rule for UseLoneExecutableDefinition {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let mut definitions = node
+        let definitions = node
             .definitions()
             .iter()
             .filter_map(|def| match def {
@@ -70,40 +95,37 @@ impl Rule for UseLoneExecutableDefinition {
                 }
                 _ => None,
             })
+            .enumerate()
+            .filter_map(|(pos, range)| if pos == 0 { None } else { Some(range) })
             .collect::<Vec<TextRange>>();
 
-        if definitions.len() > 1 {
-            definitions.remove(0);
-            return Some(definitions);
+        if definitions.is_empty() {
+            None
+        } else {
+            Some(definitions)
         }
-
-        None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let span = ctx.query().range();
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let mut diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            span,
+            state.first()?,
             markup! {
-                "Document contains (multiple) definitions."
+                "Document contains multiple definitions. This definition should be in a separate file."
             },
         );
 
-        for range in state {
+        for range in &state[1..] {
             diagnostic = diagnostic.detail(
                 range,
                 markup! {
-                    "This definition should be in a separate file."
+                    "This definition also should be in a separate file."
                 },
             );
         }
 
-        Some(
-            diagnostic
-            .note(markup! {
-                "Require queries, mutations, subscriptions or fragments to be located in separate files. Separate definitions into separate files."
-            })
-        )
+        Some(diagnostic.note(markup! {
+            "Queries, mutations, subscriptions or fragments each must be defined in separate files."
+        }))
     }
 }
