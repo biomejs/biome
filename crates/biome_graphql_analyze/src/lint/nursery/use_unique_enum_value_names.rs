@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseUniqueEnumValueNames {
-        version: "next",
+        version: "2.3.12",
         name: "useUniqueEnumValueNames",
         language: "graphql",
         recommended: false,
