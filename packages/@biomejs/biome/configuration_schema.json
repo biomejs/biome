@@ -5543,6 +5543,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useInlineScriptId": {
+					"description": "Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.\nSee <https://biomejs.dev/linter/rules/use-inline-script-id>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseInlineScriptIdConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useMaxParams": {
 					"description": "Enforce a maximum number of parameters in function definitions.\nSee <https://biomejs.dev/linter/rules/use-max-params>",
 					"anyOf": [
@@ -9381,6 +9388,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseInlineScriptIdOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseInlineScriptIdOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseIsArrayOptions": {
 			"type": "object",
 			"properties": {
@@ -12422,6 +12438,16 @@
 			]
 		},
 		"UseIndexOfOptions": { "type": "object", "additionalProperties": false },
+		"UseInlineScriptIdConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseInlineScriptIdOptions" }
+			]
+		},
+		"UseInlineScriptIdOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseIsArrayConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

@@ -10,6 +10,7 @@ static NEXT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noBeforeInteractiveScriptOutsideDocument"),
         RuleFilter::Rule("nursery", "noNextAsyncClientComponent"),
         RuleFilter::Rule("nursery", "noSyncScripts"),
+        RuleFilter::Rule("nursery", "useInlineScriptId"),
         RuleFilter::Rule("performance", "noImgElement"),
         RuleFilter::Rule("performance", "noUnwantedPolyfillio"),
         RuleFilter::Rule("performance", "useGoogleFontPreconnect"),
