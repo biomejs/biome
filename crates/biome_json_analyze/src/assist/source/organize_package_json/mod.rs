@@ -315,8 +315,9 @@ impl Rule for OrganizePackageJson {
     }
 }
 
-fn is_organized(members: &JsonMemberList, object: &JsonObjectValue) -> bool {
-    let field_names: Vec<String> = members
+/// Extract field names from JsonMemberList
+fn extract_field_names(members: &JsonMemberList) -> Vec<String> {
+    members
         .iter()
         .filter_map(|member| {
             member
@@ -327,7 +328,11 @@ fn is_organized(members: &JsonMemberList, object: &JsonObjectValue) -> bool {
                 .ok()
                 .map(|text| text.text().to_string())
         })
-        .collect();
+        .collect()
+}
+
+fn is_organized(members: &JsonMemberList, object: &JsonObjectValue) -> bool {
+    let field_names = extract_field_names(members);
 
     if field_names.is_empty() {
         return true;
@@ -389,7 +394,7 @@ fn organize_members(
         return None;
     }
 
-    let field_names: Vec<String> = member_map.keys().cloned().collect();
+    let field_names = extract_field_names(members);
     let sorted_names = get_sorted_field_order(&field_names);
 
     let mut elements = Vec::new();

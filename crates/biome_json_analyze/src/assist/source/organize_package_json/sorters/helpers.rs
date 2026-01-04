@@ -3,6 +3,20 @@ use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue, T};
 use biome_rowan::AstSeparatedList;
 use std::cmp::Ordering;
 
+/// Extract member names from a slice of JsonMembers
+pub fn extract_member_names(members: &[JsonMember]) -> Vec<String> {
+    members
+        .iter()
+        .filter_map(|m| {
+            m.name()
+                .ok()?
+                .inner_string_text()
+                .ok()
+                .map(|t| t.text().to_string())
+        })
+        .collect()
+}
+
 pub fn sort_alphabetically(object: &JsonObjectValue) -> Option<JsonObjectValue> {
     sort_object_by_comparator(object, |a, b| a.cmp(b))
 }
@@ -128,27 +142,8 @@ pub fn sort_object_by_key_order(
     });
 
     // Check if order changed by comparing key names
-    let original_keys: Vec<String> = original
-        .iter()
-        .filter_map(|m| {
-            m.name()
-                .ok()?
-                .inner_string_text()
-                .ok()
-                .map(|t| t.text().to_string())
-        })
-        .collect();
-
-    let sorted_keys: Vec<String> = sorted
-        .iter()
-        .filter_map(|m| {
-            m.name()
-                .ok()?
-                .inner_string_text()
-                .ok()
-                .map(|t| t.text().to_string())
-        })
-        .collect();
+    let original_keys = extract_member_names(&original);
+    let sorted_keys = extract_member_names(&sorted);
 
     if original_keys == sorted_keys {
         return None;

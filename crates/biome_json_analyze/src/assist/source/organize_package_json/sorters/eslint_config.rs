@@ -2,7 +2,7 @@ use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue, T};
 
 use super::constants::ESLINT_BASE_CONFIG_PROPERTIES;
-use super::helpers::{sort_alphabetically, sort_object_by_key_order};
+use super::helpers::{extract_member_names, sort_alphabetically, sort_object_by_key_order};
 
 /// https://github.com/eslint/eslint/blob/acc0e47572a9390292b4e313b4a4bf360d236358/conf/config-schema.js
 pub fn transform(value: &AnyJsonValue) -> Option<AnyJsonValue> {
@@ -135,27 +135,8 @@ fn sort_eslint_rules(object: &JsonObjectValue) -> Option<JsonObjectValue> {
     });
 
     // Check if order changed by comparing member names
-    let original_keys: Vec<String> = original
-        .iter()
-        .filter_map(|m| {
-            m.name()
-                .ok()?
-                .inner_string_text()
-                .ok()
-                .map(|t| t.text().to_string())
-        })
-        .collect();
-
-    let sorted_keys: Vec<String> = member_vec
-        .iter()
-        .filter_map(|m| {
-            m.name()
-                .ok()?
-                .inner_string_text()
-                .ok()
-                .map(|t| t.text().to_string())
-        })
-        .collect();
+    let original_keys = extract_member_names(&original);
+    let sorted_keys = extract_member_names(&member_vec);
 
     if original_keys == sorted_keys {
         return None;
