@@ -310,16 +310,16 @@ pub enum BiomeCommand {
         #[bpaf(external(json_parser_configuration), optional, hide_usage)]
         json_parser: Option<JsonParserConfiguration>,
 
-        #[bpaf(external(css_parser_configuration), optional, hide_usage, hide)]
+        #[bpaf(external(css_parser_configuration), optional, hide_usage)]
         css_parser: Option<CssParserConfiguration>,
 
-        #[bpaf(external(graphql_formatter_configuration), optional, hide_usage, hide)]
+        #[bpaf(external(graphql_formatter_configuration), optional, hide_usage)]
         graphql_formatter: Option<GraphqlFormatterConfiguration>,
 
-        #[bpaf(external(css_formatter_configuration), optional, hide_usage, hide)]
+        #[bpaf(external(css_formatter_configuration), optional, hide_usage)]
         css_formatter: Option<CssFormatterConfiguration>,
 
-        #[bpaf(external(html_formatter_configuration), optional, hide_usage, hide)]
+        #[bpaf(external(html_formatter_configuration), optional, hide_usage)]
         html_formatter: Option<HtmlFormatterConfiguration>,
 
         #[bpaf(external(vcs_configuration), optional, hide_usage)]

@@ -50,6 +50,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -79,4 +80,5 @@ x.very.long.chain.of.static.members.that.goes.on.for.ever.I.mean.it.for.ever[
 x[b["test"]];
 
 a["test"];
+
 ```

@@ -25,5 +25,6 @@ formatter_quote_style.json:3:9 deserialize ━━━━━━━━━━━━�
   - bracketSameLine
   - bracketSpacing
   - expand
+  - trailingNewline
   - useEditorconfig
   - includes

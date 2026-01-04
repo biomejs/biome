@@ -30,6 +30,7 @@ use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_parser::AnyParse;
@@ -49,6 +50,7 @@ pub struct CssFormatterSettings {
     pub indent_style: Option<IndentStyle>,
     pub quote_style: Option<QuoteStyle>,
     pub enabled: Option<CssFormatterEnabled>,
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl From<CssFormatterConfiguration> for CssFormatterSettings {
@@ -60,6 +62,7 @@ impl From<CssFormatterConfiguration> for CssFormatterSettings {
             indent_style: configuration.indent_style,
             quote_style: configuration.quote_style,
             line_ending: configuration.line_ending,
+            trailing_newline: configuration.trailing_newline,
         }
     }
 }
@@ -214,6 +217,11 @@ impl ServiceLanguage for CssLanguage {
             .or(global.line_ending)
             .unwrap_or_default();
 
+        let trailing_newline = language
+            .trailing_newline
+            .or(global.trailing_newline)
+            .unwrap_or_default();
+
         let mut options = CssFormatOptions::new(
             document_file_source
                 .to_css_file_source()
@@ -223,7 +231,8 @@ impl ServiceLanguage for CssLanguage {
         .with_indent_width(indent_width)
         .with_line_width(line_width)
         .with_line_ending(line_ending)
-        .with_quote_style(language.quote_style.unwrap_or_default());
+        .with_quote_style(language.quote_style.unwrap_or_default())
+        .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_css_format_options(path, &mut options);
 

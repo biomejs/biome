@@ -31,9 +31,11 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
 2 > (4 + ((4 * 24) % 3)) << 23 instanceof Number in data ||
 	(a in status instanceof String + 15 && foo && bar && lorem instanceof String);
+
 ```

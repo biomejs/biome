@@ -28,10 +28,12 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```svelte
 {#await import('./Component.svelte') then { default: Component }}
 	<Component />
 {/await}
+
 ```

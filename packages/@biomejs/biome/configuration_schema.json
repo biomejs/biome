@@ -1326,6 +1326,10 @@
 				"quoteStyle": {
 					"description": "The type of quotes used in CSS code. Defaults to double.",
 					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1564,6 +1568,10 @@
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
 				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
+				},
 				"useEditorconfig": {
 					"description": "Use any `.editorconfig` files to configure the formatter. Configuration\nin `biome.json` will override `.editorconfig` configuration.\n\nDefault: `true`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -1649,6 +1657,10 @@
 					"description": "The type of quotes used in GraphQL code. Defaults to double.",
 					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }],
 					"default": null
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1725,6 +1737,10 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to Grit files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1900,6 +1916,10 @@
 						{ "$ref": "#/$defs/SelfCloseVoidElements" },
 						{ "type": "null" }
 					]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				},
 				"whitespaceSensitivity": {
 					"description": "Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"css\".",
@@ -2104,6 +2124,10 @@
 				"trailingCommas": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
 					"anyOf": [{ "$ref": "#/$defs/JsTrailingCommas" }, { "type": "null" }]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -2226,6 +2250,10 @@
 						{ "$ref": "#/$defs/JsonTrailingCommas" },
 						{ "type": "null" }
 					]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -5880,6 +5908,10 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -11667,6 +11699,7 @@
 			},
 			"additionalProperties": false
 		},
+		"TrailingNewline": { "type": "boolean" },
 		"UseAdjacentOverloadSignaturesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

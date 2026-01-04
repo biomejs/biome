@@ -698,3 +698,50 @@ fn indent_size_can_set_to_tab() {
         result,
     ));
 }
+
+#[test]
+fn should_support_insert_final_newline() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+[*]
+insert_final_newline = false
+"#,
+    );
+
+    let biomeconfig = Utf8Path::new("biome.json");
+    fs.insert(
+        biomeconfig.into(),
+        r#"{
+    "formatter": {
+        "useEditorconfig": true
+    }
+}
+"#,
+    );
+
+    let test_file = Utf8Path::new("test.js");
+    let contents = r#"function test() {
+    console.log("no newline")}"#;
+    fs.insert(test_file.into(), contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_support_insert_final_newline",
+        fs,
+        console,
+        result,
+    ));
+}

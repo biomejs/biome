@@ -12,7 +12,9 @@ use crate::{
     Configuration, FormatterConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
     OverridePattern, Overrides, diagnostics::EditorConfigDiagnostic,
 };
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, ParseFormatNumberError};
+use biome_formatter::{
+    IndentStyle, IndentWidth, LineEnding, ParseFormatNumberError, TrailingNewline,
+};
 use biome_rowan::TextRange;
 use std::fmt::{Debug, Display};
 use std::num::ParseIntError;
@@ -359,7 +361,7 @@ pub struct EditorConfigOptions {
     pub indent_size: EditorconfigValue<IndentSize>,
     pub end_of_line: EditorconfigValue<LineEnding>,
     // Not a biome option, but we need it to emit a diagnostic when this is set to false.
-    pub insert_final_newline: EditorconfigValue<bool>,
+    pub insert_final_newline: EditorconfigValue<TrailingNewline>,
 }
 
 impl EditorConfigOptions {
@@ -378,6 +380,7 @@ impl EditorConfigOptions {
             indent_style: self.indent_style.into(),
             indent_width,
             line_ending: self.end_of_line.into(),
+            trailing_newline: self.insert_final_newline.into(),
             ..Default::default()
         }
     }
@@ -390,20 +393,13 @@ impl EditorConfigOptions {
             indent_style: self.indent_style.into(),
             indent_width,
             line_ending: self.end_of_line.into(),
+            trailing_newline: self.insert_final_newline.into(),
             ..Default::default()
         }
     }
 
     fn validate(&self) -> Vec<EditorConfigDiagnostic> {
-        let mut diagnostics = vec![];
-        // `insert_final_newline = false` results in formatting behavior that is incompatible with biome
-        if let EditorconfigValue::Explicit(false) = self.insert_final_newline {
-            diagnostics.push(EditorConfigDiagnostic::incompatible(
-                "insert_final_newline",
-                "Biome always inserts a final newline. Set this option to true.",
-            ));
-        }
-        diagnostics
+        vec![]
     }
 }
 

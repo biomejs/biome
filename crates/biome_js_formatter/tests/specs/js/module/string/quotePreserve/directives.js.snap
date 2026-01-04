@@ -34,6 +34,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -41,6 +42,7 @@ Operator linebreak: After
 "use preferred quote";
 "keep quotes and escapes \" ";
 'keep quotes and escapes \' ';
+
 ```
 
 ## Output 1
@@ -61,6 +63,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -68,4 +71,5 @@ Operator linebreak: After
 "use preferred quote";
 "keep quotes and escapes \" ";
 'keep quotes and escapes \' ';
+
 ```

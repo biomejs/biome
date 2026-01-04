@@ -66,6 +66,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -88,6 +89,7 @@ const d: D = ["value1", "value2"];
 type E = ["value1", "value2"];
 
 const e: E = ["value1", "value2"];
+
 ```
 
 ## Output 1
@@ -108,6 +110,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Always
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -160,4 +163,5 @@ const e: E = [
 	"value1",
 	"value2",
 ];
+
 ```

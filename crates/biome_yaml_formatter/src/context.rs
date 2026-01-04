@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
-    TransformSourceMap,
+    TrailingNewline, TransformSourceMap,
 };
 use biome_formatter::{IndentWidth, prelude::*};
 use biome_yaml_syntax::{YamlFileSource, YamlLanguage};
@@ -63,6 +63,8 @@ pub struct YamlFormatOptions {
     indent_width: IndentWidth,
     line_ending: LineEnding,
     line_width: LineWidth,
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    trailing_newline: TrailingNewline,
     /// The kind of file
     _file_source: YamlFileSource,
 }
@@ -71,6 +73,7 @@ impl YamlFormatOptions {
     pub fn new(file_source: YamlFileSource) -> Self {
         Self {
             _file_source: file_source,
+            trailing_newline: TrailingNewline::default(),
             ..Default::default()
         }
     }
@@ -95,6 +98,11 @@ impl YamlFormatOptions {
         self
     }
 
+    pub fn with_trailing_newline(mut self, trailing_newline: TrailingNewline) -> Self {
+        self.trailing_newline = trailing_newline;
+        self
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -109,6 +117,10 @@ impl YamlFormatOptions {
 
     pub fn set_line_width(&mut self, line_width: LineWidth) {
         self.line_width = line_width;
+    }
+
+    pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
+        self.trailing_newline = trailing_newline;
     }
 }
 
@@ -129,6 +141,10 @@ impl FormatOptions for YamlFormatOptions {
         self.line_ending
     }
 
+    fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::from(self)
     }
@@ -140,6 +156,7 @@ impl fmt::Display for YamlFormatOptions {
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
+        writeln!(f, "Trailing newline: {}", self.trailing_newline.value())?;
 
         Ok(())
     }

@@ -24,7 +24,7 @@ use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
-    LineEnding, LineWidth,
+    LineEnding, LineWidth, TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
@@ -537,6 +537,7 @@ pub struct FormatSettings {
     pub attribute_position: Option<AttributePosition>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub trailing_newline: Option<TrailingNewline>,
     pub expand: Option<Expand>,
     /// List of included paths/files
     pub includes: Includes,
@@ -564,6 +565,7 @@ pub struct OverrideFormatSettings {
     pub bracket_same_line: Option<BracketSameLine>,
     pub attribute_position: Option<AttributePosition>,
     pub expand: Option<Expand>,
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
@@ -579,6 +581,7 @@ impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
             bracket_same_line: conf.bracket_same_line,
             attribute_position: conf.attribute_position,
             expand: conf.expand,
+            trailing_newline: conf.trailing_newline,
         }
     }
 }
@@ -1637,6 +1640,10 @@ impl OverrideSettingPattern {
         if let Some(operator_line_break) = js_formatter.operator_linebreak {
             options.set_operator_linebreak(operator_line_break);
         }
+        if let Some(trailing_newline) = js_formatter.trailing_newline.or(formatter.trailing_newline)
+        {
+            options.set_trailing_newline(trailing_newline);
+        }
     }
 
     fn apply_overrides_to_json_format_options(&self, options: &mut JsonFormatOptions) {
@@ -1665,6 +1672,12 @@ impl OverrideSettingPattern {
         {
             options.set_bracket_spacing(bracket_spacing);
         }
+        if let Some(trailing_newline) = json_formatter
+            .trailing_newline
+            .or(formatter.trailing_newline)
+        {
+            options.set_trailing_newline(trailing_newline);
+        }
     }
 
     fn apply_overrides_to_css_format_options(&self, options: &mut CssFormatOptions) {
@@ -1685,6 +1698,12 @@ impl OverrideSettingPattern {
         }
         if let Some(quote_style) = css_formatter.quote_style {
             options.set_quote_style(quote_style);
+        }
+        if let Some(trailing_newline) = css_formatter
+            .trailing_newline
+            .or(formatter.trailing_newline)
+        {
+            options.set_trailing_newline(trailing_newline);
         }
     }
 
@@ -1713,6 +1732,12 @@ impl OverrideSettingPattern {
         if let Some(quote_style) = graphql_formatter.quote_style {
             options.set_quote_style(quote_style);
         }
+        if let Some(trailing_newline) = graphql_formatter
+            .trailing_newline
+            .or(formatter.trailing_newline)
+        {
+            options.set_trailing_newline(trailing_newline);
+        }
     }
 
     fn apply_overrides_to_grit_format_options(&self, options: &mut GritFormatOptions) {
@@ -1730,6 +1755,12 @@ impl OverrideSettingPattern {
         }
         if let Some(line_width) = grit_formatter.line_width.or(formatter.line_width) {
             options.set_line_width(line_width);
+        }
+        if let Some(trailing_newline) = grit_formatter
+            .trailing_newline
+            .or(formatter.trailing_newline)
+        {
+            options.set_trailing_newline(trailing_newline);
         }
     }
 
@@ -1782,6 +1813,13 @@ impl OverrideSettingPattern {
         }
 
         // #endregion
+
+        if let Some(trailing_newline) = html_formatter
+            .trailing_newline
+            .or(formatter.trailing_newline)
+        {
+            options.set_trailing_newline(trailing_newline);
+        }
     }
 
     fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
@@ -1859,6 +1897,7 @@ pub fn to_override_settings(
                 bracket_same_line: formatter.bracket_same_line,
                 attribute_position: formatter.attribute_position,
                 expand: formatter.expand,
+                trailing_newline: formatter.trailing_newline,
             })
             .unwrap_or_default();
         let linter = pattern
@@ -2061,6 +2100,7 @@ pub fn to_format_settings(
         bracket_same_line: conf.bracket_same_line,
         bracket_spacing: conf.bracket_spacing,
         expand: conf.expand,
+        trailing_newline: conf.trailing_newline,
         includes: Includes::new(working_directory, conf.includes),
     })
 }
@@ -2087,6 +2127,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             bracket_spacing: Some(BracketSpacing::default()),
             expand: conf.expand,
             format_with_errors: conf.format_with_errors,
+            trailing_newline: conf.trailing_newline,
             includes: Default::default(),
         })
     }

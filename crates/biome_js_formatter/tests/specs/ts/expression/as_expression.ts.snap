@@ -34,9 +34,11 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
 let a: any;
 let b = a as string;
+
 ```

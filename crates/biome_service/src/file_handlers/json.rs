@@ -25,6 +25,7 @@ use biome_configuration::json::{
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_formatter::{
     BracketSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    TrailingNewline,
 };
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::{JsonAnalyzeServices, analyze};
@@ -51,6 +52,7 @@ pub struct JsonFormatterSettings {
     pub expand: Option<Expand>,
     pub bracket_spacing: Option<BracketSpacing>,
     pub enabled: Option<JsonFormatterEnabled>,
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl From<JsonFormatterConfiguration> for JsonFormatterSettings {
@@ -64,6 +66,7 @@ impl From<JsonFormatterConfiguration> for JsonFormatterSettings {
             expand: configuration.expand,
             bracket_spacing: configuration.bracket_spacing,
             enabled: configuration.enabled,
+            trailing_newline: configuration.trailing_newline,
         }
     }
 }
@@ -178,6 +181,11 @@ impl ServiceLanguage for JsonLanguage {
             .or(global.indent_width)
             .unwrap_or_default();
 
+        let trailing_newline = language
+            .trailing_newline
+            .or(global.trailing_newline)
+            .unwrap_or_default();
+
         let line_ending = language
             .line_ending
             .or(global.line_ending)
@@ -214,7 +222,8 @@ impl ServiceLanguage for JsonLanguage {
             .with_line_width(line_width)
             .with_trailing_commas(trailing_commas)
             .with_expand(expand_lists)
-            .with_bracket_spacing(bracket_spacing);
+            .with_bracket_spacing(bracket_spacing)
+            .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_json_format_options(path, &mut options);
 

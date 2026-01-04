@@ -104,6 +104,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -144,4 +145,5 @@ foo.bar
 	.bar.baz()
 
 	.foo();
+
 ```
