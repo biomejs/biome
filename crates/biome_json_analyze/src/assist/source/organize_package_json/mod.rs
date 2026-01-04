@@ -72,7 +72,7 @@ declare_source_rule! {
     /// | man                   |                                                                                |
     /// | directories           | Key order: `lib`, `bin`, `man`, `doc`, `example`, `test`                       |
     /// | files                 | Unique items                                                                   |
-    /// | workspaces            |                                                                                |
+    /// | workspaces            | Key order (when object): `packages`, `catalog`                                 |
     /// | binary,               | Key order: `module_name`, `module_path`, `remote_path`, `package_name`, `host` |
     /// | scripts               | [Script sort](#scripts)                                                        |
     /// | betterScripts         | [Script sort](#scripts)                                                        |
@@ -118,6 +118,7 @@ declare_source_rule! {
     /// | packageManager        |                                                                                |
     /// | engines               | Key sort                                                                       |
     /// | engineStrict          | Key sort                                                                       |
+    /// | devEngines            | Key order (packageManager): `name`, `version`, `onFail`                        |
     /// | volta                 | Key order: `node`, `npm`, `yarn`                                               |
     /// | languageName          |                                                                                |
     /// | os                    |                                                                                |
@@ -129,7 +130,7 @@ declare_source_rule! {
     /// | galleryBanner         | Key sort                                                                       |
     /// | preview               |                                                                                |
     /// | markdown              |                                                                                |
-    /// | pnpm                  | Key sort (deep)                                                                |
+    /// | pnpm                  | Base property order: `neverBuiltDependencies`, `onlyBuiltDependencies`, `onlyBuiltDependenciesFile`, `overrides`, `packageExtensions`, `patchedDependencies`, `peerDependencyRules`, `allowedDeprecatedVersions`, `allowNonAppliedPatches`, `auditConfig`, `ignoredOptionalDependencies`, `updateConfig`. Other properties sorted alphabetically. Deep sorting applied. |
     ///
     /// ### Special Rules
     ///
@@ -170,15 +171,20 @@ declare_source_rule! {
     /// - `pre-push`
     /// - `pre-receive`
     /// - `update`
+    /// - `proc-receive`
     /// - `post-receive`
     /// - `post-update`
+    /// - `reference-transaction`
     /// - `push-to-checkout`
     /// - `pre-auto-gc`
     /// - `post-rewrite`
     /// - `sendemail-validate`
     /// - `fsmonitor-watchman`
+    /// - `p4-changelist`
+    /// - `p4-prepare-changelist`
+    /// - `p4-post-changelist`
     /// - `p4-pre-submit`
-    /// - `post-index-chang`
+    /// - `post-index-change`
     ///
     /// #### Prettier
     ///

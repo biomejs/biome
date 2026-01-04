@@ -105,6 +105,9 @@ fn sort_eslint_rules(object: &JsonObjectValue) -> Option<JsonObjectValue> {
         return None;
     }
 
+    // Clone original order for comparison
+    let original = member_vec.clone();
+
     member_vec.sort_by(|a, b| {
         let a_name = a
             .name()
@@ -130,6 +133,33 @@ fn sort_eslint_rules(object: &JsonObjectValue) -> Option<JsonObjectValue> {
             _ => std::cmp::Ordering::Equal,
         }
     });
+
+    // Check if order changed by comparing member names
+    let original_keys: Vec<String> = original
+        .iter()
+        .filter_map(|m| {
+            m.name()
+                .ok()?
+                .inner_string_text()
+                .ok()
+                .map(|t| t.text().to_string())
+        })
+        .collect();
+
+    let sorted_keys: Vec<String> = member_vec
+        .iter()
+        .filter_map(|m| {
+            m.name()
+                .ok()?
+                .inner_string_text()
+                .ok()
+                .map(|t| t.text().to_string())
+        })
+        .collect();
+
+    if original_keys == sorted_keys {
+        return None;
+    }
 
     let mut elements = Vec::new();
     let mut separators = Vec::new();
@@ -225,6 +255,18 @@ mod tests {
             parse_object(r#"{"env": {}, "parser": "espree", "rules": {"no-console": "warn"}}"#);
         let result = transform(&AnyJsonValue::from(obj));
         assert!(result.is_none(), "Should return None when already sorted");
+    }
+
+    #[test]
+    fn test_eslint_rules_already_sorted_returns_none() {
+        let obj = parse_object(
+            r#"{"rules": {"no-console": "warn", "prettier/prettier": "error", "react/jsx-key": "error"}}"#,
+        );
+        let result = transform(&AnyJsonValue::from(obj));
+        assert!(
+            result.is_none(),
+            "Should return None when rules are already sorted"
+        );
     }
 
     #[test]

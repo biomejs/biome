@@ -8,8 +8,12 @@ pub fn sort_alphabetically(object: &JsonObjectValue) -> Option<JsonObjectValue> 
 }
 
 pub fn sort_alphabetically_deep(object: &JsonObjectValue) -> Option<JsonObjectValue> {
-    let sorted = sort_object_by_comparator(object, |a, b| a.cmp(b))?;
-    deep_sort_all_nested_objects(&sorted)
+    let sorted_opt = sort_object_by_comparator(object, |a, b| a.cmp(b));
+    let obj_to_deep_sort = sorted_opt.as_ref().unwrap_or(object);
+    let deep_sorted_opt = deep_sort_all_nested_objects(obj_to_deep_sort);
+
+    // If deep sorting changed something, return it; otherwise return top-level sort result
+    deep_sorted_opt.or(sorted_opt)
 }
 
 fn deep_sort_all_nested_objects(object: &JsonObjectValue) -> Option<JsonObjectValue> {
@@ -31,7 +35,7 @@ fn deep_sort_all_nested_objects(object: &JsonObjectValue) -> Option<JsonObjectVa
     }
 
     if !has_changes {
-        return Some(object.clone());
+        return None;
     }
 
     let mut separators = Vec::new();
@@ -526,6 +530,66 @@ mod tests {
             .collect();
 
         assert_eq!(nested_keys, vec!["nested_a", "nested_z"]);
+    }
+
+    #[test]
+    fn test_sort_alphabetically_deep_single_parent_key() {
+        // Test that nested objects are sorted even when parent has only 1 key
+        let obj = parse_json_object(r#"{"a": {"z": 1, "b": 2, "m": 3}}"#);
+        let sorted = sort_alphabetically_deep(&obj).expect("Should sort nested object");
+
+        // Get the nested object
+        let nested = sorted
+            .json_member_list()
+            .iter()
+            .next()
+            .and_then(|m| m.ok())
+            .and_then(|m| m.value().ok())
+            .and_then(|v| v.as_json_object_value().cloned())
+            .unwrap();
+
+        let nested_keys: Vec<String> = nested
+            .json_member_list()
+            .iter()
+            .filter_map(|m| {
+                let member = m.ok()?;
+                let text = member.name().ok()?.inner_string_text().ok()?;
+                Some(text.text().to_string())
+            })
+            .collect();
+
+        // Nested object should be sorted even though parent has only 1 key
+        assert_eq!(nested_keys, vec!["b", "m", "z"]);
+    }
+
+    #[test]
+    fn test_sort_alphabetically_deep_parent_already_sorted() {
+        // Test that nested objects are sorted even when parent is already sorted
+        let obj = parse_json_object(r#"{"a": {"z": 1, "m": 2}, "b": {"z": 1, "m": 2}}"#);
+        let sorted = sort_alphabetically_deep(&obj).expect("Should sort nested objects");
+
+        // Get the first nested object
+        let first_nested = sorted
+            .json_member_list()
+            .iter()
+            .next()
+            .and_then(|m| m.ok())
+            .and_then(|m| m.value().ok())
+            .and_then(|v| v.as_json_object_value().cloned())
+            .unwrap();
+
+        let nested_keys: Vec<String> = first_nested
+            .json_member_list()
+            .iter()
+            .filter_map(|m| {
+                let member = m.ok()?;
+                let text = member.name().ok()?.inner_string_text().ok()?;
+                Some(text.text().to_string())
+            })
+            .collect();
+
+        // Nested object should be sorted even though parent was already sorted
+        assert_eq!(nested_keys, vec!["m", "z"]);
     }
 
     #[test]

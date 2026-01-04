@@ -73,7 +73,6 @@ mod tests {
     use super::*;
     use biome_json_parser::{JsonParserOptions, parse_json};
     use biome_json_syntax::JsonObjectValue;
-    use biome_rowan::AstSeparatedList;
 
     fn parse_object(source: &str) -> JsonObjectValue {
         let parsed = parse_json(source, JsonParserOptions::default());
