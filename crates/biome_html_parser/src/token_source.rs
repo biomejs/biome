@@ -86,8 +86,6 @@ pub(crate) enum TextExpressionKind {
 pub(crate) enum RestrictedExpressionStopAt {
     /// Stops at 'as' keyword or ',' (for Svelte #each blocks)
     AsOrComma,
-    /// Stops at `(`
-    OpeningParenOrComma,
     /// Stops at `)`
     ClosingParen,
     /// Stops at `then` or `catch` keywords
@@ -98,7 +96,6 @@ impl RestrictedExpressionStopAt {
     pub(crate) fn matches_punct(&self, byte: u8) -> bool {
         match self {
             Self::AsOrComma => byte == b',',
-            Self::OpeningParenOrComma => byte == b'(' || byte == b',',
             Self::ClosingParen => byte == b')',
             Self::ThenOrCatch => false,
         }
@@ -107,7 +104,6 @@ impl RestrictedExpressionStopAt {
     pub(crate) fn matches_keyword(&self, keyword: HtmlSyntaxKind) -> bool {
         match self {
             Self::AsOrComma => keyword == AS_KW,
-            Self::OpeningParenOrComma => false,
             Self::ClosingParen => false,
             Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,
         }
@@ -139,6 +135,7 @@ impl LexContext for HtmlLexContext {
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub(crate) enum HtmlReLexContext {
+    /// Specialised relex that manages certain characters such as commas, etc.
     Svelte,
     /// Relex tokens using `HtmlLexer::consume_html_text`
     HtmlText,

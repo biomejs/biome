@@ -12,6 +12,7 @@ use crate::settings::{
     OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
     check_override_feature_activity,
 };
+use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{DocumentFileSource, EmbeddedSnippet, PullDiagnosticsAndActionsResult};
 use crate::{
     WorkspaceError,
@@ -565,6 +566,7 @@ fn parse_embedded_nodes(
     _file_source: &DocumentFileSource,
     settings: &SettingsWithEditor,
     cache: &mut NodeCache,
+    _builder: &mut EmbeddedBuilder,
 ) -> ParseEmbedResult {
     if !settings
         .as_ref()
@@ -907,8 +909,14 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     };
 
     let mut process_lint = ProcessLint::new(&params);
-    let services =
+
+    let mut services =
         JsAnalyzerServices::from((params.module_graph, params.project_layout, file_source));
+
+    if let Some(embedded_bindings) = params.embedded_exported_bindings {
+        services.set_embedded_bindings(embedded_bindings.bindings)
+    }
+
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,

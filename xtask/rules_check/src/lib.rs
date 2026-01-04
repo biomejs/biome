@@ -311,7 +311,7 @@ fn assert_lint(
                     biome_service::file_handlers::AstroFileHandler::input(code),
                     JsFileSource::ts(),
                 ),
-                EmbeddingKind::Svelte => (
+                EmbeddingKind::Svelte { .. } => (
                     biome_service::file_handlers::SvelteFileHandler::input(code),
                     biome_service::file_handlers::SvelteFileHandler::file_source(code),
                 ),

@@ -8116,7 +8116,6 @@ export interface GritFileSource {
 	variant: GritVariant;
 }
 export type EmbeddingKind =
-	| "Svelte"
 	| "None"
 	| {
 			Astro: {
@@ -8129,9 +8128,21 @@ export type EmbeddingKind =
 	| {
 			Vue: {
 				/**
+				 * Where the bindings are defined
+				 */
+				is_source: boolean;
+				/**
 				 * Whether the script is inside script tag with setup attribute
 				 */
 				setup: boolean;
+			};
+	  }
+	| {
+			Svelte: {
+				/**
+				 * Where the bindings are defined
+				 */
+				is_source: boolean;
 			};
 	  };
 export type Language =

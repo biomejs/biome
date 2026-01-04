@@ -581,6 +581,26 @@ impl SvelteConstBlock {
         )
     }
 }
+impl SvelteCurlyDestructuredName {
+    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_names(self, element: SvelteBindingAssignmentBindingList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
 impl SvelteDebugBlock {
     pub fn with_sv_curly_at_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -614,7 +634,7 @@ impl SvelteEachAsKeyedItem {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: HtmlTextExpression) -> Self {
+    pub fn with_name(self, element: AnySvelteEachName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -686,7 +706,7 @@ impl SvelteEachIndex {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: HtmlTextExpression) -> Self {
+    pub fn with_value(self, element: SvelteName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1021,6 +1041,20 @@ impl SvelteRenderBlock {
         )
     }
 }
+impl SvelteRestBinding {
+    pub fn with_dotdotdot_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_name(self, element: SvelteName) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl SvelteSnippetBlock {
     pub fn with_opening_block(self, element: SvelteSnippetOpeningBlock) -> Self {
         Self::unwrap_cast(
@@ -1084,6 +1118,26 @@ impl SvelteSnippetOpeningBlock {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl SvelteSquareDestructuredName {
+    pub fn with_l_brack_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_names(self, element: SvelteBindingAssignmentBindingList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_brack_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
     }
 }

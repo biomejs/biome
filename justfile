@@ -63,8 +63,8 @@ gen-migrate:
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
 
 # Generates the initial files for all formatter crates
-gen-formatter:
-  cargo run -p xtask_codegen -- formatter
+gen-formatter *args='':
+  cargo run -p xtask_codegen -- formatter {{args}}
 
 # Generates the Tailwind CSS preset for utility class sorting
 [working-directory: 'packages/tailwindcss-config-analyzer']

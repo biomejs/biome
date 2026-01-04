@@ -342,9 +342,46 @@ AnySvelteBlockItem =
 //              ^^^^^^^^^^^^^^^^^^^^
 SvelteEachAsKeyedItem =
 	'as'
-	name: HtmlTextExpression
+	name: AnySvelteEachName
 	index: SvelteEachIndex?
 	key: SvelteEachKey?
+
+
+AnySvelteEachName =
+		SvelteName
+		| AnySvelteDestructuredName
+		| HtmlTextExpression
+
+
+AnySvelteDestructuredName =
+	SvelteCurlyDestructuredName
+	| SvelteSquareDestructuredName
+
+// {#each items as { foo, bar } }
+//                 ^^^^^^^^^^^^
+SvelteCurlyDestructuredName =
+	'{'
+	names: SvelteBindingAssignmentBindingList
+	'}'
+
+// {#each items as [ foo, bar ] }
+//                 ^^^^^^^^^^^^
+SvelteSquareDestructuredName =
+	'['
+	names: SvelteBindingAssignmentBindingList
+	']'
+
+SvelteBindingAssignmentBindingList = (AnySvelteBindingAssignmentBinding (',' AnySvelteBindingAssignmentBinding)*)
+
+AnySvelteBindingAssignmentBinding =
+	SvelteName
+	| SvelteRestBinding
+
+/// { ...rest }
+///   ^^^^^^^
+SvelteRestBinding =
+ '...'
+ name: SvelteName
 
 // {#each items, index} ... {/each}
 //             ^^^^^^^^
@@ -355,7 +392,7 @@ SvelteEachKeyedItem =
 //                     ^^^^^^^
 SvelteEachIndex =
 	','
-	value: HtmlTextExpression
+	value: SvelteName
 
 // {#each items as item, item (key)} ... {/each}
 //                            ^^^^^

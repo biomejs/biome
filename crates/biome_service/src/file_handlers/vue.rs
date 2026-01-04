@@ -78,7 +78,10 @@ impl VueFileHandler {
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)
-                        .with_embedding_kind(EmbeddingKind::Vue { setup }),
+                        .with_embedding_kind(EmbeddingKind::Vue {
+                            setup,
+                            is_source: true,
+                        }),
                 )
             })
             .map_or(JsFileSource::js_module(), |fs| fs)

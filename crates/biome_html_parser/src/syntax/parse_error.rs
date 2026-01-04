@@ -105,6 +105,15 @@ pub(crate) fn expected_svelte_closing_block(p: &HtmlParser, range: TextRange) ->
     p.err_builder("Expected a closing block, instead found none.", range)
 }
 
+pub(crate) fn expected_name(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node(
+        "Expected a name or a closing block, instead found none.",
+        range,
+        p,
+    )
+    .into_diagnostic(p)
+}
+
 pub(crate) fn disabled_vue(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file?", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.vue"</Emphasis>" option."))
 }
