@@ -75,7 +75,9 @@ impl EmbeddedBuilder {
                 .map(|specifier| specifier.imported_name());
 
             for imported_name in imported_names {
-                let imported_name = imported_name?;
+                let Some(imported_name) = imported_name else {
+                    continue;
+                };
                 self.js_bindings.insert(
                     imported_name.text_trimmed_range(),
                     imported_name.token_text_trimmed(),
@@ -130,29 +132,38 @@ impl EmbeddedBuilder {
                 }
                 AnyJsBindingPattern::JsObjectBindingPattern(object_binding_pattern) => {
                     for property in object_binding_pattern.properties().iter().flatten() {
-                        match property {
-                            AnyJsObjectBindingPatternMember::JsBogusBinding(_) => {}
-                            AnyJsObjectBindingPatternMember::JsMetavariable(_) => {}
-                            AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(property) => {
-                                self.visit_any_js_binding_pattern(
-                                    VecDeque::from([property.pattern().ok()?]),
-                                )?;
-                            }
-                            AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(rest) => {
-                                let binding = rest.binding().ok()?;
-                                let binding = binding.as_js_identifier_binding()?;
-                                let token = binding.name_token().ok()?;
-                                self.js_bindings.insert(token.text_trimmed_range(), token.token_text_trimmed());
-                            }
-                            AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(property) => {
-                                let identifier =  property.identifier().ok()?;
-                                let identifier = identifier.as_js_identifier_binding()?;
-                                let token = identifier.name_token().ok()?;
-                                self.js_bindings.insert(token.text_trimmed_range(), token.token_text_trimmed());
-                            }
-                        }
+                        self.visit_object_binding_pattern_member(property)?;
                     }
                 }
+            }
+        }
+
+        Some(())
+    }
+
+    fn visit_object_binding_pattern_member(
+        &mut self,
+        property: AnyJsObjectBindingPatternMember,
+    ) -> Option<()> {
+        match property {
+            AnyJsObjectBindingPatternMember::JsBogusBinding(_) => {}
+            AnyJsObjectBindingPatternMember::JsMetavariable(_) => {}
+            AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(property) => {
+                self.visit_any_js_binding_pattern(VecDeque::from([property.pattern().ok()?]))?;
+            }
+            AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(rest) => {
+                let binding = rest.binding().ok()?;
+                let binding = binding.as_js_identifier_binding()?;
+                let token = binding.name_token().ok()?;
+                self.js_bindings
+                    .insert(token.text_trimmed_range(), token.token_text_trimmed());
+            }
+            AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(property) => {
+                let identifier = property.identifier().ok()?;
+                let identifier = identifier.as_js_identifier_binding()?;
+                let token = identifier.name_token().ok()?;
+                self.js_bindings
+                    .insert(token.text_trimmed_range(), token.token_text_trimmed());
             }
         }
 
@@ -190,7 +201,11 @@ impl EmbeddedBuilder {
                         }
                     }
                 }
-                AnyJsBindingPattern::JsObjectBindingPattern(_) => {}
+                AnyJsBindingPattern::JsObjectBindingPattern(object) => {
+                    for property in object.properties().iter().flatten() {
+                        self.visit_object_binding_pattern_member(property)?;
+                    }
+                }
             }
         }
 
@@ -244,7 +259,7 @@ let variable = "salut";
     }
 
     #[test]
-    fn tracks_import_and_binding_patters() {
+    fn tracks_import_and_binding_patterns() {
         let source = r#"import { Component } from "somewhere";
 import Component2 from "component.astro"
 

@@ -577,18 +577,10 @@ let array = [];
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--only=noUnusedVariables",
-                "--error-on-warnings",
-                file.as_str(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

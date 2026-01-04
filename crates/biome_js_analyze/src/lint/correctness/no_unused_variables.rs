@@ -10,10 +10,10 @@ use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBindi
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
     AnyJsExpression, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression,
-    JsIdentifierExpression, JsModuleItemList, JsReferenceIdentifier, JsSequenceExpression,
-    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, TsConditionalType, TsDeclarationModule, TsInferType,
+    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
+    TsConditionalType, TsDeclarationModule, TsInferType,
 };
-use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult, declare_node_union};
+use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
 
 declare_lint_rule! {
@@ -277,33 +277,8 @@ fn suggested_fix_if_unused(
     }
 }
 
-declare_node_union! {
-    pub AnyReferenceOrBinding = AnyJsIdentifierBinding | JsReferenceIdentifier
-}
-
-impl AnyReferenceOrBinding {
-    fn binding_name(&self) -> SyntaxResult<JsSyntaxToken> {
-        match self {
-            Self::AnyJsIdentifierBinding(binding) => match binding {
-                AnyJsIdentifierBinding::JsIdentifierBinding(node) => node.name_token(),
-                AnyJsIdentifierBinding::TsIdentifierBinding(node) => node.name_token(),
-                AnyJsIdentifierBinding::TsTypeParameterName(node) => node.ident_token(),
-                AnyJsIdentifierBinding::TsLiteralEnumMemberName(node) => node.value(),
-            },
-            Self::JsReferenceIdentifier(binding) => binding.value_token(),
-        }
-    }
-
-    fn declaration(&self) -> Option<AnyJsBindingDeclaration> {
-        match self {
-            Self::AnyJsIdentifierBinding(binding) => binding.declaration(),
-            Self::JsReferenceIdentifier(_) => None,
-        }
-    }
-}
-
 impl Rule for NoUnusedVariables {
-    type Query = Semantic<AnyReferenceOrBinding>;
+    type Query = Semantic<AnyJsIdentifierBinding>;
     type State = SuggestedFix;
     type Signals = Option<Self::State>;
     type Options = NoUnusedVariablesOptions;
@@ -316,52 +291,31 @@ impl Rule for NoUnusedVariables {
             .expect("embedded bindings service");
         let file_source = ctx.source_type::<JsFileSource>();
 
-        match binding {
-            AnyReferenceOrBinding::AnyJsIdentifierBinding(binding) => {
-                let is_declaration_file = file_source.language().is_definition_file();
-                if is_declaration_file
-                    && let Some(items) = binding
-                        .syntax()
-                        .ancestors()
-                        .skip(1)
-                        .find_map(JsModuleItemList::cast)
-                {
-                    // A declaration file without top-level exports and imports is a global declaration file.
-                    // All top-level types and variables are available in every files of the project.
-                    // Thus, it is ok if top-level types are not used locally.
-                    let is_top_level = items.parent::<TsDeclarationModule>().is_some();
-                    if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some())
-                    {
-                        return None;
-                    }
-                }
+        let is_declaration_file = file_source.language().is_definition_file();
+        if is_declaration_file
+            && let Some(items) = binding
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .find_map(JsModuleItemList::cast)
+        {
+            // A declaration file without top-level exports and imports is a global declaration file.
+            // All top-level types and variables are available in every files of the project.
+            // Thus, it is ok if top-level types are not used locally.
+            let is_top_level = items.parent::<TsDeclarationModule>().is_some();
+            if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
+                return None;
+            }
+        }
 
-                // Ignore name prefixed with `_`
-                let is_underscore_prefixed =
-                    binding.name_token().ok()?.text_trimmed().starts_with('_');
-                let is_defined_in_embedded_binding =
-                    embedded_bindings.contains_binding(binding.name_token().ok()?.text_trimmed());
-                if !is_underscore_prefixed
-                    && is_unused(model, binding)
-                    && !is_defined_in_embedded_binding
-                {
-                    suggested_fix_if_unused(binding, ctx.options())
-                } else {
-                    None
-                }
-            }
-            AnyReferenceOrBinding::JsReferenceIdentifier(binding) => {
-                if file_source.is_embedded() && !file_source.is_embedded_source() {
-                    let name = binding.value_token().ok()?;
-                    if !embedded_bindings.contains_binding(name.text_trimmed()) {
-                        Some(SuggestedFix::NoSuggestion)
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                }
-            }
+        // Ignore name prefixed with `_`
+        let is_underscore_prefixed = binding.name_token().ok()?.text_trimmed().starts_with('_');
+        let is_defined_in_embedded_binding =
+            embedded_bindings.contains_binding(binding.name_token().ok()?.text_trimmed());
+        if !is_underscore_prefixed && is_unused(model, binding) && !is_defined_in_embedded_binding {
+            suggested_fix_if_unused(binding, ctx.options())
+        } else {
+            None
         }
     }
 
@@ -378,7 +332,12 @@ impl Rule for NoUnusedVariables {
             _ => "variable",
         };
 
-        let binding_name = binding.binding_name().ok()?;
+        let binding_name = match binding {
+            AnyJsIdentifierBinding::JsIdentifierBinding(node) => node.name_token().ok()?,
+            AnyJsIdentifierBinding::TsIdentifierBinding(node) => node.name_token().ok()?,
+            AnyJsIdentifierBinding::TsTypeParameterName(node) => node.ident_token().ok()?,
+            AnyJsIdentifierBinding::TsLiteralEnumMemberName(node) => node.value().ok()?,
+        };
 
         let mut diag = RuleDiagnostic::new(
             rule_category!(),
@@ -412,9 +371,6 @@ impl Rule for NoUnusedVariables {
             SuggestedFix::NoSuggestion => None,
             SuggestedFix::PrefixUnderscore => {
                 let binding = ctx.query();
-                let AnyReferenceOrBinding::AnyJsIdentifierBinding(binding) = binding else {
-                    return None;
-                };
                 let mut mutation = ctx.root().begin();
 
                 let name = match binding {
