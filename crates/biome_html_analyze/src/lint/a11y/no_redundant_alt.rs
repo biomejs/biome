@@ -24,7 +24,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```html,expect_diagnostic
-    /// <img alt="picture of cool person" aria-hidden={false} />;
+    /// <img alt="picture of cool person" aria-hidden="false" />;
     /// ```
     ///
     /// ### Valid
