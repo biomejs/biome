@@ -2148,6 +2148,11 @@ See <https://biomejs.dev/linter/rules/use-unique-argument-names>
 	 */
 	useUniqueArgumentNames?: UseUniqueArgumentNamesConfiguration;
 	/**
+	* Require all enum value names to be unique.
+See <https://biomejs.dev/linter/rules/use-unique-enum-value-names> 
+	 */
+	useUniqueEnumValueNames?: UseUniqueEnumValueNamesConfiguration;
+	/**
 	* Require all fields of a type to be unique.
 See <https://biomejs.dev/linter/rules/use-unique-field-definition-names> 
 	 */
@@ -3857,6 +3862,9 @@ export type UseSpreadConfiguration =
 export type UseUniqueArgumentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueArgumentNamesOptions;
+export type UseUniqueEnumValueNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueEnumValueNamesOptions;
 export type UseUniqueFieldDefinitionNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueFieldDefinitionNamesOptions;
@@ -5393,6 +5401,10 @@ export interface RuleWithUseUniqueArgumentNamesOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueArgumentNamesOptions;
 }
+export interface RuleWithUseUniqueEnumValueNamesOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueEnumValueNamesOptions;
+}
 export interface RuleWithUseUniqueFieldDefinitionNamesOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueFieldDefinitionNamesOptions;
@@ -6736,6 +6748,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseUniqueArgumentNamesOptions = {};
+export type UseUniqueEnumValueNamesOptions = {};
 export type UseUniqueFieldDefinitionNamesOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
 export type UseUniqueInputFieldNamesOptions = {};
@@ -7581,6 +7594,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueArgumentNames"
+	| "lint/nursery/useUniqueEnumValueNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useUniqueInputFieldNames"
