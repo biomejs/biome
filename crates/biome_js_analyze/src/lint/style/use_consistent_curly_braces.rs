@@ -7,10 +7,12 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsxAttributeValue, AnyJsxChild,
     JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken, JsxAttributeInitializerClause,
-    JsxChildList, JsxExpressionAttributeValue, T,
+    JsxChildList, JsxExpressionAttributeValue, JsxText, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPiece, declare_node_union};
-use biome_rule_options::use_consistent_curly_braces::UseConsistentCurlyBracesOptions;
+use biome_rule_options::use_consistent_curly_braces::{
+    CurlyBracesBehavior, UseConsistentCurlyBracesOptions,
+};
 
 use crate::JsRuleAction;
 
@@ -44,6 +46,27 @@ declare_lint_rule! {
     ///     <Foo foo={5} />
     ///     <Foo foo={<Bar />} />
     /// </>
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `props`
+    ///
+    /// Whether to enforce or forbid curly braces around string literals in JSX props.
+    /// Defaults to `"never"`.
+    ///
+    /// ### `children`
+    ///
+    /// Whether to enforce or forbid curly braces around string literals in JSX children.
+    /// Defaults to `"never"`.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "props": "always",
+    ///     "children": "always"
+    ///   }
+    /// }
     /// ```
     ///
     pub UseConsistentCurlyBraces {
@@ -88,12 +111,13 @@ impl Rule for UseConsistentCurlyBraces {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
+        let options = ctx.options();
         let has_curly_braces = has_curly_braces(query);
         match query {
             AnyJsxCurlyQuery::JsxAttributeInitializerClause(attr) => {
-                handle_attr_init_clause(attr, has_curly_braces)
+                handle_attr_init_clause(attr, has_curly_braces, options)
             }
-            AnyJsxCurlyQuery::AnyJsxChild(child) => handle_jsx_child(child, has_curly_braces),
+            AnyJsxCurlyQuery::AnyJsxChild(child) => handle_jsx_child(child, has_curly_braces, options),
         }
     }
 
@@ -192,9 +216,23 @@ impl Rule for UseConsistentCurlyBraces {
                     make::jsx_attribute_initializer_clause(make::token(T![=]), value),
                 );
             }
-            (CurlyBraceResolution::AddBraces, AnyJsxCurlyQuery::AnyJsxChild(_)) => {
-                // this should never get hit
-                return None;
+            (CurlyBraceResolution::AddBraces, AnyJsxCurlyQuery::AnyJsxChild(node)) => {
+                if let AnyJsxChild::JsxText(text) = node {
+                    let new_children = wrap_text_in_expression(text)?;
+                    let child_list = node.parent::<JsxChildList>()?;
+                    let mut children: Vec<AnyJsxChild> = vec![];
+                    let mut iter = (&child_list).into_iter();
+                    children.extend(iter.by_ref().take_while(|c| c != node));
+                    children.extend(new_children);
+                    children.extend(iter);
+                    let new_child_list = make::jsx_child_list(children);
+                    mutation.replace_element_discard_trivia(
+                        child_list.clone().into_syntax().into(),
+                        new_child_list.into_syntax().into(),
+                    );
+                } else {
+                    return None;
+                }
             }
             (
                 CurlyBraceResolution::RemoveBraces,
@@ -304,6 +342,48 @@ impl Rule for UseConsistentCurlyBraces {
     }
 }
 
+fn wrap_text_in_expression(text: &JsxText) -> Option<Vec<AnyJsxChild>> {
+    let text_content = text.value_token().ok()?;
+    let full_text = text_content.text_trimmed();
+    let trimmed = full_text.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+
+    let mut result = vec![];
+
+    let leading_ws = &full_text[..full_text.len() - full_text.trim_start().len()];
+    if !leading_ws.is_empty() {
+        let ws_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JSX_TEXT_LITERAL, leading_ws, [], []);
+        result.push(AnyJsxChild::JsxText(make::jsx_text(ws_token)));
+    }
+
+    let escaped = trimmed
+        .replace('\\', "\\\\")
+        .replace('"', "\\\"")
+        .replace('\n', "\\n")
+        .replace('\r', "\\r");
+
+    let quoted = format!("\"{escaped}\"");
+    let string_token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, &quoted, [], []);
+    let string_expr = make::js_string_literal_expression(string_token);
+    let expr_child = make::jsx_expression_child(make::token(T!['{']), make::token(T!['}']))
+        .with_expression(AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(string_expr),
+        ));
+    result.push(AnyJsxChild::JsxExpressionChild(expr_child.build()));
+
+    let trailing_ws = &full_text[full_text.trim_end().len()..];
+    if !trailing_ws.is_empty() {
+        let ws_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JSX_TEXT_LITERAL, trailing_ws, [], []);
+        result.push(AnyJsxChild::JsxText(make::jsx_text(ws_token)));
+    }
+
+    Some(result)
+}
+
 /// Build a new JSX expression child with the given trivia. Used for preserving comments in the original JSX expression.
 fn build_comment_expression_child(
     trivia: &[biome_rowan::SyntaxTriviaPiece<biome_js_syntax::JsLanguage>],
@@ -333,6 +413,7 @@ fn build_comment_expression_child(
 fn handle_attr_init_clause(
     attr: &JsxAttributeInitializerClause,
     has_curly_braces: bool,
+    options: &UseConsistentCurlyBracesOptions,
 ) -> Option<CurlyBraceResolution> {
     let node = attr.value().ok()?;
 
@@ -340,18 +421,32 @@ fn handle_attr_init_clause(
         AnyJsxAttributeValue::AnyJsxTag(_) => Some(CurlyBraceResolution::AddBraces),
         AnyJsxAttributeValue::JsxExpressionAttributeValue(node) => {
             if has_curly_braces && contains_string_literal(&node) {
-                Some(CurlyBraceResolution::RemoveBraces)
-            } else if !has_curly_braces && contains_jsx_tag(&node) {
-                Some(CurlyBraceResolution::AddBraces)
+                match options.props.unwrap_or(CurlyBracesBehavior::Never) {
+                    CurlyBracesBehavior::Never => Some(CurlyBraceResolution::RemoveBraces),
+                    _ => None,
+                }
             } else {
                 None
             }
         }
-        AnyJsxAttributeValue::JsxString(_) => None,
+        AnyJsxAttributeValue::JsxString(_) => {
+            match options.props.unwrap_or(CurlyBracesBehavior::Never) {
+                CurlyBracesBehavior::Always => Some(CurlyBraceResolution::AddBraces),
+                _ => None,
+            }
+        }
     }
 }
 
-fn handle_jsx_child(child: &AnyJsxChild, has_curly_braces: bool) -> Option<CurlyBraceResolution> {
+fn handle_jsx_child(
+    child: &AnyJsxChild,
+    has_curly_braces: bool,
+    options: &UseConsistentCurlyBracesOptions,
+) -> Option<CurlyBraceResolution> {
+    let behavior = options.children.unwrap_or(CurlyBracesBehavior::Never);
+    if matches!(behavior, CurlyBracesBehavior::Ignore) {
+        return None;
+    }
     match child {
         AnyJsxChild::JsxExpressionChild(child) => {
             if let Some(AnyJsExpression::AnyJsLiteralExpression(
@@ -363,13 +458,22 @@ fn handle_jsx_child(child: &AnyJsxChild, has_curly_braces: bool) -> Option<Curly
                     return None;
                 }
 
-                if has_curly_braces {
+                if has_curly_braces && matches!(behavior, CurlyBracesBehavior::Never) {
                     return Some(CurlyBraceResolution::RemoveBraces);
                 }
             }
             None
         }
-        AnyJsxChild::JsxText(_) => None,
+        AnyJsxChild::JsxText(text) => {
+            if matches!(behavior, CurlyBracesBehavior::Always) {
+                let text_content = text.value_token().ok()?;
+                let trimmed = text_content.text_trimmed();
+                if !trimmed.is_empty() && !trimmed.chars().all(char::is_whitespace) {
+                    return Some(CurlyBraceResolution::AddBraces);
+                }
+            }
+            None
+        }
         _ => None,
     }
 }
@@ -397,11 +501,6 @@ fn contains_string_literal(node: &JsxExpressionAttributeValue) -> bool {
             )
         )
     })
-}
-
-fn contains_jsx_tag(node: &JsxExpressionAttributeValue) -> bool {
-    node.expression()
-        .is_ok_and(|expr| matches!(expr, AnyJsExpression::JsxTagExpression(_)))
 }
 
 fn contains_only_spaces(literal: &JsStringLiteralExpression) -> bool {
