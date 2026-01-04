@@ -230,9 +230,16 @@ fn suggested_fix_if_unused(
         }
 
         // Bindings under catch are never ok to be unused
-        AnyJsBindingDeclaration::JsCatchDeclaration(_)
-        // Type parameters are never ok to be unused
-        | AnyJsBindingDeclaration::TsTypeParameter(_) => Some(SuggestedFix::PrefixUnderscore),
+        AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(SuggestedFix::PrefixUnderscore),
+
+        // Type parameters are never ok to be unused unless they are declared in an ambient context
+        node @ AnyJsBindingDeclaration::TsTypeParameter(_) => {
+            if is_in_ambient_context(node.syntax()) {
+                None
+            } else {
+                Some(SuggestedFix::PrefixUnderscore)
+            }
+        }
 
         AnyJsBindingDeclaration::TsInferType(_) => {
             let binding_name_token = binding.name_token().ok()?;
