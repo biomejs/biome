@@ -398,14 +398,16 @@ where
             }
 
             // Check for trailing whitespace, and preserve it if
-            // - its embedded expression content
-            // - its an element
+            // - it's embedded expression content
+            // - it's an element
+            // - it's a bogus element
             // This preserves spaces between expressions/elements and following text content.
             if matches!(
                 &child,
                 AnyHtmlElement::AnyHtmlContent(_)
                     | AnyHtmlElement::HtmlElement(_)
                     | AnyHtmlElement::HtmlSelfClosingElement(_)
+                    | AnyHtmlElement::HtmlBogusElement(_)
             ) && let Some(last_token) = child.syntax().last_token()
                 && last_token.has_trailing_whitespace()
             {

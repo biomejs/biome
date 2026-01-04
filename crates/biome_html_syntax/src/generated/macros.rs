@@ -28,6 +28,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlAttribute::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::HtmlAttributeDoubleTextExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_INITIALIZER_CLAUSE => {
                     let $pattern =
                         unsafe { $crate::HtmlAttributeInitializerClause::new_unchecked(node) };
@@ -35,6 +40,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_NAME => {
                     let $pattern = unsafe { $crate::HtmlAttributeName::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::HtmlAttributeSingleTextExpression::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_CDATA_SECTION => {
