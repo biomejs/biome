@@ -4,7 +4,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExportClause, AnyJsExpression, AnyJsModuleItem, JsModule,
 };
-use biome_rowan::{AstNode, TextRange, TokenText};
+use biome_rowan::{TextRange, TokenText};
 use biome_rule_options::no_redundant_default_export::NoRedundantDefaultExportOptions;
 use rustc_hash::FxHashSet;
 
@@ -80,7 +80,7 @@ fn collect_exports(module: &JsModule) -> (FxHashSet<TokenText>, Option<(TokenTex
                         if let Ok(reference_id) = identifier_expr.name() {
                             if let Ok(name_token) = reference_id.value_token() {
                                 let name = name_token.token_text_trimmed();
-                                default_export = Some((name, default_clause.range()));
+                                default_export = Some((name, name_token.text_range()));
                             }
                         }
                     }
