@@ -6,10 +6,11 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsModuleItem, JsClassDeclaration, JsFunctionDeclaration, JsModule, JsModuleItemList,
     TsDeclarationModule, TsDeclareStatement, TsInterfaceDeclaration, TsTypeAliasDeclaration,
-    TsTypeMemberList,
+    TsTypeMemberList, modifier_ext::Modifier,
 };
 use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
 use biome_rule_options::use_adjacent_overload_signatures::UseAdjacentOverloadSignaturesOptions;
+use enumflags2::BitFlags;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
@@ -191,38 +192,67 @@ fn collect_type_member_list(node: &TsTypeMemberList) -> Vec<(TokenText, TextRang
 
 fn collect_class(node: &JsClassDeclaration) -> Vec<(TokenText, TextRange)> {
     let mut methods: Vec<(TokenText, TextRange)> = Vec::new();
-    let mut seen_methods = FxHashSet::default();
-    let mut last_method = None;
+    // Separate tracking for static and instance methods to differentiate
+    // methods with the same name but different static modifiers.
+    // Issue: https://github.com/biomejs/biome/issues/8345
+    let mut static_seen_methods = FxHashSet::default();
+    let mut static_last_method = None;
+    let mut instance_seen_methods = FxHashSet::default();
+    let mut instance_last_method = None;
     let members = node.members();
     for member in members {
-        if let Some(method_class) = member
-            .as_js_method_class_member()
-            .or_else(|| member.as_js_method_class_member())
-        {
+        if let Some(method_class) = member.as_js_method_class_member() {
+            let modifiers: BitFlags<Modifier> = (&method_class.modifiers()).into();
+            let is_static = modifiers.contains(Modifier::Static);
+
             if let Ok(method_member) = method_class.name()
                 && let Some(text) = method_member.name()
             {
                 let range = method_member.range();
-                check_method(
-                    text,
-                    range,
-                    &mut methods,
-                    &mut seen_methods,
-                    &mut last_method,
-                );
+                if is_static {
+                    check_method(
+                        text,
+                        range,
+                        &mut methods,
+                        &mut static_seen_methods,
+                        &mut static_last_method,
+                    );
+                } else {
+                    check_method(
+                        text,
+                        range,
+                        &mut methods,
+                        &mut instance_seen_methods,
+                        &mut instance_last_method,
+                    );
+                }
             }
-        } else if let Some(method_class) = member.as_ts_method_signature_class_member()
-            && let Ok(method_member) = method_class.name()
-            && let Some(text) = method_member.name()
-        {
-            let range = method_member.range();
-            check_method(
-                text,
-                range,
-                &mut methods,
-                &mut seen_methods,
-                &mut last_method,
-            );
+        } else if let Some(method_class) = member.as_ts_method_signature_class_member() {
+            let modifiers: BitFlags<Modifier> = (&method_class.modifiers()).into();
+            let is_static = modifiers.contains(Modifier::Static);
+
+            if let Ok(method_member) = method_class.name()
+                && let Some(text) = method_member.name()
+            {
+                let range = method_member.range();
+                if is_static {
+                    check_method(
+                        text,
+                        range,
+                        &mut methods,
+                        &mut static_seen_methods,
+                        &mut static_last_method,
+                    );
+                } else {
+                    check_method(
+                        text,
+                        range,
+                        &mut methods,
+                        &mut instance_seen_methods,
+                        &mut instance_last_method,
+                    );
+                }
+            }
         }
     }
     methods
