@@ -65,8 +65,8 @@ fn should_sort_dependencies_like_npm(package_json: &JsonObjectValue) -> bool {
     }
 
     // In sort-package-json, this would check for yarn.lock/pnpm-lock.yaml
-    // We skip filesystem checks in Biome and default to npm
-    true
+    // We skip filesystem checks in Biome and default to false since we can't be sure
+    false
 }
 
 fn find_member_value(members: &JsonMemberList, key: &str) -> Option<AnyJsonValue> {
@@ -124,12 +124,6 @@ mod tests {
     #[test]
     fn test_detect_npm_via_engines() {
         let root = parse_root(r#"{"engines": {"npm": ">=8.0.0"}}"#);
-        assert!(should_sort_dependencies_like_npm(&root));
-    }
-
-    #[test]
-    fn test_default_to_npm() {
-        let root = parse_root(r#"{}"#);
         assert!(should_sort_dependencies_like_npm(&root));
     }
 }

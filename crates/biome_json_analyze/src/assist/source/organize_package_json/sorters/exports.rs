@@ -44,9 +44,6 @@ pub fn transform(value: &AnyJsonValue) -> Option<AnyJsonValue> {
         return None;
     }
 
-    // Note: paths maintain original order, only conditions sorted
-    let sorted_conditions = sorted_conditions;
-
     let mut all_members = Vec::new();
     all_members.extend(paths);
     all_members.extend(sorted_conditions);

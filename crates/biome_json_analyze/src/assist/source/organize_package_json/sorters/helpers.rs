@@ -84,13 +84,18 @@ pub fn sort_object_by_key_order(
     key_order: &[&str],
 ) -> Option<JsonObjectValue> {
     let members = object.json_member_list();
-    let mut member_vec: Vec<JsonMember> = members.iter().filter_map(|m| m.ok()).collect();
+    let member_vec: Vec<JsonMember> = members.iter().filter_map(|m| m.ok()).collect();
 
     if member_vec.len() < 2 {
         return None;
     }
 
-    member_vec.sort_by(|a, b| {
+    // Clone original order for comparison
+    let original = member_vec.clone();
+
+    // Sort using the comparator
+    let mut sorted = member_vec;
+    sorted.sort_by(|a, b| {
         let a_name = a
             .name()
             .ok()
@@ -118,7 +123,34 @@ pub fn sort_object_by_key_order(
         }
     });
 
-    rebuild_object_from_members(object, member_vec)
+    // Check if order changed by comparing key names
+    let original_keys: Vec<String> = original
+        .iter()
+        .filter_map(|m| {
+            m.name()
+                .ok()?
+                .inner_string_text()
+                .ok()
+                .map(|t| t.text().to_string())
+        })
+        .collect();
+
+    let sorted_keys: Vec<String> = sorted
+        .iter()
+        .filter_map(|m| {
+            m.name()
+                .ok()?
+                .inner_string_text()
+                .ok()
+                .map(|t| t.text().to_string())
+        })
+        .collect();
+
+    if original_keys == sorted_keys {
+        return None;
+    }
+
+    rebuild_object_from_members(object, sorted)
 }
 
 fn rebuild_object_from_members(
@@ -144,8 +176,6 @@ fn rebuild_object_from_members(
 
     Some(original.clone().with_json_member_list(new_members))
 }
-
-// Array transformer wrappers removed - now inlined in sorters/mod.rs
 
 pub(super) fn transform_array_with<F>(array: &AnyJsonValue, transform_fn: F) -> Option<AnyJsonValue>
 where
@@ -427,5 +457,139 @@ mod tests {
             .collect();
 
         assert_eq!(keys, vec!["node", "npm", "yarn"]);
+    }
+
+    #[test]
+    fn test_sort_object_by_key_order_partial_match() {
+        let obj = parse_json_object(r#"{"z": 1, "a": 2, "name": "test", "version": "1.0"}"#);
+        let sorted = sort_object_by_key_order(&obj, &["name", "version"]).unwrap();
+
+        let keys: Vec<String> = sorted
+            .json_member_list()
+            .iter()
+            .filter_map(|m| {
+                let member = m.ok()?;
+                let text = member.name().ok()?.inner_string_text().ok()?;
+                Some(text.text().to_string())
+            })
+            .collect();
+
+        // name, version first (in order), then unknown fields alphabetically
+        assert_eq!(keys, vec!["name", "version", "a", "z"]);
+    }
+
+    #[test]
+    fn test_sort_object_by_key_order_returns_none_when_sorted() {
+        let obj = parse_json_object(r#"{"name": "test", "version": "1.0"}"#);
+        let result = sort_object_by_key_order(&obj, &["name", "version"]);
+        assert!(result.is_none(), "Should return None when already sorted");
+    }
+
+    #[test]
+    fn test_sort_alphabetically_deep() {
+        let obj = parse_json_object(
+            r#"{"z": {"nested_z": 1, "nested_a": 2}, "a": {"nested_z": 1, "nested_a": 2}}"#,
+        );
+        let sorted = sort_alphabetically_deep(&obj).unwrap();
+
+        // Check top-level is sorted
+        let top_keys: Vec<String> = sorted
+            .json_member_list()
+            .iter()
+            .filter_map(|m| {
+                let member = m.ok()?;
+                let text = member.name().ok()?.inner_string_text().ok()?;
+                Some(text.text().to_string())
+            })
+            .collect();
+
+        assert_eq!(top_keys, vec!["a", "z"]);
+
+        // Check nested objects are also sorted
+        let first_nested = sorted
+            .json_member_list()
+            .iter()
+            .next()
+            .and_then(|m| m.ok())
+            .and_then(|m| m.value().ok())
+            .and_then(|v| v.as_json_object_value().cloned())
+            .unwrap();
+
+        let nested_keys: Vec<String> = first_nested
+            .json_member_list()
+            .iter()
+            .filter_map(|m| {
+                let member = m.ok()?;
+                let text = member.name().ok()?.inner_string_text().ok()?;
+                Some(text.text().to_string())
+            })
+            .collect();
+
+        assert_eq!(nested_keys, vec!["nested_a", "nested_z"]);
+    }
+
+    #[test]
+    fn test_sort_object_by_comparator() {
+        let obj = parse_json_object(r#"{"c": 1, "a": 2, "B": 3}"#);
+        // Case-insensitive sort
+        let sorted =
+            sort_object_by_comparator(&obj, |a, b| a.to_lowercase().cmp(&b.to_lowercase()))
+                .unwrap();
+
+        let keys: Vec<String> = sorted
+            .json_member_list()
+            .iter()
+            .filter_map(|m| {
+                let member = m.ok()?;
+                let text = member.name().ok()?.inner_string_text().ok()?;
+                Some(text.text().to_string())
+            })
+            .collect();
+
+        assert_eq!(keys, vec!["a", "B", "c"]);
+    }
+
+    #[test]
+    fn test_uniq_array() {
+        let array_str = r#"["a", "b", "a", "c", "b"]"#;
+        let parsed = parse_json(array_str, JsonParserOptions::default());
+        let value = parsed.tree().value().ok().unwrap();
+
+        let result = uniq_array(&value).expect("Should remove duplicates");
+        let result_array = result.as_json_array_value().unwrap();
+
+        let values: Vec<String> = result_array
+            .elements()
+            .iter()
+            .filter_map(|e| {
+                let elem = e.ok()?;
+                let text = elem.as_json_string_value()?.inner_string_text().ok()?;
+                Some(text.text().to_string())
+            })
+            .collect();
+
+        assert_eq!(values, vec!["a", "b", "c"]);
+    }
+
+    #[test]
+    fn test_uniq_and_sort_array() {
+        let array_str = r#"["z", "a", "z", "m", "a"]"#;
+        let parsed = parse_json(array_str, JsonParserOptions::default());
+        let value = parsed.tree().value().ok().unwrap();
+
+        let result = uniq_and_sort_array(&value).expect("Should remove duplicates and sort");
+        let result_array = result.as_json_array_value().unwrap();
+
+        let values: Vec<String> = result_array
+            .elements()
+            .iter()
+            .filter_map(|e| {
+                let elem = e.ok()?;
+                let text = elem.as_json_string_value()?.inner_string_text().ok()?;
+                Some(text.text().to_string())
+            })
+            .collect();
+
+        assert_eq!(values, vec!["a", "m", "z"]);
     }
 }
