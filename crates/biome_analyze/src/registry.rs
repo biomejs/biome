@@ -422,7 +422,11 @@ impl<L: Language + Default> RegistryRule<L> {
                 css_modules,
             )?;
 
-            for result in R::run(&ctx) {
+            let rule_timer = crate::profiling::start_rule::<R>();
+            let signals = R::run(&ctx);
+            rule_timer.stop();
+
+            for result in signals {
                 let text_range =
                     R::text_range(&ctx, &result).unwrap_or_else(|| params.query.text_range());
 

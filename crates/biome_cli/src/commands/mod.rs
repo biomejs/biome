@@ -171,6 +171,11 @@ pub enum BiomeCommand {
         configuration: Option<Configuration>,
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
+        /// Enable rule profiling output.
+        /// Captures timing only for rule execution, not preprocessing such as querying or building the semantic model.
+        #[bpaf(long("profile-rules"), switch)]
+        profile_rules: bool,
+
         /// Use this option when you want to format code piped from `stdin`, and
         /// print the output to `stdout`.
         ///
@@ -315,6 +320,11 @@ pub enum BiomeCommand {
         /// flag and the `defaultBranch` is not set in your biome.json
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
+        /// Enable rule profiling output.
+        /// Captures timing only for rule execution, not preprocessing such as querying or building the semantic model.
+        #[bpaf(long("profile-rules"), switch)]
+        profile_rules: bool,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
