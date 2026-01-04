@@ -205,6 +205,7 @@ define_categories! {
     "lint/nursery/noUselessUndefined": "https://biomejs.dev/linter/rules/no-useless-undefined",
     "lint/nursery/noVueDataObjectDeclaration": "https://biomejs.dev/linter/rules/no-vue-data-object-declaration",
     "lint/nursery/noVueDuplicateKeys": "https://biomejs.dev/linter/rules/no-vue-duplicate-keys",
+    "lint/nursery/noVueOptionsApi": "https://biomejs.dev/linter/rules/no-vue-options-api",
     "lint/nursery/noVueReservedKeys": "https://biomejs.dev/linter/rules/no-vue-reserved-keys",
     "lint/nursery/noVueReservedProps": "https://biomejs.dev/linter/rules/no-vue-reserved-props",
     "lint/nursery/noVueSetupPropsReactivityLoss": "https://biomejs.dev/linter/rules/no-vue-setup-props-reactivity-loss",

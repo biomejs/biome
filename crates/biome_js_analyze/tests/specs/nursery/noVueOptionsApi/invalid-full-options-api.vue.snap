@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-full-options-api.vue
+---
+# Input
+```ts
+// Full Options API component with multiple properties - all should be flagged
+export default {
+  name: 'MyComponent',
+  props: ['message'],
+  data() {
+    return { count: 0 }
+  },
+  computed: {
+    doubleCount() {
+      return this.count * 2
+    }
+  },
+  watch: {
+    count(newVal) {
+      console.log('changed')
+    }
+  },
+  methods: {
+    increment() {
+      this.count++
+    }
+  },
+  mounted() {
+    console.log('mounted')
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid-full-options-api.vue:2:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Options API is not supported in Vue Vapor Mode.
+  
+     1 │ // Full Options API component with multiple properties - all should be flagged
+   > 2 │ export default {
+       │                ^
+   > 3 │   name: 'MyComponent',
+   > 4 │   props: ['message'],
+        ...
+  > 24 │     console.log('mounted')
+  > 25 │   }
+  > 26 │ }
+       │ ^
+    27 │ 
+  
+  i Use <script setup> with the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

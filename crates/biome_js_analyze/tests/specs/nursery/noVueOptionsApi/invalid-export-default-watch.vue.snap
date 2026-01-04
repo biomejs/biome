@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-export-default-watch.vue
+---
+# Input
+```ts
+// Options API: watch is not supported in Vapor Mode
+export default {
+  watch: {
+    count(newVal, oldVal) {
+      console.log('count changed')
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid-export-default-watch.vue:2:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Options API is not supported in Vue Vapor Mode.
+  
+    1 │ // Options API: watch is not supported in Vapor Mode
+  > 2 │ export default {
+      │                ^
+  > 3 │   watch: {
+  > 4 │     count(newVal, oldVal) {
+  > 5 │       console.log('count changed')
+  > 6 │     }
+  > 7 │   }
+  > 8 │ }
+      │ ^
+    9 │ 
+  
+  i Use <script setup> with the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

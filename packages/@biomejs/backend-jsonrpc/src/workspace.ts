@@ -2039,6 +2039,11 @@ See <https://biomejs.dev/linter/rules/no-vue-duplicate-keys>
 	 */
 	noVueDuplicateKeys?: NoVueDuplicateKeysConfiguration;
 	/**
+	* Disallow the use of Vue Options API.
+See <https://biomejs.dev/linter/rules/no-vue-options-api> 
+	 */
+	noVueOptionsApi?: NoVueOptionsApiConfiguration;
+	/**
 	* Disallow reserved keys in Vue component data and computed properties.
 See <https://biomejs.dev/linter/rules/no-vue-reserved-keys> 
 	 */
@@ -3799,6 +3804,9 @@ export type NoVueDataObjectDeclarationConfiguration =
 export type NoVueDuplicateKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDuplicateKeysOptions;
+export type NoVueOptionsApiConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueOptionsApiOptions;
 export type NoVueReservedKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueReservedKeysOptions;
@@ -5313,6 +5321,10 @@ export interface RuleWithNoVueDuplicateKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDuplicateKeysOptions;
 }
+export interface RuleWithNoVueOptionsApiOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueOptionsApiOptions;
+}
 export interface RuleWithNoVueReservedKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueReservedKeysOptions;
@@ -6687,6 +6699,7 @@ export type NoUselessCatchBindingOptions = {};
 export type NoUselessUndefinedOptions = {};
 export type NoVueDataObjectDeclarationOptions = {};
 export type NoVueDuplicateKeysOptions = {};
+export type NoVueOptionsApiOptions = {};
 export type NoVueReservedKeysOptions = {};
 export type NoVueReservedPropsOptions = {};
 export type NoVueSetupPropsReactivityLossOptions = {};
@@ -7567,6 +7580,7 @@ export type Category =
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/noVueDuplicateKeys"
+	| "lint/nursery/noVueOptionsApi"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/noVueSetupPropsReactivityLoss"
