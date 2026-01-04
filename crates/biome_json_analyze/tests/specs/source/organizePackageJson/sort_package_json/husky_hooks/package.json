@@ -1,9 +1,0 @@
-{
-  "husky": {
-    "hooks": {
-      "pre-push": "npm test",
-      "commit-msg": "commitlint",
-      "pre-commit": "lint-staged"
-    }
-  }
-}

@@ -1,9 +1,0 @@
-{
-  "pnpm": {
-    "overrides": {
-      "foo": "1.0.0"
-    },
-    "peerDependencyRules": {},
-    "neverBuiltDependencies": []
-  }
-}

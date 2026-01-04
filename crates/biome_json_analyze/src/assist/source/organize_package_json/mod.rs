@@ -6,19 +6,11 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_json_factory::make;
-use biome_json_syntax::{AnyJsonValue, JsonMember, JsonMemberList, JsonObjectValue, JsonRoot, T};
+use biome_json_syntax::{JsonMember, JsonMemberList, JsonObjectValue, JsonRoot, T};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use std::collections::HashMap;
 
 mod field_order;
-mod sort_dependencies;
-mod sort_dependencies_meta;
-mod sort_eslint_config;
-mod sort_exports;
-mod sort_pnpm_config;
-mod sort_prettier_config;
-mod sort_scripts;
-mod sort_workspaces;
 mod sorters;
 
 use field_order::{FieldTransformer, get_field_index, get_field_transformer};
@@ -86,7 +78,7 @@ impl Rule for OrganizePackageJson {
         let object = value.as_json_object_value()?;
         let members = object.json_member_list();
 
-        if is_organized(&members) {
+        if is_organized(&members, object) {
             return None;
         }
 
@@ -129,7 +121,7 @@ impl Rule for OrganizePackageJson {
     }
 }
 
-fn is_organized(members: &JsonMemberList) -> bool {
+fn is_organized(members: &JsonMemberList, object: &JsonObjectValue) -> bool {
     let field_names: Vec<String> = members
         .iter()
         .filter_map(|member| {
@@ -157,7 +149,9 @@ fn is_organized(members: &JsonMemberList) -> bool {
             let field_name = name.text();
             let transformer = get_field_transformer(field_name);
 
-            if transformer != FieldTransformer::None && needs_transformation(&member, transformer) {
+            if transformer != FieldTransformer::None
+                && needs_transformation(&member, transformer, object)
+            {
                 return false;
             }
         }
@@ -166,162 +160,16 @@ fn is_organized(members: &JsonMemberList) -> bool {
     true
 }
 
-fn needs_transformation(member: &JsonMember, transformer: FieldTransformer) -> bool {
+fn needs_transformation(
+    member: &JsonMember,
+    transformer: FieldTransformer,
+    root_object: &JsonObjectValue,
+) -> bool {
     let Ok(value) = member.value() else {
         return false;
     };
 
-    match transformer {
-        FieldTransformer::None => false,
-
-        // Simple object sorters - check key order
-        FieldTransformer::SortObject
-        | FieldTransformer::SortPeopleObject
-        | FieldTransformer::SortURLObject
-        | FieldTransformer::SortBugsObject
-        | FieldTransformer::SortDirectories
-        | FieldTransformer::SortVolta
-        | FieldTransformer::SortBinary
-        | FieldTransformer::SortGitHooks => needs_key_sorting(&value, transformer),
-
-        // Object sorters with simple top-level key checking
-        FieldTransformer::SortDependencies
-        | FieldTransformer::SortDependenciesMeta
-        | FieldTransformer::SortScripts
-        | FieldTransformer::SortObjectDeep => needs_key_sorting(&value, transformer),
-
-        // Complex nested transformers - skip deep checks for performance
-        // These involve recursive transformations, conditional logic, or nested field ordering
-        // that would be expensive to validate. The transformation applies correctly when run.
-        FieldTransformer::SortExports
-        | FieldTransformer::SortEslintConfig
-        | FieldTransformer::SortPrettierConfig
-        | FieldTransformer::SortHusky
-        | FieldTransformer::SortDevEngines
-        | FieldTransformer::SortWorkspaces
-        | FieldTransformer::SortPnpmConfig => false,
-
-        // Array transformers - skip checks (would require iterating all elements)
-        FieldTransformer::SortPeopleArray | FieldTransformer::SortBadgesArray => false,
-
-        // Array uniqueness - skip checks (would require element comparison)
-        FieldTransformer::UniqArray | FieldTransformer::UniqAndSortArray => false,
-    }
-}
-
-/// Checks if object keys need sorting. Returns true when keys are NOT in the expected order.
-fn needs_key_sorting(value: &AnyJsonValue, transformer: FieldTransformer) -> bool {
-    if let Some(obj) = value.as_json_object_value() {
-        let members = obj.json_member_list();
-        let current_keys: Vec<String> = members
-            .iter()
-            .filter_map(|m| {
-                m.ok()?
-                    .name()
-                    .ok()?
-                    .inner_string_text()
-                    .ok()
-                    .map(|t| t.text().to_string())
-            })
-            .collect();
-
-        if current_keys.len() < 2 {
-            return false;
-        }
-
-        // For complex transformers, just check if top-level keys are alphabetically sorted
-        // This is a lightweight check that catches most cases without expensive nested validation
-        let sorted_keys = match transformer {
-            FieldTransformer::SortDependencies
-            | FieldTransformer::SortDependenciesMeta
-            | FieldTransformer::SortScripts
-            | FieldTransformer::SortObjectDeep => {
-                let mut sorted = current_keys.clone();
-                sorted.sort();
-                sorted
-            }
-            _ => get_expected_sorted_keys(&current_keys, transformer),
-        };
-
-        current_keys != sorted_keys
-    } else {
-        false
-    }
-}
-
-fn get_expected_sorted_keys(keys: &[String], transformer: FieldTransformer) -> Vec<String> {
-    let mut sorted = keys.to_vec();
-
-    match transformer {
-        FieldTransformer::SortObject => {
-            sorted.sort();
-        }
-        FieldTransformer::SortPeopleObject => {
-            sort_by_key_order(&mut sorted, &["name", "email", "url"]);
-        }
-        FieldTransformer::SortURLObject => {
-            sort_by_key_order(&mut sorted, &["type", "url"]);
-        }
-        FieldTransformer::SortBugsObject => {
-            sort_by_key_order(&mut sorted, &["url", "email"]);
-        }
-        FieldTransformer::SortDirectories => {
-            sort_by_key_order(
-                &mut sorted,
-                &["lib", "bin", "man", "doc", "example", "test"],
-            );
-        }
-        FieldTransformer::SortVolta => {
-            sort_by_key_order(&mut sorted, &["node", "npm", "yarn"]);
-        }
-        FieldTransformer::SortBinary => {
-            sort_by_key_order(
-                &mut sorted,
-                &[
-                    "module_name",
-                    "module_path",
-                    "remote_path",
-                    "package_name",
-                    "host",
-                ],
-            );
-        }
-        FieldTransformer::SortGitHooks => {
-            sort_by_key_order(&mut sorted, sorters::GIT_HOOKS_ORDER);
-        }
-        FieldTransformer::SortDependencies
-        | FieldTransformer::SortDependenciesMeta
-        | FieldTransformer::SortScripts
-        | FieldTransformer::SortExports
-        | FieldTransformer::SortEslintConfig
-        | FieldTransformer::SortPrettierConfig
-        | FieldTransformer::SortPeopleArray
-        | FieldTransformer::SortBadgesArray
-        | FieldTransformer::SortObjectDeep
-        | FieldTransformer::SortHusky
-        | FieldTransformer::SortDevEngines
-        | FieldTransformer::SortWorkspaces
-        | FieldTransformer::SortPnpmConfig => {
-            sorted.sort();
-        }
-        _ => {}
-    }
-
-    sorted
-}
-
-fn sort_by_key_order(keys: &mut [String], order: &[&str]) {
-    keys.sort_by(|a, b| {
-        let a_idx = order.iter().position(|&k| k == a);
-        let b_idx = order.iter().position(|&k| k == b);
-
-        match (a_idx, b_idx) {
-            (Some(a_i), Some(b_i)) => a_i.cmp(&b_i),
-            (Some(_), None) => std::cmp::Ordering::Less,
-            (None, Some(_)) => std::cmp::Ordering::Greater,
-            (None, None) => a.cmp(b),
-        }
-    });
+    sorters::try_transform_field(&value, transformer, root_object).is_some()
 }
 
 fn organize_members(
@@ -374,169 +222,12 @@ fn apply_field_transformer(
 ) -> JsonMember {
     let transformer = get_field_transformer(field_name);
 
-    if transformer == FieldTransformer::None {
-        return member.clone();
-    }
-
     let Ok(value) = member.value() else {
         return member.clone();
     };
 
-    let transformed_value = match transformer {
-        FieldTransformer::None => return member.clone(),
-
-        FieldTransformer::SortDependencies => {
-            sort_dependencies::transform(&value, root_object).unwrap_or_else(|| value.clone())
-        }
-
-        FieldTransformer::SortDependenciesMeta => {
-            sort_dependencies_meta::transform(&value).unwrap_or_else(|| value.clone())
-        }
-
-        FieldTransformer::SortScripts => {
-            sort_scripts::transform(&value, root_object).unwrap_or_else(|| value.clone())
-        }
-
-        FieldTransformer::SortExports => {
-            sort_exports::transform(&value).unwrap_or_else(|| value.clone())
-        }
-
-        FieldTransformer::SortEslintConfig => {
-            sort_eslint_config::transform(&value).unwrap_or_else(|| value.clone())
-        }
-
-        FieldTransformer::SortPrettierConfig => {
-            sort_prettier_config::transform(&value).unwrap_or_else(|| value.clone())
-        }
-
-        FieldTransformer::SortPeopleArray => {
-            sorters::transform_people_array(&value).unwrap_or_else(|| value.clone())
-        }
-
-        FieldTransformer::SortBadgesArray => {
-            sorters::transform_badges_array(&value).unwrap_or_else(|| value.clone())
-        }
-
-        FieldTransformer::SortObjectDeep => {
-            if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_alphabetically_deep(obj)
-                    .map_or_else(|| value.clone(), AnyJsonValue::from)
-            } else {
-                value.clone()
-            }
-        }
-
-        FieldTransformer::SortHusky => {
-            if let Some(obj) = value.as_json_object_value() {
-                sorters::transform_nested_property(obj, "hooks", |hooks_value| {
-                    hooks_value
-                        .as_json_object_value()
-                        .and_then(sorters::sort_git_hooks)
-                        .map(AnyJsonValue::from)
-                })
-                .map_or_else(|| value.clone(), AnyJsonValue::from)
-            } else {
-                value.clone()
-            }
-        }
-
-        FieldTransformer::SortDevEngines => {
-            if let Some(obj) = value.as_json_object_value() {
-                sorters::transform_nested_property(obj, "packageManager", |pm_value| {
-                    pm_value
-                        .as_json_object_value()
-                        .and_then(|pm_obj| {
-                            sorters::sort_object_by_key_order(
-                                pm_obj,
-                                &["name", "version", "onFail"],
-                            )
-                        })
-                        .map(AnyJsonValue::from)
-                })
-                .map_or_else(|| value.clone(), AnyJsonValue::from)
-            } else {
-                value.clone()
-            }
-        }
-
-        FieldTransformer::SortWorkspaces => {
-            sort_workspaces::transform(&value).unwrap_or_else(|| value.clone())
-        }
-
-        FieldTransformer::SortPnpmConfig => {
-            sort_pnpm_config::transform(&value).unwrap_or_else(|| value.clone())
-        }
-
-        FieldTransformer::SortObject => {
-            if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_alphabetically(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
-            } else {
-                value.clone()
-            }
-        }
-
-        FieldTransformer::SortPeopleObject => {
-            if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_people_object(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
-            } else {
-                value.clone()
-            }
-        }
-
-        FieldTransformer::SortURLObject => {
-            if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_url_object(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
-            } else {
-                value.clone()
-            }
-        }
-
-        FieldTransformer::SortBugsObject => {
-            if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_bugs_object(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
-            } else {
-                value.clone()
-            }
-        }
-
-        FieldTransformer::SortDirectories => {
-            if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_directories(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
-            } else {
-                value.clone()
-            }
-        }
-
-        FieldTransformer::SortVolta => {
-            if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_volta(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
-            } else {
-                value.clone()
-            }
-        }
-
-        FieldTransformer::SortBinary => {
-            if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_binary(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
-            } else {
-                value.clone()
-            }
-        }
-
-        FieldTransformer::SortGitHooks => {
-            if let Some(obj) = value.as_json_object_value() {
-                sorters::sort_git_hooks(obj).map_or_else(|| value.clone(), AnyJsonValue::from)
-            } else {
-                value.clone()
-            }
-        }
-
-        FieldTransformer::UniqArray => sorters::uniq_array(&value).unwrap_or_else(|| value.clone()),
-
-        FieldTransformer::UniqAndSortArray => {
-            sorters::uniq_and_sort_array(&value).unwrap_or_else(|| value.clone())
-        }
-    };
+    let transformed_value = sorters::try_transform_field(&value, transformer, root_object)
+        .unwrap_or_else(|| value.clone());
 
     member.clone().with_value(transformed_value)
 }

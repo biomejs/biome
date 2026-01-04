@@ -1,7 +1,7 @@
 use biome_json_syntax::{AnyJsonValue, JsonMemberList, JsonObjectValue};
 use biome_string_case::StrOnlyExtension;
 
-use super::sorters::{sort_alphabetically, sort_object_by_comparator};
+use super::helpers::{sort_alphabetically, sort_object_by_comparator};
 
 /// Sort dependencies alphabetically, detecting package manager to use the appropriate comparison.
 /// npm uses locale-aware comparison, yarn and pnpm use simple string comparison.

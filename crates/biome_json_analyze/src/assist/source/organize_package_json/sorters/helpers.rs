@@ -121,81 +121,6 @@ pub fn sort_object_by_key_order(
     rebuild_object_from_members(object, member_vec)
 }
 
-/// https://docs.npmjs.com/cli/v10/configuring-npm/package-json#people-fields-author-contributors
-pub fn sort_people_object(object: &JsonObjectValue) -> Option<JsonObjectValue> {
-    sort_object_by_key_order(object, &["name", "email", "url"])
-}
-
-pub fn sort_url_object(object: &JsonObjectValue) -> Option<JsonObjectValue> {
-    sort_object_by_key_order(object, &["type", "url"])
-}
-
-pub fn sort_bugs_object(object: &JsonObjectValue) -> Option<JsonObjectValue> {
-    sort_object_by_key_order(object, &["url", "email"])
-}
-
-pub fn sort_directories(object: &JsonObjectValue) -> Option<JsonObjectValue> {
-    sort_object_by_key_order(object, &["lib", "bin", "man", "doc", "example", "test"])
-}
-
-pub fn sort_volta(object: &JsonObjectValue) -> Option<JsonObjectValue> {
-    sort_object_by_key_order(object, &["node", "npm", "yarn"])
-}
-
-pub fn sort_binary(object: &JsonObjectValue) -> Option<JsonObjectValue> {
-    sort_object_by_key_order(
-        object,
-        &[
-            "module_name",
-            "module_path",
-            "remote_path",
-            "package_name",
-            "host",
-        ],
-    )
-}
-
-pub fn sort_vscode_badge_object(object: &JsonObjectValue) -> Option<JsonObjectValue> {
-    sort_object_by_key_order(object, &["description", "url", "href"])
-}
-
-/// Git hooks in execution order, based on git-hooks-list package
-pub(super) const GIT_HOOKS_ORDER: &[&str] = &[
-    "applypatch-msg",
-    "pre-applypatch",
-    "post-applypatch",
-    "pre-commit",
-    "pre-merge-commit",
-    "prepare-commit-msg",
-    "commit-msg",
-    "post-commit",
-    "pre-rebase",
-    "post-checkout",
-    "post-merge",
-    "pre-push",
-    "pre-receive",
-    "update",
-    "proc-receive",
-    "post-receive",
-    "post-update",
-    "reference-transaction",
-    "push-to-checkout",
-    "pre-auto-gc",
-    "post-rewrite",
-    "sendemail-validate",
-    "fsmonitor-watchman",
-    "p4-changelist",
-    "p4-prepare-changelist",
-    "p4-post-changelist",
-    "p4-pre-submit",
-    "post-index-change",
-];
-
-/// Based on git-hooks-list package
-pub fn sort_git_hooks(object: &JsonObjectValue) -> Option<JsonObjectValue> {
-    sort_object_by_key_order(object, GIT_HOOKS_ORDER)
-}
-
 fn rebuild_object_from_members(
     original: &JsonObjectValue,
     members: Vec<JsonMember>,
@@ -220,17 +145,9 @@ fn rebuild_object_from_members(
     Some(original.clone().with_json_member_list(new_members))
 }
 
-pub fn transform_people_array(array: &AnyJsonValue) -> Option<AnyJsonValue> {
-    transform_array_with(array, |obj| sort_people_object(obj).map(AnyJsonValue::from))
-}
+// Array transformer wrappers removed - now inlined in sorters/mod.rs
 
-pub fn transform_badges_array(array: &AnyJsonValue) -> Option<AnyJsonValue> {
-    transform_array_with(array, |obj| {
-        sort_vscode_badge_object(obj).map(AnyJsonValue::from)
-    })
-}
-
-fn transform_array_with<F>(array: &AnyJsonValue, transform_fn: F) -> Option<AnyJsonValue>
+pub(super) fn transform_array_with<F>(array: &AnyJsonValue, transform_fn: F) -> Option<AnyJsonValue>
 where
     F: Fn(&JsonObjectValue) -> Option<AnyJsonValue>,
 {
@@ -413,6 +330,7 @@ fn rebuild_array(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::assist::source::organize_package_json::sorters::constants;
     use biome_json_parser::{JsonParserOptions, parse_json};
 
     fn parse_json_object(source: &str) -> JsonObjectValue {
@@ -451,7 +369,7 @@ mod tests {
         let obj = parse_json_object(
             r#"{"url": "https://example.com", "name": "John", "email": "john@example.com"}"#,
         );
-        let sorted = sort_people_object(&obj).unwrap();
+        let sorted = sort_object_by_key_order(&obj, constants::PEOPLE_FIELD_ORDER).unwrap();
 
         let keys: Vec<String> = sorted
             .json_member_list()
@@ -472,7 +390,7 @@ mod tests {
     #[test]
     fn test_sort_url_object() {
         let obj = parse_json_object(r#"{"url": "https://github.com", "type": "git"}"#);
-        let sorted = sort_url_object(&obj).unwrap();
+        let sorted = sort_object_by_key_order(&obj, constants::URL_FIELD_ORDER).unwrap();
 
         let keys: Vec<String> = sorted
             .json_member_list()
@@ -493,7 +411,7 @@ mod tests {
     #[test]
     fn test_sort_volta() {
         let obj = parse_json_object(r#"{"yarn": "1.22.0", "node": "18.0.0", "npm": "9.0.0"}"#);
-        let sorted = sort_volta(&obj).unwrap();
+        let sorted = sort_object_by_key_order(&obj, constants::VOLTA_FIELD_ORDER).unwrap();
 
         let keys: Vec<String> = sorted
             .json_member_list()

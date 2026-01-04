@@ -1,6 +1,8 @@
 use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonObjectValue, T};
 
+use super::helpers::sort_object_by_comparator;
+
 /// Extracts package name from dependency identifiers.
 ///
 /// For identifiers like `"@scope/package@1.0.0"` or `"package@1.0.0"`,
@@ -35,12 +37,14 @@ fn get_package_name(ident: &str) -> &str {
 pub fn transform(value: &AnyJsonValue) -> Option<AnyJsonValue> {
     let object = value.as_json_object_value()?;
 
-    let sorted_top_level = super::sorters::sort_object_by_comparator(object, |a, b| {
+    let sorted_top_level = sort_object_by_comparator(object, |a, b| {
         let pkg_a = get_package_name(a);
         let pkg_b = get_package_name(b);
         pkg_a.cmp(pkg_b)
     })?;
 
+    // Note: sort_object_by_comparator already returns None if no change needed at top level
+    // deep_sort_nested_objects also returns None if no nested changes needed
     deep_sort_nested_objects(&sorted_top_level).map(AnyJsonValue::from)
 }
 
@@ -53,7 +57,7 @@ fn deep_sort_nested_objects(object: &JsonObjectValue) -> Option<JsonObjectValue>
     for m in (&members).into_iter().flatten() {
         let transformed_member = if let Ok(value) = m.value()
             && let Some(obj) = value.as_json_object_value()
-            && let Some(deep_sorted) = super::sorters::sort_alphabetically_deep(obj)
+            && let Some(deep_sorted) = super::helpers::sort_alphabetically_deep(obj)
         {
             has_changes = true;
             m.clone().with_value(AnyJsonValue::from(deep_sorted))

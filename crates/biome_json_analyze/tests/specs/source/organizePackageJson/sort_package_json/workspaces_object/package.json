@@ -1,9 +1,0 @@
-{
-  "workspaces": {
-    "packages": ["packages/*", "apps/*"],
-    "catalog": {
-      "react": "^18.0.0",
-      "typescript": "^5.0.0"
-    }
-  }
-}

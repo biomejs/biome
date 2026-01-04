@@ -3,7 +3,7 @@ use regex::Regex;
 use std::collections::{HashMap, HashSet};
 use std::sync::LazyLock;
 
-use super::sorters::sort_object_by_key_order;
+use super::helpers::sort_object_by_key_order;
 
 /// See https://docs.npmjs.com/misc/scripts
 const DEFAULT_NPM_SCRIPTS: &[&str] = &[
@@ -43,6 +43,11 @@ pub fn transform(
     let base_names = normalize_script_names(&script_names);
     let sorted_names = sort_script_names(base_names, "");
     let expanded_names = expand_with_lifecycle_scripts(&sorted_names, &script_names);
+
+    // Early return if already in correct order
+    if script_names == expanded_names {
+        return None;
+    }
 
     let expanded_refs: Vec<&str> = expanded_names.iter().map(|s| s.as_str()).collect();
     let sorted = sort_object_by_key_order(object, &expanded_refs)?;

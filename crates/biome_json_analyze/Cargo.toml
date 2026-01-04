@@ -38,6 +38,8 @@ biome_json_parser = { path = "../biome_json_parser" }
 biome_test_utils  = { path = "../biome_test_utils" }
 criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta             = { workspace = true, features = ["glob"] }
+serde             = { workspace = true, features = ["derive"] }
+serde_json        = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]

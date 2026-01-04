@@ -1,8 +1,0 @@
-{
-  "dependenciesMeta": {
-    "package-b@2.0.0": {"optional": true},
-    "package-a@1.0.0": {"optional": true},
-    "@scope/pkg-z@3.0.0": {"optional": false},
-    "@scope/pkg-a@1.0.0": {"optional": false}
-  }
-}

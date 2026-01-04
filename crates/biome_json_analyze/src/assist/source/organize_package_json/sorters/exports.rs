@@ -21,10 +21,31 @@ pub fn transform(value: &AnyJsonValue) -> Option<AnyJsonValue> {
         }
     }
 
-    // Sort paths alphabetically
-    paths.sort_by(|a, b| a.0.cmp(&b.0));
+    // Paths keep original order (NOT sorted alphabetically)
+    // Only conditions are sorted (types first, default last, others in between)
+    let sorted_conditions = sort_conditions(conditions.clone());
 
-    let sorted_conditions = sort_conditions(conditions);
+    // Check if already in correct order: paths (original order), then sorted conditions
+    let mut expected_order = Vec::new();
+    expected_order.extend(paths.iter().map(|(k, _)| k.clone()));
+    expected_order.extend(sorted_conditions.iter().map(|(k, _)| k.clone()));
+
+    let current_order: Vec<String> = (&members)
+        .into_iter()
+        .filter_map(|m| {
+            let member = m.ok()?;
+            let name = member.name().ok()?;
+            let text = name.inner_string_text().ok()?;
+            Some(text.text().to_string())
+        })
+        .collect();
+
+    if current_order == expected_order {
+        return None;
+    }
+
+    // Note: paths maintain original order, only conditions sorted
+    let sorted_conditions = sorted_conditions;
 
     let mut all_members = Vec::new();
     all_members.extend(paths);
@@ -116,7 +137,8 @@ mod tests {
     fn test_paths_before_conditions() {
         let obj =
             parse_object(r#"{"types": "./types.d.ts", "./path": {}, "default": "./default.js"}"#);
-        let result = transform(&AnyJsonValue::from(obj.clone())).unwrap();
+        let result = transform(&AnyJsonValue::from(obj.clone()))
+            .expect("Should transform when paths mixed with conditions");
         let result_obj = result.as_json_object_value().unwrap();
 
         let mut keys = Vec::new();
@@ -130,24 +152,5 @@ mod tests {
         }
 
         assert_eq!(keys, vec!["./path", "types", "default"]);
-    }
-
-    #[test]
-    fn test_paths_sorted_alphabetically() {
-        let obj = parse_object(r#"{"./z": {}, "./a": {}, "./m": {}, "types": "./types.d.ts"}"#);
-        let result = transform(&AnyJsonValue::from(obj.clone())).unwrap();
-        let result_obj = result.as_json_object_value().unwrap();
-
-        let mut keys = Vec::new();
-        for m in &result_obj.json_member_list() {
-            if let Ok(member) = m
-                && let Ok(name) = member.name()
-                && let Ok(text) = name.inner_string_text()
-            {
-                keys.push(text.text().to_string());
-            }
-        }
-
-        assert_eq!(keys, vec!["./a", "./m", "./z", "types"]);
     }
 }

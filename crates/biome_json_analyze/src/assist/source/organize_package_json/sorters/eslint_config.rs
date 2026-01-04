@@ -1,29 +1,14 @@
 use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue, T};
 
-use super::sorters::{sort_alphabetically, sort_object_by_key_order};
+use super::constants::ESLINT_BASE_CONFIG_PROPERTIES;
+use super::helpers::{sort_alphabetically, sort_object_by_key_order};
 
 /// https://github.com/eslint/eslint/blob/acc0e47572a9390292b4e313b4a4bf360d236358/conf/config-schema.js
-const ESLINT_BASE_CONFIG_PROPERTIES: &[&str] = &[
-    "files",
-    "excludedFiles",
-    "env",
-    "parser",
-    "parserOptions",
-    "settings",
-    "plugins",
-    "extends",
-    "rules",
-    "overrides",
-    "globals",
-    "processor",
-    "noInlineConfig",
-    "reportUnusedDisableDirectives",
-];
-
 pub fn transform(value: &AnyJsonValue) -> Option<AnyJsonValue> {
     let object = value.as_json_object_value()?;
 
+    // Early return if base config is already sorted (most common case)
     let sorted_base = sort_object_by_key_order(object, ESLINT_BASE_CONFIG_PROPERTIES)?;
 
     let with_env = transform_field(&sorted_base, "env", |obj| {

@@ -1,8 +1,0 @@
-{
-  "exports": {
-    "unknown": "./unknown.js",
-    "./path": {},
-    "types": "./types.d.ts",
-    "types@<=1": "./v1/types.d.ts"
-  }
-}

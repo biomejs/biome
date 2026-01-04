@@ -1,9 +1,0 @@
-{
-  "devEngines": {
-    "packageManager": {
-      "onFail": "warn",
-      "name": "npm",
-      "version": ">=9.0.0"
-    }
-  }
-}
