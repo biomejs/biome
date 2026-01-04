@@ -211,6 +211,98 @@ fn infer_resolved_type_of_destructured_array_element() {
     );
 }
 
+#[test]
+fn infer_resolved_type_of_disposable_object() {
+    const CODE: &str = r#"const a = {
+        [Symbol.dispose](): void {
+            // do something
+        }
+    };"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_variable_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &decl,
+    );
+    resolver.resolve_all();
+
+    assert_typed_bindings_snapshot(
+        CODE,
+        &bindings,
+        &resolver,
+        "infer_resolved_type_of_disposable_object",
+    );
+}
+
+#[test]
+fn infer_resolved_type_of_async_disposable_object() {
+    const CODE: &str = r#"const a = {
+        [Symbol.asyncDispose](): void {
+            // do something
+        }
+    };"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_variable_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &decl,
+    );
+    resolver.resolve_all();
+
+    assert_typed_bindings_snapshot(
+        CODE,
+        &bindings,
+        &resolver,
+        "infer_resolved_type_of_async_disposable_object",
+    );
+}
+
+#[test]
+fn infer_resolved_type_of_disposable_returning_function() {
+    const CODE: &str = r#"function returnsDisposable(): Disposable {
+    return {};
+}"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_function_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
+    resolver.resolve_all();
+
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_resolved_type_of_disposable_returning_function",
+    )
+}
+
+#[test]
+fn infer_resolved_type_of_async_disposable_returning_function() {
+    const CODE: &str = r#"function returnsAsyncDisposable(): AsyncDisposable {
+    return {};
+}"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_function_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
+    resolver.resolve_all();
+
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_resolved_type_of_async_disposable_returning_function",
+    )
+}
+
 pub fn get_expression_statement(root: &AnyJsRoot) -> JsExpressionStatement {
     let module = root.as_js_module().unwrap();
     module

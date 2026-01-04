@@ -5522,6 +5522,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useDisposables": {
+					"description": "Detects a disposable object assigned to a variable without using or await using syntax.\nSee <https://biomejs.dev/linter/rules/use-disposables>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseDisposablesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveSwitchCases": {
 					"description": "Require switch-case statements to be exhaustive.\nSee <https://biomejs.dev/linter/rules/use-exhaustive-switch-cases>",
 					"anyOf": [
@@ -9096,6 +9103,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseDisposablesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseDisposablesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseEnumInitializersOptions": {
 			"type": "object",
 			"properties": {
@@ -12096,6 +12113,16 @@
 			]
 		},
 		"UseDestructuringOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDisposablesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseDisposablesOptions" }
+			]
+		},
+		"UseDisposablesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

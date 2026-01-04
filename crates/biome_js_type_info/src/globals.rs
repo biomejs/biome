@@ -11,10 +11,11 @@ use biome_js_syntax::AnyJsExpression;
 use biome_rowan::Text;
 
 use crate::{
-    Class, Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
-    Resolvable, ResolvedTypeData, ResolvedTypeId, ResolverId, ReturnType, ScopeId, TypeData,
-    TypeId, TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
-    TypeResolver, TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
+    Class, Function, FunctionParameter, GenericTypeParameter, Interface, Literal,
+    PatternFunctionParameter, Resolvable, ResolvedTypeData, ResolvedTypeId, ResolverId, ReturnType,
+    ScopeId, TypeData, TypeId, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
+    TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore, Union,
+    flattening::MAX_FLATTEN_DEPTH,
 };
 
 use super::globals_builder::GlobalsResolverBuilder;
@@ -91,6 +92,14 @@ pub fn global_type_name(id: TypeId) -> Option<&'static str> {
         INSTANCEOF_REGEXP_ID => Some(INSTANCEOF_REGEXP_ID_NAME),
         REGEXP_ID => Some(REGEXP_ID_NAME),
         REGEXP_EXEC_ID => Some(REGEXP_EXEC_ID_NAME),
+        INSTANCEOF_SYMBOL_ID => Some(INSTANCEOF_SYMBOL_ID_NAME),
+        SYMBOL_ID => Some(SYMBOL_ID_NAME),
+        SYMBOL_DISPOSE_ID => Some(SYMBOL_DISPOSE_ID_NAME),
+        SYMBOL_ASYNC_DISPOSE_ID => Some(SYMBOL_ASYNC_DISPOSE_ID_NAME),
+        DISPOSABLE_ID => Some(DISPOSABLE_ID_NAME),
+        DISPOSABLE_DISPOSE_ID => Some(DISPOSABLE_DISPOSE_ID_NAME),
+        ASYNC_DISPOSABLE_ID => Some(ASYNC_DISPOSABLE_ID_NAME),
+        ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID => Some(ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_NAME),
         _ => None,
     }
 }
@@ -106,12 +115,12 @@ pub struct GlobalsResolver {
 
 impl Default for GlobalsResolver {
     fn default() -> Self {
-        let method = |name: &'static str, id: TypeId| TypeMember {
+        let member = |name: &'static str, id: TypeId| TypeMember {
             kind: TypeMemberKind::Named(Text::new_static(name)),
             ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
         };
 
-        let static_method = |name: &'static str, id: TypeId| TypeMember {
+        let static_member = |name: &'static str, id: TypeId| TypeMember {
             kind: TypeMemberKind::NamedStatic(Text::new_static(name)),
             ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
         };
@@ -184,9 +193,9 @@ impl Default for GlobalsResolver {
                 extends: None,
                 implements: [].into(),
                 members: Box::new([
-                    method("filter", ARRAY_FILTER_ID),
-                    method("forEach", ARRAY_FOREACH_ID),
-                    method("map", ARRAY_MAP_ID),
+                    member("filter", ARRAY_FILTER_ID),
+                    member("forEach", ARRAY_FOREACH_ID),
+                    member("map", ARRAY_MAP_ID),
                     TypeMember {
                         kind: TypeMemberKind::Named(Text::new_static("length")),
                         ty: GLOBAL_NUMBER_ID.into(),
@@ -239,16 +248,16 @@ impl Default for GlobalsResolver {
                         kind: TypeMemberKind::Constructor,
                         ty: GLOBAL_PROMISE_CONSTRUCTOR_ID.into(),
                     },
-                    method("catch", PROMISE_CATCH_ID),
-                    method("finally", PROMISE_FINALLY_ID),
-                    method("then", PROMISE_THEN_ID),
-                    static_method("all", PROMISE_ALL_ID),
-                    static_method("allSettled", PROMISE_ALL_SETTLED_ID),
-                    static_method("any", PROMISE_ANY_ID),
-                    static_method("race", PROMISE_RACE_ID),
-                    static_method("reject", PROMISE_REJECT_ID),
-                    static_method("resolve", PROMISE_RESOLVE_ID),
-                    static_method("try", PROMISE_TRY_ID),
+                    member("catch", PROMISE_CATCH_ID),
+                    member("finally", PROMISE_FINALLY_ID),
+                    member("then", PROMISE_THEN_ID),
+                    static_member("all", PROMISE_ALL_ID),
+                    static_member("allSettled", PROMISE_ALL_SETTLED_ID),
+                    static_member("any", PROMISE_ANY_ID),
+                    static_member("race", PROMISE_RACE_ID),
+                    static_member("reject", PROMISE_REJECT_ID),
+                    static_member("resolve", PROMISE_RESOLVE_ID),
+                    static_member("try", PROMISE_TRY_ID),
                 ]),
             })),
         );
@@ -392,7 +401,7 @@ impl Default for GlobalsResolver {
                 type_parameters: Box::default(),
                 extends: None,
                 implements: [].into(),
-                members: Box::new([method("exec", REGEXP_EXEC_ID)]),
+                members: Box::new([member("exec", REGEXP_EXEC_ID)]),
             })),
         );
         builder.set_type_data(
@@ -404,6 +413,79 @@ impl Default for GlobalsResolver {
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_REGEXP_ID.into()),
             }),
+        );
+        // Known symbols
+        builder.set_type_data(
+            INSTANCEOF_SYMBOL_ID,
+            TypeData::instance_of(TypeReference::from(GLOBAL_SYMBOL_ID)),
+        );
+        builder.set_type_data(
+            SYMBOL_ID,
+            TypeData::Class(Box::new(Class {
+                name: Some(Text::new_static(SYMBOL_ID_NAME)),
+                type_parameters: Box::default(),
+                extends: None,
+                implements: [].into(),
+                members: Box::new([
+                    static_member("dispose", SYMBOL_DISPOSE_ID),
+                    static_member("asyncDispose", SYMBOL_ASYNC_DISPOSE_ID),
+                ]),
+            })),
+        );
+        builder.set_type_data(SYMBOL_DISPOSE_ID, TypeData::Symbol);
+        builder.set_type_data(SYMBOL_ASYNC_DISPOSE_ID, TypeData::Symbol);
+        builder.set_type_data(
+            DISPOSABLE_ID,
+            TypeData::Interface(Box::new(Interface {
+                name: Text::new_static(DISPOSABLE_ID_NAME),
+                type_parameters: Box::default(),
+                extends: [].into(),
+                members: Box::new([TypeMember {
+                    kind: TypeMemberKind::IndexSignature(TypeReference::Resolved(
+                        GLOBAL_SYMBOL_DISPOSE_ID,
+                    )),
+                    ty: ResolvedTypeId::new(TypeResolverLevel::Global, DISPOSABLE_DISPOSE_ID)
+                        .into(),
+                }]),
+            })),
+        );
+        builder.set_type_data(
+            DISPOSABLE_DISPOSE_ID,
+            TypeData::Function(Box::new(Function {
+                is_async: false,
+                type_parameters: Default::default(),
+                name: None,
+                parameters: Default::default(),
+                return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
+            })),
+        );
+        builder.set_type_data(
+            ASYNC_DISPOSABLE_ID,
+            TypeData::Interface(Box::new(Interface {
+                name: Text::new_static(ASYNC_DISPOSABLE_ID_NAME),
+                type_parameters: Box::default(),
+                extends: [].into(),
+                members: Box::new([TypeMember {
+                    kind: TypeMemberKind::IndexSignature(TypeReference::Resolved(
+                        GLOBAL_SYMBOL_ASYNC_DISPOSE_ID,
+                    )),
+                    ty: ResolvedTypeId::new(
+                        TypeResolverLevel::Global,
+                        ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID,
+                    )
+                    .into(),
+                }]),
+            })),
+        );
+        builder.set_type_data(
+            ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID,
+            TypeData::Function(Box::new(Function {
+                is_async: true,
+                type_parameters: Default::default(),
+                name: None,
+                parameters: Default::default(),
+                return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+            })),
         );
 
         builder.build()
@@ -484,6 +566,12 @@ impl TypeResolver for GlobalsResolver {
             Some(GLOBAL_PROMISE_ID)
         } else if qualifier.is_regex() && !qualifier.has_known_type_parameters() {
             Some(GLOBAL_REGEXP_ID)
+        } else if qualifier.is_symbol() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_SYMBOL_ID)
+        } else if qualifier.is_disposable() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_DISPOSABLE_ID)
+        } else if qualifier.is_async_disposable() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_ASYNC_DISPOSABLE_ID)
         } else if !qualifier.type_only
             && let Some(ident) = qualifier.path.identifier()
         {
