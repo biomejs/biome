@@ -4,6 +4,7 @@
 
 use biome_analyze::declare_lint_group;
 pub mod no_ambiguous_anchor_text;
+pub mod no_duplicate_attributes;
 pub mod no_script_url;
 pub mod no_sync_scripts;
 pub mod no_vue_v_if_with_v_for;
@@ -23,4 +24,4 @@ pub mod use_vue_valid_v_once;
 pub mod use_vue_valid_v_pre;
 pub mod use_vue_valid_v_text;
 pub mod use_vue_vapor;
-declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: no_ambiguous_anchor_text :: NoAmbiguousAnchorText , self :: no_script_url :: NoScriptUrl , self :: no_sync_scripts :: NoSyncScripts , self :: no_vue_v_if_with_v_for :: NoVueVIfWithVFor , self :: use_vue_consistent_v_bind_style :: UseVueConsistentVBindStyle , self :: use_vue_consistent_v_on_style :: UseVueConsistentVOnStyle , self :: use_vue_hyphenated_attributes :: UseVueHyphenatedAttributes , self :: use_vue_v_for_key :: UseVueVForKey , self :: use_vue_valid_template_root :: UseVueValidTemplateRoot , self :: use_vue_valid_v_bind :: UseVueValidVBind , self :: use_vue_valid_v_cloak :: UseVueValidVCloak , self :: use_vue_valid_v_else :: UseVueValidVElse , self :: use_vue_valid_v_else_if :: UseVueValidVElseIf , self :: use_vue_valid_v_html :: UseVueValidVHtml , self :: use_vue_valid_v_if :: UseVueValidVIf , self :: use_vue_valid_v_on :: UseVueValidVOn , self :: use_vue_valid_v_once :: UseVueValidVOnce , self :: use_vue_valid_v_pre :: UseVueValidVPre , self :: use_vue_valid_v_text :: UseVueValidVText , self :: use_vue_vapor :: UseVueVapor ,] } }
+declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: no_ambiguous_anchor_text :: NoAmbiguousAnchorText , self :: no_duplicate_attributes :: NoDuplicateAttributes , self :: no_script_url :: NoScriptUrl , self :: no_sync_scripts :: NoSyncScripts , self :: no_vue_v_if_with_v_for :: NoVueVIfWithVFor , self :: use_vue_consistent_v_bind_style :: UseVueConsistentVBindStyle , self :: use_vue_consistent_v_on_style :: UseVueConsistentVOnStyle , self :: use_vue_hyphenated_attributes :: UseVueHyphenatedAttributes , self :: use_vue_v_for_key :: UseVueVForKey , self :: use_vue_valid_template_root :: UseVueValidTemplateRoot , self :: use_vue_valid_v_bind :: UseVueValidVBind , self :: use_vue_valid_v_cloak :: UseVueValidVCloak , self :: use_vue_valid_v_else :: UseVueValidVElse , self :: use_vue_valid_v_else_if :: UseVueValidVElseIf , self :: use_vue_valid_v_html :: UseVueValidVHtml , self :: use_vue_valid_v_if :: UseVueValidVIf , self :: use_vue_valid_v_on :: UseVueValidVOn , self :: use_vue_valid_v_once :: UseVueValidVOnce , self :: use_vue_valid_v_pre :: UseVueValidVPre , self :: use_vue_valid_v_text :: UseVueValidVText , self :: use_vue_vapor :: UseVueVapor ,] } }
