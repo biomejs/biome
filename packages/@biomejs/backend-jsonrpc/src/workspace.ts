@@ -1899,6 +1899,11 @@ See <https://biomejs.dev/linter/rules/no-equals-to-null>
 	 */
 	noEqualsToNull?: NoEqualsToNullConfiguration;
 	/**
+	* Restrict the number of lines in a file.
+See <https://biomejs.dev/linter/rules/no-excessive-lines-per-file> 
+	 */
+	noExcessiveLinesPerFile?: NoExcessiveLinesPerFileConfiguration;
+	/**
 	* Require Promise-like statements to be handled appropriately.
 See <https://biomejs.dev/linter/rules/no-floating-promises> 
 	 */
@@ -3720,6 +3725,9 @@ export type NoEmptySourceConfiguration =
 export type NoEqualsToNullConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEqualsToNullOptions;
+export type NoExcessiveLinesPerFileConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveLinesPerFileOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
@@ -5202,6 +5210,10 @@ export interface RuleWithNoEqualsToNullOptions {
 	level: RulePlainConfiguration;
 	options?: NoEqualsToNullOptions;
 }
+export interface RuleWithNoExcessiveLinesPerFileOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveLinesPerFileOptions;
+}
 export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6631,6 +6643,16 @@ export interface NoEmptySourceOptions {
 	allowComments?: boolean;
 }
 export type NoEqualsToNullOptions = {};
+export interface NoExcessiveLinesPerFileOptions {
+	/**
+	 * The maximum number of lines allowed in a file.
+	 */
+	maxLines?: number;
+	/**
+	 * When this option is set to `true`, blank lines are not counted towards the maximum line limit.
+	 */
+	skipBlankLines?: boolean;
+}
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export interface NoImportCyclesOptions {
@@ -7546,6 +7568,7 @@ export type Category =
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"
+	| "lint/nursery/noExcessiveLinesPerFile"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noImplicitCoercion"
