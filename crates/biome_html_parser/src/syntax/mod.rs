@@ -138,6 +138,14 @@ fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
     }
 }
 
+fn is_possible_component(p: &HtmlParser, tag_name: &str) -> bool {
+    tag_name
+        .chars()
+        .next()
+        .is_some_and(|c| c.is_ascii_uppercase())
+        && !p.options().is_html()
+}
+
 fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![<]) {
         return Absent;
@@ -148,7 +156,8 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     let opening_tag_name = p.cur_text().to_string();
     let should_be_self_closing = VOID_ELEMENTS
         .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
+        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
+        && !is_possible_component(p, opening_tag_name.as_str());
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
@@ -207,6 +216,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                     parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
                     && !closing.text(p).contains(opening_tag_name.as_str())
                 {
+                    dbg!(closing.text(p), &opening_tag_name);
                     p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
                     closing.change_to_bogus(p);
                     continue;
@@ -229,7 +239,8 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     p.bump_with_context(T![/], HtmlLexContext::InsideTag);
     let should_be_self_closing = VOID_ELEMENTS
         .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()));
+        .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()))
+        && !is_possible_component(p, p.cur_text());
     if should_be_self_closing {
         p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
     }
