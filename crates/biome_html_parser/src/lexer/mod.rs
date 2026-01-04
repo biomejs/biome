@@ -6,8 +6,8 @@ use crate::token_source::{
 };
 use biome_html_syntax::HtmlSyntaxKind::{
     AS_KW, ATTACH_KW, AWAIT_KW, CATCH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, EACH_KW,
-    ELSE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, IDENT, IF_KW, KEY_KW,
-    NEWLINE, RENDER_KW, SNIPPET_KW, THEN_KW, TOMBSTONE, UNICODE_BOM, WHITESPACE,
+    ELSE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, IDENT, IF_KW, IN_KW,
+    KEY_KW, NEWLINE, OF_KW, RENDER_KW, SNIPPET_KW, THEN_KW, TOMBSTONE, UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -36,6 +36,8 @@ enum IdentifierContext {
     Doctype,
     Vue,
     VueDirectiveArgument,
+    /// For v-for values: stops at comma, parens, and space
+    VueVForValue,
 }
 
 impl IdentifierContext {
@@ -151,6 +153,25 @@ impl<'src> HtmlLexer<'src> {
             _ if (self.current_kind != T![<] && is_attribute_name_byte_vue(current)) => {
                 self.consume_identifier(current, IdentifierContext::Vue)
             }
+            _ => self.consume_unexpected_character(),
+        }
+    }
+
+    fn consume_token_vue_v_for_value(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'\'' => self.consume_byte(T!["'"]),
+            b'"' => self.consume_byte(T!['"']),
+            b'(' => self.consume_byte(T!['(']),
+            b')' => self.consume_byte(T![')']),
+            b',' => self.consume_byte(T![,]),
+            b'i' if self.at_vue_v_for_in_keyword() => self.consume_vue_v_for_in_keyword(),
+            b'o' if self.at_vue_v_for_of_keyword() => self.consume_vue_v_for_of_keyword(),
+            _ if is_at_start_identifier(current) => {
+                self.consume_identifier(current, IdentifierContext::VueVForValue)
+            }
+            // Handle numbers in v-for expressions (like "n in 10")
+            _ if current.is_ascii_digit() => self.consume_vue_v_for_number(),
             _ => self.consume_unexpected_character(),
         }
     }
@@ -559,6 +580,8 @@ impl<'src> HtmlLexer<'src> {
             b"else" => ELSE_KW,
             b"each" => EACH_KW,
             b"as" => AS_KW,
+            b"in" => IN_KW,
+            b"of" => OF_KW,
             b"await" => AWAIT_KW,
             b"then" => THEN_KW,
             b"catch" => CATCH_KW,
@@ -609,6 +632,19 @@ impl<'src> HtmlLexer<'src> {
                 }
                 IdentifierContext::VueDirectiveArgument => {
                     if is_attribute_name_byte_vue(byte) || byte == b':' {
+                        if len < BUFFER_SIZE {
+                            buffer[len] = byte;
+                            len += 1;
+                        }
+
+                        self.advance(1)
+                    } else {
+                        break;
+                    }
+                }
+                IdentifierContext::VueVForValue => {
+                    // Stop at comma, parens, space for v-for bindings
+                    if is_vue_v_for_identifier_byte(byte) {
                         if len < BUFFER_SIZE {
                             buffer[len] = byte;
                             len += 1;
@@ -872,6 +908,44 @@ impl<'src> HtmlLexer<'src> {
         self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
     }
 
+    #[inline(always)]
+    fn at_vue_v_for_in_keyword(&self) -> bool {
+        self.current_byte() == Some(b'i')
+            && self.byte_at(1) == Some(b'n')
+            && !self.byte_at(2).is_some_and(is_at_continue_identifier)
+    }
+
+    fn consume_vue_v_for_in_keyword(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_vue_v_for_in_keyword());
+        self.advance(2);
+        T![in]
+    }
+
+    #[inline(always)]
+    fn at_vue_v_for_of_keyword(&self) -> bool {
+        self.current_byte() == Some(b'o')
+            && self.byte_at(1) == Some(b'f')
+            && !self.byte_at(2).is_some_and(is_at_continue_identifier)
+    }
+
+    fn consume_vue_v_for_of_keyword(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_vue_v_for_of_keyword());
+        self.advance(2);
+        T![of]
+    }
+
+    /// Consumes a number in v-for expressions (like "n in 10")
+    fn consume_vue_v_for_number(&mut self) -> HtmlSyntaxKind {
+        while let Some(byte) = self.current_byte() {
+            if byte.is_ascii_digit() {
+                self.advance(1);
+            } else {
+                break;
+            }
+        }
+        HTML_LITERAL
+    }
+
     /// Consumes the opening CDATA section marker '<![CDATA[' token.
     fn consume_cdata_start(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_start_cdata());
@@ -1078,6 +1152,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::Regular => self.consume_token(current),
                     HtmlLexContext::InsideTag => self.consume_token_inside_tag(current),
                     HtmlLexContext::InsideTagVue => self.consume_token_inside_tag_vue(current),
+                    HtmlLexContext::VueVForValue => self.consume_token_vue_v_for_value(current),
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {
@@ -1211,6 +1286,12 @@ fn is_attribute_name_byte(byte: u8) -> bool {
 
 fn is_attribute_name_byte_vue(byte: u8) -> bool {
     is_attribute_name_byte(byte) && byte != b':' && byte != b'.' && byte != b']' && byte != b'['
+}
+
+/// For v-for value identifiers: alphanumeric and underscore only
+/// Stops at comma, parens, space, quotes
+fn is_vue_v_for_identifier_byte(byte: u8) -> bool {
+    byte.is_ascii_alphanumeric() || byte == b'_'
 }
 
 /// Identifiers can contain letters, numbers and `_`

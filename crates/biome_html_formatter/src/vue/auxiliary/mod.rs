@@ -6,5 +6,8 @@ pub(crate) mod dynamic_argument;
 pub(crate) mod modifier;
 pub(crate) mod static_argument;
 pub(crate) mod v_bind_shorthand_directive;
+pub(crate) mod v_for_simple_binding;
+pub(crate) mod v_for_tuple_binding;
+pub(crate) mod v_for_tuple_element;
 pub(crate) mod v_on_shorthand_directive;
 pub(crate) mod v_slot_shorthand_directive;

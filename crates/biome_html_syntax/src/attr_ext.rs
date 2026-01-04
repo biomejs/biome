@@ -15,6 +15,7 @@ impl AnyHtmlAttributeInitializer {
                     .map(|token| inner_string_text(&token).into())
                     .unwrap_or_default(),
             ),
+            Self::VueVForValue(_) => None,
         }
     }
 }

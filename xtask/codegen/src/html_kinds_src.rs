@@ -28,6 +28,8 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("#", "HASH"),
         ("(", "L_PAREN"),
         (")", "R_PAREN"),
+        ("\"", "DOUBLE_QUOTE"),
+        ("'", "SINGLE_QUOTE"),
     ],
     keywords: &[
         "null",
@@ -52,6 +54,10 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "await",
         "catch",
         "snippet",
+        #[expect(unused_doc_comments)]
+        /// Vue keywords
+        "in",
+        "of",
     ],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
     tokens: &["ERROR_TOKEN", "NEWLINE", "WHITESPACE", "IDENT"],
@@ -125,6 +131,10 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "VUE_DYNAMIC_ARGUMENT",
         "VUE_MODIFIER_LIST",
         "VUE_MODIFIER",
+        "VUE_V_FOR_VALUE",
+        "VUE_V_FOR_SIMPLE_BINDING",
+        "VUE_V_FOR_TUPLE_BINDING",
+        "VUE_V_FOR_TUPLE_ELEMENT",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",

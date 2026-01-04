@@ -1048,6 +1048,114 @@ impl VueVBindShorthandDirectiveBuilder {
         ))
     }
 }
+pub fn vue_v_for_simple_binding(name: HtmlTextExpression) -> VueVForSimpleBinding {
+    VueVForSimpleBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_SIMPLE_BINDING,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
+pub fn vue_v_for_tuple_binding(
+    l_paren_token: SyntaxToken,
+    value: HtmlTextExpression,
+    r_paren_token: SyntaxToken,
+) -> VueVForTupleBindingBuilder {
+    VueVForTupleBindingBuilder {
+        l_paren_token,
+        value,
+        r_paren_token,
+        second: None,
+        third: None,
+    }
+}
+pub struct VueVForTupleBindingBuilder {
+    l_paren_token: SyntaxToken,
+    value: HtmlTextExpression,
+    r_paren_token: SyntaxToken,
+    second: Option<VueVForTupleElement>,
+    third: Option<VueVForTupleElement>,
+}
+impl VueVForTupleBindingBuilder {
+    pub fn with_second(mut self, second: VueVForTupleElement) -> Self {
+        self.second = Some(second);
+        self
+    }
+    pub fn with_third(mut self, third: VueVForTupleElement) -> Self {
+        self.third = Some(third);
+        self
+    }
+    pub fn build(self) -> VueVForTupleBinding {
+        VueVForTupleBinding::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::VUE_V_FOR_TUPLE_BINDING,
+            [
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                self.second
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.third
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn vue_v_for_tuple_element(
+    comma_token: SyntaxToken,
+    name_token: SyntaxToken,
+) -> VueVForTupleElement {
+    VueVForTupleElement::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_TUPLE_ELEMENT,
+        [
+            Some(SyntaxElement::Token(comma_token)),
+            Some(SyntaxElement::Token(name_token)),
+        ],
+    ))
+}
+pub fn vue_v_for_value(
+    l_quote_token: SyntaxToken,
+    binding: AnyVueVForBinding,
+    expr: HtmlTextExpression,
+    r_quote_token: SyntaxToken,
+) -> VueVForValueBuilder {
+    VueVForValueBuilder {
+        l_quote_token,
+        binding,
+        expr,
+        r_quote_token,
+        in_token: None,
+        of_token: None,
+    }
+}
+pub struct VueVForValueBuilder {
+    l_quote_token: SyntaxToken,
+    binding: AnyVueVForBinding,
+    expr: HtmlTextExpression,
+    r_quote_token: SyntaxToken,
+    in_token: Option<SyntaxToken>,
+    of_token: Option<SyntaxToken>,
+}
+impl VueVForValueBuilder {
+    pub fn with_in_token(mut self, in_token: SyntaxToken) -> Self {
+        self.in_token = Some(in_token);
+        self
+    }
+    pub fn with_of_token(mut self, of_token: SyntaxToken) -> Self {
+        self.of_token = Some(of_token);
+        self
+    }
+    pub fn build(self) -> VueVForValue {
+        VueVForValue::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::VUE_V_FOR_VALUE,
+            [
+                Some(SyntaxElement::Token(self.l_quote_token)),
+                Some(SyntaxElement::Node(self.binding.into_syntax())),
+                self.in_token.map(|token| SyntaxElement::Token(token)),
+                self.of_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.expr.into_syntax())),
+                Some(SyntaxElement::Token(self.r_quote_token)),
+            ],
+        ))
+    }
+}
 pub fn vue_v_on_shorthand_directive(
     at_token: SyntaxToken,
     arg: AnyVueDirectiveArgument,

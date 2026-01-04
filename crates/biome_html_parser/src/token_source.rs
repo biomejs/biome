@@ -1,5 +1,5 @@
 use crate::lexer::HtmlLexer;
-use biome_html_syntax::HtmlSyntaxKind::{AS_KW, CATCH_KW, EOF, THEN_KW};
+use biome_html_syntax::HtmlSyntaxKind::{AS_KW, CATCH_KW, EOF, IN_KW, OF_KW, THEN_KW};
 use biome_html_syntax::{HtmlSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexContext};
@@ -29,6 +29,7 @@ pub(crate) enum HtmlLexContext {
     InsideTag,
     /// Like [InsideTag], but with Vue-specific tokens enabled.
     InsideTagVue,
+    VueVForValue,
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
@@ -92,6 +93,10 @@ pub(crate) enum RestrictedExpressionStopAt {
     ClosingParen,
     /// Stops at `then` or `catch` keywords
     ThenOrCatch,
+    /// Stops at `in` or `of` keywords (for Vue v-for)
+    InOrOf,
+    /// Stops at `,` or `)` (for Vue v-for tuple bindings)
+    CommaOrCloseParen,
 }
 
 impl RestrictedExpressionStopAt {
@@ -101,6 +106,8 @@ impl RestrictedExpressionStopAt {
             Self::OpeningParenOrComma => byte == b'(' || byte == b',',
             Self::ClosingParen => byte == b')',
             Self::ThenOrCatch => false,
+            Self::InOrOf => false,
+            Self::CommaOrCloseParen => byte == b',' || byte == b')',
         }
     }
 
@@ -110,6 +117,8 @@ impl RestrictedExpressionStopAt {
             Self::OpeningParenOrComma => false,
             Self::ClosingParen => false,
             Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,
+            Self::InOrOf => keyword == IN_KW || keyword == OF_KW,
+            Self::CommaOrCloseParen => false,
         }
     }
 }

@@ -117,3 +117,11 @@ pub(crate) fn expected_expression(p: &HtmlParser, range: TextRange) -> ParseDiag
     p.err_builder("Expected an expression, instead none was found.", range)
         .into_diagnostic(p)
 }
+
+pub(crate) fn invalid_vue_vfor(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected a valid v-for directive.", range)
+}
+
+pub(crate) fn expected_vue_v_for_binding(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("v-for binding", range, p).into_diagnostic(p)
+}

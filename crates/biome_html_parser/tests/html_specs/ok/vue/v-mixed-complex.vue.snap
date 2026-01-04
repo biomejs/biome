@@ -77,8 +77,26 @@ HtmlRoot {
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
                                     eq_token: EQ@122..123 "=" [] [],
-                                    value: HtmlString {
-                                        value_token: HTML_STRING_LITERAL@123..147 "\"(item, index) in items\"" [] [],
+                                    value: VueVForValue {
+                                        l_quote: DOUBLE_QUOTE@123..124 "\"" [] [],
+                                        binding: VueVForTupleBinding {
+                                            l_paren_token: L_PAREN@124..125 "(" [] [],
+                                            value: HtmlTextExpression {
+                                                html_literal_token: HTML_LITERAL@125..129 "item" [] [],
+                                            },
+                                            second: VueVForTupleElement {
+                                                comma_token: COMMA@129..131 "," [] [Whitespace(" ")],
+                                                name_token: IDENT@131..136 "index" [] [],
+                                            },
+                                            third: missing (optional),
+                                            r_paren_token: R_PAREN@136..138 ")" [] [Whitespace(" ")],
+                                        },
+                                        in_token: IN_KW@138..141 "in" [] [Whitespace(" ")],
+                                        of_token: missing (optional),
+                                        expr: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@141..146 "items" [] [],
+                                        },
+                                        r_quote: DOUBLE_QUOTE@146..147 "\"" [] [],
                                     },
                                 },
                             },
@@ -529,8 +547,22 @@ HtmlRoot {
                 2: VUE_MODIFIER_LIST@122..122
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@122..147
                   0: EQ@122..123 "=" [] []
-                  1: HTML_STRING@123..147
-                    0: HTML_STRING_LITERAL@123..147 "\"(item, index) in items\"" [] []
+                  1: VUE_V_FOR_VALUE@123..147
+                    0: DOUBLE_QUOTE@123..124 "\"" [] []
+                    1: VUE_V_FOR_TUPLE_BINDING@124..138
+                      0: L_PAREN@124..125 "(" [] []
+                      1: HTML_TEXT_EXPRESSION@125..129
+                        0: HTML_LITERAL@125..129 "item" [] []
+                      2: VUE_V_FOR_TUPLE_ELEMENT@129..136
+                        0: COMMA@129..131 "," [] [Whitespace(" ")]
+                        1: IDENT@131..136 "index" [] []
+                      3: (empty)
+                      4: R_PAREN@136..138 ")" [] [Whitespace(" ")]
+                    2: IN_KW@138..141 "in" [] [Whitespace(" ")]
+                    3: (empty)
+                    4: HTML_TEXT_EXPRESSION@141..146
+                      0: HTML_LITERAL@141..146 "items" [] []
+                    5: DOUBLE_QUOTE@146..147 "\"" [] []
               2: VUE_V_BIND_SHORTHAND_DIRECTIVE@147..164
                 0: VUE_DIRECTIVE_ARGUMENT@147..154
                   0: COLON@147..151 ":" [Newline("\n"), Whitespace("\t\t")] []
