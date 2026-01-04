@@ -2108,6 +2108,11 @@ See <https://biomejs.dev/linter/rules/use-find>
 	 */
 	useFind?: UseFindConfiguration;
 	/**
+	* Require queries, mutations, subscriptions or fragments each to be located in separate files.
+See <https://biomejs.dev/linter/rules/use-lone-executable-definition> 
+	 */
+	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
+	/**
 	* Enforce a maximum number of parameters in function definitions.
 See <https://biomejs.dev/linter/rules/use-max-params> 
 	 */
@@ -3838,6 +3843,9 @@ export type UseExplicitTypeConfiguration =
 export type UseFindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFindOptions;
+export type UseLoneExecutableDefinitionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLoneExecutableDefinitionOptions;
 export type UseMaxParamsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMaxParamsOptions;
@@ -5367,6 +5375,10 @@ export interface RuleWithUseFindOptions {
 	level: RulePlainConfiguration;
 	options?: UseFindOptions;
 }
+export interface RuleWithUseLoneExecutableDefinitionOptions {
+	level: RulePlainConfiguration;
+	options?: UseLoneExecutableDefinitionOptions;
+}
 export interface RuleWithUseMaxParamsOptions {
 	level: RulePlainConfiguration;
 	options?: UseMaxParamsOptions;
@@ -6721,6 +6733,7 @@ export type UseDestructuringOptions = {};
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
+export type UseLoneExecutableDefinitionOptions = {};
 export interface UseMaxParamsOptions {
 	/**
 	 * Maximum number of parameters allowed (default: 4)
@@ -7586,6 +7599,7 @@ export type Category =
 	| "lint/nursery/useFind"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
