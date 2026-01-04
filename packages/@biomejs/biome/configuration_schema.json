@@ -5224,6 +5224,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateClasses": {
+					"description": "Disallow duplicate CSS classes.\nSee <https://biomejs.dev/linter/rules/no-duplicate-classes>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateDependencies": {
 					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".\nSee <https://biomejs.dev/linter/rules/no-duplicate-dependencies>",
 					"anyOf": [
@@ -6171,6 +6178,14 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseSortedAttributesOptions" }
+			},
+			"required": ["level", "options"]
+		},
+		"RuleAssistWithUseSortedClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedClassesOptions" }
 			},
 			"required": ["level", "options"]
 		},
@@ -10385,6 +10400,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noDuplicateClasses": {
+					"description": "Remove duplicate CSS classes.\nSee <https://biomejs.dev/assist/actions/no-duplicate-classes>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"organizeImports": {
 					"description": "Provides a code action to sort the imports and exports in the file using a built-in or custom order.\nSee <https://biomejs.dev/assist/actions/organize-imports>",
 					"anyOf": [
