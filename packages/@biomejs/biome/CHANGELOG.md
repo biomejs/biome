@@ -1,5 +1,20 @@
 # @biomejs/biome
 
+## 2.3.12
+
+### Patch Changes
+
+- [#8597](https://github.com/biomejs/biome/pull/8597) [`f764007`](https://github.com/biomejs/biome/commit/f7640071fa356808947bb6a4c563a04890311cc0) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`useUniqueEnumValueNames`](https://biomejs.dev/linter/rules/use-unique-enum-value-names/). Enforce unique enum value names.
+
+  **Invalid:**
+
+  ```graphql
+  enum A {
+    TEST
+    TesT
+  }
+  ```
+
 ## 2.3.11
 
 ### Patch Changes
