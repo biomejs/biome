@@ -14,14 +14,13 @@ use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::{
-    CssImport, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
-    JsModuleInfoDiagnostic, JsReexport, ModuleDiagnostic, ModuleGraph, ModuleResolver,
-    ResolvedPath,
+    ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase, JsModuleInfoDiagnostic,
+    JsReexport, ModuleDiagnostic, ModuleGraph, ModuleResolver, ResolvedPath,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
-use biome_test_utils::{get_added_js_paths, get_css_added_paths};
+use biome_test_utils::get_added_js_paths;
 use camino::{Utf8Path, Utf8PathBuf};
 use walkdir::WalkDir;
 
@@ -140,7 +139,7 @@ fn test_type_flattening_does_not_explode_on_recursive_parent_element_pattern() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
 
     let data = module_graph.data();
     let module = data.get(Utf8Path::new("/src/repro.ts")).unwrap();
@@ -165,7 +164,7 @@ fn test_resolve_relative_import() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
 
     let imports = module_graph.data();
     let file_imports = imports.get(Utf8Path::new("/src/index.ts")).unwrap();
@@ -192,7 +191,7 @@ fn test_resolve_package_import() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
 
     let imports = module_graph.data();
     let file_imports = imports.get(Utf8Path::new("/src/index.ts")).unwrap();
@@ -219,7 +218,7 @@ fn test_import_through_path_alias() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
 
     let imports = module_graph.data();
     let file_imports = imports.get(Utf8Path::new("/src/index.ts")).unwrap();
@@ -295,7 +294,7 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
 
     let imports = module_graph.data();
     let file_imports = imports
@@ -343,7 +342,7 @@ fn test_export_referenced_function() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
 
@@ -368,7 +367,7 @@ fn test_export_default_function_declaration() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
     snapshot.assert_snapshot("test_export_default_function_declaration");
@@ -396,7 +395,7 @@ fn test_export_const_type_declaration_with_namespace() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
     snapshot.assert_snapshot("test_export_const_type_declaration_with_namespace");
@@ -483,7 +482,7 @@ fn test_resolve_exports() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
 
     let dependency_data = module_graph.data();
     let data = dependency_data.get(Utf8Path::new("/src/index.ts")).unwrap();
@@ -593,7 +592,7 @@ fn test_resolve_export_types() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
     snapshot.assert_snapshot("test_resolve_export_types");
@@ -621,7 +620,7 @@ export const promise = makePromiseCb();
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -654,7 +653,7 @@ fn test_resolve_generic_mapped_value() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -716,7 +715,7 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -763,7 +762,7 @@ fn test_resolve_import_as_namespace() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -807,7 +806,7 @@ fn test_resolve_nested_function_call_with_namespace_in_return_type() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -840,7 +839,7 @@ fn test_resolve_return_value_of_function() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -898,7 +897,7 @@ fn test_resolve_type_of_property_with_getter() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -991,7 +990,7 @@ fn class_this_test_helper(case_name: &str, prefix: &str) {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -1066,7 +1065,7 @@ fn test_resolve_type_of_this_in_object() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -1158,7 +1157,7 @@ fn test_resolve_type_of_this_in_class_wrong_scope() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -1199,7 +1198,7 @@ fn test_resolve_promise_export() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
     snapshot.assert_snapshot("test_resolve_promise_export");
@@ -1229,7 +1228,7 @@ export { A, B };
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
     snapshot.assert_snapshot("test_resolve_merged_types");
@@ -1252,7 +1251,7 @@ export type Foo = Foo.Bar;
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
 
@@ -1321,7 +1320,7 @@ export const codes: {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
     snapshot.assert_snapshot("test_resolve_recursive_looking_country_info");
@@ -1500,7 +1499,7 @@ export = vfile
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
     snapshot.assert_snapshot("test_resolve_recursive_looking_vfile");
@@ -1541,7 +1540,7 @@ fn test_resolve_react_types() {
         .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -1584,7 +1583,7 @@ fn test_resolve_redis_commander_types() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     // We previously had an issue with `RedisCommander.d.ts` that caused types
     // to be duplicated. We should look out in this snapshot that method
@@ -1642,7 +1641,7 @@ fn test_resolve_single_reexport() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -1706,7 +1705,7 @@ fn test_resolve_type_of_union_from_imported_module() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -1772,7 +1771,7 @@ fn test_resolve_multiple_reexports() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -1824,7 +1823,7 @@ fn test_resolve_export_type_referencing_imported_type() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
     snapshot.assert_snapshot("test_resolve_export_type_referencing_imported_type");
@@ -1864,7 +1863,7 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -1928,7 +1927,7 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -1983,7 +1982,7 @@ const { mutate } = useSWRConfig();
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -2044,7 +2043,7 @@ type Intersection = Foo & Bar;"#,
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -2115,7 +2114,7 @@ fn test_resolve_swr_types() {
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new(&format!(
@@ -2185,7 +2184,7 @@ function f() {
 
     let module_graph = Arc::new(ModuleGraph::default());
 
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("index.ts"))
@@ -2222,7 +2221,7 @@ function g() {
 
     let module_graph = Arc::new(ModuleGraph::default());
 
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
 
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("index.ts"))
@@ -2235,58 +2234,6 @@ function g() {
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs).with_resolver(resolver.as_ref());
 
     snapshot.assert_snapshot("test_widening_via_assignment_multiple_values");
-}
-
-#[test]
-fn resolves_css_imports_correctly() {
-    let fixtures_path = get_fixtures_path();
-
-    let fs = OsFileSystem::new(fixtures_path.clone());
-
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(format!("{fixtures_path}/css").into(), {
-        let path = Utf8PathBuf::from(format!("{fixtures_path}/css/package.json"));
-        deserialize_from_json_str::<PackageJson>(
-            &fs.read_file_from_path(&path)
-                .expect("package.json must be readable"),
-            JsonParserOptions::default(),
-            "package.json",
-        )
-        .into_deserialized()
-        .expect("package.json must parse")
-    });
-
-    let added_paths = [
-        BiomePath::new(format!("{fixtures_path}/css/index.css")),
-        BiomePath::new(format!("{fixtures_path}/css/foo.css")),
-        BiomePath::new(format!("{fixtures_path}/css/bar.css")),
-    ];
-    let added_paths = get_css_added_paths(&fs, &added_paths);
-
-    let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_css_paths(&fs, &project_layout, &added_paths, None);
-
-    let imports = module_graph.data();
-    let file_imports = imports
-        .get(Utf8Path::new(&format!("{fixtures_path}/css/index.css")))
-        .unwrap();
-    let file_imports = file_imports.as_css_module_info().unwrap();
-
-    assert_eq!(file_imports.imports.len(), 2);
-    assert_eq!(
-        file_imports.imports.get("foo.css"),
-        Some(&CssImport {
-            specifier: "foo.css".into(),
-            resolved_path: ResolvedPath::from_path(format!("{fixtures_path}/css/foo.css")),
-        })
-    );
-    assert_eq!(
-        file_imports.imports.get("./bar.css"),
-        Some(&CssImport {
-            specifier: "./bar.css".into(),
-            resolved_path: ResolvedPath::from_path(format!("{fixtures_path}/css/bar.css")),
-        })
-    );
 }
 
 fn find_files_recursively_in_directory(
