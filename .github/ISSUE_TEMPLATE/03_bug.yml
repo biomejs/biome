@@ -17,7 +17,18 @@ body:
     attributes:
       label: Environment information
       description: Run the command `biome rage` and paste its output here. Please review it, in case there are sensitive information you don't want to share.
-      render: block
+      value: |
+        <details><summary>Details</summary>
+        <p>
+        
+        ```bash
+
+        Paste output here
+        
+        ```
+        
+        </p>
+        </details>
     validations:
       required: true
   - type: textarea
