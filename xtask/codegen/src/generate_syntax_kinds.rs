@@ -11,10 +11,14 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
         // These tokens, when parsed to proc_macro2::TokenStream, generates a stream of bytes
         // that can't be recognized by [quote].
         // Hence, they need to be thread differently
-        if "{}[]()` ".contains(token) {
-            // should be wrapped in single quotes
+        if "{}[]()` \"".contains(token) {
+            // should be wrapped in single quotes (as char literals)
             let c = token.chars().next().unwrap();
             quote! { #c }
+        } else if *token == "'" {
+            // Single quote needs to be wrapped in double quotes (as string literal)
+            let token = Literal::string(token);
+            quote! { #token }
         } else if should_token_be_quoted(token) {
             // should be wrapped in double quotes
             let token = Literal::string(token);

@@ -185,6 +185,7 @@ HtmlAttributeInitializerClause =
 AnyHtmlAttributeInitializer =
 	HtmlString
 	| HtmlSingleTextExpression
+	| VueVForValue
 
 
 
@@ -539,3 +540,37 @@ VueModifierList = VueModifier*
 VueModifier =
 	'.'
 	modifier: 'html_literal'
+
+// <div v-for="item in items" />
+//            ^^^^^^^^^^^^^^^
+VueVForValue =
+	l_quote: ('"' | '\'')
+	binding: AnyVueVForBinding
+	'in'?
+	'of'?
+	expr: HtmlTextExpression
+	r_quote: ('"' | '\'')
+
+AnyVueVForBinding =
+	VueVForSimpleBinding
+	| VueVForTupleBinding
+
+// <div v-for="item in items" />
+//             ^^^^
+VueVForSimpleBinding =
+	name: HtmlTextExpression
+
+// <div v-for="(value, key, index) in obj" />
+//             ^^^^^^^^^^^^^^^^^^^
+VueVForTupleBinding =
+	'('
+	value: HtmlTextExpression
+	second: VueVForTupleElement?
+	third: VueVForTupleElement?
+	')'
+
+// <div v-for="(value, key, index) in obj" />
+//                   ^^^^^
+VueVForTupleElement =
+	','
+	name: 'ident'
