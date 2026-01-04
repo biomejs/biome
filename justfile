@@ -7,6 +7,8 @@ alias r := ready
 alias l := lint
 alias qt := test-quick
 
+set windows-powershell := true
+
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
