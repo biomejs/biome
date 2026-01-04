@@ -387,6 +387,7 @@ pub mod use_trim_start_end;
 pub mod use_unified_type_signatures;
 pub mod use_unique_argument_names;
 pub mod use_unique_element_ids;
+pub mod use_unique_enum_value_names;
 pub mod use_unique_field_definition_names;
 pub mod use_unique_graphql_operation_name;
 pub mod use_unique_input_field_names;
