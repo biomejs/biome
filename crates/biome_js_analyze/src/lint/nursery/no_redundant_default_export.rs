@@ -4,7 +4,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExportClause, AnyJsExpression, AnyJsModuleItem, JsModule,
 };
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, TokenText};
 use biome_rule_options::no_redundant_default_export::NoRedundantDefaultExportOptions;
 use rustc_hash::FxHashSet;
 
@@ -39,9 +39,9 @@ declare_lint_rule! {
     }
 }
 
-fn collect_exports(module: &JsModule) -> (FxHashSet<String>, Option<(String, TextRange)>) {
-    let mut named_export_names = FxHashSet::default();
-    let mut default_export: Option<(String, TextRange)> = None;
+fn collect_exports(module: &JsModule) -> (FxHashSet<TokenText>, Option<(TokenText, TextRange)>) {
+    let mut named_export_names: FxHashSet<TokenText> = FxHashSet::default();
+    let mut default_export: Option<(TokenText, TextRange)> = None;
     
     for item in module.items() {
         if let AnyJsModuleItem::JsExport(export) = item {
@@ -67,7 +67,7 @@ fn collect_exports(module: &JsModule) -> (FxHashSet<String>, Option<(String, Tex
                     if !exported_item.is_default {
                         if let Some(identifier) = exported_item.identifier {
                             if let Some(name_token) = identifier.name_token() {
-                                named_export_names.insert(name_token.text_trimmed().to_string());
+                                named_export_names.insert(name_token.token_text_trimmed());
                             }
                         }
                     }
@@ -79,7 +79,7 @@ fn collect_exports(module: &JsModule) -> (FxHashSet<String>, Option<(String, Tex
                     if let AnyJsExpression::JsIdentifierExpression(identifier_expr) = expression {
                         if let Ok(reference_id) = identifier_expr.name() {
                             if let Ok(name_token) = reference_id.value_token() {
-                                let name = name_token.text_trimmed().to_string();
+                                let name = name_token.token_text_trimmed();
                                 default_export = Some((name, default_clause.range()));
                             }
                         }
