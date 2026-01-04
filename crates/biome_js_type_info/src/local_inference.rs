@@ -3,11 +3,12 @@ use std::str::FromStr;
 
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding,
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsConstructorParameter,
-    AnyJsDeclaration, AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression,
-    AnyJsFormalParameter, AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
-    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
-    AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsClassMemberName,
+    AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
+    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
+    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
+    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
+    AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
@@ -1830,40 +1831,38 @@ impl TypeMember {
                     ty: ty.into(),
                 })
             }
-            AnyJsClassMember::JsMethodClassMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
-                    let is_async = member.async_token().is_some();
-                    let function = Function {
+            AnyJsClassMember::JsMethodClassMember(member) => member.name().ok().and_then(|name| {
+                let is_async = member.async_token().is_some();
+                let function = Function {
+                    is_async,
+                    type_parameters: generic_params_from_ts_type_params(
+                        resolver,
+                        scope_id,
+                        member.type_parameters(),
+                    ),
+                    name: name.name().map(text_from_class_member_name),
+                    parameters: function_params_from_js_params(
+                        resolver,
+                        scope_id,
+                        member.parameters(),
+                    ),
+                    return_type: function_return_type(
+                        resolver,
+                        scope_id,
                         is_async,
-                        type_parameters: generic_params_from_ts_type_params(
-                            resolver,
-                            scope_id,
-                            member.type_parameters(),
-                        ),
-                        name: Some(text_from_class_member_name(name.clone())),
-                        parameters: function_params_from_js_params(
-                            resolver,
-                            scope_id,
-                            member.parameters(),
-                        ),
-                        return_type: function_return_type(
-                            resolver,
-                            scope_id,
-                            is_async,
-                            member.return_type_annotation(),
-                            member.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
-                        ),
-                    };
-                    let ty = resolver.register_and_resolve(function.into());
-                    let is_static = member
-                        .modifiers()
-                        .into_iter()
-                        .any(|modifier| modifier.as_js_static_modifier().is_some());
-                    Self::from_class_member_info(resolver, name, ty.into(), is_static, false)
-                })
-            }
+                        member.return_type_annotation(),
+                        member.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
+                    ),
+                };
+                let ty = resolver.register_and_resolve(function.into());
+                let is_static = member
+                    .modifiers()
+                    .into_iter()
+                    .any(|modifier| modifier.as_js_static_modifier().is_some());
+                Self::from_class_member_info(resolver, scope_id, name, ty.into(), is_static, false)
+            }),
             AnyJsClassMember::JsPropertyClassMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
+                member.name().ok().and_then(|name| {
                     let ty = match member
                         .property_annotation()
                         .and_then(|annotation| annotation.type_annotation().ok())
@@ -1886,7 +1885,14 @@ impl TypeMember {
                         .as_ref()
                         .and_then(|annotation| annotation.as_ts_optional_property_annotation())
                         .is_some();
-                    Self::from_class_member_info(resolver, name, ty, is_static, is_optional)
+                    Self::from_class_member_info(
+                        resolver,
+                        scope_id,
+                        name,
+                        ty,
+                        is_static,
+                        is_optional,
+                    )
                 })
             }
             AnyJsClassMember::JsGetterClassMember(member) => {
@@ -1910,11 +1916,8 @@ impl TypeMember {
                     }
                 })
             }
-            AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => member
-                .name()
-                .ok()
-                .and_then(|name| name.name())
-                .and_then(|name| {
+            AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => {
+                member.name().ok().and_then(|name| {
                     let ty = resolver.reference_to_resolved_expression(
                         scope_id,
                         &member.value().ok()?.expression().ok()?,
@@ -1924,16 +1927,18 @@ impl TypeMember {
                         .into_iter()
                         .any(|modifier| modifier.as_js_static_modifier().is_some());
                     let is_optional = member.question_mark_token().is_some();
-                    Some(Self::from_class_member_info(
+                    Self::from_class_member_info(
                         resolver,
+                        scope_id,
                         name,
                         ty,
                         is_static,
                         is_optional,
-                    ))
-                }),
+                    )
+                })
+            }
             AnyJsClassMember::TsPropertySignatureClassMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
+                member.name().ok().and_then(|name| {
                     let ty = member
                         .property_annotation()
                         .and_then(|annotation| annotation.type_annotation().ok())
@@ -1950,7 +1955,14 @@ impl TypeMember {
                         .as_ref()
                         .and_then(|annotation| annotation.as_ts_optional_property_annotation())
                         .is_some();
-                    Self::from_class_member_info(resolver, name, ty, is_static, is_optional)
+                    Self::from_class_member_info(
+                        resolver,
+                        scope_id,
+                        name,
+                        ty,
+                        is_static,
+                        is_optional,
+                    )
                 })
             }
             _ => {
@@ -1987,8 +1999,24 @@ impl TypeMember {
                     }
                 })
             }
-            AnyJsObjectMember::JsMethodObjectMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
+            AnyJsObjectMember::JsMethodObjectMember(member) => member
+                .name()
+                .ok()
+                .and_then(|name| match name {
+                    AnyJsObjectMemberName::JsComputedMemberName(name) => {
+                        name.expression().ok().map(|expr| {
+                            TypeMemberKind::IndexSignature(TypeReference::from_any_js_expression(
+                                resolver, scope_id, &expr,
+                            ))
+                        })
+                    }
+                    AnyJsObjectMemberName::JsLiteralMemberName(name) => name
+                        .name()
+                        .ok()
+                        .map(|name| TypeMemberKind::Named(name.into())),
+                    _ => None,
+                })
+                .map(|kind| {
                     let is_async = member.async_token().is_some();
                     let function = Function {
                         is_async,
@@ -1997,7 +2025,10 @@ impl TypeMember {
                             scope_id,
                             member.type_parameters(),
                         ),
-                        name: Some(name.clone().into()),
+                        name: match &kind {
+                            TypeMemberKind::Named(name) => Some(name.clone()),
+                            _ => None,
+                        },
                         parameters: function_params_from_js_params(
                             resolver,
                             scope_id,
@@ -2012,17 +2043,29 @@ impl TypeMember {
                         ),
                     };
                     Self {
-                        kind: TypeMemberKind::Named(name.into()),
+                        kind,
                         ty: resolver.register_and_resolve(function.into()).into(),
                     }
-                })
-            }
+                }),
             AnyJsObjectMember::JsPropertyObjectMember(member) => member
                 .name()
                 .ok()
-                .and_then(|name| name.name())
-                .map(|name| Self {
-                    kind: TypeMemberKind::Named(name.into()),
+                .and_then(|name| match name {
+                    AnyJsObjectMemberName::JsComputedMemberName(name) => {
+                        name.expression().ok().map(|expr| {
+                            TypeMemberKind::IndexSignature(TypeReference::from_any_js_expression(
+                                resolver, scope_id, &expr,
+                            ))
+                        })
+                    }
+                    AnyJsObjectMemberName::JsLiteralMemberName(name) => name
+                        .name()
+                        .ok()
+                        .map(|name| TypeMemberKind::Named(name.into())),
+                    _ => None,
+                })
+                .map(|kind| Self {
+                    kind,
                     ty: member
                         .value()
                         .map(|value| resolver.reference_to_resolved_expression(scope_id, &value))
@@ -2191,18 +2234,28 @@ impl TypeMember {
     #[inline]
     fn from_class_member_info(
         resolver: &mut dyn TypeResolver,
-        name: ClassMemberName,
+        scope_id: ScopeId,
+        name: AnyJsClassMemberName,
         ty: TypeReference,
         is_static: bool,
         is_optional: bool,
-    ) -> Self {
-        let name = text_from_class_member_name(name);
-        Self {
-            kind: if is_static {
-                TypeMemberKind::NamedStatic(name)
-            } else {
-                TypeMemberKind::Named(name)
-            },
+    ) -> Option<Self> {
+        let kind = match name {
+            AnyJsClassMemberName::JsComputedMemberName(name) => TypeMemberKind::IndexSignature(
+                TypeReference::from_any_js_expression(resolver, scope_id, &name.expression().ok()?),
+            ),
+            _ => {
+                let name = text_from_class_member_name(name.name()?);
+                if is_static {
+                    TypeMemberKind::NamedStatic(name)
+                } else {
+                    TypeMemberKind::Named(name)
+                }
+            }
+        };
+
+        Some(Self {
+            kind,
             ty: match is_optional {
                 true => {
                     let id = resolver.optional(ty);
@@ -2210,7 +2263,7 @@ impl TypeMember {
                 }
                 false => ty,
             },
-        }
+        })
     }
 
     #[inline]

@@ -17,7 +17,9 @@ use crate::{
     GLOBAL_RESOLVER, Literal, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember, TypeData,
     TypeId, TypeReference, TypeResolver, UNKNOWN_DATA,
     globals::{
-        GLOBAL_ARRAY_ID, GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID,
+        GLOBAL_ARRAY_ID, GLOBAL_ASYNC_DISPOSABLE_ID, GLOBAL_DISPOSABLE_ID, GLOBAL_NUMBER_ID,
+        GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_SYMBOL_ASYNC_DISPOSE_ID,
+        GLOBAL_SYMBOL_DISPOSE_ID, GLOBAL_UNKNOWN_ID,
     },
 };
 
@@ -244,6 +246,38 @@ impl Type {
                 _ => false,
             },
             _ => false,
+        })
+    }
+
+    pub fn is_disposable(&self) -> bool {
+        if self.id == GLOBAL_DISPOSABLE_ID {
+            return true;
+        }
+
+        self.resolved_data().is_some_and(|ty| {
+            ty.find_member(self.resolver.as_ref(), |member| {
+                member.is_index_signature_with_ty(|ty| {
+                    self.resolve(ty)
+                        .is_some_and(|ty| ty.id == GLOBAL_SYMBOL_DISPOSE_ID)
+                })
+            })
+            .is_some()
+        })
+    }
+
+    pub fn is_async_disposable(&self) -> bool {
+        if self.id == GLOBAL_ASYNC_DISPOSABLE_ID {
+            return true;
+        }
+
+        self.resolved_data().is_some_and(|ty| {
+            ty.find_member(self.resolver.as_ref(), |member| {
+                member.is_index_signature_with_ty(|ty| {
+                    self.resolve(ty)
+                        .is_some_and(|ty| ty.id == GLOBAL_SYMBOL_ASYNC_DISPOSE_ID)
+                })
+            })
+            .is_some()
         })
     }
 

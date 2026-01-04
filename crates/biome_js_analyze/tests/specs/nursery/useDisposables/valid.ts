@@ -1,0 +1,48 @@
+/* should not generate diagnostics */
+using disposable = {
+	[Symbol.dispose]() {
+		// do something
+	},
+};
+
+await using asyncDisposable = {
+	async [Symbol.asyncDispose](): Promise<void> {
+		// do something
+	},
+};
+
+function createDisposable(): Disposable {
+	return {
+		[Symbol.dispose]() {
+			// do something
+		},
+	};
+}
+
+using createdDisposable = createDisposable();
+
+function createAsyncDisposable(): AsyncDisposable {
+	return {
+		async [Symbol.asyncDispose](): Promise<void> {
+			// do something
+		},
+	};
+}
+
+await using createdAsyncDisposable = createAsyncDisposable();
+
+class DisposableClass implements Disposable {
+	[Symbol.dispose](): void {
+		// do something
+	}
+}
+
+using disposableInstance = new DisposableClass();
+
+class AsyncDisposableClass implements AsyncDisposable {
+	async [Symbol.asyncDispose](): Promise<void> {
+		// do something
+	}
+}
+
+await using asyncDisposableInstance = new AsyncDisposableClass();

@@ -70,10 +70,22 @@ define_global_type!(FETCH_ID, 40, "fetch");
 define_global_type!(INSTANCEOF_REGEXP_ID, 41, "instanceof RegExp");
 define_global_type!(REGEXP_ID, 42, "RegExp");
 define_global_type!(REGEXP_EXEC_ID, 43, "RegExp.exec");
+define_global_type!(INSTANCEOF_SYMBOL_ID, 44, "instanceof Symbol");
+define_global_type!(SYMBOL_ID, 45, "Symbol");
+define_global_type!(SYMBOL_DISPOSE_ID, 46, "Symbol.dispose");
+define_global_type!(SYMBOL_ASYNC_DISPOSE_ID, 47, "Symbol.asyncDispose");
+define_global_type!(DISPOSABLE_ID, 48, "Disposable");
+define_global_type!(DISPOSABLE_DISPOSE_ID, 49, "Disposable[Symbol.dispose]");
+define_global_type!(ASYNC_DISPOSABLE_ID, 50, "AsyncDisposable");
+define_global_type!(
+    ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID,
+    51,
+    "AsyncDisposable[Symbol.asyncDispose]"
+);
 
 /// Total number of predefined types.
 /// Must be one more than the highest TypeId above.
-pub const NUM_PREDEFINED_TYPES: usize = 44;
+pub const NUM_PREDEFINED_TYPES: usize = 52;
 
 // Resolved type ID constants (TypeId wrapped with GlobalLevel)
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
@@ -114,3 +126,11 @@ pub const GLOBAL_FETCH_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, FE
 pub const GLOBAL_INSTANCEOF_REGEXP_ID: ResolvedTypeId =
     ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_REGEXP_ID);
 pub const GLOBAL_REGEXP_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, REGEXP_ID);
+pub const GLOBAL_SYMBOL_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, SYMBOL_ID);
+pub const GLOBAL_SYMBOL_DISPOSE_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, SYMBOL_DISPOSE_ID);
+pub const GLOBAL_SYMBOL_ASYNC_DISPOSE_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, SYMBOL_ASYNC_DISPOSE_ID);
+pub const GLOBAL_DISPOSABLE_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, DISPOSABLE_ID);
+pub const GLOBAL_ASYNC_DISPOSABLE_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, ASYNC_DISPOSABLE_ID);

@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+const a = {
+	[Symbol.dispose](): void {
+		// do something
+	},
+};
+
+```
+
+## Result
+
+```
+a => Object {
+  prototype: No prototype
+  members: [[Global TypeId(0)]: Disposable[Symbol.dispose]]
+}
+
+```
+
+## Registered types
+
+```
+Global TypeId(0) => Symbol.dispose
+
+Global TypeId(1) => Object {
+  prototype: No prototype
+  members: [[Global TypeId(0)]: Disposable[Symbol.dispose]]
+}
+```
