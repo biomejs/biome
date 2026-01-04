@@ -544,6 +544,7 @@ pub enum CssSyntaxKind {
     CSS_BOGUS_SUPPORTS_CONDITION,
     CSS_BOGUS_IF_BRANCH,
     CSS_BOGUS_IF_TEST,
+    CSS_BOGUS_IF_TEST_BOOLEAN_EXPR,
     CSS_METAVARIABLE,
     #[doc(hidden)]
     __LAST,
