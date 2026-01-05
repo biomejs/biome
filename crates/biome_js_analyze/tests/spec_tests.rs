@@ -58,7 +58,8 @@ impl RegistryVisitor<JsLanguage> for NeedsModuleGraph<'_> {
         if self
             .enabled_rules
             .is_some_and(|enabled_rules| enabled_rules.contains(&filter))
-            && R::METADATA.domains.contains(&RuleDomain::Project)
+            && (R::METADATA.domains.contains(&RuleDomain::Project)
+                || R::METADATA.domains.contains(&RuleDomain::Types))
         {
             self.needs_module_graph = true;
         }

@@ -17,6 +17,7 @@ use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
 };
 use biome_service::projects::ProjectKey;
+use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::workspace::{
     FeaturesBuilder, OpenProjectParams, OpenProjectResult, PullDiagnosticsParams,
     SupportsFeatureParams,
@@ -741,7 +742,7 @@ impl Session {
         spawn_blocking(move || {
             let result = session.workspace.scan_project(ScanProjectParams {
                 project_key,
-                watch: scan_kind.is_project(),
+                watch: scan_kind.is_project() || scan_kind.is_type_aware(),
                 force,
                 scan_kind,
                 verbose: false,
@@ -960,6 +961,7 @@ impl Session {
                 .map(BiomePath::from),
             configuration,
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         });
 
         self.insert_and_scan_project(project_key, path.into(), scan_kind, force)

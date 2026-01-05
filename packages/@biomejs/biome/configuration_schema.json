@@ -6256,6 +6256,11 @@
 					"description": "Turborepo build system rules",
 					"type": "string",
 					"const": "turborepo"
+				},
+				{
+					"description": "Rules that require type inference",
+					"type": "string",
+					"const": "types"
 				}
 			]
 		},
@@ -12477,6 +12482,12 @@
 		},
 		"UseIterableCallbackReturnOptions": {
 			"type": "object",
+			"properties": {
+				"checkForEach": {
+					"description": "When `true`, the rule reports `forEach` callbacks that return a value (default behaviour).\nWhen `false` or unset, such callbacks are ignored.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseJsonImportAttributesConfiguration": {

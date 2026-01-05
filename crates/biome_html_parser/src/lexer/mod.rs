@@ -164,6 +164,8 @@ impl<'src> HtmlLexer<'src> {
             b',' if self.current() == T![<] => self.consume_byte(T![,]),
             b'-' if self.at_frontmatter_edge() => self.consume_frontmatter_edge(),
             b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
+            b'[' => self.consume_byte(T!['[']),
+            b']' => self.consume_byte(T![']']),
             b'{' => {
                 if self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
@@ -470,11 +472,14 @@ impl<'src> HtmlLexer<'src> {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'}' => self.consume_byte(T!['}']),
+            b'.' if self.is_at_three_dots() => self.consume_dot3(),
             b',' => self.consume_byte(T![,]),
             b'(' => self.consume_byte(T!['(']),
             b')' => self.consume_byte(T![')']),
             b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             b'{' => self.consume_byte(T!['{']),
+            b'[' => self.consume_byte(T!['[']),
+            b']' => self.consume_byte(T![']']),
             _ if is_at_start_identifier(current) => self
                 .consume_language_identifier(current)
                 .unwrap_or_else(|| self.consume_svelte_identifier(current)),
@@ -799,6 +804,13 @@ impl<'src> HtmlLexer<'src> {
         token
     }
 
+    #[inline(always)]
+    fn consume_dot3(&mut self) -> HtmlSyntaxKind {
+        self.assert_byte(b'.');
+        self.advance(3);
+        T![...]
+    }
+
     /// Consumes a closing double text expression '}}' token used for interpolation.
     fn consume_r_double_text_expression(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_closing_double_text_expression());
@@ -865,6 +877,13 @@ impl<'src> HtmlLexer<'src> {
                 || self.byte_at(1) == Some(b'#')
                 || self.byte_at(1) == Some(b':')
                 || self.byte_at(1) == Some(b'/'))
+    }
+
+    #[inline(always)]
+    fn is_at_three_dots(&self) -> bool {
+        self.current_byte() == Some(b'.')
+            && self.byte_at(1) == Some(b'.')
+            && self.byte_at(2) == Some(b'.')
     }
 
     #[inline(always)]

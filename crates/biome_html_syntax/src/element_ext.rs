@@ -219,6 +219,10 @@ impl HtmlElement {
     pub fn is_sass_lang(&self) -> bool {
         self.is_style_tag() && self.has_attribute("lang", "scss")
     }
+
+    pub fn name(&self) -> SyntaxResult<HtmlTagName> {
+        self.opening_element()?.name()
+    }
 }
 
 impl HtmlTagName {

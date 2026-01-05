@@ -251,7 +251,7 @@ pub fn module_graph_for_test_file(
     let fs = OsFileSystem::new(dir);
     let paths = get_added_js_paths(&fs, &paths);
 
-    module_graph.update_graph_for_js_paths(&fs, project_layout, &paths);
+    module_graph.update_graph_for_js_paths(&fs, project_layout, &paths, true);
 
     Arc::new(module_graph)
 }

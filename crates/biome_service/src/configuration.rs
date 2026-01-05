@@ -23,6 +23,7 @@ use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_analyze::METADATA as html_lint_metadata;
+use biome_html_syntax::HtmlLanguage;
 use biome_js_analyze::METADATA as js_lint_metadata;
 use biome_js_syntax::JsLanguage;
 use biome_json_analyze::METADATA as json_lint_metadata;
@@ -729,6 +730,7 @@ mod test {
 /// on the current configuration
 pub struct ProjectScanComputer<'a> {
     requires_project_scan: bool,
+    requires_types: bool,
     enabled_rules: FxHashSet<RuleFilter<'a>>,
     configuration: &'a Configuration,
     skip: &'a [AnalyzerSelector],
@@ -741,6 +743,7 @@ impl<'a> ProjectScanComputer<'a> {
         Self {
             enabled_rules,
             requires_project_scan: false,
+            requires_types: false,
             configuration,
             skip: &[],
             only: &[],
@@ -765,6 +768,11 @@ impl<'a> ProjectScanComputer<'a> {
             for (domain, value) in domains.iter() {
                 if domain == &RuleDomain::Project && value != &RuleDomainValue::None {
                     self.requires_project_scan = true;
+                }
+                if domain == &RuleDomain::Types && value != &RuleDomainValue::None {
+                    self.requires_types = true;
+                    self.requires_project_scan = true;
+                    // requiring types is of higher order of project, so we can bail
                     break;
                 }
             }
@@ -774,8 +782,11 @@ impl<'a> ProjectScanComputer<'a> {
         biome_css_analyze::visit_registry(&mut self);
         biome_json_analyze::visit_registry(&mut self);
         biome_js_analyze::visit_registry(&mut self);
+        biome_html_analyze::visit_registry(&mut self);
 
-        if self.requires_project_scan {
+        if self.requires_types {
+            ScanKind::TypeAware
+        } else if self.requires_project_scan {
             ScanKind::Project
         } else {
             // There's no need to scan further known files if the VCS isn't enabled
@@ -799,6 +810,7 @@ impl<'a> ProjectScanComputer<'a> {
                 if selector.match_rule::<R>() {
                     let domains = R::METADATA.domains;
                     self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+                    self.requires_types |= domains.contains(&RuleDomain::Types);
                     break;
                 }
             }
@@ -807,6 +819,7 @@ impl<'a> ProjectScanComputer<'a> {
         {
             let domains = R::METADATA.domains;
             self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+            self.requires_types |= domains.contains(&RuleDomain::Types);
         }
     }
 }
@@ -850,6 +863,15 @@ impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
     }
 }
 
+impl RegistryVisitor<HtmlLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.check_rule::<R, HtmlLanguage>();
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -997,6 +1019,69 @@ mod tests {
         assert_eq!(
             ProjectScanComputer::new(&configuration)
                 .with_rule_selectors(&[], &[DomainSelector("test").into()])
+                .compute(),
+            ScanKind::NoScanner
+        );
+    }
+
+    #[test]
+    fn should_return_type_aware_if_type_aware_domain_is_enabled() {
+        let mut domains = FxHashMap::default();
+        domains.insert(RuleDomain::Types, RuleDomainValue::Recommended);
+
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                domains: Some(RuleDomains(domains)),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration).compute(),
+            ScanKind::TypeAware
+        );
+    }
+
+    #[test]
+    fn should_return_type_aware_if_type_aware_domain_selector() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("types").into()])
+                .compute(),
+            ScanKind::TypeAware
+        );
+    }
+
+    #[test]
+    fn should_return_type_aware_when_both_type_aware_and_project_enabled() {
+        let mut domains = FxHashMap::default();
+        domains.insert(RuleDomain::Project, RuleDomainValue::Recommended);
+        domains.insert(RuleDomain::Types, RuleDomainValue::Recommended);
+
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                domains: Some(RuleDomains(domains)),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration).compute(),
+            ScanKind::TypeAware
+        );
+    }
+
+    #[test]
+    fn should_not_return_type_aware_if_non_type_aware_domain() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("react").into()])
                 .compute(),
             ScanKind::NoScanner
         );

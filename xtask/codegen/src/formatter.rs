@@ -21,12 +21,12 @@ struct GitRepo {
 }
 
 impl GitRepo {
-    fn open() -> Self {
+    fn open(allow_dirty: bool, allow_staged: bool) -> Self {
         let root = project_root();
         let repo = Repository::discover(&root).expect("failed to open git repo");
 
-        let mut allow_staged = false;
-        let mut allow_dirty = false;
+        let mut allow_staged = allow_staged;
+        let mut allow_dirty = allow_dirty;
         for arg in env::args() {
             match arg.as_str() {
                 "--allow-staged" => {
@@ -241,8 +241,8 @@ enum NodeKind {
     Union { variants: Vec<String> },
 }
 
-pub fn generate_formatters() {
-    let repo = GitRepo::open();
+pub fn generate_formatters(allow_dirty: bool, allow_staged: bool) {
+    let repo = GitRepo::open(allow_dirty, allow_staged);
 
     for language in ALL_LANGUAGE_KIND {
         generate_formatter(&repo, language);

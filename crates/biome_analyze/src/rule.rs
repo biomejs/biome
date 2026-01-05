@@ -475,6 +475,8 @@ pub enum RuleDomain {
     Tailwind,
     /// Turborepo build system rules
     Turborepo,
+    /// Rules that require type inference
+    Types,
 }
 
 impl Display for RuleDomain {
@@ -490,6 +492,7 @@ impl Display for RuleDomain {
             Self::Project => fmt.write_str("project"),
             Self::Tailwind => fmt.write_str("tailwind"),
             Self::Turborepo => fmt.write_str("turborepo"),
+            Self::Types => fmt.write_str("types"),
         }
     }
 }
@@ -530,6 +533,7 @@ impl RuleDomain {
             Self::Project => &[],
             Self::Tailwind => &[&("tailwindcss", ">=3.0.0")],
             Self::Turborepo => &[&("turbo", ">=1.0.0")],
+            Self::Types => &[],
         }
     }
 
@@ -556,6 +560,7 @@ impl RuleDomain {
             Self::Project => &[],
             Self::Tailwind => &[],
             Self::Turborepo => &[],
+            Self::Types => &[],
         }
     }
 
@@ -570,6 +575,7 @@ impl RuleDomain {
             Self::Project => "project",
             Self::Tailwind => "tailwind",
             Self::Turborepo => "turborepo",
+            Self::Types => "types",
         }
     }
 }
@@ -588,6 +594,7 @@ impl FromStr for RuleDomain {
             "project" => Ok(Self::Project),
             "tailwind" => Ok(Self::Tailwind),
             "turborepo" => Ok(Self::Turborepo),
+            "types" => Ok(Self::Types),
 
             _ => Err("Invalid rule domain"),
         }

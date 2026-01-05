@@ -28,6 +28,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("#", "HASH"),
         ("(", "L_PAREN"),
         (")", "R_PAREN"),
+        ("...", "DOT3"),
     ],
     keywords: &[
         "null",
@@ -115,6 +116,10 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "SVELTE_SNIPPET_BLOCK",
         "SVELTE_SNIPPET_OPENING_BLOCK",
         "SVELTE_SNIPPET_CLOSING_BLOCK",
+        "SVELTE_CURLY_DESTRUCTURED_NAME",
+        "SVELTE_SQUARE_DESTRUCTURED_NAME",
+        "SVELTE_BINDING_ASSIGNMENT_BINDING_LIST",
+        "SVELTE_REST_BINDING",
         // Vue nodes
         "VUE_DIRECTIVE",
         "VUE_DIRECTIVE_ARGUMENT",

@@ -152,6 +152,7 @@ use biome_fs::{BiomePath, FileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::configuration::{LoadedConfiguration, ProjectScanComputer, load_configuration};
 use biome_service::projects::ProjectKey;
+use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::workspace::{
     OpenProjectParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
@@ -405,6 +406,10 @@ pub(crate) trait CommandRunner {
             self.minimal_scan_kind(),
         );
 
+        // Scan the project
+        let scan_kind =
+            execution.compute_scan_kind(paths.as_slice(), working_dir.as_path(), scan_kind);
+
         // Update the settings of the project
         let result = workspace.update_settings(UpdateSettingsParams {
             project_key: open_project_result.project_key,
@@ -414,6 +419,7 @@ pub(crate) trait CommandRunner {
                 .into_iter()
                 .map(|(path, config)| (BiomePath::from(path), config))
                 .collect(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         })?;
         if self.should_validate_configuration_diagnostics() {
             print_diagnostics_from_workspace_result(
@@ -422,10 +428,6 @@ pub(crate) trait CommandRunner {
                 cli_options.verbose,
             )?;
         }
-
-        // Scan the project
-        let scan_kind =
-            execution.compute_scan_kind(paths.as_slice(), working_dir.as_path(), scan_kind);
 
         let result = workspace.scan_project(ScanProjectParams {
             project_key: open_project_result.project_key,

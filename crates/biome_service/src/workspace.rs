@@ -52,7 +52,7 @@
 //!   format a file with a language that does not have a formatter
 
 mod client;
-mod document;
+pub(crate) mod document;
 mod server;
 
 use biome_analyze::{ActionCategory, RuleCategories};
@@ -95,7 +95,7 @@ pub use crate::{
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
 
-use crate::settings::SettingsWithEditor;
+use crate::settings::{ModuleGraphResolutionKind, SettingsWithEditor};
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use server::OpenFileReason;
 
@@ -750,6 +750,8 @@ pub struct UpdateSettingsParams {
     pub workspace_directory: Option<BiomePath>,
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub extended_configurations: Vec<(BiomePath, Configuration)>,
+    #[serde(default)]
+    pub module_graph_resolution_kind: ModuleGraphResolutionKind,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -949,6 +951,7 @@ pub struct CloseFileParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateModuleGraphParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     /// The kind of update to apply to the module graph
     pub update_kind: UpdateKind,

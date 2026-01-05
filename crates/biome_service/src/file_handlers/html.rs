@@ -8,6 +8,7 @@ use crate::configuration::to_analyzer_rules;
 use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
+use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{CodeAction, CssDocumentServices, DocumentServices, EmbeddedSnippet};
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
@@ -40,7 +41,8 @@ use biome_html_formatter::{
 use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
-    AstroEmbeddedContent, HtmlElement, HtmlLanguage, HtmlRoot, HtmlSyntaxNode,
+    AstroEmbeddedContent, HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlLanguage,
+    HtmlRoot, HtmlSingleTextExpression, HtmlSyntaxNode,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
@@ -396,9 +398,13 @@ fn parse_embedded_nodes(
     file_source: &DocumentFileSource,
     settings: &SettingsWithEditor,
     cache: &mut NodeCache,
+    builder: &mut EmbeddedBuilder,
 ) -> ParseEmbedResult {
     let mut nodes = Vec::new();
     let html_root: HtmlRoot = root.tree();
+    let Some(file_source) = file_source.to_html_file_source() else {
+        return ParseEmbedResult::default();
+    };
 
     // Walk through all HTML elements looking for script tags and style tags
     for element in html_root.syntax().descendants() {
@@ -408,39 +414,63 @@ fn parse_embedded_nodes(
                 cache,
                 biome_path,
                 settings,
+                builder,
             );
             if let Some((content, file_source)) = result {
                 nodes.push((content.into(), file_source));
             }
         }
 
-        let Some(element) = HtmlElement::cast_ref(&element) else {
-            continue;
-        };
+        if file_source.is_svelte()
+            && let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
+        {
+            let result = parse_svelte_text_expression(text_expression, cache, biome_path, settings);
+            if let Some((content, file_source)) = result {
+                nodes.push((content.into(), file_source));
+            }
+        }
 
-        if let Some(script_type) = element.get_script_type() {
-            if script_type.is_javascript() {
-                let result = parse_embedded_script(
+        if file_source.is_vue()
+            && let Some(_text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
+        {
+            // TODO: uncomment this once we have better parsing of Vue syntax where we have expressions VS names
+            // let result = parse_vue_text_expression(text_expression, cache, biome_path, settings);
+            // if let Some((content, file_source)) = result {
+            //     nodes.push((content.into(), file_source));
+            // }
+        }
+
+        if let Some(element) = HtmlElement::cast_ref(&element) {
+            if let Some(script_type) = element.get_script_type() {
+                if script_type.is_javascript() {
+                    let result = parse_embedded_script(
+                        element.clone(),
+                        cache,
+                        biome_path,
+                        &file_source,
+                        settings,
+                        builder,
+                    );
+                    if let Some((content, file_source)) = result {
+                        nodes.push((content.into(), file_source));
+                    }
+                } else if script_type.is_json() {
+                    let result = parse_embedded_json(element.clone(), cache, biome_path, settings);
+                    if let Some((content, file_source)) = result {
+                        nodes.push((content.into(), file_source));
+                    }
+                }
+            } else if element.is_style_tag() {
+                let result = parse_embedded_style(
                     element.clone(),
                     cache,
                     biome_path,
-                    file_source,
+                    &file_source,
                     settings,
                 );
-                if let Some((content, file_source)) = result {
-                    nodes.push((content.into(), file_source));
+                if let Some((content, services, file_source)) = result {
+                    nodes.push(((content, services).into(), file_source));
                 }
-            } else if script_type.is_json() {
-                let result = parse_embedded_json(element.clone(), cache, biome_path, settings);
-                if let Some((content, file_source)) = result {
-                    nodes.push((content.into(), file_source));
-                }
-            }
-        } else if element.is_style_tag() {
-            let result =
-                parse_embedded_style(element.clone(), cache, biome_path, file_source, settings);
-            if let Some((content, services, file_source)) = result {
-                nodes.push(((content, services).into(), file_source));
             }
         }
     }
@@ -452,6 +482,7 @@ pub(crate) fn parse_astro_embedded_script(
     cache: &mut NodeCache,
     path: &BiomePath,
     settings: &SettingsWithEditor,
+    builder: &mut EmbeddedBuilder,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
     let content = element.content_token()?;
     let file_source =
@@ -465,6 +496,7 @@ pub(crate) fn parse_astro_embedded_script(
         options,
         cache,
     );
+    builder.visit_js_source_snippet(&parse.tree());
 
     Some((
         EmbeddedSnippet::new(
@@ -481,10 +513,10 @@ pub(crate) fn parse_embedded_script(
     element: HtmlElement,
     cache: &mut NodeCache,
     path: &BiomePath,
-    html_file_source: &DocumentFileSource,
+    html_file_source: &HtmlFileSource,
     settings: &SettingsWithEditor,
+    builder: &mut EmbeddedBuilder,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
-    let html_file_source = html_file_source.to_html_file_source()?;
     if element.is_javascript_tag() {
         let file_source = if html_file_source.is_svelte() || html_file_source.is_vue() {
             let mut file_source = if element.is_typescript_lang() {
@@ -497,10 +529,12 @@ pub(crate) fn parse_embedded_script(
                 JsFileSource::js_module()
             };
             if html_file_source.is_svelte() {
-                file_source = file_source.with_embedding_kind(EmbeddingKind::Svelte);
+                file_source =
+                    file_source.with_embedding_kind(EmbeddingKind::Svelte { is_source: true });
             } else if html_file_source.is_vue() {
                 file_source = file_source.with_embedding_kind(EmbeddingKind::Vue {
                     setup: element.is_script_with_setup_attribute(),
+                    is_source: true,
                 });
             }
             file_source
@@ -535,6 +569,8 @@ pub(crate) fn parse_embedded_script(
                 cache,
             );
 
+            builder.visit_js_source_snippet(&parse.tree());
+
             Some(EmbeddedSnippet::new(
                 parse.into(),
                 child.range(),
@@ -553,14 +589,13 @@ pub(crate) fn parse_embedded_style(
     element: HtmlElement,
     cache: &mut NodeCache,
     biome_path: &BiomePath,
-    html_file_source: &DocumentFileSource,
+    html_file_source: &HtmlFileSource,
     settings: &SettingsWithEditor,
 ) -> Option<(
     EmbeddedSnippet<CssLanguage>,
     DocumentServices,
     DocumentFileSource,
 )> {
-    let html_file_source = html_file_source.to_html_file_source()?;
     if element.is_style_tag() {
         // This is probably an error
         if element.children().len() > 1 {
@@ -648,6 +683,67 @@ pub(crate) fn parse_embedded_json(
         ))
     })?;
     Some((script_children, file_source))
+}
+
+/// Parses Svelte single text expressions `{ expression }`
+pub(crate) fn parse_svelte_text_expression(
+    element: HtmlSingleTextExpression,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    let expression = element.expression().ok()?;
+    let content = expression.html_literal_token().ok()?;
+    let file_source =
+        JsFileSource::js_module().with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
+    let document_file_source = DocumentFileSource::Js(file_source);
+    let options = settings.parse_options::<JsLanguage>(biome_path, &document_file_source);
+    let parse = parse_js_with_offset_and_cache(
+        content.text(),
+        content.text_range().start(),
+        file_source,
+        options,
+        cache,
+    );
+    let snippet = EmbeddedSnippet::new(
+        parse.into(),
+        expression.range(),
+        content.text_range(),
+        content.text_range().start(),
+    );
+    Some((snippet, document_file_source))
+}
+
+/// Parses Vue double text expressions `{{ expression }}`
+#[expect(unused)]
+pub(crate) fn parse_vue_text_expression(
+    element: HtmlDoubleTextExpression,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    let expression = element.expression().ok()?;
+    let content = expression.html_literal_token().ok()?;
+    let file_source = JsFileSource::js_module().with_embedding_kind(EmbeddingKind::Vue {
+        setup: false,
+        is_source: false,
+    });
+    let document_file_source = DocumentFileSource::Js(file_source);
+    let options = settings.parse_options::<JsLanguage>(biome_path, &document_file_source);
+    let parse = parse_js_with_offset_and_cache(
+        content.text(),
+        content.text_range().start(),
+        file_source,
+        options,
+        cache,
+    );
+    let snippet = EmbeddedSnippet::new(
+        parse.into(),
+        expression.range(),
+        content.text_range(),
+        content.text_range().start(),
+    );
+    Some((snippet, document_file_source))
 }
 
 fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
@@ -793,9 +889,11 @@ fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
 
-    let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {
-        process_lint.process_signal(signal)
-    });
+    let source_type = params.language.to_html_file_source().unwrap_or_default();
+    let (_, analyze_diagnostics) =
+        analyze(&tree, filter, &analyzer_options, source_type, |signal| {
+            process_lint.process_signal(signal)
+        });
 
     process_lint.into_result(
         params
@@ -826,7 +924,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();
     let _ = trace_span!("Parsed file", tree =? tree).entered();
-    let Some(_) = language.to_html_file_source() else {
+    let Some(source_type) = language.to_html_file_source() else {
         error!("Could not determine the HTML file source of the file");
         return PullActionsResult {
             actions: Vec::new(),
@@ -851,7 +949,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    analyze(&tree, filter, &analyzer_options, |signal| {
+    analyze(&tree, filter, &analyzer_options, source_type, |signal| {
         actions.extend(signal.actions().into_code_action_iter().map(|item| {
             CodeAction {
                 category: item.category.clone(),
@@ -905,8 +1003,12 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         tree.syntax().text_range_with_trivia().len().into(),
     );
 
+    let source_type = params
+        .document_file_source
+        .to_html_file_source()
+        .unwrap_or_default();
     loop {
-        let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
+        let (action, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
             process_fix_all.process_signal(signal)
         });
 

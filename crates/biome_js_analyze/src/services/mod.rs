@@ -1,5 +1,6 @@
 pub mod aria;
 pub mod control_flow;
+pub mod embedded_bindings;
 pub mod manifest;
 pub mod module_graph;
 pub mod semantic;
