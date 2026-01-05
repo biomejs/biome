@@ -1,14 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "This crate is internally used to share lint rule options across analyzers"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_rule_options"
-repository.workspace = true
 version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "This crate is internally used to share lint rule options across analyzers"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 [dependencies]
 biome_console            = { workspace = true }
@@ -26,11 +27,11 @@ regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true }
+serde_json               = { workspace = true, optional = true }
 smallvec                 = { workspace = true }
+
+[features]
+schema = ["dep:schemars", "dep:serde_json"]
 
 [lints]
 workspace = true
-
-
-[features]
-schema = ["dep:schemars"]

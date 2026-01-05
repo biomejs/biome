@@ -17,7 +17,7 @@ impl ModuleGraphService {
     }
 
     pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
-        self.0.module_info_for_path(path)
+        self.0.js_module_info_for_path(path)
     }
 
     pub fn project_layout(&self) -> &ProjectLayout {

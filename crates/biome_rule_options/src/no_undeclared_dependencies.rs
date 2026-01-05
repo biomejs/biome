@@ -1,25 +1,25 @@
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize_macros::{Deserializable, Merge};
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoUndeclaredDependenciesOptions {
     /// If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
-    #[serde(default)]
-    pub dev_dependencies: DependencyAvailability,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub dev_dependencies: Option<DependencyAvailability>,
 
     /// If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.
-    #[serde(default)]
-    pub peer_dependencies: DependencyAvailability,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub peer_dependencies: Option<DependencyAvailability>,
 
     /// If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.
-    #[serde(default)]
-    pub optional_dependencies: DependencyAvailability,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub optional_dependencies: Option<DependencyAvailability>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
@@ -30,6 +30,12 @@ pub enum DependencyAvailability {
 
     /// Dependencies are available in files that matches any of the globs.
     Patterns(Box<[biome_glob::Glob]>),
+}
+
+impl biome_deserialize::Merge for DependencyAvailability {
+    fn merge_with(&mut self, other: Self) {
+        *self = other;
+    }
 }
 
 impl Default for DependencyAvailability {
@@ -54,44 +60,26 @@ impl Deserializable for DependencyAvailability {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for DependencyAvailability {
-    fn schema_name() -> String {
-        "DependencyAvailability".to_owned()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("DependencyAvailability")
     }
 
-    fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-        use schemars::schema::*;
-
-        Schema::Object(SchemaObject {
-            subschemas: Some(Box::new(SubschemaValidation {
-                one_of: Some(vec![
-                    Schema::Object(SchemaObject {
-                        instance_type: Some(InstanceType::Boolean.into()),
-                        metadata: Some(Box::new(Metadata {
-                            description: Some("This type of dependency will be always available or unavailable.".to_owned()),
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    }),
-                    Schema::Object(SchemaObject {
-                        instance_type: Some(InstanceType::Array.into()),
-                        array: Some(Box::new(ArrayValidation {
-                            items: Some(SingleOrVec::Single(Box::new(Schema::Object(SchemaObject {
-                                instance_type: Some(InstanceType::String.into()),
-                                ..Default::default()
-                            })))),
-                            min_items: Some(1),
-                            ..Default::default()
-                        })),
-                        metadata: Some(Box::new(Metadata {
-                            description: Some("This type of dependency will be available only if the linted file matches any of the globs.".to_owned()),
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    })
-                ]),
-                ..Default::default()
-            })),
-            ..Default::default()
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "oneOf": [
+                {
+                    "type": "boolean",
+                    "description": "This type of dependency will be always available or unavailable."
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "description": "This type of dependency will be available only if the linted file matches any of the globs."
+                }
+            ]
         })
     }
 }

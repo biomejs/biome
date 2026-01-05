@@ -219,9 +219,15 @@ fn resolve_module_with_package_json(
 ) -> Result<Utf8PathBuf, ResolveError> {
     // `tsconfig.json` may only be found in directories containing a
     // `package.json`, so this is the only place we need to attempt to use it.
-    let tsconfig = fs.read_tsconfig_json(&package_path.join("tsconfig.json"));
-    if let Some(path) = tsconfig.as_ref().ok().and_then(|ts_config| {
-        resolve_paths_mapping(specifier, ts_config, package_path, fs, options).ok()
+    let tsconfig = match &options.tsconfig {
+        DiscoverableManifest::Auto => fs
+            .read_tsconfig_json(&package_path.join("tsconfig.json"))
+            .map(Cow::Owned),
+        DiscoverableManifest::Explicit { manifest, .. } => Ok(Cow::Borrowed(*manifest)),
+        DiscoverableManifest::Off => Err(ResolveError::NotFound),
+    };
+    if let Some(path) = tsconfig.as_ref().ok().and_then(|tsconfig| {
+        resolve_paths_mapping(specifier, tsconfig, package_path, fs, options).ok()
     }) {
         return Ok(path);
     }
@@ -256,6 +262,17 @@ fn resolve_module_with_package_json(
             fs,
             options,
         );
+    }
+
+    if let Some(base_url) = tsconfig
+        .as_ref()
+        .ok()
+        .and_then(|tsconfig| tsconfig.compiler_options.base_url.as_ref())
+    {
+        match resolve_relative_path(specifier, base_url, fs, options) {
+            Err(ResolveError::NotFound) => { /* continue below */ }
+            result => return result,
+        }
     }
 
     resolve_dependency(specifier, package_path, fs, options)
@@ -376,12 +393,12 @@ fn resolve_paths_mapping(
 
     let resolve_specifier = |specifier: &str| {
         if is_relative_specifier(specifier) {
-            let base_dir = match &tsconfig_json.compiler_options.base_url {
-                Some(base_url) => base_url.as_path(),
-                None => package_path,
-            };
-
-            resolve_relative_path(specifier, base_dir, fs, options)
+            resolve_relative_path(
+                specifier,
+                &tsconfig_json.compiler_options.paths_base,
+                fs,
+                options,
+            )
         } else {
             resolve_dependency(specifier, package_path, fs, options)
         }
@@ -731,6 +748,7 @@ fn strip_query_and_fragment(specifier: &str) -> &str {
 }
 
 /// Options to pass to the resolver.
+#[derive(Clone)]
 pub struct ResolveOptions<'a> {
     /// If `true`, specifiers are assumed to be relative paths. Resolving them
     /// as a package will still be attempted if resolving as a relative path
@@ -962,7 +980,7 @@ impl<'a> ResolveOptions<'a> {
 /// `tsconfig.json` will be automatically discovered, but this enum allows to
 /// turn them off completely, or to provide an explicit manifest to be used
 /// instead.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub enum DiscoverableManifest<T> {
     #[default]
     Auto,

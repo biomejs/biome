@@ -353,7 +353,7 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
         let in_buffer = &console.in_buffer;
         for (index, message) in in_buffer.iter().enumerate() {
             if index == 0 {
-                cli_snapshot.in_messages.stdin = Some(message.to_string());
+                cli_snapshot.in_messages.stdin = Some(message.clone());
             }
         }
 

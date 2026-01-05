@@ -1,4 +1,6 @@
-use crate::token_source::{HtmlTokenSource, HtmlTokenSourceCheckpoint, TextExpressionKind};
+use crate::token_source::{
+    HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint, TextExpressionKind,
+};
 use biome_html_factory::HtmlSyntaxFactory;
 use biome_html_syntax::{
     HtmlFileSource, HtmlLanguage, HtmlSyntaxKind, HtmlTextExpressions, HtmlVariant,
@@ -65,6 +67,12 @@ impl<'source> HtmlParser<'source> {
         // scoped properties that aren't only dependent on checkpoints and
         // should be reset manually when the scope of their use is exited.
     }
+
+    /// Re-lexes the current token in the specified context. Returns the kind
+    /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
+    pub fn re_lex(&mut self, context: HtmlReLexContext) -> HtmlSyntaxKind {
+        self.source_mut().re_lex(context)
+    }
 }
 
 pub struct HtmlParserCheckpoint {
@@ -100,6 +108,8 @@ impl<'src> Parser for HtmlParser<'src> {
 pub struct HtmlParseOptions {
     pub(crate) frontmatter: bool,
     pub(crate) text_expression: Option<TextExpressionKind>,
+    pub(crate) vue: bool,
+    pub(crate) is_html: bool,
 }
 
 impl HtmlParseOptions {
@@ -117,6 +127,27 @@ impl HtmlParseOptions {
         self.frontmatter = true;
         self
     }
+
+    /// Toggle parsing of double-quoted text expressions.
+    ///
+    /// When `value` is `true`, enables [`TextExpressionKind::Double`].
+    /// When `false`, disables text expressions entirely (`None`).
+    /// Use [`HtmlParseOptions::with_single_text_expression`] to enable single-quoted mode.
+    pub fn set_double_text_expression(&mut self, value: bool) {
+        match value {
+            true => self.text_expression = Some(TextExpressionKind::Double),
+            false => self.text_expression = None,
+        }
+    }
+
+    pub fn with_vue(mut self) -> Self {
+        self.vue = true;
+        self
+    }
+
+    pub fn is_html(&self) -> bool {
+        self.is_html
+    }
 }
 
 impl From<&HtmlFileSource> for HtmlParseOptions {
@@ -131,13 +162,13 @@ impl From<&HtmlFileSource> for HtmlParseOptions {
                 HtmlTextExpressions::Double => {
                     options = options.with_double_text_expression();
                 }
-                HtmlTextExpressions::None => {}
+                HtmlTextExpressions::None => options.is_html = true,
             },
             HtmlVariant::Astro => {
                 options = options.with_single_text_expression().with_frontmatter();
             }
             HtmlVariant::Vue => {
-                options = options.with_double_text_expression();
+                options = options.with_double_text_expression().with_vue();
             }
             HtmlVariant::Svelte => {
                 options = options.with_single_text_expression();

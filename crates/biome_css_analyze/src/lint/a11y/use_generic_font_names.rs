@@ -102,6 +102,13 @@ impl Rule for UseGenericFontNames {
             return None;
         }
 
+        // Check if the last value in the original properties is a CSS variable.
+        // This must be done before collect_font_family_properties/find_font_family
+        // which filter out functions.
+        if is_last_value_css_variable(&properties) {
+            return None;
+        }
+
         let font_families = if is_font {
             find_font_family(properties)
         } else {
@@ -116,15 +123,7 @@ impl Rule for UseGenericFontNames {
             return None;
         }
 
-        // Ignore the last value if it's a CSS variable now.
         let last_value = font_families.last()?;
-        if last_value
-            .to_string()
-            .is_some_and(|s| is_css_variable(s.as_ref()))
-        {
-            return None;
-        }
-
         Some(last_value.range())
     }
 
@@ -191,4 +190,19 @@ fn collect_font_family_properties(properties: CssGenericComponentValueList) -> V
             _ => None,
         })
         .collect()
+}
+
+/// Check if the last value in the properties list is a CSS variable.
+/// This handles cases like `font-family: "Noto Serif", var(--serif)`
+/// and `font: 1em "Noto Serif", var(--serif)`.
+fn is_last_value_css_variable(properties: &CssGenericComponentValueList) -> bool {
+    // Find the last non-delimiter value
+    properties
+        .into_iter()
+        .filter_map(|v| match v {
+            AnyCssGenericComponentValue::AnyCssValue(_) => Some(v),
+            AnyCssGenericComponentValue::CssGenericDelimiter(_) => None,
+        })
+        .last()
+        .is_some_and(|v| is_css_variable(&v.to_trimmed_text().text().to_ascii_lowercase_cow()))
 }

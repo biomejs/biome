@@ -339,7 +339,7 @@ impl Rule for UseConsistentMemberAccessibility {
         }
         let accessibility = node.accessibility_modifier();
         let options = ctx.options();
-        match &options.accessibility {
+        match &options.accessibility.unwrap_or_default() {
             Accessibility::NoPublic => accessibility
                 .filter(|accessibility| accessibility.is_public())
                 .map(|accessibility| accessibility.range()),
@@ -354,7 +354,7 @@ impl Rule for UseConsistentMemberAccessibility {
         //     None => &Accessibility::default(),
         //     Some(option) => option,
         // };
-        let (diag_msg, note_msg) = match &options.accessibility {
+        let (diag_msg, note_msg) = match &options.accessibility.unwrap_or_default() {
             Accessibility::NoPublic => (
                 markup! {
                     "The "<Emphasis>"public"</Emphasis>" modifier is disallowed."

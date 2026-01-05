@@ -1,0 +1,11 @@
+[package]
+name    = "xtask_glue"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+anyhow = { workspace = true }
+
+[lints]
+workspace = true

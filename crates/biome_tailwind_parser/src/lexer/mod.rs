@@ -1,33 +1,26 @@
+mod base_name_store;
 mod tests;
 
+use crate::lexer::base_name_store::{BASENAME_STORE, is_delimiter};
 use crate::token_source::TailwindLexContext;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::{SyntaxKind, TextLen};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::*;
-use biome_tailwind_syntax::metadata::BASENAMES_WITH_DASHES;
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextSize};
 
 pub(crate) struct TailwindLexer<'src> {
     /// Source text
     source: &'src str,
-
     /// The start byte position in the source text of the next token.
     position: usize,
-
     current_kind: TailwindSyntaxKind,
-
     current_start: TextSize,
-
     diagnostics: Vec<ParseDiagnostic>,
-
     current_flags: TokenFlags,
-
     preceding_line_break: bool,
-
     after_newline: bool,
-
     unicode_bom_length: usize,
 }
 
@@ -52,13 +45,13 @@ impl<'src> TailwindLexer<'src> {
             bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
             _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, b']'),
             _ if self.current_kind == T!['('] => self.consume_bracketed_thing(TW_VALUE, b')'),
-            _ if self.current_kind == T![-] => self.consume_named_value(),
+            _ if self.current_kind == T![-] => self.consume_after_dash(),
             _ if self.current_kind == T![/] => self.consume_modifier(),
             b':' => self.consume_byte(T![:]),
             b'-' => self.consume_byte(T![-]),
             b'!' => self.consume_byte(T![!]),
             b'/' => self.consume_byte(T![/]),
-            _ if current.is_ascii_alphabetic() => self.consume_base(),
+            _ if current.is_ascii_alphanumeric() => self.consume_base(),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
@@ -68,6 +61,21 @@ impl<'src> TailwindLexer<'src> {
                 }
                 self.consume_unexpected_character()
             }
+        }
+    }
+
+    fn consume_token_saw_negative(&mut self, current: u8) -> TailwindSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, b']'),
+            _ if self.current_kind == T!['('] => self.consume_bracketed_thing(TW_VALUE, b')'),
+            b':' => self.consume_byte(T![:]),
+            b'-' => self.consume_byte(T![-]),
+            b'!' => self.consume_byte(T![!]),
+            b'/' => self.consume_byte(T![/]),
+            _ if current.is_ascii_alphabetic() => self.consume_base(),
+            _ => self.consume_unexpected_character(),
         }
     }
 
@@ -117,26 +125,39 @@ impl<'src> TailwindLexer<'src> {
     fn consume_base(&mut self) -> TailwindSyntaxKind {
         self.assert_current_char_boundary();
 
-        // Find the longest matching base name
-        let source_from_position = &self.source[self.position..];
-        let base_name = BASENAMES_WITH_DASHES
-            .iter()
-            .rfind(|&name| source_from_position.starts_with(name));
+        let bytes = self.source.as_bytes();
+        let slice = &bytes[self.position..];
 
-        if let Some(base_name) = base_name {
-            self.advance(base_name.len());
+        // ASCII fast path: if there is no '-' before a delimiter, the basename ends at the first delimiter.
+        // This avoids entering the dashed-basename trie for the common undashed utility names.
+        let mut end = 0usize;
+        while end < slice.len() {
+            let b = slice[end];
+            if b == b'-' || is_delimiter(b) {
+                break;
+            }
+            end += 1;
+        }
+
+        if end == 4 && &slice[..end] == b"data" {
+            self.advance(end);
+            return DATA_KW;
+        }
+
+        if end > 0 && (end == slice.len() || is_delimiter(slice[end])) {
+            self.advance(end);
             return TW_BASE;
         }
 
-        while let Some(byte) = self.current_byte() {
-            let char = self.current_char_unchecked();
-            if char.is_whitespace() || byte == b'-' || byte == b'!' || byte == b':' {
-                break;
-            }
-            self.advance(char.len_utf8());
-        }
+        // Fallback to dashed-basename trie matching for cases with '-' inside the basename
+        let dashed_end = BASENAME_STORE.matcher(slice).base_end();
+        self.advance(dashed_end);
 
-        TW_BASE
+        if dashed_end == 4 && &slice[..dashed_end] == b"data" {
+            DATA_KW
+        } else {
+            TW_BASE
+        }
     }
 
     fn consume_named_value(&mut self) -> TailwindSyntaxKind {
@@ -157,6 +178,24 @@ impl<'src> TailwindLexer<'src> {
         }
 
         TW_VALUE
+    }
+
+    /// After seeing a '-', we usually lex a value. However, if the next bytes are "data"
+    /// and they are followed by another '-', this is a Tailwind data-attribute variant.
+    /// In that case, emit DATA_KW so the parser can recognize `TwDataAttribute`.
+    fn consume_after_dash(&mut self) -> TailwindSyntaxKind {
+        self.assert_current_char_boundary();
+
+        let bytes = self.source.as_bytes();
+        let slice = &bytes[self.position..];
+
+        if slice.len() >= 5 && &slice[..4] == b"data" && slice[4] == b'-' {
+            // Advance past "data" only. The following '-' will be emitted as its own token.
+            self.advance(4);
+            return DATA_KW;
+        }
+
+        self.consume_named_value()
     }
 
     fn consume_modifier(&mut self) -> TailwindSyntaxKind {
@@ -252,6 +291,7 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
             match self.current_byte() {
                 Some(current) => match context {
                     TailwindLexContext::Regular => self.consume_token(current),
+                    TailwindLexContext::SawNegative => self.consume_token_saw_negative(current),
                     TailwindLexContext::Arbitrary => self.consume_token_arbitrary(current),
                     TailwindLexContext::ArbitraryVariant => {
                         self.consume_token_arbitrary_variant(current)

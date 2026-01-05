@@ -3,6 +3,7 @@
 #[macro_use]
 mod file_source;
 mod generated;
+mod import_ext;
 pub mod selector_ext;
 pub mod stmt_ext;
 mod string_ext;
@@ -12,7 +13,7 @@ pub use self::generated::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
-pub use file_source::CssFileSource;
+pub use file_source::{CssFileSource, CssVariant};
 pub use syntax_node::*;
 
 use crate::CssSyntaxKind::*;

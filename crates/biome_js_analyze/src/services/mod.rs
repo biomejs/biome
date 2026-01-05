@@ -4,4 +4,5 @@ pub mod manifest;
 pub mod module_graph;
 pub mod semantic;
 pub mod semantic_class;
+pub mod turborepo;
 pub mod typed;

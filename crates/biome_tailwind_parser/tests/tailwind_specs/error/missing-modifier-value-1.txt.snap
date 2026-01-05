@@ -18,6 +18,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@0..2 "bg" [] [],
                 minus_token: DASH@2..3 "-" [] [],
@@ -35,10 +36,10 @@ TwRoot {
                     ],
                 },
             },
-            excl_token: BANG@13..15 "!" [] [Newline("\n")],
+            excl_token: BANG@13..14 "!" [] [],
         },
     ],
-    eof_token: EOF@15..15 "" [] [],
+    eof_token: EOF@14..15 "" [Newline("\n")] [],
 }
 ```
 
@@ -47,10 +48,11 @@ TwRoot {
 ```
 0: TW_ROOT@0..15
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..15
-    0: TW_FULL_CANDIDATE@0..15
+  1: TW_CANDIDATE_LIST@0..14
+    0: TW_FULL_CANDIDATE@0..14
       0: TW_VARIANT_LIST@0..0
-      1: TW_FUNCTIONAL_CANDIDATE@0..13
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@0..13
         0: TW_BASE@0..2 "bg" [] []
         1: DASH@2..3 "-" [] []
         2: TW_NAMED_VALUE@3..12
@@ -59,8 +61,8 @@ TwRoot {
           0: SLASH@12..13 "/" [] []
           1: TW_BOGUS_MODIFIER@13..13
             0: ERROR_TOKEN@13..13 "" [] []
-      2: BANG@13..15 "!" [] [Newline("\n")]
-  2: EOF@15..15 "" [] []
+      3: BANG@13..14 "!" [] []
+  2: EOF@14..15 "" [Newline("\n")] []
 
 ```
 

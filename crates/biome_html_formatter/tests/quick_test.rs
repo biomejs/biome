@@ -20,18 +20,22 @@ fn quick_test() {
     // quick brown fox
     // "#;
     let src = r#"
-foo bar baz boof
-<!-- comment -->
-quick brown fox
+{#snippet ff.call()}
+    {page.value}
+    {second.value}
+    <div>
+        <span></span>
+    </div>
+{/snippet}
 "#;
-    let source_type = HtmlFileSource::html();
+    let source_type = HtmlFileSource::astro();
     let tree = parse_html(src, HtmlParseOptions::from(&source_type));
-    let options = HtmlFormatOptions::new(HtmlFileSource::html())
+    let options = HtmlFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)
         .with_line_width(LineWidth::try_from(80).unwrap())
         .with_attribute_position(AttributePosition::Auto);
 
-    let doc = format_node(options.clone(), &tree.syntax()).unwrap();
+    let doc = format_node(options.clone(), &tree.syntax(), false).unwrap();
     let result = doc.print().unwrap();
 
     println!("{}", doc.into_document());

@@ -1,15 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Utilities for tests"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_test_utils"
-publish              = false
-repository.workspace = true
 version              = "0.0.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Utilities for tests"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -18,6 +18,8 @@ ansi_rgb             = "0.2.0"
 biome_analyze        = { workspace = true }
 biome_configuration  = { workspace = true }
 biome_console        = { workspace = true }
+biome_css_parser     = { workspace = true }
+biome_css_syntax     = { workspace = true }
 biome_deserialize    = { workspace = true }
 biome_diagnostics    = { workspace = true }
 biome_formatter      = { workspace = true }
@@ -39,7 +41,6 @@ serde_json           = { workspace = true }
 similar              = { workspace = true }
 ureq                 = { workspace = true }
 url                  = { workspace = true }
-
 
 [lints]
 workspace = true

@@ -1,6 +1,6 @@
 use crate::configs::{
-    CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FORMAT, CONFIG_FORMAT_JSONC,
-    CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
+    CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FILES_INCLUDES_EXCLUDES_STDIN_PATH,
+    CONFIG_FORMAT, CONFIG_FORMAT_JSONC, CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
 };
 use crate::snap_test::{SnapshotPayload, assert_file_contents, markup_to_string};
 use crate::{
@@ -47,33 +47,15 @@ statement ( ) ;
 </script>
 <div></div>"#;
 
-const SVELTE_IMPLICIT_JS_FILE_FORMATTED: &str = r#"<script>
-import { something } from "file.svelte";
-statement();
-</script>
-<div></div>"#;
-
 const SVELTE_EXPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script lang="js">
 import {    something } from "file.svelte";
 statement ( ) ;
 </script>
 <div></div>"#;
 
-const SVELTE_EXPLICIT_JS_FILE_FORMATTED: &str = r#"<script lang="js">
-import { something } from "file.svelte";
-statement();
-</script>
-<div></div>"#;
-
 const SVELTE_TS_FILE_UNFORMATTED: &str = r#"<script setup lang="ts">
 import     { type     something } from "file.svelte";
 const hello  :      string      = "world";
-</script>
-<div></div>"#;
-
-const SVELTE_TS_FILE_FORMATTED: &str = r#"<script setup lang="ts">
-import { type something } from "file.svelte";
-const hello: string = "world";
 </script>
 <div></div>"#;
 
@@ -1222,6 +1204,49 @@ fn format_stdin_successfully() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_stdin_successfully",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_stdin_formats_virtual_path_outside_includes() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config_path = Utf8Path::new("biome.json");
+    fs.insert(
+        config_path.into(),
+        CONFIG_FILES_INCLUDES_EXCLUDES_STDIN_PATH.as_bytes(),
+    );
+
+    console
+        .in_buffer
+        .push("function f() {return{}}".to_string());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--stdin-file-path", "a.tsx"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let message = console
+        .out_buffer
+        .first()
+        .expect("Console should have written a message");
+
+    let content = markup_to_string(markup! {
+        {message.content}
+    });
+
+    assert_eq!(content, "function f() {\n\treturn {};\n}\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_stdin_formats_virtual_path_outside_includes",
         fs,
         console,
         result,
@@ -2996,8 +3021,6 @@ fn format_svelte_implicit_js_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, SVELTE_IMPLICIT_JS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_implicit_js_files_write",
@@ -3056,8 +3079,6 @@ fn format_svelte_explicit_js_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, SVELTE_EXPLICIT_JS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_explicit_js_files_write",
@@ -3082,8 +3103,6 @@ fn format_empty_svelte_js_files_write() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, svelte_file_path, "<div></div>");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3143,8 +3162,6 @@ fn format_svelte_ts_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, SVELTE_TS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_ts_files_write",
@@ -3169,8 +3186,6 @@ fn format_empty_svelte_ts_files_write() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, svelte_file_path, "<script></script>");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3443,7 +3458,6 @@ fn applies_custom_bracket_spacing_for_graphql() {
     ));
 }
 
-/// Change this when HTML formatting is enabled by default
 #[test]
 fn html_disabled_by_default() {
     let fs = MemoryFileSystem::default();
@@ -3459,12 +3473,6 @@ fn html_disabled_by_default() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-    assert!(matches!(
-        result,
-        Err(biome_cli::CliDiagnostic::NoFilesWereProcessed(_))
-    ));
-
-    assert_file_contents(&fs, file_path, "<!DOCTYPE HTML>");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3568,6 +3576,41 @@ fn should_not_format_file_with_syntax_errors() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_not_format_file_with_syntax_errors",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_format_file_with_syntax_errors_when_flag_enabled() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let invalid = Utf8Path::new("invalid.js");
+    fs.insert(invalid.into(), "while ) {}".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--format-with-errors=true",
+                "--write",
+                invalid.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, invalid, "while ) {}\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_format_file_with_syntax_errors_when_flag_enabled",
         fs,
         console,
         result,

@@ -19,9 +19,20 @@ pub(crate) fn parse_font_face_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump(T![font_face]);
-
+    parse_font_face_at_rule_declarator(p).ok();
     parse_declaration_block(p);
 
     Present(m.complete(p, CSS_FONT_FACE_AT_RULE))
+}
+
+#[inline]
+pub(crate) fn parse_font_face_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_font_face_at_rule(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![font_face]);
+
+    Present(m.complete(p, CSS_FONT_FACE_AT_RULE_DECLARATOR))
 }

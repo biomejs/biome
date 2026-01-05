@@ -1,0 +1,119 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#each items as item
+  <div>{item}</div>
+{/each}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                each_token: EACH_KW@2..6 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@6..13 " items " [] [],
+                },
+                item: SvelteEachAsKeyedItem {
+                    as_token: AS_KW@13..15 "as" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@15..23 " item\n  " [] [],
+                    },
+                    index: missing (optional),
+                    key: missing (optional),
+                },
+                r_curly_token: missing (required),
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@23..49 "<div>{item}</div>\n{/each}\n" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: missing (required),
+        },
+    ],
+    eof_token: EOF@49..49 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..49
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..49
+    0: SVELTE_EACH_BLOCK@0..49
+      0: SVELTE_EACH_OPENING_BLOCK@0..23
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: EACH_KW@2..6 "each" [] []
+        2: HTML_TEXT_EXPRESSION@6..13
+          0: HTML_LITERAL@6..13 " items " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@13..23
+          0: AS_KW@13..15 "as" [] []
+          1: HTML_TEXT_EXPRESSION@15..23
+            0: HTML_LITERAL@15..23 " item\n  " [] []
+          2: (empty)
+          3: (empty)
+        4: (empty)
+      1: HTML_ELEMENT_LIST@23..49
+        0: HTML_CONTENT@23..49
+          0: HTML_LITERAL@23..49 "<div>{item}</div>\n{/each}\n" [] []
+      2: (empty)
+      3: (empty)
+  4: EOF@49..49 "" [] []
+
+```
+
+## Diagnostics
+
+```
+each_unclosed.svelte:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `<div>{item}</div>
+    {/each}
+    `
+  
+    1 │ {#each items as item
+  > 2 │   <div>{item}</div>
+      │   ^^^^^^^^^^^^^^^^^
+  > 3 │ {/each}
+  > 4 │ 
+      │ 
+  
+  i Remove <div>{item}</div>
+    {/each}
+  
+  
+each_unclosed.svelte:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing block, instead found none.
+  
+    2 │   <div>{item}</div>
+    3 │ {/each}
+  > 4 │ 
+      │ 
+  
+  i This is where the block started.
+  
+    2 │   <div>{item}</div>
+    3 │ {/each}
+  > 4 │ 
+      │ 
+  
+```

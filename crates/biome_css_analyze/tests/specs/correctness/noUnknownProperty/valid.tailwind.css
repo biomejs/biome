@@ -1,0 +1,7 @@
+/* should not generate diagnostics */
+
+@plugin "foo" {
+	we: should;
+	allow: "anything";
+	in: here;
+}

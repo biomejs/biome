@@ -9,36 +9,51 @@ use smallvec::SmallVec;
 use std::ops::Deref;
 
 /// Rule's options.
-#[derive(Debug, Clone, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(
+    Debug, Default, Clone, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseNamingConventionOptions {
     /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
     /// This does not affect other [Case].
-    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
-    pub strict_case: bool,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub strict_case: Option<bool>,
 
     /// If `false`, then non-ASCII characters are allowed.
-    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
-    pub require_ascii: bool,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub require_ascii: Option<bool>,
 
     /// Custom conventions.
-    #[serde(default, skip_serializing_if = "<[_]>::is_empty")]
-    pub conventions: Box<[Convention]>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub conventions: Option<Box<[Convention]>>,
 }
-impl Default for UseNamingConventionOptions {
-    fn default() -> Self {
-        Self {
-            strict_case: true,
-            require_ascii: true,
-            conventions: Vec::new().into_boxed_slice(),
+impl UseNamingConventionOptions {
+    pub const DEFAULT_STRICT_CASE: bool = true;
+    pub const DEFAULT_REQUIRE_ASCII: bool = true;
+
+    /// Returns [`Self::strict_case`] if it is set.
+    /// Otherwise, returns [`Self::DEFAULT_STRICT_CASE`].
+    pub fn strict_case(&self) -> bool {
+        self.strict_case.unwrap_or(Self::DEFAULT_STRICT_CASE)
+    }
+
+    /// Returns [`Self::require_ascii`] if it is set.
+    /// Otherwise, returns [`Self::DEFAULT_REQUIRE_ASCII`].
+    pub fn require_ascii(&self) -> bool {
+        self.require_ascii.unwrap_or(Self::DEFAULT_REQUIRE_ASCII)
+    }
+}
+impl biome_deserialize::Merge for UseNamingConventionOptions {
+    fn merge_with(&mut self, other: Self) {
+        self.require_ascii.merge_with(other.require_ascii);
+        self.strict_case.merge_with(other.strict_case);
+        if let Some(conventions) = other.conventions {
+            self.conventions = Some(conventions);
         }
     }
 }
 
-const fn enabled() -> bool {
-    true
-}
 fn is_default<T: Default + Eq>(value: &T) -> bool {
     value == &T::default()
 }
@@ -55,7 +70,11 @@ pub struct Convention {
     pub selector: Selector,
 
     /// Regular expression to enforce
-    #[serde(default, rename = "match", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        rename = "match",
+        skip_serializing_if = "Option::<_>::is_none"
+    )]
     pub matching: Option<RestrictedRegex>,
 
     /// String cases to enforce
@@ -479,11 +498,11 @@ impl FromIterator<RestrictedModifier> for RestrictedModifiers {
 }
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for RestrictedModifiers {
-    fn schema_name() -> String {
-        "Modifiers".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Modifiers")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         <std::collections::HashSet<RestrictedModifier>>::json_schema(generator)
     }
 }
@@ -629,10 +648,10 @@ impl From<Formats> for SmallVec<[Format; 4]> {
 }
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Formats {
-    fn schema_name() -> String {
-        "Formats".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Formats")
     }
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         <std::collections::HashSet<Format>>::json_schema(generator)
     }
 }

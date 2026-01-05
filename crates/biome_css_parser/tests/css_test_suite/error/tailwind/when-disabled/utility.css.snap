@@ -1,0 +1,73 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@utility empty-util {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
+                    CssIdentifier {
+                        value_token: IDENT@9..20 "empty-util" [] [Whitespace(" ")],
+                    },
+                    CssDeclarationOrRuleBlock {
+                        l_curly_token: L_CURLY@20..21 "{" [] [],
+                        items: CssDeclarationOrRuleList [],
+                        r_curly_token: R_CURLY@21..22 "}" [] [],
+                    },
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@22..23 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..23
+  0: (empty)
+  1: CSS_RULE_LIST@0..22
+    0: CSS_AT_RULE@0..22
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..22
+        0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@9..20
+          0: IDENT@9..20 "empty-util" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@20..22
+          0: L_CURLY@20..21 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@21..21
+          2: R_CURLY@21..22 "}" [] []
+  2: EOF@22..23 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+utility.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+  > 1 │ @utility empty-util {}
+      │  ^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Enable `tailwindDirectives` in the css parser options, or remove this if you are not using Tailwind CSS.
+  
+```

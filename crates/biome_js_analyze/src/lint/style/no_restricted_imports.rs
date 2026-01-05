@@ -261,7 +261,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic,use_options
-    /// import { export1 } 'import-foo';
+    /// import { export1 } from 'import-foo';
     /// ```
     ///
     /// ### `paths.<import>.importNames`
@@ -455,7 +455,11 @@ impl Rule for NoRestrictedImports {
 
         let mut results: Vec<RestrictedImportMessage> = vec![];
 
-        if let Some(paths) = options.paths.get(import_source) {
+        if let Some(paths) = options
+            .paths
+            .as_ref()
+            .and_then(|paths| paths.get(import_source))
+        {
             let path_options: PathOptions = paths.clone().into();
             results.extend(check_import_restrictions(
                 &path_options,

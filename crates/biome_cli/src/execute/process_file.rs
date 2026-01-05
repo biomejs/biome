@@ -136,6 +136,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
             project_key: ctx.project_key,
             path: biome_path.clone(),
             features: ctx.execution.to_feature(),
+            skip_ignore_check: false,
         })
         .with_file_path_and_code_and_tags(
             biome_path.to_string(),
@@ -197,14 +198,15 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
                 suppress,
                 suppression_reason.as_deref(),
                 categories.build(),
+                &file_features,
             )
         }
         TraversalMode::Format { .. } => {
             // the unsupported case should be handled already at this point
-            format(shared_context, biome_path.clone())
+            format(shared_context, biome_path.clone(), &file_features)
         }
         TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
-            check_file(shared_context, biome_path.clone(), file_features)
+            check_file(shared_context, biome_path.clone(), &file_features)
         }
         TraversalMode::Migrate { .. } => {
             unreachable!("The migration should not be called for this file")

@@ -1,0 +1,915 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+/* Test enhanced --value() function with arbitrary types */
+@utility opacity-* {
+	opacity: --value([percentage]);
+}
+
+@utility width-* {
+	width: --value([length]);
+}
+
+@utility color-* {
+	color: --value([color]);
+}
+
+/* Test enhanced --value() function with theme references */
+@utility spacing-* {
+	margin: --value(--spacing-*);
+}
+
+@utility color-* {
+	color: --value(--color-*);
+}
+
+/* Test enhanced --value() function with bare types */
+@utility flex-* {
+	flex: --value(integer);
+}
+
+/* Test enhanced --value() function with complex multi-expressions */
+@utility complex-* {
+	tab-size: --value(integer, [integer], --tab-size-*);
+	opacity: --value([percentage], --opacity-*);
+	width: --value([length], --width-*);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..61 "@" [Comments("/* Test enhanced --va ..."), Newline("\n")] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@61..69 "utility" [] [Whitespace(" ")],
+                name: TwFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@69..76 "opacity" [] [],
+                    },
+                    minus_token: MINUS@76..77 "-" [] [],
+                    star_token: STAR@77..79 "*" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@79..80 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@80..89 "opacity" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@89..91 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@91..98 "--value" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@98..99 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssBracketedValue {
+                                                                l_brack_token: L_BRACK@99..100 "[" [] [],
+                                                                items: CssBracketedValueList [
+                                                                    CssCustomIdentifier {
+                                                                        value_token: IDENT@100..110 "percentage" [] [],
+                                                                    },
+                                                                ],
+                                                                r_brack_token: R_BRACK@110..111 "]" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@111..112 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@112..113 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@113..115 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@115..118 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@118..126 "utility" [] [Whitespace(" ")],
+                name: TwFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@126..131 "width" [] [],
+                    },
+                    minus_token: MINUS@131..132 "-" [] [],
+                    star_token: STAR@132..134 "*" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@134..135 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@135..142 "width" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@142..144 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@144..151 "--value" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@151..152 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssBracketedValue {
+                                                                l_brack_token: L_BRACK@152..153 "[" [] [],
+                                                                items: CssBracketedValueList [
+                                                                    CssCustomIdentifier {
+                                                                        value_token: IDENT@153..159 "length" [] [],
+                                                                    },
+                                                                ],
+                                                                r_brack_token: R_BRACK@159..160 "]" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@160..161 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@161..162 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@162..164 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@164..167 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@167..175 "utility" [] [Whitespace(" ")],
+                name: TwFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@175..180 "color" [] [],
+                    },
+                    minus_token: MINUS@180..181 "-" [] [],
+                    star_token: STAR@181..183 "*" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@183..184 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@184..191 "color" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@191..193 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@193..200 "--value" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@200..201 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssBracketedValue {
+                                                                l_brack_token: L_BRACK@201..202 "[" [] [],
+                                                                items: CssBracketedValueList [
+                                                                    CssCustomIdentifier {
+                                                                        value_token: IDENT@202..207 "color" [] [],
+                                                                    },
+                                                                ],
+                                                                r_brack_token: R_BRACK@207..208 "]" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@208..209 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@209..210 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@210..212 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@212..276 "@" [Newline("\n"), Newline("\n"), Comments("/* Test enhanced --va ..."), Newline("\n")] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@276..284 "utility" [] [Whitespace(" ")],
+                name: TwFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@284..291 "spacing" [] [],
+                    },
+                    minus_token: MINUS@291..292 "-" [] [],
+                    star_token: STAR@292..294 "*" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@294..295 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@295..303 "margin" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@303..305 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@305..312 "--value" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@312..313 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            TwValueThemeReference {
+                                                                reference: CssDashedIdentifier {
+                                                                    value_token: IDENT@313..322 "--spacing" [] [],
+                                                                },
+                                                                minus_token: MINUS@322..323 "-" [] [],
+                                                                star_token: STAR@323..324 "*" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@324..325 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@325..326 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@326..328 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@328..331 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@331..339 "utility" [] [Whitespace(" ")],
+                name: TwFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@339..344 "color" [] [],
+                    },
+                    minus_token: MINUS@344..345 "-" [] [],
+                    star_token: STAR@345..347 "*" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@347..348 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@348..355 "color" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@355..357 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@357..364 "--value" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@364..365 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            TwValueThemeReference {
+                                                                reference: CssDashedIdentifier {
+                                                                    value_token: IDENT@365..372 "--color" [] [],
+                                                                },
+                                                                minus_token: MINUS@372..373 "-" [] [],
+                                                                star_token: STAR@373..374 "*" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@374..375 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@375..376 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@376..378 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@378..436 "@" [Newline("\n"), Newline("\n"), Comments("/* Test enhanced --va ..."), Newline("\n")] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@436..444 "utility" [] [Whitespace(" ")],
+                name: TwFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@444..448 "flex" [] [],
+                    },
+                    minus_token: MINUS@448..449 "-" [] [],
+                    star_token: STAR@449..451 "*" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@451..452 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@452..458 "flex" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@458..460 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@460..467 "--value" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@467..468 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@468..475 "integer" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@475..476 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@476..477 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@477..479 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@479..552 "@" [Newline("\n"), Newline("\n"), Comments("/* Test enhanced --va ..."), Newline("\n")] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@552..560 "utility" [] [Whitespace(" ")],
+                name: TwFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@560..567 "complex" [] [],
+                    },
+                    minus_token: MINUS@567..568 "-" [] [],
+                    star_token: STAR@568..570 "*" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@570..571 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@571..581 "tab-size" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@581..583 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@583..590 "--value" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@590..591 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@591..598 "integer" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                COMMA@598..600 "," [] [Whitespace(" ")],
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssBracketedValue {
+                                                                l_brack_token: L_BRACK@600..601 "[" [] [],
+                                                                items: CssBracketedValueList [
+                                                                    CssCustomIdentifier {
+                                                                        value_token: IDENT@601..608 "integer" [] [],
+                                                                    },
+                                                                ],
+                                                                r_brack_token: R_BRACK@608..609 "]" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                COMMA@609..611 "," [] [Whitespace(" ")],
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            TwValueThemeReference {
+                                                                reference: CssDashedIdentifier {
+                                                                    value_token: IDENT@611..621 "--tab-size" [] [],
+                                                                },
+                                                                minus_token: MINUS@621..622 "-" [] [],
+                                                                star_token: STAR@622..623 "*" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@623..624 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@624..625 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@625..634 "opacity" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@634..636 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@636..643 "--value" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@643..644 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssBracketedValue {
+                                                                l_brack_token: L_BRACK@644..645 "[" [] [],
+                                                                items: CssBracketedValueList [
+                                                                    CssCustomIdentifier {
+                                                                        value_token: IDENT@645..655 "percentage" [] [],
+                                                                    },
+                                                                ],
+                                                                r_brack_token: R_BRACK@655..656 "]" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                COMMA@656..658 "," [] [Whitespace(" ")],
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            TwValueThemeReference {
+                                                                reference: CssDashedIdentifier {
+                                                                    value_token: IDENT@658..667 "--opacity" [] [],
+                                                                },
+                                                                minus_token: MINUS@667..668 "-" [] [],
+                                                                star_token: STAR@668..669 "*" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@669..670 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@670..671 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@671..678 "width" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@678..680 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@680..687 "--value" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@687..688 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssBracketedValue {
+                                                                l_brack_token: L_BRACK@688..689 "[" [] [],
+                                                                items: CssBracketedValueList [
+                                                                    CssCustomIdentifier {
+                                                                        value_token: IDENT@689..695 "length" [] [],
+                                                                    },
+                                                                ],
+                                                                r_brack_token: R_BRACK@695..696 "]" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                COMMA@696..698 "," [] [Whitespace(" ")],
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            TwValueThemeReference {
+                                                                reference: CssDashedIdentifier {
+                                                                    value_token: IDENT@698..705 "--width" [] [],
+                                                                },
+                                                                minus_token: MINUS@705..706 "-" [] [],
+                                                                star_token: STAR@706..707 "*" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@707..708 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@708..709 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@709..711 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@711..712 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..712
+  0: (empty)
+  1: CSS_RULE_LIST@0..711
+    0: CSS_AT_RULE@0..115
+      0: AT@0..61 "@" [Comments("/* Test enhanced --va ..."), Newline("\n")] []
+      1: TW_UTILITY_AT_RULE@61..115
+        0: UTILITY_KW@61..69 "utility" [] [Whitespace(" ")]
+        1: TW_FUNCTIONAL_UTILITY_NAME@69..79
+          0: CSS_IDENTIFIER@69..76
+            0: IDENT@69..76 "opacity" [] []
+          1: MINUS@76..77 "-" [] []
+          2: STAR@77..79 "*" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@79..115
+          0: L_CURLY@79..80 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@80..113
+            0: CSS_DECLARATION_WITH_SEMICOLON@80..113
+              0: CSS_DECLARATION@80..112
+                0: CSS_GENERIC_PROPERTY@80..112
+                  0: CSS_IDENTIFIER@80..89
+                    0: IDENT@80..89 "opacity" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@89..91 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@91..112
+                    0: CSS_FUNCTION@91..112
+                      0: CSS_IDENTIFIER@91..98
+                        0: IDENT@91..98 "--value" [] []
+                      1: L_PAREN@98..99 "(" [] []
+                      2: CSS_PARAMETER_LIST@99..111
+                        0: CSS_PARAMETER@99..111
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@99..111
+                            0: CSS_COMPONENT_VALUE_LIST@99..111
+                              0: CSS_BRACKETED_VALUE@99..111
+                                0: L_BRACK@99..100 "[" [] []
+                                1: CSS_BRACKETED_VALUE_LIST@100..110
+                                  0: CSS_CUSTOM_IDENTIFIER@100..110
+                                    0: IDENT@100..110 "percentage" [] []
+                                2: R_BRACK@110..111 "]" [] []
+                      3: R_PAREN@111..112 ")" [] []
+                1: (empty)
+              1: SEMICOLON@112..113 ";" [] []
+          2: R_CURLY@113..115 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@115..164
+      0: AT@115..118 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_UTILITY_AT_RULE@118..164
+        0: UTILITY_KW@118..126 "utility" [] [Whitespace(" ")]
+        1: TW_FUNCTIONAL_UTILITY_NAME@126..134
+          0: CSS_IDENTIFIER@126..131
+            0: IDENT@126..131 "width" [] []
+          1: MINUS@131..132 "-" [] []
+          2: STAR@132..134 "*" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@134..164
+          0: L_CURLY@134..135 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@135..162
+            0: CSS_DECLARATION_WITH_SEMICOLON@135..162
+              0: CSS_DECLARATION@135..161
+                0: CSS_GENERIC_PROPERTY@135..161
+                  0: CSS_IDENTIFIER@135..142
+                    0: IDENT@135..142 "width" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@142..144 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@144..161
+                    0: CSS_FUNCTION@144..161
+                      0: CSS_IDENTIFIER@144..151
+                        0: IDENT@144..151 "--value" [] []
+                      1: L_PAREN@151..152 "(" [] []
+                      2: CSS_PARAMETER_LIST@152..160
+                        0: CSS_PARAMETER@152..160
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@152..160
+                            0: CSS_COMPONENT_VALUE_LIST@152..160
+                              0: CSS_BRACKETED_VALUE@152..160
+                                0: L_BRACK@152..153 "[" [] []
+                                1: CSS_BRACKETED_VALUE_LIST@153..159
+                                  0: CSS_CUSTOM_IDENTIFIER@153..159
+                                    0: IDENT@153..159 "length" [] []
+                                2: R_BRACK@159..160 "]" [] []
+                      3: R_PAREN@160..161 ")" [] []
+                1: (empty)
+              1: SEMICOLON@161..162 ";" [] []
+          2: R_CURLY@162..164 "}" [Newline("\n")] []
+    2: CSS_AT_RULE@164..212
+      0: AT@164..167 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_UTILITY_AT_RULE@167..212
+        0: UTILITY_KW@167..175 "utility" [] [Whitespace(" ")]
+        1: TW_FUNCTIONAL_UTILITY_NAME@175..183
+          0: CSS_IDENTIFIER@175..180
+            0: IDENT@175..180 "color" [] []
+          1: MINUS@180..181 "-" [] []
+          2: STAR@181..183 "*" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@183..212
+          0: L_CURLY@183..184 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@184..210
+            0: CSS_DECLARATION_WITH_SEMICOLON@184..210
+              0: CSS_DECLARATION@184..209
+                0: CSS_GENERIC_PROPERTY@184..209
+                  0: CSS_IDENTIFIER@184..191
+                    0: IDENT@184..191 "color" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@191..193 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@193..209
+                    0: CSS_FUNCTION@193..209
+                      0: CSS_IDENTIFIER@193..200
+                        0: IDENT@193..200 "--value" [] []
+                      1: L_PAREN@200..201 "(" [] []
+                      2: CSS_PARAMETER_LIST@201..208
+                        0: CSS_PARAMETER@201..208
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@201..208
+                            0: CSS_COMPONENT_VALUE_LIST@201..208
+                              0: CSS_BRACKETED_VALUE@201..208
+                                0: L_BRACK@201..202 "[" [] []
+                                1: CSS_BRACKETED_VALUE_LIST@202..207
+                                  0: CSS_CUSTOM_IDENTIFIER@202..207
+                                    0: IDENT@202..207 "color" [] []
+                                2: R_BRACK@207..208 "]" [] []
+                      3: R_PAREN@208..209 ")" [] []
+                1: (empty)
+              1: SEMICOLON@209..210 ";" [] []
+          2: R_CURLY@210..212 "}" [Newline("\n")] []
+    3: CSS_AT_RULE@212..328
+      0: AT@212..276 "@" [Newline("\n"), Newline("\n"), Comments("/* Test enhanced --va ..."), Newline("\n")] []
+      1: TW_UTILITY_AT_RULE@276..328
+        0: UTILITY_KW@276..284 "utility" [] [Whitespace(" ")]
+        1: TW_FUNCTIONAL_UTILITY_NAME@284..294
+          0: CSS_IDENTIFIER@284..291
+            0: IDENT@284..291 "spacing" [] []
+          1: MINUS@291..292 "-" [] []
+          2: STAR@292..294 "*" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@294..328
+          0: L_CURLY@294..295 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@295..326
+            0: CSS_DECLARATION_WITH_SEMICOLON@295..326
+              0: CSS_DECLARATION@295..325
+                0: CSS_GENERIC_PROPERTY@295..325
+                  0: CSS_IDENTIFIER@295..303
+                    0: IDENT@295..303 "margin" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@303..305 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@305..325
+                    0: CSS_FUNCTION@305..325
+                      0: CSS_IDENTIFIER@305..312
+                        0: IDENT@305..312 "--value" [] []
+                      1: L_PAREN@312..313 "(" [] []
+                      2: CSS_PARAMETER_LIST@313..324
+                        0: CSS_PARAMETER@313..324
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@313..324
+                            0: CSS_COMPONENT_VALUE_LIST@313..324
+                              0: TW_VALUE_THEME_REFERENCE@313..324
+                                0: CSS_DASHED_IDENTIFIER@313..322
+                                  0: IDENT@313..322 "--spacing" [] []
+                                1: MINUS@322..323 "-" [] []
+                                2: STAR@323..324 "*" [] []
+                      3: R_PAREN@324..325 ")" [] []
+                1: (empty)
+              1: SEMICOLON@325..326 ";" [] []
+          2: R_CURLY@326..328 "}" [Newline("\n")] []
+    4: CSS_AT_RULE@328..378
+      0: AT@328..331 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_UTILITY_AT_RULE@331..378
+        0: UTILITY_KW@331..339 "utility" [] [Whitespace(" ")]
+        1: TW_FUNCTIONAL_UTILITY_NAME@339..347
+          0: CSS_IDENTIFIER@339..344
+            0: IDENT@339..344 "color" [] []
+          1: MINUS@344..345 "-" [] []
+          2: STAR@345..347 "*" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@347..378
+          0: L_CURLY@347..348 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@348..376
+            0: CSS_DECLARATION_WITH_SEMICOLON@348..376
+              0: CSS_DECLARATION@348..375
+                0: CSS_GENERIC_PROPERTY@348..375
+                  0: CSS_IDENTIFIER@348..355
+                    0: IDENT@348..355 "color" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@355..357 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@357..375
+                    0: CSS_FUNCTION@357..375
+                      0: CSS_IDENTIFIER@357..364
+                        0: IDENT@357..364 "--value" [] []
+                      1: L_PAREN@364..365 "(" [] []
+                      2: CSS_PARAMETER_LIST@365..374
+                        0: CSS_PARAMETER@365..374
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@365..374
+                            0: CSS_COMPONENT_VALUE_LIST@365..374
+                              0: TW_VALUE_THEME_REFERENCE@365..374
+                                0: CSS_DASHED_IDENTIFIER@365..372
+                                  0: IDENT@365..372 "--color" [] []
+                                1: MINUS@372..373 "-" [] []
+                                2: STAR@373..374 "*" [] []
+                      3: R_PAREN@374..375 ")" [] []
+                1: (empty)
+              1: SEMICOLON@375..376 ";" [] []
+          2: R_CURLY@376..378 "}" [Newline("\n")] []
+    5: CSS_AT_RULE@378..479
+      0: AT@378..436 "@" [Newline("\n"), Newline("\n"), Comments("/* Test enhanced --va ..."), Newline("\n")] []
+      1: TW_UTILITY_AT_RULE@436..479
+        0: UTILITY_KW@436..444 "utility" [] [Whitespace(" ")]
+        1: TW_FUNCTIONAL_UTILITY_NAME@444..451
+          0: CSS_IDENTIFIER@444..448
+            0: IDENT@444..448 "flex" [] []
+          1: MINUS@448..449 "-" [] []
+          2: STAR@449..451 "*" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@451..479
+          0: L_CURLY@451..452 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@452..477
+            0: CSS_DECLARATION_WITH_SEMICOLON@452..477
+              0: CSS_DECLARATION@452..476
+                0: CSS_GENERIC_PROPERTY@452..476
+                  0: CSS_IDENTIFIER@452..458
+                    0: IDENT@452..458 "flex" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@458..460 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@460..476
+                    0: CSS_FUNCTION@460..476
+                      0: CSS_IDENTIFIER@460..467
+                        0: IDENT@460..467 "--value" [] []
+                      1: L_PAREN@467..468 "(" [] []
+                      2: CSS_PARAMETER_LIST@468..475
+                        0: CSS_PARAMETER@468..475
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@468..475
+                            0: CSS_COMPONENT_VALUE_LIST@468..475
+                              0: CSS_IDENTIFIER@468..475
+                                0: IDENT@468..475 "integer" [] []
+                      3: R_PAREN@475..476 ")" [] []
+                1: (empty)
+              1: SEMICOLON@476..477 ";" [] []
+          2: R_CURLY@477..479 "}" [Newline("\n")] []
+    6: CSS_AT_RULE@479..711
+      0: AT@479..552 "@" [Newline("\n"), Newline("\n"), Comments("/* Test enhanced --va ..."), Newline("\n")] []
+      1: TW_UTILITY_AT_RULE@552..711
+        0: UTILITY_KW@552..560 "utility" [] [Whitespace(" ")]
+        1: TW_FUNCTIONAL_UTILITY_NAME@560..570
+          0: CSS_IDENTIFIER@560..567
+            0: IDENT@560..567 "complex" [] []
+          1: MINUS@567..568 "-" [] []
+          2: STAR@568..570 "*" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@570..711
+          0: L_CURLY@570..571 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@571..709
+            0: CSS_DECLARATION_WITH_SEMICOLON@571..625
+              0: CSS_DECLARATION@571..624
+                0: CSS_GENERIC_PROPERTY@571..624
+                  0: CSS_IDENTIFIER@571..581
+                    0: IDENT@571..581 "tab-size" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@581..583 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@583..624
+                    0: CSS_FUNCTION@583..624
+                      0: CSS_IDENTIFIER@583..590
+                        0: IDENT@583..590 "--value" [] []
+                      1: L_PAREN@590..591 "(" [] []
+                      2: CSS_PARAMETER_LIST@591..623
+                        0: CSS_PARAMETER@591..598
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@591..598
+                            0: CSS_COMPONENT_VALUE_LIST@591..598
+                              0: CSS_IDENTIFIER@591..598
+                                0: IDENT@591..598 "integer" [] []
+                        1: COMMA@598..600 "," [] [Whitespace(" ")]
+                        2: CSS_PARAMETER@600..609
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@600..609
+                            0: CSS_COMPONENT_VALUE_LIST@600..609
+                              0: CSS_BRACKETED_VALUE@600..609
+                                0: L_BRACK@600..601 "[" [] []
+                                1: CSS_BRACKETED_VALUE_LIST@601..608
+                                  0: CSS_CUSTOM_IDENTIFIER@601..608
+                                    0: IDENT@601..608 "integer" [] []
+                                2: R_BRACK@608..609 "]" [] []
+                        3: COMMA@609..611 "," [] [Whitespace(" ")]
+                        4: CSS_PARAMETER@611..623
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@611..623
+                            0: CSS_COMPONENT_VALUE_LIST@611..623
+                              0: TW_VALUE_THEME_REFERENCE@611..623
+                                0: CSS_DASHED_IDENTIFIER@611..621
+                                  0: IDENT@611..621 "--tab-size" [] []
+                                1: MINUS@621..622 "-" [] []
+                                2: STAR@622..623 "*" [] []
+                      3: R_PAREN@623..624 ")" [] []
+                1: (empty)
+              1: SEMICOLON@624..625 ";" [] []
+            1: CSS_DECLARATION_WITH_SEMICOLON@625..671
+              0: CSS_DECLARATION@625..670
+                0: CSS_GENERIC_PROPERTY@625..670
+                  0: CSS_IDENTIFIER@625..634
+                    0: IDENT@625..634 "opacity" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@634..636 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@636..670
+                    0: CSS_FUNCTION@636..670
+                      0: CSS_IDENTIFIER@636..643
+                        0: IDENT@636..643 "--value" [] []
+                      1: L_PAREN@643..644 "(" [] []
+                      2: CSS_PARAMETER_LIST@644..669
+                        0: CSS_PARAMETER@644..656
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@644..656
+                            0: CSS_COMPONENT_VALUE_LIST@644..656
+                              0: CSS_BRACKETED_VALUE@644..656
+                                0: L_BRACK@644..645 "[" [] []
+                                1: CSS_BRACKETED_VALUE_LIST@645..655
+                                  0: CSS_CUSTOM_IDENTIFIER@645..655
+                                    0: IDENT@645..655 "percentage" [] []
+                                2: R_BRACK@655..656 "]" [] []
+                        1: COMMA@656..658 "," [] [Whitespace(" ")]
+                        2: CSS_PARAMETER@658..669
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@658..669
+                            0: CSS_COMPONENT_VALUE_LIST@658..669
+                              0: TW_VALUE_THEME_REFERENCE@658..669
+                                0: CSS_DASHED_IDENTIFIER@658..667
+                                  0: IDENT@658..667 "--opacity" [] []
+                                1: MINUS@667..668 "-" [] []
+                                2: STAR@668..669 "*" [] []
+                      3: R_PAREN@669..670 ")" [] []
+                1: (empty)
+              1: SEMICOLON@670..671 ";" [] []
+            2: CSS_DECLARATION_WITH_SEMICOLON@671..709
+              0: CSS_DECLARATION@671..708
+                0: CSS_GENERIC_PROPERTY@671..708
+                  0: CSS_IDENTIFIER@671..678
+                    0: IDENT@671..678 "width" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@678..680 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@680..708
+                    0: CSS_FUNCTION@680..708
+                      0: CSS_IDENTIFIER@680..687
+                        0: IDENT@680..687 "--value" [] []
+                      1: L_PAREN@687..688 "(" [] []
+                      2: CSS_PARAMETER_LIST@688..707
+                        0: CSS_PARAMETER@688..696
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@688..696
+                            0: CSS_COMPONENT_VALUE_LIST@688..696
+                              0: CSS_BRACKETED_VALUE@688..696
+                                0: L_BRACK@688..689 "[" [] []
+                                1: CSS_BRACKETED_VALUE_LIST@689..695
+                                  0: CSS_CUSTOM_IDENTIFIER@689..695
+                                    0: IDENT@689..695 "length" [] []
+                                2: R_BRACK@695..696 "]" [] []
+                        1: COMMA@696..698 "," [] [Whitespace(" ")]
+                        2: CSS_PARAMETER@698..707
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@698..707
+                            0: CSS_COMPONENT_VALUE_LIST@698..707
+                              0: TW_VALUE_THEME_REFERENCE@698..707
+                                0: CSS_DASHED_IDENTIFIER@698..705
+                                  0: IDENT@698..705 "--width" [] []
+                                1: MINUS@705..706 "-" [] []
+                                2: STAR@706..707 "*" [] []
+                      3: R_PAREN@707..708 ")" [] []
+                1: (empty)
+              1: SEMICOLON@708..709 ";" [] []
+          2: R_CURLY@709..711 "}" [Newline("\n")] []
+  2: EOF@711..712 "" [Newline("\n")] []
+
+```

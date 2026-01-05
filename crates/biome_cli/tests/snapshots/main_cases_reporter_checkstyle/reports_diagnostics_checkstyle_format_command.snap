@@ -1,0 +1,57 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+<?xml version="1.0" encoding="utf-8"?>
+<checkstyle version="4.3">
+  <file name="index.ts">
+    <error line="0" column="0" severity="error" message="Formatter would have printed the following content:" source="format" />
+  </file>
+  <file name="main.ts">
+    <error line="0" column="0" severity="error" message="Formatter would have printed the following content:" source="format" />
+  </file>
+</checkstyle>
+
+```

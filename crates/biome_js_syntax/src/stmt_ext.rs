@@ -5,7 +5,7 @@ use crate::{
     JsBlockStatement, JsBreakStatement, JsCatchClause, JsContinueStatement, JsFinallyClause,
     JsForVariableDeclaration, JsLabeledStatement, JsStatementList, JsSyntaxKind,
     JsSyntaxToken as SyntaxToken, JsTryFinallyStatement, JsTryStatement, JsVariableDeclaration,
-    JsVariableDeclarator, T, TsModuleDeclaration,
+    JsVariableDeclarator, TsModuleDeclaration,
 };
 use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 

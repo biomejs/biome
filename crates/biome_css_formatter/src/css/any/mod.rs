@@ -1,6 +1,7 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 pub(crate) mod at_rule;
+pub(crate) mod at_rule_declarator;
 pub(crate) mod attribute_matcher_value;
 pub(crate) mod composes_import_source;
 pub(crate) mod compound_selector;
@@ -29,6 +30,15 @@ pub(crate) mod font_feature_values_block;
 pub(crate) mod font_feature_values_item;
 pub(crate) mod function;
 pub(crate) mod generic_component_value;
+pub(crate) mod if_branch;
+pub(crate) mod if_condition;
+pub(crate) mod if_media_test_query;
+pub(crate) mod if_supports_test_condition;
+pub(crate) mod if_test;
+pub(crate) mod if_test_boolean_and_combinable_expr;
+pub(crate) mod if_test_boolean_expr;
+pub(crate) mod if_test_boolean_expr_group;
+pub(crate) mod if_test_boolean_or_combinable_expr;
 pub(crate) mod import_layer;
 pub(crate) mod import_supports_condition;
 pub(crate) mod import_url;

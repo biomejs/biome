@@ -1,0 +1,86 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["shared.json"],
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "style": {
+        "useNamingConvention": {
+          "level": "on",
+          "options": {
+            "strictCase": true
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## `shared.json`
+
+```json
+{
+            "linter": {
+                "enabled": true,
+                "rules": {
+                    "style": {
+                        "useNamingConvention": {
+                        "level": "on",
+                            "options": {
+                                "strictCase": false,
+                                "conventions": [{
+                                    "selector": { "kind": "variable", "scope": "global" },
+                                    "formats": ["PascalCase"]
+                                }]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+```
+
+## `test.js`
+
+```js
+export const lowercase = 0; export const PascalCASE = 1;
+```
+
+# Emitted Messages
+
+```block
+test.js:1:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This global variable name should be in PascalCase.
+  
+  > 1 │ export const lowercase = 0; export const PascalCASE = 1;
+      │              ^^^^^^^^^
+  
+
+```
+
+```block
+test.js:1:42 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  
+  > 1 │ export const lowercase = 0; export const PascalCASE = 1;
+      │                                          ^^^^^^^^^^
+  
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 infos.
+```

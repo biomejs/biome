@@ -55,6 +55,25 @@ mod client;
 mod document;
 mod server;
 
+use biome_analyze::{ActionCategory, RuleCategories};
+use biome_configuration::{Configuration, analyzer::AnalyzerSelector};
+use biome_console::{Markup, MarkupBuf, markup};
+use biome_diagnostics::{CodeSuggestion, serde::Diagnostic};
+use biome_formatter::Printed;
+use biome_fs::BiomePath;
+use biome_grit_patterns::GritTargetLanguage;
+use biome_js_syntax::{TextRange, TextSize};
+use biome_module_graph::SerializedModuleInfo;
+use biome_resolver::FsWithResolverProxy;
+use biome_text_edit::TextEdit;
+use camino::Utf8Path;
+use crossbeam::channel::bounded;
+pub use document::{AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet};
+use enumflags2::{BitFlags, bitflags};
+use rustc_hash::FxHashMap;
+use serde::{Deserialize, Serialize};
+pub use server::WorkspaceServer;
+use smallvec::SmallVec;
 use std::{
     borrow::Cow,
     fmt::{Debug, Display, Formatter},
@@ -63,30 +82,8 @@ use std::{
     sync::Arc,
     time::Duration,
 };
-
-use biome_analyze::{ActionCategory, RuleCategories};
-use biome_configuration::{Configuration, analyzer::RuleSelector};
-use biome_console::{Markup, MarkupBuf, markup};
-use biome_diagnostics::{CodeSuggestion, serde::Diagnostic};
-use biome_formatter::Printed;
-use biome_fs::BiomePath;
-use biome_grit_patterns::GritTargetLanguage;
-use biome_js_syntax::{TextRange, TextSize};
-use biome_module_graph::SerializedJsModuleInfo;
-use biome_resolver::FsWithResolverProxy;
-use biome_text_edit::TextEdit;
-use camino::Utf8Path;
-use crossbeam::channel::bounded;
-use enumflags2::{BitFlags, bitflags};
-use rustc_hash::FxHashMap;
-use serde::{Deserialize, Serialize};
-pub use server::WorkspaceServer;
-use smallvec::SmallVec;
 use tokio::sync::watch;
 use tracing::debug;
-
-#[cfg(feature = "schema")]
-use schemars::{r#gen::SchemaGenerator, schema::Schema};
 
 pub use crate::{
     WorkspaceError,
@@ -95,9 +92,10 @@ pub use crate::{
     scanner::ScanKind,
     settings::Settings,
 };
+#[cfg(feature = "schema")]
+use schemars::{Schema, SchemaGenerator};
 
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-pub use document::{EmbeddedCssContent, EmbeddedJsContent};
 pub use server::OpenFileReason;
 
 /// Notification regarding a workspace's service data.
@@ -111,6 +109,10 @@ pub enum ServiceNotification {
     WatcherStopped,
 }
 
+fn is_false(value: &bool) -> bool {
+    !*value
+}
+
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
@@ -118,6 +120,9 @@ pub struct SupportsFeatureParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub features: FeatureName,
+
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub skip_ignore_check: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
@@ -131,8 +136,9 @@ pub struct SupportsFeatureResult {
 pub struct FeaturesSupported([SupportKind; NUM_FEATURE_KINDS]);
 
 impl FeaturesSupported {
-    /// By default, all features are not supported by a file.
+    /// By default, a file does not support all features.
     const WORKSPACE_FEATURES: [SupportKind; NUM_FEATURE_KINDS] = [
+        SupportKind::FileNotSupported,
         SupportKind::FileNotSupported,
         SupportKind::FileNotSupported,
         SupportKind::FileNotSupported,
@@ -148,7 +154,10 @@ impl FeaturesSupported {
     /// Adds the features that are enabled in `capabilities` to this result.
     #[inline]
     pub fn with_capabilities(mut self, capabilities: &Capabilities) -> Self {
-        if capabilities.formatter.format.is_some() {
+        if capabilities.formatter.format.is_some()
+            || capabilities.formatter.format_range.is_some()
+            || capabilities.formatter.format_on_type.is_some()
+        {
             self.insert(FeatureKind::Format, SupportKind::Supported);
         }
         if capabilities.analyzer.lint.is_some() {
@@ -219,6 +228,12 @@ impl FeaturesSupported {
             }
         }
 
+        if let Some(experimental_full_html_support) = settings.experimental_full_html_support
+            && experimental_full_html_support.value()
+        {
+            self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
+        }
+
         debug!("The file has the following feature sets: {:?}", &self);
 
         self
@@ -266,6 +281,11 @@ impl FeaturesSupported {
 
     pub fn supports_search(&self) -> bool {
         self.supports(FeatureKind::Search)
+    }
+
+    // TODO: remove once html full support is stable
+    pub fn supports_full_html_support(&self) -> bool {
+        self.supports(FeatureKind::HtmlFullSupport)
     }
 
     /// Returns the [`SupportKind`] for the given `feature`, but only if it is
@@ -353,11 +373,12 @@ impl Default for FeaturesSupported {
 
 impl Display for FeaturesSupported {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut dbg = f.debug_map();
         for (index, support_kind) in self.0.iter().enumerate() {
             let feature = FeatureKind::from_index(index);
-            write!(f, "{feature}: {support_kind}")?;
+            dbg.key(&feature).value(&support_kind);
         }
-        Ok(())
+        dbg.finish()
     }
 }
 
@@ -411,21 +432,23 @@ impl<'de> serde::Deserialize<'de> for FeaturesSupported {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for FeaturesSupported {
-    fn schema_name() -> String {
-        "FeaturesSupported".to_owned()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("FeaturesSupported")
     }
 
     fn json_schema(generator: &mut SchemaGenerator) -> Schema {
-        use schemars::schema::*;
+        // Generate schemas for FeatureKind and SupportKind first
+        let _feature_kind_schema = generator.subschema_for::<FeatureKind>();
+        let _support_kind_schema = generator.subschema_for::<SupportKind>();
 
-        Schema::Object(SchemaObject {
-            instance_type: Some(InstanceType::Object.into()),
-            object: Some(Box::new(ObjectValidation {
-                property_names: Some(Box::new(generator.subschema_for::<FeatureKind>())),
-                additional_properties: Some(Box::new(generator.subschema_for::<SupportKind>())),
-                ..Default::default()
-            })),
-            ..Default::default()
+        schemars::json_schema!({
+            "type": "object",
+            "propertyNames": {
+                "$ref": "#/$defs/FeatureKind"
+            },
+            "additionalProperties": {
+                "$ref": "#/$defs/SupportKind"
+            }
         })
     }
 }
@@ -495,8 +518,8 @@ pub enum SupportKind {
     FileNotSupported,
 }
 
-impl std::fmt::Display for SupportKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for SupportKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Supported => write!(f, "Supported"),
             Self::Ignored => write!(f, "Ignored"),
@@ -525,20 +548,23 @@ impl SupportKind {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
-#[bitflags]
 #[repr(u8)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[bitflags]
+#[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[expect(clippy::use_self)] // false positive
 pub enum FeatureKind {
     Format,
     Lint,
     Search,
     Assist,
     Debug,
+    // TODO: remove once full HTML support is stable
+    HtmlFullSupport,
 }
 
-pub const NUM_FEATURE_KINDS: usize = 5;
+pub const NUM_FEATURE_KINDS: usize = 6;
 
 impl Display for FeatureKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -548,6 +574,7 @@ impl Display for FeatureKind {
             Self::Search => write!(f, "Search"),
             Self::Assist => write!(f, "Assist"),
             Self::Debug => write!(f, "Debug"),
+            Self::HtmlFullSupport => write!(f, "HtmlFullSupport"),
         }
     }
 }
@@ -565,6 +592,7 @@ impl FeatureKind {
             2 => Self::Search,
             3 => Self::Assist,
             4 => Self::Debug,
+            5 => Self::HtmlFullSupport,
             _ => unreachable!("invalid index for FeatureKind"),
         }
     }
@@ -578,6 +606,7 @@ impl FeatureKind {
             Self::Search => 2,
             Self::Assist => 3,
             Self::Debug => 4,
+            Self::HtmlFullSupport => 5,
         }
     }
 }
@@ -606,6 +635,7 @@ impl Debug for FeatureName {
                 FeatureKind::Search => list.entry(&"Search"),
                 FeatureKind::Assist => list.entry(&"Assist"),
                 FeatureKind::Debug => list.entry(&"Debug"),
+                FeatureKind::HtmlFullSupport => list.entry(&"HtmlFullSupport"),
             };
         }
         list.finish()
@@ -650,8 +680,8 @@ impl From<FeatureName> for SmallVec<[FeatureKind; 6]> {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for FeatureName {
-    fn schema_name() -> String {
-        String::from("FeatureName")
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("FeatureName")
     }
 
     fn json_schema(generator: &mut SchemaGenerator) -> Schema {
@@ -713,6 +743,8 @@ pub struct UpdateSettingsParams {
     pub project_key: ProjectKey,
     pub configuration: Configuration,
     pub workspace_directory: Option<BiomePath>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub extended_configurations: Vec<(BiomePath, Configuration)>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -766,6 +798,15 @@ pub enum FileContent {
 
     /// The server will be responsible for loading the content from the file system.
     FromServer,
+}
+
+impl Display for FileContent {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::FromClient { .. } => f.write_str("FromClient"),
+            Self::FromServer => f.write_str("FromServer"),
+        }
+    }
 }
 
 impl FileContent {
@@ -918,12 +959,12 @@ pub struct PullDiagnosticsParams {
     pub path: BiomePath,
     pub categories: RuleCategories,
     #[serde(default)]
-    pub only: Vec<RuleSelector>,
+    pub only: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub skip: Vec<RuleSelector>,
+    pub skip: Vec<AnalyzerSelector>,
     /// Rules to apply on top of the configuration
     #[serde(default)]
-    pub enabled_rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<AnalyzerSelector>,
     /// When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
     pub pull_code_actions: bool,
 }
@@ -932,7 +973,7 @@ pub struct PullDiagnosticsParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct PullDiagnosticsResult {
-    pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+    pub diagnostics: Vec<Diagnostic>,
     pub errors: usize,
     pub skipped_diagnostics: u64,
 }
@@ -946,13 +987,36 @@ pub struct PullActionsParams {
     pub range: Option<TextRange>,
     pub suppression_reason: Option<String>,
     #[serde(default)]
-    pub only: Vec<RuleSelector>,
+    pub only: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub skip: Vec<RuleSelector>,
+    pub skip: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub enabled_rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<AnalyzerSelector>,
     #[serde(default)]
     pub categories: RuleCategories,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct PullDiagnosticsAndActionsParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+    #[serde(default)]
+    pub only: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub skip: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub enabled_rules: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub categories: RuleCategories,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct PullDiagnosticsAndActionsResult {
+    pub diagnostics: Vec<(Diagnostic, Vec<CodeAction>)>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -969,6 +1033,7 @@ pub struct CodeAction {
     pub category: ActionCategory,
     pub rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
     pub suggestion: CodeSuggestion,
+    pub offset: Option<TextSize>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1019,18 +1084,18 @@ pub struct FixFileParams {
     pub fix_file_mode: FixFileMode,
     pub should_format: bool,
     #[serde(default)]
-    pub only: Vec<RuleSelector>,
+    pub only: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub skip: Vec<RuleSelector>,
+    pub skip: Vec<AnalyzerSelector>,
     /// Rules to apply to the file
     #[serde(default)]
-    pub enabled_rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<AnalyzerSelector>,
     pub rule_categories: RuleCategories,
     #[serde(default)]
     pub suppression_reason: Option<String>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FixFileResult {
@@ -1302,7 +1367,7 @@ impl From<BiomePath> for FileExitsParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetModuleGraphResult {
-    pub data: FxHashMap<String, SerializedJsModuleInfo>,
+    pub data: FxHashMap<String, SerializedModuleInfo>,
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {
@@ -1430,6 +1495,12 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// position within a file.
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
 
+    /// Pulls diagnostics with their relative code actions
+    fn pull_diagnostics_and_actions(
+        &self,
+        params: PullDiagnosticsAndActionsParams,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
+
     /// Runs the given file through the formatter using the provided options
     /// and returns the resulting source code.
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError>;
@@ -1552,7 +1623,7 @@ pub fn client<T>(
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync + 'static,
 {
-    Ok(Box::new(client::WorkspaceClient::new(transport, fs)?))
+    Ok(Box::new(WorkspaceClient::new(transport, fs)?))
 }
 
 /// [RAII](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization)
@@ -1565,10 +1636,11 @@ pub struct FileGuard<'app, W: Workspace + ?Sized> {
 }
 
 impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
-    pub fn open(workspace: &'app W, params: OpenFileParams) -> Result<Self, WorkspaceError> {
-        let project_key = params.project_key;
-        let path = params.path.clone();
-        workspace.open_file(params)?;
+    pub fn new(
+        workspace: &'app W,
+        project_key: ProjectKey,
+        path: BiomePath,
+    ) -> Result<Self, WorkspaceError> {
         Ok(Self {
             workspace,
             project_key,
@@ -1636,8 +1708,8 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn pull_diagnostics(
         &self,
         categories: RuleCategories,
-        only: Vec<RuleSelector>,
-        skip: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
+        skip: Vec<AnalyzerSelector>,
         pull_code_actions: bool,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
@@ -1654,10 +1726,10 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn pull_actions(
         &self,
         range: Option<TextRange>,
-        only: Vec<RuleSelector>,
-        skip: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
+        skip: Vec<AnalyzerSelector>,
         suppression_reason: Option<String>,
-        enabled_rules: Vec<RuleSelector>,
+        enabled_rules: Vec<AnalyzerSelector>,
         categories: RuleCategories,
     ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
@@ -1707,8 +1779,8 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         fix_file_mode: FixFileMode,
         should_format: bool,
         rule_categories: RuleCategories,
-        only: Vec<RuleSelector>,
-        skip: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
+        skip: Vec<AnalyzerSelector>,
         suppression_reason: Option<String>,
     ) -> Result<FixFileResult, WorkspaceError> {
         self.workspace.fix_file(FixFileParams {

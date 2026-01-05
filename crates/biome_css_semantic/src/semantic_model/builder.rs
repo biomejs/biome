@@ -1,8 +1,7 @@
-use std::collections::BTreeMap;
-
 use biome_css_syntax::CssRoot;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, AstPtr, TextRange};
 use rustc_hash::FxHashMap;
+use std::collections::BTreeMap;
 
 use super::model::{
     CssGlobalCustomVariable, CssModelDeclaration, Rule, RuleId, Selector, SemanticModel,
@@ -51,8 +50,9 @@ impl SemanticModelBuilder {
             if let Some(parent_id) = &current_parent_id {
                 let rule = self.rules_by_id.get(parent_id);
                 if let Some(rule) = rule {
+                    let typed_node = rule.node.to_node(self.root.syntax());
                     if matches!(
-                        rule.node(),
+                        typed_node,
                         AnyRuleStart::CssMediaAtRule(_) | AnyRuleStart::CssSupportsAtRule(_)
                     ) {
                         current_parent_id = iterator
@@ -83,8 +83,9 @@ impl SemanticModelBuilder {
             if let Some(parent_id) = &current_parent_id {
                 let rule = self.rules_by_id.get(parent_id);
                 if let Some(rule) = rule {
+                    let typed_node = rule.node.to_node(self.root.syntax());
                     if matches!(
-                        rule.node(),
+                        typed_node,
                         AnyRuleStart::CssMediaAtRule(_) | AnyRuleStart::CssSupportsAtRule(_)
                     ) {
                         current_parent_id = iterator
@@ -113,13 +114,15 @@ impl SemanticModelBuilder {
 
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
-            root: self.root,
             rules: self.rules,
             global_custom_variables: self.global_custom_variables,
             range_to_rule: self.range_to_rule,
             rules_by_id: self.rules_by_id,
         };
-        SemanticModel::new(data)
+        SemanticModel::new(
+            data,
+            self.root.syntax().as_send().expect("To be a root node"),
+        )
     }
 
     #[inline]
@@ -133,7 +136,7 @@ impl SemanticModelBuilder {
 
                 let new_rule = Rule {
                     id: new_rule_id,
-                    node,
+                    node: AstPtr::new(&node),
                     selectors: Vec::new(),
                     declarations: Vec::new(),
                     parent_id,
@@ -157,10 +160,10 @@ impl SemanticModelBuilder {
 
                     if has_parent {
                         self.range_to_rule
-                            .insert(completed_rule.range(), completed_rule.clone());
+                            .insert(completed_rule.range(&self.root), completed_rule.clone());
                     } else {
                         self.range_to_rule
-                            .insert(completed_rule.range(), completed_rule.clone());
+                            .insert(completed_rule.range(&self.root), completed_rule.clone());
                         self.rules.push(completed_rule.clone());
                     }
                 }
@@ -171,9 +174,9 @@ impl SemanticModelBuilder {
                         let nesting_level = node.nesting_level();
                         self.get_parent_selector_at(nesting_level)
                             .map(|rule| {
-                                rule.selectors()
+                                rule.selectors
                                     .iter()
-                                    .map(|s| s.specificity())
+                                    .map(|s| s.specificity)
                                     .max()
                                     .unwrap_or_default()
                             })
@@ -181,9 +184,9 @@ impl SemanticModelBuilder {
                     } else {
                         self.get_last_parent_selector_rule()
                             .map(|rule| {
-                                rule.selectors()
+                                rule.selectors
                                     .iter()
-                                    .map(|s| s.specificity())
+                                    .map(|s| s.specificity)
                                     .max()
                                     .unwrap_or_default()
                             })
@@ -193,7 +196,7 @@ impl SemanticModelBuilder {
                     let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
                     let combined = parent_specificity + specificity;
                     current_rule.selectors.push(Selector {
-                        node,
+                        node: AstPtr::new(&node),
                         specificity: combined,
                     });
                     if combined > current_rule.specificity {
@@ -216,15 +219,15 @@ impl SemanticModelBuilder {
                         self.global_custom_variables.insert(
                             property_name,
                             CssGlobalCustomVariable::Root(CssModelDeclaration {
-                                declaration: node.clone(),
-                                property: property.clone(),
+                                declaration: AstPtr::new(&node),
+                                property: AstPtr::new(&property),
                                 value: value.clone(),
                             }),
                         );
                     }
                     current_rule.declarations.push(CssModelDeclaration {
-                        declaration: node,
-                        property,
+                        declaration: AstPtr::new(&node),
+                        property: AstPtr::new(&property),
                         value,
                     });
                 }
@@ -246,7 +249,7 @@ impl SemanticModelBuilder {
                 self.global_custom_variables.insert(
                     property_name,
                     CssGlobalCustomVariable::AtProperty {
-                        property: property.clone(),
+                        property: AstPtr::new(&property),
                         initial_value,
                         syntax,
                         inherits,

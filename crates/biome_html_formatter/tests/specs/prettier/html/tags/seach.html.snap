@@ -44,17 +44,6 @@ info: html/tags/seach.html
  <html lang="en">
    <head>
      <meta charset="UTF-8" />
-@@ -8,7 +8,9 @@
-   </head>
-   <body>
-     <header>
--      <h1><a href="/">My fancy blog</a></h1>
-+      <h1>
-+        <a href="/">My fancy blog</a>
-+      </h1>
-       ...
-       <search>
-         <form action="search.php">
 ```
 
 # Output
@@ -70,9 +59,7 @@ info: html/tags/seach.html
   </head>
   <body>
     <header>
-      <h1>
-        <a href="/">My fancy blog</a>
-      </h1>
+      <h1><a href="/">My fancy blog</a></h1>
       ...
       <search>
         <form action="search.php">

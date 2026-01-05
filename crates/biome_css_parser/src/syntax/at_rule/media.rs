@@ -2,6 +2,7 @@ use super::parse_error::expected_media_query;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::feature::parse_any_query_feature;
 use crate::syntax::block::parse_conditional_block;
+use crate::syntax::util::skip_possible_tailwind_syntax;
 use crate::syntax::{
     is_at_identifier, is_at_metavariable, is_nth_at_identifier, parse_metavariable,
     parse_regular_identifier,
@@ -27,13 +28,27 @@ pub(crate) fn parse_media_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump(T![media]);
-
-    MediaQueryList::new(T!['{']).parse_list(p);
-
+    parse_media_at_rule_declarator(p, T!['{']).ok();
     parse_conditional_block(p);
 
     Present(m.complete(p, CSS_MEDIA_AT_RULE))
+}
+
+#[inline]
+pub(crate) fn parse_media_at_rule_declarator(
+    p: &mut CssParser,
+    end_kind: CssSyntaxKind,
+) -> ParsedSyntax {
+    if !is_at_media_at_rule(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(T![media]);
+    MediaQueryList::new(end_kind).parse_list(p);
+
+    Present(m.complete(p, CSS_MEDIA_AT_RULE_DECLARATOR))
 }
 
 pub(crate) struct MediaQueryList {
@@ -52,7 +67,11 @@ impl ParseSeparatedList for MediaQueryList {
     const LIST_KIND: Self::Kind = CSS_MEDIA_QUERY_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_any_media_query(p)
+        let parsed = parse_any_media_query(p);
+        if parsed.is_present() {
+            skip_possible_tailwind_syntax(p);
+        }
+        parsed
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -92,12 +111,12 @@ fn parse_any_media_query(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_any_media_condition(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_any_media_condition(p: &mut CssParser) -> bool {
     is_at_media_not_condition(p) || is_at_any_media_in_parens(p)
 }
 
 #[inline]
-fn parse_any_media_condition(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_any_media_condition(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_any_media_condition(p) {
         return Absent;
     }
@@ -245,7 +264,7 @@ fn is_at_any_media_in_parens(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-fn parse_any_media_in_parens(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_any_media_in_parens(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_any_media_in_parens(p) {
         return Absent;
     }

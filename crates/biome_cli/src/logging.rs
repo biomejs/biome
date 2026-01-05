@@ -7,6 +7,7 @@ use tracing::Metadata;
 use tracing::subscriber::Interest;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::fmt::format::FmtSpan;
+use tracing_subscriber::fmt::writer::MakeWriterExt;
 use tracing_subscriber::layer::{Context, Filter, SubscriberExt};
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{Layer as _, registry};
@@ -17,69 +18,40 @@ pub fn setup_cli_subscriber(
     kind: LoggingKind,
     colors: Option<&ColorsArg>,
 ) {
+    use tracing_subscriber_ext::*;
+
     if level == LoggingLevel::None {
         return;
     }
 
-    let mut format = tracing_subscriber::fmt::layer()
+    let fmt_span = matches!(level, LoggingLevel::Tracing)
+        .then_some(FmtSpan::CLOSE)
+        .unwrap_or(FmtSpan::NONE);
+
+    let make_writer = file
+        .map(File::create)
+        .transpose()
+        .expect("Failed to create log file")
+        .optional()
+        .or_else(std::io::stdout);
+
+    let layer = tracing_subscriber::fmt::layer()
         .with_level(true)
         .with_target(false)
         .with_thread_names(true)
         .with_file(true)
-        .with_ansi(colors.is_none_or(|c| c.is_enabled()));
+        .with_ansi(colors.is_none_or(|c| c.is_enabled()))
+        .with_span_events(fmt_span)
+        .with_writer(make_writer);
 
-    if level == LoggingLevel::Tracing {
-        format = format.with_span_events(FmtSpan::CLOSE);
-    }
-
-    // FIXME: I hate the duplication here, and I tried to make a function that
-    //        could take `impl Layer<Registry>` so the compiler could expand
-    //        this for us... but I got dragged into a horrible swamp of generic
-    //        constraints...
-    if let Some(file) = file {
-        let file = File::create(file).expect("Failed to create log file");
-        let format = format.with_writer(file);
-        match kind {
-            LoggingKind::Pretty => {
-                let format = format.pretty();
-                registry()
-                    .with(format.with_filter(LoggingFilter { level }))
-                    .init()
-            }
-            LoggingKind::Compact => {
-                let format = format.compact();
-                registry()
-                    .with(format.with_filter(LoggingFilter { level }))
-                    .init()
-            }
-            LoggingKind::Json => {
-                let format = format.json().flatten_event(true);
-                registry()
-                    .with(format.with_filter(LoggingFilter { level }))
-                    .init()
-            }
-        }
-    } else {
-        match kind {
-            LoggingKind::Pretty => {
-                let format = format.pretty();
-                registry()
-                    .with(format.with_filter(LoggingFilter { level }))
-                    .init()
-            }
-            LoggingKind::Compact => {
-                let format = format.compact();
-                registry()
-                    .with(format.with_filter(LoggingFilter { level }))
-                    .init()
-            }
-            LoggingKind::Json => {
-                let format = format.json().flatten_event(true);
-                registry()
-                    .with(format.with_filter(LoggingFilter { level }))
-                    .init()
-            }
-        }
+    let registry = registry();
+    let filter = LoggingFilter { level };
+    match kind {
+        LoggingKind::Pretty => registry.with(layer.pretty().with_filter(filter)).init(),
+        LoggingKind::Compact => registry.with(layer.compact().with_filter(filter)).init(),
+        LoggingKind::Json => registry
+            .with(layer.json().flatten_event(true).with_filter(filter))
+            .init(),
     };
 }
 
@@ -216,5 +188,134 @@ impl FromStr for LoggingKind {
             "json" => Ok(Self::Json),
             _ => Err("This log kind doesn't exist".to_string()),
         }
+    }
+}
+
+mod tracing_subscriber_ext {
+    //! Extensions module for [tracing_subscriber].
+    //!
+    //! This module is kept private to preserve API flexibility.
+
+    use tracing::Metadata;
+    use tracing_subscriber::fmt::{MakeWriter, writer::OptionalWriter};
+
+    /// A wrapper type for an optional [MakeWriter].
+    ///
+    /// Implements [MakeWriter] for `Option<M>` where `M: MakeWriter`.
+    ///
+    /// XXX: Remove after [PR](https://github.com/tokio-rs/tracing/pull/3196) is merged.
+    pub(super) struct OptionMakeWriter<M>(Option<M>);
+
+    impl<'a, M> MakeWriter<'a> for OptionMakeWriter<M>
+    where
+        M: MakeWriter<'a> + 'a,
+    {
+        type Writer = OptionalWriter<M::Writer>;
+
+        fn make_writer(&'a self) -> Self::Writer {
+            match &self.0 {
+                Some(inner) => OptionalWriter::some(inner.make_writer()),
+                None => OptionalWriter::none(),
+            }
+        }
+
+        fn make_writer_for(&'a self, meta: &Metadata<'_>) -> Self::Writer {
+            match &self.0 {
+                Some(inner) => OptionalWriter::some(inner.make_writer_for(meta)),
+                None => OptionalWriter::none(),
+            }
+        }
+    }
+
+    /// Extension trait for creating [OptionMakeWriter].
+    pub(super) trait OptionMakeWriterExt<M> {
+        fn optional(self) -> OptionMakeWriter<M>
+        where
+            Self: Sized;
+    }
+
+    impl<M> OptionMakeWriterExt<M> for Option<M> {
+        fn optional(self) -> OptionMakeWriter<M> {
+            OptionMakeWriter(self)
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{
+        io::Write,
+        sync::{Arc, Mutex},
+    };
+
+    struct MockWriter {
+        bytes: Mutex<Vec<u8>>,
+    }
+
+    impl MockWriter {
+        /// Creates a new, empty `Arc<Self>`.
+        fn new() -> Arc<Self> {
+            Arc::new(Self {
+                bytes: Mutex::new(Vec::new()),
+            })
+        }
+
+        /// Wraps `Arc<Self>` in `Some`.
+        fn some(self: Arc<Self>) -> Option<Arc<Self>> {
+            Some(self)
+        }
+
+        /// Wraps `Arc<Self>` in `None`.
+        fn none(self: Arc<Self>) -> Option<Arc<Self>> {
+            None
+        }
+
+        /// Asserts that something was written to this writer.
+        fn assert_written(&self) {
+            assert!(!self.bytes.lock().unwrap().is_empty())
+        }
+    }
+
+    impl std::io::Write for &MockWriter {
+        fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+            self.bytes.lock().unwrap().extend_from_slice(buf);
+
+            Ok(buf.len())
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn optional_writer_or_else_test() {
+        use super::tracing_subscriber_ext::*;
+        use tracing_subscriber::fmt::{MakeWriter, writer::MakeWriterExt};
+
+        let writer_one = MockWriter::new();
+        let writer_two = MockWriter::new();
+
+        let make_writer = writer_one
+            .clone()
+            .some()
+            .optional()
+            .or_else(writer_two.clone());
+
+        let mut writer = make_writer.make_writer();
+
+        writer.write_all(b"Hello, world!").unwrap();
+
+        writer_one.assert_written();
+
+        let writer_one = MockWriter::new();
+        let writer_two = MockWriter::new();
+
+        let make_writer = writer_one.none().optional().or_else(writer_two.clone());
+        let mut writer = make_writer.make_writer();
+
+        writer.write_all(b"Hello, world!").unwrap();
+
+        writer_two.assert_written();
     }
 }

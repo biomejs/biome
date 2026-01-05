@@ -6,7 +6,7 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, JsLanguage, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::{AstNode, FileSourceError};
@@ -121,7 +121,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         // This is needed to set the language to TypeScript for Vue files
         // because we can't do it in <script> definition in the current implementation.
         let source_type = if source_type.as_embedding_kind().is_vue() {
-            JsFileSource::ts().with_embedding_kind(EmbeddingKind::Vue)
+            JsFileSource::ts()
+                .with_embedding_kind(*VueFileHandler::file_source(&input_code).as_embedding_kind())
         } else {
             source_type
         };
@@ -131,7 +132,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             input_code.as_str()
         };
 
-        // if source_type.
         analyze_and_snap(
             &mut snapshot,
             input_code,
@@ -177,7 +177,7 @@ pub(crate) fn analyze_and_snap(
         source_type.set_module_kind(ModuleKind::Script)
     }
 
-    let parsed = parse(input_code, source_type, parser_options.clone());
+    let parsed = parse(input_code, source_type, parser_options);
     let root = parsed.tree();
 
     let options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
@@ -202,7 +202,7 @@ pub(crate) fn analyze_and_snap(
                                 input_code,
                                 source_type,
                                 &action,
-                                parser_options.clone(),
+                                parser_options,
                                 &root,
                             );
                             diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
@@ -213,7 +213,7 @@ pub(crate) fn analyze_and_snap(
                             input_code,
                             source_type,
                             &action,
-                            parser_options.clone(),
+                            parser_options,
                             &root,
                         );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
@@ -232,7 +232,7 @@ pub(crate) fn analyze_and_snap(
                             input_code,
                             source_type,
                             &action,
-                            parser_options.clone(),
+                            parser_options,
                             &root,
                         );
                         code_fixes.push(code_fix_to_string(input_code, action));
@@ -243,7 +243,7 @@ pub(crate) fn analyze_and_snap(
                         input_code,
                         source_type,
                         &action,
-                        parser_options.clone(),
+                        parser_options,
                         &root,
                     );
                     code_fixes.push(code_fix_to_string(input_code, action));
@@ -263,6 +263,7 @@ pub(crate) fn analyze_and_snap(
         diagnostics.as_slice(),
         code_fixes.as_slice(),
         source_type.file_extension(),
+        parsed.diagnostics().len(),
     );
 
     // FIXME: I wish we could do this more generically, but we cannot do this

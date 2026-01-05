@@ -263,6 +263,8 @@ if ('every' in []);
 ${a}`) { }
 ```
 
+_Note: The parser emitted 2 diagnostics which are not shown here._
+
 # Input
 ```cjs
 if (`${a}`);
@@ -393,6 +395,8 @@ while (tag`${a}`) { };
 // while (`\
 ${a}`) { }
 ```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._
 
 # Input
 ```cjs
@@ -733,5 +737,3 @@ while (true);
 ```cjs
 function foo(Boolean) { while (true); }
 ```
-
-

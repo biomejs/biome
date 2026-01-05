@@ -49,7 +49,9 @@ CssRoot {
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssFontFaceAtRule {
-                font_face_token: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")],
+                declarator: CssFontFaceAtRuleDeclarator {
+                    font_face_token: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")],
+                },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@11..12 "{" [] [],
                     declarations: CssDeclarationList [
@@ -141,7 +143,9 @@ CssRoot {
         CssAtRule {
             at_token: AT@90..93 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssFontFaceAtRule {
-                font_face_token: FONT_FACE_KW@93..103 "font-face" [] [Whitespace(" ")],
+                declarator: CssFontFaceAtRuleDeclarator {
+                    font_face_token: FONT_FACE_KW@93..103 "font-face" [] [Whitespace(" ")],
+                },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@103..104 "{" [] [],
                     declarations: CssDeclarationList [
@@ -281,7 +285,9 @@ CssRoot {
         CssAtRule {
             at_token: AT@225..228 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssFontFaceAtRule {
-                font_face_token: FONT_FACE_KW@228..238 "font-face" [] [Whitespace(" ")],
+                declarator: CssFontFaceAtRuleDeclarator {
+                    font_face_token: FONT_FACE_KW@228..238 "font-face" [] [Whitespace(" ")],
+                },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@238..239 "{" [] [],
                     declarations: CssDeclarationList [
@@ -358,7 +364,9 @@ CssRoot {
         CssAtRule {
             at_token: AT@304..307 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssFontFaceAtRule {
-                font_face_token: FONT_FACE_KW@307..317 "font-face" [] [Whitespace(" ")],
+                declarator: CssFontFaceAtRuleDeclarator {
+                    font_face_token: FONT_FACE_KW@307..317 "font-face" [] [Whitespace(" ")],
+                },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@317..318 "{" [] [],
                     declarations: CssDeclarationList [
@@ -808,7 +816,8 @@ CssRoot {
     0: CSS_AT_RULE@0..90
       0: AT@0..1 "@" [] []
       1: CSS_FONT_FACE_AT_RULE@1..90
-        0: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")]
+        0: CSS_FONT_FACE_AT_RULE_DECLARATOR@1..11
+          0: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")]
         1: CSS_DECLARATION_BLOCK@11..90
           0: L_CURLY@11..12 "{" [] []
           1: CSS_DECLARATION_LIST@12..88
@@ -869,7 +878,8 @@ CssRoot {
     1: CSS_AT_RULE@90..225
       0: AT@90..93 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_FONT_FACE_AT_RULE@93..225
-        0: FONT_FACE_KW@93..103 "font-face" [] [Whitespace(" ")]
+        0: CSS_FONT_FACE_AT_RULE_DECLARATOR@93..103
+          0: FONT_FACE_KW@93..103 "font-face" [] [Whitespace(" ")]
         1: CSS_DECLARATION_BLOCK@103..225
           0: L_CURLY@103..104 "{" [] []
           1: CSS_DECLARATION_LIST@104..223
@@ -962,7 +972,8 @@ CssRoot {
     2: CSS_AT_RULE@225..304
       0: AT@225..228 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_FONT_FACE_AT_RULE@228..304
-        0: FONT_FACE_KW@228..238 "font-face" [] [Whitespace(" ")]
+        0: CSS_FONT_FACE_AT_RULE_DECLARATOR@228..238
+          0: FONT_FACE_KW@228..238 "font-face" [] [Whitespace(" ")]
         1: CSS_DECLARATION_BLOCK@238..304
           0: L_CURLY@238..239 "{" [] []
           1: CSS_DECLARATION_LIST@239..302
@@ -1013,7 +1024,8 @@ CssRoot {
     3: CSS_AT_RULE@304..943
       0: AT@304..307 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_FONT_FACE_AT_RULE@307..943
-        0: FONT_FACE_KW@307..317 "font-face" [] [Whitespace(" ")]
+        0: CSS_FONT_FACE_AT_RULE_DECLARATOR@307..317
+          0: FONT_FACE_KW@307..317 "font-face" [] [Whitespace(" ")]
         1: CSS_DECLARATION_BLOCK@317..943
           0: L_CURLY@317..318 "{" [] []
           1: CSS_DECLARATION_LIST@318..941

@@ -22,3 +22,4 @@ pub type JsonSyntaxElement = biome_rowan::SyntaxElement<JsonLanguage>;
 pub type JsonSyntaxNodeChildren = biome_rowan::SyntaxNodeChildren<JsonLanguage>;
 pub type JsonSyntaxElementChildren = biome_rowan::SyntaxElementChildren<JsonLanguage>;
 pub type JsonSyntaxList = biome_rowan::SyntaxList<JsonLanguage>;
+pub type JsonSyntaxNodeWithOffset = biome_rowan::SyntaxNodeWithOffset<JsonLanguage>;

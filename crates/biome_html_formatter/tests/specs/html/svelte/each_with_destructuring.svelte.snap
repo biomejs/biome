@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/each_with_destructuring.svelte
+---
+# Input
+
+```svelte
+{#each items as { id, name }}
+  <div>{id}: {name}</div>
+{/each}
+
+{#each users as { name, email }, i}
+  <div>{i}: {name} ({email})</div>
+{/each}
+
+{#each products as [id, title]}
+  <div>{id}: {title}</div>
+{/each}
+
+{#each items as { id, ...rest }}
+  <div>{id}</div>
+{/each}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```svelte
+{#each items as { id, name }}
+	<div>{id}: {name}</div>
+{/each}
+
+{#each users as { name, email }, i}
+	<div>{i}: {name} ({email})</div>
+{/each}
+
+{#each products as [id, title]}
+	<div>{id}: {title}</div>
+{/each}
+
+{#each items as { id, ...rest }}
+	<div>{id}</div>
+{/each}
+```

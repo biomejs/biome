@@ -1,4 +1,4 @@
-use std::{fmt, rc::Rc, str::FromStr};
+use std::{fmt, ops::Deref, rc::Rc, str::FromStr};
 
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
@@ -9,8 +9,11 @@ use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 
 use crate::comments::{FormatHtmlComment, HtmlCommentStyle, HtmlComments};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct HtmlFormatOptions {
+    /// The file source.
+    file_source: HtmlFileSource,
+
     /// The indent style.
     indent_style: IndentStyle,
 
@@ -46,11 +49,33 @@ pub struct HtmlFormatOptions {
     self_close_void_elements: SelfCloseVoidElements,
 }
 
-impl HtmlFormatOptions {
-    pub fn new(_file_source: HtmlFileSource) -> Self {
+impl Default for HtmlFormatOptions {
+    fn default() -> Self {
         Self {
+            file_source: HtmlFileSource::html(),
+            indent_style: IndentStyle::default(),
+            indent_width: IndentWidth::default(),
+            line_ending: LineEnding::default(),
+            line_width: LineWidth::default(),
+            attribute_position: AttributePosition::default(),
+            bracket_same_line: BracketSameLine::default(),
+            whitespace_sensitivity: WhitespaceSensitivity::default(),
+            indent_script_and_style: IndentScriptAndStyle::default(),
+            self_close_void_elements: SelfCloseVoidElements::default(),
+        }
+    }
+}
+
+impl HtmlFormatOptions {
+    pub fn new(file_source: HtmlFileSource) -> Self {
+        Self {
+            file_source,
             ..Default::default()
         }
+    }
+
+    pub fn file_source(&self) -> &HtmlFileSource {
+        &self.file_source
     }
 
     pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
@@ -355,6 +380,14 @@ impl FromStr for IndentScriptAndStyle {
     }
 }
 
+impl Deref for IndentScriptAndStyle {
+    type Target = bool;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct HtmlFormatContext {
     options: HtmlFormatOptions,
@@ -363,6 +396,8 @@ pub struct HtmlFormatContext {
     comments: Rc<HtmlComments>,
 
     source_map: Option<TransformSourceMap>,
+
+    should_delegate_fmt_embedded_nodes: bool,
 }
 
 impl HtmlFormatContext {
@@ -371,12 +406,22 @@ impl HtmlFormatContext {
             options,
             comments: Rc::new(comments),
             source_map: None,
+            should_delegate_fmt_embedded_nodes: false,
         }
     }
 
     pub fn with_source_map(mut self, source_map: Option<TransformSourceMap>) -> Self {
         self.source_map = source_map;
         self
+    }
+
+    pub fn with_fmt_embedded_nodes(mut self) -> Self {
+        self.should_delegate_fmt_embedded_nodes = true;
+        self
+    }
+
+    pub fn should_delegate_fmt_embedded_nodes(&self) -> bool {
+        self.should_delegate_fmt_embedded_nodes
     }
 }
 

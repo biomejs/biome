@@ -3,8 +3,8 @@ use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression,
-    JsFunctionExpression, TextRange, binding_ext::AnyJsIdentifierBinding,
-    static_value::StaticValue,
+    JsFunctionExpression, JsObjectBindingPatternProperty, TextRange,
+    binding_ext::AnyJsIdentifierBinding, static_value::StaticValue,
 };
 use biome_js_syntax::{JsArrayBindingPatternElement, JsSyntaxToken};
 use biome_rowan::AstNode;
@@ -199,9 +199,15 @@ pub(crate) fn react_hook_with_dependency(
     let closure_index = hook.closure_index as usize;
     let dependencies_index = hook.dependencies_index as usize;
 
+    // Sort the indices to avoid triggering a panic, but reverse them
+    // afterwards to avoid breaking results
     let mut indices = [closure_index, dependencies_index];
     indices.sort_unstable();
-    let [closure_node, dependencies_node] = call.arguments().ok()?.get_arguments_by_index(indices);
+    let args = call.arguments().ok()?.get_arguments_by_index(indices);
+    let [mut closure_node, mut dependencies_node] = args;
+    if closure_index > dependencies_index {
+        (closure_node, dependencies_node) = (dependencies_node, closure_node);
+    }
 
     Some(ReactCallWithDependencyResult {
         function_name_range,
@@ -266,9 +272,18 @@ pub fn is_binding_react_stable(
         .map(|parent| parent.syntax().index() / 2)
         .and_then(|index| index.try_into().ok());
     let key = binding
-        .name_token()
-        .ok()
-        .map(|token| token.text_trimmed().to_string());
+        // Handle cases like const { foo: bar } = useSomething();
+        .parent::<JsObjectBindingPatternProperty>()
+        .and_then(|pattern_property| pattern_property.member().ok())
+        .and_then(|member| member.name())
+        .map(|name_token| name_token.to_string())
+        .or_else(|| {
+            // Handle the rest of the cases, i.e., var foo = useSomething();
+            binding
+                .name_token()
+                .ok()
+                .map(|token| token.text_trimmed().to_string())
+        });
     let Some(callee) = declarator
         .initializer()
         .and_then(|initializer| initializer.expression().ok())

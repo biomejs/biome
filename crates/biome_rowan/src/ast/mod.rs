@@ -31,7 +31,7 @@ pub use mutation::{AstNodeExt, AstNodeListExt, AstSeparatedListExt};
 /// bitfield here being twice as large as it needs to cover all nodes as well
 /// as all token kinds
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct SyntaxKindSet<L: Language>([u128; 4], PhantomData<L>);
+pub struct SyntaxKindSet<L: Language>([u128; 5], PhantomData<L>);
 
 impl<L> SyntaxKindSet<L>
 where
@@ -50,7 +50,7 @@ where
     /// ```compile_fail
     /// # use biome_rowan::{SyntaxKindSet, RawSyntaxKind, raw_language::RawLanguage};
     /// const EXAMPLE: SyntaxKindSet<RawLanguage> =
-    ///     SyntaxKindSet::<RawLanguage>::from_raw(RawSyntaxKind(512));
+    ///     SyntaxKindSet::<RawLanguage>::from_raw(RawSyntaxKind(640));
     /// # println!("{EXAMPLE:?}"); // The constant must be used to be evaluated
     /// ```
     pub const fn from_raw(kind: RawSyntaxKind) -> Self {
@@ -60,7 +60,7 @@ where
         let shift = kind % u128::BITS as u16;
         let mask = 1 << shift;
 
-        let mut bits = [0; 4];
+        let mut bits = [0; 5];
         bits[index] = mask;
 
         Self(bits, PhantomData)
@@ -74,6 +74,7 @@ where
                 self.0[1] | other.0[1],
                 self.0[2] | other.0[2],
                 self.0[3] | other.0[3],
+                self.0[4] | other.0[4],
             ],
             PhantomData,
         )
@@ -273,6 +274,15 @@ pub trait AstNode: Clone {
         I::IntoIter: ExactSizeIterator,
     {
         Self::cast(self.into_syntax().append_trivia_pieces(trivia)?)
+    }
+
+    /// Returns a new version of this node with *all* trivia stripped.
+    fn trim_comments_and_trivia(self) -> Option<Self> {
+        Self::cast(
+            self.into_syntax()
+                .with_leading_trivia_pieces([])?
+                .with_trailing_trivia_pieces([])?,
+        )
     }
 
     /// Return a new version of this node without leading and trailing newlines and whitespaces.
@@ -682,6 +692,19 @@ impl<L: Language, N: AstNode<Language = L>> Iterator for AstSeparatedListElement
             trailing_separator: separator,
         })
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.slots.len();
+        // Each element typically consumes 2 slots (node + separator),
+        // but the last element may have only 1 slot (node without trailing separator)
+        let len = len.div_ceil(2);
+        (len, Some(len))
+    }
+}
+
+impl<L: Language, N: AstNode<Language = L>> ExactSizeIterator
+    for AstSeparatedListElementsIterator<L, N>
+{
 }
 
 impl<L: Language, N: AstNode<Language = L>> FusedIterator
@@ -735,6 +758,15 @@ impl<L: Language, N: AstNode<Language = L>> Iterator for AstSeparatedListNodesIt
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|element| element.node)
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
+
+impl<L: Language, N: AstNode<Language = L>> ExactSizeIterator
+    for AstSeparatedListNodesIterator<L, N>
+{
 }
 
 impl<L: Language, N: AstNode<Language = L>> FusedIterator for AstSeparatedListNodesIterator<L, N> {}

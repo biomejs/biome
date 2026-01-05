@@ -4,12 +4,15 @@ use crate::commands::{CommandRunner, get_files_to_process_with_cli_options};
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::analyzer::LinterEnabled;
 use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
-use biome_configuration::formatter::FormatterEnabled;
+use biome_configuration::css::CssParserConfiguration;
+use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
+use biome_configuration::json::JsonParserConfiguration;
 use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
-use biome_service::{Workspace, WorkspaceError, configuration::LoadedConfiguration};
+use biome_service::{Workspace, WorkspaceError};
+use camino::Utf8PathBuf;
 use std::ffi::OsString;
 
 pub(crate) struct CheckCommandPayload {
@@ -26,6 +29,9 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
+    pub(crate) format_with_errors: Option<FormatWithErrorsEnabled>,
+    pub(crate) json_parser: Option<JsonParserConfiguration>,
+    pub(crate) css_parser: Option<CssParserConfiguration>,
 }
 
 impl LoadEditorConfig for CheckCommandPayload {
@@ -42,17 +48,15 @@ impl CommandRunner for CheckCommandPayload {
 
     fn merge_configuration(
         &mut self,
-        loaded_configuration: LoadedConfiguration,
+        loaded_configuration: Configuration,
+        loaded_directory: Option<Utf8PathBuf>,
+        _loaded_file: Option<Utf8PathBuf>,
+
         fs: &dyn FileSystem,
         _console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError> {
-        let LoadedConfiguration {
-            configuration: biome_configuration,
-            directory_path,
-            ..
-        } = loaded_configuration;
         let mut configuration =
-            self.combine_configuration(directory_path, biome_configuration, fs)?;
+            self.combine_configuration(loaded_directory, loaded_configuration, fs)?;
 
         let formatter = configuration
             .formatter
@@ -60,6 +64,9 @@ impl CommandRunner for CheckCommandPayload {
 
         if self.formatter_enabled.is_some() {
             formatter.enabled = self.formatter_enabled;
+        }
+        if self.format_with_errors.is_some() {
+            formatter.format_with_errors = self.format_with_errors;
         }
 
         let linter = configuration
@@ -76,6 +83,16 @@ impl CommandRunner for CheckCommandPayload {
 
         if self.assist_enabled.is_some() {
             assist.enabled = self.assist_enabled;
+        }
+
+        let css = configuration.css.get_or_insert_with(Default::default);
+        if self.css_parser.is_some() {
+            css.parser.merge_with(self.css_parser.clone());
+        }
+
+        let json = configuration.json.get_or_insert_with(Default::default);
+        if self.json_parser.is_some() {
+            json.parser.merge_with(self.json_parser.clone())
         }
 
         if let Some(mut conf) = self.configuration.clone() {

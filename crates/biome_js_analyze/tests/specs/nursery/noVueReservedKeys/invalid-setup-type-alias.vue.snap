@@ -4,7 +4,6 @@ expression: invalid-setup-type-alias.vue
 ---
 # Input
 ```ts
-; // this is a hack because vue files are still parsed as js/ts files.
 type A = {
     $el: string
 };
@@ -14,18 +13,19 @@ defineProps<A>();
 
 # Diagnostics
 ```
-invalid-setup-type-alias.vue:3:5 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-setup-type-alias.vue:2:5 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Key $el is reserved in Vue.
   
-    1 │ ; // this is a hack because vue files are still parsed as js/ts files.
-    2 │ type A = {
-  > 3 │     $el: string
+    1 │ type A = {
+  > 2 │     $el: string
       │     ^^^
-    4 │ };
-    5 │ defineProps<A>();
+    3 │ };
+    4 │ defineProps<A>();
   
   i Rename the key to avoid conflicts with Vue reserved keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

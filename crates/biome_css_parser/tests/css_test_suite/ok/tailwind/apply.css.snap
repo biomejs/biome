@@ -1,0 +1,372 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+/* @apply directive */
+@apply text-lg font-bold;
+
+@apply flex items-center justify-between px-4 py-2;
+
+/* @apply with single utility */
+@apply hidden;
+
+/* @apply with spacing utilities */
+@apply m-4 p-8;
+
+/* @apply with color utilities */
+@apply bg-blue-500 text-white;
+
+/* @apply with typography utilities */
+@apply text-center leading-relaxed tracking-wide;
+
+/* @apply with layout utilities */
+@apply container mx-auto max-w-4xl;
+
+/* @apply with transform utilities */
+@apply transform rotate-45 scale-110;
+
+/* @apply with transition utilities */
+@apply transition-all duration-300 ease-in-out;
+
+/* @apply with custom utilities */
+@apply my-custom-utility another-utility;
+
+/* @apply with numeric utilities */
+@apply w-1 h-96 z-10;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..24 "@" [Comments("/* @apply directive */"), Newline("\n")] [],
+            rule: TwApplyAtRule {
+                apply_token: APPLY_KW@24..30 "apply" [] [Whitespace(" ")],
+                classes: TwApplyClassList [
+                    CssIdentifier {
+                        value_token: IDENT@30..38 "text-lg" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@38..47 "font-bold" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@47..48 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@48..51 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwApplyAtRule {
+                apply_token: APPLY_KW@51..57 "apply" [] [Whitespace(" ")],
+                classes: TwApplyClassList [
+                    CssIdentifier {
+                        value_token: IDENT@57..62 "flex" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@62..75 "items-center" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@75..91 "justify-between" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@91..96 "px-4" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@96..100 "py-2" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@100..101 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@101..137 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with single ..."), Newline("\n")] [],
+            rule: TwApplyAtRule {
+                apply_token: APPLY_KW@137..143 "apply" [] [Whitespace(" ")],
+                classes: TwApplyClassList [
+                    CssIdentifier {
+                        value_token: IDENT@143..149 "hidden" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@149..150 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@150..189 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with spacin ..."), Newline("\n")] [],
+            rule: TwApplyAtRule {
+                apply_token: APPLY_KW@189..195 "apply" [] [Whitespace(" ")],
+                classes: TwApplyClassList [
+                    CssIdentifier {
+                        value_token: IDENT@195..199 "m-4" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@199..202 "p-8" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@202..203 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@203..240 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with color  ..."), Newline("\n")] [],
+            rule: TwApplyAtRule {
+                apply_token: APPLY_KW@240..246 "apply" [] [Whitespace(" ")],
+                classes: TwApplyClassList [
+                    CssIdentifier {
+                        value_token: IDENT@246..258 "bg-blue-500" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@258..268 "text-white" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@268..269 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@269..311 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with typogr ..."), Newline("\n")] [],
+            rule: TwApplyAtRule {
+                apply_token: APPLY_KW@311..317 "apply" [] [Whitespace(" ")],
+                classes: TwApplyClassList [
+                    CssIdentifier {
+                        value_token: IDENT@317..329 "text-center" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@329..345 "leading-relaxed" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@345..358 "tracking-wide" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@358..359 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@359..397 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with layout ..."), Newline("\n")] [],
+            rule: TwApplyAtRule {
+                apply_token: APPLY_KW@397..403 "apply" [] [Whitespace(" ")],
+                classes: TwApplyClassList [
+                    CssIdentifier {
+                        value_token: IDENT@403..413 "container" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@413..421 "mx-auto" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@421..430 "max-w-4xl" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@430..431 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@431..472 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with transf ..."), Newline("\n")] [],
+            rule: TwApplyAtRule {
+                apply_token: APPLY_KW@472..478 "apply" [] [Whitespace(" ")],
+                classes: TwApplyClassList [
+                    CssIdentifier {
+                        value_token: IDENT@478..488 "transform" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@488..498 "rotate-45" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@498..507 "scale-110" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@507..508 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@508..550 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with transi ..."), Newline("\n")] [],
+            rule: TwApplyAtRule {
+                apply_token: APPLY_KW@550..556 "apply" [] [Whitespace(" ")],
+                classes: TwApplyClassList [
+                    CssIdentifier {
+                        value_token: IDENT@556..571 "transition-all" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@571..584 "duration-300" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@584..595 "ease-in-out" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@595..596 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@596..634 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with custom ..."), Newline("\n")] [],
+            rule: TwApplyAtRule {
+                apply_token: APPLY_KW@634..640 "apply" [] [Whitespace(" ")],
+                classes: TwApplyClassList [
+                    CssIdentifier {
+                        value_token: IDENT@640..658 "my-custom-utility" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@658..673 "another-utility" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@673..674 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@674..713 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with numeri ..."), Newline("\n")] [],
+            rule: TwApplyAtRule {
+                apply_token: APPLY_KW@713..719 "apply" [] [Whitespace(" ")],
+                classes: TwApplyClassList [
+                    CssIdentifier {
+                        value_token: IDENT@719..723 "w-1" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@723..728 "h-96" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@728..732 "z-10" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@732..733 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@733..734 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..734
+  0: (empty)
+  1: CSS_RULE_LIST@0..733
+    0: CSS_AT_RULE@0..48
+      0: AT@0..24 "@" [Comments("/* @apply directive */"), Newline("\n")] []
+      1: TW_APPLY_AT_RULE@24..48
+        0: APPLY_KW@24..30 "apply" [] [Whitespace(" ")]
+        1: TW_APPLY_CLASS_LIST@30..47
+          0: CSS_IDENTIFIER@30..38
+            0: IDENT@30..38 "text-lg" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@38..47
+            0: IDENT@38..47 "font-bold" [] []
+        2: SEMICOLON@47..48 ";" [] []
+    1: CSS_AT_RULE@48..101
+      0: AT@48..51 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_APPLY_AT_RULE@51..101
+        0: APPLY_KW@51..57 "apply" [] [Whitespace(" ")]
+        1: TW_APPLY_CLASS_LIST@57..100
+          0: CSS_IDENTIFIER@57..62
+            0: IDENT@57..62 "flex" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@62..75
+            0: IDENT@62..75 "items-center" [] [Whitespace(" ")]
+          2: CSS_IDENTIFIER@75..91
+            0: IDENT@75..91 "justify-between" [] [Whitespace(" ")]
+          3: CSS_IDENTIFIER@91..96
+            0: IDENT@91..96 "px-4" [] [Whitespace(" ")]
+          4: CSS_IDENTIFIER@96..100
+            0: IDENT@96..100 "py-2" [] []
+        2: SEMICOLON@100..101 ";" [] []
+    2: CSS_AT_RULE@101..150
+      0: AT@101..137 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with single ..."), Newline("\n")] []
+      1: TW_APPLY_AT_RULE@137..150
+        0: APPLY_KW@137..143 "apply" [] [Whitespace(" ")]
+        1: TW_APPLY_CLASS_LIST@143..149
+          0: CSS_IDENTIFIER@143..149
+            0: IDENT@143..149 "hidden" [] []
+        2: SEMICOLON@149..150 ";" [] []
+    3: CSS_AT_RULE@150..203
+      0: AT@150..189 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with spacin ..."), Newline("\n")] []
+      1: TW_APPLY_AT_RULE@189..203
+        0: APPLY_KW@189..195 "apply" [] [Whitespace(" ")]
+        1: TW_APPLY_CLASS_LIST@195..202
+          0: CSS_IDENTIFIER@195..199
+            0: IDENT@195..199 "m-4" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@199..202
+            0: IDENT@199..202 "p-8" [] []
+        2: SEMICOLON@202..203 ";" [] []
+    4: CSS_AT_RULE@203..269
+      0: AT@203..240 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with color  ..."), Newline("\n")] []
+      1: TW_APPLY_AT_RULE@240..269
+        0: APPLY_KW@240..246 "apply" [] [Whitespace(" ")]
+        1: TW_APPLY_CLASS_LIST@246..268
+          0: CSS_IDENTIFIER@246..258
+            0: IDENT@246..258 "bg-blue-500" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@258..268
+            0: IDENT@258..268 "text-white" [] []
+        2: SEMICOLON@268..269 ";" [] []
+    5: CSS_AT_RULE@269..359
+      0: AT@269..311 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with typogr ..."), Newline("\n")] []
+      1: TW_APPLY_AT_RULE@311..359
+        0: APPLY_KW@311..317 "apply" [] [Whitespace(" ")]
+        1: TW_APPLY_CLASS_LIST@317..358
+          0: CSS_IDENTIFIER@317..329
+            0: IDENT@317..329 "text-center" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@329..345
+            0: IDENT@329..345 "leading-relaxed" [] [Whitespace(" ")]
+          2: CSS_IDENTIFIER@345..358
+            0: IDENT@345..358 "tracking-wide" [] []
+        2: SEMICOLON@358..359 ";" [] []
+    6: CSS_AT_RULE@359..431
+      0: AT@359..397 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with layout ..."), Newline("\n")] []
+      1: TW_APPLY_AT_RULE@397..431
+        0: APPLY_KW@397..403 "apply" [] [Whitespace(" ")]
+        1: TW_APPLY_CLASS_LIST@403..430
+          0: CSS_IDENTIFIER@403..413
+            0: IDENT@403..413 "container" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@413..421
+            0: IDENT@413..421 "mx-auto" [] [Whitespace(" ")]
+          2: CSS_IDENTIFIER@421..430
+            0: IDENT@421..430 "max-w-4xl" [] []
+        2: SEMICOLON@430..431 ";" [] []
+    7: CSS_AT_RULE@431..508
+      0: AT@431..472 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with transf ..."), Newline("\n")] []
+      1: TW_APPLY_AT_RULE@472..508
+        0: APPLY_KW@472..478 "apply" [] [Whitespace(" ")]
+        1: TW_APPLY_CLASS_LIST@478..507
+          0: CSS_IDENTIFIER@478..488
+            0: IDENT@478..488 "transform" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@488..498
+            0: IDENT@488..498 "rotate-45" [] [Whitespace(" ")]
+          2: CSS_IDENTIFIER@498..507
+            0: IDENT@498..507 "scale-110" [] []
+        2: SEMICOLON@507..508 ";" [] []
+    8: CSS_AT_RULE@508..596
+      0: AT@508..550 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with transi ..."), Newline("\n")] []
+      1: TW_APPLY_AT_RULE@550..596
+        0: APPLY_KW@550..556 "apply" [] [Whitespace(" ")]
+        1: TW_APPLY_CLASS_LIST@556..595
+          0: CSS_IDENTIFIER@556..571
+            0: IDENT@556..571 "transition-all" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@571..584
+            0: IDENT@571..584 "duration-300" [] [Whitespace(" ")]
+          2: CSS_IDENTIFIER@584..595
+            0: IDENT@584..595 "ease-in-out" [] []
+        2: SEMICOLON@595..596 ";" [] []
+    9: CSS_AT_RULE@596..674
+      0: AT@596..634 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with custom ..."), Newline("\n")] []
+      1: TW_APPLY_AT_RULE@634..674
+        0: APPLY_KW@634..640 "apply" [] [Whitespace(" ")]
+        1: TW_APPLY_CLASS_LIST@640..673
+          0: CSS_IDENTIFIER@640..658
+            0: IDENT@640..658 "my-custom-utility" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@658..673
+            0: IDENT@658..673 "another-utility" [] []
+        2: SEMICOLON@673..674 ";" [] []
+    10: CSS_AT_RULE@674..733
+      0: AT@674..713 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with numeri ..."), Newline("\n")] []
+      1: TW_APPLY_AT_RULE@713..733
+        0: APPLY_KW@713..719 "apply" [] [Whitespace(" ")]
+        1: TW_APPLY_CLASS_LIST@719..732
+          0: CSS_IDENTIFIER@719..723
+            0: IDENT@719..723 "w-1" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@723..728
+            0: IDENT@723..728 "h-96" [] [Whitespace(" ")]
+          2: CSS_IDENTIFIER@728..732
+            0: IDENT@728..732 "z-10" [] []
+        2: SEMICOLON@732..733 ";" [] []
+  2: EOF@733..734 "" [Newline("\n")] []
+
+```

@@ -4,4 +4,5 @@
 
 use biome_analyze::declare_lint_group;
 pub mod no_duplicate_dependencies;
-declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: no_duplicate_dependencies :: NoDuplicateDependencies ,] } }
+pub mod use_required_scripts;
+declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: no_duplicate_dependencies :: NoDuplicateDependencies , self :: use_required_scripts :: UseRequiredScripts ,] } }

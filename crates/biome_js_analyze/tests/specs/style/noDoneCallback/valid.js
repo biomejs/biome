@@ -22,3 +22,7 @@ beforeAll(async () => {});
 afterAll(() => {});
 afterAll(async function () {});
 afterAll(async function () {}, 5);
+const before = [];
+const after = [];
+before.find((b) => true);
+after.filter((a) => false);

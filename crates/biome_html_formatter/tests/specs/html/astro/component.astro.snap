@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro/component.astro
+---
+# Input
+
+```astro
+---
+import Base from "$layouts/Base.astro";
+---
+
+<Base title="500">
+</Base>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```astro
+---
+import Base from "$layouts/Base.astro";
+---
+
+<Base title="500"></Base>
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"import Base from \"$layouts/Base.astro\";\n-" => 4..45

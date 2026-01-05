@@ -147,7 +147,7 @@ impl Rule for NoJsxLiterals {
         let node = ctx.query();
         let options = ctx.options();
 
-        if options.ignore_props
+        if options.ignore_props()
             && node
                 .syntax()
                 .ancestors()
@@ -160,19 +160,19 @@ impl Rule for NoJsxLiterals {
         let value_token = match node {
             AnyJsxText::JsxText(text) => text.value_token().ok()?,
             AnyJsxText::JsStringLiteralExpression(expression) => {
-                if !options.no_strings {
+                if !options.no_strings() {
                     return None;
                 }
                 expression.value_token().ok()?
             }
             AnyJsxText::JsxString(string) => {
-                if !options.no_strings {
+                if !options.no_strings() {
                     return None;
                 }
                 string.value_token().ok()?
             }
             AnyJsxText::JsxExpressionAttributeValue(expression) => {
-                if !options.no_strings {
+                if !options.no_strings() {
                     return None;
                 }
                 let expression = expression.expression().ok()?;
@@ -193,7 +193,7 @@ impl Rule for NoJsxLiterals {
             }
         };
 
-        for allowed_string in &options.allowed_strings {
+        for allowed_string in options.allowed_strings.iter().flatten() {
             if inner_string_text(&value_token) == allowed_string.as_ref() {
                 return None;
             }

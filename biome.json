@@ -32,12 +32,9 @@
       "!**/__snapshots__",
       "!**/undefined",
       "!**/benchmark/target",
-      "!**/benches"
-    ],
-    "experimentalScannerIgnores": [
-      ".cargo",
-      ".git",
-      "target"
+      "!**/benches",
+      "!!**/target",
+      "!!.cargo"
     ]
   },
   "formatter": {

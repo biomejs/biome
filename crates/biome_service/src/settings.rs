@@ -6,13 +6,13 @@ use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
 use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
-use biome_configuration::html::HtmlConfiguration;
+use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguration};
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::max_size::MaxSize;
-use biome_configuration::plugins::Plugins;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
-    BiomeDiagnostic, Configuration, CssConfiguration, FilesConfiguration,
+    BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
+    DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
     FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
     JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
     OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
@@ -32,6 +32,7 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_grit_formatter::context::GritFormatOptions;
 use biome_grit_syntax::GritLanguage;
 use biome_html_formatter::HtmlFormatOptions;
+use biome_html_parser::HtmlParseOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
@@ -39,6 +40,7 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
@@ -46,31 +48,13 @@ use std::ops::Deref;
 use std::sync::Arc;
 use tracing::instrument;
 
-const DEFAULT_SCANNER_IGNORE_ENTRIES: &[&[u8]] = &[
-    b".cache",
-    b".git",
-    b".hg",
-    b".netlify",
-    b".output",
-    b".svn",
-    b".yarn",
-    b".timestamp",
-    b".turbo",
-    b".vercel",
-    b".DS_Store",
-    // TODO: Remove when https://github.com/biomejs/biome/issues/6172 is fixed.
-    b"RedisCommander.d.ts",
-];
-
 /// Settings active in a project.
 ///
 /// These can be either root settings, or settings for a section of the project.
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
     /// The configuration that originated this setting, if applicable.
-    ///
-    /// It contains [Configuration] and the folder where it was found.
-    source: Option<Arc<(Configuration, Option<Utf8PathBuf>)>>,
+    source: Option<Arc<ConfigurationSource>>,
 
     /// Formatter settings applied to all files in the project.
     pub formatter: FormatSettings,
@@ -88,21 +72,28 @@ pub struct Settings {
     pub override_settings: OverrideSettings,
     /// The VCS settings of the project
     pub vcs_settings: VcsSettings,
+
+    // TODO: remove once HTML full support is stable
+    pub experimental_full_html_support: Option<ExperimentalFullSupportEnabled>,
 }
 
 impl Settings {
+    pub fn experimental_full_html_support_enabled(&self) -> bool {
+        self.experimental_full_html_support
+            .unwrap_or_default()
+            .value()
+    }
+
     pub fn source(&self) -> Option<Configuration> {
-        self.source.as_ref().map(|source| {
-            let (config, _) = source.deref().clone();
-            config
-        })
+        self.source.as_ref()?.source()
     }
 
     pub fn source_path(&self) -> Option<Utf8PathBuf> {
-        self.source.as_ref().and_then(|source| {
-            let (_, path) = source.deref().clone();
-            path
-        })
+        self.source.as_ref()?.source_path()
+    }
+
+    pub fn full_source(&self) -> Option<Arc<ConfigurationSource>> {
+        self.source.clone()
     }
 
     /// Merges the [Configuration] into the settings.
@@ -111,27 +102,51 @@ impl Settings {
         &mut self,
         configuration: Configuration,
         working_directory: Option<Utf8PathBuf>,
+        extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
     ) -> Result<(), WorkspaceError> {
-        self.source = Some(Arc::new((configuration.clone(), working_directory.clone())));
+        self.source = Some(Arc::new(ConfigurationSource {
+            source: Some((configuration.clone(), working_directory.clone())),
+            extended_configurations: ExtendedConfigurations::from(extended_configurations),
+        }));
 
         // formatter part§
         if let Some(formatter) = configuration.formatter {
-            self.formatter = to_format_settings(working_directory.clone(), formatter)?;
+            self.formatter = to_format_settings(
+                working_directory
+                    .as_ref()
+                    .map(|p| p.as_path().to_path_buf()),
+                formatter,
+            )?;
         }
 
         // linter part
         if let Some(linter) = configuration.linter {
-            self.linter = to_linter_settings(working_directory.clone(), linter)?;
+            self.linter = to_linter_settings(
+                working_directory
+                    .as_ref()
+                    .map(|p| p.as_path().to_path_buf()),
+                linter,
+            )?;
         }
 
         // assist part
         if let Some(assist) = configuration.assist {
-            self.assist = to_assist_settings(working_directory.clone(), assist)?;
+            self.assist = to_assist_settings(
+                working_directory
+                    .as_ref()
+                    .map(|p| p.as_path().to_path_buf()),
+                assist,
+            )?;
         }
 
         // Filesystem settings
         if let Some(files) = configuration.files {
-            self.files = to_file_settings(working_directory.clone(), files)?;
+            self.files = to_file_settings(
+                working_directory
+                    .as_ref()
+                    .map(|p| p.as_path().to_path_buf()),
+                files,
+            )?;
         }
 
         // VCS settings
@@ -157,7 +172,8 @@ impl Settings {
         }
         // html settings
         if let Some(html) = configuration.html {
-            self.languages.html = html.into()
+            self.experimental_full_html_support = html.experimental_full_support_enabled;
+            self.languages.html = html.into();
         }
 
         // plugin settings
@@ -167,7 +183,13 @@ impl Settings {
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
         if let Some(overrides) = configuration.overrides {
-            self.override_settings = to_override_settings(working_directory, overrides, self)?;
+            self.override_settings = to_override_settings(
+                working_directory
+                    .as_ref()
+                    .map(|p| p.as_path().to_path_buf()),
+                overrides,
+                self,
+            )?;
         }
 
         Ok(())
@@ -319,6 +341,7 @@ impl Settings {
             FeatureKind::Format => &self.formatter.includes,
             FeatureKind::Lint => &self.linter.includes,
             FeatureKind::Assist => &self.assist.includes,
+            FeatureKind::HtmlFullSupport => return false,
             FeatureKind::Search => return false, // There is no search-specific config.
             FeatureKind::Debug => return false,
         };
@@ -610,14 +633,13 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
             language_setting.parser = parser.into();
         }
 
-        // NOTE: uncomment once ready
-        // if let Some(linter) = html.linter {
-        //     language_setting.linter = linter.into();
-        // }
-        //
-        // if let Some(assist) = html.assist {
-        //     language_setting.assist = assist.into();
-        // }
+        if let Some(linter) = html.linter {
+            language_setting.linter = linter.into();
+        }
+
+        if let Some(assist) = html.assist {
+            language_setting.assist = assist.into();
+        }
 
         language_setting
     }
@@ -637,6 +659,8 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Settings that belong to the parser
     type ParserSettings: Default;
 
+    type ParserOptions: Default;
+
     /// Settings related to the environment/runtime in which the language is used.
     type EnvironmentSettings: Default;
 
@@ -645,6 +669,14 @@ pub trait ServiceLanguage: biome_rowan::Language {
 
     /// Retrieve the environment settings of the current language
     fn resolve_environment(settings: &Settings) -> Option<&Self::EnvironmentSettings>;
+
+    /// Retrieve the parser options that belong to this language
+    fn resolve_parse_options(
+        overrides: &OverrideSettings,
+        language: &Self::ParserSettings,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> Self::ParserOptions;
 
     /// Resolve the formatter options from the global (workspace level),
     /// per-language and editor provided formatter settings
@@ -957,6 +989,21 @@ impl Includes {
         self.is_unset() || self.matches_directory_with_exceptions(dir_path)
     }
 
+    /// Returns whether the given `path` is force-ignored.
+    #[inline]
+    pub fn is_force_ignored(&self, path: &Utf8Path) -> bool {
+        let Some(globs) = self.globs.as_ref() else {
+            return false;
+        };
+        let path = if let Some(working_directory) = &self.working_directory {
+            path.strip_prefix(working_directory).unwrap_or(path)
+        } else {
+            path
+        };
+        let candidate_path = biome_glob::CandidatePath::new(path);
+        candidate_path.matches_forced_negation(globs)
+    }
+
     /// Returns `true` is no globs are set.
     #[inline]
     pub fn is_unset(&self) -> bool {
@@ -1075,6 +1122,19 @@ impl Settings {
         L::resolve_format_options(formatter, overrides, editor_settings, path, file_source)
     }
 
+    pub fn parse_options<L>(
+        &self,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> L::ParserOptions
+    where
+        L: ServiceLanguage,
+    {
+        let overrides = &self.override_settings;
+        let editor_settings = &L::lookup_settings(&self.languages).parser;
+        L::resolve_parse_options(overrides, editor_settings, path, file_source)
+    }
+
     pub fn analyzer_options<L>(
         &self,
         path: &BiomePath,
@@ -1138,6 +1198,26 @@ impl Settings {
             .or(self.formatter.format_with_errors)
             .unwrap_or_default()
             .into()
+    }
+
+    /// Returns the maximum file size setting for the given `file_path`.
+    pub fn get_max_file_size(&self, file_path: &Utf8Path) -> usize {
+        let limit = self
+            .override_settings
+            .patterns
+            .iter()
+            .rev()
+            .find_map(|pattern| {
+                if pattern.is_file_included(file_path) {
+                    pattern.files.max_size
+                } else {
+                    None
+                }
+            })
+            .or(self.files.max_size)
+            .unwrap_or_default();
+
+        usize::from(limit)
     }
 }
 
@@ -1241,6 +1321,18 @@ impl OverrideSettings {
         }
     }
 
+    pub(crate) fn apply_override_html_parser_options(
+        &self,
+        path: &Utf8Path,
+        options: &mut HtmlParseOptions,
+    ) {
+        for pattern in self.patterns.iter() {
+            if pattern.is_file_included(path) {
+                pattern.apply_overrides_to_html_parser_options(options);
+            }
+        }
+    }
+
     /// Scans the override rules and returns the parser options of the first matching override.
     pub fn apply_override_css_parser_options(
         &self,
@@ -1335,6 +1427,11 @@ impl OverrideSettings {
                         biome_graphql_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_html_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
                 }
 
                 if let Some(actions) = pattern.assist.actions.as_ref() {
@@ -1356,6 +1453,11 @@ impl OverrideSettings {
                     push_to_analyzer_assist(
                         actions,
                         biome_graphql_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
+                    push_to_analyzer_assist(
+                        actions,
+                        biome_html_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
                 }
@@ -1610,6 +1712,14 @@ impl OverrideSettingPattern {
         }
     }
 
+    fn apply_overrides_to_html_parser_options(&self, options: &mut HtmlParseOptions) {
+        let html_parser = &self.languages.html.parser;
+
+        if let Some(interpolation) = html_parser.interpolation {
+            options.set_double_text_expression(interpolation.value());
+        }
+    }
+
     fn apply_overrides_to_css_parser_options(&self, options: &mut CssParserOptions) {
         let css_parser = &self.languages.css.parser;
 
@@ -1618,6 +1728,9 @@ impl OverrideSettingPattern {
         }
         if let Some(css_modules) = css_parser.css_modules_enabled {
             options.css_modules = css_modules.value();
+        }
+        if let Some(tailwind_directives) = css_parser.tailwind_directives {
+            options.tailwind_directives = tailwind_directives.value();
         }
     }
 
@@ -1637,7 +1750,7 @@ pub fn to_override_settings(
         let formatter = pattern
             .formatter
             .map(|formatter| OverrideFormatSettings {
-                enabled: formatter.enabled,
+                enabled: formatter.enabled.or(current_settings.formatter.enabled),
                 format_with_errors: formatter
                     .format_with_errors
                     .or(current_settings.formatter.format_with_errors),
@@ -1654,7 +1767,7 @@ pub fn to_override_settings(
         let linter = pattern
             .linter
             .map(|linter| OverrideLinterSettings {
-                enabled: linter.enabled,
+                enabled: linter.enabled.or(current_settings.linter.enabled),
                 rules: linter.rules,
                 domains: linter.domains,
             })
@@ -1662,7 +1775,7 @@ pub fn to_override_settings(
         let assist = pattern
             .assist
             .map(|assist| OverrideAssistSettings {
-                enabled: assist.enabled,
+                enabled: assist.enabled.or(current_settings.assist.enabled),
                 actions: assist.actions,
             })
             .unwrap_or_default();
@@ -1776,6 +1889,9 @@ fn to_css_language_settings(
         .or(parent_parser.allow_wrong_line_comments);
     language_setting.parser.css_modules_enabled =
         parser.css_modules.or(parent_parser.css_modules_enabled);
+    language_setting.parser.tailwind_directives = parser
+        .tailwind_directives
+        .or(parent_parser.tailwind_directives);
 
     let linter = conf.linter.take().unwrap_or_default();
     language_setting.linter.enabled = linter.enabled;

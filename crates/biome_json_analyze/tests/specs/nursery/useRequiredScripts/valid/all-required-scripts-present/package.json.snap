@@ -1,0 +1,16 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "name": "test-package",
+  "scripts": {
+    "test": "vitest",
+    "build": "tsc",
+    "lint": "biome lint"
+  }
+}
+
+```

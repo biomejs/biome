@@ -724,6 +724,14 @@ pub(crate) fn is_canonical_html_tag(tag_name: &HtmlTagName) -> bool {
     is_canonical_html_tag_name(tag_name.text_trimmed())
 }
 
+/// Whether a tag should be lowercased in the current formatting context.
+///
+/// Returns `true` only for canonical HTML tags in pure HTML files (.html).
+/// Component frameworks preserve tag name casing.
+pub(crate) fn should_lowercase_html_tag(f: &HtmlFormatter, tag_name: &HtmlTagName) -> bool {
+    f.options().file_source().is_html() && is_canonical_html_tag(tag_name)
+}
+
 /// Whether the given attribute name is a known HTML attribute for the given tag name.
 ///
 /// See [`HTML_ATTRIBUTES_BY_TAG`], [`HTML_GLOBAL_ATTRIBUTES`].
@@ -799,6 +807,22 @@ pub(crate) fn is_inline_element(tag_name: &HtmlTagName) -> bool {
     HTML_INLINE_TAGS
         .iter()
         .any(|tag| tag_name.text_trimmed().eq_ignore_ascii_case(tag))
+}
+
+/// Checks if an element is an inline element based on its tag name.
+pub(crate) fn is_inline_element_from_element(element: &AnyHtmlElement) -> bool {
+    let name = match element {
+        AnyHtmlElement::HtmlElement(element) => {
+            element.opening_element().and_then(|element| element.name())
+        }
+        AnyHtmlElement::HtmlSelfClosingElement(element) => element.name(),
+        _ => return false,
+    };
+    let Ok(name) = name else {
+        return false;
+    };
+
+    is_inline_element(&name)
 }
 
 #[cfg(test)]

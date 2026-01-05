@@ -30,6 +30,8 @@ invalid-methods.vue:3:9 lint/nursery/noVueReservedKeys ━━━━━━━━�
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -46,6 +48,8 @@ invalid-methods.vue:4:9 lint/nursery/noVueReservedKeys ━━━━━━━━�
     6 │         $options: function() {},
   
   i Rename the key to avoid conflicts with Vue reserved keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -64,6 +68,8 @@ invalid-methods.vue:5:9 lint/nursery/noVueReservedKeys ━━━━━━━━�
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -80,6 +86,8 @@ invalid-methods.vue:6:9 lint/nursery/noVueReservedKeys ━━━━━━━━�
     8 │ };
   
   i Rename the key to avoid conflicts with Vue reserved keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

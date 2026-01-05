@@ -259,28 +259,45 @@ impl fmt::Display for ConsoleTraversalSummary<'_> {
         let detail = SummaryDetail(mode, summary.changed);
         fmt.write_markup(markup!(<Info>{total}{detail}</Info>))?;
 
-        if summary.errors > 0 {
-            if summary.errors == 1 {
-                fmt.write_markup(markup!("\n"<Error>"Found "{summary.errors}" error."</Error>))?;
-            } else {
-                fmt.write_markup(markup!("\n"<Error>"Found "{summary.errors}" errors."</Error>))?;
-            }
-        }
-        if summary.warnings > 0 {
-            if summary.warnings == 1 {
-                fmt.write_markup(markup!("\n"<Warn>"Found "{summary.warnings}" warning."</Warn>))?;
-            } else {
-                fmt.write_markup(markup!("\n"<Warn>"Found "{summary.warnings}" warnings."</Warn>))?;
-            }
-        }
-
+        // The search emits info diagnostics, so we use if control-flow to print a different message
         if let TraversalMode::Search { .. } = mode {
             if summary.matches == 1 {
                 fmt.write_markup(markup!(" "<Info>"Found "{summary.matches}" match."</Info>))?
             } else {
                 fmt.write_markup(markup!(" "<Info>"Found "{summary.matches}" matches."</Info>))?
             };
-        };
+        } else {
+            if summary.errors > 0 {
+                if summary.errors == 1 {
+                    fmt.write_markup(
+                        markup!("\n"<Error>"Found "{summary.errors}" error."</Error>),
+                    )?;
+                } else {
+                    fmt.write_markup(
+                        markup!("\n"<Error>"Found "{summary.errors}" errors."</Error>),
+                    )?;
+                }
+            }
+            if summary.warnings > 0 {
+                if summary.warnings == 1 {
+                    fmt.write_markup(
+                        markup!("\n"<Warn>"Found "{summary.warnings}" warning."</Warn>),
+                    )?;
+                } else {
+                    fmt.write_markup(
+                        markup!("\n"<Warn>"Found "{summary.warnings}" warnings."</Warn>),
+                    )?;
+                }
+            }
+
+            if summary.infos > 0 {
+                if summary.infos == 1 {
+                    fmt.write_markup(markup!("\n"<Info>"Found "{summary.infos}" info."</Info>))?;
+                } else {
+                    fmt.write_markup(markup!("\n"<Info>"Found "{summary.infos}" infos."</Info>))?;
+                }
+            }
+        }
         Ok(())
     }
 }

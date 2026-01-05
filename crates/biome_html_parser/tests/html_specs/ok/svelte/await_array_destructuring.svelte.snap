@@ -1,0 +1,201 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#await promise then [first, second, ...rest]}
+  <p>First: {first}, Second: {second}</p>
+  <p>Rest: {rest.join(', ')}</p>
+{/await}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                await_token: AWAIT_KW@2..7 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@7..16 " promise " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@16..20 "then" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@20..45 " [first, second, ...rest]" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@45..46 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@46..50 "<" [Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@50..51 "p" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@51..52 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@52..59 "First:" [] [Whitespace(" ")],
+                            },
+                            HtmlSingleTextExpression {
+                                l_curly_token: L_CURLY@59..60 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@60..65 "first" [] [],
+                                },
+                                r_curly_token: R_CURLY@65..66 "}" [] [],
+                            },
+                            HtmlContent {
+                                value_token: HTML_LITERAL@66..76 ", Second:" [] [Whitespace(" ")],
+                            },
+                            HtmlSingleTextExpression {
+                                l_curly_token: L_CURLY@76..77 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@77..83 "second" [] [],
+                                },
+                                r_curly_token: R_CURLY@83..84 "}" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@84..85 "<" [] [],
+                            slash_token: SLASH@85..86 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@86..87 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@87..88 ">" [] [],
+                        },
+                    },
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@88..92 "<" [Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@92..93 "p" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@93..94 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@94..100 "Rest:" [] [Whitespace(" ")],
+                            },
+                            HtmlSingleTextExpression {
+                                l_curly_token: L_CURLY@100..101 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@101..116 "rest.join(', ')" [] [],
+                                },
+                                r_curly_token: R_CURLY@116..117 "}" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@117..118 "<" [] [],
+                            slash_token: SLASH@118..119 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@119..120 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@120..121 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@121..124 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@124..129 "await" [] [],
+                r_curly_token: R_CURLY@129..130 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@130..131 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..131
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..130
+    0: SVELTE_AWAIT_BLOCK@0..130
+      0: SVELTE_AWAIT_OPENING_BLOCK@0..121
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: AWAIT_KW@2..7 "await" [] []
+        2: HTML_TEXT_EXPRESSION@7..16
+          0: HTML_LITERAL@7..16 " promise " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@16..45
+          0: THEN_KW@16..20 "then" [] []
+          1: HTML_TEXT_EXPRESSION@20..45
+            0: HTML_LITERAL@20..45 " [first, second, ...rest]" [] []
+        4: (empty)
+        5: R_CURLY@45..46 "}" [] []
+        6: HTML_ELEMENT_LIST@46..121
+          0: HTML_ELEMENT@46..88
+            0: HTML_OPENING_ELEMENT@46..52
+              0: L_ANGLE@46..50 "<" [Newline("\n"), Whitespace("  ")] []
+              1: HTML_TAG_NAME@50..51
+                0: HTML_LITERAL@50..51 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@51..51
+              3: R_ANGLE@51..52 ">" [] []
+            1: HTML_ELEMENT_LIST@52..84
+              0: HTML_CONTENT@52..59
+                0: HTML_LITERAL@52..59 "First:" [] [Whitespace(" ")]
+              1: HTML_SINGLE_TEXT_EXPRESSION@59..66
+                0: L_CURLY@59..60 "{" [] []
+                1: HTML_TEXT_EXPRESSION@60..65
+                  0: HTML_LITERAL@60..65 "first" [] []
+                2: R_CURLY@65..66 "}" [] []
+              2: HTML_CONTENT@66..76
+                0: HTML_LITERAL@66..76 ", Second:" [] [Whitespace(" ")]
+              3: HTML_SINGLE_TEXT_EXPRESSION@76..84
+                0: L_CURLY@76..77 "{" [] []
+                1: HTML_TEXT_EXPRESSION@77..83
+                  0: HTML_LITERAL@77..83 "second" [] []
+                2: R_CURLY@83..84 "}" [] []
+            2: HTML_CLOSING_ELEMENT@84..88
+              0: L_ANGLE@84..85 "<" [] []
+              1: SLASH@85..86 "/" [] []
+              2: HTML_TAG_NAME@86..87
+                0: HTML_LITERAL@86..87 "p" [] []
+              3: R_ANGLE@87..88 ">" [] []
+          1: HTML_ELEMENT@88..121
+            0: HTML_OPENING_ELEMENT@88..94
+              0: L_ANGLE@88..92 "<" [Newline("\n"), Whitespace("  ")] []
+              1: HTML_TAG_NAME@92..93
+                0: HTML_LITERAL@92..93 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@93..93
+              3: R_ANGLE@93..94 ">" [] []
+            1: HTML_ELEMENT_LIST@94..117
+              0: HTML_CONTENT@94..100
+                0: HTML_LITERAL@94..100 "Rest:" [] [Whitespace(" ")]
+              1: HTML_SINGLE_TEXT_EXPRESSION@100..117
+                0: L_CURLY@100..101 "{" [] []
+                1: HTML_TEXT_EXPRESSION@101..116
+                  0: HTML_LITERAL@101..116 "rest.join(', ')" [] []
+                2: R_CURLY@116..117 "}" [] []
+            2: HTML_CLOSING_ELEMENT@117..121
+              0: L_ANGLE@117..118 "<" [] []
+              1: SLASH@118..119 "/" [] []
+              2: HTML_TAG_NAME@119..120
+                0: HTML_LITERAL@119..120 "p" [] []
+              3: R_ANGLE@120..121 ">" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@121..121
+      2: SVELTE_AWAIT_CLOSING_BLOCK@121..130
+        0: SV_CURLY_SLASH@121..124 "{/" [Newline("\n")] []
+        1: AWAIT_KW@124..129 "await" [] []
+        2: R_CURLY@129..130 "}" [] []
+  4: EOF@130..131 "" [Newline("\n")] []
+
+```

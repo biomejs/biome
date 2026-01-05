@@ -1,24 +1,27 @@
 use biome_analyze::{
-    FixKind, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
+    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
 };
 use biome_css_syntax::CssLanguage;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use biome_string_case::Case;
-use proc_macro2::{Ident, Literal, Span, TokenStream};
-use pulldown_cmark::{Event, Parser, Tag, TagEnd};
+use proc_macro2::{Ident, Literal, Span};
 use quote::{format_ident, quote};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
-use xtask::*;
+use xtask_codegen::update;
 use xtask_codegen::{generate_analyzer_rule_options, get_analyzer_rule_options_path};
-use xtask_codegen::{to_capitalized, update};
+use xtask_glue::*;
 
 // ======= LINT ======
 #[derive(Default)]
 struct LintRulesVisitor {
     groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
+    /// Mapping from domain to group/rule
+    /// e.g next => (<group>/<rule>, <group>/<rule>)
+    domains: BTreeMap<&'static str, BTreeSet<(&'static str, &'static str)>>,
 }
 
 impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
@@ -36,6 +39,13 @@ impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
             .entry(<R::Group as RuleGroup>::NAME)
             .or_default()
             .insert(R::METADATA.name, R::METADATA);
+
+        for domain in R::METADATA.domains.iter() {
+            self.domains
+                .entry(domain.as_str())
+                .or_default()
+                .insert((<R::Group as RuleGroup>::NAME, R::METADATA.name));
+        }
     }
 }
 
@@ -87,6 +97,25 @@ impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
     fn record_rule<R>(&mut self)
     where
         R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+impl RegistryVisitor<HtmlLanguage> for LintRulesVisitor {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Lint) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
             + 'static,
     {
         self.groups
@@ -177,6 +206,25 @@ impl RegistryVisitor<GraphqlLanguage> for AssistActionsVisitor {
     }
 }
 
+impl RegistryVisitor<HtmlLanguage> for AssistActionsVisitor {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Action) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
 pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     let rule_options_root = get_analyzer_rule_options_path();
     let lib_root = rule_options_root.join("lib.rs");
@@ -190,6 +238,8 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     biome_css_analyze::visit_registry(&mut assist_visitor);
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
     biome_graphql_analyze::visit_registry(&mut assist_visitor);
+    biome_html_analyze::visit_registry(&mut lint_visitor);
+    biome_html_analyze::visit_registry(&mut assist_visitor);
 
     let mut rule_names = BTreeSet::default();
     let mut lib_exports = vec![quote! {
@@ -227,7 +277,7 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     let content = quote! {
         #( #lib_exports )*
     };
-    update(lib_root.as_path(), &xtask::reformat(content)?, &mode)?;
+    update(lib_root.as_path(), &xtask_glue::reformat(content)?, &mode)?;
 
     Ok(())
 }
@@ -247,6 +297,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     biome_css_analyze::visit_registry(&mut assist_visitor);
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
     biome_graphql_analyze::visit_registry(&mut assist_visitor);
+    biome_html_analyze::visit_registry(&mut lint_visitor);
+    biome_html_analyze::visit_registry(&mut assist_visitor);
 
     // let LintRulesVisitor { groups } = lint_visitor;
 
@@ -264,6 +316,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         &mode,
         RuleCategory::Action,
     )?;
+
+    generate_for_domains(lint_visitor.domains, &mode)?;
 
     Ok(())
 }
@@ -316,14 +370,29 @@ fn generate_for_groups(
         });
 
         group_pascal_idents.push(group_pascal_ident);
-        group_idents.push(group_ident);
+        group_idents.push(group_ident.clone());
         group_strings.push(Literal::string(group_name));
-        struct_groups.push(generate_group_struct(group_name, &rules, kind));
+        // if kind == RuleCategory::Action {
+        //     struct_groups.push(generate_group_struct(group_name, &rules, kind));
+        //     // struct_groups.push(quote! {
+        //     //     biome_configuration_macros::assist_group_struct!(#group_name);
+        //     // });
+        // } else {
+        // }
         rule_group_names.extend(rules.keys().map(|rule_name| RuleGroup {
             rule_name,
             group_name,
         }));
     }
+    if kind == RuleCategory::Lint {
+        struct_groups.push(quote! {
+            biome_configuration_macros::lint_group_structs!();
+        });
+    } else if kind == RuleCategory::Action {
+        struct_groups.push(quote! {
+            biome_configuration_macros::assist_group_structs!();
+        });
+    };
 
     rule_group_names.sort_unstable_by_key(|item| item.rule_name);
     rule_group_names.dedup_by_key(|item| item.rule_name);
@@ -775,331 +844,84 @@ fn generate_for_groups(
     } else {
         &root.join("rules.rs")
     };
-    update(path, &xtask::reformat(configuration)?, mode)?;
-    update(file_name, &xtask::reformat(push_rules)?, mode)?;
+    update(path, &xtask_glue::reformat(configuration)?, mode)?;
+    update(file_name, &xtask_glue::reformat(push_rules)?, mode)?;
 
     Ok(())
 }
 
-fn generate_group_struct(
-    group: &str,
-    rules: &BTreeMap<&'static str, RuleMetadata>,
-    kind: RuleCategory,
-) -> TokenStream {
-    let mut lines_recommended_rule = Vec::new();
-    let mut lines_recommended_rule_as_filter = Vec::new();
-    let mut lines_all_rule_as_filter = Vec::new();
-    let mut lines_rule = Vec::new();
-    let mut schema_lines_rules = Vec::new();
-    let mut rule_enabled_check_line = Vec::new();
-    let mut rule_disabled_check_line = Vec::new();
-    let mut get_rule_configuration_line = Vec::new();
-    let mut rule_identifiers = Vec::new();
+fn generate_for_domains(
+    domains: BTreeMap<&'static str, BTreeSet<(&'static str, &'static str)>>,
+    mode: &Mode,
+) -> Result<()> {
+    let destination =
+        project_root().join("crates/biome_configuration/src/generated/domain_selector.rs");
 
-    for (index, (rule, metadata)) in rules.iter().enumerate() {
-        let summary = {
-            let mut docs = String::new();
-            let parser = Parser::new(metadata.docs);
-            for event in parser {
-                match event {
-                    Event::Text(text) => {
-                        docs.push_str(text.as_ref());
-                    }
-                    Event::Code(text) => {
-                        // Escape `[` and `<` to obtain valid Markdown
-                        docs.push_str(text.replace('[', "\\[").replace('<', "\\<").as_ref());
-                    }
-                    Event::SoftBreak => {
-                        docs.push(' ');
-                    }
-
-                    Event::Start(Tag::Paragraph) => {}
-                    Event::End(TagEnd::Paragraph) => {
-                        break;
-                    }
-
-                    Event::Start(tag) => match tag {
-                        Tag::Strong | Tag::Paragraph => {}
-
-                        _ => panic!("Unimplemented tag {:?}", { tag }),
-                    },
-
-                    Event::End(tag) => match tag {
-                        TagEnd::Strong | TagEnd::Paragraph => {}
-                        _ => panic!("Unimplemented tag {:?}", { tag }),
-                    },
-
-                    _ => {
-                        panic!("Unimplemented event {:?}", { event })
-                    }
+    let mut as_rule_filters_arms = vec![];
+    let mut match_rule_arms = vec![];
+    let mut lazy_locks = vec![];
+    for (domain_name, data) in domains {
+        let vector = data
+            .iter()
+            .map(|(group, rules)| {
+                quote! {
+                    RuleFilter::Rule(#group, #rules)
                 }
-            }
-            docs
-        };
-
-        let rule_position = Literal::u8_unsuffixed(index as u8);
-        let rule_identifier = quote::format_ident!("{}", Case::Snake.convert(rule));
-        let rule_config_type = quote::format_ident!(
-            "{}",
-            if kind == RuleCategory::Action {
-                "RuleAssistConfiguration"
-            } else if metadata.fix_kind != FixKind::None {
-                "RuleFixConfiguration"
-            } else {
-                "RuleConfiguration"
-            }
-        );
-        let rule_base_name = Ident::new(&Case::Snake.convert(rule), Span::call_site());
-        let rule_name = Ident::new(
-            &format!("{}Options", &to_capitalized(rule)),
+            })
+            .collect::<Vec<_>>();
+        let domain_filters = Ident::new(
+            &format!("{}_FILTERS", domain_name.to_ascii_uppercase()),
             Span::call_site(),
         );
-        if metadata.recommended && metadata.domains.is_empty() {
-            lines_recommended_rule_as_filter.push(quote! {
-                RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
+
+        lazy_locks.push(quote! {
+            static #domain_filters: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+                vec![
+                    #( #vector ),*
+                ]
             });
-
-            lines_recommended_rule.push(quote! {
-                #rule
-            });
-        }
-        lines_all_rule_as_filter.push(quote! {
-            RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
-        });
-        lines_rule.push(quote! {
-             #rule
-        });
-        let rule_option_type = quote! {
-            biome_rule_options::#rule_base_name::#rule_name
-        };
-
-        let rule_option = quote! { Option<#rule_config_type<#rule_option_type>> };
-        schema_lines_rules.push(quote! {
-            #[doc = #summary]
-            #[serde(skip_serializing_if = "Option::is_none")]
-            pub #rule_identifier: #rule_option
         });
 
-        rule_enabled_check_line.push(quote! {
-            if let Some(rule) = self.#rule_identifier.as_ref()
-                && rule.is_enabled()
-            {
-                index_set.insert(RuleFilter::Rule(
-                    Self::GROUP_NAME,
-                    Self::GROUP_RULES[#rule_position],
-                ));
-            }
+        let domain_as_string = Literal::string(domain_name);
+        as_rule_filters_arms.push(quote! {
+            #domain_as_string => #domain_filters.clone()
         });
-        rule_disabled_check_line.push(quote! {
-            if let Some(rule) = self.#rule_identifier.as_ref()
-                && rule.is_disabled()
-            {
-                index_set.insert(RuleFilter::Rule(
-                    Self::GROUP_NAME,
-                    Self::GROUP_RULES[#rule_position],
-                ));
-            }
+        match_rule_arms.push(quote! {
+            #domain_as_string => #domain_filters.iter().any(|filter| filter.match_rule::<R>())
         });
-
-        get_rule_configuration_line.push(quote! {
-            #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
-        });
-
-        rule_identifiers.push(rule_identifier);
     }
 
-    let group_pascal_ident = Ident::new(&to_capitalized(group), Span::call_site());
+    let stream = quote! {
+        use std::sync::LazyLock;
+        use crate::analyzer::DomainSelector;
+        use biome_analyze::{Rule, RuleFilter};
 
-    let get_configuration_function = if kind == RuleCategory::Action {
-        quote! {
-            pub(crate) fn get_rule_configuration(&self, rule_name: &str) -> Option<(RuleAssistPlainConfiguration, Option<RuleOptions>)> {
-                match rule_name {
-                    #( #get_rule_configuration_line ),*,
-                    _ => None
+        #( #lazy_locks )*
+
+        impl DomainSelector {
+            pub fn as_rule_filters(&self) -> Vec<RuleFilter<'static>> {
+                match self.0 {
+                    #( #as_rule_filters_arms ),*,
+                    _ => unreachable!(
+                        "DomainFilter::as_rule_filters: domain {} not found",
+                        self.0
+                    )
                 }
             }
-        }
-    } else {
-        quote! {
-            fn get_rule_configuration(&self, rule_name: &str) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
-                match rule_name {
-                    #( #get_rule_configuration_line ),*,
-                    _ => None
+
+            pub fn match_rule<R>(&self) -> bool
+                where
+                    R: Rule,
+            {
+                match self.0 {
+                    #( #match_rule_arms ),*,
+                    _ => false,
                 }
             }
         }
     };
 
-    if kind == RuleCategory::Action {
-        quote! {
-            #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-            #[cfg_attr(feature = "schema", derive(JsonSchema))]
-            #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
-            /// A list of rules that belong to this group
-            pub struct #group_pascal_ident {
-                /// Enables the recommended rules for this group
-                #[serde(skip_serializing_if = "Option::is_none")]
-                pub recommended: Option<bool>,
+    update(destination.as_path(), &xtask_glue::reformat(stream)?, mode)?;
 
-                #( #schema_lines_rules ),*
-            }
-
-            impl #group_pascal_ident {
-
-                const GROUP_NAME: &'static str = #group;
-                pub(crate) const GROUP_RULES: &'static [&'static str] = &[
-                    #( #lines_rule ),*
-                ];
-
-                const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-                    #( #lines_recommended_rule_as_filter ),*
-                ];
-
-                pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
-                    Self::RECOMMENDED_RULES_AS_FILTERS
-                }
-
-                /// Retrieves the recommended rules
-                pub(crate) fn is_recommended_true(&self) -> bool {
-                    // we should inject recommended rules only when they are set to "true"
-                    matches!(self.recommended, Some(true))
-                }
-
-                pub(crate) fn is_recommended_unset(&self) -> bool {
-                    self.recommended.is_none()
-                }
-
-                pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
-                   let mut index_set = FxHashSet::default();
-                   #( #rule_enabled_check_line )*
-                   index_set
-                }
-
-                pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
-                   let mut index_set = FxHashSet::default();
-                   #( #rule_disabled_check_line )*
-                   index_set
-                }
-
-                /// Checks if, given a rule name, matches one of the rules contained in this category
-                pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
-                    Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
-                }
-
-                /// Select preset rules
-                // Preset rules shouldn't populate disabled rules
-                // because that will make specific rules cannot be enabled later.
-                pub(crate) fn collect_preset_rules(
-                    &self,
-                    parent_is_recommended: bool,
-                    enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
-                ) {
-                    // The order of the if-else branches MATTERS!
-                    if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
-                        enabled_rules.extend(Self::recommended_rules_as_filters());
-                    }
-                }
-
-                #get_configuration_function
-            }
-        }
-    } else {
-        quote! {
-            #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-            #[cfg_attr(feature = "schema", derive(JsonSchema))]
-            #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
-            /// A list of rules that belong to this group
-            pub struct #group_pascal_ident {
-                /// Enables the recommended rules for this group
-                #[serde(skip_serializing_if = "Option::is_none")]
-                pub recommended: Option<bool>,
-
-                #( #schema_lines_rules ),*
-            }
-
-
-            impl #group_pascal_ident {
-
-                const GROUP_NAME: &'static str = #group;
-                pub(crate) const GROUP_RULES: &'static [&'static str] = &[
-                    #( #lines_rule ),*
-                ];
-
-                const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-                    #( #lines_recommended_rule_as_filter ),*
-                ];
-
-                const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-                    #( #lines_all_rule_as_filter ),*
-                ];
-
-            }
-
-            impl RuleGroupExt for #group_pascal_ident {
-                fn is_recommended_true(&self) -> bool {
-                    // we should inject recommended rules only when they are set to "true"
-                    matches!(self.recommended, Some(true))
-                }
-
-                fn is_recommended_unset(&self) -> bool {
-                    self.recommended.is_none()
-                }
-
-
-                fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
-                   let mut index_set = FxHashSet::default();
-                   #( #rule_enabled_check_line )*
-                   index_set
-                }
-
-                fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
-                   let mut index_set = FxHashSet::default();
-                   #( #rule_disabled_check_line )*
-                   index_set
-                }
-
-                /// Checks if, given a rule name, matches one of the rules contained in this category
-                fn has_rule(rule_name: &str) -> Option<&'static str> {
-                    Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
-                }
-
-                fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
-                    Self::RECOMMENDED_RULES_AS_FILTERS
-                }
-
-                fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
-                    Self::ALL_RULES_AS_FILTERS
-                }
-
-                /// Select preset rules
-                // Preset rules shouldn't populate disabled rules
-                // because that will make specific rules cannot be enabled later.
-                fn collect_preset_rules(
-                    &self,
-                    parent_is_recommended: bool,
-                    enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
-                ) {
-                    // The order of the if-else branches MATTERS!
-                    if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
-                        enabled_rules.extend(Self::recommended_rules_as_filters());
-                    }
-                }
-
-                fn set_recommended(&mut self, value: Option<bool>) {
-                    self.recommended = value;
-                }
-
-                #get_configuration_function
-            }
-
-            impl From<GroupPlainConfiguration> for #group_pascal_ident {
-                fn from(value: GroupPlainConfiguration) -> Self {
-                    Self {
-                        recommended: None,
-                        #( #rule_identifiers: Some(value.into()), )*
-                    }
-                }
-            }
-        }
-    }
+    Ok(())
 }

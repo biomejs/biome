@@ -24,15 +24,16 @@ declare_lint_rule! {
     ///
     /// The rule supports the following exceptions:
     ///
-    /// - The name of the file can start with a dot or a plus sign, be prefixed and suffixed by underscores `_`.
-    ///   For example, `.filename.js`, `+filename.js`, `__filename__.js`, or even `.__filename__.js`.
+    /// - The name of the file can start with a dot, a plus sign, or a dollar sign, be prefixed and suffixed by underscores `_`.
+    ///   For example, `.filename.js`, `+filename.js`, `$filename.js`, `__filename__.js`, or even `.__filename__.js`.
     ///
-    ///   The convention of prefixing a filename with a plus sign is used by [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
+    ///   - The convention of prefixing a filename with a plus sign is used by [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
+    ///   - The convention of prefixing a filename with a dollar sign is used by [TanStack Start](https://tanstack.com/start/latest/docs/framework/react/guide/routing#file-based-routing) for file-based routing.
     ///
     /// - Also, the rule supports dynamic route syntaxes of [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/dynamic-routes#catch-all-segments), [SolidStart](https://docs.solidjs.com/solid-start/building-your-application/routing#renaming-index), [Nuxt](https://nuxt.com/docs/guide/directory-structure/server#catch-all-route), and [Astro](https://docs.astro.build/en/guides/routing/#rest-parameters).
     ///   For example `[...slug].js` and `[[...slug]].js` are valid filenames.
     ///
-    /// Note that if you specify the `match' option, the previous exceptions will no longer be handled.
+    /// Note that if you specify the `match` option, the previous exceptions will no longer be handled.
     ///
     /// ## Ignoring some files
     ///
@@ -155,7 +156,7 @@ impl Rule for UseFilenamingConvention {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let file_name = ctx.file_path().file_name()?;
         let options = ctx.options();
-        if options.require_ascii && !file_name.is_ascii() {
+        if options.require_ascii() && !file_name.is_ascii() {
             return Some(FileNamingConventionState::Ascii);
         }
         let first_char = file_name.bytes().next()?;
@@ -217,7 +218,9 @@ impl Rule for UseFilenamingConvention {
             //
             // Support [Sveltekit](https://kit.svelte.dev/docs/routing#page) and
             // [Vike](https://vike.dev/route) routing conventions where page name starts with `+`.
-            let file_name = if matches!(first_char, b'.' | b'+') {
+            //
+            // Support filenames starting with `$`.
+            let file_name = if matches!(first_char, b'.' | b'+' | b'$') {
                 &file_name[1..]
             } else {
                 file_name
@@ -228,11 +231,12 @@ impl Rule for UseFilenamingConvention {
             };
             (name, split)
         };
-        let allowed_cases = options.filename_cases.cases;
+        let filename_cases = options.filename_cases.unwrap_or_default();
+        let allowed_cases = filename_cases.cases;
         let allowed_extension_cases = allowed_cases | Case::Lower;
         // Check extension case
         if extensions.any(|extension| {
-            !allowed_extension_cases.contains(Case::identify(extension, options.strict_case))
+            !allowed_extension_cases.contains(Case::identify(extension, options.strict_case()))
         }) {
             return Some(FileNamingConventionState::Extension);
         }
@@ -242,12 +246,12 @@ impl Rule for UseFilenamingConvention {
         // Check filename case
         if !allowed_cases.is_empty() {
             let trimmed_name = name.trim_matches('_');
-            let case = Case::identify(trimmed_name, options.strict_case);
+            let case = Case::identify(trimmed_name, options.strict_case());
             if (allowed_cases | Case::Uni).contains(case) {
                 return None;
             }
         }
-        if options.filename_cases.allow_export {
+        if filename_cases.allow_export {
             // If no exported binding has the file name, then reports the filename
             ctx.model()
                 .all_exported_bindings()
@@ -272,6 +276,7 @@ impl Rule for UseFilenamingConvention {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let file_name = ctx.file_path().file_name()?;
         let options = ctx.options();
+        let filename_cases = options.filename_cases.unwrap_or_default();
         match state {
             FileNamingConventionState::Ascii => {
                 Some(RuleDiagnostic::new(
@@ -285,9 +290,9 @@ impl Rule for UseFilenamingConvention {
                 }))
             },
             FileNamingConventionState::Filename => {
-                let allowed_cases = options.filename_cases.cases;
+                let allowed_cases = filename_cases.cases;
                 let allowed_case_names = allowed_cases.into_iter().map(|case| case.to_string());
-                let allowed_case_names = if options.filename_cases.allow_export {
+                let allowed_case_names = if filename_cases.allow_export {
                     allowed_case_names
                         .chain(["equal to the name of an export".to_string()])
                         .collect::<SmallVec<[_; 4]>>()
@@ -304,6 +309,8 @@ impl Rule for UseFilenamingConvention {
                     split.next()?
                 } else if let Some(stripped_name) = name.strip_prefix('+') {
                     stripped_name
+                } else if let Some(stripped_name) = name.strip_prefix('$') {
+                    stripped_name
                 } else {
                     name
                 };
@@ -313,7 +320,7 @@ impl Rule for UseFilenamingConvention {
                 } else {
                     markup! {""}.to_owned()
                 };
-                if options.strict_case && options.filename_cases.cases.contains(Case::Camel) {
+                if options.strict_case() && filename_cases.cases.contains(Case::Camel) {
                     let case_type = Case::identify(trimmed_name, false);
                     let case_strict = Case::identify(trimmed_name, true);
                     if case_type == Case::Camel && case_strict == Case::Unknown {
@@ -331,7 +338,7 @@ impl Rule for UseFilenamingConvention {
                 let mut suggested_filenames = allowed_cases
                     .into_iter()
                     .map(|case| case.convert(trimmed_name).into_boxed_str())
-                    .filter(|new_trimmed_name| allowed_cases.contains(Case::identify(new_trimmed_name, options.strict_case)))
+                    .filter(|new_trimmed_name| allowed_cases.contains(Case::identify(new_trimmed_name, options.strict_case())))
                     .collect::<SmallVec<[_; 4]>>();
                 // We sort and deduplicate the suggested names
                 suggested_filenames.sort();
@@ -355,7 +362,7 @@ impl Rule for UseFilenamingConvention {
                 }))
             },
             FileNamingConventionState::Extension => {
-                let allowed_cases = options.filename_cases.cases | Case::Lower;
+                let allowed_cases = filename_cases.cases | Case::Lower;
                 let allowed_case_names = allowed_cases.into_iter().map(|case| case.to_string());
                 let allowed_case_names = allowed_case_names.collect::<SmallVec<[_; 4]>>().join(" or ");
                 Some(RuleDiagnostic::new(

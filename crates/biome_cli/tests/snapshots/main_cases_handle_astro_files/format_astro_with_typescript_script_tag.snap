@@ -1,0 +1,41 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": { "enabled": true },
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+const title = "My Page";
+---
+
+<html>
+	<body>
+		<script>
+		const message: string = "Hello TypeScript";
+		function greet(name: string): void {
+			console.log(message + ", " + name);
+		}
+		</script>
+	</body>
+</html>
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

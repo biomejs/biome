@@ -1,0 +1,7 @@
+---
+// Astro invalid cases - should trigger the rule
+---
+
+<a href="javascript:void(0)">Void</a>
+<a href=" javascript:prompt('XSS') ">Prompt</a>
+<a href="JAVASCRIPT:doSomething()">Uppercase</a>

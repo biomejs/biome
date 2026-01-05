@@ -22,6 +22,8 @@ always.invalid.js:1:30 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━
     2 │ 
     3 │ const returnsAwaitArrow = async () => await fetchData()
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Add braces to the arrow function body.
   
     1   │ - const·returnsSequenceArrow·=·()·=>·(a,·b)
@@ -44,6 +46,8 @@ always.invalid.js:3:27 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━
   > 3 │ const returnsAwaitArrow = async () => await fetchData()
       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Add braces to the arrow function body.
   

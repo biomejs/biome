@@ -4,7 +4,7 @@ use crate::workspace::ScanKind;
 use biome_analyze::{
     AnalyzerRules, Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
-use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
+use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
 use biome_configuration::diagnostics::{
     CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
@@ -22,13 +22,14 @@ use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_html_analyze::METADATA as html_lint_metadata;
 use biome_js_analyze::METADATA as js_lint_metadata;
 use biome_js_syntax::JsLanguage;
 use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::JsonLanguage;
-use biome_resolver::{FsWithResolverProxy, ResolveOptions, resolve};
+use biome_resolver::{FsWithResolverProxy, ResolveOptions, is_relative_specifier, resolve};
 use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
@@ -36,7 +37,6 @@ use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
 use std::ops::Deref;
-use std::path::Path;
 use std::str::FromStr;
 use tracing::instrument;
 
@@ -54,6 +54,8 @@ pub struct LoadedConfiguration {
     pub configuration: Configuration,
     /// All diagnostics that were emitted during parsing and deserialization
     pub diagnostics: Vec<Error>,
+    /// The list of possible extended configuration files
+    pub extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
 }
 
 impl LoadedConfiguration {
@@ -73,26 +75,48 @@ impl LoadedConfiguration {
         } = value;
         let (partial_configuration, mut diagnostics) = deserialized.consume();
 
-        Ok(Self {
-            configuration: match partial_configuration {
-                Some(mut partial_configuration) => {
-                    partial_configuration.apply_extends(
-                        fs,
-                        &configuration_file_path,
-                        &external_resolution_base_path,
-                        &mut diagnostics,
-                    )?;
-                    partial_configuration.migrate_deprecated_fields();
-                    partial_configuration
+        let mut extended_configurations: Vec<(Utf8PathBuf, Configuration)> = vec![];
+
+        let configuration = match partial_configuration {
+            Some(mut partial_configuration) => {
+                extended_configurations.extend(partial_configuration.apply_extends(
+                    fs,
+                    &configuration_file_path,
+                    &external_resolution_base_path,
+                    &mut diagnostics,
+                )?);
+                partial_configuration.migrate_deprecated_fields();
+
+                // Normalize plugin paths relative to the configuration file directory so
+                // merged configurations (e.g. nested configs extending from root) can
+                // still load plugins defined in other configuration files.
+                let config_dir = configuration_file_path
+                    .parent()
+                    .unwrap_or(external_resolution_base_path.as_path());
+                if let Some(plugins) = partial_configuration.plugins.as_mut() {
+                    plugins.normalize_relative_paths(config_dir);
                 }
-                None => Configuration::default(),
-            },
+                if let Some(overrides) = partial_configuration.overrides.as_mut() {
+                    for pattern in overrides.0.iter_mut() {
+                        if let Some(plugins) = pattern.plugins.as_mut() {
+                            plugins.normalize_relative_paths(config_dir);
+                        }
+                    }
+                }
+                partial_configuration
+            }
+            None => Configuration::default(),
+        };
+
+        Ok(Self {
+            configuration,
             diagnostics: diagnostics
                 .into_iter()
                 .map(|diagnostic| diagnostic.with_file_path(configuration_file_path.to_string()))
                 .collect(),
             directory_path: configuration_file_path.parent().map(Utf8PathBuf::from),
             file_path: Some(configuration_file_path),
+            extended_configurations,
         })
     }
 
@@ -437,12 +461,14 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
         push_to_analyzer_rules(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, json_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, html_lint_metadata.deref(), &mut analyzer_rules);
     }
     if let Some(rules) = settings.assist.actions.as_ref() {
         push_to_analyzer_assist(rules, js_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, json_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_assist(rules, html_lint_metadata.deref(), &mut analyzer_rules);
     }
     let overrides = &settings.override_settings;
     overrides.override_analyzer_rules(path, analyzer_rules)
@@ -455,7 +481,7 @@ pub trait ConfigurationExt {
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
-    ) -> Result<(), WorkspaceError>;
+    ) -> Result<Vec<(Utf8PathBuf, Configuration)>, WorkspaceError>;
 
     fn deserialize_extends(
         &mut self,
@@ -488,7 +514,7 @@ impl ConfigurationExt for Configuration {
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<(Utf8PathBuf, Configuration)>, WorkspaceError> {
         let deserialized = self.deserialize_extends(
             fs,
             file_path.parent().expect("file path should have a parent"),
@@ -496,6 +522,13 @@ impl ConfigurationExt for Configuration {
         )?;
         let (configurations, errors): (Vec<_>, Vec<_>) =
             deserialized.into_iter().map(Deserialized::consume).unzip();
+
+        let configuration_list = configurations
+            .iter()
+            .flatten()
+            .cloned()
+            .map(|c| (file_path.to_path_buf(), c))
+            .collect::<Vec<_>>();
 
         let extended_configuration = configurations.into_iter().flatten().reduce(
             |mut previous_configuration, current_configuration| {
@@ -521,7 +554,7 @@ impl ConfigurationExt for Configuration {
                 .collect::<Vec<_>>(),
         );
 
-        Ok(())
+        Ok(configuration_list)
     }
 
     /// Deserializes all the configuration files that were specified in the
@@ -539,9 +572,8 @@ impl ConfigurationExt for Configuration {
         let mut deserialized_configurations = vec![];
         if let Some(extends) = extends.as_list() {
             for extend_entry in extends.iter() {
-                let extend_entry_as_path = Path::new(extend_entry.as_ref());
-
-                let extend_configuration_file_path = if extend_entry_as_path.starts_with(".") {
+                let extend_configuration_file_path = if is_relative_specifier(extend_entry.as_ref())
+                {
                     relative_resolution_base_path.join(extend_entry.as_ref())
                 } else {
                     const RESOLVE_OPTIONS: ResolveOptions = ResolveOptions::new()
@@ -699,8 +731,8 @@ pub struct ProjectScanComputer<'a> {
     requires_project_scan: bool,
     enabled_rules: FxHashSet<RuleFilter<'a>>,
     configuration: &'a Configuration,
-    skip: &'a [RuleSelector],
-    only: &'a [RuleSelector],
+    skip: &'a [AnalyzerSelector],
+    only: &'a [AnalyzerSelector],
 }
 
 impl<'a> ProjectScanComputer<'a> {
@@ -717,8 +749,8 @@ impl<'a> ProjectScanComputer<'a> {
 
     pub fn with_rule_selectors(
         mut self,
-        skip: &'a [RuleSelector],
-        only: &'a [RuleSelector],
+        skip: &'a [AnalyzerSelector],
+        only: &'a [AnalyzerSelector],
     ) -> Self {
         self.skip = skip;
         self.only = only;
@@ -761,13 +793,18 @@ impl<'a> ProjectScanComputer<'a> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
-        let selector = RuleSelector::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+
         if !self.only.is_empty() {
-            if self.only.contains(&selector) {
-                let domains = R::METADATA.domains;
-                self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+            for selector in self.only.iter() {
+                if selector.match_rule::<R>() {
+                    let domains = R::METADATA.domains;
+                    self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+                    break;
+                }
             }
-        } else if !self.skip.contains(&selector) && self.enabled_rules.contains(&filter) {
+        } else if !self.skip.iter().any(|s| s.match_rule::<R>())
+            && self.enabled_rules.contains(&filter)
+        {
             let domains = R::METADATA.domains;
             self.requires_project_scan |= domains.contains(&RuleDomain::Project);
         }
@@ -817,7 +854,7 @@ impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
 mod tests {
     use super::*;
     use biome_configuration::analyzer::{
-        Correctness, RuleDomainValue, RuleDomains, SeverityOrGroup,
+        Correctness, DomainSelector, RuleDomainValue, RuleDomains, RuleSelector, SeverityOrGroup,
     };
     use biome_configuration::{
         LinterConfiguration, RuleConfiguration, RulePlainConfiguration, Rules,
@@ -904,7 +941,7 @@ mod tests {
         assert_eq!(
             ProjectScanComputer::new(&configuration)
                 .with_rule_selectors(
-                    &[RuleSelector::Rule("correctness", "noPrivateImports")],
+                    &[RuleSelector::Rule("correctness", "noPrivateImports").into()],
                     &[]
                 )
                 .compute(),
@@ -934,10 +971,34 @@ mod tests {
             ProjectScanComputer::new(&configuration)
                 .with_rule_selectors(
                     &[],
-                    &[RuleSelector::Rule("correctness", "noPrivateImports")]
+                    &[RuleSelector::Rule("correctness", "noPrivateImports").into()]
                 )
                 .compute(),
             ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_return_project_if_a_domain_contains_project_rules() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("project").into()])
+                .compute(),
+            ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_not_return_project_if_a_domain_does_not_contain_project_rules() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("test").into()])
+                .compute(),
+            ScanKind::NoScanner
         );
     }
 }

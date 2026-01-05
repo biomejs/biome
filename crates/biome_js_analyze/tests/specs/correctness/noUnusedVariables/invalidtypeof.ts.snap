@@ -21,7 +21,7 @@ invalidtypeof.ts:1:11 lint/correctness/noUnusedVariables ━━━━━━━�
     2 │ 
     3 │ export declare const x: typeof I;
   
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
 
 ```

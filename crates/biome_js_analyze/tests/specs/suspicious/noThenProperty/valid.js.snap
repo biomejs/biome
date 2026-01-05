@@ -85,3 +85,5 @@ export const notThen = 1
 export const {then: notThen} = 1
 export const {then: notThen = then} = 1
 ```
+
+_Note: The parser emitted 4 diagnostics which are not shown here._
