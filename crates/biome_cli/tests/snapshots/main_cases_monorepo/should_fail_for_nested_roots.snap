@@ -29,9 +29,9 @@ expression: redactor(content)
 # Termination Message
 
 ```block
-configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome exited because the configuration resulted in errors. Please fix them.
+  × Some errors were emitted while running checks.
   
 
 
@@ -40,15 +40,52 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-<TEMP_DIR>/should_fail_for_nested_roots/packages/lib/biome.json configuration ━━━━━━━━━━━━━━━━━━━━
+biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Found a nested root configuration, but there's already a root configuration.
+  × Formatter would have printed the following content:
   
-  i The other configuration was found in <TEMP_DIR>/should_fail_for_nested_roots.
-  
-  i Use the migration command from the root of the project to update the configuration.
-  
-  $ biome migrate --write
+    1   │ - 
+    2 1 │   {
+    3   │ - ····"javascript":·{
+    4   │ - ········"formatter":·{
+    5   │ - ············"quoteStyle":·"double"
+    6   │ - ········}
+    7   │ - ····}
+      2 │ + → "javascript":·{
+      3 │ + → → "formatter":·{
+      4 │ + → → → "quoteStyle":·"double"
+      5 │ + → → }
+      6 │ + → }
+    8 7 │   }
+    9 8 │   
   
 
+```
+
+```block
+packages/lib/biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - 
+    2 1 │   {
+    3   │ - ····"javascript":·{
+    4   │ - ········"formatter":·{
+    5   │ - ············"quoteStyle":·"double"
+    6   │ - ········}
+    7   │ - ····}
+      2 │ + → "javascript":·{
+      3 │ + → → "formatter":·{
+      4 │ + → → → "quoteStyle":·"double"
+      5 │ + → → }
+      6 │ + → }
+    8 7 │   }
+    9 8 │   
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 2 errors.
 ```
