@@ -678,6 +678,7 @@ name = "biome_grit_formatter"
 version = "0.0.0"
 dependencies = [
  "biome_configuration",
+ "biome_diagnostics_categories",
  "biome_formatter",
  "biome_formatter_test",
  "biome_fs",
@@ -687,6 +688,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_service",
+ "biome_suppression",
  "camino",
  "serde",
  "serde_json",

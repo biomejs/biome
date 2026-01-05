@@ -184,7 +184,7 @@ where
     N: AstNode<Language = GraphqlLanguage>,
 {
     fn fmt(&self, node: &N, f: &mut GraphqlFormatter) -> FormatResult<()> {
-        if self.is_suppressed(node, f) {
+        if self.is_suppressed(node, f) | self.is_global_suppressed(node, f) {
             return write!(f, [format_suppressed_node(node.syntax())]);
         }
 
@@ -199,6 +199,11 @@ where
     /// Returns `true` if the node has a suppression comment and should use the same formatting as in the source document.
     fn is_suppressed(&self, node: &N, f: &GraphqlFormatter) -> bool {
         f.context().comments().is_suppressed(node.syntax())
+    }
+
+    /// Returns `true` if the node has a global suppression comment and should use the same formatting as in the source document.
+    fn is_global_suppressed(&self, node: &N, f: &GraphqlFormatter) -> bool {
+        f.context().comments().is_global_suppressed(node.syntax())
     }
 
     /// Formats the [leading comments](biome_formatter::comments#leading-comments) of the node.
