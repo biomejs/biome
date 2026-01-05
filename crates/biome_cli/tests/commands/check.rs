@@ -756,7 +756,10 @@ fn check_only_assist_action() {
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.js");
-    fs.insert(file_path.into(), "import b from \"b\";\nimport a from \"a\";\n".as_bytes());
+    fs.insert(
+        file_path.into(),
+        "import b from \"b\";\nimport a from \"a\";\n".as_bytes(),
+    );
 
     let (_fs, result) = run_cli(
         fs,
@@ -796,7 +799,10 @@ fn check_skip_assist_action_and_group() {
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.js");
-    fs.insert(file_path.into(), "import b from \"b\";\nimport a from \"a\";\n".as_bytes());
+    fs.insert(
+        file_path.into(),
+        "import b from \"b\";\nimport a from \"a\";\n".as_bytes(),
+    );
 
     let (_fs, result) = run_cli(
         fs,

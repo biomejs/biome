@@ -1077,7 +1077,10 @@ fn ci_only_assist_action() {
     let mut console = BufferConsole::default();
 
     let file = Utf8Path::new("file.js");
-    fs.insert(file.into(), "import b from \"b\";\nimport a from \"a\";\n".as_bytes());
+    fs.insert(
+        file.into(),
+        "import b from \"b\";\nimport a from \"a\";\n".as_bytes(),
+    );
 
     let (_fs, result) = run_cli(
         fs,
@@ -1117,7 +1120,10 @@ fn ci_skip_assist_action_and_group() {
     let mut console = BufferConsole::default();
 
     let file = Utf8Path::new("file.js");
-    fs.insert(file.into(), "import b from \"b\";\nimport a from \"a\";\n".as_bytes());
+    fs.insert(
+        file.into(),
+        "import b from \"b\";\nimport a from \"a\";\n".as_bytes(),
+    );
 
     let (_fs, result) = run_cli(
         fs,
