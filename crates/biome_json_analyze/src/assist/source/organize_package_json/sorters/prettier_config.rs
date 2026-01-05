@@ -36,8 +36,7 @@ pub fn transform(value: &AnyJsonValue) -> Option<AnyJsonValue> {
             .filter_map(|m| m.ok())
             .last()
             .and_then(|m| m.name().ok()?.inner_string_text().ok())
-            .map(|name| name.text() == "overrides")
-            .unwrap_or(false)
+            .is_some_and(|name| name.text() == "overrides")
     } else {
         true
     };
