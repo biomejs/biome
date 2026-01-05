@@ -2158,6 +2158,11 @@ See <https://biomejs.dev/linter/rules/use-find>
 	 */
 	useFind?: UseFindConfiguration;
 	/**
+	* Require mutation argument to be always called "input".
+See <https://biomejs.dev/linter/rules/use-input-name> 
+	 */
+	useInputName?: UseInputNameConfiguration;
+	/**
 	* Require queries, mutations, subscriptions or fragments each to be located in separate files.
 See <https://biomejs.dev/linter/rules/use-lone-executable-definition> 
 	 */
@@ -3893,6 +3898,9 @@ export type UseExplicitTypeConfiguration =
 export type UseFindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFindOptions;
+export type UseInputNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseInputNameOptions;
 export type UseLoneExecutableDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneExecutableDefinitionOptions;
@@ -5447,6 +5455,10 @@ export interface RuleWithUseFindOptions {
 	level: RulePlainConfiguration;
 	options?: UseFindOptions;
 }
+export interface RuleWithUseInputNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseInputNameOptions;
+}
 export interface RuleWithUseLoneExecutableDefinitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneExecutableDefinitionOptions;
@@ -6814,6 +6826,16 @@ export interface UseErrorCauseOptions {
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
+export interface UseInputNameOptions {
+	/**
+	 * Treat input type names as case-sensitive
+	 */
+	caseSensitiveInputType?: boolean;
+	/**
+	 * Check that the input type name follows the convention <mutationName>Input
+	 */
+	checkInputType?: boolean;
+}
 export type UseLoneExecutableDefinitionOptions = {};
 export interface UseMaxParamsOptions {
 	/**
@@ -7674,6 +7696,7 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useInputName"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useMaxParams"

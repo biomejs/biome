@@ -1,0 +1,13 @@
+# should generate diagnostics
+
+# Input name not "input"
+type Mutation { SetMessage(record: String): String }
+
+# Input type not ending with Input
+type Mutation { SetMessage(input: String): String }
+
+# Case sensitive
+type Mutation { SetMessage(input: setMessageInput): String }
+
+# Input type not matching mutation name
+type Mutation { SetMessage(input: CreateAMessageInput): String }

@@ -5723,6 +5723,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useInputName": {
+					"description": "Require mutation argument to be always called \"input\".\nSee <https://biomejs.dev/linter/rules/use-input-name>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseInputNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useLoneExecutableDefinition": {
 					"description": "Require queries, mutations, subscriptions or fragments each to be located in separate files.\nSee <https://biomejs.dev/linter/rules/use-lone-executable-definition>",
 					"anyOf": [
@@ -9616,6 +9623,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseInputNameOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseInputNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseIsArrayOptions": {
 			"type": "object",
 			"properties": {
@@ -12630,6 +12646,26 @@
 			]
 		},
 		"UseIndexOfOptions": { "type": "object", "additionalProperties": false },
+		"UseInputNameConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseInputNameOptions" }
+			]
+		},
+		"UseInputNameOptions": {
+			"type": "object",
+			"properties": {
+				"caseSensitiveInputType": {
+					"description": "Treat input type names as case-sensitive",
+					"type": ["boolean", "null"]
+				},
+				"checkInputType": {
+					"description": "Check that the input type name follows the convention <mutationName>Input",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseIsArrayConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
