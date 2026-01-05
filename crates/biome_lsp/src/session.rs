@@ -2,6 +2,7 @@ use crate::diagnostics::LspError;
 use crate::documents::Document;
 use crate::extension_settings::{CONFIGURATION_SECTION, ExtensionSettings};
 use crate::utils;
+use crate::utils::diagnostic_to_lsp;
 use anyhow::Result;
 use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::{Configuration, ConfigurationPathHint};
@@ -16,6 +17,7 @@ use biome_service::WorkspaceError;
 use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
 };
+use biome_service::diagnostics::ConfigurationOutsideProject;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     FeaturesBuilder, OpenProjectParams, OpenProjectResult, PullDiagnosticsParams,
@@ -858,6 +860,10 @@ impl Session {
                 return ConfigurationStatus::Error;
             }
         };
+        if !loaded_configuration.loaded_location.is_in_project() {
+            let message = PrintDescription(&ConfigurationOutsideProject).to_string();
+            self.client.log_message(MessageType::INFO, message).await;
+        }
 
         if loaded_configuration.has_errors() {
             error!("Couldn't load the configuration file, reasons:");

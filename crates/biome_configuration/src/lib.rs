@@ -673,16 +673,6 @@ impl biome_deserialize::Deserializable for FilesConfiguration {
     }
 }
 
-#[derive(Debug)]
-pub struct ConfigurationPayload {
-    /// The result of the deserialization
-    pub deserialized: Deserialized<Configuration>,
-    /// The path of where the `biome.json` or `biome.jsonc` file was found. This contains the file name.
-    pub configuration_file_path: Utf8PathBuf,
-    /// The base path where the external configuration in a package should be resolved from
-    pub external_resolution_base_path: Utf8PathBuf,
-}
-
 #[derive(Debug, Default, PartialEq, Clone, Eq, Hash)]
 pub enum ConfigurationPathHint {
     /// The default mode, not having a configuration file is not an error.
