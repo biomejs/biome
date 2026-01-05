@@ -1070,3 +1070,84 @@ fn ci_skip_takes_precedence_over_only() {
         "expected skip to override only, found {error_count:?}: {messages:?}"
     );
 }
+
+#[test]
+fn ci_only_assist_action() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.js");
+    fs.insert(file.into(), "import b from \"b\";\nimport a from \"a\";\n".as_bytes());
+
+    let (_fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "ci",
+                "--assist-enabled=true",
+                "--only=assist/source/organizeImports",
+                file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    let messages = &console.out_buffer;
+    let error_count = messages
+        .iter()
+        .filter(|m| m.level == LogLevel::Error)
+        .filter(|m| {
+            let content = format!("{:#?}", m.content);
+            content.contains("assist/source/organizeImports")
+        })
+        .count();
+
+    assert_eq!(
+        error_count, 1,
+        "expected assist action to be enforced when selected with --only, found {error_count:?}: {messages:?}"
+    );
+}
+
+#[test]
+fn ci_skip_assist_action_and_group() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.js");
+    fs.insert(file.into(), "import b from \"b\";\nimport a from \"a\";\n".as_bytes());
+
+    let (_fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "ci",
+                "--assist-enabled=true",
+                "--only=assist/source",
+                "--skip=assist/source/organizeImports",
+                file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let messages = &console.out_buffer;
+    let error_count = messages
+        .iter()
+        .filter(|m| m.level == LogLevel::Error)
+        .filter(|m| {
+            let content = format!("{:#?}", m.content);
+            content.contains("assist/source/organizeImports")
+        })
+        .count();
+
+    assert_eq!(
+        error_count, 0,
+        "expected assist action to be skipped when group and action are both provided, found {error_count:?}: {messages:?}"
+    );
+}

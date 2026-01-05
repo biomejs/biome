@@ -190,7 +190,7 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome check --only=correctness/noUnusedVariables --only=suspicious --only=test
         /// ```
-        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION"))]
         only: Vec<AnalyzerSelector>,
 
         /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
@@ -201,7 +201,7 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome check --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
         /// ```
-        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN"))]
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
         skip: Vec<AnalyzerSelector>,
 
         /// Single file, single path or list of paths
@@ -273,7 +273,7 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome lint --only=correctness/noUnusedVariables --only=suspicious --only=test
         /// ```
-        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION"))]
         only: Vec<AnalyzerSelector>,
 
         /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
@@ -284,7 +284,7 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome lint --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
         /// ```
-        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN"))]
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
         skip: Vec<AnalyzerSelector>,
 
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
@@ -468,7 +468,7 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome ci --only=correctness/noUnusedVariables --only=suspicious --only=test
         /// ```
-        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION"))]
         only: Vec<AnalyzerSelector>,
 
         /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
@@ -479,7 +479,7 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome ci --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
         /// ```
-        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN"))]
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
         skip: Vec<AnalyzerSelector>,
 
         /// Single file, single path or list of paths
