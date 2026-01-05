@@ -1,11 +1,10 @@
-use biome_analyze::context::RuleContext;
-use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_analyze::{
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, AnyJsxAttributeValue,
-};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlFileSource};
 use biome_rowan::AstNode;
 use biome_rule_options::is_redundant_alt;
 use biome_rule_options::no_redundant_alt::NoRedundantAltOptions;
@@ -20,32 +19,27 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```jsx,expect_diagnostic
+    /// ```html,expect_diagnostic
     /// <img src="src" alt="photo content" />;
     /// ```
     ///
-    /// ```jsx,expect_diagnostic
-    /// <img alt={`picture doing ${things}`} {...this.props} />;
-    /// ```
-    ///
-    /// ```jsx,expect_diagnostic
-    /// <img alt="picture of cool person" aria-hidden={false} />;
+    /// ```html,expect_diagnostic
+    /// <img alt="picture of cool person" aria-hidden="false" />;
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```jsx
+    /// ```html
     /// <>
     /// 	<img src="src" alt="alt" />
-    /// 	<img src="src" alt={photo} />
     /// 	<img src="bar" aria-hidden alt="Picture of me taking a photo of an image" />
     /// </>
     /// ```
     ///
     pub NoRedundantAlt {
-        version: "1.0.0",
+        version: "next",
         name: "noRedundantAlt",
-        language: "jsx",
+        language: "html",
         sources: &[RuleSource::EslintJsxA11y("img-redundant-alt").same()],
         recommended: true,
         severity: Severity::Error,
@@ -53,32 +47,35 @@ declare_lint_rule! {
 }
 
 impl Rule for NoRedundantAlt {
-    type Query = Ast<AnyJsxElement>;
-    type State = AnyJsxAttributeValue;
+    type Query = Ast<AnyHtmlTagElement>;
+    type State = AnyHtmlAttributeInitializer;
     type Signals = Option<Self::State>;
     type Options = NoRedundantAltOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node.name_value_token().ok()?.text_trimmed() != "img" {
+        let file_source = ctx.source_type::<HtmlFileSource>();
+
+        let name = node.name().ok()?.value_token().ok()?;
+        if (file_source.is_html() && !name.text_trimmed().eq_ignore_ascii_case("img"))
+            || (!file_source.is_html() && name.text_trimmed() != "img")
+        {
             return None;
         }
+
         let aria_hidden_attribute = node.find_attribute_by_name("aria-hidden");
         if let Some(aria_hidden) = aria_hidden_attribute {
             let is_false = match aria_hidden.initializer()?.value().ok()? {
-                AnyJsxAttributeValue::AnyJsxTag(_) => false,
-                AnyJsxAttributeValue::JsxExpressionAttributeValue(aria_hidden) => {
+                AnyHtmlAttributeInitializer::HtmlSingleTextExpression(aria_hidden) => {
                     aria_hidden
                         .expression()
                         .ok()?
-                        .as_any_js_literal_expression()?
-                        .as_js_boolean_literal_expression()?
-                        .value_token()
+                        .html_literal_token()
                         .ok()?
                         .text_trimmed()
                         == "false"
                 }
-                AnyJsxAttributeValue::JsxString(aria_hidden) => {
+                AnyHtmlAttributeInitializer::HtmlString(aria_hidden) => {
                     aria_hidden.inner_string_text().ok()?.text() == "false"
                 }
             };
@@ -95,32 +92,12 @@ impl Rule for NoRedundantAlt {
             .ok()?;
 
         match alt {
-            AnyJsxAttributeValue::AnyJsxTag(_) => None,
-            AnyJsxAttributeValue::JsxExpressionAttributeValue(ref value) => {
-                match value.expression().ok()? {
-                    AnyJsExpression::AnyJsLiteralExpression(
-                        AnyJsLiteralExpression::JsStringLiteralExpression(expr),
-                    ) => is_redundant_alt(expr.inner_string_text().ok()?.text()).then_some(alt),
-                    AnyJsExpression::JsTemplateExpression(expr) => {
-                        let contain_redundant_alt =
-                            expr.elements().into_iter().any(|template_element| {
-                                match template_element {
-                                    AnyJsTemplateElement::JsTemplateChunkElement(node) => {
-                                        node.template_chunk_token().ok().is_some_and(|token| {
-                                            is_redundant_alt(token.text_trimmed())
-                                        })
-                                    }
-                                    AnyJsTemplateElement::JsTemplateElement(_) => false,
-                                }
-                            });
+            AnyHtmlAttributeInitializer::HtmlSingleTextExpression(ref expression) => {
+                let value = expression.expression().ok()?.html_literal_token().ok()?;
 
-                        contain_redundant_alt.then_some(alt)
-                    }
-
-                    _ => None,
-                }
+                is_redundant_alt(value.text_trimmed()).then_some(alt)
             }
-            AnyJsxAttributeValue::JsxString(ref value) => {
+            AnyHtmlAttributeInitializer::HtmlString(ref value) => {
                 let inner_string_text = value.inner_string_text().ok()?;
                 is_redundant_alt(inner_string_text.text()).then_some(alt)
             }
