@@ -2,7 +2,6 @@ use crate::diagnostics::LspError;
 use crate::documents::Document;
 use crate::extension_settings::{CONFIGURATION_SECTION, ExtensionSettings};
 use crate::utils;
-use crate::utils::diagnostic_to_lsp;
 use anyhow::Result;
 use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::{Configuration, ConfigurationPathHint};

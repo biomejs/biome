@@ -44,8 +44,7 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::{KeyValuePair, markup};
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValidator, DeserializableValue,
-    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Deserialized, Text,
-    TextRange,
+    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Text, TextRange,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;

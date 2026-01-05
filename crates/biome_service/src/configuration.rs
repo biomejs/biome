@@ -302,17 +302,11 @@ pub fn read_config(
             &ConfigName::file_names(),
             &mut predicate,
         )
-        .and_then(|auto_search_result| {
-            dbg!("here!!!");
-            dbg!(
-                &configuration_directory,
-                &auto_search_result.file_path,
-                &auto_search_result.directory_path
-            );
+        .map(|auto_search_result| {
             if configuration_directory == auto_search_result.directory_path {
-                Some((auto_search_result, LoadedLocation::InProject))
+                (auto_search_result, LoadedLocation::InProject)
             } else {
-                Some((auto_search_result, LoadedLocation::ParentFolder))
+                (auto_search_result, LoadedLocation::ParentFolder)
             }
         })
         .or_else(|| {
@@ -320,9 +314,7 @@ pub fn read_config(
 
             let paths = ConfigName::file_names().map(|file_name| user_config_dir.join(file_name));
             fs.read_file_from_paths_with_predicate(paths.as_slice(), &mut predicate)
-                .and_then(|auto_search_result| {
-                    Some((auto_search_result, LoadedLocation::UserConfigFolder))
-                })
+                .map(|auto_search_result| (auto_search_result, LoadedLocation::UserConfigFolder))
         })
     else {
         return Ok(None);
@@ -355,15 +347,13 @@ fn load_user_config(
             _ => return Err(BiomeDiagnostic::invalid_configuration_file(config_file_path).into()),
         };
         let deserialized = deserialize_from_json_str::<Configuration>(&content, parser_options, "");
-        let loaded_location = working_directory
-            .map(|wd| {
-                if config_file_path.starts_with(wd) {
-                    LoadedLocation::InProject
-                } else {
-                    LoadedLocation::ParentFolder
-                }
-            })
-            .unwrap_or(LoadedLocation::InProject);
+        let loaded_location = working_directory.map_or(LoadedLocation::InProject, |wd| {
+            if config_file_path.starts_with(wd) {
+                LoadedLocation::InProject
+            } else {
+                LoadedLocation::ParentFolder
+            }
+        });
         Ok(Some(ConfigurationPayload {
             deserialized,
             configuration_file_path: config_file_path.to_path_buf(),
@@ -395,15 +385,13 @@ fn load_user_config(
         {
             return Err(BiomeDiagnostic::non_root_configuration(config_file_path).into());
         }
-        let loaded_location = working_directory
-            .map(|wd| {
-                if wd.starts_with(config_file_path) {
-                    LoadedLocation::InProject
-                } else {
-                    LoadedLocation::ParentFolder
-                }
-            })
-            .unwrap_or(LoadedLocation::InProject);
+        let loaded_location = working_directory.map_or(LoadedLocation::InProject, |wd| {
+            if config_file_path.starts_with(wd) {
+                LoadedLocation::InProject
+            } else {
+                LoadedLocation::ParentFolder
+            }
+        });
         Ok(Some(ConfigurationPayload {
             deserialized,
             configuration_file_path: result.file_path.to_path_buf(),
