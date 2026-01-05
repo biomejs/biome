@@ -2098,6 +2098,11 @@ See <https://biomejs.dev/linter/rules/use-destructuring>
 	 */
 	useDestructuring?: UseDestructuringConfiguration;
 	/**
+	* Enforce that new Error() is thrown with the original error as cause.
+See <https://biomejs.dev/linter/rules/use-error-cause> 
+	 */
+	useErrorCause?: UseErrorCauseConfiguration;
+	/**
 	* Require switch-case statements to be exhaustive.
 See <https://biomejs.dev/linter/rules/use-exhaustive-switch-cases> 
 	 */
@@ -3842,6 +3847,9 @@ export type UseDeprecatedDateConfiguration =
 export type UseDestructuringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDestructuringOptions;
+export type UseErrorCauseConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseErrorCauseOptions;
 export type UseExhaustiveSwitchCasesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExhaustiveSwitchCasesOptions;
@@ -5374,6 +5382,10 @@ export interface RuleWithUseDestructuringOptions {
 	level: RulePlainConfiguration;
 	options?: UseDestructuringOptions;
 }
+export interface RuleWithUseErrorCauseOptions {
+	level: RulePlainConfiguration;
+	options?: UseErrorCauseOptions;
+}
 export interface RuleWithUseExhaustiveSwitchCasesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6752,6 +6764,15 @@ export interface UseDeprecatedDateOptions {
 	argumentName?: string;
 }
 export type UseDestructuringOptions = {};
+/**
+ * Options for the `useErrorCause` rule.
+ */
+export interface UseErrorCauseOptions {
+	/**
+	 * When set to `true`, the rule requires that `catch` clauses have a parameter.
+	 */
+	requireCatchParameter?: boolean;
+}
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
@@ -7610,6 +7631,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
+	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useDestructuring"

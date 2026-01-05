@@ -5552,6 +5552,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useErrorCause": {
+					"description": "Enforce that new Error() is thrown with the original error as cause.\nSee <https://biomejs.dev/linter/rules/use-error-cause>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseErrorCauseConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveSwitchCases": {
 					"description": "Require switch-case statements to be exhaustive.\nSee <https://biomejs.dev/linter/rules/use-exhaustive-switch-cases>",
 					"anyOf": [
@@ -9145,6 +9152,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseErrorCauseOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseErrorCauseOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseErrorMessageOptions": {
 			"type": "object",
 			"properties": {
@@ -12146,6 +12162,24 @@
 		},
 		"UseEnumInitializersOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseErrorCauseConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseErrorCauseOptions" }
+			]
+		},
+		"UseErrorCauseOptions": {
+			"description": "Options for the `useErrorCause` rule.",
+			"type": "object",
+			"properties": {
+				"requireCatchParameter": {
+					"description": "When set to `true`, the rule requires that `catch` clauses have a parameter.",
+					"type": "boolean",
+					"default": true
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseErrorMessageConfiguration": {
