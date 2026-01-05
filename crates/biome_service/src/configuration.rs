@@ -368,7 +368,7 @@ fn load_user_config(
             return Err(BiomeDiagnostic::no_configuration_file_found(config_file_path).into());
         };
 
-        let parser_options = if result.file_path.ends_with(".json") {
+        let parser_options = if result.file_path.extension() == Some("json") {
             JsonParserOptions::default()
         } else {
             JsonParserOptions::default()
