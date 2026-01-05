@@ -51,6 +51,8 @@ noRequireCatchParameter.invalid.js:6:3 lint/nursery/useErrorCause ━━━━�
     7 │ }
     8 │ 
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -66,6 +68,8 @@ noRequireCatchParameter.invalid.js:13:3 lint/nursery/useErrorCause ━━━━�
     14 │ }
     15 │ 
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -80,6 +84,8 @@ noRequireCatchParameter.invalid.js:29:10 lint/nursery/useErrorCause ━━━━
        │          ^^^^^^^^^^^
     30 │   throw new Error(message);
     31 │ }
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

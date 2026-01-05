@@ -78,6 +78,8 @@ invalid.js:6:3 lint/nursery/useErrorCause ━━━━━━━━━━━━�
     7 │ }
     8 │ 
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -92,6 +94,8 @@ invalid.js:13:3 lint/nursery/useErrorCause ━━━━━━━━━━━━�
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │ }
     15 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -108,6 +112,8 @@ invalid.js:27:2 lint/nursery/useErrorCause ━━━━━━━━━━━━�
     28 │ }
     29 │ 
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -123,6 +129,8 @@ invalid.js:33:10 lint/nursery/useErrorCause ━━━━━━━━━━━━
     34 │   throw new Error(message);
     35 │ }
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -137,6 +145,8 @@ invalid.js:41:3 lint/nursery/useErrorCause ━━━━━━━━━━━━�
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     42 │ }
     43 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -162,6 +172,8 @@ invalid.js:49:58 lint/nursery/useErrorCause ━━━━━━━━━━━━
     47 │     if (whatever) {
     48 │         const error = anotherError; // This declaration is the problem.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -176,6 +188,8 @@ invalid.js:56:2 lint/nursery/useErrorCause ━━━━━━━━━━━━�
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     57 │ }
     58 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
