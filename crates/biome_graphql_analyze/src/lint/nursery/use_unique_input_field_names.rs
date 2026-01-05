@@ -32,7 +32,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseUniqueInputFieldNames {
-        version: "next",
+        version: "2.3.11",
         name: "useUniqueInputFieldNames",
         language: "graphql",
         recommended: false,

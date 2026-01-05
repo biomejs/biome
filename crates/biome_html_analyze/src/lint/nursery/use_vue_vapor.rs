@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueVapor {
-        version: "next",
+        version: "2.3.11",
         name: "useVueVapor",
         language: "html",
         recommended: false,
