@@ -1,0 +1,26 @@
+# should generate diagnostics
+query Valid {
+	id
+}
+{
+	id
+}
+fragment Bar on Bar {
+	id
+}
+mutation ($name: String!) {
+	createFoo {
+		name
+	}
+}
+mutation Baz($name: String!) {
+	createFoo {
+		name
+	}
+}
+subscription {
+	id
+}
+subscription Sub {
+	id
+}

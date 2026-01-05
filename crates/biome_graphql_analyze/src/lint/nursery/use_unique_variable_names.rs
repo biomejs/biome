@@ -32,7 +32,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseUniqueVariableNames {
-        version: "next",
+        version: "2.3.11",
         name: "useUniqueVariableNames",
         language: "graphql",
         recommended: false,

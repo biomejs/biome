@@ -31,7 +31,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoMultiAssign {
-        version: "next",
+        version: "2.3.11",
         name: "noMultiAssign",
         language: "js",
         recommended: false,

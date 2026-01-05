@@ -1899,6 +1899,11 @@ See <https://biomejs.dev/linter/rules/no-equals-to-null>
 	 */
 	noEqualsToNull?: NoEqualsToNullConfiguration;
 	/**
+	* Restrict the number of lines in a file.
+See <https://biomejs.dev/linter/rules/no-excessive-lines-per-file> 
+	 */
+	noExcessiveLinesPerFile?: NoExcessiveLinesPerFileConfiguration;
+	/**
 	* Require Promise-like statements to be handled appropriately.
 See <https://biomejs.dev/linter/rules/no-floating-promises> 
 	 */
@@ -2113,6 +2118,11 @@ See <https://biomejs.dev/linter/rules/use-inline-script-id>
 	 */
 	useInlineScriptId?: UseInlineScriptIdConfiguration;
 	/**
+	* Require queries, mutations, subscriptions or fragments each to be located in separate files.
+See <https://biomejs.dev/linter/rules/use-lone-executable-definition> 
+	 */
+	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
+	/**
 	* Enforce a maximum number of parameters in function definitions.
 See <https://biomejs.dev/linter/rules/use-max-params> 
 	 */
@@ -2152,6 +2162,11 @@ See <https://biomejs.dev/linter/rules/use-spread>
 See <https://biomejs.dev/linter/rules/use-unique-argument-names> 
 	 */
 	useUniqueArgumentNames?: UseUniqueArgumentNamesConfiguration;
+	/**
+	* Require all enum value names to be unique.
+See <https://biomejs.dev/linter/rules/use-unique-enum-value-names> 
+	 */
+	useUniqueEnumValueNames?: UseUniqueEnumValueNamesConfiguration;
 	/**
 	* Require all fields of a type to be unique.
 See <https://biomejs.dev/linter/rules/use-unique-field-definition-names> 
@@ -3715,6 +3730,9 @@ export type NoEmptySourceConfiguration =
 export type NoEqualsToNullConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEqualsToNullOptions;
+export type NoExcessiveLinesPerFileConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveLinesPerFileOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
@@ -3841,6 +3859,9 @@ export type UseFindConfiguration =
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
+export type UseLoneExecutableDefinitionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLoneExecutableDefinitionOptions;
 export type UseMaxParamsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMaxParamsOptions;
@@ -3865,6 +3886,9 @@ export type UseSpreadConfiguration =
 export type UseUniqueArgumentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueArgumentNamesOptions;
+export type UseUniqueEnumValueNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueEnumValueNamesOptions;
 export type UseUniqueFieldDefinitionNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueFieldDefinitionNamesOptions;
@@ -5194,6 +5218,10 @@ export interface RuleWithNoEqualsToNullOptions {
 	level: RulePlainConfiguration;
 	options?: NoEqualsToNullOptions;
 }
+export interface RuleWithNoExcessiveLinesPerFileOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveLinesPerFileOptions;
+}
 export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -5371,6 +5399,10 @@ export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
 	options?: UseInlineScriptIdOptions;
 }
+export interface RuleWithUseLoneExecutableDefinitionOptions {
+	level: RulePlainConfiguration;
+	options?: UseLoneExecutableDefinitionOptions;
+}
 export interface RuleWithUseMaxParamsOptions {
 	level: RulePlainConfiguration;
 	options?: UseMaxParamsOptions;
@@ -5404,6 +5436,10 @@ export interface RuleWithUseSpreadOptions {
 export interface RuleWithUseUniqueArgumentNamesOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueArgumentNamesOptions;
+}
+export interface RuleWithUseUniqueEnumValueNamesOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueEnumValueNamesOptions;
 }
 export interface RuleWithUseUniqueFieldDefinitionNamesOptions {
 	level: RulePlainConfiguration;
@@ -6619,6 +6655,16 @@ export interface NoEmptySourceOptions {
 	allowComments?: boolean;
 }
 export type NoEqualsToNullOptions = {};
+export interface NoExcessiveLinesPerFileOptions {
+	/**
+	 * The maximum number of lines allowed in a file.
+	 */
+	maxLines?: number;
+	/**
+	 * When this option is set to `true`, blank lines are not counted towards the maximum line limit.
+	 */
+	skipBlankLines?: boolean;
+}
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export interface NoImportCyclesOptions {
@@ -6722,6 +6768,7 @@ export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseInlineScriptIdOptions = {};
+export type UseLoneExecutableDefinitionOptions = {};
 export interface UseMaxParamsOptions {
 	/**
 	 * Maximum number of parameters allowed (default: 4)
@@ -6749,6 +6796,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseUniqueArgumentNamesOptions = {};
+export type UseUniqueEnumValueNamesOptions = {};
 export type UseUniqueFieldDefinitionNamesOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
 export type UseUniqueInputFieldNamesOptions = {};
@@ -7469,12 +7517,10 @@ export type Category =
 	| "lint/correctness/noInvalidConstructorSuper"
 	| "lint/correctness/noInvalidDirectionInLinearGradient"
 	| "lint/correctness/noInvalidGridAreas"
-	| "lint/correctness/noInvalidNewBuiltin"
 	| "lint/correctness/noInvalidPositionAtImportRule"
 	| "lint/correctness/noInvalidUseBeforeDeclaration"
 	| "lint/correctness/noMissingVarFunction"
 	| "lint/correctness/noNestedComponentDefinitions"
-	| "lint/correctness/noNewSymbol"
 	| "lint/correctness/noNodejsModules"
 	| "lint/correctness/noNonoctalDecimalEscape"
 	| "lint/correctness/noPrecisionLoss"
@@ -7535,6 +7581,7 @@ export type Category =
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"
+	| "lint/nursery/noExcessiveLinesPerFile"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noImplicitCoercion"
@@ -7571,7 +7618,6 @@ export type Category =
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/noVueSetupPropsReactivityLoss"
 	| "lint/nursery/noVueVIfWithVFor"
-	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBiomeSuppressionComment"
@@ -7587,6 +7633,7 @@ export type Category =
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
@@ -7595,6 +7642,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueArgumentNames"
+	| "lint/nursery/useUniqueEnumValueNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useUniqueInputFieldNames"
@@ -7701,7 +7749,6 @@ export type Category =
 	| "lint/style/useReactFunctionComponents"
 	| "lint/style/useReadonlyClassProperties"
 	| "lint/style/useSelfClosingElements"
-	| "lint/style/useShorthandArrayType"
 	| "lint/style/useShorthandAssign"
 	| "lint/style/useShorthandFunctionType"
 	| "lint/style/useSingleCaseStatement"
