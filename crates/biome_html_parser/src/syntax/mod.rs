@@ -216,7 +216,6 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                     parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
                     && !closing.text(p).contains(opening_tag_name.as_str())
                 {
-                    dbg!(closing.text(p), &opening_tag_name);
                     p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
                     closing.change_to_bogus(p);
                     continue;
