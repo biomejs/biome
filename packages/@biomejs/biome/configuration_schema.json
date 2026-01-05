@@ -5553,9 +5553,9 @@
 					]
 				},
 				"useErrorCause": {
-					"description": "Enforce that new Error() is thrown with the original error as cause.",
+					"description": "Enforce that new Error() is thrown with the original error as cause.\nSee <https://biomejs.dev/linter/rules/use-error-cause>",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseErrorCauseConfiguration" },
+						{ "$ref": "#/$defs/UseErrorCauseConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9154,18 +9154,12 @@
 		},
 		"RuleWithUseErrorCauseOptions": {
 			"type": "object",
-			"required": ["level"],
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseErrorCauseOptions" }]
-				}
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseErrorCauseOptions" }
 			},
-			"additionalProperties": false
+			"additionalProperties": false,
+			"required": ["level"]
 		},
 		"RuleWithUseErrorMessageOptions": {
 			"type": "object",
@@ -12171,9 +12165,9 @@
 			"additionalProperties": false
 		},
 		"UseErrorCauseConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseErrorCauseOptions" }
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseErrorCauseOptions" }
 			]
 		},
 		"UseErrorCauseOptions": {
@@ -12182,8 +12176,8 @@
 			"properties": {
 				"requireCatchParameter": {
 					"description": "When set to `true`, the rule requires that `catch` clauses have a parameter.",
-					"default": true,
-					"type": "boolean"
+					"type": "boolean",
+					"default": true
 				}
 			},
 			"additionalProperties": false
