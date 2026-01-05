@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Added `--only` and `--skip` options to `biome check` and `biome ci`, covering both lint diagnostics and assist actions. Biome now lets you run or exclude specific rules, groups, or domains when running these commands.
+Added `--only` and `--skip` options to `biome check` and `biome ci`, covering both lint diagnostics and assist actions. Biome now lets you run or exclude specific lint rules, assist actions, group or rules and actions, or domains when running these commands.
 
 Examples:
 

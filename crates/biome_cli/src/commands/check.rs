@@ -65,9 +65,9 @@ struct CheckExecution {
     /// It skips parse errors
     skip_parse_errors: bool,
 
-    /// Run only the given rule or group of rules.
+    /// Run only the given lint rule, assist action, group of rules and actions, or domain
     only: Vec<AnalyzerSelector>,
-    /// Skip the given rule or group of rules.
+    /// Skip the given lint rule, assist action, group of rules and actions, or domain
     skip: Vec<AnalyzerSelector>,
 }
 
