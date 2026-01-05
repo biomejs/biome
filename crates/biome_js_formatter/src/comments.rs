@@ -1380,7 +1380,7 @@ fn handle_global_suppression(
 ) -> CommentPlacement<JsLanguage> {
     let node = comment.enclosing_node();
 
-    if node.text_range_with_trivia().start() >= TextSize::from(0) {
+    if node.text_range_with_trivia().start() == TextSize::from(0) {
         let has_global_suppression = node.first_leading_trivia().is_some_and(|trivia| {
             trivia
                 .pieces()

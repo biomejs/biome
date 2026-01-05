@@ -184,7 +184,7 @@ where
     N: AstNode<Language = GraphqlLanguage>,
 {
     fn fmt(&self, node: &N, f: &mut GraphqlFormatter) -> FormatResult<()> {
-        if self.is_suppressed(node, f) | self.is_global_suppressed(node, f) {
+        if self.is_suppressed(node, f) || self.is_global_suppressed(node, f) {
             return write!(f, [format_suppressed_node(node.syntax())]);
         }
 
