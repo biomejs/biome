@@ -174,6 +174,7 @@ define_categories! {
     "lint/nursery/noExcessiveLinesPerFile": "https://biomejs.dev/linter/rules/no-excessive-lines-per-file",
     "lint/nursery/noFloatingPromises": "https://biomejs.dev/linter/rules/no-floating-promises",
     "lint/nursery/noForIn": "https://biomejs.dev/linter/rules/no-for-in",
+    "lint/nursery/noHtmlLinkForPages": "https://biomejs.dev/linter/rules/no-html-link-for-pages",
     "lint/nursery/noImplicitCoercion": "https://biomejs.dev/linter/rules/no-implicit-coercion",
     "lint/nursery/noImportCycles": "https://biomejs.dev/linter/rules/no-import-cycles",
     "lint/nursery/noIncrementDecrement": "https://biomejs.dev/linter/rules/no-increment-decrement",

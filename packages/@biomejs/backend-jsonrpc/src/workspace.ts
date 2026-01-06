@@ -1914,6 +1914,11 @@ See <https://biomejs.dev/linter/rules/no-for-in>
 	 */
 	noForIn?: NoForInConfiguration;
 	/**
+	* Succinct description of the rule.
+See <https://biomejs.dev/linter/rules/no-html-link-for-pages> 
+	 */
+	noHtmlLinkForPages?: NoHtmlLinkForPagesConfiguration;
+	/**
 	* Prevent import cycles.
 See <https://biomejs.dev/linter/rules/no-import-cycles> 
 	 */
@@ -3739,6 +3744,9 @@ export type NoFloatingPromisesConfiguration =
 export type NoForInConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoForInOptions;
+export type NoHtmlLinkForPagesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoHtmlLinkForPagesOptions;
 export type NoImportCyclesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImportCyclesOptions;
@@ -5231,6 +5239,10 @@ export interface RuleWithNoForInOptions {
 	level: RulePlainConfiguration;
 	options?: NoForInOptions;
 }
+export interface RuleWithNoHtmlLinkForPagesOptions {
+	level: RulePlainConfiguration;
+	options?: NoHtmlLinkForPagesOptions;
+}
 export interface RuleWithNoImportCyclesOptions {
 	level: RulePlainConfiguration;
 	options?: NoImportCyclesOptions;
@@ -6667,6 +6679,7 @@ export interface NoExcessiveLinesPerFileOptions {
 }
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
+export type NoHtmlLinkForPagesOptions = {};
 export interface NoImportCyclesOptions {
 	/**
 	* Ignores type-only imports when finding an import cycle. A type-only import (`import type`)
@@ -7592,6 +7605,7 @@ export type Category =
 	| "lint/nursery/noExcessiveLinesPerFile"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
+	| "lint/nursery/noHtmlLinkForPages"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noIncrementDecrement"

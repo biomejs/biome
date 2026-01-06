@@ -1,0 +1,176 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+export const Page = () => {
+  return (
+    <a href='/'>Homepage</a>
+  );
+}
+
+export const Page = () => {
+  return (
+    <a href='/list/foo/bar'>Homepage</a>
+  );
+}
+
+export const Page = () => {
+  return (
+    <a href='/list/foo?q=bar'>Homepage</a>
+  );
+}
+
+export const Page = () => {
+  return (
+    <a href='/photo/1/#section'>Photo</a>
+  );
+}
+
+export const Page = () => {
+  return (
+    <div>
+      <a href='./photo'>Photo</a>
+    </div>
+  );
+}
+
+export const Page = () => {
+  return (
+    <div>
+      <a href='../photo'>Photo</a>
+    </div>
+  );
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:5:5 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! <a> element has an internal link to /.
+  
+    3 │ export const Page = () => {
+    4 │   return (
+  > 5 │     <a href='/'>Homepage</a>
+      │     ^^^^^^^^^^^^
+    6 │   );
+    7 │ }
+  
+  i <a> elements for internal navigation can cause unnecessary full-page reloads. Use next/link component instead.
+  
+  i See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:5 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! <a> element has an internal link to /list/foo/bar.
+  
+     9 │ export const Page = () => {
+    10 │   return (
+  > 11 │     <a href='/list/foo/bar'>Homepage</a>
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │   );
+    13 │ }
+  
+  i <a> elements for internal navigation can cause unnecessary full-page reloads. Use next/link component instead.
+  
+  i See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:17:5 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! <a> element has an internal link to /list/foo?q=bar.
+  
+    15 │ export const Page = () => {
+    16 │   return (
+  > 17 │     <a href='/list/foo?q=bar'>Homepage</a>
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │   );
+    19 │ }
+  
+  i <a> elements for internal navigation can cause unnecessary full-page reloads. Use next/link component instead.
+  
+  i See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:23:5 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! <a> element has an internal link to /photo/1/#section.
+  
+    21 │ export const Page = () => {
+    22 │   return (
+  > 23 │     <a href='/photo/1/#section'>Photo</a>
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │   );
+    25 │ }
+  
+  i <a> elements for internal navigation can cause unnecessary full-page reloads. Use next/link component instead.
+  
+  i See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:30:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! <a> element has an internal link to ./photo.
+  
+    28 │   return (
+    29 │     <div>
+  > 30 │       <a href='./photo'>Photo</a>
+       │       ^^^^^^^^^^^^^^^^^^
+    31 │     </div>
+    32 │   );
+  
+  i <a> elements for internal navigation can cause unnecessary full-page reloads. Use next/link component instead.
+  
+  i See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:38:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! <a> element has an internal link to ../photo.
+  
+    36 │   return (
+    37 │     <div>
+  > 38 │       <a href='../photo'>Photo</a>
+       │       ^^^^^^^^^^^^^^^^^^^
+    39 │     </div>
+    40 │   );
+  
+  i <a> elements for internal navigation can cause unnecessary full-page reloads. Use next/link component instead.
+  
+  i See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

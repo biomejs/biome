@@ -103,6 +103,7 @@ pub mod no_global_object_calls;
 pub mod no_head_element;
 pub mod no_head_import_in_document;
 pub mod no_header_scope;
+pub mod no_html_link_for_pages;
 pub mod no_img_element;
 pub mod no_implicit_any_let;
 pub mod no_implicit_boolean;

@@ -3497,6 +3497,16 @@
 			]
 		},
 		"NoHeaderScopeOptions": { "type": "object", "additionalProperties": false },
+		"NoHtmlLinkForPagesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoHtmlLinkForPagesOptions" }
+			]
+		},
+		"NoHtmlLinkForPagesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoImgElementConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5293,6 +5303,13 @@
 					"description": "Disallow iterating using a for-in loop.\nSee <https://biomejs.dev/linter/rules/no-for-in>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoForInConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noHtmlLinkForPages": {
+					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/no-html-link-for-pages>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoHtmlLinkForPagesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7271,6 +7288,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoHeaderScopeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoHtmlLinkForPagesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoHtmlLinkForPagesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
