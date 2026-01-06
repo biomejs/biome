@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": minor
+"@biomejs/biome": patch
 ---
 
-Added `noExcessiveLinesPerFile` rule to CSS and GraphQL. Fixes #8673.
+Added the nursery lint rule [`noExcessiveLinesPerFile`](https://biomejs.dev/linter/rules/no-excessive-lines-per-file/) to CSS and GraphQL.
