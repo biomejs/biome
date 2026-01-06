@@ -1914,7 +1914,7 @@ See <https://biomejs.dev/linter/rules/no-for-in>
 	 */
 	noForIn?: NoForInConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Prevent usage of \<a> elements to navigate to internal Next.js pages.
 See <https://biomejs.dev/linter/rules/no-html-link-for-pages> 
 	 */
 	noHtmlLinkForPages?: NoHtmlLinkForPagesConfiguration;
