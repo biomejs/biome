@@ -150,7 +150,10 @@ use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::{BiomePath, FileSystem};
 use biome_resolver::FsWithResolverProxy;
-use biome_service::configuration::{LoadedConfiguration, ProjectScanComputer, load_configuration};
+use biome_service::configuration::{
+    LoadedConfiguration, LoadedLocation, ProjectScanComputer, load_configuration,
+};
+use biome_service::diagnostics::ConfigurationOutsideProject;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::workspace::{
@@ -358,6 +361,7 @@ pub(crate) trait CommandRunner {
             diagnostics: _,
             directory_path,
             file_path,
+            mut loaded_location,
         } = loaded_configuration;
 
         // Merge the FS configuration with the CLI arguments
@@ -381,8 +385,14 @@ pub(crate) trait CommandRunner {
         let project_dir = if root_configuration_dir.starts_with(&working_dir) {
             &working_dir
         } else {
+            loaded_location = LoadedLocation::InProject;
             &root_configuration_dir
         };
+        if !loaded_location.is_in_project() {
+            console.log(markup! {
+                {PrintDiagnostic::simple(&ConfigurationOutsideProject)}
+            })
+        }
 
         let paths = self.get_files_to_process(fs, &configuration)?;
         let paths = self.validated_paths_for_execution(paths, &working_dir, execution.as_ref())?;
