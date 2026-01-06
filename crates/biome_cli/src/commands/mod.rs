@@ -181,6 +181,29 @@ pub enum BiomeCommand {
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
 
+        /// Run only the given lint rule, assist action, group of rules and actions, or domain.
+        /// If the severity level of a rule is `off`,
+        /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
+        ///
+        /// Example:
+        ///
+        /// ```shell
+        /// biome check --only=correctness/noUnusedVariables --only=suspicious --only=test
+        /// ```
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        only: Vec<AnalyzerSelector>,
+
+        /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
+        /// This option takes precedence over `--only`.
+        ///
+        /// Example:
+        ///
+        /// ```shell
+        /// biome check --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+        /// ```
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        skip: Vec<AnalyzerSelector>,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
@@ -241,7 +264,7 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         log_options: LogOptions,
 
-        /// Run only the given rule, group of rules or domain.
+        /// Run only the given lint rule, assist action, group of rules and actions, or domain.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
         ///
@@ -250,10 +273,10 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome lint --only=correctness/noUnusedVariables --only=suspicious --only=test
         /// ```
-        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION"))]
         only: Vec<AnalyzerSelector>,
 
-        /// Skip the given rule, group of rules or domain by setting the severity level of the rules to `off`.
+        /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
         /// This option takes precedence over `--only`.
         ///
         /// Example:
@@ -261,7 +284,7 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome lint --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
         /// ```
-        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN"))]
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
         skip: Vec<AnalyzerSelector>,
 
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
@@ -435,6 +458,29 @@ pub enum BiomeCommand {
             hide_usage
         )]
         threads: Option<usize>,
+
+        /// Run only the given lint rule, assist action, group of rules and actions, or domain.
+        /// If the severity level of a rule is `off`,
+        /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
+        ///
+        /// Example:
+        ///
+        /// ```shell
+        /// biome ci --only=correctness/noUnusedVariables --only=suspicious --only=test
+        /// ```
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        only: Vec<AnalyzerSelector>,
+
+        /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
+        /// This option takes precedence over `--only`.
+        ///
+        /// Example:
+        ///
+        /// ```shell
+        /// biome ci --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+        /// ```
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        skip: Vec<AnalyzerSelector>,
 
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]

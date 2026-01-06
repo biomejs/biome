@@ -5,6 +5,7 @@ use crate::runner::execution::{AnalyzerSelectors, Execution, ExecutionEnvironmen
 use crate::runner::impls::commands::traversal::{LoadEditorConfig, TraversalCommand};
 use crate::runner::impls::executions::summary_verb::SummaryVerbExecution;
 use crate::runner::impls::process_file::check::CheckProcessFile;
+use biome_configuration::analyzer::AnalyzerSelector;
 use biome_configuration::analyzer::LinterEnabled;
 use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
 use biome_configuration::css::CssParserConfiguration;
@@ -37,6 +38,8 @@ pub(crate) struct CiCommandPayload {
     pub(crate) format_with_errors: Option<FormatWithErrorsEnabled>,
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
+    pub(crate) only: Vec<AnalyzerSelector>,
+    pub(crate) skip: Vec<AnalyzerSelector>,
 }
 
 struct CiExecution {
@@ -48,6 +51,10 @@ struct CiExecution {
     enforce_assist: bool,
     /// It skips parse errors
     skip_parse_errors: bool,
+    /// Run only the given rule or group of rules.
+    only: Vec<AnalyzerSelector>,
+    /// Skip the given rule or group of rules.
+    skip: Vec<AnalyzerSelector>,
 }
 
 impl Execution for CiExecution {
@@ -95,7 +102,10 @@ impl Execution for CiExecution {
     }
 
     fn analyzer_selectors(&self) -> AnalyzerSelectors {
-        AnalyzerSelectors::default()
+        AnalyzerSelectors {
+            only: self.only.clone(),
+            skip: self.skip.clone(),
+        }
     }
 
     fn should_enforce_assist(&self) -> bool {
@@ -147,6 +157,8 @@ impl TraversalCommand for CiCommandPayload {
             vcs_targeted: (false, self.changed).into(),
             enforce_assist: self.enforce_assist,
             skip_parse_errors: cli_options.skip_parse_errors,
+            only: self.only.clone(),
+            skip: self.skip.clone(),
         }))
     }
 
