@@ -1,7 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 211
-info: js/module/globa_suppression.js
+info: js/module/global_suppression.js
 ---
 # Input
 
