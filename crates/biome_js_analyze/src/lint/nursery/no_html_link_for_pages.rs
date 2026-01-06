@@ -70,7 +70,7 @@ impl Rule for NoHtmlLinkForPages {
         }
 
         // Skip when download attribute is present
-        if let Some(_) = jsx_element.find_attribute_by_name("download") {
+        if jsx_element.find_attribute_by_name("download").is_some() {
             return None;
         }
 
@@ -141,8 +141,8 @@ fn is_internal_link(href: &str) -> bool {
 
     // Skip if it appears to be a public file (e.g. .pdf)
     // Internal links in Next.js do not contain file extensions basically
-    if let Some(last_segment) = href.split("/").last()
-        && last_segment.contains(".")
+    if let Some(last_segment) = href.split('/').next_back()
+        && last_segment.contains('.')
     {
         return false;
     }
