@@ -2,7 +2,6 @@
 
 #![allow(dead_code)]
 #![allow(unused)]
-use crate::static_value::StaticValue;
 use crate::{
     HtmlLanguage as Language, HtmlSyntaxElement as SyntaxElement,
     HtmlSyntaxElementChildren as SyntaxElementChildren,
@@ -17,7 +16,6 @@ use biome_rowan::{
 use serde::ser::SerializeSeq;
 use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
-
 #[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
