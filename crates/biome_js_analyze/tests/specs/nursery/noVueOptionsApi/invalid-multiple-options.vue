@@ -1,4 +1,5 @@
 <script>
+// should generate diagnostics
 // Multiple Options API properties - all should be flagged
 export default {
   data() {

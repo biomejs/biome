@@ -4,6 +4,7 @@ expression: invalid-export-default-computed.vue
 ---
 # Input
 ```ts
+// should generate diagnostics
 // Options API: computed is not supported in Vapor Mode
 export default {
 	computed: {
@@ -17,23 +18,26 @@ export default {
 
 # Diagnostics
 ```
-invalid-export-default-computed.vue:2:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-export-default-computed.vue:3:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Options API is not supported in Vue Vapor Mode.
   
-    1 │ // Options API: computed is not supported in Vapor Mode
-  > 2 │ export default {
-      │                ^
-  > 3 │ 	computed: {
-  > 4 │ 		doubleCount() {
-  > 5 │ 			return this.count * 2;
-  > 6 │ 		},
-  > 7 │ 	},
-  > 8 │ };
-      │ ^
-    9 │ 
+     1 │ // should generate diagnostics
+     2 │ // Options API: computed is not supported in Vapor Mode
+   > 3 │ export default {
+       │                ^
+   > 4 │ 	computed: {
+   > 5 │ 		doubleCount() {
+   > 6 │ 			return this.count * 2;
+   > 7 │ 		},
+   > 8 │ 	},
+   > 9 │ };
+       │ ^
+    10 │ 
   
-  i Use <script setup> with the Composition API instead.
+  i Although the Options API is still supported by Vue, using the Composition API is recommended, and makes it possible to use Vue's Vapor mode for better performance.
+  
+  i Use <script setup> or defineComponent with a function signature to use the Composition API instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

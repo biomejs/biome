@@ -1,4 +1,5 @@
 <script>
+// should generate diagnostics
 // Mixed setup() with Options API is not supported in Vapor Mode
 export default {
 	setup() {

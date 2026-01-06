@@ -14,7 +14,7 @@ declare_lint_rule! {
     /// Disallow the use of Vue Options API.
     ///
     /// Vue 3.6's Vapor Mode does not support the Options API.
-    /// Components must use the Composition API with `<script setup>` instead.
+    /// Components must use the Composition API (`<script setup>` or `defineComponent` with function signature) instead.
     ///
     /// This rule helps prepare codebases for Vapor Mode by detecting Options API
     /// patterns that are incompatible with the new rendering mode.
@@ -125,36 +125,9 @@ declare_lint_rule! {
     }
 }
 
-/// State for detected Options API component
+/// State for detected Options API component.
 pub struct RuleState {
-    /// The range of the detected Options API component
     range: TextRange,
-}
-
-/// Checks if the expression is a defineComponent or createApp call.
-/// Used to avoid duplicate diagnostics when `export default defineComponent({...})` is used.
-fn is_define_component_or_create_app(
-    expr: &AnyJsExpression,
-    model: &biome_js_semantic::SemanticModel,
-) -> bool {
-    let Some(call_expr) = expr.as_js_call_expression() else {
-        return false;
-    };
-    let Some(callee) = call_expr.callee().ok().and_then(|c| c.inner_expression()) else {
-        return false;
-    };
-    is_vue_api_reference(&callee, model, "defineComponent")
-        || is_vue_api_reference(&callee, model, "createApp")
-}
-
-/// Extracts the range for a component definition.
-/// Falls back to query range if definition expression is not available.
-fn extract_component_range(
-    query_range: TextRange,
-    definition_expr: Option<AnyJsExpression>,
-) -> RuleState {
-    let range = definition_expr.map_or(query_range, |expr| expr.range());
-    RuleState { range }
 }
 
 impl Rule for NoVueOptionsApi {
@@ -171,13 +144,11 @@ impl Rule for NoVueOptionsApi {
             ctx.file_path(),
         )?;
 
-        // Only <script setup> is valid for Vapor Mode
+        // <script setup> or defineComponent with function signature are valid for Vapor Mode
         match component.kind() {
             AnyVueComponent::Setup(_) => None,
             AnyVueComponent::OptionsApi(opts) => {
                 let expr = opts.definition_expression()?;
-                // Skip if the expression is a defineComponent or createApp call
-                // to avoid duplicate diagnostics (they will be caught by their own cases)
                 if is_define_component_or_create_app(&expr, ctx.model()) {
                     return None;
                 }
@@ -185,14 +156,29 @@ impl Rule for NoVueOptionsApi {
                     range: expr.range(),
                 })
             }
-            AnyVueComponent::DefineComponent(dc) => Some(extract_component_range(
-                ctx.query().range(),
-                dc.definition_expression(),
-            )),
-            AnyVueComponent::CreateApp(ca) => Some(extract_component_range(
-                ctx.query().range(),
-                ca.definition_expression(),
-            )),
+            AnyVueComponent::DefineComponent(component) => {
+                if component.setup_func().is_some() {
+                    return None;
+                }
+                let definition = component.definition_expression()?;
+                if definition.as_js_object_expression().is_some() {
+                    Some(RuleState {
+                        range: definition.range(),
+                    })
+                } else {
+                    None
+                }
+            }
+            AnyVueComponent::CreateApp(component) => {
+                let definition = component.definition_expression()?;
+                if definition.as_js_object_expression().is_some() {
+                    Some(RuleState {
+                        range: definition.range(),
+                    })
+                } else {
+                    None
+                }
+            }
         }
     }
 
@@ -206,8 +192,25 @@ impl Rule for NoVueOptionsApi {
                 },
             )
             .note(markup! {
-                "Use "<Emphasis>"<script setup>"</Emphasis>" with the Composition API instead."
+                "Although the Options API is still supported by Vue, using the Composition API is recommended, and makes it possible to use Vue's Vapor mode for better performance."
+            })
+            .note(markup! {
+                "Use "<Emphasis>"<script setup>"</Emphasis>" or "<Emphasis>"defineComponent"</Emphasis>" with a function signature to use the "<Hyperlink href="https://vuejs.org/guide/introduction.html#composition-api">"Composition API"</Hyperlink>" instead."
             }),
         )
     }
+}
+
+fn is_define_component_or_create_app(
+    expr: &AnyJsExpression,
+    model: &biome_js_semantic::SemanticModel,
+) -> bool {
+    let Some(call_expr) = expr.as_js_call_expression() else {
+        return false;
+    };
+    let Some(callee) = call_expr.callee().ok().and_then(|c| c.inner_expression()) else {
+        return false;
+    };
+    is_vue_api_reference(&callee, model, "defineComponent")
+        || is_vue_api_reference(&callee, model, "createApp")
 }

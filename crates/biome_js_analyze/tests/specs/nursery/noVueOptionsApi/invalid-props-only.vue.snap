@@ -1,39 +1,31 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalid-export-default-methods.vue
+expression: invalid-props-only.vue
 ---
 # Input
 ```ts
 // should generate diagnostics
-// Options API: methods is not supported in Vapor Mode
+// Options API with props only - still Options API, not Composition API
 export default {
-  methods: {
-    increment() {
-      this.count++
-    }
-  }
+  props: ['message']
 }
 
 ```
 
 # Diagnostics
 ```
-invalid-export-default-methods.vue:3:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-props-only.vue:3:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Options API is not supported in Vue Vapor Mode.
   
-     1 │ // should generate diagnostics
-     2 │ // Options API: methods is not supported in Vapor Mode
-   > 3 │ export default {
-       │                ^
-   > 4 │   methods: {
-   > 5 │     increment() {
-   > 6 │       this.count++
-   > 7 │     }
-   > 8 │   }
-   > 9 │ }
-       │ ^
-    10 │ 
+    1 │ // should generate diagnostics
+    2 │ // Options API with props only - still Options API, not Composition API
+  > 3 │ export default {
+      │                ^
+  > 4 │   props: ['message']
+  > 5 │ }
+      │ ^
+    6 │ 
   
   i Although the Options API is still supported by Vue, using the Composition API is recommended, and makes it possible to use Vue's Vapor mode for better performance.
   

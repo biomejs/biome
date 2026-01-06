@@ -1,37 +1,28 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalid-createapp-data.vue
+expression: invalid-definecomponent-empty.js
 ---
 # Input
-```ts
+```js
 // should generate diagnostics
-// createApp with Options API is not supported in Vapor Mode
-import { createApp } from "vue";
+// defineComponent with empty object is Options API style
+import { defineComponent } from "vue";
 
-createApp({
-	data() {
-		return { count: 0 };
-	},
-}).mount("#app");
+export default defineComponent({});
 
 ```
 
 # Diagnostics
 ```
-invalid-createapp-data.vue:5:11 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-definecomponent-empty.js:5:32 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Options API is not supported in Vue Vapor Mode.
   
-     3 │ import { createApp } from "vue";
-     4 │ 
-   > 5 │ createApp({
-       │           ^
-   > 6 │ 	data() {
-   > 7 │ 		return { count: 0 };
-   > 8 │ 	},
-   > 9 │ }).mount("#app");
-       │ ^
-    10 │ 
+    3 │ import { defineComponent } from "vue";
+    4 │ 
+  > 5 │ export default defineComponent({});
+      │                                ^^
+    6 │ 
   
   i Although the Options API is still supported by Vue, using the Composition API is recommended, and makes it possible to use Vue's Vapor mode for better performance.
   

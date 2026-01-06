@@ -1,4 +1,5 @@
 <script>
+// should generate diagnostics
 // Full Options API component with multiple properties - all should be flagged
 export default {
   name: 'MyComponent',

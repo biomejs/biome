@@ -4,6 +4,7 @@ expression: invalid-full-options-api.vue
 ---
 # Input
 ```ts
+// should generate diagnostics
 // Full Options API component with multiple properties - all should be flagged
 export default {
   name: 'MyComponent',
@@ -35,23 +36,25 @@ export default {
 
 # Diagnostics
 ```
-invalid-full-options-api.vue:2:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-full-options-api.vue:3:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Options API is not supported in Vue Vapor Mode.
   
-     1 │ // Full Options API component with multiple properties - all should be flagged
-   > 2 │ export default {
+     1 │ // should generate diagnostics
+     2 │ // Full Options API component with multiple properties - all should be flagged
+   > 3 │ export default {
        │                ^
-   > 3 │   name: 'MyComponent',
-   > 4 │   props: ['message'],
+   > 4 │   name: 'MyComponent',
         ...
-  > 24 │     console.log('mounted')
-  > 25 │   }
-  > 26 │ }
+  > 25 │     console.log('mounted')
+  > 26 │   }
+  > 27 │ }
        │ ^
-    27 │ 
+    28 │ 
   
-  i Use <script setup> with the Composition API instead.
+  i Although the Options API is still supported by Vue, using the Composition API is recommended, and makes it possible to use Vue's Vapor mode for better performance.
+  
+  i Use <script setup> or defineComponent with a function signature to use the Composition API instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

@@ -2,21 +2,20 @@
 "@biomejs/biome": patch
 ---
 
-Added the nursery rule [`noVueOptionsApi`](https://biomejs.dev/linter/rules/no-vue-options-api/).
+Added a new nursery rule [`noVueOptionsApi`](https://biomejs.dev/linter/rules/no-vue-options-api/).
 
-The rule disallows Vue Options API properties (`data`, `methods`, `computed`, lifecycle hooks) which are incompatible with Vue 3.6's Vapor Mode. For example:
+Biome now reports Vue Options API usage, which is incompatible with Vue 3.6's Vapor Mode.
+This rule detects Options API patterns in `<script>` blocks, `defineComponent()`, and `createApp()` calls,
+helping prepare codebases for Vapor Mode adoption.
+
+For example, the following now triggers this rule:
 
 ```vue
-<!-- Invalid -->
 <script>
 export default {
-  data() { return { count: 0 } }
+  data() {
+    return { count: 0 };
+  }
 }
-</script>
-
-<!-- Valid -->
-<script setup>
-import { ref } from 'vue'
-const count = ref(0)
 </script>
 ```
