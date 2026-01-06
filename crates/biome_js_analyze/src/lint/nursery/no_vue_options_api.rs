@@ -188,7 +188,7 @@ impl Rule for NoVueOptionsApi {
                 rule_category!(),
                 state.range,
                 markup! {
-                    "Options API is not supported in Vue Vapor Mode."
+                    "Using the Options API is not allowed."
                 },
             )
             .note(markup! {
