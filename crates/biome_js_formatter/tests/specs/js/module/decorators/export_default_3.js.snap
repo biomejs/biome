@@ -32,10 +32,12 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
 @dec1
 @dec2
 export default class Foo {}
+
 ```

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo clippy:*)",
+      "Bash(cargo t:*)",
+      "Bash(cargo clean:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

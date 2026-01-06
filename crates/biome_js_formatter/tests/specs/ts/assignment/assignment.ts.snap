@@ -44,6 +44,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -61,4 +62,5 @@ loooooooooooooooooooooooooong7 =
 
 const gitBaseExtension =
 	extensions.getExtension<GitBaseExtension>("vscode.git-base")!.exports;
+
 ```

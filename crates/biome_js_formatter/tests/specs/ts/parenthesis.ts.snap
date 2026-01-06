@@ -40,6 +40,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -53,4 +54,5 @@ type T2 = (typeof obj)[number];
 type T3 = keyof (typeof obj)[number];
 type T4 = keyof (typeof obj)[number];
 type T5 = (keyof typeof obj)["toString"];
+
 ```

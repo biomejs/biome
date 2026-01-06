@@ -27,7 +27,7 @@ use biome_formatter::format_element::{Interned, LineMode};
 use biome_formatter::prelude::{Document, Tag};
 use biome_formatter::{
     AttributePosition, BracketSameLine, FormatElement, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, Printed,
+    LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_html_analyze::analyze;
@@ -83,6 +83,7 @@ pub struct HtmlFormatterSettings {
     pub whitespace_sensitivity: Option<WhitespaceSensitivity>,
     pub indent_script_and_style: Option<IndentScriptAndStyle>,
     pub self_close_void_elements: Option<SelfCloseVoidElements>,
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl From<HtmlFormatterConfiguration> for HtmlFormatterSettings {
@@ -98,6 +99,7 @@ impl From<HtmlFormatterConfiguration> for HtmlFormatterSettings {
             whitespace_sensitivity: config.whitespace_sensitivity,
             indent_script_and_style: config.indent_script_and_style,
             self_close_void_elements: config.self_close_void_elements,
+            trailing_newline: config.trailing_newline,
         }
     }
 }
@@ -178,6 +180,7 @@ impl ServiceLanguage for HtmlLanguage {
         let whitespace_sensitivity = language.whitespace_sensitivity.unwrap_or_default();
         let indent_script_and_style = language.indent_script_and_style.unwrap_or_default();
         let self_close_void_elements = language.self_close_void_elements.unwrap_or_default();
+        let trailing_newline = language.trailing_newline.unwrap_or_default();
 
         let mut options =
             HtmlFormatOptions::new(file_source.to_html_file_source().unwrap_or_default())
@@ -189,7 +192,8 @@ impl ServiceLanguage for HtmlLanguage {
                 .with_bracket_same_line(bracket_same_line)
                 .with_whitespace_sensitivity(whitespace_sensitivity)
                 .with_indent_script_and_style(indent_script_and_style)
-                .with_self_close_void_elements(self_close_void_elements);
+                .with_self_close_void_elements(self_close_void_elements)
+                .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_html_format_options(path, &mut options);
 

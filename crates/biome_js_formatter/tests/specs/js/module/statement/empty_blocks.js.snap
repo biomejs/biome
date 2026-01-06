@@ -60,6 +60,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -99,4 +100,5 @@ function test() {}
 for (;;) {}
 while (true) {}
 do {} while (true);
+
 ```

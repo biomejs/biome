@@ -53,6 +53,15 @@ The configuration that is contained inside the file `biome.json`
                               list. When set to `never`, these literals are formatted on a single
                               line if it fits in the line. When formatting `package.json`, Biome
                               will use `always` unless configured otherwise. Defaults to "auto".
+        --trailing-newline=<true|false>  Whether to add a trailing newline at the end of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
         --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
                               Configuration in `biome.json` will override `.editorconfig`
                               configuration.
@@ -101,6 +110,16 @@ The configuration that is contained inside the file `biome.json`
         --javascript-formatter-operator-linebreak=<before|after>  When breaking binary expressions
                               into multiple lines, whether to break them before or after the binary
                               operator. Defaults to "after".
+        --javascript-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at
+                              the end of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
         --javascript-linter-enabled=<true|false>  Control the linter for JavaScript (and its super
                               languages) files.
         --javascript-assist-enabled=<true|false>  Control the assist for JavaScript (and its super
@@ -132,6 +151,16 @@ The configuration that is contained inside the file `biome.json`
                               Defaults to "auto".
         --json-formatter-bracket-spacing=<true|false>  Whether to insert spaces around brackets in
                               object literals. Defaults to true.
+        --json-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
         --json-linter-enabled=<true|false>  Control the linter for JSON (and its super languages)
                               files.
         --json-assist-enabled=<true|false>  Control the assist for JSON (and its super languages)
@@ -153,6 +182,16 @@ The configuration that is contained inside the file `biome.json`
                               super languages) files. Defaults to 80.
         --css-formatter-quote-style=<double|single>  The type of quotes used in CSS code. Defaults
                               to double.
+        --css-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
         --css-linter-enabled=<true|false>  Control the linter for CSS files.
         --css-assist-enabled=<true|false>  Control the assist for CSS files.
         --graphql-formatter-enabled=<true|false>  Control the formatter for GraphQL files.
@@ -165,6 +204,16 @@ The configuration that is contained inside the file `biome.json`
                               files. Defaults to 80.
         --graphql-formatter-quote-style=<double|single>  The type of quotes used in GraphQL code.
                               Defaults to double.
+        --graphql-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the
+                              end of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
         --graphql-linter-enabled=<true|false>  Control the formatter for GraphQL files.
         --graphql-assist-enabled=<true|false>  Control the formatter for GraphQL files.
         --grit-formatter-enabled=<true|false>  Control the formatter for Grit files.
@@ -174,6 +223,16 @@ The configuration that is contained inside the file `biome.json`
         --grit-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to Grit files.
         --grit-formatter-line-width=NUMBER  What's the max width of a line applied to Grit files.
                               Defaults to 80.
+        --grit-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
         --grit-linter-enabled=<true|false>  Control the linter for Grit files.
         --grit-assist-enabled=<true|false>  Control the assist functionality for Grit files.
         --html-formatter-enabled=<true|false>  Control the formatter for HTML (and its super
@@ -199,6 +258,16 @@ The configuration that is contained inside the file `biome.json`
                               `<style>` tags for HTML (and its super languages). Defaults to false.
         --html-formatter-self-close-void-elements=<always|never>  Whether void elements should be
                               self-closed. Defaults to never.
+        --html-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
         --html-linter-enabled=<true|false>  Control the linter for HTML (and its super languages)
                               files.
         --html-assist-enabled=<true|false>  Control the assist for HTML (and its super languages)

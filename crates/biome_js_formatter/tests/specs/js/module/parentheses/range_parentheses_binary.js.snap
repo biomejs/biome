@@ -32,10 +32,12 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
 import React from 'react'; function test() { const AppShelled = () => 1 + 2 } function one() {return 1}
+
 ```
 
 # Lines exceeding max width of 80 characters

@@ -33,6 +33,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```jsx
@@ -40,6 +41,7 @@ Operator linebreak: After
 	className="px-1 px-2
 px-3"
 />;
+
 ```
 
 ## Output 1
@@ -60,6 +62,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```jsx
@@ -67,4 +70,5 @@ Operator linebreak: After
 	className="px-1 px-2<CRLF>
 px-3"<CRLF>
 />;<CRLF>
+
 ```

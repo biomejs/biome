@@ -39,6 +39,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -52,4 +53,5 @@ const a = () => {
 };
 console.log("🚀".length);
 ("Jan 1, 2018 – Jan 1, 2019");
+
 ```

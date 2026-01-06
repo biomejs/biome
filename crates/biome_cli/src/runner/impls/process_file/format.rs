@@ -132,6 +132,7 @@ impl ProcessFile for FormatProcessFile {
             execution: _,
             skip_ignore_check,
         } = payload;
+
         let FileFeaturesResult {
             features_supported: file_features,
         } = workspace.file_features(SupportsFeatureParams {
