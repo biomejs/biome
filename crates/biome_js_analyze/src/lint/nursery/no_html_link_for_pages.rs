@@ -89,7 +89,7 @@ impl Rule for NoHtmlLinkForPages {
             return None;
         }
 
-        if is_internal_link(href_value) {
+        if is_internal_link(&normalize_href(href_value)) {
             return Some(jsx_element.range());
         }
 
@@ -120,6 +120,21 @@ impl Rule for NoHtmlLinkForPages {
     }
 }
 
+fn normalize_href(href: &str) -> String {
+    let query_start = href.find('?');
+    let href = &href[..query_start.unwrap_or(href.len())];
+
+    let hash_start = href.find('#');
+    let href = &href[..hash_start.unwrap_or(href.len())];
+
+    href.to_string()
+}
+
+const COMMON_EXTENSIONS: [&str; 18] = [
+    ".pdf", ".txt", ".md", ".json", ".xml", ".csv", ".rss", ".atom", ".zip", ".tar", ".gz", ".png",
+    ".jpg", ".jpeg", ".webp", ".svg", ".mp4", ".mp3",
+];
+
 fn is_internal_link(href: &str) -> bool {
     let href = href.trim();
     if href.is_empty() {
@@ -142,7 +157,9 @@ fn is_internal_link(href: &str) -> bool {
     // Skip if it appears to be a public file (e.g. .pdf)
     // Internal links in Next.js do not contain file extensions basically
     if let Some(last_segment) = href.split('/').next_back()
-        && last_segment.contains('.')
+        && COMMON_EXTENSIONS
+            .iter()
+            .any(|ext| last_segment.ends_with(ext))
     {
         return false;
     }
