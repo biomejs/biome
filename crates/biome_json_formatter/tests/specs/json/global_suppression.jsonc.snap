@@ -31,6 +31,7 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```jsonc
@@ -40,4 +41,5 @@ Bracket spacing: true
 
 
 	    "a": "b", "c": "d", "e": "f"
-}```
+}
+```
