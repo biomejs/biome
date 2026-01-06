@@ -42,6 +42,7 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
@@ -64,4 +65,5 @@ Quote style: Double Quotes
 
 		reason: "Deprecated")
 	@addExternalFields(source: "profiles")
-}```
+}
+```
