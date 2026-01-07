@@ -16,7 +16,7 @@ export default {
 ```
 invalid-props-only.vue:3:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Options API is not supported in Vue Vapor Mode.
+  × Using the Options API is not allowed.
   
     1 │ // should generate diagnostics
     2 │ // Options API with props only - still Options API, not Composition API

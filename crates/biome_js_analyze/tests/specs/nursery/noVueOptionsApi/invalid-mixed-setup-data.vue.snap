@@ -22,7 +22,7 @@ export default {
 ```
 invalid-mixed-setup-data.vue:3:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Options API is not supported in Vue Vapor Mode.
+  × Using the Options API is not allowed.
   
      1 │ // should generate diagnostics
      2 │ // Mixed setup() with Options API is not supported in Vapor Mode

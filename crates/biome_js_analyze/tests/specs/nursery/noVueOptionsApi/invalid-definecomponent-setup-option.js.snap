@@ -22,7 +22,7 @@ export default defineComponent({
 ```
 invalid-definecomponent-setup-option.js:6:32 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Options API is not supported in Vue Vapor Mode.
+  × Using the Options API is not allowed.
   
      4 │ import { defineComponent, ref } from "vue";
      5 │ 

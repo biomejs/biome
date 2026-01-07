@@ -20,7 +20,7 @@ createApp({
 ```
 invalid-createapp-data.vue:5:11 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Options API is not supported in Vue Vapor Mode.
+  × Using the Options API is not allowed.
   
      3 │ import { createApp } from "vue";
      4 │ 

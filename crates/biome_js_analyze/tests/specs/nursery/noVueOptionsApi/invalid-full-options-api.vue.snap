@@ -38,7 +38,7 @@ export default {
 ```
 invalid-full-options-api.vue:3:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Options API is not supported in Vue Vapor Mode.
+  × Using the Options API is not allowed.
   
      1 │ // should generate diagnostics
      2 │ // Full Options API component with multiple properties - all should be flagged

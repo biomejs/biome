@@ -20,7 +20,7 @@ export default {
 ```
 invalid-export-default-methods.vue:3:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Options API is not supported in Vue Vapor Mode.
+  × Using the Options API is not allowed.
   
      1 │ // should generate diagnostics
      2 │ // Options API: methods is not supported in Vapor Mode
