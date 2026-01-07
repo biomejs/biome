@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_graphql_syntax::{
     GraphqlLanguage, GraphqlObjectTypeDefinition, GraphqlObjectTypeExtension,
 };
-use biome_rowan::{SyntaxToken, TokenText, declare_node_union};
+use biome_rowan::{SyntaxToken, TextRange, TokenText, declare_node_union};
 use biome_rule_options::no_root_type::NoRootTypeOptions;
 use biome_string_case::StrOnlyExtension;
 
@@ -44,7 +44,8 @@ declare_lint_rule! {
     ///
     /// ### `disallow`
     ///
-    /// This required option lists all disallowed root types (e.g. `mutation` and/or `subscription`)
+    /// This required option lists all disallowed root types (e.g. `mutation` and/or `subscription`).
+    /// These list values will be handled case-insensitive.
     ///
     /// Default `[]`
     ///
@@ -73,7 +74,7 @@ declare_lint_rule! {
 
 impl Rule for NoRootType {
     type Query = Ast<NoRootTypeQuery>;
-    type State = TokenText;
+    type State = (TokenText, TextRange);
     type Signals = Option<Self::State>;
     type Options = NoRootTypeOptions;
 
@@ -99,13 +100,13 @@ impl Rule for NoRootType {
         }
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, (name, range): &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state.relative_range(),
+                range,
                 markup! {
-                    "The root type "{{state.to_string()}}" is forbidden."
+                    "The root type "{{name.to_string()}}" is forbidden."
                 },
             )
             .note(markup! {
@@ -119,12 +120,15 @@ declare_node_union! {
     pub NoRootTypeQuery = GraphqlObjectTypeDefinition | GraphqlObjectTypeExtension
 }
 
-fn check_name(root_types: &Vec<String>, name: SyntaxToken<GraphqlLanguage>) -> Option<TokenText> {
+fn check_name(
+    root_types: &Vec<String>,
+    name: SyntaxToken<GraphqlLanguage>,
+) -> Option<(TokenText, TextRange)> {
     let trimmed = name.token_text_trimmed();
 
     for root_type in root_types {
         if root_type.to_lowercase_cow() == trimmed.to_lowercase_cow() {
-            return Some(trimmed);
+            return Some((trimmed, name.text_range()));
         }
     }
 
