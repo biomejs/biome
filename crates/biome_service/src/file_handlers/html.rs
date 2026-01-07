@@ -435,13 +435,21 @@ fn parse_embedded_nodes(
         }
 
         if file_source.is_vue()
-            && let Some(_text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
+            && let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
         {
-            // TODO: uncomment this once we have better parsing of Vue syntax where we have expressions VS names
-            // let result = parse_vue_text_expression(text_expression, cache, biome_path, settings);
-            // if let Some((content, file_source)) = result {
-            //     nodes.push((content.into(), file_source));
-            // }
+            let result = parse_vue_text_expression(text_expression, cache, biome_path, settings);
+            if let Some((content, file_source)) = result {
+                nodes.push((content.into(), file_source));
+            }
+        }
+
+        if file_source.is_astro()
+            && let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
+        {
+            let result = parse_astro_text_expression(text_expression, cache, biome_path, settings);
+            if let Some((content, file_source)) = result {
+                nodes.push((content.into(), file_source));
+            }
         }
 
         if let Some(element) = HtmlElement::cast_ref(&element) {
@@ -718,8 +726,41 @@ pub(crate) fn parse_svelte_text_expression(
     Some((snippet, document_file_source))
 }
 
+/// Parses Astro single text expressions `{ expression }`
+pub(crate) fn parse_astro_text_expression(
+    element: HtmlSingleTextExpression,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    let expression = element.expression().ok()?;
+    let content = expression.html_literal_token().ok()?;
+    // Astro is kinda weird in its JSX-like expressions. They are JS, but they contain HTML, not JSX.
+    // That's because Astro doesn't parse what's inside the expressions, actually. In fact, their arrow function callbacks
+    // don't have curly brackets.
+    //
+    // As for now, we use the TSX parser, hoping it won't bite us back in the future.
+    let file_source =
+        JsFileSource::tsx().with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
+    let document_file_source = DocumentFileSource::Js(file_source);
+    let options = settings.parse_options::<JsLanguage>(biome_path, &document_file_source);
+    let parse = parse_js_with_offset_and_cache(
+        content.text(),
+        content.text_range().start(),
+        file_source,
+        options,
+        cache,
+    );
+    let snippet = EmbeddedSnippet::new(
+        parse.into(),
+        expression.range(),
+        content.text_range(),
+        content.text_range().start(),
+    );
+    Some((snippet, document_file_source))
+}
+
 /// Parses Vue double text expressions `{{ expression }}`
-#[expect(unused)]
 pub(crate) fn parse_vue_text_expression(
     element: HtmlDoubleTextExpression,
     cache: &mut NodeCache,

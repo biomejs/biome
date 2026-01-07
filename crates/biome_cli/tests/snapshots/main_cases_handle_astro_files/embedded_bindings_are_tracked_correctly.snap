@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+import { Component } from "./component.svelte";
+let hello = "Hello World";
+let array = [];
+---
+
+<html>
+    <span>{hello}</span>
+    <span>{notDefined}</span>
+    { array.map(item => (<span>{item}</span>)) }
+    <Component />
+</html>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

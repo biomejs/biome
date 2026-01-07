@@ -4088,7 +4088,9 @@ async fn should_correctly_fix_all_astro_files() -> Result<()> {
     server
         .open_named_document(
             r#"---
-let useConst = "Astro Test";
+loop: for (let i = 0; i < 5; i++) {
+  continue loop;
+}
 ---
 <!doctype html>"#,
             uri!("document.astro"),
@@ -4141,13 +4143,13 @@ let useConst = "Astro Test";
                     character: 0,
                 },
                 end: Position {
-                    line: 4,
+                    line: 6,
                     character: 0,
                 },
             },
             new_text: String::from(
                 r#"---
-const useConst = "Astro Test";
+for (let i = 0; i < 5; i++) {}
 ---
 <!doctype html>"#,
             ),
