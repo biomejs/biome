@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoRootTypeOptions {
-    /// A case-insensitive list of disallowed root types (e.g. "mutation" and/or "subscription").
+    /// A list of disallowed root types (e.g. "mutation" and/or "subscription").
+    /// The values of the list are case-insensitive.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub disallow: Vec<String>,
 }

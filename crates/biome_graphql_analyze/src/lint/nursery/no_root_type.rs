@@ -45,7 +45,7 @@ declare_lint_rule! {
     /// ### `disallow`
     ///
     /// This required option lists all disallowed root types (e.g. `mutation` and/or `subscription`).
-    /// These list values will be handled case-insensitive.
+    /// The values of the list are case-insensitive.
     ///
     /// Default `[]`
     ///
