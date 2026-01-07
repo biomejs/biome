@@ -6720,7 +6720,7 @@ export type NoReactForwardRefOptions = {};
 export type NoReturnAssignOptions = {};
 export interface NoRootTypeOptions {
 	/**
-	 * A list of disallowed root types (e.g. "mutation" and/or "subscription").
+	 * A case-insensitive list of disallowed root types (e.g. "mutation" and/or "subscription").
 	 */
 	disallow?: string[];
 }

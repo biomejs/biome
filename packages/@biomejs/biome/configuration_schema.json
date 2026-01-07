@@ -4309,7 +4309,7 @@
 			"type": "object",
 			"properties": {
 				"disallow": {
-					"description": "A list of disallowed root types (e.g. \"mutation\" and/or \"subscription\").",
+					"description": "A case-insensitive list of disallowed root types (e.g. \"mutation\" and/or \"subscription\").",
 					"type": "array",
 					"items": { "type": "string" }
 				}
