@@ -761,7 +761,6 @@ pub(crate) fn parse_astro_text_expression(
 }
 
 /// Parses Vue double text expressions `{{ expression }}`
-#[expect(unused)]
 pub(crate) fn parse_vue_text_expression(
     element: HtmlDoubleTextExpression,
     cache: &mut NodeCache,
