@@ -2969,6 +2969,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateAttributesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicateAttributesOptions" }
+			]
+		},
+		"NoDuplicateAttributesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDuplicateCaseConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5247,6 +5257,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateAttributes": {
+					"description": "Disallow duplication of attributes.\nSee <https://biomejs.dev/linter/rules/no-duplicate-attributes>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateAttributesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateDependencies": {
 					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".\nSee <https://biomejs.dev/linter/rules/no-duplicate-dependencies>",
 					"anyOf": [
@@ -6808,6 +6825,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDuplicateAtImportRulesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDuplicateAttributesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateAttributesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
