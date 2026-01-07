@@ -1,0 +1,30 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- Valid: no duplicates -->
+<div class="flex p-4"></div>
+<div class="p-4 text-red-500 bg-white"></div>
+
+<!-- Valid: similar but different classes -->
+<div class="p-4 px-4 py-4"></div>
+<div class="text-red-500 text-lg"></div>
+
+<!-- Valid: empty class -->
+<div class=""></div>
+
+<!-- Valid: single class -->
+<div class="flex"></div>
+
+<!-- Valid: single-quoted strings -->
+<div class='flex p-4'></div>
+
+<!-- Valid: whitespace-only (no classes to duplicate) -->
+<div class="   "></div>
+
+<!-- Valid: case-sensitive (CSS classes are case-sensitive) -->
+<div class="Flex flex"></div>
+
+```
