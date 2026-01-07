@@ -4311,7 +4311,6 @@
 				"disallow": {
 					"description": "A list of disallowed root types (e.g. \"mutation\" and/or \"subscription\").",
 					"type": "array",
-					"default": [],
 					"items": { "type": "string" }
 				}
 			},
