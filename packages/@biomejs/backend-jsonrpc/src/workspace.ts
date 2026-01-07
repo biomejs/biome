@@ -1979,6 +1979,11 @@ See <https://biomejs.dev/linter/rules/no-return-assign>
 	 */
 	noReturnAssign?: NoReturnAssignConfiguration;
 	/**
+	* Disallow the usage of specified root types.
+See <https://biomejs.dev/linter/rules/no-root-type> 
+	 */
+	noRootType?: NoRootTypeConfiguration;
+	/**
 	* Disallow javascript: URLs in HTML.
 See <https://biomejs.dev/linter/rules/no-script-url> 
 	 */
@@ -3778,6 +3783,9 @@ export type NoReactForwardRefConfiguration =
 export type NoReturnAssignConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnAssignOptions;
+export type NoRootTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoRootTypeOptions;
 export type NoScriptUrlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoScriptUrlOptions;
@@ -5286,6 +5294,10 @@ export interface RuleWithNoReturnAssignOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnAssignOptions;
 }
+export interface RuleWithNoRootTypeOptions {
+	level: RulePlainConfiguration;
+	options?: NoRootTypeOptions;
+}
 export interface RuleWithNoScriptUrlOptions {
 	level: RulePlainConfiguration;
 	options?: NoScriptUrlOptions;
@@ -6706,6 +6718,12 @@ export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoProtoOptions = {};
 export type NoReactForwardRefOptions = {};
 export type NoReturnAssignOptions = {};
+export interface NoRootTypeOptions {
+	/**
+	 * A list of disallowed root types (e.g. "mutation" and/or "subscription").
+	 */
+	disallow?: string[];
+}
 export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
@@ -7607,6 +7625,7 @@ export type Category =
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noReturnAssign"
+	| "lint/nursery/noRootType"
 	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
@@ -7631,10 +7650,10 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
-	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useDestructuring"
+	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
@@ -7662,7 +7681,6 @@ export type Category =
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/nursery/useVueVForKey"
-	| "lint/nursery/useVueVapor"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"
 	| "lint/nursery/useVueValidVCloak"
@@ -7676,6 +7694,7 @@ export type Category =
 	| "lint/nursery/useVueValidVOnce"
 	| "lint/nursery/useVueValidVPre"
 	| "lint/nursery/useVueValidVText"
+	| "lint/nursery/useVueVapor"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
