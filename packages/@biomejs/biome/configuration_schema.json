@@ -4309,6 +4309,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoRootTypeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoRootTypeOptions" }
+			]
+		},
+		"NoRootTypeOptions": {
+			"type": "object",
+			"properties": {
+				"disallow": {
+					"description": "A list of disallowed root types (e.g. \"mutation\" and/or \"subscription\").\nThe values of the list are case-insensitive.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoScriptUrlConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5401,6 +5418,13 @@
 					"description": "Disallow assignments in return statements.\nSee <https://biomejs.dev/linter/rules/no-return-assign>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReturnAssignConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRootType": {
+					"description": "Disallow the usage of specified root types.\nSee <https://biomejs.dev/linter/rules/no-root-type>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoRootTypeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7987,6 +8011,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReturnAssignOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoRootTypeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoRootTypeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
