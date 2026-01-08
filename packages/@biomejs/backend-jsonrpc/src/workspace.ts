@@ -1879,6 +1879,11 @@ See <https://biomejs.dev/linter/rules/no-deprecated-imports>
 	 */
 	noDeprecatedImports?: NoDeprecatedImportsConfiguration;
 	/**
+	* Disallow duplication of attributes.
+See <https://biomejs.dev/linter/rules/no-duplicate-attributes> 
+	 */
+	noDuplicateAttributes?: NoDuplicateAttributesConfiguration;
+	/**
 	* Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
 See <https://biomejs.dev/linter/rules/no-duplicate-dependencies> 
 	 */
@@ -1978,6 +1983,11 @@ See <https://biomejs.dev/linter/rules/no-react-forward-ref>
 See <https://biomejs.dev/linter/rules/no-return-assign> 
 	 */
 	noReturnAssign?: NoReturnAssignConfiguration;
+	/**
+	* Disallow the usage of specified root types.
+See <https://biomejs.dev/linter/rules/no-root-type> 
+	 */
+	noRootType?: NoRootTypeConfiguration;
 	/**
 	* Disallow javascript: URLs in HTML.
 See <https://biomejs.dev/linter/rules/no-script-url> 
@@ -2097,6 +2107,11 @@ See <https://biomejs.dev/linter/rules/use-deprecated-date>
 See <https://biomejs.dev/linter/rules/use-destructuring> 
 	 */
 	useDestructuring?: UseDestructuringConfiguration;
+	/**
+	* Enforce that new Error() is thrown with the original error as cause.
+See <https://biomejs.dev/linter/rules/use-error-cause> 
+	 */
+	useErrorCause?: UseErrorCauseConfiguration;
 	/**
 	* Require switch-case statements to be exhaustive.
 See <https://biomejs.dev/linter/rules/use-exhaustive-switch-cases> 
@@ -3718,6 +3733,9 @@ export type NoContinueConfiguration =
 export type NoDeprecatedImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDeprecatedImportsOptions;
+export type NoDuplicateAttributesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateAttributesOptions;
 export type NoDuplicateDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateDependenciesOptions;
@@ -3778,6 +3796,9 @@ export type NoReactForwardRefConfiguration =
 export type NoReturnAssignConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnAssignOptions;
+export type NoRootTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoRootTypeOptions;
 export type NoScriptUrlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoScriptUrlOptions;
@@ -3847,6 +3868,9 @@ export type UseDeprecatedDateConfiguration =
 export type UseDestructuringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDestructuringOptions;
+export type UseErrorCauseConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseErrorCauseOptions;
 export type UseExhaustiveSwitchCasesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExhaustiveSwitchCasesOptions;
@@ -5201,6 +5225,10 @@ export interface RuleWithNoDeprecatedImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDeprecatedImportsOptions;
 }
+export interface RuleWithNoDuplicateAttributesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateAttributesOptions;
+}
 export interface RuleWithNoDuplicateDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateDependenciesOptions;
@@ -5285,6 +5313,10 @@ export interface RuleWithNoReactForwardRefOptions {
 export interface RuleWithNoReturnAssignOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnAssignOptions;
+}
+export interface RuleWithNoRootTypeOptions {
+	level: RulePlainConfiguration;
+	options?: NoRootTypeOptions;
 }
 export interface RuleWithNoScriptUrlOptions {
 	level: RulePlainConfiguration;
@@ -5381,6 +5413,10 @@ export interface RuleWithUseDeprecatedDateOptions {
 export interface RuleWithUseDestructuringOptions {
 	level: RulePlainConfiguration;
 	options?: UseDestructuringOptions;
+}
+export interface RuleWithUseErrorCauseOptions {
+	level: RulePlainConfiguration;
+	options?: UseErrorCauseOptions;
 }
 export interface RuleWithUseExhaustiveSwitchCasesOptions {
 	fix?: FixKind;
@@ -6646,6 +6682,7 @@ export interface NoAmbiguousAnchorTextOptions {
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
+export type NoDuplicateAttributesOptions = {};
 export type NoDuplicateDependenciesOptions = {};
 export type NoDuplicatedSpreadPropsOptions = {};
 export interface NoEmptySourceOptions {
@@ -6706,6 +6743,13 @@ export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoProtoOptions = {};
 export type NoReactForwardRefOptions = {};
 export type NoReturnAssignOptions = {};
+export interface NoRootTypeOptions {
+	/**
+	* A list of disallowed root types (e.g. "mutation" and/or "subscription").
+The values of the list are case-insensitive. 
+	 */
+	disallow?: string[];
+}
 export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
@@ -6764,6 +6808,15 @@ export interface UseDeprecatedDateOptions {
 	argumentName?: string;
 }
 export type UseDestructuringOptions = {};
+/**
+ * Options for the `useErrorCause` rule.
+ */
+export interface UseErrorCauseOptions {
+	/**
+	 * When set to `true`, the rule requires that `catch` clauses have a parameter.
+	 */
+	requireCatchParameter?: boolean;
+}
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
@@ -7577,6 +7630,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDuplicateAttributes"
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
@@ -7599,6 +7653,7 @@ export type Category =
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noReturnAssign"
+	| "lint/nursery/noRootType"
 	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
@@ -7626,6 +7681,7 @@ export type Category =
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useDestructuring"
+	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
@@ -7654,7 +7710,6 @@ export type Category =
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/nursery/useVueVForKey"
-	| "lint/nursery/useVueVapor"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"
 	| "lint/nursery/useVueValidVCloak"
@@ -7668,6 +7723,7 @@ export type Category =
 	| "lint/nursery/useVueValidVOnce"
 	| "lint/nursery/useVueValidVPre"
 	| "lint/nursery/useVueValidVText"
+	| "lint/nursery/useVueVapor"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"

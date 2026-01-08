@@ -28,9 +28,9 @@ fn quick_test() {
     </div>
 {/snippet}
 "#;
-    let source_type = HtmlFileSource::svelte();
+    let source_type = HtmlFileSource::astro();
     let tree = parse_html(src, HtmlParseOptions::from(&source_type));
-    let options = HtmlFormatOptions::new(HtmlFileSource::html())
+    let options = HtmlFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)
         .with_line_width(LineWidth::try_from(80).unwrap())
         .with_attribute_position(AttributePosition::Auto);

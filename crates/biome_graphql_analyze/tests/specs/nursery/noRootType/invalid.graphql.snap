@@ -1,0 +1,31 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:2:6 lint/nursery/noRootType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The root type Mutation is forbidden.
+  
+    1 │ # should generate diagnostics
+  > 2 │ type Mutation {
+      │      ^^^^^^^^^
+    3 │   createUser(input: CreateUserInput!): User!
+    4 │ }
+  
+  i It's forbidden to use this root type within this project. Rework to use a different root type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
