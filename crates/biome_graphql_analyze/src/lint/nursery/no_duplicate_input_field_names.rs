@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlObjectValue;
 use biome_rowan::{AstNode, TokenText};
-use biome_rule_options::use_unique_input_field_names::UseUniqueInputFieldNamesOptions;
+use biome_rule_options::no_duplicate_input_field_names::NoDuplicateInputFieldNamesOptions;
 
 declare_lint_rule! {
     /// Require fields within an input object to be unique.
@@ -31,20 +31,20 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub UseUniqueInputFieldNames {
+    pub NoDuplicateInputFieldNames {
         version: "2.3.11",
-        name: "useUniqueInputFieldNames",
+        name: "noDuplicateInputFieldNames",
         language: "graphql",
         recommended: false,
         sources: &[RuleSource::EslintGraphql("unique-input-field-names").same()],
     }
 }
 
-impl Rule for UseUniqueInputFieldNames {
+impl Rule for NoDuplicateInputFieldNames {
     type Query = Ast<GraphqlObjectValue>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = UseUniqueInputFieldNamesOptions;
+    type Options = NoDuplicateInputFieldNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

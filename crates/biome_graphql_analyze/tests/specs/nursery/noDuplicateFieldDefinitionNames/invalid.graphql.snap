@@ -27,7 +27,7 @@ input SomeInputObject {
 
 # Diagnostics
 ```
-invalid.graphql:2:1 lint/nursery/useUniqueFieldDefinitionNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:2:1 lint/nursery/noDuplicateFieldDefinitionNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate field name.
   
@@ -50,7 +50,7 @@ invalid.graphql:2:1 lint/nursery/useUniqueFieldDefinitionNames ━━━━━�
 ```
 
 ```
-invalid.graphql:8:1 lint/nursery/useUniqueFieldDefinitionNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:8:1 lint/nursery/noDuplicateFieldDefinitionNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate field name.
   
@@ -74,7 +74,7 @@ invalid.graphql:8:1 lint/nursery/useUniqueFieldDefinitionNames ━━━━━�
 ```
 
 ```
-invalid.graphql:14:1 lint/nursery/useUniqueFieldDefinitionNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:14:1 lint/nursery/noDuplicateFieldDefinitionNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate field name.
   

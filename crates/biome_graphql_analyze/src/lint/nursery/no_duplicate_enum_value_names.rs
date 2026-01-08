@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlEnumTypeDefinition;
 use biome_rowan::{AstNodeList, TextRange};
-use biome_rule_options::use_unique_enum_value_names::UseUniqueEnumValueNamesOptions;
+use biome_rule_options::no_duplicate_enum_value_names::NoDuplicateEnumValueNamesOptions;
 use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
@@ -43,20 +43,20 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub UseUniqueEnumValueNames {
+    pub NoDuplicateEnumValueNames {
         version: "next",
-        name: "useUniqueEnumValueNames",
+        name: "noDuplicateEnumValueNames",
         language: "graphql",
         recommended: false,
         sources: &[RuleSource::EslintGraphql("unique-enum-value-names").same()],
     }
 }
 
-impl Rule for UseUniqueEnumValueNames {
+impl Rule for NoDuplicateEnumValueNames {
     type Query = Ast<GraphqlEnumTypeDefinition>;
     type State = Vec<TextRange>;
     type Signals = Option<Self::State>;
-    type Options = UseUniqueEnumValueNamesOptions;
+    type Options = NoDuplicateEnumValueNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

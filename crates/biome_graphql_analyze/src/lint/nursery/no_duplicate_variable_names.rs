@@ -4,54 +4,55 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_graphql_syntax::GraphqlArguments;
+use biome_graphql_syntax::GraphqlVariableDefinitions;
 use biome_rowan::{AstNode, TokenText};
-use biome_rule_options::use_unique_argument_names::UseUniqueArgumentNamesOptions;
+use biome_rule_options::no_duplicate_variable_names::NoDuplicateVariableNamesOptions;
 
 declare_lint_rule! {
-    /// Require all argument names for fields & directives to be unique.
+    /// Require all variable definitions to be unique.
     ///
-    /// A GraphQL field or directive is only valid if all supplied arguments are uniquely named.
+    /// A GraphQL operation is only valid if all its variables are uniquely named.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```graphql,expect_diagnostic
-    /// query {
-    ///   field(arg1: "value", arg1: "value")
+    /// query ($x: Int, $x: Int) {
+    ///   field
     /// }
     /// ```
     ///
     /// ### Valid
     ///
     /// ```graphql
-    /// query {
-    ///   field(arg1: "value", arg2: "value")
+    /// query ($x: Int, $y: Int) {
+    ///   field
     /// }
     /// ```
     ///
-    pub UseUniqueArgumentNames {
+    pub NoDuplicateVariableNames {
         version: "2.3.11",
-        name: "useUniqueArgumentNames",
+        name: "noDuplicateVariableNames",
         language: "graphql",
         recommended: false,
-        sources: &[RuleSource::EslintGraphql("unique-argument-names").same()],
+        sources: &[RuleSource::EslintGraphql("unique-variable-names").same()],
     }
 }
 
-impl Rule for UseUniqueArgumentNames {
-    type Query = Ast<GraphqlArguments>;
+impl Rule for NoDuplicateVariableNames {
+    type Query = Ast<GraphqlVariableDefinitions>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = UseUniqueArgumentNamesOptions;
+    type Options = NoDuplicateVariableNamesOptions;
 
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let mut found: HashSet<TokenText> = HashSet::new();
 
-        for element in node.arguments() {
-            if let Some(name) = element.name().ok()
+        for element in node.elements() {
+            if let Some(variable) = element.variable().ok()
+                && let Some(name) = variable.name().ok()
                 && let Some(value_token) = name.value_token().ok()
             {
                 let string = value_token.token_text();
@@ -73,11 +74,11 @@ impl Rule for UseUniqueArgumentNames {
                 rule_category!(),
                 span,
                 markup! {
-                    "Duplicate argument name."
+                    "Duplicate variable name."
                 },
             )
             .note(markup! {
-                "A GraphQL field or directive is only valid if all supplied arguments are uniquely named. Make sure to name every argument differently."
+                "A GraphQL operation is only valid if all its variables are uniquely named. Make sure to name every variable differently."
             }),
         )
     }

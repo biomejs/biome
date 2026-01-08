@@ -19,7 +19,7 @@ query C {
 
 # Diagnostics
 ```
-invalid.graphql:3:13 lint/nursery/useUniqueInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:3:13 lint/nursery/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate input field name.
   
@@ -38,7 +38,7 @@ invalid.graphql:3:13 lint/nursery/useUniqueInputFieldNames ━━━━━━━
 ```
 
 ```
-invalid.graphql:6:13 lint/nursery/useUniqueInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:6:13 lint/nursery/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate input field name.
   
@@ -57,7 +57,7 @@ invalid.graphql:6:13 lint/nursery/useUniqueInputFieldNames ━━━━━━━
 ```
 
 ```
-invalid.graphql:9:19 lint/nursery/useUniqueInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:9:19 lint/nursery/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate input field name.
   

@@ -17,7 +17,7 @@ enum A {
 
 # Diagnostics
 ```
-invalid.graphql:4:7 lint/nursery/useUniqueEnumValueNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:4:7 lint/nursery/noDuplicateEnumValueNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate enum value name.
   
