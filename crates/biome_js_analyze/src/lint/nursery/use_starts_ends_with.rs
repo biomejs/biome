@@ -1,4 +1,4 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
@@ -57,6 +57,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Warning,
+        sources: &[RuleSource::Eslint("prefer-string-starts-ends-with").same()],
     }
 }
 
@@ -108,7 +109,10 @@ impl Rule for UseStartsEndsWith {
                 },
             )
             .note(markup! {
-                "This pattern can be replaced with `"{method_name}"('"{ &state.pattern }"')`."
+                "The current code uses a complex pattern to check if a string starts or ends with a specific substring."
+            })
+            .note(markup! {
+                "Using `"{method_name}"('"{ &state.pattern }"')` is more readable and easier to maintain."
             }),
         )
     }
@@ -189,7 +193,8 @@ fn check_computed_member(
         let left = binary.left().ok()?;
         let right = binary.right().ok()?;
 
-        if is_length_access(&left) && is_number_literal(&right, 1.0) {
+        let computed_object = computed.object().ok()?;
+        if is_same_object_length_access(&left, &computed_object) && is_number_literal(&right, 1.0) {
             return Some(UseStartsEndsWithState {
                 variant: StartsEndsWithVariant::EndsWith,
                 pattern: pattern_str,
@@ -271,10 +276,21 @@ fn check_string_method(
             {
                 let left = binary.left().ok()?;
                 if is_length_access(&left) {
-                    return Some(UseStartsEndsWithState {
-                        variant: StartsEndsWithVariant::EndsWith,
-                        pattern,
-                    });
+                    // Validate that the right operand is a numeric literal equal to pattern length
+                    let right = binary.right().ok()?;
+                    let pattern_length = pattern.chars().count();
+                    
+                    if let AnyJsExpression::AnyJsLiteralExpression(literal) = right
+                        && let Some(number) = literal.as_js_number_literal_expression()
+                        && let Ok(value) = number.value_token()
+                        && let Ok(parsed) = value.text_trimmed().parse::<usize>()
+                        && parsed == pattern_length
+                    {
+                        return Some(UseStartsEndsWithState {
+                            variant: StartsEndsWithVariant::EndsWith,
+                            pattern,
+                        });
+                    }
                 }
             }
 
@@ -404,6 +420,19 @@ fn is_length_access(expr: &AnyJsExpression) -> bool {
         && let Ok(token) = prop.value_token()
     {
         return token.text_trimmed() == "length";
+    }
+    false
+}
+
+fn is_same_object_length_access(expr: &AnyJsExpression, target_object: &AnyJsExpression) -> bool {
+    if let AnyJsExpression::JsStaticMemberExpression(member) = expr
+        && let Ok(prop) = member.member()
+        && let Ok(token) = prop.value_token()
+        && token.text_trimmed() == "length"
+        && let Ok(length_object) = member.object()
+    {
+        // Compare the two objects by their syntax text representation
+        return length_object.syntax().text_trimmed() == target_object.syntax().text_trimmed();
     }
     false
 }

@@ -34,7 +34,9 @@ invalid.js:2:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
     3 │ foo.charAt(0) === 'b';
     4 │ foo.indexOf('bar') === 0;
   
-  i This pattern can be replaced with `startsWith('b')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `startsWith('b')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -53,7 +55,9 @@ invalid.js:3:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
     4 │ foo.indexOf('bar') === 0;
     5 │ foo.slice(0, 3) === 'bar';
   
-  i This pattern can be replaced with `startsWith('b')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `startsWith('b')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -72,7 +76,9 @@ invalid.js:4:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
     5 │ foo.slice(0, 3) === 'bar';
     6 │ foo.substring(0, 3) === 'bar';
   
-  i This pattern can be replaced with `startsWith('bar')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `startsWith('bar')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -91,7 +97,9 @@ invalid.js:5:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
     6 │ foo.substring(0, 3) === 'bar';
     7 │ foo.match(/^bar/) != null;
   
-  i This pattern can be replaced with `startsWith('bar')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `startsWith('bar')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -110,7 +118,9 @@ invalid.js:6:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
     7 │ foo.match(/^bar/) != null;
     8 │ /^bar/.test(foo);
   
-  i This pattern can be replaced with `startsWith('bar')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `startsWith('bar')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -129,7 +139,9 @@ invalid.js:7:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
     8 │ /^bar/.test(foo);
     9 │ foo[foo.length - 1] === 'b';
   
-  i This pattern can be replaced with `startsWith('bar')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `startsWith('bar')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -148,7 +160,9 @@ invalid.js:8:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
      9 │ foo[foo.length - 1] === 'b';
     10 │ foo.charAt(foo.length - 1) === 'b';
   
-  i This pattern can be replaced with `startsWith('bar')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `startsWith('bar')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -167,7 +181,9 @@ invalid.js:9:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━�
     10 │ foo.charAt(foo.length - 1) === 'b';
     11 │ foo.lastIndexOf('bar') === foo.length - 3;
   
-  i This pattern can be replaced with `endsWith('b')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `endsWith('b')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -186,7 +202,9 @@ invalid.js:10:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━
     11 │ foo.lastIndexOf('bar') === foo.length - 3;
     12 │ foo.slice(-3) === 'bar';
   
-  i This pattern can be replaced with `endsWith('b')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `endsWith('b')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -205,7 +223,9 @@ invalid.js:11:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━
     12 │ foo.slice(-3) === 'bar';
     13 │ foo.substring(foo.length - 3) === 'bar';
   
-  i This pattern can be replaced with `endsWith('bar')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `endsWith('bar')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -224,7 +244,9 @@ invalid.js:12:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━
     13 │ foo.substring(foo.length - 3) === 'bar';
     14 │ foo.match(/bar$/) != null;
   
-  i This pattern can be replaced with `endsWith('bar')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `endsWith('bar')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -243,7 +265,9 @@ invalid.js:13:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━
     14 │ foo.match(/bar$/) != null;
     15 │ /bar$/.test(foo);
   
-  i This pattern can be replaced with `endsWith('bar')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `endsWith('bar')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -262,7 +286,9 @@ invalid.js:14:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━
     15 │ /bar$/.test(foo);
     16 │ 
   
-  i This pattern can be replaced with `endsWith('bar')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `endsWith('bar')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -280,7 +306,9 @@ invalid.js:15:1 lint/nursery/useStartsEndsWith ━━━━━━━━━━━
        │ ^^^^^^^^^^^^^^^^
     16 │ 
   
-  i This pattern can be replaced with `endsWith('bar')`.
+  i The current code uses a complex pattern to check if a string starts or ends with a specific substring.
+  
+  i Using `endsWith('bar')` is more readable and easier to maintain.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
