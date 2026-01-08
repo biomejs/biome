@@ -187,9 +187,6 @@ use crate::{
     prelude::*,
     utils::{
         children::{HtmlChild, html_split_children},
-        classified_children::{
-            ChildSeparator, ClassificationContext, classify_children, get_separator_between,
-        },
         css_display::{CssDisplay, get_css_display},
     },
     verbatim::format_html_verbatim_node,
@@ -405,22 +402,7 @@ impl FormatHtmlElementList {
             f,
         )?;
 
-        // Create classification context and classify children
         let sensitivity = f.options().whitespace_sensitivity();
-        let ctx = ClassificationContext::new(sensitivity)
-            .with_whitespace_preserving(self.is_element_whitespace_sensitive);
-
-        let mut classified = classify_children(children, &ctx);
-
-        // Trim leading whitespace (formatter controls indentation)
-        while classified.first().is_some_and(|c| c.is_whitespace()) {
-            classified.remove_leading_whitespace();
-        }
-
-        // Trim trailing whitespace
-        while classified.last().is_some_and(|c| c.is_whitespace()) {
-            classified.pop_trailing_whitespace();
-        }
 
         // Determine if we should force multiline
         let force_multiline =
@@ -441,99 +423,7 @@ impl FormatHtmlElementList {
             multiline_builder.write(&r_angle_format, f);
         }
 
-        // Iterate and format children
-        let mut prev_non_whitespace_idx: Option<usize> = None;
-
-        // For multiline, we need to collect content to wrap in indent
-        // Build up the children content first
-        let children_content = format_with(|f: &mut HtmlFormatter| {
-            let mut prev_idx: Option<usize> = None;
-
-            for (idx, child) in classified.iter().enumerate() {
-                // Skip whitespace nodes - they're used for separator computation only
-                if child.is_whitespace() {
-                    continue;
-                }
-
-                // Compute separator from previous non-whitespace child
-                if let Some(p_idx) = prev_idx
-                    && let Some(prev) = classified.get(p_idx)
-                {
-                    let mut existing_separator = classified.get(p_idx + 1);
-                    if existing_separator.is_some_and(|s| !s.is_whitespace()) {
-                        existing_separator = None;
-                    }
-                    let separator = get_separator_between(prev, existing_separator, child, &ctx);
-                    write!(f, [separator])?;
-                }
-
-                // Format the child content
-                write!(f, [format_child(&child.child)])?;
-                prev_idx = Some(idx);
-            }
-
-            Ok(())
-        });
-
-        // Build multiline with proper indentation
-        let is_inside_element = !is_root;
-
-        if is_inside_element {
-            // Always use block_indent for the multiline/expanded version.
-            // block_indent uses hard line breaks, which is necessary because:
-            // 1. When used via `if_group_breaks`, we need actual line breaks
-            //    (soft line breaks won't break since they're in a different group)
-            // 2. The expanded version is meant to show content on multiple lines
-            //
-            // The flat version (flat_children) handles the single-line case.
-            multiline_builder.write(&format_args![block_indent(&children_content)], f);
-        } else {
-            // Root level - no indentation wrapper
-            multiline_builder.write(&children_content, f);
-        }
-        flat_builder.write(&format_args![children_content], f);
-
-        // // Build flat version
-        // for (idx, child) in classified.iter().enumerate() {
-        //     // Skip whitespace nodes
-        //     if child.is_whitespace() {
-        //         continue;
-        //     }
-
-        //     // Compute separator from previous non-whitespace child
-        //     if let Some(prev_idx) = prev_non_whitespace_idx
-        //         && let Some(prev) = classified.get(prev_idx)
-        //     {
-        //         let separator = get_separator_between(prev, child, &ctx);
-        //         write!(f, [separator])?;
-
-        //         // Write separator to flat builder
-        //         match separator {
-        //             ChildSeparator::None => {}
-        //             ChildSeparator::Space => {
-        //                 flat_builder.write(&space(), f);
-        //             }
-        //             ChildSeparator::SoftLine => {
-        //                 flat_builder.write(&soft_line_break(), f);
-        //             }
-        //             ChildSeparator::SoftLineOrSpace => {
-        //                 flat_builder.write(&soft_line_break_or_space(), f);
-        //             }
-        //             ChildSeparator::HardLine => {
-        //                 flat_builder.write(&hard_line_break(), f);
-        //             }
-        //             ChildSeparator::EmptyLine => {
-        //                 flat_builder.write(&empty_line(), f);
-        //             }
-        //         }
-        //     }
-
-        //     // Format the child content
-        //     let child_format = format_child(&child.child);
-        //     flat_builder.write(&child_format, f);
-
-        //     prev_non_whitespace_idx = Some(idx);
-        // }
+        // TODO: actually format the children here.
 
         // Print borrowed closing tag
         if let Some(ref closing_tag) = self.borrowed_tokens.borrowed_closing_tag {
