@@ -32,17 +32,10 @@ export const Page = () => {
 
 export const Page = () => {
   return (
-    <div>
+    <>
       <a href='./photo'>Photo</a>
-    </div>
-  );
-}
-
-export const Page = () => {
-  return (
-    <div>
       <a href='../photo'>Photo</a>
-    </div>
+    </>
   );
 }
 
@@ -139,11 +132,11 @@ invalid.jsx:30:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━�
   ! <a> element has an internal link to ./photo.
   
     28 │   return (
-    29 │     <div>
+    29 │     <>
   > 30 │       <a href='./photo'>Photo</a>
        │       ^^^^^^^^^^^^^^^^^^
-    31 │     </div>
-    32 │   );
+    31 │       <a href='../photo'>Photo</a>
+    32 │     </>
   
   i <a> elements for internal navigation can cause unnecessary full-page reloads. Use next/link component instead.
   
@@ -155,16 +148,16 @@ invalid.jsx:30:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:38:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:31:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! <a> element has an internal link to ../photo.
   
-    36 │   return (
-    37 │     <div>
-  > 38 │       <a href='../photo'>Photo</a>
+    29 │     <>
+    30 │       <a href='./photo'>Photo</a>
+  > 31 │       <a href='../photo'>Photo</a>
        │       ^^^^^^^^^^^^^^^^^^^
-    39 │     </div>
-    40 │   );
+    32 │     </>
+    33 │   );
   
   i <a> elements for internal navigation can cause unnecessary full-page reloads. Use next/link component instead.
   

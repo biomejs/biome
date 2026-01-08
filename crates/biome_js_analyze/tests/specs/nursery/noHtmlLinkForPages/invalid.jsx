@@ -26,16 +26,9 @@ export const Page = () => {
 
 export const Page = () => {
   return (
-    <div>
+    <>
       <a href='./photo'>Photo</a>
-    </div>
-  );
-}
-
-export const Page = () => {
-  return (
-    <div>
       <a href='../photo'>Photo</a>
-    </div>
+    </>
   );
 }

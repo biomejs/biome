@@ -4,9 +4,7 @@ import Link from 'next/link';
 
 export const Page = () => {
   return (
-    <Link href='/'>
-      <a>Homepage</a>
-    </Link>
+    <a>Homepage</a>
   );
 }
 
@@ -24,7 +22,11 @@ export const Page = () => {
 
 export const Page = () => {
   return (
-    <a href='https://example.com/'>Homepage</a>
+    <>
+      <a href='https://example.com/'>Homepage</a>
+      <a href='http://example.com/'>Homepage</a>
+      <a href='//example.com/'>Homepage</a>
+    </>
   );
 }
 
@@ -51,21 +53,18 @@ export const Page = () => {
 
 export const Page = () => {
   return (
-    <Link href='./photo'>Photo</Link>
-  );
-}
-
-export const Page = () => {
-  return (
-    <Link href='../photo'>Photo</Link>
-  );
-}
-
-export const Page = () => {
-  return (
   	<>
-	   <a href='mailto:test@example.com'>Email</a>
-	   <a href='tel:+1234567890'>Phone</a>
+      <Link href='./photo'>Photo</Link>
+      <Link href='../photo'>Photo</Link>
+   	</>
+  );
+}
+
+export const Page = () => {
+  return (
+    <>
+      <a href='mailto:test@example.com'>Email</a>
+      <a href='tel:+1234567890'>Phone</a>
    </>
   );
 }
