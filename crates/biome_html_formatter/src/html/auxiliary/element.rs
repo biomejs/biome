@@ -7,7 +7,7 @@ use crate::{
 use biome_formatter::{
     CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, format_args, write,
 };
-use biome_html_syntax::{HtmlElement, HtmlElementFields};
+use biome_html_syntax::{HtmlElement, HtmlElementFields, HtmlRoot};
 use biome_string_case::StrLikeExtension;
 
 use super::{
@@ -56,6 +56,16 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         let css_display = get_css_display_from_tag(&tag_name);
         let is_element_internally_whitespace_sensitive =
             css_display.is_internally_whitespace_sensitive();
+        let is_root_element_list = node
+            .syntax()
+            .ancestors()
+            .nth(2)
+            .is_some_and(|ancestor| HtmlRoot::can_cast(ancestor.kind()));
+        // If `<template>` is at the root level, force multiline formatting of its children.
+        let is_template_element = tag_name
+            .token_text_trimmed()
+            .is_some_and(|tt| tt.to_ascii_lowercase_cow() == "template");
+
         let tag_name = tag_name
             .trim_trivia()
             .map(|t| t.value_token())
@@ -117,7 +127,8 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         // should NOT borrow tokens because their children are always multiline.
         let forces_break_children = tag_name
             .as_ref()
-            .is_some_and(|t| should_force_break_children(t.text()));
+            .is_some_and(|t| should_force_break_children(t.text()))
+            || (is_root_element_list && is_template_element);
 
         let should_borrow_opening_r_angle = is_element_internally_whitespace_sensitive
             && !children.is_empty()
@@ -163,7 +174,11 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             // flat and expanded versions. The `if_group_breaks`/`if_group_fits_on_line`
             // logic below will handle breaking children when attributes break.
             // The layout is only forced to Multiline when children contain block elements.
-            let layout = HtmlChildListLayout::BestFitting;
+            let layout = if forces_break_children {
+                HtmlChildListLayout::Multiline
+            } else {
+                HtmlChildListLayout::BestFitting
+            };
             let format_children = FormatHtmlElementList::default()
                 .with_options(FormatHtmlElementListOptions {
                     layout,

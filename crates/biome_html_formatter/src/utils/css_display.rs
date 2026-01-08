@@ -131,7 +131,7 @@ impl CssDisplay {
     /// Whether elements with this display value are considered
     /// whitespace-sensitive on the inside (i.e., their children).
     pub fn is_internally_whitespace_sensitive(&self) -> bool {
-        !self.is_block_like() && *self != CssDisplay::InlineBlock
+        !self.is_block_like() && *self != Self::InlineBlock
     }
 
     /// Whether elements with this display value are considered
