@@ -163,6 +163,10 @@ fn check_binary_sides(
     pattern: &AnyJsExpression,
 ) -> Option<UseStartsEndsWithState> {
     if let AnyJsExpression::JsComputedMemberExpression(computed) = expr {
+        // Check if the object is a string type
+        if !is_string_type(&computed.object().ok()?) {
+            return None;
+        }
         return check_computed_member(computed, pattern);
     }
 
@@ -212,6 +216,10 @@ fn check_method_call(
     let callee = call.callee().ok()?;
 
     if let AnyJsExpression::JsStaticMemberExpression(member_expr) = callee {
+        // Check if the object is a string type
+        if !is_string_type(&member_expr.object().ok()?) {
+            return None;
+        }
         let args = call.arguments().ok()?;
         return check_string_method(&member_expr, pattern_expr, &args);
     }
@@ -435,4 +443,27 @@ fn is_same_object_length_access(expr: &AnyJsExpression, target_object: &AnyJsExp
         return length_object.syntax().text_trimmed() == target_object.syntax().text_trimmed();
     }
     false
+}
+
+fn is_string_type(expr: &AnyJsExpression) -> bool {
+    // If it's a string literal, it's definitely a string
+    if let AnyJsExpression::AnyJsLiteralExpression(literal) = expr {
+        if literal.as_js_string_literal_expression().is_some() {
+            return true;
+        }
+    }
+
+    // Check for template literals
+    if matches!(expr, AnyJsExpression::JsTemplateExpression(_)) {
+        return true;
+    }
+
+    // Check for array literals - these are not strings
+    if matches!(expr, AnyJsExpression::JsArrayExpression(_)) {
+        return false;
+    }
+
+    // For now, we allow unknown types or types that could be strings
+    // This is conservative but helps avoid false positives
+    true
 }
