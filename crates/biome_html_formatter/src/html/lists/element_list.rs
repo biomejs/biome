@@ -1,4 +1,185 @@
-//! This implementation is very heavily inspired by the JSX formatter implementation for JsxChildList.
+//! # Caution
+//!
+//! Although it might look a lot like `JsxChildList` formatter, the formatting logic for JSX and HTML
+//! differ in several key ways, primarily due to HTML's whitespace sensitivity. It may be tempting to
+//! reuse the JSX logic here, but doing so would leads to incorrect formatting in many scenarios.
+//!
+//! # Formatting Rules
+//!
+//! At a very high level, these are the rules that the HTML element list formatter must take into account.
+//!
+//! Something to keep in mind is that generally, the HTML formatter **maintains presence of whitespace**, just
+//! not the amount of whitespace in those spots. That can sound a little confusing at first, but it'll make
+//! sense after reading this.
+//!
+//! ## Root vs Inside element
+//!
+//! The root level [`HtmlElementList`] is always formatted on multiple lines. However, inside an element, it
+//! depends on the initial CSS display value as defined in browser user agent style sheets. Prettier loads this
+//! info from `html-ua-styles`, and Biome's HTML metadata is manually derived from it.
+//!
+//! ## How CSS Display affects whitespace sensitivity
+//!
+//! There are 2 types of whitespace sensitivity that an element can be sensitive to:
+//! - Inside of the element, specifically at the first and last child, e.g. `<span>here and here</span>`
+//! - Outside of the element, when its adjacent to sibling elements/text, e.g. `here <span>not here</span> here`
+//!
+//! These sensitivities are **not** mutually exclusive.
+//!
+//! The whitespace sensitivity formatter option controls if sensitivity is always considered, sometimes
+//! considered (based on css display value), or never considered.
+//!
+//! ### Block elements
+//! Block elements are elements that take up the full width of the container (by default). Because of this, the first and last children don't care about the whitespace between the parent and those children.
+//!
+//! Whitespace Sensitivity:
+//! - Inside (first/last child): NO
+//! - Outside (sibling): NO
+//!
+//! ```html
+//! <div>
+//!     It's ok for me to be like this...
+//! </div>
+//! <div>... or like this.</div>
+//! ```
+//!
+//! Block elements also don't care about whitespace around them on the outside.
+//!
+//! ```html
+//! <div>
+//!     <div>Block inside block.</div>
+//! </div>
+//! ```
+//!
+//! As previously mentioned, the existence of whitespace is preserved.
+//!
+//! In this one, the outer and inner div has no whitespace between them:
+//! ```html
+//! <div><div>Block inside block.</div></div>
+//! ```
+//!
+//! However, if the outer div has a newline before the inner div, then it treats the group
+//! as breaking.
+//! ```diff
+//! - <div>
+//! - <div>Block inside block.</div>
+//! - <div>Block inside block.</div></div>
+//! + <div>
+//! +   <div>Block inside block.</div>
+//! +   <div>Block inside block.</div>
+//! + </div>
+//! ```
+//!
+//! Also if the block element has multiple block elements inside it, the outer block element always breaks.
+//! ```html
+//! <div>
+//!     <div>Block inside block.</div>
+//!     <div>Block inside block.</div>
+//! </div>
+//! ```
+//!
+//! Some elements may not necessarily have `display: block`, but always break their children onto multiple lines (if any children are present).
+//! - elements with `display: table-*`, except for `display: table-cell`
+//! - elements with `display: list-item`
+//! - "html", "head", "ul", "ol", "select"
+//!
+//! (see `forceBreakChildren()`: prettier/src/language-html/utilities/index.js:271)
+//!
+//! ### Inline Elements
+//! Inline elements, however, are sensitive to both inside and outside whitespace.
+//!
+//! Whitespace Sensitivity:
+//! - Inside (first/last child): YES
+//! - Outside (sibling): YES
+//!
+//! For example, the whitespace around the inline elements here makes it so that
+//! when the page renders, it'll render spaces around them. Where there is a lack
+//! of spaces, no space will be rendered.
+//! ```html
+//! Whitespace <b>must</b> be preserved around the inline elements, or it'll render
+//! <i>wierd</i>.
+//! ```
+//!
+//! It's **very important** to note that whitespace doesn't just mean any number of space ` `
+//! characters. It can also refer to any amount of newlines too.
+//!
+//! ```html
+//! <!-- Input -->
+//! <span>
+//! 123</span>
+//! <!-- Output - newline is replaced with a space -->
+//! <span> 123</span>
+//! ```
+//!
+//! Sometimes, an inline element is too long for the line width. When an inline element breaks,
+//! it actually breaks inside the element to not introduce whitespace that would be rendered by the
+//! browser.
+//!
+//! ```html
+//! <span
+//!     >pretend this is really long</span
+//! >
+//! ```
+//!
+//! Biome acomplishes this by having the element list "borrow" the tokens from the container
+//! to include inside the element list's group.
+//!
+//! ### Inline-Block Elements
+//!
+//! Inline-Block elements care about whitespace on the outside, but not on the inside. `<button>` is a perfect example of an Inline-Block element.
+//!
+//! Whitespace Sensitivity:
+//! - Inside (first/last child): NO
+//! - Outside (sibling): YES
+//!
+//! In this example, the lack of whitespace before the `<button>` causes it to hug the text.
+//! But, because of the line width restriction, it can't keep the button on the same line.
+//! But also, because it doesn't care about whitespace on the inside, its
+//! ```html
+//! <div>
+//!     Nulla id velit convallis, Integer sed enim id neque molestie mollis.<button>
+//!         submit
+//!     </button>
+//! </div>
+//! ```
+//!
+//! ## Text Content
+//!
+//! Text content is generally considered to be "inline".
+//! Long text content wraps at the line width limit. The easiest way to do this is to use the `f.fill()` helper.
+//!
+//! Examples:
+//!
+//! ```html
+//! foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar
+//! foo bar foo bar foo bar foo bar foo bar
+//! <p>
+//!   Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long
+//!   Long Long Long
+//! </p>
+//! ```
+//!
+//! The `<br>` element has special handling, in that when it occurs, its always followed by a literal line break.
+//!
+//! ```html
+//! <p>
+//!   Long Long Long Long Long Long Long Long<br />
+//!   Long Long Long Long Long Long Long Long Long Long
+//! </p>
+//! ```
+//!
+//! Text content gets condensed if it spans multiple lines. Biome has fill helpers
+//! to make this happen correctly.
+//!
+//! ```diff
+//! - This      will     get
+//! - condensed into
+//! -
+//! -
+//! -
+//! - a single line   because its just text.
+//! + This will get condensed into a single line because its just text.
+//! ```
 
 use std::cell::RefCell;
 
