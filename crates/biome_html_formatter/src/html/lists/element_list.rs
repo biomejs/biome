@@ -204,8 +204,8 @@ use biome_string_case::StrLikeExtension;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
     layout: HtmlChildListLayout,
-    /// Whether the parent element that encapsulates this element list is whitespace sensitive.
-    is_element_whitespace_sensitive: bool,
+    /// Whether the parent element that encapsulates this element list is internally whitespace sensitive.
+    is_container_whitespace_sensitive: bool,
 
     borrowed_tokens: BorrowedTokens,
 
@@ -226,7 +226,7 @@ pub(crate) struct FormatHtmlElementListOptions {
     /// Whether or not the parent element that encapsulates this element list is internally whitespace sensitive.
     ///
     /// This should always be false for the root element.
-    pub is_element_whitespace_sensitive: bool,
+    pub is_container_whitespace_sensitive: bool,
     /// Borrowed token from the containing element's opening tag.
     ///
     /// The existence of this token is not guaranteed, even if the opening tag exists. It only `Some` if
@@ -249,7 +249,7 @@ impl FormatRuleWithOptions<HtmlElementList> for FormatHtmlElementList {
 
     fn with_options(mut self, options: Self::Options) -> Self {
         self.layout = options.layout;
-        self.is_element_whitespace_sensitive = options.is_element_whitespace_sensitive;
+        self.is_container_whitespace_sensitive = options.is_container_whitespace_sensitive;
         self.borrowed_tokens = BorrowedTokens {
             borrowed_opening_r_angle: options.borrowed_r_angle,
             borrowed_closing_tag: options.borrowed_closing_tag,
@@ -470,27 +470,42 @@ impl FormatHtmlElementList {
 
         // Trim trailing new lines from children
         let mut children = children;
-        while matches!(
-            children.last(),
-            Some(HtmlChild::EmptyLine | HtmlChild::Newline)
-        ) {
-            children.pop();
+        if !self.is_container_whitespace_sensitive {
+            while matches!(
+                children.last(),
+                Some(HtmlChild::EmptyLine | HtmlChild::Newline)
+            ) {
+                children.pop();
+            }
         }
 
         let mut children_iter = HtmlChildrenIterator::new(children.iter());
 
         // Trim leading new lines
-        while matches!(
-            children_iter.peek(),
-            Some(HtmlChild::Newline | HtmlChild::EmptyLine)
-        ) {
-            children_iter.next();
+        if !self.is_container_whitespace_sensitive {
+            while matches!(
+                children_iter.peek(),
+                Some(HtmlChild::Newline | HtmlChild::EmptyLine)
+            ) {
+                children_iter.next();
+            }
         }
 
         let mut last: Option<&HtmlChild> = None;
 
+        let mut is_first_child = true;
         while let Some(child) = children_iter.next() {
             let mut child_breaks = false;
+            let is_last_child = children_iter.peek().is_none();
+
+            // Preserve whitespace existence for the first child
+            if is_first_child && self.is_container_whitespace_sensitive && child.is_whitespace() {
+                flat_builder.write(&soft_line_break_or_space(), f);
+                multiline_builder.write_separator(&soft_line_break_or_space(), f);
+                is_first_child = false;
+                last = Some(child);
+                continue;
+            }
 
             match child {
                 // A single word in text content
@@ -722,6 +737,7 @@ impl FormatHtmlElementList {
             }
 
             last = Some(child);
+            is_first_child = false;
         }
 
         // Print borrowed closing tag

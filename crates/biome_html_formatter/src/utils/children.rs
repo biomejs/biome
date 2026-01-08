@@ -132,6 +132,10 @@ impl HtmlChild {
     pub(crate) const fn is_any_line(&self) -> bool {
         matches!(self, Self::EmptyLine | Self::Newline)
     }
+
+    pub(crate) const fn is_whitespace(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::EmptyLine | Self::Newline)
+    }
 }
 
 pub(crate) fn html_split_children<I>(

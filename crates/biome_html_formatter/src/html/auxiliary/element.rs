@@ -182,7 +182,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             let format_children = FormatHtmlElementList::default()
                 .with_options(FormatHtmlElementListOptions {
                     layout,
-                    is_element_whitespace_sensitive: is_element_internally_whitespace_sensitive,
+                    is_container_whitespace_sensitive: is_element_internally_whitespace_sensitive,
                     borrowed_r_angle,
                     borrowed_closing_tag,
                     opening_tag_group: Some(attr_group_id),
