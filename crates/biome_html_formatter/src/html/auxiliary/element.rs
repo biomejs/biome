@@ -1,4 +1,5 @@
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
+use crate::utils::css_display::{CssDisplay, get_css_display};
 use crate::utils::metadata::is_element_whitespace_sensitive;
 use crate::{
     html::lists::element_list::{FormatChildrenResult, FormatHtmlElementList},
@@ -8,6 +9,7 @@ use biome_formatter::{
     CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, format_args, write,
 };
 use biome_html_syntax::{HtmlElement, HtmlElementFields};
+use biome_string_case::StrLikeExtension;
 
 use super::{
     closing_element::{FormatHtmlClosingElement, FormatHtmlClosingElementOptions},
@@ -18,6 +20,25 @@ use super::{
 /// We ignore the `script` and `style` tags as well, since embedded language parsing/formatting is not yet implemented.
 ///
 const HTML_VERBATIM_TAGS: &[&str] = &["script", "style", "pre"];
+
+/// Determines if an element should force line breaks between all its children.
+///
+/// Elements that force break children should NOT borrow tokens because their
+/// children are always formatted on multiple lines, not inline.
+///
+/// Prettier source: src/language-html/utilities/index.js:271-278
+fn should_force_break_children(tag_name: &str) -> bool {
+    let tag_lower = tag_name.to_ascii_lowercase_cow();
+
+    // These elements always break children
+    if matches!(tag_lower.as_ref(), "html" | "head" | "ul" | "ol" | "select") {
+        return true;
+    }
+
+    // Table-related elements (except table-cell) break children
+    let display = get_css_display(&tag_lower);
+    display.is_table_like() && !matches!(display, CssDisplay::TableCell)
+}
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElement;
@@ -90,16 +111,24 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         // to borrow, while the child formatters are responsible for actually printing
         // the tokens. `HtmlElementList` prints them if they are borrowed, otherwise
         // they are printed by their original formatter.
+        //
+        // Elements that force break children (like `select`, `ul`, `ol`, table elements)
+        // should NOT borrow tokens because their children are always multiline.
+        let forces_break_children = tag_name
+            .as_ref()
+            .is_some_and(|t| should_force_break_children(t.text()));
         let should_borrow_opening_r_angle = is_whitespace_sensitive
             && !children.is_empty()
             && !content_has_leading_whitespace
             && !should_be_verbatim
-            && !should_format_embedded_nodes;
+            && !should_format_embedded_nodes
+            && !forces_break_children;
         let should_borrow_closing_tag = is_whitespace_sensitive
             && !children.is_empty()
             && !content_has_trailing_whitespace
             && !should_be_verbatim
-            && !should_format_embedded_nodes;
+            && !should_format_embedded_nodes
+            && !forces_break_children;
 
         let borrowed_r_angle = if should_borrow_opening_r_angle {
             opening_element.r_angle_token().ok()

@@ -135,6 +135,7 @@ impl CssDisplay {
 /// For unknown elements, returns `CssDisplay::Inline` (the CSS default).
 ///
 /// Data source: `html-ua-styles` npm package and HTML WHATWG spec.
+/// Includes Prettier-specific adjustments for formatting purposes.
 pub fn get_css_display(tag_name: &str) -> CssDisplay {
     // Use case-insensitive matching
     let tag_lower = tag_name.to_ascii_lowercase_cow();
@@ -177,13 +178,12 @@ pub fn get_css_display(tag_name: &str) -> CssDisplay {
 
         // Hidden elements (display: none)
         "area" | "base" | "basefont" | "datalist" | "head" | "link" | "meta" | "noembed"
-        | "noframes" | "param" | "script" | "style" | "template" | "title" | "noscript" => {
-            CssDisplay::None
-        }
+        | "noframes" | "script" | "style" | "title" | "noscript" => CssDisplay::None,
 
         // Media elements - these have special handling but are essentially block-like
         // for formatting purposes when considering children
-        "audio" | "video" => CssDisplay::Inline,
+        "audio" | "video" | "object" => CssDisplay::InlineBlock,
+        "param" => CssDisplay::Block,
 
         // Form elements - inline-block
         "button" | "textarea" | "input" | "select" | "meter" | "progress" => {
@@ -191,7 +191,7 @@ pub fn get_css_display(tag_name: &str) -> CssDisplay {
         }
 
         // Replaced/embedded content (inline or inline-block depending on context)
-        "img" | "embed" | "object" | "iframe" | "canvas" => CssDisplay::Inline,
+        "img" | "embed" | "iframe" | "canvas" | "template" => CssDisplay::Inline,
 
         // Other inline elements
         "a" | "abbr" | "acronym" | "b" | "bdi" | "bdo" | "big" | "br" | "cite" | "code"
@@ -201,8 +201,8 @@ pub fn get_css_display(tag_name: &str) -> CssDisplay {
             CssDisplay::Inline
         }
 
-        // Source and track are hidden
-        "source" | "track" => CssDisplay::None,
+        // Source and track are hidden, but prettier treats them as block for formatting purposes
+        "source" | "track" => CssDisplay::Block,
 
         // Fieldset is block
         "fieldset" => CssDisplay::Block,
@@ -267,7 +267,7 @@ mod tests {
 
     #[test]
     fn test_hidden_elements() {
-        let hidden_tags = ["head", "script", "style", "template", "meta", "link"];
+        let hidden_tags = ["head", "script", "style", "meta", "link"];
         for tag in hidden_tags {
             assert_eq!(
                 get_css_display(tag),

@@ -186,11 +186,12 @@ use std::cell::RefCell;
 use crate::{
     prelude::*,
     utils::{
-        children::{HtmlChild, html_split_children},
+        children::{HtmlChild, HtmlChildrenIterator, html_split_children},
         css_display::{CssDisplay, get_css_display},
     },
     verbatim::format_html_verbatim_node,
 };
+use biome_formatter::format_element::tag::{GroupMode, Tag};
 use biome_formatter::{FormatRuleWithOptions, GroupId, best_fitting, prelude::*};
 use biome_formatter::{VecBuffer, format_args, write};
 use biome_html_syntax::{
@@ -369,29 +370,60 @@ impl Format<HtmlFormatContext> for FormatChildrenResult {
     }
 }
 
+/// Metadata about the children used to determine layout decisions.
+#[derive(Copy, Clone, Debug, Default)]
+struct ChildrenMeta {
+    /// `true` if children contains an element (HtmlElement, HtmlSelfClosingElement)
+    any_tag: bool,
+
+    /// `true` if children contains a block-like element
+    has_block_element: bool,
+
+    /// `true` if any child contains meaningful text content
+    meaningful_text: bool,
+
+    /// `true` if there are multiple non-text children
+    multiple_non_text: bool,
+}
+
 impl FormatHtmlElementList {
+    /// Computes metadata about the children by iterating once over all children.
+    fn children_meta(&self, children: &[HtmlChild]) -> ChildrenMeta {
+        let mut meta = ChildrenMeta::default();
+        let mut non_text_count = 0;
+
+        for child in children {
+            match child {
+                HtmlChild::NonText(element) => {
+                    non_text_count += 1;
+                    meta.any_tag = true;
+
+                    // Check if this is a block element
+                    let display = get_element_css_display(element);
+                    if display.is_block_like() {
+                        meta.has_block_element = true;
+                    }
+                }
+                HtmlChild::Word(_) | HtmlChild::Comment(_) => {
+                    meta.meaningful_text = true;
+                }
+                HtmlChild::Verbatim(_) => {
+                    non_text_count += 1;
+                }
+                HtmlChild::Whitespace | HtmlChild::Newline | HtmlChild::EmptyLine => {}
+            }
+        }
+
+        meta.multiple_non_text = non_text_count > 1;
+        meta
+    }
+
     pub(crate) fn fmt_children(
         &self,
         list: &HtmlElementList,
         f: &mut HtmlFormatter,
     ) -> FormatResult<FormatChildrenResult> {
         let is_root = list.parent::<HtmlRoot>().is_some();
-
-        // This intentionally considers the actual items in the element list, not the split children.
-        //
-        // For example:
-        // ```html
-        // <div>foo bar</div>
-        // <div>foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar</div>
-        // ```
-        // Should get formatted as:
-        // ```html
-        // <div>foo bar</div>
-        // <div>
-        //     foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo
-        //     bar foo bar foo bar foo bar foo bar foo bar
-        // </div>
-        let has_multiple_true_children = list.len() > 1;
 
         // Split children into HtmlChild variants
         let children = html_split_children(
@@ -402,15 +434,27 @@ impl FormatHtmlElementList {
             f,
         )?;
 
-        let sensitivity = f.options().whitespace_sensitivity();
+        let children_meta = self.children_meta(&children);
+
+        // Determine multiline layout based on whether there's meaningful text
+        let multiline_layout = if children_meta.meaningful_text {
+            MultilineLayout::Fill
+        } else {
+            MultilineLayout::NoFill
+        };
 
         // Determine if we should force multiline
-        let force_multiline =
-            matches!(self.layout, HtmlChildListLayout::Multiline) || classified.has_block_element();
+        // Force multiline if:
+        // - Layout is explicitly set to Multiline
+        // - Children contain block elements
+        // - There are multiple non-text children
+        let mut force_multiline = matches!(self.layout, HtmlChildListLayout::Multiline)
+            || children_meta.has_block_element
+            || children_meta.multiple_non_text;
 
         // Create builders
         let mut flat_builder = FlatBuilder::new();
-        let mut multiline_builder = MultilineBuilder::new();
+        let mut multiline_builder = MultilineBuilder::new(multiline_layout, is_root);
 
         if force_multiline {
             flat_builder.disable();
@@ -420,16 +464,270 @@ impl FormatHtmlElementList {
         if let Some(ref r_angle_token) = self.borrowed_tokens.borrowed_opening_r_angle {
             let r_angle_format = format_with(|f| r_angle_token.format().fmt(f));
             flat_builder.write(&r_angle_format, f);
-            multiline_builder.write(&r_angle_format, f);
+            multiline_builder.write_content(&r_angle_format, f);
         }
 
-        // TODO: actually format the children here.
+        // Trim trailing new lines from children
+        let mut children = children;
+        while matches!(
+            children.last(),
+            Some(HtmlChild::EmptyLine | HtmlChild::Newline)
+        ) {
+            children.pop();
+        }
+
+        let mut children_iter = HtmlChildrenIterator::new(children.iter());
+
+        // Trim leading new lines
+        while matches!(
+            children_iter.peek(),
+            Some(HtmlChild::Newline | HtmlChild::EmptyLine)
+        ) {
+            children_iter.next();
+        }
+
+        let mut last: Option<&HtmlChild> = None;
+
+        while let Some(child) = children_iter.next() {
+            let mut child_breaks = false;
+
+            match child {
+                // A single word in text content
+                HtmlChild::Word(word) => {
+                    let separator = match children_iter.peek() {
+                        Some(HtmlChild::Word(_)) => {
+                            // Separate words by a space or line break in extended mode
+                            Some(WordSeparator::BetweenWords)
+                        }
+
+                        // Last word or word before an element without any whitespace in between
+                        Some(HtmlChild::NonText(next_child)) => {
+                            // <br> elements handle their own line breaking (after themselves),
+                            // so we don't need to force a break before them.
+                            // Other self-closing elements may need a hard break before them.
+                            let is_br = is_br_element(next_child);
+                            Some(WordSeparator::EndOfText {
+                                is_soft_line_break: is_br
+                                    || !is_self_closing_or_br(next_child)
+                                    || word.is_single_character(),
+                            })
+                        }
+
+                        Some(HtmlChild::Whitespace | HtmlChild::Newline | HtmlChild::EmptyLine) => {
+                            None
+                        }
+
+                        Some(HtmlChild::Comment(_) | HtmlChild::Verbatim(_)) => {
+                            Some(WordSeparator::BetweenWords)
+                        }
+
+                        None => None,
+                    };
+
+                    child_breaks = separator.is_some_and(|sep| sep.will_break());
+
+                    flat_builder.write(&format_args![word, separator], f);
+
+                    if let Some(separator) = separator {
+                        multiline_builder.write_with_separator(word, &separator, f);
+                    } else {
+                        multiline_builder.write_content(word, f);
+                    }
+                }
+
+                // HTML comment
+                HtmlChild::Comment(comment) => {
+                    let separator = match children_iter.peek() {
+                        Some(HtmlChild::Word(_)) => Some(WordSeparator::BetweenWords),
+                        Some(HtmlChild::NonText(_)) => Some(WordSeparator::EndOfText {
+                            is_soft_line_break: true,
+                        }),
+                        _ => None,
+                    };
+
+                    flat_builder.write(&format_args![comment, separator], f);
+
+                    if let Some(separator) = separator {
+                        multiline_builder.write_with_separator(comment, &separator, f);
+                    } else {
+                        multiline_builder.write_content(comment, f);
+                    }
+                }
+
+                // Whitespace between children
+                HtmlChild::Whitespace => {
+                    flat_builder.write(&space(), f);
+
+                    let is_after_line_break = last.as_ref().is_some_and(|l| l.is_any_line());
+                    let is_trailing_or_only_whitespace = children_iter.peek().is_none();
+
+                    if is_trailing_or_only_whitespace || is_after_line_break {
+                        multiline_builder.write_separator(&space(), f);
+                    } else if last.is_none() {
+                        // Leading whitespace
+                        multiline_builder.write_with_separator(&space(), &hard_line_break(), f);
+                    } else {
+                        multiline_builder.write_separator(&space(), f);
+                    }
+                }
+
+                // A new line between children
+                HtmlChild::Newline => {
+                    let is_soft_break = {
+                        // Handle case of newline between single-char word and element
+                        if let Some(HtmlChild::Word(word)) = last {
+                            let is_next_self_closing = matches!(
+                                children_iter.peek(),
+                                Some(HtmlChild::NonText(elem)) if is_self_closing_or_br(elem)
+                            );
+                            !is_next_self_closing && word.is_single_character()
+                        } else if let Some(HtmlChild::Word(next_word)) = children_iter.peek() {
+                            let next_next = children_iter.peek_next();
+                            let is_next_next_self_closing = matches!(
+                                next_next,
+                                Some(HtmlChild::NonText(elem)) if is_self_closing_or_br(elem)
+                            );
+                            !is_next_next_self_closing && next_word.is_single_character()
+                        } else {
+                            false
+                        }
+                    };
+
+                    if is_soft_break {
+                        multiline_builder.write_separator(&soft_line_break(), f);
+                    } else {
+                        child_breaks = true;
+                        multiline_builder.write_separator(&hard_line_break(), f);
+                    }
+                }
+
+                // An empty line between children
+                HtmlChild::EmptyLine => {
+                    child_breaks = true;
+
+                    // Preserve empty lines between children
+                    multiline_builder.write_separator(&empty_line(), f);
+                }
+
+                // Any non-text child (elements)
+                HtmlChild::NonText(non_text) => {
+                    let is_br = is_br_element(non_text);
+                    let line_mode = match children_iter.peek() {
+                        Some(HtmlChild::Word(word)) => {
+                            // <br /> always forces a hard line break after it
+                            if is_br {
+                                Some(LineMode::Hard)
+                            } else if is_self_closing_or_br(non_text) && !word.is_single_character()
+                            {
+                                Some(LineMode::Hard)
+                            } else {
+                                Some(LineMode::Soft)
+                            }
+                        }
+
+                        Some(HtmlChild::NonText(_)) => Some(LineMode::Hard),
+
+                        Some(HtmlChild::Comment(_)) => {
+                            if is_br {
+                                Some(LineMode::Hard)
+                            } else {
+                                Some(LineMode::Soft)
+                            }
+                        }
+
+                        Some(HtmlChild::Whitespace | HtmlChild::Newline | HtmlChild::EmptyLine) => {
+                            // <br /> forces hard break even with trailing whitespace
+                            if is_br { Some(LineMode::Hard) } else { None }
+                        }
+
+                        Some(HtmlChild::Verbatim(_)) => Some(LineMode::Hard),
+
+                        None => {
+                            // <br /> at the end still forces a break
+                            if is_br { Some(LineMode::Hard) } else { None }
+                        }
+                    };
+
+                    child_breaks = line_mode.is_some_and(|mode| mode.is_hard());
+
+                    let format_separator = line_mode.map(|mode| {
+                        format_with(move |f| f.write_element(FormatElement::Line(mode)))
+                    });
+
+                    if force_multiline {
+                        if let Some(format_separator) = format_separator {
+                            multiline_builder.write_with_separator(
+                                &non_text.format(),
+                                &format_separator,
+                                f,
+                            );
+                        } else {
+                            multiline_builder.write_content(&non_text.format(), f);
+                        }
+                    } else {
+                        let mut memoized = non_text.format().memoized();
+
+                        // Only propagate breaks from block-like elements.
+                        // Inline elements can break internally without forcing the parent to multiline.
+                        let is_block_like = get_element_css_display(non_text).is_block_like();
+                        if is_block_like && memoized.inspect(f)?.will_break() {
+                            force_multiline = true;
+                        }
+                        flat_builder.write(&format_args![memoized, format_separator], f);
+
+                        if let Some(format_separator) = format_separator {
+                            multiline_builder.write_with_separator(&memoized, &format_separator, f);
+                        } else {
+                            multiline_builder.write_content(&memoized, f);
+                        }
+                    }
+                }
+
+                // Verbatim content (suppressed formatting)
+                HtmlChild::Verbatim(element) => {
+                    let format_verbatim = format_html_verbatim_node(element.syntax());
+
+                    let line_mode = match children_iter.peek() {
+                        Some(HtmlChild::NonText(_) | HtmlChild::Verbatim(_)) => {
+                            Some(LineMode::Hard)
+                        }
+                        Some(HtmlChild::Word(_)) => Some(LineMode::Soft),
+                        _ => None,
+                    };
+
+                    child_breaks = line_mode.is_some_and(|mode| mode.is_hard());
+
+                    let format_separator = line_mode.map(|mode| {
+                        format_with(move |f| f.write_element(FormatElement::Line(mode)))
+                    });
+
+                    flat_builder.write(&format_args![format_verbatim, format_separator], f);
+
+                    if let Some(format_separator) = format_separator {
+                        multiline_builder.write_with_separator(
+                            &format_verbatim,
+                            &format_separator,
+                            f,
+                        );
+                    } else {
+                        multiline_builder.write_content(&format_verbatim, f);
+                    }
+                }
+            }
+
+            if child_breaks {
+                flat_builder.disable();
+                force_multiline = true;
+            }
+
+            last = Some(child);
+        }
 
         // Print borrowed closing tag
         if let Some(ref closing_tag) = self.borrowed_tokens.borrowed_closing_tag {
             let closing_tag_format = format_with(|f| format_partial_closing_tag(f, closing_tag));
             flat_builder.write(&closing_tag_format, f);
-            multiline_builder.write(&closing_tag_format, f);
+            multiline_builder.write_content(&closing_tag_format, f);
         }
 
         // Return result
@@ -447,16 +745,61 @@ impl FormatHtmlElementList {
     }
 }
 
-// /// Helper function to format individual `HtmlChild` variants.
-fn format_child(child: &HtmlChild) -> impl Format<HtmlFormatContext> + '_ {
-    format_with(move |f| match child {
-        HtmlChild::Word(word) => write!(f, [word]),
-        HtmlChild::Comment(comment) => write!(f, [comment]),
-        HtmlChild::NonText(element) => write!(f, [element.format()]),
-        HtmlChild::Verbatim(element) => write!(f, [format_html_verbatim_node(element.syntax())]),
-        // Whitespace variants are handled by separator logic, not here
-        HtmlChild::Whitespace | HtmlChild::Newline | HtmlChild::EmptyLine => Ok(()),
-    })
+/// Gets the CSS display value for an HTML element.
+fn get_element_css_display(element: &AnyHtmlElement) -> CssDisplay {
+    if let Some(tag_name) = element.name() {
+        get_css_display(&tag_name)
+    } else {
+        CssDisplay::Inline
+    }
+}
+
+/// Check if an element is a self-closing element or `<br>`
+fn is_self_closing_or_br(element: &AnyHtmlElement) -> bool {
+    matches!(element, AnyHtmlElement::HtmlSelfClosingElement(_)) || is_br_element(element)
+}
+
+/// Check if an element is a `<br>` element
+fn is_br_element(element: &AnyHtmlElement) -> bool {
+    element
+        .name()
+        .is_some_and(|name| name.text().eq_ignore_ascii_case("br"))
+}
+
+/// Separator between words in text content.
+#[derive(Copy, Clone, Debug)]
+enum WordSeparator {
+    /// Separator between two words. Creates a soft line break or space.
+    BetweenWords,
+
+    /// A separator at the end of text content, before an element.
+    EndOfText { is_soft_line_break: bool },
+}
+
+impl WordSeparator {
+    fn will_break(&self) -> bool {
+        matches!(
+            self,
+            Self::EndOfText {
+                is_soft_line_break: false,
+            }
+        )
+    }
+}
+
+impl Format<HtmlFormatContext> for WordSeparator {
+    fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
+        match self {
+            Self::BetweenWords => soft_line_break_or_space().fmt(f),
+            Self::EndOfText { is_soft_line_break } => {
+                if *is_soft_line_break {
+                    soft_line_break().fmt(f)
+                } else {
+                    hard_line_break().fmt(f)
+                }
+            }
+        }
+    }
 }
 
 #[derive(Debug, Default, Copy, Clone)]
@@ -529,49 +872,141 @@ impl Format<HtmlFormatContext> for FormatFlatChildren {
     }
 }
 
-/// Wrapper for formatting children in multiline/expanded mode.
-#[derive(Debug)]
-pub(crate) struct FormatMultilineChildren {
-    elements: RefCell<Vec<FormatElement>>,
-}
-
-impl Format<HtmlFormatContext> for FormatMultilineChildren {
-    fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
-        if let Some(elements) = f.intern_vec(self.elements.take()) {
-            f.write_element(elements)?;
-        }
-        Ok(())
-    }
+/// Layout mode for multiline content
+#[derive(Copy, Clone, Debug, Default)]
+enum MultilineLayout {
+    /// Use fill layout for text content wrapping
+    Fill,
+    /// Don't use fill, just regular line breaks
+    #[default]
+    NoFill,
 }
 
 /// Builder for multiline/expanded output.
 ///
-/// Similar to `FlatBuilder`, but for the expanded (multiline) variant.
+/// Supports both Fill and NoFill layouts depending on whether there's text content.
 #[derive(Debug)]
 struct MultilineBuilder {
+    layout: MultilineLayout,
     result: FormatResult<Vec<FormatElement>>,
+    is_root: bool,
 }
 
 impl MultilineBuilder {
-    fn new() -> Self {
+    fn new(layout: MultilineLayout, is_root: bool) -> Self {
         Self {
+            layout,
             result: Ok(Vec::new()),
+            is_root,
         }
     }
 
-    fn write(&mut self, content: &dyn Format<HtmlFormatContext>, f: &mut HtmlFormatter) {
+    /// Formats content without a separator
+    fn write_content(&mut self, content: &dyn Format<HtmlFormatContext>, f: &mut HtmlFormatter) {
+        self.write(content, None, f);
+    }
+
+    /// Formats just a separator
+    fn write_separator(
+        &mut self,
+        separator: &dyn Format<HtmlFormatContext>,
+        f: &mut HtmlFormatter,
+    ) {
+        self.write(separator, None, f);
+    }
+
+    /// Formats content with a separator
+    fn write_with_separator(
+        &mut self,
+        content: &dyn Format<HtmlFormatContext>,
+        separator: &dyn Format<HtmlFormatContext>,
+        f: &mut HtmlFormatter,
+    ) {
+        self.write(content, Some(separator), f);
+    }
+
+    fn write(
+        &mut self,
+        content: &dyn Format<HtmlFormatContext>,
+        separator: Option<&dyn Format<HtmlFormatContext>>,
+        f: &mut HtmlFormatter,
+    ) {
         let result = std::mem::replace(&mut self.result, Ok(Vec::new()));
+
         self.result = result.and_then(|elements| {
             let mut buffer = VecBuffer::new_with_vec(f.state_mut(), elements);
-            write!(buffer, [content])?;
+
+            match self.layout {
+                MultilineLayout::Fill => {
+                    // Wrap in entry tags for fill layout
+                    buffer.write_element(FormatElement::Tag(Tag::StartEntry))?;
+                    write!(buffer, [content])?;
+                    buffer.write_element(FormatElement::Tag(Tag::EndEntry))?;
+
+                    if let Some(separator) = separator {
+                        buffer.write_element(FormatElement::Tag(Tag::StartEntry))?;
+                        write!(buffer, [separator])?;
+                        buffer.write_element(FormatElement::Tag(Tag::EndEntry))?;
+                    }
+                }
+                MultilineLayout::NoFill => {
+                    write!(buffer, [content])?;
+
+                    if let Some(separator) = separator {
+                        write!(buffer, [separator])?;
+                    }
+                }
+            }
+
             Ok(buffer.into_vec())
-        })
+        });
     }
 
     fn finish(self) -> FormatResult<FormatMultilineChildren> {
         Ok(FormatMultilineChildren {
+            layout: self.layout,
             elements: RefCell::new(self.result?),
+            is_root: self.is_root,
         })
+    }
+}
+
+/// Wrapper for formatting children in multiline/expanded mode.
+#[derive(Debug)]
+pub(crate) struct FormatMultilineChildren {
+    layout: MultilineLayout,
+    elements: RefCell<Vec<FormatElement>>,
+    is_root: bool,
+}
+
+impl Format<HtmlFormatContext> for FormatMultilineChildren {
+    fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
+        let format_inner = format_once(|f| {
+            if let Some(elements) = f.intern_vec(self.elements.take()) {
+                match self.layout {
+                    MultilineLayout::Fill => f.write_elements([
+                        FormatElement::Tag(Tag::StartFill),
+                        elements,
+                        FormatElement::Tag(Tag::EndFill),
+                    ])?,
+                    MultilineLayout::NoFill => f.write_elements([
+                        FormatElement::Tag(Tag::StartGroup(
+                            tag::Group::new().with_mode(GroupMode::Expand),
+                        )),
+                        elements,
+                        FormatElement::Tag(Tag::EndGroup),
+                    ])?,
+                }
+            }
+
+            Ok(())
+        });
+
+        if self.is_root {
+            write!(f, [format_inner])
+        } else {
+            write!(f, [group(&block_indent(&format_inner))])
+        }
     }
 }
 

@@ -129,7 +129,6 @@ pub(crate) enum HtmlChild {
 }
 
 impl HtmlChild {
-    #[expect(dead_code)]
     pub(crate) const fn is_any_line(&self) -> bool {
         matches!(self, Self::EmptyLine | Self::Newline)
     }
