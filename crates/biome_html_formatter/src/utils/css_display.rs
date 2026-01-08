@@ -127,6 +127,18 @@ impl CssDisplay {
                 | Self::TableCaption
         )
     }
+
+    /// Whether elements with this display value are considered
+    /// whitespace-sensitive on the inside (i.e., their children).
+    pub fn is_internally_whitespace_sensitive(&self) -> bool {
+        !self.is_block_like() && *self != CssDisplay::InlineBlock
+    }
+
+    /// Whether elements with this display value are considered
+    /// whitespace-sensitive on the outside (i.e., around the element, to siblings).
+    pub fn is_externally_whitespace_sensitive(&self) -> bool {
+        self.is_inline_like()
+    }
 }
 
 /// Gets the CSS display value for a given HTML tag name.

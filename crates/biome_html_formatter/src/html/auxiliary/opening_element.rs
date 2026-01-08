@@ -1,7 +1,7 @@
 use crate::{
     html::lists::attribute_list::FormatHtmlAttributeListOptions,
     prelude::*,
-    utils::metadata::{is_element_whitespace_sensitive, should_lowercase_html_tag},
+    utils::{css_display::get_css_display_from_tag, metadata::should_lowercase_html_tag},
 };
 use biome_formatter::{FormatRuleWithOptions, GroupId, write};
 use biome_html_syntax::{HtmlOpeningElement, HtmlOpeningElementFields};
@@ -47,7 +47,8 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
 
         let l_angle_token = l_angle_token?;
         let name = name?;
-        let is_whitespace_sensitive = is_element_whitespace_sensitive(f, &name);
+        let css_display = get_css_display_from_tag(&name);
+        let is_whitespace_sensitive = css_display.is_internally_whitespace_sensitive();
         let is_canonical_html_element = should_lowercase_html_tag(f, &name);
 
         let bracket_same_line = f.options().bracket_same_line().value();

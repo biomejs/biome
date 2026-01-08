@@ -1,6 +1,5 @@
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
-use crate::utils::css_display::{CssDisplay, get_css_display};
-use crate::utils::metadata::is_element_whitespace_sensitive;
+use crate::utils::css_display::{CssDisplay, get_css_display, get_css_display_from_tag};
 use crate::{
     html::lists::element_list::{FormatChildrenResult, FormatHtmlElementList},
     prelude::*,
@@ -54,7 +53,9 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         let closing_element = closing_element?;
         let opening_element = opening_element?;
         let tag_name = opening_element.name()?;
-        let is_whitespace_sensitive = is_element_whitespace_sensitive(f, &tag_name);
+        let css_display = get_css_display_from_tag(&tag_name);
+        let is_element_internally_whitespace_sensitive =
+            css_display.is_internally_whitespace_sensitive();
         let tag_name = tag_name
             .trim_trivia()
             .map(|t| t.value_token())
@@ -117,13 +118,14 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         let forces_break_children = tag_name
             .as_ref()
             .is_some_and(|t| should_force_break_children(t.text()));
-        let should_borrow_opening_r_angle = is_whitespace_sensitive
+
+        let should_borrow_opening_r_angle = is_element_internally_whitespace_sensitive
             && !children.is_empty()
             && !content_has_leading_whitespace
             && !should_be_verbatim
             && !should_format_embedded_nodes
             && !forces_break_children;
-        let should_borrow_closing_tag = is_whitespace_sensitive
+        let should_borrow_closing_tag = is_element_internally_whitespace_sensitive
             && !children.is_empty()
             && !content_has_trailing_whitespace
             && !should_be_verbatim
@@ -165,7 +167,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             let format_children = FormatHtmlElementList::default()
                 .with_options(FormatHtmlElementListOptions {
                     layout,
-                    is_element_whitespace_sensitive: is_whitespace_sensitive,
+                    is_element_whitespace_sensitive: is_element_internally_whitespace_sensitive,
                     borrowed_r_angle,
                     borrowed_closing_tag,
                     opening_tag_group: Some(attr_group_id),

@@ -777,14 +777,6 @@ pub(crate) fn is_element_whitespace_sensitive_from_element(
     sensitivity.is_css() && is_whitespace_sensitive || sensitivity.is_strict()
 }
 
-/// Whether an element should be considered whitespace sensitive, considering the element's tag name and the
-/// formatter's whitespace sensitivity options.
-pub(crate) fn is_element_whitespace_sensitive(f: &HtmlFormatter, tag_name: &HtmlTagName) -> bool {
-    let sensitivity = f.options().whitespace_sensitivity();
-    sensitivity.is_css() && get_css_display_from_tag(tag_name).is_inline_like()
-        || sensitivity.is_strict()
-}
-
 /// Checks if an element has an inline CSS display value (whitespace-sensitive).
 ///
 /// NOTE: This currently uses a conservative list of inline elements that matches

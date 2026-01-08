@@ -199,6 +199,7 @@ use biome_html_syntax::{
     HtmlElementList, HtmlRoot, HtmlSyntaxToken,
 };
 use biome_rowan::AstNode;
+use biome_string_case::StrLikeExtension;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
@@ -222,7 +223,7 @@ impl FormatHtmlElementList {
 
 pub(crate) struct FormatHtmlElementListOptions {
     pub layout: HtmlChildListLayout,
-    /// Whether or not the parent element that encapsulates this element list is whitespace sensitive.
+    /// Whether or not the parent element that encapsulates this element list is internally whitespace sensitive.
     ///
     /// This should always be false for the root element.
     pub is_element_whitespace_sensitive: bool,
@@ -462,7 +463,7 @@ impl FormatHtmlElementList {
 
         // Print borrowed opening `>` token
         if let Some(ref r_angle_token) = self.borrowed_tokens.borrowed_opening_r_angle {
-            let r_angle_format = format_with(|f| r_angle_token.format().fmt(f));
+            let r_angle_format = format_with(|f| r_angle_token.format().fmt(f)).memoized();
             flat_builder.write(&r_angle_format, f);
             multiline_builder.write_content(&r_angle_format, f);
         }
@@ -725,7 +726,8 @@ impl FormatHtmlElementList {
 
         // Print borrowed closing tag
         if let Some(ref closing_tag) = self.borrowed_tokens.borrowed_closing_tag {
-            let closing_tag_format = format_with(|f| format_partial_closing_tag(f, closing_tag));
+            let closing_tag_format =
+                format_with(|f| format_partial_closing_tag(f, closing_tag)).memoized();
             flat_builder.write(&closing_tag_format, f);
             multiline_builder.write_content(&closing_tag_format, f);
         }
@@ -1013,16 +1015,15 @@ impl Format<HtmlFormatContext> for FormatMultilineChildren {
 /// Determines if an element should force line breaks between all its children.
 ///
 /// Prettier source: src/language-html/utilities/index.js:271-278
-#[allow(dead_code)]
 fn should_force_break_children(tag_name: Option<&str>) -> bool {
     let Some(tag) = tag_name else {
         return false;
     };
 
-    let tag_lower = tag.to_ascii_lowercase();
+    let tag_lower = tag.to_ascii_lowercase_cow();
 
     // These elements always break children
-    if matches!(tag_lower.as_str(), "html" | "head" | "ul" | "ol" | "select") {
+    if matches!(tag_lower.as_ref(), "html" | "head" | "ul" | "ol" | "select") {
         return true;
     }
 

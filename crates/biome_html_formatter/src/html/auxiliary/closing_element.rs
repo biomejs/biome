@@ -1,4 +1,7 @@
-use crate::{prelude::*, utils::metadata::is_element_whitespace_sensitive};
+use crate::{
+    prelude::*,
+    utils::css_display::{self, get_css_display_from_tag},
+};
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{HtmlClosingElement, HtmlClosingElementFields};
 #[derive(Debug, Clone, Default)]
@@ -36,7 +39,8 @@ impl FormatNodeRule<HtmlClosingElement> for FormatHtmlClosingElement {
         } = node.as_fields();
 
         let name = name?;
-        let is_whitespace_sensitive = is_element_whitespace_sensitive(f, &name);
+        let css_display = get_css_display_from_tag(&name);
+        let is_whitespace_sensitive = css_display.is_internally_whitespace_sensitive();
 
         // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
         if !self.tag_borrowed {
