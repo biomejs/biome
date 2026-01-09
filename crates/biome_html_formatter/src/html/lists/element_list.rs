@@ -635,14 +635,20 @@ impl FormatHtmlElementList {
                 // Any non-text child (elements)
                 HtmlChild::NonText(non_text) => {
                     let is_br = is_br_element(non_text);
+                    let css_display = get_element_css_display(non_text);
                     let line_mode = match children_iter.peek() {
                         Some(HtmlChild::Word(word)) => {
                             // <br /> always forces a hard line break after it
-                            if is_br {
-                                Some(LineMode::Hard)
-                            } else if is_self_closing_or_br(non_text) && !word.is_single_character()
+                            if is_br
+                                || (is_self_closing_or_br(non_text) && !word.is_single_character())
                             {
                                 Some(LineMode::Hard)
+                            } else if css_display.is_externally_whitespace_sensitive() {
+                                // not allowed to add whitespace if the next one is externally whitespace sensitive
+                                // ```html
+                                // <a>link</a>more text
+                                // ```
+                                None
                             } else {
                                 Some(LineMode::Soft)
                             }
