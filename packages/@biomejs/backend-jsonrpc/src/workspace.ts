@@ -986,6 +986,11 @@ See <https://biomejs.dev/assist/actions/organize-imports>
 	 */
 	organizeImports?: OrganizeImportsConfiguration;
 	/**
+	* Organize package.json fields according to established conventions.
+See <https://biomejs.dev/assist/actions/organize-package-json> 
+	 */
+	organizePackageJson?: OrganizePackageJsonConfiguration;
+	/**
 	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -1178,6 +1183,9 @@ export interface OverrideLinterConfiguration {
 export type OrganizeImportsConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithOrganizeImportsOptions;
+export type OrganizePackageJsonConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithOrganizePackageJsonOptions;
 export type UseSortedAttributesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedAttributesOptions;
@@ -3334,6 +3342,10 @@ export interface RuleAssistWithOrganizeImportsOptions {
 	level: RuleAssistPlainConfiguration;
 	options: OrganizeImportsOptions;
 }
+export interface RuleAssistWithOrganizePackageJsonOptions {
+	level: RuleAssistPlainConfiguration;
+	options: OrganizePackageJsonOptions;
+}
 export interface RuleAssistWithUseSortedAttributesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedAttributesOptions;
@@ -4591,6 +4603,7 @@ export interface OrganizeImportsOptions {
 	groups?: ImportGroups;
 	identifierOrder?: SortOrder;
 }
+export type OrganizePackageJsonOptions = {};
 export interface UseSortedAttributesOptions {
 	sortOrder?: SortOrder;
 }
@@ -7946,11 +7959,12 @@ export type Category =
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
+	| "assist/source/organizeImports"
+	| "assist/source/organizePackageJson"
+	| "assist/source/useSortedAttributes"
 	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"
-	| "assist/source/useSortedAttributes"
-	| "assist/source/organizeImports"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
