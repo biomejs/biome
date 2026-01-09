@@ -153,6 +153,7 @@ impl ServiceLanguage for JsonLanguage {
                     || optional_json_file_source.is_some_and(|x| x.allow_trailing_commas()),
                     |value| value.value(),
                 ),
+                allow_metavariables: false,
             };
 
             overrides.apply_override_json_parser_options(path, &mut options);
