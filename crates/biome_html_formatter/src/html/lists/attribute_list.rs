@@ -58,6 +58,7 @@ impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
                                             is_canonical_html_element: self
                                                 .is_canonical_html_element,
                                             tag_name: self.tag_name.clone(),
+                                            compact: false,
                                         })
                                         .fmt(f),
                                     AnyHtmlAttribute::HtmlDoubleTextExpression(attr) => {

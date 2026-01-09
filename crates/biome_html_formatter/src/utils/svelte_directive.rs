@@ -1,94 +1,123 @@
 use crate::AsFormat;
 use crate::prelude::HtmlFormatContext;
+use crate::svelte::value::directive_value::FormatSvelteDirectiveValueOptions;
 use biome_formatter::Buffer;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::write;
 use biome_formatter::{Format, FormatResult};
 use biome_html_syntax::{
-    HtmlSyntaxToken, SvelteAnimateDirective, SvelteBindDirective, SvelteClassDirective,
-    SvelteDirectiveValue, SvelteInDirective, SvelteOutDirective, SvelteStyleDirective,
-    SvelteTransitionDirective, SvelteUseDirective,
+    HtmlSyntaxNode, HtmlSyntaxToken, SvelteAnimateDirective, SvelteBindDirective,
+    SvelteClassDirective, SvelteDirectiveValue, SvelteInDirective, SvelteOutDirective,
+    SvelteStyleDirective, SvelteTransitionDirective, SvelteUseDirective,
 };
-use biome_rowan::SyntaxResult;
+use biome_rowan::{AstNode, SyntaxResult};
 
-pub(crate) struct FmtSvelteDirective {
+pub(crate) struct FmtSvelteDirective<'a> {
+    _node: &'a HtmlSyntaxNode,
     token: SyntaxResult<HtmlSyntaxToken>,
     value: SyntaxResult<SvelteDirectiveValue>,
+    allows_compact: bool,
 }
 
-impl From<&SvelteAnimateDirective> for FmtSvelteDirective {
-    fn from(value: &SvelteAnimateDirective) -> Self {
+impl<'a> From<&'a SvelteAnimateDirective> for FmtSvelteDirective<'a> {
+    fn from(value: &'a SvelteAnimateDirective) -> Self {
         Self {
             token: value.animate_token(),
             value: value.value(),
+            _node: value.syntax(),
+            allows_compact: false,
         }
     }
 }
 
-impl From<&SvelteInDirective> for FmtSvelteDirective {
-    fn from(value: &SvelteInDirective) -> Self {
+impl<'a> From<&'a SvelteInDirective> for FmtSvelteDirective<'a> {
+    fn from(value: &'a SvelteInDirective) -> Self {
         Self {
             token: value.in_token(),
             value: value.value(),
+            _node: value.syntax(),
+            allows_compact: false,
         }
     }
 }
 
-impl From<&SvelteOutDirective> for FmtSvelteDirective {
-    fn from(value: &SvelteOutDirective) -> Self {
+impl<'a> From<&'a SvelteOutDirective> for FmtSvelteDirective<'a> {
+    fn from(value: &'a SvelteOutDirective) -> Self {
         Self {
             token: value.out_token(),
             value: value.value(),
+            _node: value.syntax(),
+            allows_compact: false,
         }
     }
 }
 
-impl From<&SvelteBindDirective> for FmtSvelteDirective {
-    fn from(value: &SvelteBindDirective) -> Self {
+impl<'a> From<&'a SvelteBindDirective> for FmtSvelteDirective<'a> {
+    fn from(value: &'a SvelteBindDirective) -> Self {
         Self {
             token: value.bind_token(),
             value: value.value(),
+            _node: value.syntax(),
+            allows_compact: true,
         }
     }
 }
 
-impl From<&SvelteTransitionDirective> for FmtSvelteDirective {
-    fn from(value: &SvelteTransitionDirective) -> Self {
+impl<'a> From<&'a SvelteTransitionDirective> for FmtSvelteDirective<'a> {
+    fn from(value: &'a SvelteTransitionDirective) -> Self {
         Self {
             token: value.transition_token(),
             value: value.value(),
+            _node: value.syntax(),
+            allows_compact: false,
         }
     }
 }
 
-impl From<&SvelteClassDirective> for FmtSvelteDirective {
-    fn from(value: &SvelteClassDirective) -> Self {
+impl<'a> From<&'a SvelteClassDirective> for FmtSvelteDirective<'a> {
+    fn from(value: &'a SvelteClassDirective) -> Self {
         Self {
             token: value.class_token(),
             value: value.value(),
+            _node: value.syntax(),
+            allows_compact: false,
         }
     }
 }
-impl From<&SvelteStyleDirective> for FmtSvelteDirective {
-    fn from(value: &SvelteStyleDirective) -> Self {
+impl<'a> From<&'a SvelteStyleDirective> for FmtSvelteDirective<'a> {
+    fn from(value: &'a SvelteStyleDirective) -> Self {
         Self {
             token: value.style_token(),
             value: value.value(),
+            _node: value.syntax(),
+            allows_compact: false,
         }
     }
 }
 
-impl From<&SvelteUseDirective> for FmtSvelteDirective {
-    fn from(value: &SvelteUseDirective) -> Self {
+impl<'a> From<&'a SvelteUseDirective> for FmtSvelteDirective<'a> {
+    fn from(value: &'a SvelteUseDirective) -> Self {
         Self {
             token: value.use_token(),
             value: value.value(),
+            _node: value.syntax(),
+            allows_compact: false,
         }
     }
 }
 
-impl Format<HtmlFormatContext> for FmtSvelteDirective {
+impl<'a> Format<HtmlFormatContext> for FmtSvelteDirective<'a> {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
-        write!(f, [self.token.format(), self.value.format()])
+        write!(
+            f,
+            [
+                self.token.format(),
+                self.value
+                    .format()?
+                    .with_options(FormatSvelteDirectiveValueOptions {
+                        compact: self.allows_compact
+                    })
+            ]
+        )
     }
 }
