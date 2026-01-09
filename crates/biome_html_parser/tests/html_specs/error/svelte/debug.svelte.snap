@@ -87,7 +87,7 @@ HtmlRoot {
 ```
 debug.svelte:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a Expected a name or a closing block, instead found none. but instead found '{@'.
+  × Unexpected value or character.
   
     1 │ {@debug
   > 2 │ {@debug something}
@@ -95,12 +95,9 @@ debug.svelte:2:1 parse ━━━━━━━━━━━━━━━━━━━
     3 │ {@debug debug}
     4 │ 
   
-  i Expected a Expected a name or a closing block, instead found none. here.
+  i Expected one of:
   
-    1 │ {@debug
-  > 2 │ {@debug something}
-      │ ^^
-    3 │ {@debug debug}
-    4 │ 
+  - name
+  - closing block
   
 ```

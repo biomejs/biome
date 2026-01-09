@@ -165,6 +165,7 @@ AnyHtmlAttribute =
 	| HtmlDoubleTextExpression
 	| HtmlSingleTextExpression
 	| SvelteAttachAttribute
+	| AnySvelteDirective
 	| AnyVueDirective
 	| HtmlBogusAttribute
 
@@ -494,8 +495,90 @@ SvelteSnippetClosingBlock =
 	'snippet'
 	'}'
 
+AnySvelteDirective =
+	SvelteBindDirective
+	| SvelteTransitionDirective
+	| SvelteInDirective
+  | SvelteOutDirective
+  | SvelteUseDirective
+  | SvelteAnimateDirective
+  | SvelteStyleDirective
+  | SvelteClassDirective
+
+// <div bind:value={value} >
+//      ^^^^^^^^^^^^^^^^^^
+SvelteBindDirective =
+	'bind'
+	value: SvelteDirectiveValue
+
+// <div transition:fade|global={value} >
+//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteTransitionDirective =
+	'transition'
+	value: SvelteDirectiveValue
+
+// <div in:fly >
+//      ^^^^^^
+SvelteInDirective =
+	'in'
+	value: SvelteDirectiveValue
+
+// <div out:fly >
+//      ^^^^^^^
+SvelteOutDirective =
+	'out'
+	value: SvelteDirectiveValue
+
+// <div use:fly >
+//      ^^^^^^^
+SvelteUseDirective =
+	'use'
+	value: SvelteDirectiveValue
+
+// <div animate:fly >
+//      ^^^^^^^^^^^
+SvelteAnimateDirective =
+	'animate'
+	value: SvelteDirectiveValue
+
+// <div style:fly >
+//      ^^^^^^^^^
+SvelteStyleDirective =
+	'style'
+	value: SvelteDirectiveValue
+
+// <div class:fly >
+//      ^^^^^^^^^
+SvelteClassDirective =
+	'class'
+	value: SvelteDirectiveValue
+
+// <div transition:fade|global={value} >
+//                ^^^^^^^^^^^^^^^^^^^^
+SvelteDirectiveValue =
+	':'
+	property: AnySvelteBindingProperty
+	modifiers: SvelteDirectiveModifierList
+  initializer: HtmlAttributeInitializerClause?
+
+AnySvelteBindingProperty =
+	SvelteName
+	| SvelteLiteral
+
+SvelteDirectiveModifierList = SvelteDirectiveModifier*
+
+// <div transition:fade|global|global={value} >
+//                     ^^^^^^^^^^^^^^
+SvelteDirectiveModifier =
+	'|'
+	name: SvelteName
+
+
+
+
 // Keep it different just for svelte
 SvelteName = 'ident'
+SvelteLiteral = value: 'html_literal'
 HtmlString = value: 'html_string_literal'
 HtmlTagName = value: 'html_literal'
 HtmlAttributeName = value: 'html_literal'

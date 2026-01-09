@@ -73,6 +73,9 @@ impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
                                         attr.format().fmt(f)
                                     }
                                     AnyHtmlAttribute::AnyVueDirective(attr) => attr.format().fmt(f),
+                                    AnyHtmlAttribute::AnySvelteDirective(attr) => {
+                                        attr.format().fmt(f)
+                                    }
                                 })
                             }))
                             .finish()?;

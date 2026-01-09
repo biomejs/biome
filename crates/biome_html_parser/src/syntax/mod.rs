@@ -8,7 +8,8 @@ use crate::syntax::HtmlSyntaxFeatures::{DoubleTextExpressions, SingleTextExpress
 use crate::syntax::astro::parse_astro_fence;
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
-    is_at_svelte_keyword, parse_attach_attribute, parse_svelte_at_block, parse_svelte_hash_block,
+    is_at_svelte_directive_start, is_at_svelte_keyword, parse_attach_attribute,
+    parse_svelte_at_block, parse_svelte_directive, parse_svelte_hash_block,
 };
 use crate::syntax::vue::{
     parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_on_shorthand_directive,
@@ -393,16 +394,21 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         T!['{'] => SingleTextExpressions.parse_exclusive_syntax(
             p,
             |p| parse_single_text_expression(p, HtmlLexContext::InsideTag),
-            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte_prop(p, m.range(p)),
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte(p, m.range(p)),
         ),
         T!["{@"] => SingleTextExpressions.parse_exclusive_syntax(
             p,
             |p| parse_attach_attribute(p),
-            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte_prop(p, m.range(p)),
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte(p, m.range(p)),
         ),
         _ if p.cur_text().starts_with("v-") => {
             HtmlSyntaxFeatures::Vue
                 .parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
+        }
+        _ if is_at_svelte_directive_start(p) => {
+            SingleTextExpressions.parse_exclusive_syntax(p, parse_svelte_directive, |p, m| {
+                disabled_svelte(p, m.range(p))
+            })
         }
         _ => {
             let m = p.start();

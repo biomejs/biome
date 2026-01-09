@@ -3,7 +3,8 @@
     "allow": [
       "Bash(cargo clippy:*)",
       "Bash(cargo t:*)",
-      "Bash(cargo clean:*)"
+      "Bash(cargo clean:*)",
+      "WebFetch(domain:svelte.dev)"
     ],
     "deny": [],
     "ask": []
