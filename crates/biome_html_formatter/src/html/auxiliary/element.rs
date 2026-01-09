@@ -1,9 +1,6 @@
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
 use crate::utils::css_display::{CssDisplay, get_css_display, get_css_display_from_tag};
-use crate::{
-    html::lists::element_list::{FormatChildrenResult, FormatHtmlElementList},
-    prelude::*,
-};
+use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{
     CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, format_args, write,
 };
@@ -179,7 +176,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             } else {
                 HtmlChildListLayout::BestFitting
             };
-            let format_children = FormatHtmlElementList::default()
+            FormatHtmlElementList::default()
                 .with_options(FormatHtmlElementListOptions {
                     layout,
                     is_container_whitespace_sensitive: is_element_internally_whitespace_sensitive,
@@ -187,32 +184,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
                     borrowed_closing_tag,
                     opening_tag_group: Some(attr_group_id),
                 })
-                .fmt_children(&children, f)?;
-            match format_children {
-                FormatChildrenResult::ForceMultiline(multiline) => {
-                    write!(f, [multiline])?;
-                }
-                FormatChildrenResult::BestFitting {
-                    flat_children,
-                    expanded_children,
-                    group_id: _,
-                } => {
-                    let expanded_children = expanded_children.memoized();
-                    write!(
-                        f,
-                        [
-                            // If the attribute group breaks, prettier always breaks the children as well.
-                            &if_group_breaks(&expanded_children).with_group_id(Some(attr_group_id)),
-                            // If the attribute group does NOT break, print whatever fits best for the children.
-                            &if_group_fits_on_line(&best_fitting![
-                                format_args![flat_children],
-                                format_args![expanded_children],
-                            ])
-                            .with_group_id(Some(attr_group_id)),
-                        ]
-                    )?;
-                }
-            }
+                .fmt(&children, f)?;
         }
         FormatNodeRule::fmt(
             &FormatHtmlClosingElement::default().with_options(FormatHtmlClosingElementOptions {
