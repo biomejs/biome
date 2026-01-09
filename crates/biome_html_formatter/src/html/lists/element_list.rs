@@ -374,9 +374,6 @@ impl Format<HtmlFormatContext> for FormatChildrenResult {
 /// Metadata about the children used to determine layout decisions.
 #[derive(Copy, Clone, Debug, Default)]
 struct ChildrenMeta {
-    /// `true` if children contains an element (HtmlElement, HtmlSelfClosingElement)
-    any_tag: bool,
-
     /// `true` if children contains a block-like element
     has_block_element: bool,
 
@@ -384,38 +381,36 @@ struct ChildrenMeta {
     meaningful_text: bool,
 
     /// `true` if there are multiple non-text children
-    multiple_non_text: bool,
+    multiple_block_elements: bool,
 }
 
 impl FormatHtmlElementList {
     /// Computes metadata about the children by iterating once over all children.
     fn children_meta(&self, children: &[HtmlChild]) -> ChildrenMeta {
         let mut meta = ChildrenMeta::default();
-        let mut non_text_count = 0;
+        let mut block_element_count = 0;
 
         for child in children {
             match child {
                 HtmlChild::NonText(element) => {
-                    non_text_count += 1;
-                    meta.any_tag = true;
-
                     // Check if this is a block element
                     let display = get_element_css_display(element);
                     if display.is_block_like() {
                         meta.has_block_element = true;
+                        block_element_count += 1;
                     }
                 }
                 HtmlChild::Word(_) | HtmlChild::Comment(_) => {
                     meta.meaningful_text = true;
                 }
                 HtmlChild::Verbatim(_) => {
-                    non_text_count += 1;
+                    block_element_count += 1;
                 }
                 HtmlChild::Whitespace | HtmlChild::Newline | HtmlChild::EmptyLine => {}
             }
         }
 
-        meta.multiple_non_text = non_text_count > 1;
+        meta.multiple_block_elements = block_element_count > 1;
         meta
     }
 
@@ -448,10 +443,10 @@ impl FormatHtmlElementList {
         // Force multiline if:
         // - Layout is explicitly set to Multiline
         // - Children contain block elements
-        // - There are multiple non-text children
+        // - There are multiple block elements
         let mut force_multiline = matches!(self.layout, HtmlChildListLayout::Multiline)
             || children_meta.has_block_element
-            || children_meta.multiple_non_text;
+            || children_meta.multiple_block_elements;
 
         // Create builders
         let mut flat_builder = FlatBuilder::new();
@@ -496,15 +491,27 @@ impl FormatHtmlElementList {
         let mut is_first_child = true;
         while let Some(child) = children_iter.next() {
             let mut child_breaks = false;
+
             let is_last_child = children_iter.peek().is_none();
 
-            // Preserve whitespace existence for the first child
-            if is_first_child && self.is_container_whitespace_sensitive && child.is_whitespace() {
-                flat_builder.write(&soft_line_break_or_space(), f);
-                multiline_builder.write_separator(&soft_line_break_or_space(), f);
-                is_first_child = false;
-                last = Some(child);
-                continue;
+            // For whitespace-sensitive containers (like <span>), leading/trailing
+            // whitespace (including newlines) should be converted to a space in flat mode.
+            // This matches Prettier's behavior where `<span>\n123</span>` becomes `<span> 123</span>`.
+            if self.is_container_whitespace_sensitive && child.is_whitespace() {
+                if is_first_child {
+                    // Leading whitespace: becomes a space in flat mode
+                    flat_builder.write(&space(), f);
+                    multiline_builder.write_with_separator(&space(), &hard_line_break(), f);
+                    is_first_child = false;
+                    last = Some(child);
+                    continue;
+                } else if is_last_child {
+                    // Trailing whitespace: becomes a space in flat mode
+                    flat_builder.write(&space(), f);
+                    multiline_builder.write_separator(&hard_line_break(), f);
+                    last = Some(child);
+                    continue;
+                }
             }
 
             match child {
@@ -1026,26 +1033,6 @@ impl Format<HtmlFormatContext> for FormatMultilineChildren {
             write!(f, [group(&block_indent(&format_inner))])
         }
     }
-}
-
-/// Determines if an element should force line breaks between all its children.
-///
-/// Prettier source: src/language-html/utilities/index.js:271-278
-fn should_force_break_children(tag_name: Option<&str>) -> bool {
-    let Some(tag) = tag_name else {
-        return false;
-    };
-
-    let tag_lower = tag.to_ascii_lowercase_cow();
-
-    // These elements always break children
-    if matches!(tag_lower.as_ref(), "html" | "head" | "ul" | "ol" | "select") {
-        return true;
-    }
-
-    // Table-related elements (except table-cell) break children
-    let display = get_css_display(&tag_lower);
-    display.is_table_like() && !matches!(display, CssDisplay::TableCell)
 }
 
 fn format_partial_closing_tag(
