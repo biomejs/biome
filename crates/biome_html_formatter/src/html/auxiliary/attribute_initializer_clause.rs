@@ -156,7 +156,7 @@ impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeIniti
                     f,
                     [format_removed(&eq_token), value.format().with_options(true),]
                 )?;
-                return Ok(());
+                Ok(())
             }
         }
     }

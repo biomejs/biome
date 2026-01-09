@@ -1137,12 +1137,10 @@ fn parse_directive_value(p: &mut HtmlParser, context_after_colon: HtmlLexContext
     p.bump_with_context(T![:], context_after_colon);
     if p.cur_text().is_empty() {
         p.error(p.err_builder("The directive can't be empty.", p.cur_range()))
+    } else if context_after_colon == HtmlLexContext::SvelteBindingLiteral {
+        parse_binding_literal(p).or_add_diagnostic(p, expected_svelte_property);
     } else {
-        if context_after_colon == HtmlLexContext::SvelteBindingLiteral {
-            parse_binding_literal(p).or_add_diagnostic(p, expected_svelte_property);
-        } else {
-            parse_name(p).or_add_diagnostic(p, expected_name);
-        }
+        parse_name(p).or_add_diagnostic(p, expected_name);
     }
 
     ModifiersList.parse_list(p);
