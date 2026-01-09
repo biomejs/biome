@@ -26,11 +26,11 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 static GLOBAL: std::alloc::System = std::alloc::System;
 fn bench_analyzer(criterion: &mut Criterion) {
     let mut all_suites = HashMap::new();
-    all_suites.insert("json", include_str!("analyzer-libs-json.txt"));
+    all_suites.insert("html", include_str!("libs-html.txt"));
     let mut libs = vec![];
     libs.extend(all_suites.values().flat_map(|suite| suite.lines()));
 
-    let mut group = criterion.benchmark_group("json_analyzer");
+    let mut group = criterion.benchmark_group("html_analyzer");
 
     for lib in libs {
         let test_case = BenchCase::try_from(lib);

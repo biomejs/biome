@@ -1,4 +1,3 @@
-use biome_bench_utils::BenchCase;
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
 use biome_html_parser::{HtmlParseOptions, parse_html, parse_html_with_cache};
 use biome_html_syntax::HtmlFileSource;
