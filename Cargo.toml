@@ -20,6 +20,7 @@ anyhow                       = "1.0.100"
 biome_analyze                = { path = "./crates/biome_analyze", version = "0.5.7" }
 biome_aria                   = { path = "./crates/biome_aria", version = "0.5.7" }
 biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version = "0.5.7" }
+biome_bench_utils            = { path = "./crates/biome_bench_utils" }
 # not publish
 biome_cli                    = { path = "./crates/biome_cli" }
 biome_configuration          = { path = "./crates/biome_configuration" }

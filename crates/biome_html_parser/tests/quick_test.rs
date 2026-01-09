@@ -4,7 +4,8 @@ use biome_test_utils::has_bogus_nodes_or_empty_slots;
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"{#each products as {id, ...title}}{/each}
+    let code = r#"<p style:width style:height>Multiple shorthand</p>
+
 
 "#;
 

@@ -61,16 +61,15 @@ HtmlRoot {
 ```
 debug-trailing-comma.svelte:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a Expected a name or a closing block, instead found none. but instead found '}'.
+  × Unexpected value or character.
   
   > 1 │ {@debug something,}
       │                   ^
     2 │ 
   
-  i Expected a Expected a name or a closing block, instead found none. here.
+  i Expected one of:
   
-  > 1 │ {@debug something,}
-      │                   ^
-    2 │ 
+  - name
+  - closing block
   
 ```
