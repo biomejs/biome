@@ -2093,6 +2093,11 @@ See <https://biomejs.dev/linter/rules/use-consistent-arrow-return>
 	 */
 	useConsistentArrowReturn?: UseConsistentArrowReturnConfiguration;
 	/**
+	* Disallow enums from having both number and string members.
+See <https://biomejs.dev/linter/rules/use-consistent-enum-value-type> 
+	 */
+	useConsistentEnumValueType?: UseConsistentEnumValueTypeConfiguration;
+	/**
 	* Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.
 See <https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions> 
 	 */
@@ -3854,6 +3859,9 @@ export type UseAwaitThenableConfiguration =
 export type UseConsistentArrowReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentArrowReturnOptions;
+export type UseConsistentEnumValueTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentEnumValueTypeOptions;
 export type UseConsistentGraphqlDescriptionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentGraphqlDescriptionsOptions;
@@ -5394,6 +5402,10 @@ export interface RuleWithUseConsistentArrowReturnOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentArrowReturnOptions;
 }
+export interface RuleWithUseConsistentEnumValueTypeOptions {
+	level: RulePlainConfiguration;
+	options?: UseConsistentEnumValueTypeOptions;
+}
 export interface RuleWithUseConsistentGraphqlDescriptionsOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentGraphqlDescriptionsOptions;
@@ -6786,6 +6798,7 @@ This option is only applicable when used in conjunction with the `asNeeded` opti
 	 */
 	style?: UseConsistentArrowReturnStyle;
 }
+export type UseConsistentEnumValueTypeOptions = {};
 export interface UseConsistentGraphqlDescriptionsOptions {
 	/**
 	 * The description style to enforce. Defaults to "block"
@@ -7633,6 +7646,7 @@ export type Category =
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
+	| "lint/nursery/useConsistentEnumValueType"
 	| "lint/nursery/noMultiAssign"
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNextAsyncClientComponent"
