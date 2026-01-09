@@ -489,6 +489,8 @@ impl FormatHtmlElementList {
         let mut last: Option<&HtmlChild> = None;
 
         let mut is_first_child = true;
+        // It is **critically important** in this loop to check external whitespace sensitivity for the
+        // current and next item to ensure we don't accidentally add whitespace where none is allowed!
         while let Some(child) = children_iter.next() {
             let mut child_breaks = false;
 
@@ -654,10 +656,29 @@ impl FormatHtmlElementList {
                             }
                         }
 
-                        Some(HtmlChild::NonText(_)) => Some(LineMode::Hard),
+                        Some(HtmlChild::NonText(non_text_next)) => {
+                            let next_css_display = get_element_css_display(non_text_next);
+                            if css_display.is_externally_whitespace_sensitive()
+                                && next_css_display.is_externally_whitespace_sensitive()
+                            {
+                                // not allowed to add whitespace if the next one is externally whitespace sensitive
+                                // ```html
+                                // <a>link</a><span>foo</span>
+                                // ```
+                                None
+                            } else {
+                                Some(LineMode::Hard)
+                            }
+                        }
 
                         Some(HtmlChild::Comment(_)) => {
-                            if is_br {
+                            if css_display.is_externally_whitespace_sensitive() {
+                                // not allowed to add whitespace if the next one is externally whitespace sensitive
+                                // ```html
+                                // <a>link</a><!-- comment -->
+                                // ```
+                                None
+                            } else if is_br {
                                 Some(LineMode::Hard)
                             } else {
                                 Some(LineMode::Soft)
