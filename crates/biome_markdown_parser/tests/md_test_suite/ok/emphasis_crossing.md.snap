@@ -1,0 +1,85 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```
+Crossing: **a *b** c*
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..10 "Crossing: " [] [],
+                },
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_STAR@10..12 "**" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@12..14 "a " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@14..15 "*" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@15..16 "b" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_STAR@16..18 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@18..20 " c" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@20..21 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@21..22 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@22..22 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..22
+  0: (empty)
+  1: MD_BLOCK_LIST@0..22
+    0: MD_PARAGRAPH@0..22
+      0: MD_INLINE_ITEM_LIST@0..22
+        0: MD_TEXTUAL@0..10
+          0: MD_TEXTUAL_LITERAL@0..10 "Crossing: " [] []
+        1: MD_INLINE_EMPHASIS@10..18
+          0: DOUBLE_STAR@10..12 "**" [] []
+          1: MD_INLINE_ITEM_LIST@12..16
+            0: MD_TEXTUAL@12..14
+              0: MD_TEXTUAL_LITERAL@12..14 "a " [] []
+            1: MD_TEXTUAL@14..15
+              0: MD_TEXTUAL_LITERAL@14..15 "*" [] []
+            2: MD_TEXTUAL@15..16
+              0: MD_TEXTUAL_LITERAL@15..16 "b" [] []
+          2: DOUBLE_STAR@16..18 "**" [] []
+        2: MD_TEXTUAL@18..20
+          0: MD_TEXTUAL_LITERAL@18..20 " c" [] []
+        3: MD_TEXTUAL@20..21
+          0: MD_TEXTUAL_LITERAL@20..21 "*" [] []
+        4: MD_TEXTUAL@21..22
+          0: MD_TEXTUAL_LITERAL@21..22 "\n" [] []
+      1: (empty)
+  2: EOF@22..22 "" [] []
+
+```
