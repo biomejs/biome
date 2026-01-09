@@ -1,0 +1,47 @@
+/* Standard CSS multiline comment
+   in SCSS context */
+$var: value;
+
+/* Comment before selector */
+.foo {
+  color: red;
+}
+
+/* Multi-line comment
+   with multiple lines
+   and more content */
+$another-var: blue;
+
+// SCSS line comment
+$line-comment: true;
+
+/* Nested /* comment */ attempt */
+.nested {
+  /* Comment inside rule */
+  background: white;
+}
+
+/**
+ * Documentation style comment
+ * @param $size - The size value
+ * @returns Computed size
+ */
+@function compute-size($size) {
+  @return $size * 2;
+}
+
+/* Comment with special chars: @#$%^&*() */
+$special: 10px;
+
+/*
+ * Comment before mixin
+ */
+@mixin test-mixin {
+  /* Comment inside mixin */
+  margin: 0;
+}
+
+/* Comment at end of file */
+
+
+

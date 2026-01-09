@@ -6,6 +6,7 @@ mod css;
 mod cst;
 mod generated;
 mod prelude;
+mod scss;
 mod separated;
 mod tailwind;
 mod trivia;

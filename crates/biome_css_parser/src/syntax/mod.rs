@@ -3,6 +3,7 @@ mod block;
 mod css_modules;
 mod parse_error;
 mod property;
+mod scss;
 mod selector;
 mod util;
 mod value;
@@ -12,11 +13,15 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{DeclarationOrRuleList, parse_declaration_or_rule_list_block};
 use crate::syntax::parse_error::{
-    expected_any_rule, expected_non_css_wide_keyword_identifier, tailwind_disabled,
+    expected_any_rule, expected_component_value, expected_declaration_item,
+    expected_non_css_wide_keyword_identifier, scss_only_syntax_error, tailwind_disabled,
 };
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::property::{is_at_any_property, parse_any_property};
+use crate::syntax::scss::{
+    is_at_scss_declaration, is_at_scss_identifier, parse_scss_declaration, parse_scss_identifier,
+};
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
 use crate::syntax::selector::relative_selector::{RelativeSelectorList, is_at_relative_selector};
@@ -33,9 +38,9 @@ use biome_parser::{Parser, SyntaxFeature, token_set};
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
 use value::function::{is_at_any_function, parse_any_function};
 
-use self::parse_error::{expected_component_value, expected_declaration_item};
-
 pub(crate) enum CssSyntaxFeatures {
+    /// Enable support for SCSS-specific syntax.
+    Scss,
     /// Enable support for Tailwind CSS directives and syntax.
     Tailwind,
 
@@ -51,6 +56,7 @@ impl SyntaxFeature for CssSyntaxFeatures {
 
     fn is_supported(&self, p: &Self::Parser<'_>) -> bool {
         match self {
+            Self::Scss => p.source_type.is_scss(),
             Self::Tailwind => p.options().is_tailwind_directives_enabled(),
             Self::CssModules => p.options().is_css_modules_enabled(),
             Self::CssModulesWithVue => p.options().is_css_modules_vue_enabled(),
@@ -88,7 +94,7 @@ impl RuleList {
 
 #[inline]
 pub(crate) fn is_at_rule_list_element(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_qualified_rule(p)
+    is_at_at_rule(p) || is_at_scss_declaration(p) || is_at_qualified_rule(p)
 }
 
 struct RuleListParseRecovery {
@@ -119,6 +125,14 @@ impl ParseNodeList for RuleList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
+        } else if is_at_scss_declaration(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_declaration,
+                |p, marker| {
+                    scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+                },
+            )
         } else if is_at_qualified_rule(p) {
             parse_qualified_rule(p)
         } else {
@@ -199,7 +213,7 @@ impl ParseNodeList for DeclarationList {
     const LIST_KIND: Self::Kind = CSS_DECLARATION_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_declaration_with_semicolon(p)
+        parse_any_declaration_with_semicolon(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -238,18 +252,27 @@ pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn is_at_any_declaration_with_semicolon(p: &mut CssParser) -> bool {
-    is_at_declaration(p) || is_at_empty_declaration(p)
+    is_at_any_declaration(p) || is_at_empty_declaration(p)
 }
 
 #[inline]
 pub(crate) fn parse_any_declaration_with_semicolon(p: &mut CssParser) -> ParsedSyntax {
     if is_at_empty_declaration(p) {
         parse_empty_declaration(p)
+    } else if is_at_scss_declaration(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_declaration, |p, marker| {
+            scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+        })
     } else if is_at_any_declaration_with_semicolon(p) {
         parse_declaration_with_semicolon(p)
     } else {
         Absent
     }
+}
+
+#[inline]
+pub(crate) fn is_at_any_declaration(p: &mut CssParser) -> bool {
+    is_at_declaration(p) || is_at_scss_declaration(p)
 }
 
 /// Parses a CSS declaration that may optionally end with a semicolon.
@@ -339,6 +362,7 @@ fn parse_metavariable(p: &mut CssParser) -> ParsedSyntax {
 #[inline]
 pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
     is_at_any_function(p)
+        || is_at_scss_identifier(p)
         || is_at_identifier(p)
         || p.at(CSS_STRING_LITERAL)
         || is_at_any_dimension(p)
@@ -352,7 +376,11 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_any_function(p) {
+    if is_at_scss_identifier(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_identifier, |p, m| {
+            scss_only_syntax_error(p, "SCSS variables", m.range(p))
+        })
+    } else if is_at_any_function(p) {
         parse_any_function(p)
     } else if is_at_dashed_identifier(p) {
         if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {

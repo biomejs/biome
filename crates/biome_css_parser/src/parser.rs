@@ -110,7 +110,7 @@ impl<'source> CssParser<'source> {
     ) -> Self {
         Self {
             context: ParserContext::default(),
-            source: CssTokenSource::from_str(source, options),
+            source: CssTokenSource::from_str(source, options, source_type),
             source_type,
             state: CssParserState::new(),
             options,

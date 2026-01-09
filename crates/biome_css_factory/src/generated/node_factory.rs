@@ -2964,6 +2964,81 @@ pub fn css_view_transition_at_rule_declarator(
         [Some(SyntaxElement::Token(view_transition_token))],
     ))
 }
+pub fn scss_declaration(
+    name: AnyScssDeclarationName,
+    colon_token: SyntaxToken,
+    value: CssGenericComponentValueList,
+    modifiers: ScssVariableModifierList,
+) -> ScssDeclarationBuilder {
+    ScssDeclarationBuilder {
+        name,
+        colon_token,
+        value,
+        modifiers,
+        semicolon_token: None,
+    }
+}
+pub struct ScssDeclarationBuilder {
+    name: AnyScssDeclarationName,
+    colon_token: SyntaxToken,
+    value: CssGenericComponentValueList,
+    modifiers: ScssVariableModifierList,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl ScssDeclarationBuilder {
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> ScssDeclaration {
+        ScssDeclaration::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_DECLARATION,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.colon_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
+pub fn scss_identifier(dollar_token: SyntaxToken, name: CssIdentifier) -> ScssIdentifier {
+    ScssIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_IDENTIFIER,
+        [
+            Some(SyntaxElement::Token(dollar_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_namespaced_identifier(
+    namespace: CssIdentifier,
+    dot_token: SyntaxToken,
+    name: ScssIdentifier,
+) -> ScssNamespacedIdentifier {
+    ScssNamespacedIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_NAMESPACED_IDENTIFIER,
+        [
+            Some(SyntaxElement::Node(namespace.into_syntax())),
+            Some(SyntaxElement::Token(dot_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_variable_modifier(
+    excl_token: SyntaxToken,
+    value_token: SyntaxToken,
+) -> ScssVariableModifier {
+    ScssVariableModifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_VARIABLE_MODIFIER,
+        [
+            Some(SyntaxElement::Token(excl_token)),
+            Some(SyntaxElement::Token(value_token)),
+        ],
+    ))
+}
 pub fn tw_apply_at_rule(
     apply_token: SyntaxToken,
     classes: TwApplyClassList,
@@ -3849,6 +3924,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn scss_variable_modifier_list<I>(items: I) -> ScssVariableModifierList
+where
+    I: IntoIterator<Item = ScssVariableModifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    ScssVariableModifierList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_VARIABLE_MODIFIER_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn tw_apply_class_list<I>(items: I) -> TwApplyClassList

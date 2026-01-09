@@ -909,6 +909,22 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssViewTransitionAtRuleDeclarator::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_DECLARATION => {
+                    let $pattern = unsafe { $crate::ScssDeclaration::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_IDENTIFIER => {
+                    let $pattern = unsafe { $crate::ScssIdentifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_NAMESPACED_IDENTIFIER => {
+                    let $pattern = unsafe { $crate::ScssNamespacedIdentifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_VARIABLE_MODIFIER => {
+                    let $pattern = unsafe { $crate::ScssVariableModifier::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::TW_APPLY_AT_RULE => {
                     let $pattern = unsafe { $crate::TwApplyAtRule::new_unchecked(node) };
                     $body
@@ -1268,6 +1284,10 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_PROPERTY_LIST => {
                     let $pattern =
                         unsafe { $crate::CssValueAtRulePropertyList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_VARIABLE_MODIFIER_LIST => {
+                    let $pattern = unsafe { $crate::ScssVariableModifierList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::TW_APPLY_CLASS_LIST => {
