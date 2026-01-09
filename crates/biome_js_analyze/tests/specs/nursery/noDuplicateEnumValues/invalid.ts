@@ -16,3 +16,19 @@ enum Invalid3 {
 	B = 'A',
 	C = `A`,
 }
+
+enum Invalid4 {
+	A,
+	B = 1,
+	C = 0,
+	D,
+}
+
+enum Invalid5 {
+	A = 2,
+	B,
+	D = "A",
+	E = 1,
+	F,
+	G,
+}

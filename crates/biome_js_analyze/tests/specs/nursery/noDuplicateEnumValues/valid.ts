@@ -14,3 +14,10 @@ enum Valid3 {
 	A = 0,
 	B = "0",
 }
+
+enum Valid4 {
+	A = 0,
+	B = 1,
+	C = 0.5,
+	D,
+}

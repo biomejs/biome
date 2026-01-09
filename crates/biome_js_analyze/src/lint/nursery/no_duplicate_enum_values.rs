@@ -16,11 +16,6 @@ declare_lint_rule! {
     /// Although TypeScript supports duplicate enum member values, people usually expect members to have unique values within the same enum.
     /// Duplicate values can lead to bugs that are hard to track down.
     ///
-    /// This rule disallows defining an enum with multiple members initialized to the same value.
-    ///
-    /// This rule only enforces on enum members initialized with string or number literals.
-    /// Members without an initializer or initialized with an expression are not checked by this rule.
-    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -77,12 +72,24 @@ impl Rule for NoDuplicateEnumValues {
         let mut found: HashSet<EnumValue> = HashSet::new();
         let mut duplicates = vec![];
 
+        let mut enum_idx: Option<f64> = Some(0.0);
         for member in node.members() {
             let Some(member) = member.ok() else {
                 continue;
             };
 
             let Some(initializer) = member.initializer() else {
+                // enum members without an initializer after a member which initialized a string are considered invalid and linted by TypeScript
+                let Some(enum_idx_value) = enum_idx else {
+                    continue;
+                };
+
+                if !found.insert(EnumValue::Number(enum_idx_value.to_string())) {
+                    duplicates.push(member.range());
+                }
+
+                enum_idx = Some(enum_idx_value + 1.0);
+
                 continue;
             };
             let Some(expr) = initializer.expression().ok() else {
@@ -99,8 +106,12 @@ impl Rule for NoDuplicateEnumValues {
                         if !found.insert(EnumValue::Number(number.to_string())) {
                             duplicates.push(member.range());
                         }
+
+                        enum_idx = Some(number + 1.0);
                     }
                     AnyJsLiteralExpression::JsStringLiteralExpression(string_expr) => {
+                        enum_idx = None;
+
                         let Some(token_text) = string_expr.inner_string_text().ok() else {
                             continue;
                         };
@@ -109,9 +120,12 @@ impl Rule for NoDuplicateEnumValues {
                             duplicates.push(member.range());
                         }
                     }
-                    _ => {}
+                    _ => {
+                        enum_idx = None;
+                    }
                 },
                 AnyJsExpression::JsTemplateExpression(template_expr) => {
+                    enum_idx = None;
                     let elements = template_expr.elements();
 
                     if elements.len() == 1 {
@@ -126,7 +140,9 @@ impl Rule for NoDuplicateEnumValues {
                         }
                     }
                 }
-                _ => {}
+                _ => {
+                    enum_idx = None;
+                }
             }
         }
 

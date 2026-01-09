@@ -23,6 +23,22 @@ enum Invalid3 {
 	C = `A`,
 }
 
+enum Invalid4 {
+	A,
+	B = 1,
+	C = 0,
+	D,
+}
+
+enum Invalid5 {
+	A = 2,
+	B,
+	D = "A",
+	E = 1,
+	F,
+	G,
+}
+
 ```
 
 # Diagnostics
@@ -102,6 +118,62 @@ invalid.ts:16:2 lint/nursery/noDuplicateEnumValues ━━━━━━━━━�
        │ 	^^^^^^^
     18 │ }
     19 │ 
+  
+  i Expected members to have unique values. Duplicate values can lead to bugs that are hard to track down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:23:2 lint/nursery/noDuplicateEnumValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate enum member value.
+  
+    21 │ 	A,
+    22 │ 	B = 1,
+  > 23 │ 	C = 0,
+       │ 	^^^^^
+    24 │ 	D,
+    25 │ }
+  
+  i Another duplicate enum member value.
+  
+    22 │ 	B = 1,
+    23 │ 	C = 0,
+  > 24 │ 	D,
+       │ 	^
+    25 │ }
+    26 │ 
+  
+  i Expected members to have unique values. Duplicate values can lead to bugs that are hard to track down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:32:2 lint/nursery/noDuplicateEnumValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate enum member value.
+  
+    30 │ 	D = "A",
+    31 │ 	E = 1,
+  > 32 │ 	F,
+       │ 	^
+    33 │ 	G,
+    34 │ }
+  
+  i Another duplicate enum member value.
+  
+    31 │ 	E = 1,
+    32 │ 	F,
+  > 33 │ 	G,
+       │ 	^
+    34 │ }
+    35 │ 
   
   i Expected members to have unique values. Duplicate values can lead to bugs that are hard to track down.
   
