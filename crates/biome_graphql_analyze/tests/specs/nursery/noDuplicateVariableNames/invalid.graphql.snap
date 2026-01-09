@@ -13,7 +13,7 @@ query C($x: Int, $x: Int) { __typename }
 
 # Diagnostics
 ```
-invalid.graphql:2:8 lint/nursery/useUniqueVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:2:8 lint/nursery/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate variable name.
   
@@ -31,7 +31,7 @@ invalid.graphql:2:8 lint/nursery/useUniqueVariableNames ━━━━━━━━
 ```
 
 ```
-invalid.graphql:3:8 lint/nursery/useUniqueVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:3:8 lint/nursery/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate variable name.
   
@@ -50,7 +50,7 @@ invalid.graphql:3:8 lint/nursery/useUniqueVariableNames ━━━━━━━━
 ```
 
 ```
-invalid.graphql:4:8 lint/nursery/useUniqueVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:4:8 lint/nursery/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate variable name.
   

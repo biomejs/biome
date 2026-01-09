@@ -1879,6 +1879,11 @@ See <https://biomejs.dev/linter/rules/no-deprecated-imports>
 	 */
 	noDeprecatedImports?: NoDeprecatedImportsConfiguration;
 	/**
+	* Require all argument names for fields & directives to be unique.
+See <https://biomejs.dev/linter/rules/no-duplicate-argument-names> 
+	 */
+	noDuplicateArgumentNames?: NoDuplicateArgumentNamesConfiguration;
+	/**
 	* Disallow duplication of attributes.
 See <https://biomejs.dev/linter/rules/no-duplicate-attributes> 
 	 */
@@ -1888,6 +1893,31 @@ See <https://biomejs.dev/linter/rules/no-duplicate-attributes>
 See <https://biomejs.dev/linter/rules/no-duplicate-dependencies> 
 	 */
 	noDuplicateDependencies?: NoDuplicateDependenciesConfiguration;
+	/**
+	* Require all enum value names to be unique.
+See <https://biomejs.dev/linter/rules/no-duplicate-enum-value-names> 
+	 */
+	noDuplicateEnumValueNames?: NoDuplicateEnumValueNamesConfiguration;
+	/**
+	* Require all fields of a type to be unique.
+See <https://biomejs.dev/linter/rules/no-duplicate-field-definition-names> 
+	 */
+	noDuplicateFieldDefinitionNames?: NoDuplicateFieldDefinitionNamesConfiguration;
+	/**
+	* Enforce unique operation names across a GraphQL document.
+See <https://biomejs.dev/linter/rules/no-duplicate-graphql-operation-name> 
+	 */
+	noDuplicateGraphqlOperationName?: NoDuplicateGraphqlOperationNameConfiguration;
+	/**
+	* Require fields within an input object to be unique.
+See <https://biomejs.dev/linter/rules/no-duplicate-input-field-names> 
+	 */
+	noDuplicateInputFieldNames?: NoDuplicateInputFieldNamesConfiguration;
+	/**
+	* Require all variable definitions to be unique.
+See <https://biomejs.dev/linter/rules/no-duplicate-variable-names> 
+	 */
+	noDuplicateVariableNames?: NoDuplicateVariableNamesConfiguration;
 	/**
 	* Disallow JSX prop spreading the same identifier multiple times.
 See <https://biomejs.dev/linter/rules/no-duplicated-spread-props> 
@@ -2167,36 +2197,6 @@ See <https://biomejs.dev/linter/rules/use-sorted-classes>
 See <https://biomejs.dev/linter/rules/use-spread> 
 	 */
 	useSpread?: UseSpreadConfiguration;
-	/**
-	* Require all argument names for fields & directives to be unique.
-See <https://biomejs.dev/linter/rules/use-unique-argument-names> 
-	 */
-	useUniqueArgumentNames?: UseUniqueArgumentNamesConfiguration;
-	/**
-	* Require all enum value names to be unique.
-See <https://biomejs.dev/linter/rules/use-unique-enum-value-names> 
-	 */
-	useUniqueEnumValueNames?: UseUniqueEnumValueNamesConfiguration;
-	/**
-	* Require all fields of a type to be unique.
-See <https://biomejs.dev/linter/rules/use-unique-field-definition-names> 
-	 */
-	useUniqueFieldDefinitionNames?: UseUniqueFieldDefinitionNamesConfiguration;
-	/**
-	* Enforce unique operation names across a GraphQL document.
-See <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name> 
-	 */
-	useUniqueGraphqlOperationName?: UseUniqueGraphqlOperationNameConfiguration;
-	/**
-	* Require fields within an input object to be unique.
-See <https://biomejs.dev/linter/rules/use-unique-input-field-names> 
-	 */
-	useUniqueInputFieldNames?: UseUniqueInputFieldNamesConfiguration;
-	/**
-	* Require all variable definitions to be unique.
-See <https://biomejs.dev/linter/rules/use-unique-variable-names> 
-	 */
-	useUniqueVariableNames?: UseUniqueVariableNamesConfiguration;
 	/**
 	* Enforce consistent defineProps declaration style.
 See <https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration> 
@@ -3728,12 +3728,30 @@ export type NoContinueConfiguration =
 export type NoDeprecatedImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDeprecatedImportsOptions;
+export type NoDuplicateArgumentNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateArgumentNamesOptions;
 export type NoDuplicateAttributesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateAttributesOptions;
 export type NoDuplicateDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateDependenciesOptions;
+export type NoDuplicateEnumValueNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateEnumValueNamesOptions;
+export type NoDuplicateFieldDefinitionNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateFieldDefinitionNamesOptions;
+export type NoDuplicateGraphqlOperationNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateGraphqlOperationNameOptions;
+export type NoDuplicateInputFieldNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateInputFieldNamesOptions;
+export type NoDuplicateVariableNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateVariableNamesOptions;
 export type NoDuplicatedSpreadPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicatedSpreadPropsOptions;
@@ -3899,24 +3917,6 @@ export type UseSortedClassesConfiguration =
 export type UseSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSpreadOptions;
-export type UseUniqueArgumentNamesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseUniqueArgumentNamesOptions;
-export type UseUniqueEnumValueNamesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseUniqueEnumValueNamesOptions;
-export type UseUniqueFieldDefinitionNamesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseUniqueFieldDefinitionNamesOptions;
-export type UseUniqueGraphqlOperationNameConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseUniqueGraphqlOperationNameOptions;
-export type UseUniqueInputFieldNamesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseUniqueInputFieldNamesOptions;
-export type UseUniqueVariableNamesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseUniqueVariableNamesOptions;
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
@@ -5217,6 +5217,10 @@ export interface RuleWithNoDeprecatedImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDeprecatedImportsOptions;
 }
+export interface RuleWithNoDuplicateArgumentNamesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateArgumentNamesOptions;
+}
 export interface RuleWithNoDuplicateAttributesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateAttributesOptions;
@@ -5224,6 +5228,26 @@ export interface RuleWithNoDuplicateAttributesOptions {
 export interface RuleWithNoDuplicateDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateDependenciesOptions;
+}
+export interface RuleWithNoDuplicateEnumValueNamesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateEnumValueNamesOptions;
+}
+export interface RuleWithNoDuplicateFieldDefinitionNamesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateFieldDefinitionNamesOptions;
+}
+export interface RuleWithNoDuplicateGraphqlOperationNameOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateGraphqlOperationNameOptions;
+}
+export interface RuleWithNoDuplicateInputFieldNamesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateInputFieldNamesOptions;
+}
+export interface RuleWithNoDuplicateVariableNamesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateVariableNamesOptions;
 }
 export interface RuleWithNoDuplicatedSpreadPropsOptions {
 	level: RulePlainConfiguration;
@@ -5456,30 +5480,6 @@ export interface RuleWithUseSpreadOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseSpreadOptions;
-}
-export interface RuleWithUseUniqueArgumentNamesOptions {
-	level: RulePlainConfiguration;
-	options?: UseUniqueArgumentNamesOptions;
-}
-export interface RuleWithUseUniqueEnumValueNamesOptions {
-	level: RulePlainConfiguration;
-	options?: UseUniqueEnumValueNamesOptions;
-}
-export interface RuleWithUseUniqueFieldDefinitionNamesOptions {
-	level: RulePlainConfiguration;
-	options?: UseUniqueFieldDefinitionNamesOptions;
-}
-export interface RuleWithUseUniqueGraphqlOperationNameOptions {
-	level: RulePlainConfiguration;
-	options?: UseUniqueGraphqlOperationNameOptions;
-}
-export interface RuleWithUseUniqueInputFieldNamesOptions {
-	level: RulePlainConfiguration;
-	options?: UseUniqueInputFieldNamesOptions;
-}
-export interface RuleWithUseUniqueVariableNamesOptions {
-	level: RulePlainConfiguration;
-	options?: UseUniqueVariableNamesOptions;
 }
 export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
@@ -6670,8 +6670,14 @@ export interface NoAmbiguousAnchorTextOptions {
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
+export type NoDuplicateArgumentNamesOptions = {};
 export type NoDuplicateAttributesOptions = {};
 export type NoDuplicateDependenciesOptions = {};
+export type NoDuplicateEnumValueNamesOptions = {};
+export type NoDuplicateFieldDefinitionNamesOptions = {};
+export type NoDuplicateGraphqlOperationNameOptions = {};
+export type NoDuplicateInputFieldNamesOptions = {};
+export type NoDuplicateVariableNamesOptions = {};
 export type NoDuplicatedSpreadPropsOptions = {};
 export interface NoEmptySourceOptions {
 	/**
@@ -6835,12 +6841,6 @@ export interface UseSortedClassesOptions {
 	functions?: string[];
 }
 export type UseSpreadOptions = {};
-export type UseUniqueArgumentNamesOptions = {};
-export type UseUniqueEnumValueNamesOptions = {};
-export type UseUniqueFieldDefinitionNamesOptions = {};
-export type UseUniqueGraphqlOperationNameOptions = {};
-export type UseUniqueInputFieldNamesOptions = {};
-export type UseUniqueVariableNamesOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
 }
@@ -7683,12 +7683,12 @@ export type Category =
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
-	| "lint/nursery/useUniqueArgumentNames"
-	| "lint/nursery/useUniqueEnumValueNames"
-	| "lint/nursery/useUniqueFieldDefinitionNames"
-	| "lint/nursery/useUniqueGraphqlOperationName"
-	| "lint/nursery/useUniqueInputFieldNames"
-	| "lint/nursery/useUniqueVariableNames"
+	| "lint/nursery/noDuplicateArgumentNames"
+	| "lint/nursery/noDuplicateEnumValueNames"
+	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateGraphqlOperationName"
+	| "lint/nursery/noDuplicateInputFieldNames"
+	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentVBindStyle"
 	| "lint/nursery/useVueConsistentVOnStyle"

@@ -22,7 +22,7 @@ query D {
 
 # Diagnostics
 ```
-invalid.graphql:3:7 lint/nursery/useUniqueArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:3:7 lint/nursery/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate argument name.
   
@@ -41,7 +41,7 @@ invalid.graphql:3:7 lint/nursery/useUniqueArgumentNames ━━━━━━━━
 ```
 
 ```
-invalid.graphql:6:7 lint/nursery/useUniqueArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:6:7 lint/nursery/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate argument name.
   
@@ -60,7 +60,7 @@ invalid.graphql:6:7 lint/nursery/useUniqueArgumentNames ━━━━━━━━
 ```
 
 ```
-invalid.graphql:9:18 lint/nursery/useUniqueArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:9:18 lint/nursery/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate argument name.
   
@@ -79,7 +79,7 @@ invalid.graphql:9:18 lint/nursery/useUniqueArgumentNames ━━━━━━━�
 ```
 
 ```
-invalid.graphql:12:18 lint/nursery/useUniqueArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:12:18 lint/nursery/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate argument name.
   

@@ -9,7 +9,7 @@ use biome_graphql_syntax::{
     GraphqlInterfaceTypeDefinition, GraphqlObjectTypeDefinition,
 };
 use biome_rowan::{AstNode, TokenText, declare_node_union};
-use biome_rule_options::use_unique_field_definition_names::UseUniqueFieldDefinitionNamesOptions;
+use biome_rule_options::no_duplicate_field_definition_names::NoDuplicateFieldDefinitionNamesOptions;
 
 declare_lint_rule! {
     /// Require all fields of a type to be unique.
@@ -64,34 +64,34 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub UseUniqueFieldDefinitionNames {
+    pub NoDuplicateFieldDefinitionNames {
         version: "2.3.11",
-        name: "useUniqueFieldDefinitionNames",
+        name: "noDuplicateFieldDefinitionNames",
         language: "graphql",
         recommended: false,
         sources: &[RuleSource::EslintGraphql("unique-field-definition-names").same()],
     }
 }
 
-impl Rule for UseUniqueFieldDefinitionNames {
-    type Query = Ast<UseUniqueFieldDefinitionNamesQuery>;
+impl Rule for NoDuplicateFieldDefinitionNames {
+    type Query = Ast<NoDuplicateFieldDefinitionNamesQuery>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = UseUniqueFieldDefinitionNamesOptions;
+    type Options = NoDuplicateFieldDefinitionNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
         match node {
-            UseUniqueFieldDefinitionNamesQuery::GraphqlObjectTypeDefinition(object_def) => {
+            NoDuplicateFieldDefinitionNamesQuery::GraphqlObjectTypeDefinition(object_def) => {
                 let fields = object_def.fields()?;
                 check_list(fields)
             }
-            UseUniqueFieldDefinitionNamesQuery::GraphqlInterfaceTypeDefinition(interface_def) => {
+            NoDuplicateFieldDefinitionNamesQuery::GraphqlInterfaceTypeDefinition(interface_def) => {
                 let fields = interface_def.fields()?;
                 check_list(fields)
             }
-            UseUniqueFieldDefinitionNamesQuery::GraphqlInputObjectTypeDefinition(input_def) => {
+            NoDuplicateFieldDefinitionNamesQuery::GraphqlInputObjectTypeDefinition(input_def) => {
                 let fields = input_def.input_fields()?;
                 check_input_list(fields)
             }
@@ -154,5 +154,5 @@ fn check_input_list(fields: GraphqlInputFieldsDefinition) -> Option<()> {
 }
 
 declare_node_union! {
-    pub UseUniqueFieldDefinitionNamesQuery = GraphqlObjectTypeDefinition | GraphqlInterfaceTypeDefinition | GraphqlInputObjectTypeDefinition
+    pub NoDuplicateFieldDefinitionNamesQuery = GraphqlObjectTypeDefinition | GraphqlInterfaceTypeDefinition | GraphqlInputObjectTypeDefinition
 }
