@@ -1185,7 +1185,9 @@ impl ParseNodeList for ModifiersList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         let m = p.start();
         p.expect_with_context(T![|], HtmlLexContext::Svelte);
-        parse_name(p).ok();
+        parse_name(p).or_add_diagnostic(p, |p, range| {
+            p.err_builder("Expected a valid Svelte modifier name", range)
+        });
         Present(m.complete(p, SVELTE_DIRECTIVE_MODIFIER))
     }
 

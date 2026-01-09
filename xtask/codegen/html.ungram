@@ -499,11 +499,11 @@ AnySvelteDirective =
 	SvelteBindDirective
 	| SvelteTransitionDirective
 	| SvelteInDirective
-  | SvelteOutDirective
-  | SvelteUseDirective
-  | SvelteAnimateDirective
-  | SvelteStyleDirective
-  | SvelteClassDirective
+	| SvelteOutDirective
+	| SvelteUseDirective
+	| SvelteAnimateDirective
+	| SvelteStyleDirective
+	| SvelteClassDirective
 
 // <div bind:value={value} >
 //      ^^^^^^^^^^^^^^^^^^
@@ -559,7 +559,7 @@ SvelteDirectiveValue =
 	':'
 	property: AnySvelteBindingProperty
 	modifiers: SvelteDirectiveModifierList
-  initializer: HtmlAttributeInitializerClause?
+	initializer: HtmlAttributeInitializerClause?
 
 AnySvelteBindingProperty =
 	SvelteName
