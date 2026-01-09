@@ -3049,6 +3049,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateEnumValuesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicateEnumValuesOptions" }
+			]
+		},
+		"NoDuplicateEnumValuesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDuplicateFieldDefinitionNamesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5362,6 +5372,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateEnumValues": {
+					"description": "Disallow duplicate enum member values.\nSee <https://biomejs.dev/linter/rules/no-duplicate-enum-values>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateEnumValuesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateFieldDefinitionNames": {
 					"description": "Require all fields of a type to be unique.\nSee <https://biomejs.dev/linter/rules/no-duplicate-field-definition-names>",
 					"anyOf": [
@@ -6981,6 +6998,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDuplicateEnumValueNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDuplicateEnumValuesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateEnumValuesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

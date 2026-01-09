@@ -1899,6 +1899,11 @@ See <https://biomejs.dev/linter/rules/no-duplicate-enum-value-names>
 	 */
 	noDuplicateEnumValueNames?: NoDuplicateEnumValueNamesConfiguration;
 	/**
+	* Disallow duplicate enum member values.
+See <https://biomejs.dev/linter/rules/no-duplicate-enum-values> 
+	 */
+	noDuplicateEnumValues?: NoDuplicateEnumValuesConfiguration;
+	/**
 	* Require all fields of a type to be unique.
 See <https://biomejs.dev/linter/rules/no-duplicate-field-definition-names> 
 	 */
@@ -3740,6 +3745,9 @@ export type NoDuplicateDependenciesConfiguration =
 export type NoDuplicateEnumValueNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateEnumValueNamesOptions;
+export type NoDuplicateEnumValuesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateEnumValuesOptions;
 export type NoDuplicateFieldDefinitionNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateFieldDefinitionNamesOptions;
@@ -5233,6 +5241,10 @@ export interface RuleWithNoDuplicateEnumValueNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateEnumValueNamesOptions;
 }
+export interface RuleWithNoDuplicateEnumValuesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateEnumValuesOptions;
+}
 export interface RuleWithNoDuplicateFieldDefinitionNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateFieldDefinitionNamesOptions;
@@ -6674,6 +6686,7 @@ export type NoDuplicateArgumentNamesOptions = {};
 export type NoDuplicateAttributesOptions = {};
 export type NoDuplicateDependenciesOptions = {};
 export type NoDuplicateEnumValueNamesOptions = {};
+export type NoDuplicateEnumValuesOptions = {};
 export type NoDuplicateFieldDefinitionNamesOptions = {};
 export type NoDuplicateGraphqlOperationNameOptions = {};
 export type NoDuplicateInputFieldNamesOptions = {};
@@ -7619,6 +7632,7 @@ export type Category =
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateAttributes"
 	| "lint/nursery/noDuplicateDependencies"
+	| "lint/nursery/noDuplicateEnumValues"
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"

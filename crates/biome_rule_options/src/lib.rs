@@ -61,6 +61,7 @@ pub mod no_duplicate_custom_properties;
 pub mod no_duplicate_dependencies;
 pub mod no_duplicate_else_if;
 pub mod no_duplicate_enum_value_names;
+pub mod no_duplicate_enum_values;
 pub mod no_duplicate_field_definition_names;
 pub mod no_duplicate_fields;
 pub mod no_duplicate_font_names;
