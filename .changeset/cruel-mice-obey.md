@@ -10,4 +10,4 @@ Renamed the following GraphQL nursery rules to match the Biome standard:
 - `useUniqueInputFieldNames` -> `noDuplicateInputFieldNames`
 - `useUniqueVariableNames` -> `noDuplicateVariableNames`
 
-Run the biome migrate --write command to automatically update the configuration file.
+Run the `biome migrate --write` command to automatically update the configuration file.
