@@ -3,7 +3,7 @@ use super::{
     DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler, FormatEmbedNode,
     FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
     ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint,
-    SearchCapabilities, search,
+    SearchCapabilities, UpdateSnippetsNodes, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -43,6 +43,7 @@ use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
     ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
 };
+use biome_js_factory::make::ident;
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
     ArrowParentheses, JsFormatOptions, OperatorLinebreak, QuoteProperties, Semicolons,
@@ -53,20 +54,23 @@ use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
-    JsLanguage, JsSyntaxNode, JsTemplateExpression, JsVariableDeclarator, TextRange, TextSize,
-    TokenAtOffset,
+    JsLanguage, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression, JsVariableDeclarator,
+    TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 use biome_module_graph::ModuleGraph;
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction, NodeCache, WalkEvent};
+use biome_rowan::{
+    AstNode, AstNodeList, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode,
+    WalkEvent,
+};
 use camino::Utf8Path;
 use either::Either;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
 use std::sync::Arc;
-use tracing::{debug, debug_span, error, trace_span};
+use tracing::{debug, debug_span, error, instrument, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -519,7 +523,7 @@ impl ExtensionHandler for JsFileHandler {
                 code_actions: Some(code_actions),
                 fix_all: Some(fix_all),
                 rename: Some(rename),
-                update_snippets: None,
+                update_snippets: Some(update_snippets),
                 pull_diagnostics_and_actions: Some(pull_diagnostics_and_actions),
             },
             formatter: FormatterCapabilities {
@@ -1329,4 +1333,35 @@ fn rename(
             RenameError::CannotFindDeclaration(new_name),
         ))
     }
+}
+
+#[instrument(level = "debug", skip_all)]
+fn update_snippets(
+    root: AnyParse,
+    new_snippets: Vec<UpdateSnippetsNodes>,
+) -> Result<SendNode, WorkspaceError> {
+    let tree: AnyJsRoot = root.tree();
+    let mut mutation = BatchMutation::new(tree.syntax().clone());
+    let iterator = tree
+        .syntax()
+        .descendants()
+        .filter_map(JsTemplateChunkElement::cast);
+
+    for element in iterator {
+        let Some(snippet) = new_snippets
+            .iter()
+            .find(|snippet| snippet.range == element.range())
+        else {
+            continue;
+        };
+
+        if let Ok(value_token) = element.template_chunk_token() {
+            let new_token = ident(snippet.new_code.as_str());
+            mutation.replace_token(value_token, new_token);
+        }
+    }
+
+    let root = mutation.commit();
+
+    Ok(root.as_send().unwrap())
 }
