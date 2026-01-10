@@ -165,10 +165,6 @@ impl CssFileSource {
         self.variant == CssVariant::TailwindCss
     }
 
-    pub fn set_language(&mut self, language: CssFileLanguage) {
-        self.language = language;
-    }
-
     pub fn set_variant(&mut self, variant: CssVariant) {
         self.variant = variant;
     }
