@@ -1,0 +1,126 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@utility container {
+  @apply mx-auto space-y-4 px-8 py-10 sm:px-16 md:px-24 lg:px-32
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@9..19 "container" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@19..20 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssAtRule {
+                            at_token: AT@20..24 "@" [Newline("\n"), Whitespace("  ")] [],
+                            rule: TwApplyAtRule {
+                                apply_token: APPLY_KW@24..30 "apply" [] [Whitespace(" ")],
+                                classes: TwApplyClassList [
+                                    CssIdentifier {
+                                        value_token: IDENT@30..38 "mx-auto" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@38..48 "space-y-4" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@48..53 "px-8" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@53..59 "py-10" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@59..68 "sm:px-16" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@68..77 "md:px-24" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@77..85 "lg:px-32" [] [],
+                                    },
+                                ],
+                                semicolon_token: missing (required),
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@85..87 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@87..88 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..88
+  0: (empty)
+  1: CSS_RULE_LIST@0..87
+    0: CSS_AT_RULE@0..87
+      0: AT@0..1 "@" [] []
+      1: TW_UTILITY_AT_RULE@1..87
+        0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@9..19
+          0: IDENT@9..19 "container" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@19..87
+          0: L_CURLY@19..20 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@20..85
+            0: CSS_AT_RULE@20..85
+              0: AT@20..24 "@" [Newline("\n"), Whitespace("  ")] []
+              1: TW_APPLY_AT_RULE@24..85
+                0: APPLY_KW@24..30 "apply" [] [Whitespace(" ")]
+                1: TW_APPLY_CLASS_LIST@30..85
+                  0: CSS_IDENTIFIER@30..38
+                    0: IDENT@30..38 "mx-auto" [] [Whitespace(" ")]
+                  1: CSS_IDENTIFIER@38..48
+                    0: IDENT@38..48 "space-y-4" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@48..53
+                    0: IDENT@48..53 "px-8" [] [Whitespace(" ")]
+                  3: CSS_IDENTIFIER@53..59
+                    0: IDENT@53..59 "py-10" [] [Whitespace(" ")]
+                  4: CSS_IDENTIFIER@59..68
+                    0: IDENT@59..68 "sm:px-16" [] [Whitespace(" ")]
+                  5: CSS_IDENTIFIER@68..77
+                    0: IDENT@68..77 "md:px-24" [] [Whitespace(" ")]
+                  6: CSS_IDENTIFIER@77..85
+                    0: IDENT@77..85 "lg:px-32" [] []
+                2: (empty)
+          2: R_CURLY@85..87 "}" [Newline("\n")] []
+  2: EOF@87..88 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+apply-missing-semicolon.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `}`
+  
+    1 │ @utility container {
+    2 │   @apply mx-auto space-y-4 px-8 py-10 sm:px-16 md:px-24 lg:px-32
+  > 3 │ }
+      │ ^
+    4 │ 
+  
+  i Remove }
+  
+```
