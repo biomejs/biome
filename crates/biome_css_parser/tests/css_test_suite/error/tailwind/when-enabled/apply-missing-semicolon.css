@@ -1,0 +1,3 @@
+@utility container {
+  @apply mx-auto space-y-4 px-8 py-10 sm:px-16 md:px-24 lg:px-32
+}
