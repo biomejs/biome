@@ -1,6 +1,5 @@
 use crate::{
-    AnyJsonMemberName, AnyJsonValue, JsonMember, JsonMemberName, JsonSyntaxToken,
-    inner_string_text,
+    AnyJsonMemberName, AnyJsonValue, JsonMember, JsonMemberName, JsonSyntaxToken, inner_string_text,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, TokenText};
 

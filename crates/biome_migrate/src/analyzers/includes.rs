@@ -29,7 +29,12 @@ impl Rule for Includes {
         };
         let mut result = Vec::default();
         for root_member in root.json_member_list().into_iter().flatten() {
-            let Some(name) = root_member.name().ok().and_then(|name| name.inner_string_text()).and_then(|r| r.ok()) else {
+            let Some(name) = root_member
+                .name()
+                .ok()
+                .and_then(|name| name.inner_string_text())
+                .and_then(|r| r.ok())
+            else {
                 continue;
             };
             match name.text() {
@@ -206,7 +211,11 @@ impl TryFrom<JsonObjectValue> for State {
     fn try_from(value: JsonObjectValue) -> Result<Self, Self::Error> {
         let mut result = Self::default();
         for member in value.json_member_list().into_iter().flatten() {
-            let member_name = member.name().ok().and_then(|name| name.inner_string_text()).and_then(|r| r.ok());
+            let member_name = member
+                .name()
+                .ok()
+                .and_then(|name| name.inner_string_text())
+                .and_then(|r| r.ok());
             if member_name.as_ref().is_some_and(|name| name == &"include") {
                 result.include = Some(member);
             } else if member_name.as_ref().is_some_and(|name| name == &"ignore") {

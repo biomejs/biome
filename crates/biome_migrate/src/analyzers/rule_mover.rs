@@ -62,7 +62,11 @@ impl Rule for RuleMover {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let member_name = node.name().ok().and_then(|name| name.inner_string_text()).and_then(|r| r.ok());
+        let member_name = node
+            .name()
+            .ok()
+            .and_then(|name| name.inner_string_text())
+            .and_then(|r| r.ok());
         let is_linter_rules = member_name
             .as_ref()
             .is_some_and(|name| name.text() == "rules");
@@ -78,7 +82,12 @@ impl Rule for RuleMover {
             let Ok(AnyJsonValue::JsonObjectValue(group_rules)) = group_elt.value() else {
                 continue;
             };
-            let Some(group_name) = group_elt.name().ok().and_then(|name| name.inner_string_text()).and_then(|r| r.ok()) else {
+            let Some(group_name) = group_elt
+                .name()
+                .ok()
+                .and_then(|name| name.inner_string_text())
+                .and_then(|r| r.ok())
+            else {
                 continue;
             };
             if is_linter_rules {
@@ -86,7 +95,11 @@ impl Rule for RuleMover {
                     continue;
                 };
                 for rule_node in group_rules.json_member_list().into_iter().flatten() {
-                    let Some(rule_name) = rule_node.name().ok().and_then(|name| name.inner_string_text()).and_then(|r| r.ok())
+                    let Some(rule_name) = rule_node
+                        .name()
+                        .ok()
+                        .and_then(|name| name.inner_string_text())
+                        .and_then(|r| r.ok())
                     else {
                         continue;
                     };
@@ -123,7 +136,11 @@ impl Rule for RuleMover {
                     continue;
                 };
                 for rule_node in group_rules.json_member_list().into_iter().flatten() {
-                    let Some(rule_name) = rule_node.name().ok().and_then(|name| name.inner_string_text()).and_then(|r| r.ok())
+                    let Some(rule_name) = rule_node
+                        .name()
+                        .ok()
+                        .and_then(|name| name.inner_string_text())
+                        .and_then(|r| r.ok())
                     else {
                         continue;
                     };
@@ -231,7 +248,12 @@ impl Rule for RuleMover {
             let mut is_rule_migrated = false;
             for elt in old_list.elements() {
                 let node = elt.node.ok()?;
-                if let Some(name) = node.name().ok().and_then(|name| name.inner_string_text()).and_then(|r| r.ok()) {
+                if let Some(name) = node
+                    .name()
+                    .ok()
+                    .and_then(|name| name.inner_string_text())
+                    .and_then(|r| r.ok())
+                {
                     if name.text() == new_rule_name {
                         // This happens when:
                         // - the rule has already been manually migrated, but the old one was not removed
@@ -481,7 +503,11 @@ fn transform_value(value: AnyJsonValue, old_rule_name: &'static str) -> Option<A
 fn get_rule_level(value: AnyJsonValue) -> AnyJsonValue {
     if let AnyJsonValue::JsonObjectValue(obj) = &value {
         for item in obj.json_member_list().into_iter().flatten() {
-            let text = item.name().ok().and_then(|n| n.inner_string_text()).and_then(|r| r.ok());
+            let text = item
+                .name()
+                .ok()
+                .and_then(|n| n.inner_string_text())
+                .and_then(|r| r.ok());
             if text.is_some_and(|name| name.text() == "level") {
                 return item.value().unwrap_or(value);
             }

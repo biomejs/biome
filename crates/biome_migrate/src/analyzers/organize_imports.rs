@@ -27,7 +27,12 @@ impl Rule for OrganizeImports {
         };
         let mut result = Vec::new();
         for member in root.json_member_list().into_iter().flatten() {
-            let Some(name) = member.name().ok().and_then(|n| n.inner_string_text()).and_then(|r| r.ok()) else {
+            let Some(name) = member
+                .name()
+                .ok()
+                .and_then(|n| n.inner_string_text())
+                .and_then(|r| r.ok())
+            else {
                 continue;
             };
             match name.text() {
@@ -43,7 +48,12 @@ impl Rule for OrganizeImports {
                             continue;
                         };
                         for member in override_item.json_member_list().into_iter().flatten() {
-                            let Some(name) = member.name().ok().and_then(|n| n.inner_string_text()).and_then(|r| r.ok()) else {
+                            let Some(name) = member
+                                .name()
+                                .ok()
+                                .and_then(|n| n.inner_string_text())
+                                .and_then(|r| r.ok())
+                            else {
                                 continue;
                             };
                             if name.text() == "organizeImports" {

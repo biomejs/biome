@@ -64,11 +64,7 @@ impl GritTargetLanguageImpl for JsonTargetLanguage {
     }
 
     fn snippet_context_strings(&self) -> &[(&'static str, &'static str)] {
-        &[
-            ("", ""),
-            ("{\"GRIT_KEY\": ", "}"),
-            ("[", "]"),
-        ]
+        &[("", ""), ("{\"GRIT_KEY\": ", "}"), ("[", "]")]
     }
 
     fn is_comment_kind(kind: GritTargetSyntaxKind) -> bool {

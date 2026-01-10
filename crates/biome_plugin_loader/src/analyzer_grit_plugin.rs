@@ -61,9 +61,10 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
             PluginTargetLanguage::Css => {
                 CssRoot::KIND_SET.iter().map(|kind| kind.to_raw()).collect()
             }
-            PluginTargetLanguage::Json => {
-                JsonRoot::KIND_SET.iter().map(|kind| kind.to_raw()).collect()
-            }
+            PluginTargetLanguage::Json => JsonRoot::KIND_SET
+                .iter()
+                .map(|kind| kind.to_raw())
+                .collect(),
         }
     }
 

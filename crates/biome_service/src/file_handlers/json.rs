@@ -544,9 +544,14 @@ fn lint(params: LintParams) -> LintResults {
         file_source,
         configuration_source: params.settings.as_ref().full_source(),
     };
-    let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, services, &params.plugins, |signal| {
-        process_lint.process_signal(signal)
-    });
+    let (_, analyze_diagnostics) = analyze(
+        &root,
+        filter,
+        &analyzer_options,
+        services,
+        &params.plugins,
+        |signal| process_lint.process_signal(signal),
+    );
 
     let mut diagnostics = params
         .parse
@@ -620,20 +625,27 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         file_source,
         configuration_source: workspace.as_ref().full_source(),
     };
-    analyze(&tree, filter, &analyzer_options, services, &plugins, |signal| {
-        actions.extend(signal.actions().into_code_action_iter().map(|item| {
-            CodeAction {
-                category: item.category.clone(),
-                rule_name: item
-                    .rule_name
-                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                suggestion: item.suggestion,
-                offset: action_offset,
-            }
-        }));
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        services,
+        &plugins,
+        |signal| {
+            actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                CodeAction {
+                    category: item.category.clone(),
+                    rule_name: item
+                        .rule_name
+                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                    suggestion: item.suggestion,
+                    offset: action_offset,
+                }
+            }));
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     PullActionsResult { actions }
 }
@@ -686,9 +698,14 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             file_source,
             configuration_source: params.settings.as_ref().full_source(),
         };
-        let (action, _) = analyze(&tree, filter, &analyzer_options, services, &params.plugins, |signal| {
-            process_fix_all.process_signal(signal)
-        });
+        let (action, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            services,
+            &params.plugins,
+            |signal| process_fix_all.process_signal(signal),
+        );
 
         let result = process_fix_all.process_action(action, |root| {
             tree = match JsonRoot::cast(root) {

@@ -57,7 +57,15 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, filter, |_| {}, options, json_services, plugins, emit_signal)
+    analyze_with_inspect_matcher(
+        root,
+        filter,
+        |_| {},
+        options,
+        json_services,
+        plugins,
+        emit_signal,
+    )
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
