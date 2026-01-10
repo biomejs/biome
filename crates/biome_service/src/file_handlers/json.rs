@@ -542,7 +542,7 @@ fn lint(params: LintParams) -> LintResults {
         file_source,
         configuration_source: params.settings.as_ref().full_source(),
     };
-    let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, services, |signal| {
+    let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, services, &params.plugins, |signal| {
         process_lint.process_signal(signal)
     });
 
@@ -580,7 +580,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         only,
         enabled_rules: rules,
         suppression_reason,
-        plugins: _,
+        plugins,
         categories,
         action_offset,
         document_services: _,
@@ -618,7 +618,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         file_source,
         configuration_source: workspace.as_ref().full_source(),
     };
-    analyze(&tree, filter, &analyzer_options, services, |signal| {
+    analyze(&tree, filter, &analyzer_options, services, &plugins, |signal| {
         actions.extend(signal.actions().into_code_action_iter().map(|item| {
             CodeAction {
                 category: item.category.clone(),
@@ -684,7 +684,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             file_source,
             configuration_source: params.settings.as_ref().full_source(),
         };
-        let (action, _) = analyze(&tree, filter, &analyzer_options, services, |signal| {
+        let (action, _) = analyze(&tree, filter, &analyzer_options, services, &params.plugins, |signal| {
             process_fix_all.process_signal(signal)
         });
 

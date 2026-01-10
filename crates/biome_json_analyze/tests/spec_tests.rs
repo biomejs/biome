@@ -175,7 +175,7 @@ pub(crate) fn analyze_and_snap(
             })
         }),
     };
-    let (_, errors) = biome_json_analyze::analyze(&root, filter, &options, services, |event| {
+    let (_, errors) = biome_json_analyze::analyze(&root, filter, &options, services, &[], |event| {
         if let Some(mut diag) = event.diagnostic() {
             for action in event.actions() {
                 if action.is_suppression() {
