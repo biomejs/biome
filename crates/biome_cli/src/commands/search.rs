@@ -124,6 +124,9 @@ impl SearchProcessFile {
             GritTargetLanguage::CssTargetLanguage(_) => {
                 matches!(file_source, DocumentFileSource::Css(_))
             }
+            GritTargetLanguage::JsonTargetLanguage(_) => {
+                matches!(file_source, DocumentFileSource::Json(_))
+            }
         }
     }
 }
