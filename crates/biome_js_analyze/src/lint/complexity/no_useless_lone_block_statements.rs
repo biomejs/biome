@@ -77,6 +77,10 @@ impl Rule for NoUselessLoneBlockStatements {
         }
 
         if block.statements().is_empty() {
+            // Preserve empty blocks that contain comments
+            if block.syntax().has_comments_descendants() {
+                return None;
+            }
             return Some(());
         }
 

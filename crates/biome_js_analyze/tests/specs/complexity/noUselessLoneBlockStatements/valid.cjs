@@ -84,3 +84,21 @@ switch (foo) {
     break;
   }
 }
+
+// Empty blocks with comments should not trigger diagnostics
+{
+    // TODO: add error handling
+}
+
+{
+    /*
+     * Multi-line block comment
+     * should also be preserved
+     */
+}
+
+function withCommentedCode() {
+    {
+        // return x + y;
+    }
+}
