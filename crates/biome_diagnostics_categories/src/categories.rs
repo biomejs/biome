@@ -169,6 +169,7 @@ define_categories! {
     "lint/nursery/noDeprecatedImports": "https://biomejs.dev/linter/rules/no-deprecated-imports",
     "lint/nursery/noDuplicateAttributes": "https://biomejs.dev/linter/rules/no-duplicate-attributes",
     "lint/nursery/noDuplicateDependencies": "https://biomejs.dev/linter/rules/no-duplicate-dependencies",
+    "lint/nursery/noDuplicateEnumValues": "https://biomejs.dev/linter/rules/no-duplicate-enum-values",
     "lint/nursery/noDuplicatedSpreadProps": "https://biomejs.dev/linter/rules/no-duplicated-spread-props",
     "lint/nursery/noEmptySource": "https://biomejs.dev/linter/rules/no-empty-source",
     "lint/nursery/noEqualsToNull": "https://biomejs.dev/linter/rules/no-equals-to-null",
