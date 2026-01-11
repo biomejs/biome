@@ -52,6 +52,20 @@ class D {
   fooD(sn: string | number): void {};
 }
 
+class E {
+  fooE(s: string): void;
+  static barE(): void {};
+  fooE(n: number): void;
+  fooE(sn: string | number): void {};
+}
+
+class F {
+  static fooF(s: string): void;
+  barF(): void {};
+  static fooF(n: number): void;
+  static fooF(sn: string | number): void {};
+}
+
 export function foo(s: string): void;
 export function foo(n: number): void;
 export function bar(): void;
