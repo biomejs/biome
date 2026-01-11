@@ -6292,7 +6292,51 @@
 			},
 			"additionalProperties": false
 		},
-		"PluginConfiguration": { "anyOf": [{ "type": "string" }] },
+		"PluginConfiguration": {
+			"anyOf": [
+				{ "description": "A simple path to a plugin file", "type": "string" },
+				{
+					"description": "A plugin with additional options",
+					"$ref": "#/$defs/PluginWithOptions"
+				}
+			]
+		},
+		"PluginSeverity": {
+			"description": "Severity level for plugin diagnostics",
+			"oneOf": [
+				{
+					"description": "Plugin is disabled",
+					"type": "string",
+					"const": "off"
+				},
+				{
+					"description": "Plugin emits warnings",
+					"type": "string",
+					"const": "warn"
+				},
+				{
+					"description": "Plugin emits errors (default)",
+					"type": "string",
+					"const": "error"
+				}
+			]
+		},
+		"PluginWithOptions": {
+			"description": "Plugin configuration with additional options",
+			"type": "object",
+			"properties": {
+				"path": {
+					"description": "Path to the plugin file",
+					"type": "string",
+					"default": ""
+				},
+				"severity": {
+					"description": "Severity level for the plugin's diagnostics.\nUse \"off\" to disable, \"warn\" for warnings, \"error\" for errors (default).",
+					"anyOf": [{ "$ref": "#/$defs/PluginSeverity" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"Plugins": {
 			"type": "array",
 			"items": { "$ref": "#/$defs/PluginConfiguration" }

@@ -892,7 +892,7 @@ match these patterns.
 	 */
 	plugins?: Plugins;
 }
-export type PluginConfiguration = string;
+export type PluginConfiguration = string | PluginWithOptions;
 export type VcsClientKind = "git";
 /**
  * A list of rules that belong to this group
@@ -1073,6 +1073,20 @@ export interface OverrideLinterConfiguration {
 	 * List of rules
 	 */
 	rules?: Rules;
+}
+/**
+ * Plugin configuration with additional options
+ */
+export interface PluginWithOptions {
+	/**
+	 * Path to the plugin file
+	 */
+	path?: string;
+	/**
+	* Severity level for the plugin's diagnostics.
+Use "off" to disable, "warn" for warnings, "error" for errors (default). 
+	 */
+	severity?: PluginSeverity;
 }
 export type OrganizeImportsConfiguration =
 	| RuleAssistPlainConfiguration
@@ -3260,6 +3274,10 @@ See <https://biomejs.dev/linter/rules/use-strict-mode>
 	useStrictMode?: UseStrictModeConfiguration;
 }
 export type Glob = string;
+/**
+ * Severity level for plugin diagnostics
+ */
+export type PluginSeverity = "off" | "warn" | "error";
 export type RuleAssistPlainConfiguration = "off" | "on";
 export interface RuleAssistWithOrganizeImportsOptions {
 	level: RuleAssistPlainConfiguration;
