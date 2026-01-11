@@ -64,7 +64,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoRootType {
-        version: "next",
+        version: "2.3.12",
         name: "noRootType",
         language: "graphql",
         recommended: false,

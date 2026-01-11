@@ -1,5 +1,140 @@
 # @biomejs/biome
 
+## 2.3.12
+
+### Patch Changes
+
+- [#8653](https://github.com/biomejs/biome/pull/8653) [`047576d`](https://github.com/biomejs/biome/commit/047576d1077f0399aca5eb13819863eefcdaf28c) Thanks [@dyc3](https://github.com/dyc3)! - Added new nursery rule [`noDuplicateAttributes`](https://biomejs.dev/linter/rules/no-duplicate-attributes/) to forbid duplicate attributes in HTML elements.
+
+- [#8561](https://github.com/biomejs/biome/pull/8561) [`981affb`](https://github.com/biomejs/biome/commit/981affb8b6ad7970d081a1686b87f35c1a5a4455) Thanks [@wataryooou](https://github.com/wataryooou)! - Fixed `noUnusedVariables` to ignore type parameters declared in ambient contexts such as `declare module` blocks.
+
+- [#8704](https://github.com/biomejs/biome/pull/8704) [`a1914d4`](https://github.com/biomejs/biome/commit/a1914d45c80efc90e58dee95b4fa34b3c8154831) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noRootType`](https://biomejs.dev/linter/rules/no-root-type).
+  Disallow the usage of specified root types. (e.g. `mutation` and/or `subscription`)
+
+  **Invalid:**
+
+  ```json
+  {
+    "options": {
+      "disallow": ["mutation"]
+    }
+  }
+  ```
+
+  ```graphql
+  type Mutation {
+    SetMessage(message: String): String
+  }
+  ```
+
+- [#8712](https://github.com/biomejs/biome/pull/8712) [`251b47b`](https://github.com/biomejs/biome/commit/251b47ba3e0f47ecaa818b547aeb61be83e1c59c) Thanks [@Netail](https://github.com/Netail)! - Renamed the following GraphQL nursery rules to match the Biome standard:
+  - `useUniqueArgumentNames` -> `noDuplicateArgumentNames`
+  - `useUniqueFieldDefinitionNames` -> `noDuplicateFieldDefinitionNames`
+  - `useUniqueGraphqlOperationName` -> `noDuplicateGraphqlOperationName`
+  - `useUniqueInputFieldNames` -> `noDuplicateInputFieldNames`
+  - `useUniqueVariableNames` -> `noDuplicateVariableNames`
+
+  Run the `biome migrate --write` command to automatically update the configuration file.
+
+- [#7602](https://github.com/biomejs/biome/pull/7602) [`957cd8e`](https://github.com/biomejs/biome/commit/957cd8e83cf543db300dba9fc85e52a3ef6226b5) Thanks [@kedevked](https://github.com/kedevked)! - Added the nursery lint rule `useErrorCause`.
+
+  This rule enforces that errors caught in a `catch` clause are not rethrown without wrapping them in a new `Error` object and specifying the original error as the `cause`. This helps preserve the error’s stack trace and context for better debugging.
+
+  It can be configured with the following option:
+  - `requireCatchParameter`: (default: `true`)
+    - When `true`, the rule requires that `catch` clauses have a parameter. If a `throw` statement appears inside a `catch` clause without a parameter, it will be flagged.
+
+  **Invalid examples**:
+
+  ```js
+  try {
+    foo();
+  } catch {
+    throw new Error("fail");
+  }
+  ```
+
+  ```js
+  try {
+    foo();
+  } catch (err) {
+    throw new Error(err.message);
+  }
+  ```
+
+  **Valid examples:**
+
+  ```js
+  try {
+    foo();
+  } catch (err) {
+    throw new Error("fail", { cause: err });
+  }
+  ```
+
+  ```js
+  try {
+    foo();
+  } catch (error) {
+    throw new Error("Something went wrong", { cause: error });
+  }
+  ```
+
+  **Valid example** when `requireCatchParameter` is `false`:
+
+  Valid:
+
+  ```js
+  try {
+    foo();
+  } catch {
+    throw new Error("fail");
+  }
+  ```
+
+- [#8725](https://github.com/biomejs/biome/pull/8725) [`95aba98`](https://github.com/biomejs/biome/commit/95aba98823d80b5581c3e55153d6a8804e690757) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8715](https://github.com/biomejs/biome/issues/8715): The CSS parser will now recover slightly better if a semicolon is missing from Tailwind's `@apply` at-rule.
+
+- [#8597](https://github.com/biomejs/biome/pull/8597) [`f764007`](https://github.com/biomejs/biome/commit/f7640071fa356808947bb6a4c563a04890311cc0) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noDuplicateEnumValueNames`](https://biomejs.dev/linter/rules/no-duplicate-enum-value-names/). Enforce unique enum value names.
+
+  **Invalid:**
+
+  ```graphql
+  enum A {
+    TEST
+    TesT
+  }
+  ```
+
+- [#8679](https://github.com/biomejs/biome/pull/8679) [`33dfd7c`](https://github.com/biomejs/biome/commit/33dfd7c4eb657e7986040fc32e8840d14d0340ad) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#8678](https://github.com/biomejs/biome/issues/8678). Now Biome correctly parses components inside Vue, Svelte and Astro files when they have the same name of self-closing elements.
+
+- [#8617](https://github.com/biomejs/biome/pull/8617) [`31a9bfe`](https://github.com/biomejs/biome/commit/31a9bfe57d532183aaf146de892bb670908ad456) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`useLoneExecutableDefinition`](https://biomejs.dev/linter/rules/use-lone-executable-definition/). Require queries, mutations, subscriptions or fragments to be located in separate files.
+
+  **Invalid:**
+
+  ```graphql
+  query Foo {
+    id
+  }
+
+  fragment Bar on Baz {
+    id
+  }
+  ```
+
+- [#8711](https://github.com/biomejs/biome/pull/8711) [`365f7aa`](https://github.com/biomejs/biome/commit/365f7aa2631700e8379d8633aae676f5de8b0918) Thanks [@Netail](https://github.com/Netail)! - Added new nursery rule [`noDuplicateEnumValues`](https://biomejs.dev/linter/rules/no-duplicate-enum-values), which disallows defining an enum with multiple members initialized to the same value.
+
+- [#8740](https://github.com/biomejs/biome/pull/8740) [`4962ed0`](https://github.com/biomejs/biome/commit/4962ed0d11bc5155aa9a89bf98fac9412f43c8f9) Thanks [@Netail](https://github.com/Netail)! - Extra rule source references. `biome migrate eslint` should do a bit better detecting rules in your eslint configurations.
+
+- [#8639](https://github.com/biomejs/biome/pull/8639) [`6577e32`](https://github.com/biomejs/biome/commit/6577e32ddf855bd1b1cc05b0f496b89001ce2925) Thanks [@ohnoah](https://github.com/ohnoah)! - Added the nursery lint rule [`noExcessiveLinesPerFile`](https://biomejs.dev/linter/rules/no-excessive-lines-per-file/).
+  Biome now reports files that exceed a configurable line limit.
+
+  ```js
+  // maxLines: 2
+  const a = 1;
+  const b = 2;
+  const c = 3;
+  ```
+
 ## 2.3.11
 
 ### Patch Changes

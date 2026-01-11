@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDuplicateAttributes {
-        version: "next",
+        version: "2.3.12",
         name: "noDuplicateAttributes",
         language: "html",
         recommended: true,
