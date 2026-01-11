@@ -53,13 +53,8 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
     };
 
     let source_type: CssFileSource = test_file.input_file().as_path().try_into().unwrap();
-
     let options = CssFormatOptions::default();
-    let language = if source_type.is_scss() {
-        language::CssTestFormatLanguage::new(CssFileSource::scss())
-    } else {
-        language::CssTestFormatLanguage::default()
-    };
+    let language = language::CssTestFormatLanguage::new(source_type);
 
     let snapshot = SpecSnapshot::new(
         test_file,
