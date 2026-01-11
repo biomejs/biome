@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDuplicateEnumValueNames {
-        version: "next",
+        version: "2.3.12",
         name: "noDuplicateEnumValueNames",
         language: "graphql",
         recommended: false,
