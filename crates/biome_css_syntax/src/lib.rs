@@ -4,6 +4,7 @@
 mod file_source;
 mod generated;
 mod import_ext;
+mod scss_ext;
 pub mod selector_ext;
 pub mod stmt_ext;
 mod string_ext;

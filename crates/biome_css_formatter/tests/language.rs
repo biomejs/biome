@@ -15,6 +15,14 @@ pub struct CssTestFormatLanguage {
     source_type: CssFileSource,
 }
 
+impl CssTestFormatLanguage {
+    pub fn scss() -> Self {
+        Self {
+            source_type: CssFileSource::scss(),
+        }
+    }
+}
+
 impl TestFormatLanguage for CssTestFormatLanguage {
     type ServiceLanguage = CssLanguage;
     type Context = CssFormatContext;

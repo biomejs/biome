@@ -1,8 +1,13 @@
-$global-var: initial;
+$global-var:initial;
 
 .component {
-  $global-var: modified !global;
-  $another-var: value !default !global;
+  $global-var:
+		modified !global;
+  $another-var: value      !default         !global;
   $third-var:value!global!default;
-  color: $global-var;
+  $fourth-var:test!default!global!default;
+  $fifth-var  :   value
+
+    !global    !default;
+  color:         $global-var;
 }

@@ -21,7 +21,7 @@ impl FormatNodeRule<ScssDeclaration> for FormatScssDeclaration {
         )?;
 
         if !modifiers.is_empty() {
-            write!(f, [space(), modifiers.format()])?;
+            write!(f, [modifiers.format()])?;
         }
 
         write!(f, [semicolon_token.format()])

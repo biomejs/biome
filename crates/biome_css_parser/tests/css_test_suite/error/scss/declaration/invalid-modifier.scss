@@ -1,0 +1,14 @@
+// Invalid modifier - using unknown identifier instead of !default or !global
+$color: red !important;
+
+// Invalid modifier - just a random word
+$width: 100px !random;
+
+// Invalid modifier - typo in default
+$height: 50vh !defalt;
+
+// Invalid modifier - typo in global
+$font-size: 16px !globl;
+
+// Multiple invalid modifiers
+$margin: 10px !wrong !invalid;

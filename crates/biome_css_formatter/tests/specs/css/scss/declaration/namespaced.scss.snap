@@ -5,9 +5,12 @@ info: css/scss/declaration/namespaced.scss
 # Input
 
 ```scss
-ns.$var: value;
+ns.$var:   value;
 namespace.$primary-color:#ff0000;
-config.$theme-color  :  blue  ;
+
+config.$theme-color  :
+
+  blue  ;
 
 ```
 
@@ -29,7 +32,8 @@ Trailing newline: true
 
 ```scss
 ns.$var: value;
-namespace.$primary-color:#ff0000;
-config.$theme-color  :  blue  ;
+namespace.$primary-color: #ff0000;
+
+config.$theme-color: blue;
 
 ```

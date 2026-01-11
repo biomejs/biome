@@ -14,13 +14,16 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-.container {& [lang="ru"] {
-         color: blue;
-        } }
+.component {
+	$global-var: modified !global;
+	$another-var: value !default!global;
+	$third-var:value!global!default!default;
+	color: $global-var;
+}
 
 
 "#;
-    let parse = parse_css(src, CssFileSource::css(), CssParserOptions::default());
+    let parse = parse_css(src, CssFileSource::scss(), CssParserOptions::default());
     println!("{parse:#?}");
 
     let options = CssFormatOptions::default()
@@ -31,7 +34,7 @@ fn quick_test() {
     let result = doc.print().unwrap();
 
     let root = &parse.syntax();
-    let language = language::CssTestFormatLanguage::default();
+    let language = language::CssTestFormatLanguage::scss();
 
     println!("{}", doc.into_document());
     eprintln!("{}", result.as_code());
