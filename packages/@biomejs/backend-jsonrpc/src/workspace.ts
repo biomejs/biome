@@ -7958,9 +7958,11 @@ export type Category =
 	| "flags/invalid"
 	| "semanticTests";
 export interface Location {
+	end?: [number, number];
 	path?: Resource;
 	sourceCode?: string;
 	span?: TextRange;
+	start?: [number, number];
 }
 export type MarkupBuf = MarkupNodeBuf[];
 /**

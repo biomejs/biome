@@ -1,0 +1,2920 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+a ==b
+a ==b
+a ==b
+
+debugger
+debugger
+debugger
+debugger
+
+let f;
+let f;
+let f;
+		let f;
+		let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+a ==b
+a ==b
+a ==b
+
+debugger
+debugger
+debugger
+debugger
+
+let f;
+let f;
+let f;
+		let f;
+		let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+The --json option is unstable/experimental and its output might change between patches/minor releases.
+```
+
+```block
+{
+	"summary": {
+		"changed": 0,
+		"unchanged": 2,
+		"matches": 0,
+		"errors": 40,
+		"warnings": 16,
+		"infos": 0,
+		"skipped": 0,
+		"suggestedFixesSkipped": 0,
+		"diagnosticsNotPrinted": 0
+	},
+	"diagnostics": [
+		{
+			"category": "lint/correctness/noUnusedImports",
+			"severity": "warning",
+			"description": "This import is unused.",
+			"message": [
+				{ "elements": [], "content": "This " },
+				{ "elements": ["Emphasis"], "content": "import" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused imports might be the result of an incomplete refactoring."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: Remove the unused imports."
+								}
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "delete": { "range": [0, 20] } } },
+								{ "diffOp": { "equal": { "range": [20, 54] } } },
+								{ "equalLines": { "line_count": 13 } },
+								{ "diffOp": { "equal": { "range": [54, 80] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [7, 11],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [1, 8],
+				"end": [1, 12]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedImports",
+			"severity": "warning",
+			"description": "Several of these imports are unused.",
+			"message": [
+				{ "elements": [], "content": "Several of these " },
+				{ "elements": ["Emphasis"], "content": "imports" },
+				{ "elements": [], "content": " are unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused imports might be the result of an incomplete refactoring."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: Remove the unused imports."
+								}
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 30] } } },
+								{ "diffOp": { "delete": { "range": [30, 31] } } },
+								{ "diffOp": { "delete": { "range": [31, 33] } } },
+								{ "diffOp": { "equal": { "range": [33, 60] } } },
+								{ "equalLines": { "line_count": 12 } },
+								{ "diffOp": { "equal": { "range": [60, 86] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [30, 31],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [2, 10],
+				"end": [2, 11]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedVariables",
+			"severity": "warning",
+			"description": "This variable f is unused.",
+			"message": [
+				{ "elements": [], "content": "This variable " },
+				{ "elements": ["Emphasis"], "content": "f" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: If this is intentional, prepend "
+								},
+								{ "elements": ["Emphasis"], "content": "f" },
+								{ "elements": [], "content": " with an underscore." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\ndebugger\n\nlet f_f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 8 } },
+								{ "diffOp": { "equal": { "range": [54, 68] } } },
+								{ "diffOp": { "delete": { "range": [68, 69] } } },
+								{ "diffOp": { "insert": { "range": [69, 71] } } },
+								{ "diffOp": { "equal": { "range": [71, 113] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [121, 122],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [14, 5],
+				"end": [14, 6]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedVariables",
+			"severity": "warning",
+			"description": "This variable f is unused.",
+			"message": [
+				{ "elements": [], "content": "This variable " },
+				{ "elements": ["Emphasis"], "content": "f" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: If this is intentional, prepend "
+								},
+								{ "elements": ["Emphasis"], "content": "f" },
+								{ "elements": [], "content": " with an underscore." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\nlet f;\nlet f_f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 9 } },
+								{ "diffOp": { "equal": { "range": [54, 66] } } },
+								{ "diffOp": { "delete": { "range": [66, 67] } } },
+								{ "diffOp": { "insert": { "range": [67, 69] } } },
+								{ "diffOp": { "equal": { "range": [69, 104] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [128, 129],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [15, 5],
+				"end": [15, 6]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedVariables",
+			"severity": "warning",
+			"description": "This variable f is unused.",
+			"message": [
+				{ "elements": [], "content": "This variable " },
+				{ "elements": ["Emphasis"], "content": "f" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: If this is intentional, prepend "
+								},
+								{ "elements": ["Emphasis"], "content": "f" },
+								{ "elements": [], "content": " with an underscore." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\nlet f;\nlet f;\nlet f_f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 10 } },
+								{ "diffOp": { "equal": { "range": [54, 72] } } },
+								{ "diffOp": { "delete": { "range": [72, 73] } } },
+								{ "diffOp": { "insert": { "range": [73, 75] } } },
+								{ "diffOp": { "equal": { "range": [75, 103] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [135, 136],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [16, 5],
+				"end": [16, 6]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedVariables",
+			"severity": "warning",
+			"description": "This variable f is unused.",
+			"message": [
+				{ "elements": [], "content": "This variable " },
+				{ "elements": ["Emphasis"], "content": "f" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: If this is intentional, prepend "
+								},
+								{ "elements": ["Emphasis"], "content": "f" },
+								{ "elements": [], "content": " with an underscore." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\nlet f;\nlet f;\n\t\tlet f_f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 11 } },
+								{ "diffOp": { "equal": { "range": [54, 74] } } },
+								{ "diffOp": { "delete": { "range": [74, 75] } } },
+								{ "diffOp": { "insert": { "range": [75, 77] } } },
+								{ "diffOp": { "equal": { "range": [77, 96] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [144, 145],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [17, 7],
+				"end": [17, 8]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedVariables",
+			"severity": "warning",
+			"description": "This variable f is unused.",
+			"message": [
+				{ "elements": [], "content": "This variable " },
+				{ "elements": ["Emphasis"], "content": "f" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: If this is intentional, prepend "
+								},
+								{ "elements": ["Emphasis"], "content": "f" },
+								{ "elements": [], "content": " with an underscore." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\nlet f;\n\t\tlet f;\n\t\tlet f_f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 12 } },
+								{ "diffOp": { "equal": { "range": [54, 76] } } },
+								{ "diffOp": { "delete": { "range": [76, 77] } } },
+								{ "diffOp": { "insert": { "range": [77, 79] } } },
+								{ "diffOp": { "equal": { "range": [79, 89] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [153, 154],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [18, 7],
+				"end": [18, 8]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedVariables",
+			"severity": "warning",
+			"description": "This variable f is unused.",
+			"message": [
+				{ "elements": [], "content": "This variable " },
+				{ "elements": ["Emphasis"], "content": "f" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: If this is intentional, prepend "
+								},
+								{ "elements": ["Emphasis"], "content": "f" },
+								{ "elements": [], "content": " with an underscore." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\t\tlet f;\n\t\tlet f;\n\t\tlet f_f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 13 } },
+								{ "diffOp": { "equal": { "range": [54, 78] } } },
+								{ "diffOp": { "delete": { "range": [78, 79] } } },
+								{ "diffOp": { "insert": { "range": [79, 81] } } },
+								{ "diffOp": { "equal": { "range": [81, 82] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [162, 163],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [19, 7],
+				"end": [19, 8]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedVariables",
+			"severity": "warning",
+			"description": "This variable f is unused.",
+			"message": [
+				{ "elements": [], "content": "This variable " },
+				{ "elements": ["Emphasis"], "content": "f" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: If this is intentional, prepend "
+								},
+								{ "elements": ["Emphasis"], "content": "f" },
+								{ "elements": [], "content": " with an underscore." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\t\tlet f;\n\t\tlet f;\n\t\tlet f_f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 13 } },
+								{ "diffOp": { "equal": { "range": [54, 78] } } },
+								{ "diffOp": { "delete": { "range": [78, 79] } } },
+								{ "diffOp": { "insert": { "range": [79, 81] } } },
+								{ "diffOp": { "equal": { "range": [81, 82] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [162, 163],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [19, 7],
+				"end": [19, 8]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedImports",
+			"severity": "warning",
+			"description": "This import is unused.",
+			"message": [
+				{ "elements": [], "content": "This " },
+				{ "elements": ["Emphasis"], "content": "import" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused imports might be the result of an incomplete refactoring."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: Remove the unused imports."
+								}
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "delete": { "range": [0, 20] } } },
+								{ "diffOp": { "equal": { "range": [20, 54] } } },
+								{ "equalLines": { "line_count": 13 } },
+								{ "diffOp": { "equal": { "range": [54, 80] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [7, 11],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [1, 8],
+				"end": [1, 12]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedImports",
+			"severity": "warning",
+			"description": "Several of these imports are unused.",
+			"message": [
+				{ "elements": [], "content": "Several of these " },
+				{ "elements": ["Emphasis"], "content": "imports" },
+				{ "elements": [], "content": " are unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused imports might be the result of an incomplete refactoring."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: Remove the unused imports."
+								}
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 30] } } },
+								{ "diffOp": { "delete": { "range": [30, 31] } } },
+								{ "diffOp": { "delete": { "range": [31, 33] } } },
+								{ "diffOp": { "equal": { "range": [33, 60] } } },
+								{ "equalLines": { "line_count": 12 } },
+								{ "diffOp": { "equal": { "range": [60, 86] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [30, 31],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [2, 10],
+				"end": [2, 11]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedVariables",
+			"severity": "warning",
+			"description": "This variable f is unused.",
+			"message": [
+				{ "elements": [], "content": "This variable " },
+				{ "elements": ["Emphasis"], "content": "f" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: If this is intentional, prepend "
+								},
+								{ "elements": ["Emphasis"], "content": "f" },
+								{ "elements": [], "content": " with an underscore." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\ndebugger\n\nlet f_f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 8 } },
+								{ "diffOp": { "equal": { "range": [54, 68] } } },
+								{ "diffOp": { "delete": { "range": [68, 69] } } },
+								{ "diffOp": { "insert": { "range": [69, 71] } } },
+								{ "diffOp": { "equal": { "range": [71, 113] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [121, 122],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [14, 5],
+				"end": [14, 6]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedVariables",
+			"severity": "warning",
+			"description": "This variable f is unused.",
+			"message": [
+				{ "elements": [], "content": "This variable " },
+				{ "elements": ["Emphasis"], "content": "f" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: If this is intentional, prepend "
+								},
+								{ "elements": ["Emphasis"], "content": "f" },
+								{ "elements": [], "content": " with an underscore." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\nlet f;\nlet f_f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 9 } },
+								{ "diffOp": { "equal": { "range": [54, 66] } } },
+								{ "diffOp": { "delete": { "range": [66, 67] } } },
+								{ "diffOp": { "insert": { "range": [67, 69] } } },
+								{ "diffOp": { "equal": { "range": [69, 104] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [128, 129],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [15, 5],
+				"end": [15, 6]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedVariables",
+			"severity": "warning",
+			"description": "This variable f is unused.",
+			"message": [
+				{ "elements": [], "content": "This variable " },
+				{ "elements": ["Emphasis"], "content": "f" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: If this is intentional, prepend "
+								},
+								{ "elements": ["Emphasis"], "content": "f" },
+								{ "elements": [], "content": " with an underscore." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\nlet f;\nlet f;\nlet f_f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 10 } },
+								{ "diffOp": { "equal": { "range": [54, 72] } } },
+								{ "diffOp": { "delete": { "range": [72, 73] } } },
+								{ "diffOp": { "insert": { "range": [73, 75] } } },
+								{ "diffOp": { "equal": { "range": [75, 103] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [135, 136],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [16, 5],
+				"end": [16, 6]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedVariables",
+			"severity": "warning",
+			"description": "This variable f is unused.",
+			"message": [
+				{ "elements": [], "content": "This variable " },
+				{ "elements": ["Emphasis"], "content": "f" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: If this is intentional, prepend "
+								},
+								{ "elements": ["Emphasis"], "content": "f" },
+								{ "elements": [], "content": " with an underscore." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\nlet f;\nlet f;\n\t\tlet f_f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 11 } },
+								{ "diffOp": { "equal": { "range": [54, 74] } } },
+								{ "diffOp": { "delete": { "range": [74, 75] } } },
+								{ "diffOp": { "insert": { "range": [75, 77] } } },
+								{ "diffOp": { "equal": { "range": [77, 96] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [144, 145],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [17, 7],
+				"end": [17, 8]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/correctness/noUnusedVariables",
+			"severity": "warning",
+			"description": "This variable f is unused.",
+			"message": [
+				{ "elements": [], "content": "This variable " },
+				{ "elements": ["Emphasis"], "content": "f" },
+				{ "elements": [], "content": " is unused." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."
+								}
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: If this is intentional, prepend "
+								},
+								{ "elements": ["Emphasis"], "content": "f" },
+								{ "elements": [], "content": " with an underscore." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\nlet f;\n\t\tlet f;\n\t\tlet f_f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 12 } },
+								{ "diffOp": { "equal": { "range": [54, 76] } } },
+								{ "diffOp": { "delete": { "range": [76, 77] } } },
+								{ "diffOp": { "insert": { "range": [77, 79] } } },
+								{ "diffOp": { "equal": { "range": [79, 89] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [153, 154],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [18, 7],
+				"end": [18, 8]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDoubleEquals",
+			"severity": "error",
+			"description": "Using == may be unsafe if you are relying on type coercion.",
+			"message": [
+				{ "elements": [], "content": "Using " },
+				{ "elements": ["Emphasis"], "content": "==" },
+				{
+					"elements": [],
+					"content": " may be unsafe if you are relying on type coercion."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": ["Emphasis"], "content": "==" },
+								{
+									"elements": [],
+									"content": " is only allowed when comparing against "
+								},
+								{ "elements": ["Emphasis"], "content": "null" },
+								{ "elements": [], "content": "." }
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": [], "content": "Unsafe fix: Use " },
+								{ "elements": ["Emphasis"], "content": "===" },
+								{ "elements": [], "content": " instead." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 57] } } },
+								{ "diffOp": { "equal": { "range": [57, 59] } } },
+								{ "diffOp": { "insert": { "range": [57, 58] } } },
+								{ "diffOp": { "equal": { "range": [59, 72] } } },
+								{ "equalLines": { "line_count": 10 } },
+								{ "diffOp": { "equal": { "range": [72, 98] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [57, 59],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [4, 3],
+				"end": [4, 5]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noRedeclare",
+			"severity": "error",
+			"description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"message": [
+				{
+					"elements": [],
+					"content": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[{ "elements": [], "content": "'f' is defined here:" }]
+						]
+					},
+					{
+						"frame": {
+							"path": null,
+							"span": [121, 122],
+							"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"start": [14, 5],
+							"end": [14, 6]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [153, 154],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [18, 7],
+				"end": [18, 8]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noRedeclare",
+			"severity": "error",
+			"description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"message": [
+				{
+					"elements": [],
+					"content": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[{ "elements": [], "content": "'f' is defined here:" }]
+						]
+					},
+					{
+						"frame": {
+							"path": null,
+							"span": [121, 122],
+							"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"start": [14, 5],
+							"end": [14, 6]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [162, 163],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [19, 7],
+				"end": [19, 8]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDoubleEquals",
+			"severity": "error",
+			"description": "Using == may be unsafe if you are relying on type coercion.",
+			"message": [
+				{ "elements": [], "content": "Using " },
+				{ "elements": ["Emphasis"], "content": "==" },
+				{
+					"elements": [],
+					"content": " may be unsafe if you are relying on type coercion."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": ["Emphasis"], "content": "==" },
+								{
+									"elements": [],
+									"content": " is only allowed when comparing against "
+								},
+								{ "elements": ["Emphasis"], "content": "null" },
+								{ "elements": [], "content": "." }
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": [], "content": "Unsafe fix: Use " },
+								{ "elements": ["Emphasis"], "content": "===" },
+								{ "elements": [], "content": " instead." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 69] } } },
+								{ "diffOp": { "equal": { "range": [69, 71] } } },
+								{ "diffOp": { "insert": { "range": [69, 70] } } },
+								{ "diffOp": { "equal": { "range": [71, 79] } } },
+								{ "equalLines": { "line_count": 8 } },
+								{ "diffOp": { "equal": { "range": [79, 105] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [69, 71],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [6, 3],
+				"end": [6, 5]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDoubleEquals",
+			"severity": "error",
+			"description": "Using == may be unsafe if you are relying on type coercion.",
+			"message": [
+				{ "elements": [], "content": "Using " },
+				{ "elements": ["Emphasis"], "content": "==" },
+				{
+					"elements": [],
+					"content": " may be unsafe if you are relying on type coercion."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": ["Emphasis"], "content": "==" },
+								{
+									"elements": [],
+									"content": " is only allowed when comparing against "
+								},
+								{ "elements": ["Emphasis"], "content": "null" },
+								{ "elements": [], "content": "." }
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": [], "content": "Unsafe fix: Use " },
+								{ "elements": ["Emphasis"], "content": "===" },
+								{ "elements": [], "content": " instead." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\na ==b\na ==b\na ==b\n\ndebugger\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 1 } },
+								{ "diffOp": { "equal": { "range": [54, 68] } } },
+								{ "diffOp": { "equal": { "range": [68, 70] } } },
+								{ "diffOp": { "insert": { "range": [68, 69] } } },
+								{ "diffOp": { "equal": { "range": [70, 81] } } },
+								{ "equalLines": { "line_count": 7 } },
+								{ "diffOp": { "equal": { "range": [81, 107] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [75, 77],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [7, 3],
+				"end": [7, 5]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDebugger",
+			"severity": "error",
+			"description": "This is an unexpected use of the debugger statement.",
+			"message": [
+				{ "elements": [], "content": "This is an unexpected use of the " },
+				{ "elements": ["Emphasis"], "content": "debugger" },
+				{ "elements": [], "content": " statement." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: Remove debugger statement"
+								}
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 1 } },
+								{ "diffOp": { "equal": { "range": [54, 71] } } },
+								{ "diffOp": { "delete": { "range": [71, 81] } } },
+								{ "diffOp": { "equal": { "range": [81, 99] } } },
+								{ "equalLines": { "line_count": 5 } },
+								{ "diffOp": { "equal": { "range": [99, 125] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [80, 88],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [9, 1],
+				"end": [9, 9]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDebugger",
+			"severity": "error",
+			"description": "This is an unexpected use of the debugger statement.",
+			"message": [
+				{ "elements": [], "content": "This is an unexpected use of the " },
+				{ "elements": ["Emphasis"], "content": "debugger" },
+				{ "elements": [], "content": " statement." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: Remove debugger statement"
+								}
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 3 } },
+								{ "diffOp": { "equal": { "range": [54, 69] } } },
+								{ "diffOp": { "delete": { "range": [69, 78] } } },
+								{ "diffOp": { "equal": { "range": [78, 96] } } },
+								{ "equalLines": { "line_count": 4 } },
+								{ "diffOp": { "equal": { "range": [96, 122] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [89, 97],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [10, 1],
+				"end": [10, 9]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDebugger",
+			"severity": "error",
+			"description": "This is an unexpected use of the debugger statement.",
+			"message": [
+				{ "elements": [], "content": "This is an unexpected use of the " },
+				{ "elements": ["Emphasis"], "content": "debugger" },
+				{ "elements": [], "content": " statement." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: Remove debugger statement"
+								}
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\ndebugger\ndebugger\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 4 } },
+								{ "diffOp": { "equal": { "range": [54, 72] } } },
+								{ "diffOp": { "delete": { "range": [54, 63] } } },
+								{ "diffOp": { "equal": { "range": [54, 64] } } },
+								{ "equalLines": { "line_count": 3 } },
+								{ "diffOp": { "equal": { "range": [72, 98] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [98, 106],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [11, 1],
+				"end": [11, 9]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDebugger",
+			"severity": "error",
+			"description": "This is an unexpected use of the debugger statement.",
+			"message": [
+				{ "elements": [], "content": "This is an unexpected use of the " },
+				{ "elements": ["Emphasis"], "content": "debugger" },
+				{ "elements": [], "content": " statement." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: Remove debugger statement"
+								}
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 5 } },
+								{ "diffOp": { "equal": { "range": [54, 80] } } },
+								{ "diffOp": { "delete": { "range": [80, 89] } } },
+								{ "diffOp": { "equal": { "range": [89, 97] } } },
+								{ "equalLines": { "line_count": 2 } },
+								{ "diffOp": { "equal": { "range": [97, 123] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [107, 115],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [12, 1],
+				"end": [12, 9]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"severity": "error",
+			"description": "This variable implicitly has the any type.",
+			"message": [
+				{ "elements": [], "content": "This variable implicitly has the " },
+				{ "elements": ["Emphasis"], "content": "any" },
+				{ "elements": [], "content": " type." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Variable declarations without type annotation and initialization implicitly have the "
+								},
+								{ "elements": ["Emphasis"], "content": "any" },
+								{
+									"elements": [],
+									"content": " type. Declare a type or initialize the variable with some value."
+								}
+							]
+						]
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [121, 122],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [14, 5],
+				"end": [14, 6]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"severity": "error",
+			"description": "This variable implicitly has the any type.",
+			"message": [
+				{ "elements": [], "content": "This variable implicitly has the " },
+				{ "elements": ["Emphasis"], "content": "any" },
+				{ "elements": [], "content": " type." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Variable declarations without type annotation and initialization implicitly have the "
+								},
+								{ "elements": ["Emphasis"], "content": "any" },
+								{
+									"elements": [],
+									"content": " type. Declare a type or initialize the variable with some value."
+								}
+							]
+						]
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [128, 129],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [15, 5],
+				"end": [15, 6]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDoubleEquals",
+			"severity": "error",
+			"description": "Using == may be unsafe if you are relying on type coercion.",
+			"message": [
+				{ "elements": [], "content": "Using " },
+				{ "elements": ["Emphasis"], "content": "==" },
+				{
+					"elements": [],
+					"content": " may be unsafe if you are relying on type coercion."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": ["Emphasis"], "content": "==" },
+								{
+									"elements": [],
+									"content": " is only allowed when comparing against "
+								},
+								{ "elements": ["Emphasis"], "content": "null" },
+								{ "elements": [], "content": "." }
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": [], "content": "Unsafe fix: Use " },
+								{ "elements": ["Emphasis"], "content": "===" },
+								{ "elements": [], "content": " instead." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 63] } } },
+								{ "diffOp": { "equal": { "range": [63, 65] } } },
+								{ "diffOp": { "insert": { "range": [63, 64] } } },
+								{ "diffOp": { "equal": { "range": [65, 78] } } },
+								{ "equalLines": { "line_count": 9 } },
+								{ "diffOp": { "equal": { "range": [78, 104] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [63, 65],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [5, 3],
+				"end": [5, 5]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"severity": "error",
+			"description": "This variable implicitly has the any type.",
+			"message": [
+				{ "elements": [], "content": "This variable implicitly has the " },
+				{ "elements": ["Emphasis"], "content": "any" },
+				{ "elements": [], "content": " type." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Variable declarations without type annotation and initialization implicitly have the "
+								},
+								{ "elements": ["Emphasis"], "content": "any" },
+								{
+									"elements": [],
+									"content": " type. Declare a type or initialize the variable with some value."
+								}
+							]
+						]
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [135, 136],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [16, 5],
+				"end": [16, 6]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"severity": "error",
+			"description": "This variable implicitly has the any type.",
+			"message": [
+				{ "elements": [], "content": "This variable implicitly has the " },
+				{ "elements": ["Emphasis"], "content": "any" },
+				{ "elements": [], "content": " type." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Variable declarations without type annotation and initialization implicitly have the "
+								},
+								{ "elements": ["Emphasis"], "content": "any" },
+								{
+									"elements": [],
+									"content": " type. Declare a type or initialize the variable with some value."
+								}
+							]
+						]
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [144, 145],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [17, 7],
+				"end": [17, 8]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"severity": "error",
+			"description": "This variable implicitly has the any type.",
+			"message": [
+				{ "elements": [], "content": "This variable implicitly has the " },
+				{ "elements": ["Emphasis"], "content": "any" },
+				{ "elements": [], "content": " type." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Variable declarations without type annotation and initialization implicitly have the "
+								},
+								{ "elements": ["Emphasis"], "content": "any" },
+								{
+									"elements": [],
+									"content": " type. Declare a type or initialize the variable with some value."
+								}
+							]
+						]
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [153, 154],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [18, 7],
+				"end": [18, 8]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"severity": "error",
+			"description": "This variable implicitly has the any type.",
+			"message": [
+				{ "elements": [], "content": "This variable implicitly has the " },
+				{ "elements": ["Emphasis"], "content": "any" },
+				{ "elements": [], "content": " type." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Variable declarations without type annotation and initialization implicitly have the "
+								},
+								{ "elements": ["Emphasis"], "content": "any" },
+								{
+									"elements": [],
+									"content": " type. Declare a type or initialize the variable with some value."
+								}
+							]
+						]
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [162, 163],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [19, 7],
+				"end": [19, 8]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noRedeclare",
+			"severity": "error",
+			"description": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
+			"message": [
+				{
+					"elements": [],
+					"content": "Shouldn't redeclare 'z'. Consider to delete it or rename it."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[{ "elements": [], "content": "'z' is defined here:" }]
+						]
+					},
+					{
+						"frame": {
+							"path": null,
+							"span": [9, 10],
+							"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"start": [1, 10],
+							"end": [1, 11]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [30, 31],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [2, 10],
+				"end": [2, 11]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noRedeclare",
+			"severity": "error",
+			"description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"message": [
+				{
+					"elements": [],
+					"content": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[{ "elements": [], "content": "'f' is defined here:" }]
+						]
+					},
+					{
+						"frame": {
+							"path": null,
+							"span": [121, 122],
+							"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"start": [14, 5],
+							"end": [14, 6]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [128, 129],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [15, 5],
+				"end": [15, 6]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noRedeclare",
+			"severity": "error",
+			"description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"message": [
+				{
+					"elements": [],
+					"content": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[{ "elements": [], "content": "'f' is defined here:" }]
+						]
+					},
+					{
+						"frame": {
+							"path": null,
+							"span": [121, 122],
+							"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"start": [14, 5],
+							"end": [14, 6]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [135, 136],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [16, 5],
+				"end": [16, 6]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noRedeclare",
+			"severity": "error",
+			"description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"message": [
+				{
+					"elements": [],
+					"content": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[{ "elements": [], "content": "'f' is defined here:" }]
+						]
+					},
+					{
+						"frame": {
+							"path": null,
+							"span": [121, 122],
+							"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"start": [14, 5],
+							"end": [14, 6]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "index.ts" },
+				"span": [144, 145],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [17, 7],
+				"end": [17, 8]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noRedeclare",
+			"severity": "error",
+			"description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"message": [
+				{
+					"elements": [],
+					"content": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[{ "elements": [], "content": "'f' is defined here:" }]
+						]
+					},
+					{
+						"frame": {
+							"path": null,
+							"span": [121, 122],
+							"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"start": [14, 5],
+							"end": [14, 6]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [144, 145],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [17, 7],
+				"end": [17, 8]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"severity": "error",
+			"description": "This variable implicitly has the any type.",
+			"message": [
+				{ "elements": [], "content": "This variable implicitly has the " },
+				{ "elements": ["Emphasis"], "content": "any" },
+				{ "elements": [], "content": " type." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Variable declarations without type annotation and initialization implicitly have the "
+								},
+								{ "elements": ["Emphasis"], "content": "any" },
+								{
+									"elements": [],
+									"content": " type. Declare a type or initialize the variable with some value."
+								}
+							]
+						]
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [128, 129],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [15, 5],
+				"end": [15, 6]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"severity": "error",
+			"description": "This variable implicitly has the any type.",
+			"message": [
+				{ "elements": [], "content": "This variable implicitly has the " },
+				{ "elements": ["Emphasis"], "content": "any" },
+				{ "elements": [], "content": " type." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Variable declarations without type annotation and initialization implicitly have the "
+								},
+								{ "elements": ["Emphasis"], "content": "any" },
+								{
+									"elements": [],
+									"content": " type. Declare a type or initialize the variable with some value."
+								}
+							]
+						]
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [135, 136],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [16, 5],
+				"end": [16, 6]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"severity": "error",
+			"description": "This variable implicitly has the any type.",
+			"message": [
+				{ "elements": [], "content": "This variable implicitly has the " },
+				{ "elements": ["Emphasis"], "content": "any" },
+				{ "elements": [], "content": " type." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Variable declarations without type annotation and initialization implicitly have the "
+								},
+								{ "elements": ["Emphasis"], "content": "any" },
+								{
+									"elements": [],
+									"content": " type. Declare a type or initialize the variable with some value."
+								}
+							]
+						]
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [144, 145],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [17, 7],
+				"end": [17, 8]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"severity": "error",
+			"description": "This variable implicitly has the any type.",
+			"message": [
+				{ "elements": [], "content": "This variable implicitly has the " },
+				{ "elements": ["Emphasis"], "content": "any" },
+				{ "elements": [], "content": " type." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Variable declarations without type annotation and initialization implicitly have the "
+								},
+								{ "elements": ["Emphasis"], "content": "any" },
+								{
+									"elements": [],
+									"content": " type. Declare a type or initialize the variable with some value."
+								}
+							]
+						]
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [153, 154],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [18, 7],
+				"end": [18, 8]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"severity": "error",
+			"description": "This variable implicitly has the any type.",
+			"message": [
+				{ "elements": [], "content": "This variable implicitly has the " },
+				{ "elements": ["Emphasis"], "content": "any" },
+				{ "elements": [], "content": " type." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Variable declarations without type annotation and initialization implicitly have the "
+								},
+								{ "elements": ["Emphasis"], "content": "any" },
+								{
+									"elements": [],
+									"content": " type. Declare a type or initialize the variable with some value."
+								}
+							]
+						]
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [162, 163],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [19, 7],
+				"end": [19, 8]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noRedeclare",
+			"severity": "error",
+			"description": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
+			"message": [
+				{
+					"elements": [],
+					"content": "Shouldn't redeclare 'z'. Consider to delete it or rename it."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[{ "elements": [], "content": "'z' is defined here:" }]
+						]
+					},
+					{
+						"frame": {
+							"path": null,
+							"span": [9, 10],
+							"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"start": [1, 10],
+							"end": [1, 11]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [30, 31],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [2, 10],
+				"end": [2, 11]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noRedeclare",
+			"severity": "error",
+			"description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"message": [
+				{
+					"elements": [],
+					"content": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[{ "elements": [], "content": "'f' is defined here:" }]
+						]
+					},
+					{
+						"frame": {
+							"path": null,
+							"span": [121, 122],
+							"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"start": [14, 5],
+							"end": [14, 6]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [128, 129],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [15, 5],
+				"end": [15, 6]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noRedeclare",
+			"severity": "error",
+			"description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"message": [
+				{
+					"elements": [],
+					"content": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[{ "elements": [], "content": "'f' is defined here:" }]
+						]
+					},
+					{
+						"frame": {
+							"path": null,
+							"span": [121, 122],
+							"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"start": [14, 5],
+							"end": [14, 6]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [135, 136],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [16, 5],
+				"end": [16, 6]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDoubleEquals",
+			"severity": "error",
+			"description": "Using == may be unsafe if you are relying on type coercion.",
+			"message": [
+				{ "elements": [], "content": "Using " },
+				{ "elements": ["Emphasis"], "content": "==" },
+				{
+					"elements": [],
+					"content": " may be unsafe if you are relying on type coercion."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": ["Emphasis"], "content": "==" },
+								{
+									"elements": [],
+									"content": " is only allowed when comparing against "
+								},
+								{ "elements": ["Emphasis"], "content": "null" },
+								{ "elements": [], "content": "." }
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": [], "content": "Unsafe fix: Use " },
+								{ "elements": ["Emphasis"], "content": "===" },
+								{ "elements": [], "content": " instead." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 57] } } },
+								{ "diffOp": { "equal": { "range": [57, 59] } } },
+								{ "diffOp": { "insert": { "range": [57, 58] } } },
+								{ "diffOp": { "equal": { "range": [59, 72] } } },
+								{ "equalLines": { "line_count": 10 } },
+								{ "diffOp": { "equal": { "range": [72, 98] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [57, 59],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [4, 3],
+				"end": [4, 5]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noRedeclare",
+			"severity": "error",
+			"description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"message": [
+				{
+					"elements": [],
+					"content": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[{ "elements": [], "content": "'f' is defined here:" }]
+						]
+					},
+					{
+						"frame": {
+							"path": null,
+							"span": [121, 122],
+							"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"start": [14, 5],
+							"end": [14, 6]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [153, 154],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [18, 7],
+				"end": [18, 8]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noRedeclare",
+			"severity": "error",
+			"description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"message": [
+				{
+					"elements": [],
+					"content": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[{ "elements": [], "content": "'f' is defined here:" }]
+						]
+					},
+					{
+						"frame": {
+							"path": null,
+							"span": [121, 122],
+							"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"start": [14, 5],
+							"end": [14, 6]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [162, 163],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [19, 7],
+				"end": [19, 8]
+			},
+			"tags": [],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDoubleEquals",
+			"severity": "error",
+			"description": "Using == may be unsafe if you are relying on type coercion.",
+			"message": [
+				{ "elements": [], "content": "Using " },
+				{ "elements": ["Emphasis"], "content": "==" },
+				{
+					"elements": [],
+					"content": " may be unsafe if you are relying on type coercion."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": ["Emphasis"], "content": "==" },
+								{
+									"elements": [],
+									"content": " is only allowed when comparing against "
+								},
+								{ "elements": ["Emphasis"], "content": "null" },
+								{ "elements": [], "content": "." }
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": [], "content": "Unsafe fix: Use " },
+								{ "elements": ["Emphasis"], "content": "===" },
+								{ "elements": [], "content": " instead." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 63] } } },
+								{ "diffOp": { "equal": { "range": [63, 65] } } },
+								{ "diffOp": { "insert": { "range": [63, 64] } } },
+								{ "diffOp": { "equal": { "range": [65, 78] } } },
+								{ "equalLines": { "line_count": 9 } },
+								{ "diffOp": { "equal": { "range": [78, 104] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [63, 65],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [5, 3],
+				"end": [5, 5]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDoubleEquals",
+			"severity": "error",
+			"description": "Using == may be unsafe if you are relying on type coercion.",
+			"message": [
+				{ "elements": [], "content": "Using " },
+				{ "elements": ["Emphasis"], "content": "==" },
+				{
+					"elements": [],
+					"content": " may be unsafe if you are relying on type coercion."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": ["Emphasis"], "content": "==" },
+								{
+									"elements": [],
+									"content": " is only allowed when comparing against "
+								},
+								{ "elements": ["Emphasis"], "content": "null" },
+								{ "elements": [], "content": "." }
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": [], "content": "Unsafe fix: Use " },
+								{ "elements": ["Emphasis"], "content": "===" },
+								{ "elements": [], "content": " instead." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 69] } } },
+								{ "diffOp": { "equal": { "range": [69, 71] } } },
+								{ "diffOp": { "insert": { "range": [69, 70] } } },
+								{ "diffOp": { "equal": { "range": [71, 79] } } },
+								{ "equalLines": { "line_count": 8 } },
+								{ "diffOp": { "equal": { "range": [79, 105] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [69, 71],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [6, 3],
+				"end": [6, 5]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDoubleEquals",
+			"severity": "error",
+			"description": "Using == may be unsafe if you are relying on type coercion.",
+			"message": [
+				{ "elements": [], "content": "Using " },
+				{ "elements": ["Emphasis"], "content": "==" },
+				{
+					"elements": [],
+					"content": " may be unsafe if you are relying on type coercion."
+				}
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": ["Emphasis"], "content": "==" },
+								{
+									"elements": [],
+									"content": " is only allowed when comparing against "
+								},
+								{ "elements": ["Emphasis"], "content": "null" },
+								{ "elements": [], "content": "." }
+							]
+						]
+					},
+					{
+						"log": [
+							"info",
+							[
+								{ "elements": [], "content": "Unsafe fix: Use " },
+								{ "elements": ["Emphasis"], "content": "===" },
+								{ "elements": [], "content": " instead." }
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\na ==b\na ==b\na ==b\n\ndebugger\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 1 } },
+								{ "diffOp": { "equal": { "range": [54, 68] } } },
+								{ "diffOp": { "equal": { "range": [68, 70] } } },
+								{ "diffOp": { "insert": { "range": [68, 69] } } },
+								{ "diffOp": { "equal": { "range": [70, 81] } } },
+								{ "equalLines": { "line_count": 7 } },
+								{ "diffOp": { "equal": { "range": [81, 107] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [75, 77],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [7, 3],
+				"end": [7, 5]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDebugger",
+			"severity": "error",
+			"description": "This is an unexpected use of the debugger statement.",
+			"message": [
+				{ "elements": [], "content": "This is an unexpected use of the " },
+				{ "elements": ["Emphasis"], "content": "debugger" },
+				{ "elements": [], "content": " statement." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: Remove debugger statement"
+								}
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 1 } },
+								{ "diffOp": { "equal": { "range": [54, 71] } } },
+								{ "diffOp": { "delete": { "range": [71, 81] } } },
+								{ "diffOp": { "equal": { "range": [81, 99] } } },
+								{ "equalLines": { "line_count": 5 } },
+								{ "diffOp": { "equal": { "range": [99, 125] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [80, 88],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [9, 1],
+				"end": [9, 9]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDebugger",
+			"severity": "error",
+			"description": "This is an unexpected use of the debugger statement.",
+			"message": [
+				{ "elements": [], "content": "This is an unexpected use of the " },
+				{ "elements": ["Emphasis"], "content": "debugger" },
+				{ "elements": [], "content": " statement." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: Remove debugger statement"
+								}
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 3 } },
+								{ "diffOp": { "equal": { "range": [54, 69] } } },
+								{ "diffOp": { "delete": { "range": [69, 78] } } },
+								{ "diffOp": { "equal": { "range": [78, 96] } } },
+								{ "equalLines": { "line_count": 4 } },
+								{ "diffOp": { "equal": { "range": [96, 122] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [89, 97],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [10, 1],
+				"end": [10, 9]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDebugger",
+			"severity": "error",
+			"description": "This is an unexpected use of the debugger statement.",
+			"message": [
+				{ "elements": [], "content": "This is an unexpected use of the " },
+				{ "elements": ["Emphasis"], "content": "debugger" },
+				{ "elements": [], "content": " statement." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: Remove debugger statement"
+								}
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\ndebugger\ndebugger\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 4 } },
+								{ "diffOp": { "equal": { "range": [54, 72] } } },
+								{ "diffOp": { "delete": { "range": [54, 63] } } },
+								{ "diffOp": { "equal": { "range": [54, 64] } } },
+								{ "equalLines": { "line_count": 3 } },
+								{ "diffOp": { "equal": { "range": [72, 98] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [98, 106],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [11, 1],
+				"end": [11, 9]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noDebugger",
+			"severity": "error",
+			"description": "This is an unexpected use of the debugger statement.",
+			"message": [
+				{ "elements": [], "content": "This is an unexpected use of the " },
+				{ "elements": ["Emphasis"], "content": "debugger" },
+				{ "elements": [], "content": " statement." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Unsafe fix: Remove debugger statement"
+								}
+							]
+						]
+					},
+					{
+						"diff": {
+							"dictionary": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+							"ops": [
+								{ "diffOp": { "equal": { "range": [0, 54] } } },
+								{ "equalLines": { "line_count": 5 } },
+								{ "diffOp": { "equal": { "range": [54, 80] } } },
+								{ "diffOp": { "delete": { "range": [80, 89] } } },
+								{ "diffOp": { "equal": { "range": [89, 97] } } },
+								{ "equalLines": { "line_count": 2 } },
+								{ "diffOp": { "equal": { "range": [97, 123] } } }
+							]
+						}
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [107, 115],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [12, 1],
+				"end": [12, 9]
+			},
+			"tags": ["fixable"],
+			"source": null
+		},
+		{
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"severity": "error",
+			"description": "This variable implicitly has the any type.",
+			"message": [
+				{ "elements": [], "content": "This variable implicitly has the " },
+				{ "elements": ["Emphasis"], "content": "any" },
+				{ "elements": [], "content": " type." }
+			],
+			"advices": {
+				"advices": [
+					{
+						"log": [
+							"info",
+							[
+								{
+									"elements": [],
+									"content": "Variable declarations without type annotation and initialization implicitly have the "
+								},
+								{ "elements": ["Emphasis"], "content": "any" },
+								{
+									"elements": [],
+									"content": " type. Declare a type or initialize the variable with some value."
+								}
+							]
+						]
+					}
+				]
+			},
+			"verboseAdvices": { "advices": [] },
+			"location": {
+				"path": { "file": "main.ts" },
+				"span": [121, 122],
+				"sourceCode": "import { z} from \"z\"\nimport { z, b , a} from \"lodash\"\n\na ==b\na ==b\na ==b\na ==b\n\ndebugger\ndebugger\ndebugger\ndebugger\n\nlet f;\nlet f;\nlet f;\n\t\tlet f;\n\t\tlet f;\n\t\tlet f;",
+				"start": [14, 5],
+				"end": [14, 6]
+			},
+			"tags": [],
+			"source": null
+		}
+	],
+	"command": "lint"
+}
+
+```
