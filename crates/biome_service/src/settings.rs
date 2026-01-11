@@ -280,6 +280,27 @@ impl Settings {
         result
     }
 
+    /// Returns the plugin severity map for the analyzer, taking overrides into account.
+    /// Keys are plugin names (derived from file stems), values are severity overrides.
+    /// None means "off" (skip diagnostics), Some(severity) means override to that level.
+    /// Only plugins with explicit severity config are included; plugins without explicit
+    /// severity use their own inline severity from the Grit pattern.
+    pub fn get_plugin_severities_for_path(
+        &self,
+        path: &Utf8Path,
+    ) -> biome_analyze::PluginSeverityMap {
+        let plugins = self.get_plugins_for_path(path);
+        plugins
+            .iter()
+            .filter(|config| config.has_explicit_severity())
+            .map(|config| {
+                let name = config.name().into();
+                let severity = config.severity().to_diagnostic_severity();
+                (name, severity)
+            })
+            .collect()
+    }
+
     /// Returns the plugins that should be enabled for the given `path`, taking overrides into account.
     /// When the same plugin path appears in both base config and overrides, the override takes precedence.
     pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<'_, Plugins> {

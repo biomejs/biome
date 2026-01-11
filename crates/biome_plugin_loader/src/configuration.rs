@@ -109,6 +109,15 @@ impl PluginConfiguration {
         }
     }
 
+    /// Returns whether the plugin has an explicit severity config.
+    /// This is used to determine whether to override the plugin's inline severity.
+    pub fn has_explicit_severity(&self) -> bool {
+        match self {
+            Self::Path(_) => false,
+            Self::WithOptions(opts) => opts.severity.is_some(),
+        }
+    }
+
     /// Returns whether the plugin is enabled (severity is not "off")
     pub fn is_enabled(&self) -> bool {
         self.severity() != PluginSeverity::Off

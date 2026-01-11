@@ -14,11 +14,11 @@ Add `severity` option to plugin configuration. Plugins can now be configured usi
 ```
 
 Supported severity values:
-- `"off"`: Disable the plugin entirely
-- `"warn"`: Enable the plugin (uses plugin's own severity)
-- `"error"`: Enable the plugin (default)
+- `"off"`: Disable the plugin entirely (no diagnostics emitted).
+- `"warn"`: Override plugin diagnostics to warning severity.
+- `"error"`: Override plugin diagnostics to error severity (default).
 
-This allows disabling plugins per-path via overrides:
+This allows configuring plugin behavior per-path via overrides:
 
 ```json
 {
@@ -29,5 +29,3 @@ This allows disabling plugins per-path via overrides:
   }]
 }
 ```
-
-Note: Severity override (actually changing diagnostics from error to warning) is planned for a future release.

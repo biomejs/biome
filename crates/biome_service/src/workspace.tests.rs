@@ -875,6 +875,95 @@ fn plugin_can_be_disabled_in_override_via_options() {
 }
 
 #[test]
+fn plugin_severity_can_be_overridden_to_warn() {
+    // Plugin normally emits Error severity, but we override to Warn via config
+    const PLUGIN_CONTENT: &[u8] = br#"
+`Object.assign($args)` where {
+    register_diagnostic(
+        span = $args,
+        message = "Prefer object spread instead of `Object.assign()`"
+    )
+}
+"#;
+
+    const FILE_CONTENT: &[u8] = b"const a = Object.assign({ foo: 'bar' });";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
+    fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
+
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    // Configure plugin with severity: warn
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                plugins: Some(Plugins(vec![PluginConfiguration::WithOptions(
+                    PluginWithOptions {
+                        path: "./plugin.grit".to_string(),
+                        severity: Some(PluginSeverity::Warn),
+                    },
+                )])),
+                ..Default::default()
+            },
+            workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/a.ts"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new("/project/a.ts"),
+            categories: RuleCategories::default(),
+            only: Vec::new(),
+            skip: Vec::new(),
+            enabled_rules: Vec::new(),
+            pull_code_actions: true,
+        })
+        .unwrap();
+
+    // Plugin should emit a diagnostic with Warning severity (not Error)
+    let plugin_diagnostics: Vec<_> = result
+        .diagnostics
+        .iter()
+        .filter(|diag| diag.category().is_some_and(|cat| cat.name() == "plugin"))
+        .collect();
+
+    assert_eq!(
+        plugin_diagnostics.len(),
+        1,
+        "Expected exactly one plugin diagnostic"
+    );
+
+    // Check the severity is Warning
+    let severity = plugin_diagnostics[0].severity();
+    assert_eq!(
+        severity,
+        biome_diagnostics::Severity::Warning,
+        "Expected plugin diagnostic to have Warning severity (was {:?})",
+        severity
+    );
+}
+
+#[test]
 fn correctly_apply_plugins_in_override() {
     let files: &[(&str, &[u8])] = &[
     (

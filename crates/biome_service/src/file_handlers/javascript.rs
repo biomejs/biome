@@ -382,7 +382,8 @@ impl ServiceLanguage for JsLanguage {
             .with_globals(globals)
             .with_preferred_quote(preferred_quote)
             .with_preferred_jsx_quote(preferred_jsx_quote)
-            .with_preferred_indentation(preferred_indentation);
+            .with_preferred_indentation(preferred_indentation)
+            .with_plugin_severities(global.get_plugin_severities_for_path(path.as_path()));
 
         AnalyzerOptions::default()
             .with_file_path(path.as_path())
