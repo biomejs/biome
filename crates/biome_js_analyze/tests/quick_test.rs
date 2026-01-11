@@ -8,18 +8,22 @@ use biome_fs::TemporaryFs;
 use biome_js_analyze::{JsAnalyzerServices, analyze};
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
-use biome_package::{Dependencies, PackageJson};
+use biome_package::{Dependencies, PackageJson, PackageType};
 use biome_project_layout::ProjectLayout;
 use biome_test_utils::module_graph_for_test_file;
 use camino::Utf8PathBuf;
 use std::slice;
 use std::sync::Arc;
 
-fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc<ProjectLayout> {
-    let manifest = PackageJson::default().with_dependencies(dependencies);
+fn project_layout_with_top_level_dependencies(
+    root: Utf8PathBuf,
+    dependencies: Dependencies,
+) -> Arc<ProjectLayout> {
+    let mut manifest = PackageJson::default().with_dependencies(dependencies);
+    manifest.r#type = Some(PackageType::CommonJs);
 
     let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest("/".into(), manifest);
+    project_layout.insert_node_manifest(root, manifest);
 
     Arc::new(project_layout)
 }
@@ -29,12 +33,13 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"import * as postcssModules from "postcss-modules"
+    const SOURCE: &str = r#"
+interface Array<T> {
+    m: (a: T) => void;
+}
 
-type PostcssOptions = Parameters<postcssModules>[0]
-
-export function f(options: PostcssOptions) {
-	console.log(options)
+namespace Mine {
+    export const t = 0;
 }
 "#;
 
@@ -52,11 +57,12 @@ export function f(options: PostcssOptions) {
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
         );
-    let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
+    let rule_filter = RuleFilter::Rule("correctness", "noUnusedVariables");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
-    let project_layout = project_layout_with_top_level_dependencies(dependencies);
+    let root = Utf8PathBuf::from(fs.cli_path());
+    let project_layout = project_layout_with_top_level_dependencies(root, dependencies);
     let services = crate::JsAnalyzerServices::from((
         module_graph_for_test_file(file_path.as_path(), project_layout.as_ref()),
         project_layout,
