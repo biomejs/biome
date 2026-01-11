@@ -1,10 +1,10 @@
 use biome_configuration::css::CssFormatterConfiguration;
 use biome_configuration::{Configuration, CssConfiguration};
 use biome_css_formatter::{CssFormatLanguage, context::CssFormatOptions};
+use biome_css_syntax::CssFileSource;
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_service::workspace::UpdateSettingsParams;
 use camino::Utf8Path;
-use biome_css_syntax::CssFileSource;
 
 mod language {
     include!("language.rs");
@@ -57,7 +57,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
     let options = CssFormatOptions::default();
     let language = if source_type.is_scss() {
         language::CssTestFormatLanguage::scss()
-    }  else {
+    } else {
         language::CssTestFormatLanguage::default()
     };
 
