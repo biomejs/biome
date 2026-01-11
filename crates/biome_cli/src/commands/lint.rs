@@ -282,6 +282,14 @@ impl TraversalCommand for LintCommandPayload {
                     "Applying code fixes is not available in watch mode.",
                 ));
             }
+
+            if self.suppress {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--suppress",
+                    "Applying suppressions is not available in watch mode.",
+                ));
+            }
         }
 
         Ok(())

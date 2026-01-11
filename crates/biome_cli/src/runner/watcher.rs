@@ -13,7 +13,7 @@ pub(crate) trait Watcher {
 
     /// Wait for the first event from the watcher.
     /// Returns [`None`] if the watcher is no longer available.
-    fn poll(&self) -> Option<WatcherEvent>;
+    fn poll(&mut self) -> Option<WatcherEvent>;
 }
 
 impl Watcher for () {
@@ -21,7 +21,7 @@ impl Watcher for () {
 
     fn watch(&mut self, _paths: impl IntoIterator<Item = Utf8PathBuf>) {}
 
-    fn poll(&self) -> Option<WatcherEvent> {
+    fn poll(&mut self) -> Option<WatcherEvent> {
         None
     }
 }

@@ -32,7 +32,7 @@ impl Watcher for DefaultWatcher {
         watched_paths.commit().ok();
     }
 
-    fn poll(&self) -> Option<WatcherEvent> {
+    fn poll(&mut self) -> Option<WatcherEvent> {
         let event = self.rx.iter().filter_map(Result::ok).find(|event| {
             // Modifying folder or metadata is ignored as it can unlikely affect the results.
             // Any event types are necessary for some platforms to catch events.
