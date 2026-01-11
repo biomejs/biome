@@ -577,6 +577,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_SUPPORTS_CONDITION",
         "CSS_BOGUS_IF_BRANCH",
         "CSS_BOGUS_IF_TEST",
+        "CSS_BOGUS_IF_TEST_BOOLEAN_EXPR",
         // Grit metavariable
         "CSS_METAVARIABLE",
     ],

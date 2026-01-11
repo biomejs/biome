@@ -20,6 +20,15 @@ pub(crate) struct CssParserState {
     /// handling top-level `@rules` or style declarations directly under the stylesheet.
     /// This distinction is critical for correctly interpreting and parsing different sections of a CSS document.
     pub(crate) is_nesting_block: bool,
+
+    /// Indicates whether the parser encountered an `if()` function during speculative parsing.
+    ///
+    /// This flag is used to handle a conflict between speculative parsing and `if()` function parsing.
+    /// The `if()` function uses semicolons as branch separators which conflicts with speculative parsing
+    /// that uses semicolons to detect declaration endings. When this flag is set during a failed
+    /// speculative parse, the parser knows to retry without speculative mode, allowing proper error
+    /// recovery inside the `if()` function.
+    pub(crate) encountered_if_function: bool,
 }
 
 impl CssParserState {
@@ -27,6 +36,7 @@ impl CssParserState {
         Self {
             speculative_parsing: false,
             is_nesting_block: false,
+            encountered_if_function: false,
         }
     }
 }
