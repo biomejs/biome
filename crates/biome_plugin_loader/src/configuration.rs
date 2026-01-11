@@ -26,17 +26,18 @@ impl Plugins {
     /// `.` / `..` segments (without resolving symlinks).
     pub fn normalize_relative_paths(&mut self, base_dir: &Utf8Path) {
         for plugin_config in self.0.iter_mut() {
-            match plugin_config {
-                PluginConfiguration::Path(plugin_path) => {
-                    let plugin_path_buf = Utf8Path::new(plugin_path.as_str());
-                    if plugin_path_buf.is_absolute() {
-                        continue;
-                    }
+            let plugin_path = match plugin_config {
+                PluginConfiguration::Path(path) => path,
+                PluginConfiguration::WithOptions(opts) => &mut opts.path,
+            };
 
-                    let normalized = normalize_path(&base_dir.join(plugin_path_buf));
-                    *plugin_path = normalized.to_string();
-                }
+            let plugin_path_buf = Utf8Path::new(plugin_path.as_str());
+            if plugin_path_buf.is_absolute() {
+                continue;
             }
+
+            let normalized = normalize_path(&base_dir.join(plugin_path_buf));
+            *plugin_path = normalized.to_string();
         }
     }
 }
@@ -67,8 +68,41 @@ impl DerefMut for Plugins {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum PluginConfiguration {
+    /// A simple path to a plugin file
     Path(String),
-    // TODO: PathWithOptions(PluginPathWithOptions),
+    /// A plugin with additional options
+    WithOptions(PluginWithOptions),
+}
+
+impl PluginConfiguration {
+    /// Returns the path to the plugin file
+    pub fn path(&self) -> &str {
+        match self {
+            Self::Path(path) => path,
+            Self::WithOptions(opts) => &opts.path,
+        }
+    }
+
+    /// Returns whether the plugin is enabled (default: true)
+    pub fn is_enabled(&self) -> bool {
+        match self {
+            Self::Path(_) => true,
+            Self::WithOptions(opts) => opts.enabled.unwrap_or(true),
+        }
+    }
+}
+
+/// Plugin configuration with additional options
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PluginWithOptions {
+    /// Path to the plugin file
+    #[serde(default)]
+    pub path: String,
+    /// Whether the plugin is enabled (default: true)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<bool>,
 }
 
 impl Deserializable for PluginConfiguration {
@@ -77,17 +111,14 @@ impl Deserializable for PluginConfiguration {
         value: &impl DeserializableValue,
         rule_name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
-            Deserializable::deserialize(ctx, value, rule_name).map(Self::Path)
-        } else {
-            // TODO: Fix this to allow plugins to receive options.
-            //       We probably need to pass them as `AnyJsonValue` or
-            //       `biome_json_value::JsonValue`, since plugin options are
-            //       untyped.
-            //       Also, we don't have a way to configure Grit plugins yet.
-            /*Deserializable::deserialize(value, rule_name, diagnostics)
-            .map(|plugin| Self::PathWithOptions(plugin))*/
-            None
+        match value.visitable_type()? {
+            DeserializableType::Str => {
+                Deserializable::deserialize(ctx, value, rule_name).map(Self::Path)
+            }
+            DeserializableType::Map => {
+                Deserializable::deserialize(ctx, value, rule_name).map(Self::WithOptions)
+            }
+            _ => None,
         }
     }
 }
@@ -106,12 +137,12 @@ mod tests {
 
         plugins.normalize_relative_paths(base_dir);
 
-        let PluginConfiguration::Path(first) = &plugins.0[0];
+        let first = plugins.0[0].path();
         assert!(Utf8Path::new(first).starts_with(base_dir));
         let expected_suffix = Utf8Path::new("biome").join("my-plugin.grit");
         assert!(Utf8Path::new(first).ends_with(expected_suffix.as_path()));
 
-        let PluginConfiguration::Path(second) = &plugins.0[1];
+        let second = plugins.0[1].path();
         assert!(Utf8Path::new(second).starts_with(base_dir));
         assert!(Utf8Path::new(second).ends_with("other.grit"));
     }
@@ -125,7 +156,46 @@ mod tests {
 
         plugins.normalize_relative_paths(base_dir);
 
-        let PluginConfiguration::Path(result) = &plugins.0[0];
-        assert_eq!(result, &absolute);
+        assert_eq!(plugins.0[0].path(), &absolute);
+    }
+
+    #[test]
+    fn normalize_relative_paths_works_with_options() {
+        let base_dir = Utf8Path::new("base");
+        let mut plugins = Plugins(vec![PluginConfiguration::WithOptions(PluginWithOptions {
+            path: "./my-plugin.grit".into(),
+            enabled: Some(false),
+        })]);
+
+        plugins.normalize_relative_paths(base_dir);
+
+        let first = plugins.0[0].path();
+        assert!(Utf8Path::new(first).starts_with(base_dir));
+        assert!(Utf8Path::new(first).ends_with("my-plugin.grit"));
+        assert!(!plugins.0[0].is_enabled());
+    }
+
+    #[test]
+    fn plugin_is_enabled_by_default() {
+        let path_only = PluginConfiguration::Path("./plugin.grit".into());
+        assert!(path_only.is_enabled());
+
+        let with_none = PluginConfiguration::WithOptions(PluginWithOptions {
+            path: "./plugin.grit".into(),
+            enabled: None,
+        });
+        assert!(with_none.is_enabled());
+
+        let explicitly_enabled = PluginConfiguration::WithOptions(PluginWithOptions {
+            path: "./plugin.grit".into(),
+            enabled: Some(true),
+        });
+        assert!(explicitly_enabled.is_enabled());
+
+        let explicitly_disabled = PluginConfiguration::WithOptions(PluginWithOptions {
+            path: "./plugin.grit".into(),
+            enabled: Some(false),
+        });
+        assert!(!explicitly_disabled.is_enabled());
     }
 }

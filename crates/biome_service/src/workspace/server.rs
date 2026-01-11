@@ -37,8 +37,7 @@ use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
-use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
-use biome_plugin_loader::{PluginConfiguration, Plugins};
+use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic, Plugins};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{NodeCache, SendNode};
@@ -680,15 +679,12 @@ impl WorkspaceServer {
         let plugin_cache = PluginCache::default();
 
         for plugin_config in plugins.iter() {
-            match plugin_config {
-                PluginConfiguration::Path(plugin_path) => {
-                    match BiomePlugin::load(self.fs.clone(), plugin_path, base_path) {
-                        Ok((plugin, _)) => {
-                            plugin_cache.insert_plugin(plugin_path.clone().into(), plugin);
-                        }
-                        Err(diagnostic) => diagnostics.push(diagnostic),
-                    }
+            let plugin_path = plugin_config.path();
+            match BiomePlugin::load(self.fs.clone(), plugin_path, base_path) {
+                Ok((plugin, _)) => {
+                    plugin_cache.insert_plugin(plugin_path.to_string().into(), plugin);
                 }
+                Err(diagnostic) => diagnostics.push(diagnostic),
             }
         }
 

@@ -40,7 +40,7 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_plugin_loader::Plugins;
+use biome_plugin_loader::{PluginConfiguration, Plugins};
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
@@ -281,16 +281,39 @@ impl Settings {
     }
 
     /// Returns the plugins that should be enabled for the given `path`, taking overrides into account.
+    /// When the same plugin path appears in both base config and overrides, the override takes precedence.
     pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<'_, Plugins> {
-        let mut result = Cow::Borrowed(&self.plugins);
+        let mut has_overrides = false;
 
         for pattern in &self.override_settings.patterns {
-            if pattern.is_file_included(path) {
-                result.to_mut().extend_from_slice(&pattern.plugins);
+            if pattern.is_file_included(path) && !pattern.plugins.is_empty() {
+                has_overrides = true;
+                break;
             }
         }
 
-        result
+        if !has_overrides {
+            return Cow::Borrowed(&self.plugins);
+        }
+
+        // Merge plugins: override entries replace base entries with the same path
+        let mut merged: Vec<PluginConfiguration> = self.plugins.0.clone();
+
+        for pattern in &self.override_settings.patterns {
+            if pattern.is_file_included(path) {
+                for override_plugin in pattern.plugins.iter() {
+                    let override_path = override_plugin.path();
+                    // Replace existing plugin with same path, or add if not found
+                    if let Some(pos) = merged.iter().position(|p| p.path() == override_path) {
+                        merged[pos] = override_plugin.clone();
+                    } else {
+                        merged.push(override_plugin.clone());
+                    }
+                }
+            }
+        }
+
+        Cow::Owned(Plugins(merged))
     }
 
     /// Return all plugins configured in setting
