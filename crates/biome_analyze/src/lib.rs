@@ -38,7 +38,10 @@ pub use crate::categories::{
 pub use crate::diagnostics::{AnalyzerDiagnostic, AnalyzerSuppressionDiagnostic, RuleError};
 use crate::matcher::SignalRuleKey;
 pub use crate::matcher::{InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry};
-pub use crate::options::{AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
+pub use crate::options::{
+    AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules, PluginRuleSeverity,
+    PluginRulesConfiguration,
+};
 pub use crate::query::{AddVisitor, QueryKey, QueryMatch, Queryable};
 pub use crate::registry::{
     LanguageRoot, MetadataRegistry, Phase, Phases, RegistryRuleMetadata, RegistryVisitor,
@@ -421,6 +424,16 @@ where
                         )
                 }
                 SignalRuleKey::Plugin(plugin) => {
+                    // Check if plugin rule is disabled via configuration
+                    let is_config_disabled = self
+                        .options
+                        .plugin_rule_severity(plugin.as_ref())
+                        .is_some_and(|severity| severity.is_off());
+                    if is_config_disabled {
+                        self.signal_queue.pop();
+                        continue;
+                    }
+                    // Check suppression comments
                     self.suppressions
                         .top_level_suppression
                         .suppressed_plugin(plugin)

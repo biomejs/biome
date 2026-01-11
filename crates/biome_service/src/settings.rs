@@ -15,8 +15,8 @@ use biome_configuration::{
     DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
     FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
     JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
-    push_to_analyzer_assist, push_to_analyzer_rules,
+    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides,
+    PluginRules, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -259,6 +259,27 @@ impl Settings {
         result
     }
 
+    /// Returns plugin rules configuration taking overrides into account.
+    pub fn as_plugin_rules(&self, path: &Utf8Path) -> Option<Cow<'_, PluginRules>> {
+        let mut result = self.linter.plugin_rules.as_ref().map(Cow::Borrowed);
+        let overrides = &self.override_settings;
+        for pattern in overrides.patterns.iter() {
+            let pattern_plugin_rules = pattern.linter.plugin_rules.as_ref();
+            if let Some(pattern_plugin_rules) = pattern_plugin_rules
+                && pattern.is_file_included(path)
+            {
+                result = if let Some(mut result) = result.take() {
+                    // Override plugin rules
+                    result.to_mut().merge_with(pattern_plugin_rules.clone());
+                    Some(result)
+                } else {
+                    Some(Cow::Borrowed(pattern_plugin_rules))
+                };
+            }
+        }
+        result
+    }
+
     /// Returns assists rules taking overrides into account.
     pub fn as_assist_actions(&self, path: &Utf8Path) -> Option<Cow<'_, Actions>> {
         let mut result = self.assist.actions.as_ref().map(Cow::Borrowed);
@@ -429,6 +450,9 @@ pub struct LinterSettings {
 
     /// Rule domains
     pub domains: Option<RuleDomains>,
+
+    /// Configuration for plugin rules
+    pub plugin_rules: Option<PluginRules>,
 }
 
 impl LinterSettings {
@@ -456,6 +480,9 @@ pub struct OverrideLinterSettings {
 
     /// List of domains
     pub domains: Option<RuleDomains>,
+
+    /// Configuration for plugin rules
+    pub plugin_rules: Option<PluginRules>,
 }
 
 /// Linter settings for the entire workspace
@@ -1770,6 +1797,7 @@ pub fn to_override_settings(
                 enabled: linter.enabled.or(current_settings.linter.enabled),
                 rules: linter.rules,
                 domains: linter.domains,
+                plugin_rules: linter.plugin_rules,
             })
             .unwrap_or_default();
         let assist = pattern
@@ -2004,6 +2032,7 @@ pub fn to_linter_settings(
         rules: conf.rules,
         includes: Includes::new(working_directory, conf.includes),
         domains: conf.domains,
+        plugin_rules: conf.plugin_rules,
     })
 }
 
@@ -2016,6 +2045,7 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
             rules: conf.rules,
             includes: Default::default(),
             domains: conf.domains,
+            plugin_rules: conf.plugin_rules,
         })
     }
 }

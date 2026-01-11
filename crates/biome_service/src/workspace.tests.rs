@@ -4,9 +4,10 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use biome_analyze::RuleCategories;
-use biome_configuration::analyzer::{RuleGroup, RuleSelector};
+use biome_configuration::analyzer::{RuleGroup, RulePlainConfiguration, RuleSelector};
 use biome_configuration::{
-    Configuration, FilesConfiguration, OverrideGlobs, OverridePattern, Overrides,
+    Configuration, FilesConfiguration, LinterConfiguration, OverrideGlobs,
+    OverrideLinterConfiguration, OverridePattern, Overrides, PluginRules,
 };
 use biome_diagnostics::Diagnostic;
 use biome_fs::{BiomePath, MemoryFileSystem};
@@ -810,6 +811,216 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
         assert_debug_snapshot!(snapshot_name, plugin_diagnostics);
         assert!(plugin_diagnostics.len() == expect_diagnosis_count);
     }
+}
+
+#[test]
+fn plugin_rules_can_be_disabled_via_config() {
+    const PLUGIN_CONTENT: &[u8] = br#"
+`Object.assign($args)` as $rule where {
+    $rule <: within `const $name = $rule`,
+    register_diagnostic(
+        span = $args,
+        message = "Prefer object spread instead of `Object.assign()`"
+    )
+}
+"#;
+
+    const FILE_CONTENT: &[u8] = b"const a = Object.assign({ foo: 'bar' });";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
+    fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
+
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    // Configure with the plugin and disable it via pluginRules
+    // Plugin rule names are derived from the Grit file name (e.g., "plugin.grit" -> "plugin")
+    let mut plugin_rules_map = rustc_hash::FxHashMap::default();
+    plugin_rules_map.insert("plugin".to_string(), RulePlainConfiguration::Off);
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                    "./plugin.grit".to_string(),
+                )])),
+                linter: Some(LinterConfiguration {
+                    plugin_rules: Some(PluginRules(plugin_rules_map)),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/a.ts"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new("/project/a.ts"),
+            categories: RuleCategories::default(),
+            only: Vec::new(),
+            skip: Vec::new(),
+            enabled_rules: Vec::new(),
+            pull_code_actions: true,
+        })
+        .unwrap();
+
+    // The plugin diagnostic should be suppressed because the rule is disabled
+    let plugin_diagnostics: Vec<_> = result
+        .diagnostics
+        .iter()
+        .filter(|diag| diag.category().is_some_and(|cat| cat.name() == "plugin"))
+        .collect();
+    assert_eq!(
+        plugin_diagnostics.len(),
+        0,
+        "Expected no plugin diagnostics because the rule is disabled"
+    );
+}
+
+#[test]
+fn plugin_rules_can_be_disabled_in_overrides() {
+    const PLUGIN_CONTENT: &[u8] = br#"
+`Object.assign($args)` as $rule where {
+    $rule <: within `const $name = $rule`,
+    register_diagnostic(
+        span = $args,
+        message = "Prefer object spread instead of `Object.assign()`"
+    )
+}
+"#;
+
+    const FILE_CONTENT: &[u8] = b"const a = Object.assign({ foo: 'bar' });";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
+    fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
+    fs.insert(Utf8PathBuf::from("/project/scripts/b.ts"), FILE_CONTENT);
+
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    // Configure with the plugin, but disable it only for scripts directory via overrides
+    // Plugin rule names are derived from the Grit file name (e.g., "plugin.grit" -> "plugin")
+    let mut plugin_rules_map = rustc_hash::FxHashMap::default();
+    plugin_rules_map.insert("plugin".to_string(), RulePlainConfiguration::Off);
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                    "./plugin.grit".to_string(),
+                )])),
+                overrides: Some(Overrides(vec![OverridePattern {
+                    includes: Some(OverrideGlobs::Globs(Box::new([
+                        biome_glob::NormalizedGlob::from_str("./scripts/**").unwrap(),
+                    ]))),
+                    linter: Some(OverrideLinterConfiguration {
+                        plugin_rules: Some(PluginRules(plugin_rules_map)),
+                        ..Default::default()
+                    }),
+                    ..OverridePattern::default()
+                }])),
+                ..Default::default()
+            },
+            workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
+        })
+        .unwrap();
+
+    // Open both files
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/a.ts"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/scripts/b.ts"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    // Check a.ts - should have the plugin diagnostic
+    let result_a = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new("/project/a.ts"),
+            categories: RuleCategories::default(),
+            only: Vec::new(),
+            skip: Vec::new(),
+            enabled_rules: Vec::new(),
+            pull_code_actions: true,
+        })
+        .unwrap();
+
+    let plugin_diagnostics_a: Vec<_> = result_a
+        .diagnostics
+        .iter()
+        .filter(|diag| diag.category().is_some_and(|cat| cat.name() == "plugin"))
+        .collect();
+    assert_eq!(
+        plugin_diagnostics_a.len(),
+        1,
+        "Expected plugin diagnostic for a.ts (not in overrides)"
+    );
+
+    // Check scripts/b.ts - should NOT have the plugin diagnostic because it's disabled in overrides
+    let result_b = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new("/project/scripts/b.ts"),
+            categories: RuleCategories::default(),
+            only: Vec::new(),
+            skip: Vec::new(),
+            enabled_rules: Vec::new(),
+            pull_code_actions: true,
+        })
+        .unwrap();
+
+    let plugin_diagnostics_b: Vec<_> = result_b
+        .diagnostics
+        .iter()
+        .filter(|diag| diag.category().is_some_and(|cat| cat.name() == "plugin"))
+        .collect();
+    assert_eq!(
+        plugin_diagnostics_b.len(),
+        0,
+        "Expected no plugin diagnostic for scripts/b.ts (disabled in overrides)"
+    );
 }
 
 #[test]

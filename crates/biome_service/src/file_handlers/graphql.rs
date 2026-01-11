@@ -4,7 +4,7 @@ use super::{
     ProcessLint, SearchCapabilities,
 };
 use crate::WorkspaceError;
-use crate::configuration::to_analyzer_rules;
+use crate::configuration::{to_analyzer_rules, to_plugin_rules_configuration};
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
@@ -171,8 +171,11 @@ impl ServiceLanguage for GraphqlLanguage {
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
-        let configuration =
-            AnalyzerConfiguration::default().with_rules(to_analyzer_rules(global, path.as_path()));
+        let plugin_rules = to_plugin_rules_configuration(global, path.as_path());
+
+        let configuration = AnalyzerConfiguration::default()
+            .with_rules(to_analyzer_rules(global, path.as_path()))
+            .with_plugin_rules(plugin_rules);
         AnalyzerOptions::default()
             .with_file_path(path.as_path())
             .with_configuration(configuration)

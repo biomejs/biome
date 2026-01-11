@@ -3,7 +3,7 @@ use super::{
     LintParams, LintResults, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, search,
 };
 use crate::WorkspaceError;
-use crate::configuration::to_analyzer_rules;
+use crate::configuration::{to_analyzer_rules, to_plugin_rules_configuration};
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
@@ -234,6 +234,8 @@ impl ServiceLanguage for CssLanguage {
             })
             .unwrap_or_default();
 
+        let plugin_rules = to_plugin_rules_configuration(global, file_path.as_path());
+
         let configuration = AnalyzerConfiguration::default()
             .with_rules(to_analyzer_rules(global, file_path.as_path()))
             .with_preferred_quote(preferred_quote)
@@ -244,7 +246,8 @@ impl ServiceLanguage for CssLanguage {
                     .parser
                     .css_modules_enabled
                     .is_some_and(|css_modules_enabled| css_modules_enabled.into()),
-            );
+            )
+            .with_plugin_rules(plugin_rules);
 
         AnalyzerOptions::default()
             .with_file_path(file_path.as_path())

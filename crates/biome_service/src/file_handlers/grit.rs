@@ -3,13 +3,14 @@ use super::{
     ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, SearchCapabilities,
 };
+use crate::configuration::to_plugin_rules_configuration;
 use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
 use crate::workspace::{FixFileResult, GetSyntaxTreeResult};
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings},
 };
-use biome_analyze::{AnalyzerOptions, QueryMatch};
+use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions, QueryMatch};
 use biome_configuration::grit::{
     GritAssistConfiguration, GritAssistEnabled, GritFormatterConfiguration, GritFormatterEnabled,
     GritLinterConfiguration, GritLinterEnabled,
@@ -140,15 +141,20 @@ impl ServiceLanguage for GritLanguage {
     }
 
     fn resolve_analyzer_options(
-        _global: &Settings,
+        global: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
+        let plugin_rules = to_plugin_rules_configuration(global, path.as_path());
+
+        let configuration = AnalyzerConfiguration::default().with_plugin_rules(plugin_rules);
+
         AnalyzerOptions::default()
             .with_file_path(path.as_path())
+            .with_configuration(configuration)
             .with_suppression_reason(suppression_reason)
     }
 

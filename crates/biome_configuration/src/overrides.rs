@@ -190,10 +190,16 @@ pub struct OverrideLinterConfiguration {
     #[bpaf(pure(Default::default()), hide)]
     pub rules: Option<Rules>,
 
-    /// List of rules
+    /// List of domains
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(pure(Default::default()), optional, hide)]
     pub domains: Option<RuleDomains>,
+
+    /// Configuration for plugin rules.
+    /// An object where keys are plugin rule names and values are their severity levels.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(pure(Default::default()), optional, hide)]
+    pub plugin_rules: Option<crate::analyzer::linter::PluginRules>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]

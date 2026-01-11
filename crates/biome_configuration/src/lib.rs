@@ -37,8 +37,8 @@ use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use crate::max_size::MaxSize;
 use crate::vcs::{VcsConfiguration, vcs_configuration};
 pub use analyzer::{
-    LinterConfiguration, RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration,
-    RuleWithFixOptions, RuleWithOptions, Rules, linter_configuration,
+    LinterConfiguration, PluginRules, RuleConfiguration, RuleFixConfiguration,
+    RulePlainConfiguration, RuleWithFixOptions, RuleWithOptions, Rules, linter_configuration,
 };
 use biome_analyze::ExtendedConfigurationProvider;
 use biome_console::fmt::{Display, Formatter};

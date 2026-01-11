@@ -2,6 +2,7 @@ use camino::Utf8PathBuf;
 use rustc_hash::FxHashMap;
 
 use crate::{FixKind, Rule, RuleKey};
+use biome_diagnostics::Severity;
 use std::any::{Any, TypeId};
 use std::borrow::Cow;
 use std::sync::Arc;
@@ -52,6 +53,49 @@ impl AnalyzerRules {
     }
 }
 
+/// Configuration for a plugin rule's severity.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum PluginRuleSeverity {
+    /// Rule is disabled
+    Off,
+    /// Rule is enabled with default severity
+    #[default]
+    On,
+    /// Rule emits informational diagnostics
+    Info,
+    /// Rule emits warning diagnostics
+    Warn,
+    /// Rule emits error diagnostics
+    Error,
+}
+
+impl PluginRuleSeverity {
+    /// Returns `true` if the rule is disabled
+    pub fn is_off(&self) -> bool {
+        matches!(self, Self::Off)
+    }
+
+    /// Returns `true` if the rule is enabled (anything but Off)
+    pub fn is_enabled(&self) -> bool {
+        !self.is_off()
+    }
+
+    /// Converts to a diagnostic severity.
+    /// Returns `None` for `Off` and `On` (which uses default severity).
+    pub fn to_severity(&self) -> Option<Severity> {
+        match self {
+            Self::Off | Self::On => None,
+            Self::Info => Some(Severity::Information),
+            Self::Warn => Some(Severity::Warning),
+            Self::Error => Some(Severity::Error),
+        }
+    }
+}
+
+/// Configuration for plugin rules.
+/// Maps plugin rule names to their severity configuration.
+pub type PluginRulesConfiguration = FxHashMap<Box<str>, PluginRuleSeverity>;
+
 /// A data structured derived from the `biome.json` file
 #[derive(Debug, Default)]
 pub struct AnalyzerConfiguration {
@@ -77,6 +121,9 @@ pub struct AnalyzerConfiguration {
 
     /// Whether the CSS files contain CSS Modules
     css_modules: bool,
+
+    /// Configuration for plugin rules (severity settings)
+    pub plugin_rules: PluginRulesConfiguration,
 }
 
 impl AnalyzerConfiguration {
@@ -115,6 +162,11 @@ impl AnalyzerConfiguration {
 
     pub fn with_css_modules(mut self, css_modules: bool) -> Self {
         self.css_modules = css_modules;
+        self
+    }
+
+    pub fn with_plugin_rules(mut self, plugin_rules: PluginRulesConfiguration) -> Self {
+        self.plugin_rules = plugin_rules;
         self
     }
 }
@@ -193,6 +245,16 @@ impl AnalyzerOptions {
 
     pub fn css_modules(&self) -> bool {
         self.configuration.css_modules
+    }
+
+    /// Get the severity configuration for a specific plugin rule.
+    pub fn plugin_rule_severity(&self, plugin_name: &str) -> Option<PluginRuleSeverity> {
+        self.configuration.plugin_rules.get(plugin_name).copied()
+    }
+
+    /// Get the full plugin rules configuration.
+    pub fn plugin_rules(&self) -> &PluginRulesConfiguration {
+        &self.configuration.plugin_rules
     }
 }
 

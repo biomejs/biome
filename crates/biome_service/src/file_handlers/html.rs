@@ -4,7 +4,7 @@ use super::{
     FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
     ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
 };
-use crate::configuration::to_analyzer_rules;
+use crate::configuration::{to_analyzer_rules, to_plugin_rules_configuration};
 use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
 use crate::workspace::{CodeAction, CssDocumentServices, DocumentServices, EmbeddedSnippet};
 use crate::workspace::{FixFileResult, PullActionsResult};
@@ -200,8 +200,11 @@ impl ServiceLanguage for HtmlLanguage {
         _file_source: &super::DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
-        let configuration =
-            AnalyzerConfiguration::default().with_rules(to_analyzer_rules(global, path.as_path()));
+        let plugin_rules = to_plugin_rules_configuration(global, path.as_path());
+
+        let configuration = AnalyzerConfiguration::default()
+            .with_rules(to_analyzer_rules(global, path.as_path()))
+            .with_plugin_rules(plugin_rules);
 
         AnalyzerOptions::default()
             .with_file_path(path.as_path())

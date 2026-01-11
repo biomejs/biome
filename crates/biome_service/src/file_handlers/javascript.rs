@@ -4,7 +4,7 @@ use super::{
     LintParams, LintResults, ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions,
     ProcessFixAll, ProcessLint, SearchCapabilities, search,
 };
-use crate::configuration::to_analyzer_rules;
+use crate::configuration::{to_analyzer_rules, to_plugin_rules_configuration};
 use crate::diagnostics::extension_error;
 use crate::file_handlers::FixAllParams;
 use crate::settings::{
@@ -377,12 +377,15 @@ impl ServiceLanguage for JsLanguage {
             }
         }
 
+        let plugin_rules = to_plugin_rules_configuration(global, path.as_path());
+
         let configuration = configuration
             .with_rules(to_analyzer_rules(global, path.as_path()))
             .with_globals(globals)
             .with_preferred_quote(preferred_quote)
             .with_preferred_jsx_quote(preferred_jsx_quote)
-            .with_preferred_indentation(preferred_indentation);
+            .with_preferred_indentation(preferred_indentation)
+            .with_plugin_rules(plugin_rules);
 
         AnalyzerOptions::default()
             .with_file_path(path.as_path())

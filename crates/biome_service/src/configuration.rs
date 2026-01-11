@@ -2,9 +2,11 @@ use crate::WorkspaceError;
 use crate::settings::Settings;
 use crate::workspace::ScanKind;
 use biome_analyze::{
-    AnalyzerRules, Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
+    AnalyzerRules, PluginRuleSeverity, PluginRulesConfiguration, Queryable, RegistryVisitor, Rule,
+    RuleDomain, RuleFilter, RuleGroup,
 };
-use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
+use biome_configuration::PluginRules;
+use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue, RulePlainConfiguration};
 use biome_configuration::diagnostics::{
     CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
@@ -472,6 +474,36 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
     }
     let overrides = &settings.override_settings;
     overrides.override_analyzer_rules(path, analyzer_rules)
+}
+
+/// Returns the plugin rules configuration for a specific path, taking overrides into account.
+pub fn to_plugin_rules_configuration(
+    settings: &Settings,
+    path: &Utf8Path,
+) -> PluginRulesConfiguration {
+    let plugin_rules = settings.as_plugin_rules(path);
+
+    match plugin_rules {
+        Some(rules) => convert_plugin_rules(&rules),
+        None => PluginRulesConfiguration::default(),
+    }
+}
+
+/// Converts a `PluginRules` configuration to `PluginRulesConfiguration`.
+fn convert_plugin_rules(plugin_rules: &PluginRules) -> PluginRulesConfiguration {
+    plugin_rules
+        .iter()
+        .map(|(name, config)| {
+            let severity = match config {
+                RulePlainConfiguration::Off => PluginRuleSeverity::Off,
+                RulePlainConfiguration::On => PluginRuleSeverity::On,
+                RulePlainConfiguration::Info => PluginRuleSeverity::Info,
+                RulePlainConfiguration::Warn => PluginRuleSeverity::Warn,
+                RulePlainConfiguration::Error => PluginRuleSeverity::Error,
+            };
+            (name.clone().into_boxed_str(), severity)
+        })
+        .collect()
 }
 
 pub trait ConfigurationExt {

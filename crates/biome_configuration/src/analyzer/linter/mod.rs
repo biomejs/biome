@@ -1,7 +1,9 @@
 mod rules;
 
+use crate::analyzer::RulePlainConfiguration;
 use crate::bool::Bool;
 use biome_analyze::RuleDomain;
+use biome_deserialize::Merge;
 use biome_deserialize_macros::{Deserializable, Merge};
 use bpaf::Bpaf;
 pub use rules::*;
@@ -37,6 +39,51 @@ pub struct LinterConfiguration {
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub domains: Option<RuleDomains>,
+
+    /// Configuration for plugin rules.
+    /// An object where keys are plugin rule names and values are their severity levels.
+    #[bpaf(hide, pure(Default::default()))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub plugin_rules: Option<PluginRules>,
+}
+
+/// Configuration for plugin rules.
+/// Maps plugin rule names to their severity configuration.
+#[derive(Clone, Debug, Default, Eq, PartialEq, Deserialize, Serialize, Deserializable)]
+pub struct PluginRules(pub FxHashMap<String, RulePlainConfiguration>);
+
+impl Deref for PluginRules {
+    type Target = FxHashMap<String, RulePlainConfiguration>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl Merge for PluginRules {
+    fn merge_with(&mut self, other: Self) {
+        for (key, value) in other.0 {
+            self.0.insert(key, value);
+        }
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for PluginRules {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("PluginRules")
+    }
+
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        let _values = generator.subschema_for::<RulePlainConfiguration>();
+        schemars::json_schema!({
+            "type": "object",
+            "description": "Configuration for plugin rules. Keys are plugin rule names, values are severity levels.",
+            "additionalProperties": {
+                "$ref": "#/$defs/RulePlainConfiguration"
+            }
+        })
+    }
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize, Merge)]
