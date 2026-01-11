@@ -5,8 +5,10 @@ info: css/scss/declaration/simple-variable.scss
 # Input
 
 ```scss
-$primary-color: #ff0000;
-$secondary-color  :  #00ff00  ;
+$primary-color:   #ff0000;
+
+$secondary-color  :
+  #00ff00  ;
 $font-size:16px;
 
 ```
@@ -29,7 +31,8 @@ Trailing newline: true
 
 ```scss
 $primary-color: #ff0000;
-$secondary-color  :  #00ff00  ;
-$font-size:16px;
+
+$secondary-color: #00ff00;
+$font-size: 16px;
 
 ```

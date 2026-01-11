@@ -6,13 +6,14 @@ info: css/scss/declaration/mixed.scss
 
 ```scss
 .example {
-  $local-var: 10px;
-  ns.$namespaced-var: 20px;
-  $default-var: red !default;
+  $local-var:   10px;
+  ns.$namespaced-var:    20px;
+  $default-var:   red   !default;
   $global-var:blue!global;
+  $combined:green!global!default!global;
 
-  padding: $local-var;
-  margin: ns.$namespaced-var;
+  padding:   $local-var;
+  margin:  ns.$namespaced-var;
 }
 
 ```
@@ -38,10 +39,11 @@ Trailing newline: true
 	$local-var: 10px;
 	ns.$namespaced-var: 20px;
 	$default-var: red !default;
-	$global-var:blue!global;
+	$global-var: blue !global;
+	$combined: green !default !global !global;
 
 	padding: $local-var;
-	margin: ns.$namespaced-var;
+	margin:  ns.$namespaced-var;
 }
 
 ```

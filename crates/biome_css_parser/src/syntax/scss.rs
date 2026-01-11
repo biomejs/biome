@@ -1,12 +1,13 @@
 use super::property::GenericComponentValueList;
-use super::{is_nth_at_identifier, parse_regular_identifier};
+use super::{is_at_identifier, is_nth_at_identifier, parse_regular_identifier};
 use crate::parser::CssParser;
 use biome_css_syntax::CssSyntaxKind::{
     SCSS_DECLARATION, SCSS_IDENTIFIER, SCSS_NAMESPACED_IDENTIFIER, SCSS_VARIABLE_MODIFIER,
     SCSS_VARIABLE_MODIFIER_LIST,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::Parser;
+use biome_parser::diagnostic::expected_token_any;
+use biome_parser::{token_set, Parser, TokenSet};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
@@ -98,8 +99,11 @@ fn parse_scss_declaration_name(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_scss_variable_modifier(p: &mut CssParser) -> bool {
-    p.at(T![!]) && (p.nth_at(1, T![default]) || p.nth_at(1, T![global]))
+    p.at(T![!])
 }
+
+const SCSS_VARIABLE_MODIFIER_SET: TokenSet<CssSyntaxKind> =
+    token_set!(T![default], T![global]);
 
 #[inline]
 fn parse_scss_variable_modifier(p: &mut CssParser) -> ParsedSyntax {
@@ -109,11 +113,16 @@ fn parse_scss_variable_modifier(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T![!]);
-    if p.at(T![default]) {
-        p.bump(T![default]);
+
+    if p.at_ts(SCSS_VARIABLE_MODIFIER_SET) {
+        p.bump_ts(SCSS_VARIABLE_MODIFIER_SET);
     } else {
-        p.bump(T![global]);
+        p.error(expected_token_any(&[T![default], T![global]]));
+        if is_at_identifier(p) {
+            p.bump_any();
+        }
     }
+
     Present(m.complete(p, SCSS_VARIABLE_MODIFIER))
 }
 

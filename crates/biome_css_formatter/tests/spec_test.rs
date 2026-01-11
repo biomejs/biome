@@ -4,6 +4,7 @@ use biome_css_formatter::{CssFormatLanguage, context::CssFormatOptions};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_service::workspace::UpdateSettingsParams;
 use camino::Utf8Path;
+use biome_css_syntax::CssFileSource;
 
 mod language {
     include!("language.rs");
@@ -51,8 +52,14 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
         return;
     };
 
+    let source_type: CssFileSource = test_file.input_file().as_path().try_into().unwrap();
+
     let options = CssFormatOptions::default();
-    let language = language::CssTestFormatLanguage::default();
+    let language = if source_type.is_scss() {
+        language::CssTestFormatLanguage::scss()
+    }  else {
+        language::CssTestFormatLanguage::default()
+    };
 
     let snapshot = SpecSnapshot::new(
         test_file,
