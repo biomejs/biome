@@ -11,7 +11,7 @@ use biome_configuration::{
 use biome_diagnostics::Diagnostic;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_syntax::{JsFileSource, TextSize};
-use biome_plugin_loader::{PluginConfiguration, PluginWithOptions, Plugins};
+use biome_plugin_loader::{PluginConfiguration, PluginSeverity, PluginWithOptions, Plugins};
 use camino::Utf8PathBuf;
 use insta::{assert_debug_snapshot, assert_snapshot};
 
@@ -708,7 +708,7 @@ fn plugin_can_be_disabled_via_options() {
                 plugins: Some(Plugins(vec![PluginConfiguration::WithOptions(
                     PluginWithOptions {
                         path: "./plugin.grit".to_string(),
-                        enabled: Some(false),
+                        severity: Some(PluginSeverity::Off),
                     },
                 )])),
                 ..Default::default()
@@ -793,7 +793,7 @@ fn plugin_can_be_disabled_in_override_via_options() {
                     plugins: Some(Plugins(vec![PluginConfiguration::WithOptions(
                         PluginWithOptions {
                             path: "./plugin.grit".to_string(),
-                            enabled: Some(false),
+                            severity: Some(PluginSeverity::Off),
                         },
                     )])),
                     ..OverridePattern::default()

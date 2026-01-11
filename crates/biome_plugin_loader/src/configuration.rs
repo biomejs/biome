@@ -4,6 +4,7 @@ use biome_deserialize::{
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_fs::normalize_path;
 use camino::Utf8Path;
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::{
     ops::{Deref, DerefMut},
@@ -15,9 +16,20 @@ use std::{
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Plugins(pub Vec<PluginConfiguration>);
 
+/// Map from plugin name to severity configuration
+pub type PluginSeverityMap = FxHashMap<Box<str>, PluginSeverity>;
+
 impl Plugins {
     pub fn iter(&self) -> impl Iterator<Item = &PluginConfiguration> {
         self.deref().iter()
+    }
+
+    /// Builds a map of plugin name -> severity from the configuration.
+    /// This is used to pass severity overrides to the analyzer.
+    pub fn to_severity_map(&self) -> PluginSeverityMap {
+        self.iter()
+            .map(|config| (config.name().into(), config.severity()))
+            .collect()
     }
 
     /// Normalizes plugin paths in-place.
@@ -83,11 +95,48 @@ impl PluginConfiguration {
         }
     }
 
-    /// Returns whether the plugin is enabled (default: true)
-    pub fn is_enabled(&self) -> bool {
+    /// Returns the plugin name (derived from the file stem of the path)
+    pub fn name(&self) -> &str {
+        let path = self.path();
+        Utf8Path::new(path).file_stem().unwrap_or(path)
+    }
+
+    /// Returns the severity level for this plugin (default: Error)
+    pub fn severity(&self) -> PluginSeverity {
         match self {
-            Self::Path(_) => true,
-            Self::WithOptions(opts) => opts.enabled.unwrap_or(true),
+            Self::Path(_) => PluginSeverity::Error,
+            Self::WithOptions(opts) => opts.severity.unwrap_or_default(),
+        }
+    }
+
+    /// Returns whether the plugin is enabled (severity is not "off")
+    pub fn is_enabled(&self) -> bool {
+        self.severity() != PluginSeverity::Off
+    }
+}
+
+/// Severity level for plugin diagnostics
+#[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum PluginSeverity {
+    /// Plugin is disabled
+    Off,
+    /// Plugin emits warnings
+    Warn,
+    /// Plugin emits errors (default)
+    #[default]
+    Error,
+}
+
+impl PluginSeverity {
+    /// Converts to a diagnostic severity.
+    /// Returns `None` for `Off` (meaning the diagnostic should be skipped).
+    pub fn to_diagnostic_severity(self) -> Option<biome_diagnostics::Severity> {
+        match self {
+            Self::Off => None,
+            Self::Warn => Some(biome_diagnostics::Severity::Warning),
+            Self::Error => Some(biome_diagnostics::Severity::Error),
         }
     }
 }
@@ -100,9 +149,10 @@ pub struct PluginWithOptions {
     /// Path to the plugin file
     #[serde(default)]
     pub path: String,
-    /// Whether the plugin is enabled (default: true)
+    /// Severity level for the plugin's diagnostics.
+    /// Use "off" to disable, "warn" for warnings, "error" for errors (default).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub enabled: Option<bool>,
+    pub severity: Option<PluginSeverity>,
 }
 
 impl Deserializable for PluginConfiguration {
@@ -164,7 +214,7 @@ mod tests {
         let base_dir = Utf8Path::new("base");
         let mut plugins = Plugins(vec![PluginConfiguration::WithOptions(PluginWithOptions {
             path: "./my-plugin.grit".into(),
-            enabled: Some(false),
+            severity: Some(PluginSeverity::Off),
         })]);
 
         plugins.normalize_relative_paths(base_dir);
@@ -176,26 +226,57 @@ mod tests {
     }
 
     #[test]
-    fn plugin_is_enabled_by_default() {
+    fn plugin_name_from_path() {
+        let plugin = PluginConfiguration::Path("./my-plugin.grit".into());
+        assert_eq!(plugin.name(), "my-plugin");
+
+        let plugin = PluginConfiguration::Path("/absolute/path/to/plugin.grit".into());
+        assert_eq!(plugin.name(), "plugin");
+
+        let plugin = PluginConfiguration::WithOptions(PluginWithOptions {
+            path: "./foo/bar/baz.grit".into(),
+            severity: None,
+        });
+        assert_eq!(plugin.name(), "baz");
+    }
+
+    #[test]
+    fn plugin_severity_and_enabled() {
+        // Path-only defaults to Error severity and enabled
         let path_only = PluginConfiguration::Path("./plugin.grit".into());
         assert!(path_only.is_enabled());
+        assert_eq!(path_only.severity(), PluginSeverity::Error);
 
+        // WithOptions with no severity defaults to Error and enabled
         let with_none = PluginConfiguration::WithOptions(PluginWithOptions {
             path: "./plugin.grit".into(),
-            enabled: None,
+            severity: None,
         });
         assert!(with_none.is_enabled());
+        assert_eq!(with_none.severity(), PluginSeverity::Error);
 
-        let explicitly_enabled = PluginConfiguration::WithOptions(PluginWithOptions {
+        // Explicit Error severity
+        let explicit_error = PluginConfiguration::WithOptions(PluginWithOptions {
             path: "./plugin.grit".into(),
-            enabled: Some(true),
+            severity: Some(PluginSeverity::Error),
         });
-        assert!(explicitly_enabled.is_enabled());
+        assert!(explicit_error.is_enabled());
+        assert_eq!(explicit_error.severity(), PluginSeverity::Error);
 
-        let explicitly_disabled = PluginConfiguration::WithOptions(PluginWithOptions {
+        // Warn severity is enabled but with warning level
+        let warn = PluginConfiguration::WithOptions(PluginWithOptions {
             path: "./plugin.grit".into(),
-            enabled: Some(false),
+            severity: Some(PluginSeverity::Warn),
         });
-        assert!(!explicitly_disabled.is_enabled());
+        assert!(warn.is_enabled());
+        assert_eq!(warn.severity(), PluginSeverity::Warn);
+
+        // Off severity disables the plugin
+        let off = PluginConfiguration::WithOptions(PluginWithOptions {
+            path: "./plugin.grit".into(),
+            severity: Some(PluginSeverity::Off),
+        });
+        assert!(!off.is_enabled());
+        assert_eq!(off.severity(), PluginSeverity::Off);
     }
 }
