@@ -1,0 +1,20 @@
+{
+    "root": true,
+    "vcs": {
+        "enabled": false
+    },
+    "files": {
+        "ignoreUnknown": true,
+        "includes": ["**/biome.jsonc", "**/*.html"]
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4
+    },
+    "html": {
+        "formatter": {
+            "enabled": true
+        }
+    }
+}
