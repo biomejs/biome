@@ -16,6 +16,7 @@ pub struct CssTestFormatLanguage {
 }
 
 impl CssTestFormatLanguage {
+    #[allow(dead_code)]
     pub fn scss() -> Self {
         Self {
             source_type: CssFileSource::scss(),
