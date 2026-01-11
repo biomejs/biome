@@ -56,7 +56,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
 
     let options = CssFormatOptions::default();
     let language = if source_type.is_scss() {
-        language::CssTestFormatLanguage::scss()
+        language::CssTestFormatLanguage::new(CssFileSource::scss())
     } else {
         language::CssTestFormatLanguage::default()
     };

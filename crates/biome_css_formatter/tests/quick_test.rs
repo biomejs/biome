@@ -34,7 +34,7 @@ fn quick_test() {
     let result = doc.print().unwrap();
 
     let root = &parse.syntax();
-    let language = language::CssTestFormatLanguage::scss();
+    let language = language::CssTestFormatLanguage::new(CssFileSource::scss());
 
     println!("{}", doc.into_document());
     eprintln!("{}", result.as_code());
