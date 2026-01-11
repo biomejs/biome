@@ -92,4 +92,46 @@
 	background: if(not foo: red;);
 }
 
+.invalid-branch-content {
+	a: if(style(--foo: bar): black; !bogus; else: white);
+}
 
+.invalid-branch-content-no-trailing-semi {
+	a: if(style(--foo: bar): black; !bogus; else: white)
+}
+
+.multiple-invalid-branches {
+	a: if(style(--a: 1): red; !!!; style(--b: 2): blue; @@@; else: green);
+}
+
+.invalid-then-valid {
+	a: if(###: red; style(--foo: bar): blue; else: green);
+}
+
+.recovery-at-semicolon {
+	a: if(style(--foo: bar): black; bogus-no-colon; else: white);
+}
+
+.multiple-if-declarations {
+	a: if(style(--foo: bar): black; else: white);
+	b: if(style(--invalid): red; !!!; else: blue);
+	c: if(style(--baz: qux): green; else: yellow);
+}
+
+/* Test if() inside nested rules */
+.outer {
+	.inner {
+		color: if(style(--foo: bar): red; !bogus; else: blue);
+	}
+	a: if(style(--test: val): green; else: yellow);
+}
+
+/* Deeply nested with multiple if() declarations */
+.level1 {
+	.level2 {
+		.level3 {
+			a: if(style(--deep: true): red; !!!; else: blue);
+			b: if(style(--valid: false): green; else: yellow);
+		}
+	}
+}

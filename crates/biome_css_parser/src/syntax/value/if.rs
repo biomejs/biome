@@ -101,6 +101,10 @@ pub(crate) fn parse_if_function(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
+    // Signal that we encountered an if() function. This flag is used by
+    // declaration_or_rule_list_block to handle speculative parsing conflicts.
+    p.state_mut().encountered_if_function = true;
+
     let m = p.start();
 
     p.bump(T![if]);
@@ -421,26 +425,7 @@ fn parse_any_if_condition(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
-    // The DeclarationOrRuleList parser that this function call will be parsed in higher up
-    // the node tree uses  speculative parsing and the semicolon character to determine when
-    // parsing is complete or when to recover from a parsing error. This comes in conflict with
-    // error recovery parsing for if branches since this parser also uses the semicolon as a recovery
-    // point. To get around this, we handle our own manual recovery here by consuming all unexpected
-    // tokens into the CssBogusIfBranch node until we are able to recover.
     if !is_at_any_if_condition(p) {
-        if !p.at_ts(IF_BRANCH_RECOVERY_TOKEN_SET) {
-            let m = p.start();
-
-            while !p.at_ts(IF_BRANCH_RECOVERY_TOKEN_SET) {
-                p.bump_any();
-            }
-
-            let bogus = m.complete(p, CSS_BOGUS_IF_BRANCH);
-            p.error(expected_if_branch(p, bogus.range(p)));
-
-            return Present(bogus);
-        }
-
         return Absent;
     }
 
