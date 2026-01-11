@@ -1,0 +1,114 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<video src="video.mp4"></video>
+<audio src="audio.mp3"></audio>
+<video>
+    <source src="video.webm" type="video/webm" />
+</video>
+<audio>
+    <source src="audio.ogg" type="audio/ogg" />
+</audio>
+<!-- track without kind="captions" -->
+<video>
+    <track kind="subtitles" src="subtitles.vtt" />
+</video>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <video src="video.mp4"></video>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <audio src="audio.mp3"></audio>
+    4 │ <video>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.html:3:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <video src="video.mp4"></video>
+  > 3 │ <audio src="audio.mp3"></audio>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <video>
+    5 │     <source src="video.webm" type="video/webm" />
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.html:4:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+    2 │ <video src="video.mp4"></video>
+    3 │ <audio src="audio.mp3"></audio>
+  > 4 │ <video>
+      │ ^^^^^^^
+  > 5 │     <source src="video.webm" type="video/webm" />
+  > 6 │ </video>
+      │ ^^^^^^^^
+    7 │ <audio>
+    8 │     <source src="audio.ogg" type="audio/ogg" />
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.html:7:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+     5 │     <source src="video.webm" type="video/webm" />
+     6 │ </video>
+   > 7 │ <audio>
+       │ ^^^^^^^
+   > 8 │     <source src="audio.ogg" type="audio/ogg" />
+   > 9 │ </audio>
+       │ ^^^^^^^^
+    10 │ <!-- track without kind="captions" -->
+    11 │ <video>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.html:11:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+     9 │ </audio>
+    10 │ <!-- track without kind="captions" -->
+  > 11 │ <video>
+       │ ^^^^^^^
+  > 12 │     <track kind="subtitles" src="subtitles.vtt" />
+  > 13 │ </video>
+       │ ^^^^^^^^
+    14 │ 
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
