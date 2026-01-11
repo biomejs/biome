@@ -128,6 +128,11 @@ fn handle_collections(
     options: &UseJsxKeyInIterableOptions,
 ) -> Vec<TextRange> {
     let is_inside_jsx = node.parent::<JsxExpressionChild>().is_some();
+    // Only check for keys when the array is inside JSX context (used for rendering)
+    // Arrays outside JSX context (e.g., const arr = [<Hello />]) don't need keys
+    if !is_inside_jsx {
+        return vec![];
+    }
     node.elements()
         .iter()
         .filter_map(|node| {

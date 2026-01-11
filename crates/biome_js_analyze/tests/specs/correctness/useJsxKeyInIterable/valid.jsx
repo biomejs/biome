@@ -108,6 +108,25 @@ const Valid = [<>
 	<p>Test 3</p>
 </>]
 
+// Arrays outside JSX context should not require keys
+const components = [<Hello />, <Hello />, <Hello />];
+
+const routes = [<Route path="/" />, <Route path="/about" />];
+
+export const menuItems = [<MenuItem />, <MenuItem />];
+
+let items = [<Item />];
+
+var config = [<ConfigItem />, <ConfigItem />];
+
+// Standalone array literals (not inside JSX) should not require keys
+[<Hello />, <Hello />, <Hello />];
+
+[...[<Hello />, <Hello />], <Hello />];
+
+[<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
+
+[React.createElement("h1"), React.createElement("h1"), React.createElement("h1")];
 
 // should not generate diagnostics
 import { component$ } from "@builder.io/qwik";

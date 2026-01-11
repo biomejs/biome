@@ -1,11 +1,5 @@
 import React from "react";
 
-[<Hello />, <Hello />, <Hello />];
-
-[...[<Hello />, <Hello />], <Hello />];
-
-[<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
-
 data.map(x => <Hello>{x}</Hello>);
 
 data.map(x => <>{x}</>);
@@ -18,11 +12,12 @@ Array.from([1, 2, 3], (x) => {
 	return <Hello>{x}</Hello>
 });
 
-[React.createElement("h1"), React.createElement("h1"), React.createElement("h1")];
-
 data.map(c => React.createElement("h1"));
 
 React.Children.map(c => React.cloneElement(c));
+
+// Standalone arrays (not inside JSX) should not trigger the rule
+// These cases are now handled in valid.jsx
 
 (<h1>{data.map(x => <h1>{x}</h1>)}</h1>)
 
