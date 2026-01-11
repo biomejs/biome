@@ -3323,6 +3323,55 @@ fn check_plugin_suppressions() {
 }
 
 #[test]
+fn check_json_plugin() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["noTestName.grit"],
+    "formatter": {
+        "enabled": false
+    }
+}"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("noTestName.grit"),
+        br#"language json
+
+`"test"` as $val where {
+    register_diagnostic(span = $val, message = "Avoid using 'test' as package name.", severity = "error")
+}
+"#,
+    );
+
+    let file_path = "package.json";
+    fs.insert(
+        file_path.into(),
+        br#"{
+    "name": "test",
+    "version": "1.0.0"
+}"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_json_plugin",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn doesnt_check_file_when_assist_is_disabled() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

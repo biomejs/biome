@@ -120,7 +120,7 @@ impl JsonMember {
             value: self.value(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<JsonMemberName> {
+    pub fn name(&self) -> SyntaxResult<AnyJsonMemberName> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -140,7 +140,7 @@ impl Serialize for JsonMember {
 }
 #[derive(Serialize)]
 pub struct JsonMemberFields {
-    pub name: SyntaxResult<JsonMemberName>,
+    pub name: SyntaxResult<AnyJsonMemberName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<AnyJsonValue>,
 }
@@ -177,6 +177,41 @@ impl Serialize for JsonMemberName {
 }
 #[derive(Serialize)]
 pub struct JsonMemberNameFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsonMetavariable {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsonMetavariable {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsonMetavariableFields {
+        JsonMetavariableFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for JsonMetavariable {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsonMetavariableFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -375,10 +410,37 @@ pub struct JsonStringValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyJsonMemberName {
+    JsonBogusName(JsonBogusName),
+    JsonMemberName(JsonMemberName),
+    JsonMetavariable(JsonMetavariable),
+}
+impl AnyJsonMemberName {
+    pub fn as_json_bogus_name(&self) -> Option<&JsonBogusName> {
+        match &self {
+            Self::JsonBogusName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_json_member_name(&self) -> Option<&JsonMemberName> {
+        match &self {
+            Self::JsonMemberName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_json_metavariable(&self) -> Option<&JsonMetavariable> {
+        match &self {
+            Self::JsonMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsonValue {
     JsonArrayValue(JsonArrayValue),
     JsonBogusValue(JsonBogusValue),
     JsonBooleanValue(JsonBooleanValue),
+    JsonMetavariable(JsonMetavariable),
     JsonNullValue(JsonNullValue),
     JsonNumberValue(JsonNumberValue),
     JsonObjectValue(JsonObjectValue),
@@ -400,6 +462,12 @@ impl AnyJsonValue {
     pub fn as_json_boolean_value(&self) -> Option<&JsonBooleanValue> {
         match &self {
             Self::JsonBooleanValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_json_metavariable(&self) -> Option<&JsonMetavariable> {
+        match &self {
+            Self::JsonMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -632,6 +700,56 @@ impl From<JsonMemberName> for SyntaxNode {
 }
 impl From<JsonMemberName> for SyntaxElement {
     fn from(n: JsonMemberName) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsonMetavariable {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JSON_METAVARIABLE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JSON_METAVARIABLE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsonMetavariable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsonMetavariable")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsonMetavariable").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<JsonMetavariable> for SyntaxNode {
+    fn from(n: JsonMetavariable) -> Self {
+        n.syntax
+    }
+}
+impl From<JsonMetavariable> for SyntaxElement {
+    fn from(n: JsonMetavariable) -> Self {
         n.syntax.into()
     }
 }
@@ -892,6 +1010,77 @@ impl From<JsonStringValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl From<JsonBogusName> for AnyJsonMemberName {
+    fn from(node: JsonBogusName) -> Self {
+        Self::JsonBogusName(node)
+    }
+}
+impl From<JsonMemberName> for AnyJsonMemberName {
+    fn from(node: JsonMemberName) -> Self {
+        Self::JsonMemberName(node)
+    }
+}
+impl From<JsonMetavariable> for AnyJsonMemberName {
+    fn from(node: JsonMetavariable) -> Self {
+        Self::JsonMetavariable(node)
+    }
+}
+impl AstNode for AnyJsonMemberName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = JsonBogusName::KIND_SET
+        .union(JsonMemberName::KIND_SET)
+        .union(JsonMetavariable::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, JSON_BOGUS_NAME | JSON_MEMBER_NAME | JSON_METAVARIABLE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JSON_BOGUS_NAME => Self::JsonBogusName(JsonBogusName { syntax }),
+            JSON_MEMBER_NAME => Self::JsonMemberName(JsonMemberName { syntax }),
+            JSON_METAVARIABLE => Self::JsonMetavariable(JsonMetavariable { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::JsonBogusName(it) => it.syntax(),
+            Self::JsonMemberName(it) => it.syntax(),
+            Self::JsonMetavariable(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::JsonBogusName(it) => it.into_syntax(),
+            Self::JsonMemberName(it) => it.into_syntax(),
+            Self::JsonMetavariable(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyJsonMemberName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::JsonBogusName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsonMemberName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsonMetavariable(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyJsonMemberName> for SyntaxNode {
+    fn from(n: AnyJsonMemberName) -> Self {
+        match n {
+            AnyJsonMemberName::JsonBogusName(it) => it.into_syntax(),
+            AnyJsonMemberName::JsonMemberName(it) => it.into_syntax(),
+            AnyJsonMemberName::JsonMetavariable(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyJsonMemberName> for SyntaxElement {
+    fn from(n: AnyJsonMemberName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<JsonArrayValue> for AnyJsonValue {
     fn from(node: JsonArrayValue) -> Self {
         Self::JsonArrayValue(node)
@@ -905,6 +1094,11 @@ impl From<JsonBogusValue> for AnyJsonValue {
 impl From<JsonBooleanValue> for AnyJsonValue {
     fn from(node: JsonBooleanValue) -> Self {
         Self::JsonBooleanValue(node)
+    }
+}
+impl From<JsonMetavariable> for AnyJsonValue {
+    fn from(node: JsonMetavariable) -> Self {
+        Self::JsonMetavariable(node)
     }
 }
 impl From<JsonNullValue> for AnyJsonValue {
@@ -932,6 +1126,7 @@ impl AstNode for AnyJsonValue {
     const KIND_SET: SyntaxKindSet<Language> = JsonArrayValue::KIND_SET
         .union(JsonBogusValue::KIND_SET)
         .union(JsonBooleanValue::KIND_SET)
+        .union(JsonMetavariable::KIND_SET)
         .union(JsonNullValue::KIND_SET)
         .union(JsonNumberValue::KIND_SET)
         .union(JsonObjectValue::KIND_SET)
@@ -942,6 +1137,7 @@ impl AstNode for AnyJsonValue {
             JSON_ARRAY_VALUE
                 | JSON_BOGUS_VALUE
                 | JSON_BOOLEAN_VALUE
+                | JSON_METAVARIABLE
                 | JSON_NULL_VALUE
                 | JSON_NUMBER_VALUE
                 | JSON_OBJECT_VALUE
@@ -953,6 +1149,7 @@ impl AstNode for AnyJsonValue {
             JSON_ARRAY_VALUE => Self::JsonArrayValue(JsonArrayValue { syntax }),
             JSON_BOGUS_VALUE => Self::JsonBogusValue(JsonBogusValue { syntax }),
             JSON_BOOLEAN_VALUE => Self::JsonBooleanValue(JsonBooleanValue { syntax }),
+            JSON_METAVARIABLE => Self::JsonMetavariable(JsonMetavariable { syntax }),
             JSON_NULL_VALUE => Self::JsonNullValue(JsonNullValue { syntax }),
             JSON_NUMBER_VALUE => Self::JsonNumberValue(JsonNumberValue { syntax }),
             JSON_OBJECT_VALUE => Self::JsonObjectValue(JsonObjectValue { syntax }),
@@ -966,6 +1163,7 @@ impl AstNode for AnyJsonValue {
             Self::JsonArrayValue(it) => it.syntax(),
             Self::JsonBogusValue(it) => it.syntax(),
             Self::JsonBooleanValue(it) => it.syntax(),
+            Self::JsonMetavariable(it) => it.syntax(),
             Self::JsonNullValue(it) => it.syntax(),
             Self::JsonNumberValue(it) => it.syntax(),
             Self::JsonObjectValue(it) => it.syntax(),
@@ -977,6 +1175,7 @@ impl AstNode for AnyJsonValue {
             Self::JsonArrayValue(it) => it.into_syntax(),
             Self::JsonBogusValue(it) => it.into_syntax(),
             Self::JsonBooleanValue(it) => it.into_syntax(),
+            Self::JsonMetavariable(it) => it.into_syntax(),
             Self::JsonNullValue(it) => it.into_syntax(),
             Self::JsonNumberValue(it) => it.into_syntax(),
             Self::JsonObjectValue(it) => it.into_syntax(),
@@ -990,6 +1189,7 @@ impl std::fmt::Debug for AnyJsonValue {
             Self::JsonArrayValue(it) => std::fmt::Debug::fmt(it, f),
             Self::JsonBogusValue(it) => std::fmt::Debug::fmt(it, f),
             Self::JsonBooleanValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsonMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::JsonNullValue(it) => std::fmt::Debug::fmt(it, f),
             Self::JsonNumberValue(it) => std::fmt::Debug::fmt(it, f),
             Self::JsonObjectValue(it) => std::fmt::Debug::fmt(it, f),
@@ -1003,6 +1203,7 @@ impl From<AnyJsonValue> for SyntaxNode {
             AnyJsonValue::JsonArrayValue(it) => it.into_syntax(),
             AnyJsonValue::JsonBogusValue(it) => it.into_syntax(),
             AnyJsonValue::JsonBooleanValue(it) => it.into_syntax(),
+            AnyJsonValue::JsonMetavariable(it) => it.into_syntax(),
             AnyJsonValue::JsonNullValue(it) => it.into_syntax(),
             AnyJsonValue::JsonNumberValue(it) => it.into_syntax(),
             AnyJsonValue::JsonObjectValue(it) => it.into_syntax(),
@@ -1014,6 +1215,11 @@ impl From<AnyJsonValue> for SyntaxElement {
     fn from(n: AnyJsonValue) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
+    }
+}
+impl std::fmt::Display for AnyJsonMemberName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for AnyJsonValue {
@@ -1037,6 +1243,11 @@ impl std::fmt::Display for JsonMember {
     }
 }
 impl std::fmt::Display for JsonMemberName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsonMetavariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -1123,6 +1334,62 @@ impl From<JsonBogus> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct JsonBogusName {
+    syntax: SyntaxNode,
+}
+impl JsonBogusName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for JsonBogusName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JSON_BOGUS_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JSON_BOGUS_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsonBogusName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JsonBogusName")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<JsonBogusName> for SyntaxNode {
+    fn from(n: JsonBogusName) -> Self {
+        n.syntax
+    }
+}
+impl From<JsonBogusName> for SyntaxElement {
+    fn from(n: JsonBogusName) -> Self {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct JsonBogusValue {
     syntax: SyntaxNode,
 }
@@ -1178,7 +1445,7 @@ impl From<JsonBogusValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyJsonBogusNode = JsonBogus | JsonBogusValue }
+biome_rowan::declare_node_union! { pub AnyJsonBogusNode = JsonBogus | JsonBogusName | JsonBogusValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct JsonArrayElementList {
     syntax_list: SyntaxList,

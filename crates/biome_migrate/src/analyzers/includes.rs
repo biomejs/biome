@@ -29,7 +29,12 @@ impl Rule for Includes {
         };
         let mut result = Vec::default();
         for root_member in root.json_member_list().into_iter().flatten() {
-            let Ok(name) = root_member.name().and_then(|name| name.inner_string_text()) else {
+            let Some(name) = root_member
+                .name()
+                .ok()
+                .and_then(|name| name.inner_string_text())
+                .and_then(|r| r.ok())
+            else {
                 continue;
             };
             match name.text() {
@@ -90,7 +95,7 @@ impl Rule for Includes {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<MigrationAction> {
-        let includes_name = make::json_member_name(make::json_string_literal("includes"));
+        let includes_name = make::json_member_name(make::json_string_literal("includes")).into();
         let includes_array = AnyJsonValue::JsonArrayValue(state.to_includes());
         let mut mutation = ctx.root().begin();
         if let Some(include) = &state.include {
@@ -206,10 +211,14 @@ impl TryFrom<JsonObjectValue> for State {
     fn try_from(value: JsonObjectValue) -> Result<Self, Self::Error> {
         let mut result = Self::default();
         for member in value.json_member_list().into_iter().flatten() {
-            let member_name = member.name().and_then(|name| name.inner_string_text());
-            if member_name.as_ref().is_ok_and(|name| name == &"include") {
+            let member_name = member
+                .name()
+                .ok()
+                .and_then(|name| name.inner_string_text())
+                .and_then(|r| r.ok());
+            if member_name.as_ref().is_some_and(|name| name == &"include") {
                 result.include = Some(member);
-            } else if member_name.as_ref().is_ok_and(|name| name == &"ignore") {
+            } else if member_name.as_ref().is_some_and(|name| name == &"ignore") {
                 result.ignore = Some(member);
             }
         }

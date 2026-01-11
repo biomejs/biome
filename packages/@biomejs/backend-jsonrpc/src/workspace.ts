@@ -8639,7 +8639,7 @@ export interface ParsePatternParams {
 	defaultLanguage: GritTargetLanguage;
 	pattern: string;
 }
-export type GritTargetLanguage = "CSS" | "JavaScript";
+export type GritTargetLanguage = "CSS" | "JavaScript" | "JSON";
 export interface ParsePatternResult {
 	patternId: PatternId;
 }
