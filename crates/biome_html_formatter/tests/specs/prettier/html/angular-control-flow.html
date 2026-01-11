@@ -1,0 +1,48 @@
+<div class="message" [class.me]="message.sender === peerService.localId()">
+    @if (message.status === "Failure") {
+    <div>
+        <mat-icon svgIcon="error" class="warn" matTooltip="Message sending failed!"></mat-icon>
+    </div>
+    }
+    <mat-card class="message-card mat-shadow-2">
+        <mat-card-header>
+            <mat-card-subtitle>{{ message.sender }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+            @switch (message.type) { @case ("Text") {<span class="content">{{ message.text }}</span>} @case
+            ("File") {<span class="content">{{ message.fileName }}({{ message.fileSize | fileSize }})</span>
+            @if (isImage) {
+            <img [src]="imageUrl" alt="image" style="max-width: 100%">} } }<mat-divider></mat-divider>
+        </mat-card-content>
+        <mat-card-actions>
+            @switch (message.type) { @case ("Text") {
+            <button
+                (click)="onCopy(message)"
+                appThrottleButton
+                mat-icon-button
+                class="accent"
+                matTooltip="Copy to clipboard"
+                type="button"
+            >
+                <mat-icon svgIcon="content_copy"></mat-icon>
+            </button>
+            } @case ("File") {
+            <button
+                (click)="onSave(message)"
+                appThrottleButton
+                mat-icon-button
+                class="accent"
+                matTooltip="Save"
+                type="button"
+            >
+                <mat-icon svgIcon="download"></mat-icon>
+            </button>
+            } }<span class="time">{{ message.timestamp | date: "HH:mm" }}</span>
+        </mat-card-actions>
+        <mat-card-footer>
+            @if (message.status === "Queued") {
+            <mat-progress-bar class="accent" mode="indeterminate"></mat-progress-bar>}
+        </mat-card-footer>
+    </mat-card>
+</div>
+

@@ -842,22 +842,97 @@ pub(crate) struct FormatMultilineChildren {
 
 impl Format<HtmlFormatContext> for FormatMultilineChildren {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
-        let format_inner = format_once(|f| {
-            let prefix = f.intern_vec(self.elements_prefix.take());
+        // We do not need the block ident when the list node is at the html root node
+        if self.is_root {
+            let format_inner = format_once(|f| {
+                let prefix = f.intern_vec(self.elements_prefix.take());
 
-            if let Some(elements) = f.intern_vec(self.elements.take()) {
-                match self.layout {
-                    MultilineLayout::Fill => {
+                if let Some(elements) = f.intern_vec(self.elements.take()) {
+                    match self.layout {
+                        MultilineLayout::Fill => {
+                            if let Some(prefix) = prefix {
+                                f.write_elements([prefix])?;
+                            }
+                            f.write_elements([
+                                FormatElement::Tag(Tag::StartFill),
+                                elements,
+                                FormatElement::Tag(Tag::EndFill),
+                            ])?;
+                        }
+                        MultilineLayout::NoFill => {
+                            f.write_elements([FormatElement::Tag(Tag::StartGroup(
+                                tag::Group::new().with_mode(GroupMode::Expand),
+                            ))])?;
+                            if let Some(prefix) = prefix {
+                                f.write_elements([prefix])?;
+                            }
+                            f.write_elements([elements, FormatElement::Tag(Tag::EndGroup)])?;
+                        }
+                    };
+                }
+
+                Ok(())
+            });
+            return write!(f, [format_inner]);
+        }
+
+        // For Fill layout, we need to ensure the Indent tags are inside the Fill tags
+        // to avoid tag mismatch errors when interned elements contain nested Indent tags.
+        match self.layout {
+            MultilineLayout::Fill => {
+                let prefix = self.elements_prefix.take();
+                let elements = self.elements.take();
+                
+                let format_inner = format_once(|f| {
+                    let prefix = f.intern_vec(prefix);
+
+                    if let Some(elements) = f.intern_vec(elements) {
                         if let Some(prefix) = prefix {
                             f.write_elements([prefix])?;
                         }
-                        f.write_elements([
-                            FormatElement::Tag(Tag::StartFill),
-                            elements,
-                            FormatElement::Tag(Tag::EndFill),
-                        ])?;
+                        // Put the Fill tags on the outside, with block_indent inside
+                        // This ensures that when interned elements contain nested Indent tags,
+                        // they are properly closed before the Fill tag is closed.
+                        f.write_elements([FormatElement::Tag(Tag::StartFill)])?;
+                        // Create a format closure for the interned elements and wrap it in block_indent
+                        let elements_format = format_with(|f| {
+                            f.write_elements([elements])
+                        });
+                        write!(f, [block_indent(&elements_format)])?;
+                        f.write_elements([FormatElement::Tag(Tag::EndFill)])?;
                     }
-                    MultilineLayout::NoFill => {
+
+                    Ok(())
+                });
+                // This indent is wrapped with a group to ensure that the print mode is
+                // set to `Expanded` when the group prints and will guarantee that the
+                // content _does not_ fit when printed as part of a `Fill`. Example:
+                //   <div>
+                //     <span a b>
+                //       <Foo />
+                //     </span>{" "}
+                //     ({variable})
+                //   </div>
+                // The `<span>...</span>` is the element that gets wrapped in the group
+                // by this line. Importantly, it contains a hard line break, and because
+                // [FitsMeasurer::fits_element] considers all hard lines as `Fits::Yes`,
+                // it will cause the element and the following separator to be printed
+                // in flat mode due to the logic of `Fill`. But because the we know the
+                // item breaks over multiple lines, we want it to _not_ fit and print
+                // both the content and the separator in Expanded mode, keeping the
+                // formatting as shown above.
+                //
+                // The `group` here allows us to opt-in to telling the `FitsMeasurer`
+                // that content that breaks shouldn't be considered flat and should be
+                // expanded. This is in contrast to something like a concise array fill,
+                // which _does_ allow breaks to fit and preserves density.
+                write!(f, [group(&format_inner)])
+            }
+            MultilineLayout::NoFill => {
+                let format_inner = format_once(|f| {
+                    let prefix = f.intern_vec(self.elements_prefix.take());
+
+                    if let Some(elements) = f.intern_vec(self.elements.take()) {
                         f.write_elements([FormatElement::Tag(Tag::StartGroup(
                             tag::Group::new().with_mode(GroupMode::Expand),
                         ))])?;
@@ -866,39 +941,34 @@ impl Format<HtmlFormatContext> for FormatMultilineChildren {
                         }
                         f.write_elements([elements, FormatElement::Tag(Tag::EndGroup)])?;
                     }
-                };
+
+                    Ok(())
+                });
+                // This indent is wrapped with a group to ensure that the print mode is
+                // set to `Expanded` when the group prints and will guarantee that the
+                // content _does not_ fit when printed as part of a `Fill`. Example:
+                //   <div>
+                //     <span a b>
+                //       <Foo />
+                //     </span>{" "}
+                //     ({variable})
+                //   </div>
+                // The `<span>...</span>` is the element that gets wrapped in the group
+                // by this line. Importantly, it contains a hard line break, and because
+                // [FitsMeasurer::fits_element] considers all hard lines as `Fits::Yes`,
+                // it will cause the element and the following separator to be printed
+                // in flat mode due to the logic of `Fill`. But because the we know the
+                // item breaks over multiple lines, we want it to _not_ fit and print
+                // both the content and the separator in Expanded mode, keeping the
+                // formatting as shown above.
+                //
+                // The `group` here allows us to opt-in to telling the `FitsMeasurer`
+                // that content that breaks shouldn't be considered flat and should be
+                // expanded. This is in contrast to something like a concise array fill,
+                // which _does_ allow breaks to fit and preserves density.
+                write!(f, [group(&block_indent(&format_inner))])
             }
-
-            Ok(())
-        });
-        // We do not need the block ident when the list node is at the html root node
-        if self.is_root {
-            return write!(f, [format_inner]);
         }
-
-        // This indent is wrapped with a group to ensure that the print mode is
-        // set to `Expanded` when the group prints and will guarantee that the
-        // content _does not_ fit when printed as part of a `Fill`. Example:
-        //   <div>
-        //     <span a b>
-        //       <Foo />
-        //     </span>{" "}
-        //     ({variable})
-        //   </div>
-        // The `<span>...</span>` is the element that gets wrapped in the group
-        // by this line. Importantly, it contains a hard line break, and because
-        // [FitsMeasurer::fits_element] considers all hard lines as `Fits::Yes`,
-        // it will cause the element and the following separator to be printed
-        // in flat mode due to the logic of `Fill`. But because the we know the
-        // item breaks over multiple lines, we want it to _not_ fit and print
-        // both the content and the separator in Expanded mode, keeping the
-        // formatting as shown above.
-        //
-        // The `group` here allows us to opt-in to telling the `FitsMeasurer`
-        // that content that breaks shouldn't be considered flat and should be
-        // expanded. This is in contrast to something like a concise array fill,
-        // which _does_ allow breaks to fit and preserves density.
-        write!(f, [group(&block_indent(&format_inner))])
     }
 }
 
