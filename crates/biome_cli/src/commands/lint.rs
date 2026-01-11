@@ -49,6 +49,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) graphql_linter: Option<GraphqlLinterConfiguration>,
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
+    pub(crate) watch: bool,
 }
 
 struct LintExecution {
@@ -150,6 +151,10 @@ impl TraversalCommand for LintCommandPayload {
 
     fn command_name(&self) -> &'static str {
         "lint"
+    }
+
+    fn is_watch_mode(&self) -> bool {
+        self.watch
     }
 
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
@@ -258,5 +263,27 @@ impl TraversalCommand for LintCommandPayload {
         .unwrap_or(self.paths.clone());
 
         Ok(paths)
+    }
+
+    fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
+        if self.is_watch_mode() {
+            if self.fix {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--fix",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+
+            if self.write {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--write",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+        }
+
+        Ok(())
     }
 }

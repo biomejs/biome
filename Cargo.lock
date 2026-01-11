@@ -212,6 +212,7 @@ dependencies = [
  "insta",
  "libc",
  "mimalloc",
+ "notify",
  "path-absolutize",
  "quick-junit",
  "rayon",
