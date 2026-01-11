@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlElement;
+use biome_html_syntax::{AnyHtmlElement, HtmlElementList};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -106,8 +106,6 @@ impl Rule for UseMediaCaption {
         Some(diagnostic)
     }
 }
-
-use biome_html_syntax::HtmlElementList;
 
 /// Checks if the given `HtmlElementList` has a `track` element with `kind="captions"`.
 fn has_caption_track(html_child_list: &HtmlElementList) -> bool {
