@@ -964,6 +964,48 @@ fn plugin_severity_can_be_overridden_to_warn() {
 }
 
 #[test]
+fn disabled_plugin_with_missing_file_does_not_error() {
+    // If a plugin is disabled, we shouldn't try to load it at all.
+    // This means a missing plugin file shouldn't cause an error if severity is "off".
+    let fs = MemoryFileSystem::default();
+    // Note: We intentionally do NOT create the plugin file
+    fs.insert(
+        Utf8PathBuf::from("/project/a.ts"),
+        b"const a = Object.assign({ foo: 'bar' });",
+    );
+
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    // Configure a non-existent plugin with severity: off
+    let result = workspace.update_settings(UpdateSettingsParams {
+        project_key,
+        configuration: Configuration {
+            plugins: Some(Plugins(vec![PluginConfiguration::WithOptions(
+                PluginWithOptions {
+                    path: "./non-existent-plugin.grit".to_string(),
+                    severity: Some(PluginSeverity::Off),
+                },
+            )])),
+            ..Default::default()
+        },
+        workspace_directory: Some(BiomePath::new("/project")),
+        extended_configurations: Default::default(),
+    });
+
+    // Should succeed without errors since disabled plugins are not loaded
+    assert!(
+        result.is_ok(),
+        "update_settings should succeed for disabled plugin with missing file"
+    );
+}
+
+#[test]
 fn correctly_apply_plugins_in_override() {
     let files: &[(&str, &[u8])] = &[
     (

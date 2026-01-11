@@ -679,6 +679,11 @@ impl WorkspaceServer {
         let plugin_cache = PluginCache::default();
 
         for plugin_config in plugins.iter() {
+            // Skip loading disabled plugins entirely
+            if !plugin_config.is_enabled() {
+                continue;
+            }
+
             let plugin_path = plugin_config.path();
             match BiomePlugin::load(self.fs.clone(), plugin_path, base_path) {
                 Ok((plugin, _)) => {
