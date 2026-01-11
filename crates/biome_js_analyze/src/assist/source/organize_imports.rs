@@ -1,6 +1,6 @@
 use biome_analyze::{
-    ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, SourceActionKind, context::RuleContext,
-    declare_source_rule,
+    ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource, SourceActionKind,
+    context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::category;
@@ -652,6 +652,7 @@ declare_source_rule! {
         language: "js",
         recommended: true,
         fix_kind: FixKind::Safe,
+        sources: &[RuleSource::Eslint("sort-imports").inspired(), RuleSource::Eslint("no-duplicate-imports").inspired()],
     }
 }
 
