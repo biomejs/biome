@@ -3,10 +3,7 @@ use super::parse_scss_identifier;
 use crate::parser::CssParser;
 use crate::syntax::property::GenericComponentValueList;
 use crate::syntax::{is_at_identifier, is_nth_at_identifier, parse_regular_identifier};
-use biome_css_syntax::CssSyntaxKind::{
-    SCSS_DECLARATION, SCSS_NAMESPACED_IDENTIFIER, SCSS_VARIABLE_MODIFIER,
-    SCSS_VARIABLE_MODIFIER_LIST,
-};
+use biome_css_syntax::CssSyntaxKind::{EOF, SCSS_DECLARATION, SCSS_NAMESPACED_IDENTIFIER, SCSS_VARIABLE_MODIFIER, SCSS_VARIABLE_MODIFIER_LIST};
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::diagnostic::expected_token_any;
 use biome_parser::parse_lists::ParseNodeList;
@@ -38,10 +35,9 @@ pub(crate) fn parse_scss_declaration(p: &mut CssParser) -> ParsedSyntax {
     p.expect(T![:]);
 
     GenericComponentValueList.parse_list(p);
-
     ScssVariableModifierList.parse_list(p);
 
-    if !p.at(T!['}']) {
+    if !p.at(T!['}']) && !p.at(EOF) {
         if p.nth_at(1, T!['}']) {
             p.eat(T![;]);
         } else {
