@@ -59,11 +59,10 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
             write!(f, [hard_line_break()])?;
         }
 
-        write!(f, [l_angle_token.format(), name.format()])?;
-
         write!(
             f,
             [&group(&format_with(|f| {
+                write!(f, [l_angle_token.format(), name.format()])?;
                 attributes
                     .format()
                     .with_options(FormatHtmlAttributeListOptions {

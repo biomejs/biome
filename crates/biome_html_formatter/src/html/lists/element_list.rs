@@ -413,7 +413,7 @@ impl FormatHtmlElementList {
             // - Children contain block elements
             // - There are multiple block elements
             let mut force_multiline = matches!(self.layout, HtmlChildListLayout::Multiline)
-                || children_meta.has_block_element
+                // || children_meta.has_block_element
                 || children_meta.multiple_block_elements;
             let mut children_iter = HtmlChildrenIterator::new(children.iter());
 
@@ -430,9 +430,11 @@ impl FormatHtmlElementList {
             let mut last: Option<&HtmlChild> = None;
 
             let mut is_first_child = true;
+            // we have to collect words in batches
+            let mut collected_words = vec![];
+
             // It is **critically important** in this loop to check external whitespace sensitivity for the
             // current and next item to ensure we don't accidentally add whitespace where none is allowed!
-
             while let Some(child) = children_iter.next() {
                 let mut child_breaks = false;
 
@@ -459,41 +461,16 @@ impl FormatHtmlElementList {
                 match child {
                     // A single word in text content
                     HtmlChild::Word(word) => {
-                        let separator = match children_iter.peek() {
-                            Some(HtmlChild::Word(_)) => {
-                                // Separate words by a space or line break in extended mode
-                                Some(WordSeparator::BetweenWords)
-                            }
+                        collected_words.push(word);
 
-                            // Last word or word before an element without any whitespace in between
-                            Some(HtmlChild::NonText(next_child)) => {
-                                // <br> elements handle their own line breaking (after themselves),
-                                // so we don't need to force a break before them.
-                                // Other self-closing elements may need a hard break before them.
-                                let is_br = is_br_element(next_child);
-                                Some(WordSeparator::EndOfText {
-                                    is_soft_line_break: is_br
-                                        || !is_self_closing_or_br(next_child)
-                                        || word.is_single_character(),
-                                })
-                            }
-
-                            Some(
-                                HtmlChild::Whitespace | HtmlChild::Newline | HtmlChild::EmptyLine,
-                            ) => None,
-
-                            Some(HtmlChild::Comment(_) | HtmlChild::Verbatim(_)) => {
-                                Some(WordSeparator::BetweenWords)
-                            }
-
-                            None => None,
-                        };
-
-                        child_breaks = separator.is_some_and(|sep| sep.will_break());
-
-                        write!(f, [word])?;
-                        if let Some(separator) = separator {
-                            write!(f, [separator])?;
+                        if let Some(
+                            HtmlChild::NonText(_) | HtmlChild::Comment(_) | HtmlChild::Verbatim(_),
+                        ) = children_iter.peek()
+                        {
+                            // time to flush the collected words
+                            f.fill()
+                                .entries(&soft_line_break_or_space(), collected_words.drain(0..))
+                                .finish()?;
                         }
                     }
 
@@ -630,7 +607,7 @@ impl FormatHtmlElementList {
                         });
 
                         if force_multiline {
-                            write!(f, [non_text.format(), format_separator])?;
+                            write!(f, [group(&non_text.format()), format_separator])?;
                         } else {
                             let mut memoized = non_text.format().memoized();
 
@@ -674,6 +651,13 @@ impl FormatHtmlElementList {
                 is_first_child = false;
             }
 
+            // Flush any remaining collected words
+            if !collected_words.is_empty() {
+                f.fill()
+                    .entries(&soft_line_break_or_space(), collected_words.drain(0..))
+                    .finish()?;
+            }
+
             // Print borrowed closing tag
             if let Some(ref closing_tag) = self.borrowed_tokens.borrowed_closing_tag {
                 let closing_tag_format =
@@ -688,15 +672,17 @@ impl FormatHtmlElementList {
         if is_root {
             write!(f, [&formatted_children])
         } else {
-            write!(
-                f,
-                [group(&format_args![
-                    if_group_breaks(&block_indent(&formatted_children))
-                        .with_group_id(self.opening_tag_group),
-                    if_group_fits_on_line(&soft_block_indent(&formatted_children))
-                        .with_group_id(self.opening_tag_group)
-                ])]
-            )
+            // write!(
+            //     f,
+            //     [group(&format_args![
+            //         if_group_breaks(&block_indent(&formatted_children))
+            //             .with_group_id(self.opening_tag_group),
+            //         if_group_fits_on_line(&soft_block_indent(&formatted_children))
+            //             .with_group_id(self.opening_tag_group)
+            //     ])]
+            // )
+
+            write!(f, [&soft_block_indent(&formatted_children)])
         }
     }
 }
