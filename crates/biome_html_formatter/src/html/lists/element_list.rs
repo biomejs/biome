@@ -430,8 +430,6 @@ impl FormatHtmlElementList {
             let mut last: Option<&HtmlChild> = None;
 
             let mut is_first_child = true;
-            // we have to collect words in batches
-            let mut collected_words = vec![];
 
             // It is **critically important** in this loop to check external whitespace sensitivity for the
             // current and next item to ensure we don't accidentally add whitespace where none is allowed!
@@ -461,16 +459,63 @@ impl FormatHtmlElementList {
                 match child {
                     // A single word in text content
                     HtmlChild::Word(word) => {
-                        collected_words.push(word);
+                        // when we encounter a word, we need to collect all subsequent words
+                        // so we can use fill to format them together.
+                        let mut fill = f.fill();
+                        fill.entry(&soft_line_break_or_space(), word);
+                        loop {
+                            match children_iter.peek() {
+                                Some(HtmlChild::Word(next_word)) => {
+                                    fill.entry(&soft_line_break_or_space(), next_word);
+                                    children_iter.next();
+                                }
+                                Some(
+                                    HtmlChild::Whitespace
+                                    | HtmlChild::Newline
+                                    | HtmlChild::EmptyLine,
+                                ) => match children_iter.peek() {
+                                    Some(HtmlChild::Word(_)) => {
+                                        // consume the whitespace/newline/emptyline
+                                        children_iter.next();
+                                    }
+                                    Some(
+                                        HtmlChild::Whitespace
+                                        | HtmlChild::Newline
+                                        | HtmlChild::EmptyLine,
+                                    ) => {
+                                        children_iter.next();
+                                    }
+                                    _ => {
+                                        break;
+                                    }
+                                },
+                                _ => {
+                                    break;
+                                }
+                            }
+                        }
+                        fill.finish()?;
 
-                        if let Some(
-                            HtmlChild::NonText(_) | HtmlChild::Comment(_) | HtmlChild::Verbatim(_),
-                        ) = children_iter.peek()
-                        {
-                            // time to flush the collected words
-                            f.fill()
-                                .entries(&soft_line_break_or_space(), collected_words.drain(0..))
-                                .finish()?;
+                        // TODO: if next child is not a whitespace sensitive element, we can insert a newline here.
+                        match children_iter.peek() {
+                            Some(HtmlChild::NonText(non_text)) => {
+                                let css_display = get_element_css_display(non_text);
+                                // not allowed to add whitespace if the next one is externally whitespace sensitive
+                                // ```html
+                                // <a>link</a>more text
+                                // ```
+                                if !css_display.is_externally_whitespace_sensitive() {
+                                    // add a soft line break after the word
+                                    write!(f, [hard_line_break()])?;
+                                }
+                            }
+                            Some(HtmlChild::Comment(_)) => {
+                                // comments are whitespace sensitive
+                            }
+                            Some(HtmlChild::Word(_)) => {
+                                unreachable!("should have already consumed all the words")
+                            }
+                            _ => {}
                         }
                     }
 
@@ -651,13 +696,6 @@ impl FormatHtmlElementList {
                 is_first_child = false;
             }
 
-            // Flush any remaining collected words
-            if !collected_words.is_empty() {
-                f.fill()
-                    .entries(&soft_line_break_or_space(), collected_words.drain(0..))
-                    .finish()?;
-            }
-
             // Print borrowed closing tag
             if let Some(ref closing_tag) = self.borrowed_tokens.borrowed_closing_tag {
                 let closing_tag_format =
@@ -672,16 +710,6 @@ impl FormatHtmlElementList {
         if is_root {
             write!(f, [&formatted_children])
         } else {
-            // write!(
-            //     f,
-            //     [group(&format_args![
-            //         if_group_breaks(&block_indent(&formatted_children))
-            //             .with_group_id(self.opening_tag_group),
-            //         if_group_fits_on_line(&soft_block_indent(&formatted_children))
-            //             .with_group_id(self.opening_tag_group)
-            //     ])]
-            // )
-
             write!(f, [&soft_block_indent(&formatted_children)])
         }
     }
