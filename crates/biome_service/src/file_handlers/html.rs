@@ -200,8 +200,9 @@ impl ServiceLanguage for HtmlLanguage {
         _file_source: &super::DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
-        let configuration =
-            AnalyzerConfiguration::default().with_rules(to_analyzer_rules(global, path.as_path()));
+        let configuration = AnalyzerConfiguration::default()
+            .with_rules(to_analyzer_rules(global, path.as_path()))
+            .with_plugin_severities(global.get_plugin_severities_for_path(path.as_path()));
 
         AnalyzerOptions::default()
             .with_file_path(path.as_path())

@@ -1,3 +1,4 @@
+use biome_diagnostics::Severity;
 use camino::Utf8PathBuf;
 use rustc_hash::FxHashMap;
 
@@ -5,6 +6,10 @@ use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::borrow::Cow;
 use std::sync::Arc;
+
+/// Map from plugin name to severity configuration.
+/// None means "off" (skip the diagnostic), Some(severity) means override to that severity.
+pub type PluginSeverityMap = FxHashMap<Box<str>, Option<Severity>>;
 
 /// A convenient new type data structure to store the options that belong to a rule
 #[derive(Debug)]
@@ -77,6 +82,11 @@ pub struct AnalyzerConfiguration {
 
     /// Whether the CSS files contain CSS Modules
     css_modules: bool,
+
+    /// Severity configuration for plugins.
+    /// Keys are plugin names (derived from file stems), values are severity overrides.
+    /// None means "off" (skip diagnostics), Some(severity) means override to that level.
+    pub plugin_severities: PluginSeverityMap,
 }
 
 impl AnalyzerConfiguration {
@@ -115,6 +125,11 @@ impl AnalyzerConfiguration {
 
     pub fn with_css_modules(mut self, css_modules: bool) -> Self {
         self.css_modules = css_modules;
+        self
+    }
+
+    pub fn with_plugin_severities(mut self, plugin_severities: PluginSeverityMap) -> Self {
+        self.plugin_severities = plugin_severities;
         self
     }
 }
@@ -193,6 +208,17 @@ impl AnalyzerOptions {
 
     pub fn css_modules(&self) -> bool {
         self.configuration.css_modules
+    }
+
+    /// Get the configured severity for a plugin.
+    /// Returns None if no configuration exists for this plugin.
+    /// Returns Some(None) if the plugin is configured as "off".
+    /// Returns Some(Some(severity)) if a severity override is configured.
+    pub fn plugin_severity(&self, plugin_name: &str) -> Option<Option<Severity>> {
+        self.configuration
+            .plugin_severities
+            .get(plugin_name)
+            .copied()
     }
 }
 

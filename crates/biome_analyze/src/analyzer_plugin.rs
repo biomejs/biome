@@ -103,19 +103,38 @@ where
             .plugin
             .evaluate(node.clone().into(), ctx.options.file_path.clone())
             .into_iter()
-            .map(|diagnostic| {
+            .filter_map(|diagnostic| {
                 let name = diagnostic
                     .subcategory
                     .clone()
                     .unwrap_or_else(|| "anonymous".into());
 
-                SignalEntry {
+                // Check if there's a severity override for this plugin
+                if let Some(severity_override) = ctx.options.plugin_severity(&name) {
+                    match severity_override {
+                        // Plugin is disabled - skip this diagnostic
+                        None => return None,
+                        // Override the severity
+                        Some(severity) => {
+                            let diagnostic = diagnostic.with_severity(severity);
+                            return Some(SignalEntry {
+                                text_range: diagnostic.span().unwrap_or_default(),
+                                signal: Box::new(DiagnosticSignal::new(move || diagnostic.clone())),
+                                rule: SignalRuleKey::Plugin(name.into()),
+                                category: RuleCategory::Lint,
+                                instances: Default::default(),
+                            });
+                        }
+                    }
+                }
+
+                Some(SignalEntry {
                     text_range: diagnostic.span().unwrap_or_default(),
                     signal: Box::new(DiagnosticSignal::new(move || diagnostic.clone())),
                     rule: SignalRuleKey::Plugin(name.into()),
                     category: RuleCategory::Lint,
                     instances: Default::default(),
-                }
+                })
             });
 
         ctx.signal_queue.extend(signals);
