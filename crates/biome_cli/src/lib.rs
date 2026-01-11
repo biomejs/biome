@@ -99,6 +99,7 @@ impl<'app> CliSession<'app> {
                 log_options,
                 only,
                 skip,
+                watch,
             } => run_command(
                 self,
                 &log_options,
@@ -122,6 +123,7 @@ impl<'app> CliSession<'app> {
                     css_parser,
                     only,
                     skip,
+                    watch,
                 }),
             ),
             BiomeCommand::Lint {
@@ -148,6 +150,7 @@ impl<'app> CliSession<'app> {
                 css_parser,
                 json_parser,
                 log_options,
+                watch,
             } => run_command(
                 self,
                 &log_options,
@@ -174,6 +177,7 @@ impl<'app> CliSession<'app> {
                     graphql_linter,
                     css_parser,
                     json_parser,
+                    watch,
                 }),
             ),
             BiomeCommand::Ci {
@@ -233,6 +237,7 @@ impl<'app> CliSession<'app> {
                 css_parser,
                 json_parser,
                 log_options,
+                watch,
             } => run_command(
                 self,
                 &log_options,
@@ -255,6 +260,7 @@ impl<'app> CliSession<'app> {
                     since,
                     css_parser,
                     json_parser,
+                    watch,
                 }),
             ),
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),

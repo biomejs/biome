@@ -7,7 +7,7 @@ expression: redactor(content)
 ```block
 Run the formatter on a set of files.
 
-Usage: format [--write] [--staged] [--changed] [--since=REF] [PATH]...
+Usage: format [--write] [--staged] [--changed] [--since=REF] [--watch] [PATH]...
 
 Generic options applied to all files
         --format-with-errors=<true|false>  Whether formatting should be allowed to proceed if a
@@ -320,6 +320,8 @@ Available options:
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag, and the `defaultBranch` is not set in your
                               biome.json
+        --watch               Enables the watch mode to re-run the check automatically when any file
+                              in the workspace has changed.
     -h, --help                Prints help information
 
 ```

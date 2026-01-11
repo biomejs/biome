@@ -127,6 +127,7 @@ insta                        = "1.43.2"
 jiff                         = "0.2.17"
 libc                         = "0.2.178"
 mimalloc                     = "0.1.48"
+notify                       = "8.2.0"
 papaya                       = "0.2.3"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 proc-macro-error2            = { version = "2.0.1", default-features = false }

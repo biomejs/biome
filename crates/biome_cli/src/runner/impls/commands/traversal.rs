@@ -5,6 +5,7 @@ use crate::runner::impls::collectors::default::DefaultCollector;
 use crate::runner::impls::crawlers::default::DefaultCrawler;
 use crate::runner::impls::finalizers::default::DefaultFinalizer;
 use crate::runner::impls::handlers::default::DefaultHandler;
+use crate::runner::impls::watchers::default::DefaultWatcher;
 use crate::runner::process_file::ProcessFile;
 use crate::{CliDiagnostic, TraversalSummary};
 use biome_configuration::Configuration;
@@ -96,6 +97,11 @@ pub(crate) trait TraversalCommand {
     /// Alias of [CommandRunner::command_name]
     fn command_name(&self) -> &'static str;
 
+    /// Alias of [CommandRunner::is_watch_mode]
+    fn is_watch_mode(&self) -> bool {
+        false
+    }
+
     /// Alias of [CommandRunner::minimal_scan_kind]
     fn minimal_scan_kind(&self) -> Option<ScanKind>;
 
@@ -138,6 +144,7 @@ where
     type CrawlerOutput = TraverseResult;
     type Collector = DefaultCollector;
     type Crawler = DefaultCrawler<Self::ProcessFile>;
+    type Watcher = DefaultWatcher;
     type Finalizer = DefaultFinalizer;
     type Handler = DefaultHandler;
     type ProcessFile = P;
@@ -149,6 +156,10 @@ where
 
     fn requires_crawling(&self) -> bool {
         true
+    }
+
+    fn is_watch_mode(&self) -> bool {
+        self.deref().is_watch_mode()
     }
 
     /// The [ScanKind] to use for this command

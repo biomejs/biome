@@ -17,6 +17,11 @@ use std::thread;
 use std::time::{Duration, Instant};
 use tracing::instrument;
 
+pub enum CrawlPath {
+    String(String),
+    Path(Utf8PathBuf),
+}
+
 pub trait Crawler<Output> {
     type Handler: Handler;
     type ProcessFile: ProcessFile;
@@ -33,7 +38,7 @@ pub trait Crawler<Output> {
         workspace: &dyn Workspace,
         fs: &dyn FileSystem,
         project_key: ProjectKey,
-        inputs: Vec<String>,
+        inputs: Vec<CrawlPath>,
         collector: Self::Collector,
     ) -> Result<Output, CliDiagnostic> {
         let (interner, recv_files) = PathInterner::new();
@@ -70,13 +75,16 @@ pub trait Crawler<Output> {
     /// run it to completion, returning the duration of the process and the evaluated paths
     fn crawl_inputs(
         fs: &dyn FileSystem,
-        inputs: Vec<String>,
+        inputs: Vec<CrawlPath>,
         ctx: &CrawlerOptions<Self::Handler, Self::ProcessFile>,
     ) -> (Duration, BTreeSet<BiomePath>) {
         let start = Instant::now();
         fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
             for input in inputs {
-                scope.evaluate(ctx, Utf8PathBuf::from(input));
+                match input {
+                    CrawlPath::Path(input) => scope.evaluate(ctx, input),
+                    CrawlPath::String(input) => scope.evaluate(ctx, Utf8PathBuf::from(input)),
+                };
             }
         }));
 
