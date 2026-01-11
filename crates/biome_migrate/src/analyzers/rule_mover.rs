@@ -217,7 +217,7 @@ impl Rule for RuleMover {
         // Rename the rule
         let new_rule_name = state.new_rule_name.as_str();
         let new_rule_node = if let Some(old_rule_name) = state.old_rule_name {
-            let new_name = make::json_member_name(make::json_string_literal(new_rule_name)).into();
+            let new_name = make::json_member_name(make::json_string_literal(new_rule_name));
             let new_rule_node = rule_node.with_name(new_name);
             if let Some(value) = new_rule_node
                 .value()
