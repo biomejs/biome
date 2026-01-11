@@ -16,6 +16,7 @@ pub(crate) struct JsonParser<'source> {
 pub struct JsonParserOptions {
     pub allow_comments: bool,
     pub allow_trailing_commas: bool,
+    pub allow_metavariables: bool,
 }
 
 impl JsonParserOptions {
@@ -29,6 +30,16 @@ impl JsonParserOptions {
     pub fn with_allow_trailing_commas(mut self) -> Self {
         self.allow_trailing_commas = true;
         self
+    }
+
+    #[must_use]
+    pub fn allow_metavariables(mut self) -> Self {
+        self.allow_metavariables = true;
+        self
+    }
+
+    pub fn is_metavariable_enabled(&self) -> bool {
+        self.allow_metavariables
     }
 }
 

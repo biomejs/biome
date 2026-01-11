@@ -14,7 +14,7 @@ impl SyntaxFactory for JsonSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            JSON_BOGUS | JSON_BOGUS_VALUE => {
+            JSON_BOGUS | JSON_BOGUS_NAME | JSON_BOGUS_VALUE => {
                 RawSyntaxNode::new(kind, children.into_iter().map(Some))
             }
             JSON_ARRAY_VALUE => {
@@ -74,7 +74,7 @@ impl SyntaxFactory for JsonSyntaxFactory {
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && JsonMemberName::can_cast(element.kind())
+                    && AnyJsonMemberName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -120,6 +120,25 @@ impl SyntaxFactory for JsonSyntaxFactory {
                     );
                 }
                 slots.into_node(JSON_MEMBER_NAME, children)
+            }
+            JSON_METAVARIABLE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == GRIT_METAVARIABLE
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JSON_METAVARIABLE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JSON_METAVARIABLE, children)
             }
             JSON_NULL_VALUE => {
                 let mut elements = (&children).into_iter();

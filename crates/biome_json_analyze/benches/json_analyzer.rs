@@ -71,6 +71,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                                 filter,
                                 &options,
                                 json_services,
+                                &[],
                                 |event| {
                                     black_box(event.diagnostic());
                                     black_box(event.actions());

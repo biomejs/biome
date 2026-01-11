@@ -28,7 +28,7 @@ impl Rule for IgnoreScanner {
         let member = ctx.query();
         let name = member.name().ok()?;
 
-        if name.inner_string_text().ok()?.text() != "experimentalScannerIgnores" {
+        if name.inner_string_text()?.ok()?.text() != "experimentalScannerIgnores" {
             return None;
         }
 
@@ -85,7 +85,7 @@ impl Rule for IgnoreScanner {
             .iter()
             .flatten()
             .filter_map(|member| {
-                let text = member.name().ok()?.inner_string_text().ok()?;
+                let text = member.name().ok()?.inner_string_text()?.ok()?;
                 if text.text() == "experimentalScannerIgnores" {
                     None
                 } else if text.text() == "includes" {
@@ -140,7 +140,7 @@ impl Rule for IgnoreScanner {
                 token(T![']']),
             );
             files_list.push(json_member(
-                json_member_name(json_string_literal("includes")),
+                json_member_name(json_string_literal("includes")).into(),
                 token(T![:]),
                 AnyJsonValue::JsonArrayValue(value),
             ))

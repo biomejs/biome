@@ -27,6 +27,7 @@ pub trait AnalyzerPlugin: Debug + Send + Sync {
 pub enum PluginTargetLanguage {
     JavaScript,
     Css,
+    Json,
 }
 
 /// A syntax visitor that queries nodes and evaluates in a plugin.
