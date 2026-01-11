@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useInputName": {
+          "level": "error",
+          "options": {
+            "checkInputType": true,
+            "caseSensitiveInputType": true
+          }
+        }
+      }
+    }
+  }
+}
