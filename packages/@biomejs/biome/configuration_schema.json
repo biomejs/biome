@@ -2913,6 +2913,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDivRegexConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDivRegexOptions" }
+			]
+		},
+		"NoDivRegexOptions": { "type": "object", "additionalProperties": false },
 		"NoDocumentCookieConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5344,6 +5351,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDivRegex": {
+					"description": "Disallow equal signs explicitly at the beginning of regular expressions.\nSee <https://biomejs.dev/linter/rules/no-div-regex>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDivRegexConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateArgumentNames": {
 					"description": "Require all argument names for fields & directives to be unique.\nSee <https://biomejs.dev/linter/rules/no-duplicate-argument-names>",
 					"anyOf": [
@@ -6880,6 +6894,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDistractingElementsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDivRegexOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDivRegexOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

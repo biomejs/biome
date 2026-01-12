@@ -1879,6 +1879,11 @@ See <https://biomejs.dev/linter/rules/no-deprecated-imports>
 	 */
 	noDeprecatedImports?: NoDeprecatedImportsConfiguration;
 	/**
+	* Disallow equal signs explicitly at the beginning of regular expressions.
+See <https://biomejs.dev/linter/rules/no-div-regex> 
+	 */
+	noDivRegex?: NoDivRegexConfiguration;
+	/**
 	* Require all argument names for fields & directives to be unique.
 See <https://biomejs.dev/linter/rules/no-duplicate-argument-names> 
 	 */
@@ -3733,6 +3738,9 @@ export type NoContinueConfiguration =
 export type NoDeprecatedImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDeprecatedImportsOptions;
+export type NoDivRegexConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDivRegexOptions;
 export type NoDuplicateArgumentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateArgumentNamesOptions;
@@ -5225,6 +5233,11 @@ export interface RuleWithNoDeprecatedImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDeprecatedImportsOptions;
 }
+export interface RuleWithNoDivRegexOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoDivRegexOptions;
+}
 export interface RuleWithNoDuplicateArgumentNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateArgumentNamesOptions;
@@ -6682,6 +6695,7 @@ export interface NoAmbiguousAnchorTextOptions {
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
+export type NoDivRegexOptions = {};
 export type NoDuplicateArgumentNamesOptions = {};
 export type NoDuplicateAttributesOptions = {};
 export type NoDuplicateDependenciesOptions = {};
@@ -7630,9 +7644,16 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDivRegex"
+	| "lint/nursery/noDuplicateArgumentNames"
 	| "lint/nursery/noDuplicateAttributes"
 	| "lint/nursery/noDuplicateDependencies"
+	| "lint/nursery/noDuplicateEnumValueNames"
 	| "lint/nursery/noDuplicateEnumValues"
+	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateGraphqlOperationName"
+	| "lint/nursery/noDuplicateInputFieldNames"
+	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"
@@ -7697,12 +7718,6 @@ export type Category =
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
-	| "lint/nursery/noDuplicateArgumentNames"
-	| "lint/nursery/noDuplicateEnumValueNames"
-	| "lint/nursery/noDuplicateFieldDefinitionNames"
-	| "lint/nursery/noDuplicateGraphqlOperationName"
-	| "lint/nursery/noDuplicateInputFieldNames"
-	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentVBindStyle"
 	| "lint/nursery/useVueConsistentVOnStyle"
