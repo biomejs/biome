@@ -1,6 +1,12 @@
 <!-- should generate diagnostics -->
 <video></video>
 <audio></audio>
+<video>
+    <source src="video.webm" type="video/webm" />
+</video>
+<audio>
+    <source src="audio.ogg" type="audio/ogg" />
+</audio>
 <!-- track without kind="captions" -->
 <video><track kind="subtitles" /></video>
 <!-- track with missing kind attribute -->
