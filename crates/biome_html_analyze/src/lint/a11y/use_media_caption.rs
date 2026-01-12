@@ -75,8 +75,8 @@ impl Rule for UseMediaCaption {
             return None;
         }
 
-        // If element has muted attribute, it's valid (no caption needed)
-        if node.find_attribute_by_name("muted").is_some() {
+        // Muted videos don't need captions (audio still requires captions)
+        if element_name == "video" && node.find_attribute_by_name("muted").is_some() {
             return None;
         }
 

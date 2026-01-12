@@ -17,6 +17,8 @@ expression: invalid.html
 <video>
     <track kind="subtitles" src="subtitles.vtt" />
 </video>
+<!-- muted audio still requires captions -->
+<audio muted src="audio.mp3"></audio>
 
 ```
 
@@ -106,7 +108,24 @@ invalid.html:11:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━
   > 12 │     <track kind="subtitles" src="subtitles.vtt" />
   > 13 │ </video>
        │ ^^^^^^^^
-    14 │ 
+    14 │ <!-- muted audio still requires captions -->
+    15 │ <audio muted src="audio.mp3"></audio>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.html:15:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+    13 │ </video>
+    14 │ <!-- muted audio still requires captions -->
+  > 15 │ <audio muted src="audio.mp3"></audio>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
   
   i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
   
