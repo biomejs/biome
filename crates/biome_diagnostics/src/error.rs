@@ -8,25 +8,21 @@
 //! When [`ThinBox`](https://doc.rust-lang.org/std/boxed/struct.ThinBox.html)
 //! becomes available in stable Rust, we can switch to that.
 
+use crate::{
+    Category, Diagnostic, DiagnosticTags, Location, Severity, Visit,
+    diagnostic::internal::AsDiagnostic,
+};
+use biome_console::fmt;
 use std::ops::Deref;
-use std::sync::Arc;
 use std::{
     fmt::{Debug, Formatter},
     io,
 };
 
-use biome_console::fmt;
-
-use crate::{
-    Category, Diagnostic, DiagnosticTags, Location, Severity, Visit,
-    diagnostic::internal::AsDiagnostic,
-};
-
 /// The `Error` struct wraps any type implementing [Diagnostic] into a single
 /// dynamic type.
-#[derive(Clone)]
 pub struct Error {
-    inner: Arc<dyn Diagnostic + Send + Sync + 'static>,
+    inner: Box<Box<dyn Diagnostic + Send + Sync + 'static>>,
 }
 
 /// Implement the [Diagnostic] trait as inherent methods on the [Error] type.
@@ -85,7 +81,7 @@ where
 {
     fn from(diag: T) -> Self {
         Self {
-            inner: Arc::new(diag),
+            inner: Box::new(Box::new(diag)),
         }
     }
 }
@@ -94,7 +90,7 @@ impl AsDiagnostic for Error {
     type Diagnostic = dyn Diagnostic;
 
     fn as_diagnostic(&self) -> &Self::Diagnostic {
-        &*self.inner
+        &**self.inner
     }
 
     fn as_dyn(&self) -> &dyn Diagnostic {

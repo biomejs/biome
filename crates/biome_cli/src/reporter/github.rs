@@ -7,7 +7,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use std::io;
 
 pub(crate) struct GithubReporter<'a> {
-    pub(crate) diagnostics_payload: DiagnosticsPayload,
+    pub diagnostics_payload: &'a DiagnosticsPayload,
     pub(crate) execution: &'a dyn Execution,
     pub(crate) verbose: bool,
     pub(crate) working_directory: Option<Utf8PathBuf>,
@@ -39,7 +39,7 @@ impl ReporterVisitor for GithubReporterVisitor<'_> {
     fn report_diagnostics(
         &mut self,
         _execution: &dyn Execution,
-        diagnostics_payload: DiagnosticsPayload,
+        diagnostics_payload: &DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {

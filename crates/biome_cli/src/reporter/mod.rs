@@ -19,7 +19,7 @@ use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct DiagnosticsPayload {
     pub diagnostics: Vec<Error>,
     pub diagnostic_level: Severity,
@@ -76,7 +76,7 @@ pub(crate) trait ReporterVisitor {
     fn report_diagnostics(
         &mut self,
         _execution: &dyn Execution,
-        _payload: DiagnosticsPayload,
+        _payload: &DiagnosticsPayload,
         _verbose: bool,
         _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()>;

@@ -18,7 +18,7 @@ use std::io;
 
 pub(crate) struct SummaryReporter<'a> {
     pub(crate) summary: TraversalSummary,
-    pub(crate) diagnostics_payload: DiagnosticsPayload,
+    pub(crate) diagnostics_payload: &'a DiagnosticsPayload,
     pub(crate) execution: &'a dyn Execution,
     pub(crate) evaluated_paths: BTreeSet<BiomePath>,
     pub(crate) working_directory: Option<Utf8PathBuf>,
@@ -127,7 +127,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
     fn report_diagnostics(
         &mut self,
         execution: &dyn Execution,
-        diagnostics_payload: DiagnosticsPayload,
+        diagnostics_payload: &DiagnosticsPayload,
         verbose: bool,
         working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {

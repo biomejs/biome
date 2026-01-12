@@ -81,7 +81,7 @@ impl Finalizer for DefaultFinalizer {
                     if with_summary {
                         let reporter = SummaryReporter {
                             summary,
-                            diagnostics_payload: diagnostics_payload.clone(),
+                            diagnostics_payload: &diagnostics_payload,
                             execution,
                             verbose: cli_options.verbose,
                             working_directory: fs.working_directory().clone(),
@@ -91,7 +91,7 @@ impl Finalizer for DefaultFinalizer {
                     } else {
                         let reporter = ConsoleReporter {
                             summary,
-                            diagnostics_payload: diagnostics_payload.clone(),
+                            diagnostics_payload: &diagnostics_payload,
                             execution,
                             verbose: cli_options.verbose,
                             working_directory: fs.working_directory().clone(),
@@ -106,7 +106,7 @@ impl Finalizer for DefaultFinalizer {
                     });
                     let reporter = JsonReporter {
                         summary,
-                        diagnostics: diagnostics_payload.clone(),
+                        diagnostics_payload: &diagnostics_payload,
                         execution,
                         verbose: cli_options.verbose,
                         working_directory: fs.working_directory().clone(),
@@ -148,7 +148,7 @@ impl Finalizer for DefaultFinalizer {
                 }
                 ReportMode::GitHub => {
                     let reporter = GithubReporter {
-                        diagnostics_payload: diagnostics_payload.clone(),
+                        diagnostics_payload: &diagnostics_payload,
                         execution,
                         verbose: cli_options.verbose,
                         working_directory: fs.working_directory().clone(),
@@ -157,7 +157,7 @@ impl Finalizer for DefaultFinalizer {
                 }
                 ReportMode::GitLab => {
                     let reporter = GitLabReporter {
-                        diagnostics_payload: diagnostics_payload.clone(),
+                        diagnostics_payload: &diagnostics_payload,
                         execution,
                         verbose: cli_options.verbose,
                         working_directory: fs.working_directory().clone(),
@@ -170,7 +170,7 @@ impl Finalizer for DefaultFinalizer {
                 ReportMode::Junit => {
                     let reporter = JunitReporter {
                         summary,
-                        diagnostics_payload: diagnostics_payload.clone(),
+                        diagnostics_payload: &diagnostics_payload,
                         execution,
                         verbose: cli_options.verbose,
                         working_directory: fs.working_directory().clone(),
@@ -180,7 +180,7 @@ impl Finalizer for DefaultFinalizer {
                 ReportMode::Checkstyle => {
                     let reporter = CheckstyleReporter {
                         summary,
-                        diagnostics_payload: diagnostics_payload.clone(),
+                        diagnostics_payload: &diagnostics_payload,
                         execution,
                         verbose: cli_options.verbose,
                         working_directory: fs.working_directory().clone(),
@@ -191,7 +191,7 @@ impl Finalizer for DefaultFinalizer {
                 }
                 ReportMode::RdJson => {
                     let reporter = RdJsonReporter {
-                        diagnostics_payload: diagnostics_payload.clone(),
+                        diagnostics_payload: &diagnostics_payload,
                         execution,
                         verbose: cli_options.verbose,
                         working_directory: fs.working_directory().clone(),
@@ -200,7 +200,7 @@ impl Finalizer for DefaultFinalizer {
                 }
                 ReportMode::Sarif => {
                     let reporter = SarifReporter {
-                        diagnostics_payload: diagnostics_payload.clone(),
+                        diagnostics_payload: &diagnostics_payload,
                         execution,
                         verbose: cli_options.verbose,
                         working_directory: fs.working_directory().clone(),

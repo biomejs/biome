@@ -9,7 +9,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
 
 pub(crate) struct RdJsonReporter<'a> {
-    pub(crate) diagnostics_payload: DiagnosticsPayload,
+    pub(crate) diagnostics_payload: &'a DiagnosticsPayload,
     pub(crate) execution: &'a dyn Execution,
     pub(crate) verbose: bool,
     pub(crate) working_directory: Option<Utf8PathBuf>,
@@ -42,7 +42,7 @@ impl ReporterVisitor for RdJsonReporterVisitor<'_> {
     fn report_diagnostics(
         &mut self,
         _execution: &dyn Execution,
-        payload: DiagnosticsPayload,
+        payload: &DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,
     ) -> std::io::Result<()> {

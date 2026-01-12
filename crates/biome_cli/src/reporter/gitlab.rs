@@ -18,7 +18,7 @@ use std::{
 
 pub struct GitLabReporter<'a> {
     pub(crate) execution: &'a dyn Execution,
-    pub(crate) diagnostics_payload: DiagnosticsPayload,
+    pub(crate) diagnostics_payload: &'a DiagnosticsPayload,
     pub(crate) verbose: bool,
     pub(crate) working_directory: Option<Utf8PathBuf>,
 }
@@ -81,7 +81,7 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
     fn report_diagnostics(
         &mut self,
         _execution: &dyn Execution,
-        payload: DiagnosticsPayload,
+        payload: &DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,
     ) -> std::io::Result<()> {
@@ -98,7 +98,7 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
 }
 
 struct GitLabDiagnostics<'a> {
-    payload: DiagnosticsPayload,
+    payload: &'a DiagnosticsPayload,
     verbose: bool,
     lock: &'a RwLock<GitLabHasher>,
     path: Option<&'a Utf8Path>,

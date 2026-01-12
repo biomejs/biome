@@ -10,7 +10,7 @@ use std::fmt::{Display, Formatter};
 use std::io;
 
 pub(crate) struct JunitReporter<'a> {
-    pub(crate) diagnostics_payload: DiagnosticsPayload,
+    pub(crate) diagnostics_payload: &'a DiagnosticsPayload,
     pub(crate) execution: &'a dyn Execution,
     pub(crate) summary: TraversalSummary,
     pub(crate) verbose: bool,
@@ -65,7 +65,7 @@ impl ReporterVisitor for JunitReporterVisitor<'_> {
     fn report_diagnostics(
         &mut self,
         _execution: &dyn Execution,
-        payload: DiagnosticsPayload,
+        payload: &DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {

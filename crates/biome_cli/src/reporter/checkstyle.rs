@@ -10,7 +10,7 @@ use std::io::{self, Write};
 
 pub struct CheckstyleReporter<'a> {
     pub summary: TraversalSummary,
-    pub diagnostics_payload: DiagnosticsPayload,
+    pub diagnostics_payload: &'a DiagnosticsPayload,
     pub execution: &'a dyn Execution,
     pub verbose: bool,
     pub(crate) working_directory: Option<Utf8PathBuf>,
@@ -52,7 +52,7 @@ impl<'a> ReporterVisitor for CheckstyleReporterVisitor<'a> {
     fn report_diagnostics(
         &mut self,
         _execution: &dyn Execution,
-        payload: DiagnosticsPayload,
+        payload: &DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
