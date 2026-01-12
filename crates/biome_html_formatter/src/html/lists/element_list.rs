@@ -542,7 +542,21 @@ impl FormatHtmlElementList {
 
                     // Whitespace between children
                     HtmlChild::Whitespace => {
-                        write!(f, [space()])?;
+                        // `<br>` is explicitly special-cased in `preferHardlineAsTrailingSpaces()` to always prefer a hard line break after it.
+                        //
+                        // ```html
+                        // <p>
+                        //   Hello world!<br/>
+                        //   This is HTML5 Boilerplate.
+                        // </p>
+                        // ```
+                        if let Some(HtmlChild::NonText(last)) = last
+                            && is_br_element(last)
+                        {
+                            write!(f, [hard_line_break()])?;
+                        } else {
+                            write!(f, [space()])?;
+                        }
                     }
 
                     // A new line between children

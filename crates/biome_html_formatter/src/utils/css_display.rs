@@ -92,6 +92,10 @@ impl CssDisplay {
         )
     }
 
+    pub fn is_inline_block(self) -> bool {
+        matches!(self, Self::InlineBlock)
+    }
+
     /// Returns true if this is a strictly inline display value.
     ///
     /// This is more restrictive than `is_inline_like()` and only includes
