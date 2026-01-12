@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlElementList};
+use biome_html_syntax::{AnyHtmlElement, HtmlElementList, HtmlFileSource};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -68,15 +68,27 @@ impl Rule for UseMediaCaption {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
         // Check if element is audio or video
         let element_name = node.name()?;
-        if element_name != "audio" && element_name != "video" {
+        let is_audio = if source_type.is_html() {
+            element_name.text().eq_ignore_ascii_case("audio")
+        } else {
+            element_name.text() == "audio"
+        };
+        let is_video = if source_type.is_html() {
+            element_name.text().eq_ignore_ascii_case("video")
+        } else {
+            element_name.text() == "video"
+        };
+
+        if !is_audio && !is_video {
             return None;
         }
 
         // Muted videos don't need captions (audio still requires captions)
-        if element_name == "video" && node.find_attribute_by_name("muted").is_some() {
+        if is_video && node.find_attribute_by_name("muted").is_some() {
             return None;
         }
 
@@ -86,7 +98,7 @@ impl Rule for UseMediaCaption {
         if html_element.opening_element().is_err() {
             return None;
         }
-        if has_caption_track(&html_element.children()) {
+        if has_caption_track(&html_element.children(), *source_type) {
             return None;
         }
 
@@ -112,30 +124,31 @@ impl Rule for UseMediaCaption {
 }
 
 /// Checks if the given `HtmlElementList` has a `track` element with `kind="captions"`.
-fn has_caption_track(html_child_list: &HtmlElementList) -> bool {
-    html_child_list.into_iter().any(|child| {
-        // Check if element is a track element (works for both HtmlElement and HtmlSelfClosingElement)
-        let Some(name) = child.name() else {
-            return false;
-        };
+fn has_caption_track(html_child_list: &HtmlElementList, source_type: HtmlFileSource) -> bool {
+    html_child_list
+        .into_iter()
+        .filter_map(|child| {
+            let name = child.name()?;
+            let is_track = if source_type.is_html() {
+                name.text().eq_ignore_ascii_case("track")
+            } else {
+                name.text() == "track"
+            };
+            if !is_track {
+                return None;
+            }
 
-        if name.text() != "track" {
-            return false;
-        }
+            let kind_attr = child.find_attribute_by_name("kind")?;
+            let initializer = kind_attr.initializer()?;
+            let value = initializer.value().ok()?;
+            let string_value = value.string_value()?;
 
-        // Check if track has kind="captions"
-        let Some(kind_attr) = child.find_attribute_by_name("kind") else {
-            return false;
-        };
-        let Some(initializer) = kind_attr.initializer() else {
-            return false;
-        };
-        let Ok(value) = initializer.value() else {
-            return false;
-        };
-        let Some(string_value) = value.string_value() else {
-            return false;
-        };
-        string_value.eq_ignore_ascii_case("captions")
-    })
+            if string_value.eq_ignore_ascii_case("captions") {
+                Some(())
+            } else {
+                None
+            }
+        })
+        .next()
+        .is_some()
 }
