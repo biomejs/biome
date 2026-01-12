@@ -1944,7 +1944,7 @@ See <https://biomejs.dev/linter/rules/no-excessive-lines-per-file>
 	 */
 	noExcessiveLinesPerFile?: NoExcessiveLinesPerFileConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Disallow new operators outside of assignments or comparisons.
 See <https://biomejs.dev/linter/rules/no-floating-classes> 
 	 */
 	noFloatingClasses?: NoFloatingClassesConfiguration;

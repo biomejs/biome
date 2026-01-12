@@ -5446,7 +5446,7 @@
 					]
 				},
 				"noFloatingClasses": {
-					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/no-floating-classes>",
+					"description": "Disallow new operators outside of assignments or comparisons.\nSee <https://biomejs.dev/linter/rules/no-floating-classes>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoFloatingClassesConfiguration" },
 						{ "type": "null" }
