@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multi-class-expr.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const InvalidClassExpr1 = class { }
+const InvalidClassExpr2 = class { }
+
+```
+
+# Diagnostics
+```
+multi-class-expr.js:2:1 lint/nursery/noExcessiveClassesPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i File exceeds the maximum of 1 classes.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const InvalidClassExpr1 = class { }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ const InvalidClassExpr2 = class { }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Files containing multiple classes can often result in a less navigable and poorly structured codebase. Extract the excessive classes into a separate file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

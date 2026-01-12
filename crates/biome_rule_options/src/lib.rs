@@ -86,6 +86,7 @@ pub mod no_empty_type_parameters;
 pub mod no_enum;
 pub mod no_equals_to_null;
 pub mod no_evolving_types;
+pub mod no_excessive_classes_per_file;
 pub mod no_excessive_cognitive_complexity;
 pub mod no_excessive_lines_per_file;
 pub mod no_excessive_lines_per_function;
