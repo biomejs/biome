@@ -191,8 +191,7 @@ use crate::{
     },
     verbatim::format_html_verbatim_node,
 };
-use biome_formatter::format_element::tag::{GroupMode, Tag};
-use biome_formatter::{FormatRuleWithOptions, GroupId, best_fitting, prelude::*};
+use biome_formatter::{FormatRuleWithOptions, GroupId, prelude::*};
 use biome_formatter::{VecBuffer, format_args, write};
 use biome_html_syntax::{
     AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElement,
@@ -496,7 +495,6 @@ impl FormatHtmlElementList {
                         }
                         fill.finish()?;
 
-                        // TODO: if next child is not a whitespace sensitive element, we can insert a newline here.
                         match children_iter.peek() {
                             Some(HtmlChild::NonText(non_text)) => {
                                 let css_display = get_element_css_display(non_text);
@@ -580,17 +578,10 @@ impl FormatHtmlElementList {
 
                     // Any non-text child (elements)
                     HtmlChild::NonText(non_text) => {
-                        let is_br = is_br_element(non_text);
                         let css_display = get_element_css_display(non_text);
                         let line_mode = match children_iter.peek() {
-                            Some(HtmlChild::Word(word)) => {
-                                // <br /> always forces a hard line break after it
-                                if is_br
-                                    || (is_self_closing_or_br(non_text)
-                                        && !word.is_single_character())
-                                {
-                                    Some(LineMode::Hard)
-                                } else if css_display.is_externally_whitespace_sensitive() {
+                            Some(HtmlChild::Word(_)) => {
+                                if css_display.is_externally_whitespace_sensitive() {
                                     // not allowed to add whitespace if the next one is externally whitespace sensitive
                                     // ```html
                                     // <a>link</a>more text
@@ -623,8 +614,6 @@ impl FormatHtmlElementList {
                                     // <a>link</a><!-- comment -->
                                     // ```
                                     None
-                                } else if is_br {
-                                    Some(LineMode::Hard)
                                 } else {
                                     Some(LineMode::Soft)
                                 }
@@ -632,17 +621,11 @@ impl FormatHtmlElementList {
 
                             Some(
                                 HtmlChild::Whitespace | HtmlChild::Newline | HtmlChild::EmptyLine,
-                            ) => {
-                                // <br /> forces hard break even with trailing whitespace
-                                if is_br { Some(LineMode::Hard) } else { None }
-                            }
+                            ) => None,
 
                             Some(HtmlChild::Verbatim(_)) => Some(LineMode::Hard),
 
-                            None => {
-                                // <br /> at the end still forces a break
-                                if is_br { Some(LineMode::Hard) } else { None }
-                            }
+                            None => None,
                         };
 
                         child_breaks = line_mode.is_some_and(|mode| mode.is_hard());
