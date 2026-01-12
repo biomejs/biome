@@ -777,62 +777,6 @@ pub(crate) fn is_element_whitespace_sensitive_from_element(
     sensitivity.is_css() && is_whitespace_sensitive || sensitivity.is_strict()
 }
 
-/// Checks if an element has an inline CSS display value (whitespace-sensitive).
-///
-/// NOTE: This currently uses a conservative list of inline elements that matches
-/// the original implementation. The full CSS display classification is available
-/// in `crate::utils::css_display` but integrating it requires changes to the
-/// token borrowing logic in element.rs to avoid unnecessary borrowing for simple
-/// inline elements.
-///
-/// TODO: Once the element formatter is updated to handle token borrowing correctly
-/// for inline elements (only borrow when attributes break), this should be updated
-/// to use `get_css_display_from_tag(tag_name).is_strictly_inline()`.
-pub(crate) fn is_inline_element(tag_name: &HtmlTagName) -> bool {
-    get_css_display_from_tag(tag_name).is_strictly_inline()
-}
-
-/// Checks if an element is an inline element based on its tag name.
-pub(crate) fn is_inline_element_from_element(element: &AnyHtmlElement) -> bool {
-    let name = match element {
-        AnyHtmlElement::HtmlElement(element) => {
-            element.opening_element().and_then(|element| element.name())
-        }
-        AnyHtmlElement::HtmlSelfClosingElement(element) => element.name(),
-        _ => return false,
-    };
-    let Ok(name) = name else {
-        return false;
-    };
-
-    is_inline_element(&name)
-}
-
-/// Checks if an element has a block-like CSS display value (not whitespace-sensitive).
-///
-/// This uses the CSS display value from the browser's user-agent stylesheet.
-/// Block-like elements include `display: block`, `list-item`, `table`, `table-row`, etc.
-#[deprecated(note = "just use get_css_display_from_tag().is_block_like() directly")]
-pub(crate) fn is_block_element(tag_name: &HtmlTagName) -> bool {
-    get_css_display_from_tag(tag_name).is_block_like()
-}
-
-/// Checks if an element is a block element based on its tag name.
-pub(crate) fn is_block_element_from_element(element: &AnyHtmlElement) -> bool {
-    let name = match element {
-        AnyHtmlElement::HtmlElement(element) => {
-            element.opening_element().and_then(|element| element.name())
-        }
-        AnyHtmlElement::HtmlSelfClosingElement(element) => element.name(),
-        _ => return false,
-    };
-    let Ok(name) = name else {
-        return false;
-    };
-
-    get_css_display_from_tag(&name).is_block_like()
-}
-
 /// Gets the CSS display value for an element.
 ///
 /// This is useful when you need more granular control than just inline/block.
