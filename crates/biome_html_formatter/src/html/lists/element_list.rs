@@ -426,6 +426,10 @@ impl FormatHtmlElementList {
                 }
             }
 
+            if force_multiline {
+                write!(f, [expand_parent()])?;
+            }
+
             let mut last: Option<&HtmlChild> = None;
 
             let mut is_first_child = true;
@@ -434,7 +438,6 @@ impl FormatHtmlElementList {
             // current and next item to ensure we don't accidentally add whitespace where none is allowed!
             while let Some(child) = children_iter.next() {
                 let mut child_breaks = false;
-
                 let is_last_child = children_iter.peek().is_none();
 
                 // For whitespace-sensitive containers (like <span>), leading/trailing
@@ -503,8 +506,12 @@ impl FormatHtmlElementList {
                                 // <a>link</a>more text
                                 // ```
                                 if !css_display.is_externally_whitespace_sensitive() {
-                                    // add a soft line break after the word
-                                    write!(f, [hard_line_break()])?;
+                                    // add a line break after the word
+                                    if force_multiline {
+                                        write!(f, [hard_line_break()])?;
+                                    } else {
+                                        write!(f, [soft_line_break()])?;
+                                    }
                                 }
                             }
                             Some(HtmlChild::Comment(_)) => {
