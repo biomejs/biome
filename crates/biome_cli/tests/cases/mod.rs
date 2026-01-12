@@ -19,6 +19,7 @@ mod handle_vue_files;
 mod html;
 mod included_files;
 mod indent_script_and_style;
+mod javascript;
 mod json_parsing;
 mod linter_domains;
 mod linter_groups_plain;
