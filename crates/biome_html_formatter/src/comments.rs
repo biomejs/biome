@@ -7,9 +7,11 @@ use biome_formatter::{
     prelude::*,
     write,
 };
-use biome_html_syntax::{HtmlClosingElement, HtmlLanguage, HtmlOpeningElement, HtmlSyntaxKind};
-use biome_rowan::{SyntaxNodeCast, SyntaxTriviaPieceComments};
-use biome_suppression::parse_suppression_comment;
+use biome_html_syntax::{
+    HtmlClosingElement, HtmlLanguage, HtmlOpeningElement, HtmlRoot, HtmlSyntaxKind,
+};
+use biome_rowan::{AstNode, SyntaxNodeCast, SyntaxTriviaPieceComments, TextSize};
+use biome_suppression::{SuppressionKind, parse_suppression_comment};
 
 use crate::context::HtmlFormatContext;
 
@@ -39,6 +41,15 @@ impl CommentStyle for HtmlCommentStyle {
     fn is_suppression(text: &str) -> bool {
         parse_suppression_comment(text)
             .filter_map(Result::ok)
+            .filter(|suppression| suppression.kind == SuppressionKind::Classic)
+            .flat_map(|suppression| suppression.categories)
+            .any(|(key, ..)| key == category!("format"))
+    }
+
+    fn is_global_suppression(text: &str) -> bool {
+        parse_suppression_comment(text)
+            .filter_map(Result::ok)
+            .filter(|suppression| suppression.kind == SuppressionKind::All)
             .flat_map(|suppression| suppression.categories)
             .any(|(key, ..)| key == category!("format"))
     }
@@ -56,72 +67,76 @@ impl CommentStyle for HtmlCommentStyle {
         &self,
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
-        // Fix trailing comments that are right before EOF being assigned to the wrong node.
-        //
-        // The issue is demonstrated in the example below.
-        // ```html
-        // Foo
-        //
-        // <!-- This comment gets assigned to the text node, despite it being actually attached to the EOF token. -->
-        // ```
-        if let Some(token) = comment.following_token()
-            && token.kind() == HtmlSyntaxKind::EOF
-        {
-            return CommentPlacement::trailing(comment.enclosing_node().clone(), comment);
-        }
-
-        // Fix trailing comments that should actually be leading comments for the next node.
-        // ```html
-        // 123<!--biome-ignore format: prettier ignore-->456
-        // ```
-        // This fix will ensure that the ignore comment is assigned to the 456 node instead of the 123 node.
-        if let Some(following_node) = comment.following_node()
-            && comment.text_position().is_same_line()
-        {
-            return CommentPlacement::leading(following_node.clone(), comment);
-        }
-        // match (comment.preceding_node(), comment.following_node()) {
-        //     (Some(preceding_node), Some(following_node)) => {
-        //         if preceding_node.kind() == HtmlSyntaxKind::HTML_CONTENT
-        //             && following_node.kind() == HtmlSyntaxKind::HTML_CONTENT
-        //         {
-        //             return CommentPlacement::leading(following_node.clone(), comment);
-        //         }
-
-        //         if matches!(
-        //             following_node.kind(),
-        //             HtmlSyntaxKind::HTML_CONTENT
-        //                 | HtmlSyntaxKind::HTML_ELEMENT
-        //                 | HtmlSyntaxKind::HTML_SELF_CLOSING_ELEMENT
-        //                 | HtmlSyntaxKind::HTML_BOGUS_ELEMENT
-        //         ) {
-        //             return CommentPlacement::leading(following_node.clone(), comment);
-        //         }
-        //     }
-        //     _ => {}
-        // }
-
-        // move leading comments placed on closing tags to trailing tags of previous siblings, or to be dangling if no siblings are present.
-        if let Some(_closing_tag) = comment
-            .following_node()
-            .and_then(|node| node.clone().cast::<HtmlClosingElement>())
-        {
-            if let Some(_preceding_opening_tag) = comment
-                .preceding_node()
-                .and_then(|node| node.clone().cast::<HtmlOpeningElement>())
+        handle_global_suppression(comment).or_else(|comment| {
+            // Fix trailing comments that are right before EOF being assigned to the wrong node.
+            //
+            // The issue is demonstrated in the example below.
+            // ```html
+            // Foo
+            //
+            // <!-- This comment gets assigned to the text node, despite it being actually attached to the EOF token. -->
+            // ```
+            if let Some(token) = comment.following_token()
+                && token.kind() == HtmlSyntaxKind::EOF
             {
-                return CommentPlacement::dangling(
-                    comment.preceding_node().unwrap().clone(),
-                    comment,
-                );
-            } else {
-                return CommentPlacement::trailing(
-                    comment.preceding_node().unwrap().clone(),
-                    comment,
-                );
+                return CommentPlacement::trailing(comment.enclosing_node().clone(), comment);
             }
-        }
 
-        CommentPlacement::Default(comment)
+            // Fix trailing comments that should actually be leading comments for the next node.
+            // ```html
+            // 123<!--biome-ignore format: prettier ignore-->456
+            // ```
+            // This fix will ensure that the ignore comment is assigned to the 456 node instead of the 123 node.
+            if let Some(following_node) = comment.following_node()
+                && comment.text_position().is_same_line()
+            {
+                return CommentPlacement::leading(following_node.clone(), comment);
+            }
+
+            // move leading comments placed on closing tags to trailing tags of previous siblings, or to be dangling if no siblings are present.
+            if let Some(_closing_tag) = comment
+                .following_node()
+                .and_then(|node| node.clone().cast::<HtmlClosingElement>())
+            {
+                if let Some(_preceding_opening_tag) = comment
+                    .preceding_node()
+                    .and_then(|node| node.clone().cast::<HtmlOpeningElement>())
+                {
+                    return CommentPlacement::dangling(
+                        comment.preceding_node().unwrap().clone(),
+                        comment,
+                    );
+                } else {
+                    return CommentPlacement::trailing(
+                        comment.preceding_node().unwrap().clone(),
+                        comment,
+                    );
+                }
+            }
+
+            CommentPlacement::Default(comment)
+        })
     }
+}
+fn handle_global_suppression(
+    comment: DecoratedComment<HtmlLanguage>,
+) -> CommentPlacement<HtmlLanguage> {
+    let node = comment.enclosing_node();
+
+    if node.text_range_with_trivia().start() == TextSize::from(0) {
+        let has_global_suppression = node.first_leading_trivia().is_some_and(|trivia| {
+            trivia
+                .pieces()
+                .filter(|piece| piece.is_comments())
+                .any(|piece| HtmlCommentStyle::is_global_suppression(piece.text()))
+        });
+        let root = node.ancestors().find_map(HtmlRoot::cast);
+        if let Some(root) = root
+            && has_global_suppression
+        {
+            return CommentPlacement::leading(root.syntax().clone(), comment);
+        }
+    }
+
+    CommentPlacement::Default(comment)
 }

@@ -217,6 +217,7 @@ impl Display for RageConfiguration<'_> {
                         directory_path,
                         file_path,
                         extended_configurations,
+                        loaded_location: _,
                     } = loaded_configuration;
                     let vcs_enabled = configuration.is_vcs_enabled();
                     let mut settings = Settings::default();

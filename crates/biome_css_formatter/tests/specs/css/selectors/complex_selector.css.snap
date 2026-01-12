@@ -35,6 +35,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
@@ -62,4 +63,5 @@ Quote style: Double Quotes
 /* a comment */
 .parent > .child > .child2 {
 }
+
 ```

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: elements/empty-extra-lines.html
-snapshot_kind: text
 ---
 # Input
 
@@ -29,8 +28,10 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```html
 <div></div>
+
 ```

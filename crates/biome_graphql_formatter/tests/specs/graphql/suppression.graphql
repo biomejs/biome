@@ -1,0 +1,20 @@
+# biome-ignore-all format: test reason
+
+{
+	hero
+	@deprecated(reason: "Deprecated", reason: "Deprecated",
+
+
+		reason: "Deprecated")
+	@addExternalFields(source: "profiles")
+}
+
+
+{
+	hero
+	@deprecated(reason: "Deprecated", reason: "Deprecated",
+
+
+		reason: "Deprecated")
+	@addExternalFields(source: "profiles")
+}

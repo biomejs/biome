@@ -1,3 +1,5 @@
+use crate::settings::ModuleGraphResolutionKind;
+use crate::test_utils::setup_workspace_and_open_project;
 use biome_configuration::{
     FormatterConfiguration, JsConfiguration,
     javascript::{JsFormatterConfiguration, JsParserConfiguration},
@@ -5,8 +7,6 @@ use biome_configuration::{
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
 use biome_rowan::TextSize;
-
-use crate::test_utils::setup_workspace_and_open_project;
 
 use super::*;
 
@@ -243,6 +243,7 @@ function Foo({cond}) {
             configuration,
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -359,6 +360,7 @@ function Foo({cond}) {
             configuration,
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -516,6 +518,7 @@ const Bar = styled(Component)`
                 ..Default::default()
             },
             extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -587,6 +590,7 @@ const Bar = graphql(`
                 ..Default::default()
             },
             extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 

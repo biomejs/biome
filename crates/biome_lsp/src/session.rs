@@ -16,7 +16,9 @@ use biome_service::WorkspaceError;
 use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
 };
+use biome_service::diagnostics::ConfigurationOutsideProject;
 use biome_service::projects::ProjectKey;
+use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::workspace::{
     FeaturesBuilder, OpenProjectParams, OpenProjectResult, PullDiagnosticsParams,
     SupportsFeatureParams,
@@ -741,7 +743,7 @@ impl Session {
         spawn_blocking(move || {
             let result = session.workspace.scan_project(ScanProjectParams {
                 project_key,
-                watch: scan_kind.is_project(),
+                watch: scan_kind.is_project() || scan_kind.is_type_aware(),
                 force,
                 scan_kind,
                 verbose: false,
@@ -858,6 +860,10 @@ impl Session {
                 return ConfigurationStatus::Error;
             }
         };
+        if !loaded_configuration.loaded_location.is_in_project() {
+            let message = PrintDescription(&ConfigurationOutsideProject).to_string();
+            self.client.log_message(MessageType::INFO, message).await;
+        }
 
         if loaded_configuration.has_errors() {
             error!("Couldn't load the configuration file, reasons:");
@@ -960,6 +966,7 @@ impl Session {
                 .map(BiomePath::from),
             configuration,
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         });
 
         self.insert_and_scan_project(project_key, path.into(), scan_kind, force)

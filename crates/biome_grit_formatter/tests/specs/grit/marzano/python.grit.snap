@@ -25,6 +25,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Attribute Position: Auto
+Trailing newline: true
 -----
 
 ```grit
@@ -32,4 +33,5 @@ engine biome(0.1)
 language python
 
 `$var in $dict.keys()` => `$var in $dict`
+
 ```

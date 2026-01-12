@@ -40,6 +40,9 @@ pub(crate) enum HtmlLexContext {
     /// Outside of this context, the lexer doesn't yield any particular keywords.
     Svelte,
 
+    /// The binding properties in Svelte are special and require a special lexing. They accept everything until `=` is found.
+    SvelteBindingLiteral,
+
     /// Lex tokens inside text expressions. In the following examples, `foo` is the text expression:
     /// - `{{ foo }}`
     /// - `attr={ foo }`
@@ -86,8 +89,6 @@ pub(crate) enum TextExpressionKind {
 pub(crate) enum RestrictedExpressionStopAt {
     /// Stops at 'as' keyword or ',' (for Svelte #each blocks)
     AsOrComma,
-    /// Stops at `(`
-    OpeningParenOrComma,
     /// Stops at `)`
     ClosingParen,
     /// Stops at `then` or `catch` keywords
@@ -98,7 +99,6 @@ impl RestrictedExpressionStopAt {
     pub(crate) fn matches_punct(&self, byte: u8) -> bool {
         match self {
             Self::AsOrComma => byte == b',',
-            Self::OpeningParenOrComma => byte == b'(' || byte == b',',
             Self::ClosingParen => byte == b')',
             Self::ThenOrCatch => false,
         }
@@ -107,7 +107,6 @@ impl RestrictedExpressionStopAt {
     pub(crate) fn matches_keyword(&self, keyword: HtmlSyntaxKind) -> bool {
         match self {
             Self::AsOrComma => keyword == AS_KW,
-            Self::OpeningParenOrComma => false,
             Self::ClosingParen => false,
             Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,
         }
@@ -139,9 +138,12 @@ impl LexContext for HtmlLexContext {
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub(crate) enum HtmlReLexContext {
+    /// Specialised relex that manages certain characters such as commas, etc.
     Svelte,
     /// Relex tokens using `HtmlLexer::consume_html_text`
     HtmlText,
+    /// Relex tokens as if the parser was inside a tag.
+    InsideTag,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;

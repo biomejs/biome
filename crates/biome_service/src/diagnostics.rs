@@ -690,6 +690,14 @@ pub struct WatchError {
     pub reason: String,
 }
 
+#[derive(Debug, Default, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "project",
+    severity = Hint,
+    message = "Biome found a configuration file outside of the current working directory. If the configuration enables the scanner, Biome might scan the whole file system. This behaviour will be fixed in the next major version.",
+)]
+pub struct ConfigurationOutsideProject;
+
 #[cfg(test)]
 mod test {
     use crate::diagnostics::{CantReadFile, FileIgnored, NotFound, SourceFileNotSupported};

@@ -29,6 +29,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```html
@@ -37,6 +38,7 @@ body {
   background-color: seagreen;
 }
 </style>
+
 ```
 
 
@@ -56,6 +58,7 @@ Bracket same line: false
 Whitespace sensitivity: strict
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```html
@@ -64,6 +67,7 @@ body {
   background-color: seagreen;
 }
 </style>
+
 ```
 
 

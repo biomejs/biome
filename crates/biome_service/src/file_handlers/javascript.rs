@@ -12,6 +12,7 @@ use crate::settings::{
     OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
     check_override_feature_activity,
 };
+use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{DocumentFileSource, EmbeddedSnippet, PullDiagnosticsAndActionsResult};
 use crate::{
     WorkspaceError,
@@ -33,7 +34,7 @@ use biome_css_syntax::{CssFileSource, CssLanguage, EmbeddingKind};
 use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatElement, FormatError,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
@@ -90,6 +91,7 @@ pub struct JsFormatterSettings {
     pub attribute_position: Option<AttributePosition>,
     pub expand: Option<Expand>,
     pub operator_linebreak: Option<OperatorLinebreak>,
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl From<JsFormatterConfiguration> for JsFormatterSettings {
@@ -111,6 +113,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             line_ending: value.line_ending,
             expand: value.expand,
             operator_linebreak: value.operator_linebreak,
+            trailing_newline: value.trailing_newline,
         }
     }
 }
@@ -278,6 +281,12 @@ impl ServiceLanguage for JsLanguage {
                 .unwrap_or_default(),
         )
         .with_expand(language.expand.or(global.expand).unwrap_or_default())
+        .with_trailing_newline(
+            language
+                .trailing_newline
+                .or(global.trailing_newline)
+                .unwrap_or_default(),
+        )
         .with_operator_linebreak(language.operator_linebreak.unwrap_or_default());
 
         overrides.override_js_format_options(path, options)
@@ -569,6 +578,7 @@ fn parse_embedded_nodes(
     _file_source: &DocumentFileSource,
     settings: &SettingsWithEditor,
     cache: &mut NodeCache,
+    _builder: &mut EmbeddedBuilder,
 ) -> ParseEmbedResult {
     if !settings
         .as_ref()
@@ -911,8 +921,14 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     };
 
     let mut process_lint = ProcessLint::new(&params);
-    let services =
+
+    let mut services =
         JsAnalyzerServices::from((params.module_graph, params.project_layout, file_source));
+
+    if let Some(embedded_bindings) = params.embedded_exported_bindings {
+        services.set_embedded_bindings(embedded_bindings.bindings)
+    }
+
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,

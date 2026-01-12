@@ -52,6 +52,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -75,6 +76,7 @@ Operator linebreak: After
 (action) => /* comment */ `
 ${test}
 multiline`;
+
 ```
 
 ## Output 1
@@ -95,6 +97,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -118,4 +121,5 @@ action =>
 action => /* comment */ `
 ${test}
 multiline`;
+
 ```

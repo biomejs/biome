@@ -39,6 +39,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -50,6 +51,7 @@ switch (n) {
 
 var c = a.e;
 (i.a += Ga(c.e)), F(i, c.i, 0);
+
 ```
 
 ## Output 1
@@ -70,6 +72,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -81,4 +84,5 @@ switch (n) {
 
 var c = a.e
 ;(i.a += Ga(c.e)), F(i, c.i, 0)
+
 ```

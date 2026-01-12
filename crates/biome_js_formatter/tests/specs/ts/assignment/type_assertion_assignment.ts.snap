@@ -45,6 +45,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -58,4 +59,5 @@ let x;
 for (<boolean>x of []) {
 }
 ({ x: <string>x } = { x: "test" });
+
 ```

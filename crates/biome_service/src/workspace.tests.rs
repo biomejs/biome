@@ -15,16 +15,16 @@ use biome_plugin_loader::{PluginConfiguration, Plugins};
 use camino::Utf8PathBuf;
 use insta::{assert_debug_snapshot, assert_snapshot};
 
-use crate::file_handlers::DocumentFileSource;
-use crate::projects::ProjectKey;
-use crate::{Workspace, WorkspaceError};
-
 use super::{
     CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
     GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
     OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateKind,
     UpdateModuleGraphParams, UpdateSettingsParams, server,
 };
+use crate::file_handlers::DocumentFileSource;
+use crate::projects::ProjectKey;
+use crate::settings::ModuleGraphResolutionKind;
+use crate::{Workspace, WorkspaceError};
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
     let workspace = server(Arc::new(MemoryFileSystem::default()), None);
@@ -471,6 +471,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
             },
             workspace_directory: None,
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -531,6 +532,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
             },
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -601,6 +603,7 @@ language css;
             },
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -667,6 +670,7 @@ fn plugins_may_use_invalid_span() {
             },
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -787,6 +791,7 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
             },
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -1017,12 +1022,14 @@ export const squash = function squash() {};
         .update_module_graph(UpdateModuleGraphParams {
             path: BiomePath::new("/project/file.js"),
             update_kind: UpdateKind::AddOrUpdate,
+            project_key,
         })
         .unwrap();
     workspace
         .update_module_graph(UpdateModuleGraphParams {
             path: BiomePath::new("/project/utils.js"),
             update_kind: UpdateKind::AddOrUpdate,
+            project_key,
         })
         .unwrap();
 
@@ -1030,6 +1037,7 @@ export const squash = function squash() {};
         .update_module_graph(UpdateModuleGraphParams {
             path: BiomePath::new("/project/dynamic.js"),
             update_kind: UpdateKind::AddOrUpdate,
+            project_key,
         })
         .unwrap();
 

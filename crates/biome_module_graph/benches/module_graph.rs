@@ -73,6 +73,7 @@ fn bench_index_d_ts(bencher: Bencher, name: &str) {
                 &fs,
                 &ProjectLayout::default(),
                 &[(&path, root)],
+                true,
             );
             divan::black_box(&module_graph);
         });

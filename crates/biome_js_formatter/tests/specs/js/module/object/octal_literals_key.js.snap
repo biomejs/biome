@@ -37,6 +37,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -46,4 +47,5 @@ const x = {
 	0: "zero",
 	"010": "oh no",
 };
+
 ```

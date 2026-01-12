@@ -32,6 +32,7 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```json
@@ -45,4 +46,5 @@ Bracket spacing: true
 	"c": "2",
 	"d": 3
 }
+
 ```

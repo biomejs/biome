@@ -47,6 +47,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -62,4 +63,5 @@ if (true) {
 if (false) {
 	let x = 99;
 } else {
+
 ```

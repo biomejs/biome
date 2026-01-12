@@ -5,6 +5,7 @@ use crate::{
 };
 use biome_rule_options::no_unused_imports::NoUnusedImportsOptions;
 
+use crate::services::embedded_bindings::EmbeddedBindings;
 use biome_analyze::{
     AddVisitor, FixKind, FromServices, Phase, Phases, QueryKey, Queryable, Rule, RuleDiagnostic,
     RuleKey, RuleMetadata, RuleSource, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor,
@@ -270,6 +271,10 @@ impl Rule for NoUnusedImports {
     type Options = NoUnusedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let embedded_bindings = ctx
+            .get_service::<EmbeddedBindings>()
+            .expect("embedded bindings service");
+
         match ctx.query() {
             AnyJsImportClause::JsImportBareClause(_) => {
                 // ignore bare imports (aka side-effect imports) such as `import "mod"`.
@@ -277,10 +282,12 @@ impl Rule for NoUnusedImports {
             }
             AnyJsImportClause::JsImportCombinedClause(clause) => {
                 let default_local_name = clause.default_specifier().ok()?.local_name().ok()?;
-                let is_default_import_unused = is_unused(ctx, &default_local_name);
+
+                let is_default_import_unused =
+                    is_unused(ctx, embedded_bindings, &default_local_name);
                 let (is_combined_unused, named_import_range) = match clause.specifier().ok()? {
                     AnyJsCombinedSpecifier::JsNamedImportSpecifiers(specifiers) => {
-                        match unused_named_specifiers(ctx, &specifiers) {
+                        match unused_named_specifiers(ctx, embedded_bindings, &specifiers) {
                             Some(Unused::AllImports(range) | Unused::EmptyStatement(range)) => {
                                 (true, range)
                             }
@@ -299,7 +306,10 @@ impl Rule for NoUnusedImports {
                     }
                     AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(specifier) => {
                         let local_name = specifier.local_name().ok()?;
-                        (is_unused(ctx, &local_name), local_name.range())
+                        (
+                            is_unused(ctx, embedded_bindings, &local_name),
+                            local_name.range(),
+                        )
                     }
                 };
                 match (is_default_import_unused, is_combined_unused) {
@@ -314,7 +324,8 @@ impl Rule for NoUnusedImports {
             }
             AnyJsImportClause::JsImportDefaultClause(clause) => {
                 let local_name = clause.default_specifier().ok()?.local_name().ok()?;
-                is_unused(ctx, &local_name).then_some(Unused::AllImports(local_name.range()))
+                is_unused(ctx, embedded_bindings, &local_name)
+                    .then_some(Unused::AllImports(local_name.range()))
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
                 // exception: allow type augmentation imports
@@ -326,11 +337,12 @@ impl Rule for NoUnusedImports {
                     return None;
                 }
 
-                unused_named_specifiers(ctx, &clause.named_specifiers().ok()?)
+                unused_named_specifiers(ctx, embedded_bindings, &clause.named_specifiers().ok()?)
             }
             AnyJsImportClause::JsImportNamespaceClause(clause) => {
                 let local_name = clause.namespace_specifier().ok()?.local_name().ok()?;
-                is_unused(ctx, &local_name).then_some(Unused::AllImports(local_name.range()))
+                is_unused(ctx, embedded_bindings, &local_name)
+                    .then_some(Unused::AllImports(local_name.range()))
             }
         }
     }
@@ -591,6 +603,7 @@ pub enum Unused {
 
 fn unused_named_specifiers(
     ctx: &RuleContext<NoUnusedImports>,
+    embedded_bindings: &EmbeddedBindings,
     named_specifiers: &JsNamedImportSpecifiers,
 ) -> Option<Unused> {
     let specifiers = named_specifiers.specifiers();
@@ -604,7 +617,7 @@ fn unused_named_specifiers(
             let Some(local_name) = specifier.local_name() else {
                 continue;
             };
-            if is_unused(ctx, &local_name) {
+            if is_unused(ctx, embedded_bindings, &local_name) {
                 unused_imports.push(specifier);
             }
         }
@@ -620,10 +633,23 @@ fn unused_named_specifiers(
     }
 }
 
-fn is_unused(ctx: &RuleContext<NoUnusedImports>, local_name: &AnyJsBinding) -> bool {
+fn is_unused(
+    ctx: &RuleContext<NoUnusedImports>,
+    embedded_bindings: &EmbeddedBindings,
+    local_name: &AnyJsBinding,
+) -> bool {
     let AnyJsBinding::JsIdentifierBinding(binding) = &local_name else {
         return false;
     };
+
+    let is_defined_in_embed = binding
+        .name_token()
+        .ok()
+        .is_some_and(|token| embedded_bindings.contains_binding(token.text_trimmed()));
+    if is_defined_in_embed {
+        return false;
+    }
+
     if ctx.jsx_runtime() == JsxRuntime::ReactClassic {
         // Check for standard React import
         if is_global_react_import(binding, ReactLibrary::React) {

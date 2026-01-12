@@ -1,6 +1,6 @@
 use super::{
     AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
+    ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -25,6 +25,7 @@ use biome_configuration::json::{
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_formatter::{
     BracketSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    TrailingNewline,
 };
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::{JsonAnalyzeServices, analyze};
@@ -51,6 +52,7 @@ pub struct JsonFormatterSettings {
     pub expand: Option<Expand>,
     pub bracket_spacing: Option<BracketSpacing>,
     pub enabled: Option<JsonFormatterEnabled>,
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl From<JsonFormatterConfiguration> for JsonFormatterSettings {
@@ -64,6 +66,7 @@ impl From<JsonFormatterConfiguration> for JsonFormatterSettings {
             expand: configuration.expand,
             bracket_spacing: configuration.bracket_spacing,
             enabled: configuration.enabled,
+            trailing_newline: configuration.trailing_newline,
         }
     }
 }
@@ -150,6 +153,7 @@ impl ServiceLanguage for JsonLanguage {
                     || optional_json_file_source.is_some_and(|x| x.allow_trailing_commas()),
                     |value| value.value(),
                 ),
+                allow_metavariables: false,
             };
 
             overrides.apply_override_json_parser_options(path, &mut options);
@@ -176,6 +180,11 @@ impl ServiceLanguage for JsonLanguage {
         let indent_width = language
             .indent_width
             .or(global.indent_width)
+            .unwrap_or_default();
+
+        let trailing_newline = language
+            .trailing_newline
+            .or(global.trailing_newline)
             .unwrap_or_default();
 
         let line_ending = language
@@ -214,7 +223,8 @@ impl ServiceLanguage for JsonLanguage {
             .with_line_width(line_width)
             .with_trailing_commas(trailing_commas)
             .with_expand(expand_lists)
-            .with_bracket_spacing(bracket_spacing);
+            .with_bracket_spacing(bracket_spacing)
+            .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_json_format_options(path, &mut options);
 
@@ -358,7 +368,9 @@ impl ExtensionHandler for JsonFileHandler {
                 format_on_type: Some(format_on_type),
                 format_embedded: None,
             },
-            search: SearchCapabilities { search: None },
+            search: SearchCapabilities {
+                search: Some(search),
+            },
         }
     }
 }
@@ -532,9 +544,14 @@ fn lint(params: LintParams) -> LintResults {
         file_source,
         configuration_source: params.settings.as_ref().full_source(),
     };
-    let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, services, |signal| {
-        process_lint.process_signal(signal)
-    });
+    let (_, analyze_diagnostics) = analyze(
+        &root,
+        filter,
+        &analyzer_options,
+        services,
+        &params.plugins,
+        |signal| process_lint.process_signal(signal),
+    );
 
     let mut diagnostics = params
         .parse
@@ -570,7 +587,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         only,
         enabled_rules: rules,
         suppression_reason,
-        plugins: _,
+        plugins,
         categories,
         action_offset,
         document_services: _,
@@ -608,20 +625,27 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         file_source,
         configuration_source: workspace.as_ref().full_source(),
     };
-    analyze(&tree, filter, &analyzer_options, services, |signal| {
-        actions.extend(signal.actions().into_code_action_iter().map(|item| {
-            CodeAction {
-                category: item.category.clone(),
-                rule_name: item
-                    .rule_name
-                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                suggestion: item.suggestion,
-                offset: action_offset,
-            }
-        }));
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        services,
+        &plugins,
+        |signal| {
+            actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                CodeAction {
+                    category: item.category.clone(),
+                    rule_name: item
+                        .rule_name
+                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                    suggestion: item.suggestion,
+                    offset: action_offset,
+                }
+            }));
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     PullActionsResult { actions }
 }
@@ -674,9 +698,14 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             file_source,
             configuration_source: params.settings.as_ref().full_source(),
         };
-        let (action, _) = analyze(&tree, filter, &analyzer_options, services, |signal| {
-            process_fix_all.process_signal(signal)
-        });
+        let (action, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            services,
+            &params.plugins,
+            |signal| process_fix_all.process_signal(signal),
+        );
 
         let result = process_fix_all.process_action(action, |root| {
             tree = match JsonRoot::cast(root) {

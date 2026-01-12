@@ -11,6 +11,9 @@ pub use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::vue::VueFileHandler;
 use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
+use crate::workspace::document::services::embedded_bindings::{
+    EmbeddedBuilder, EmbeddedExportedBindings,
+};
 use crate::workspace::{
     AnyEmbeddedSnippet, CodeAction, DocumentServices, FixAction, FixFileMode, FixFileResult,
     GetSyntaxTreeResult, PullActionsResult, PullDiagnosticsAndActionsResult, RenameResult,
@@ -491,6 +494,7 @@ pub struct ParseResult {
     pub(crate) language: Option<DocumentFileSource>,
 }
 
+#[derive(Default)]
 pub struct ParseEmbedResult {
     pub(crate) nodes: Vec<(AnyEmbeddedSnippet, DocumentFileSource)>,
 }
@@ -503,6 +507,7 @@ type ParseEmbeddedNodes = fn(
     &DocumentFileSource,
     &SettingsWithEditor,
     &mut NodeCache,
+    &mut EmbeddedBuilder,
 ) -> ParseEmbedResult;
 #[derive(Default)]
 pub struct ParserCapabilities {
@@ -558,6 +563,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) pull_code_actions: bool,
     pub(crate) diagnostic_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
+    pub(crate) embedded_exported_bindings: Option<EmbeddedExportedBindings>,
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
@@ -1073,7 +1079,7 @@ impl Features {
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro { .. } => self.astro.capabilities(),
                 EmbeddingKind::Vue { .. } => self.vue.capabilities(),
-                EmbeddingKind::Svelte => self.svelte.capabilities(),
+                EmbeddingKind::Svelte { .. } => self.svelte.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),

@@ -38,6 +38,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -48,4 +49,5 @@ class SourceRemoveUnused extends SourceAction {
 	public static readonly id =
 		"javascript-walkthrough.commands.nodeInstallationFound";
 }
+
 ```

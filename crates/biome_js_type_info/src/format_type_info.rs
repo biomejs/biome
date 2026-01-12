@@ -10,7 +10,7 @@ use crate::{
 use biome_formatter::prelude::*;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
-    SourceMapGeneration, TransformSourceMap,
+    SourceMapGeneration, TrailingNewline, TransformSourceMap,
 };
 use biome_formatter::{format_args, write};
 use biome_js_syntax::TextSize;
@@ -36,6 +36,10 @@ impl FormatOptions for FormatTypeOptions {
 
     fn line_ending(&self) -> LineEnding {
         LineEnding::Lf
+    }
+
+    fn trailing_newline(&self) -> TrailingNewline {
+        TrailingNewline::default()
     }
 
     fn as_print_options(&self) -> PrinterOptions {

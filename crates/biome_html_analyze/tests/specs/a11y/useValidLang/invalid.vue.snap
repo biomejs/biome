@@ -1,0 +1,176 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<html lang="lorem"></html>
+<html lang="en-babab"></html>
+<html lang="en-GB-something"></html>
+<html lang="zh-Xxxx"></html>
+<html lang="zh-Hans-ZZ"></html>
+<html lang="en-US-GB-Extra"></html>
+
+```
+
+# Diagnostics
+```
+invalid.vue:2:12 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the lang attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <html lang="lorem"></html>
+      │            ^^^^^^^
+    3 │ <html lang="en-babab"></html>
+    4 │ <html lang="en-GB-something"></html>
+  
+  i Some of valid languages:
+  
+  - ab
+  - aa
+  - af
+  - sq
+  - am
+  - ar
+  - an
+  - hy
+  - as
+  - ay
+  - az
+  - ba
+  - eu
+  - bn
+  - dz
+  
+
+```
+
+```
+invalid.vue:3:12 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the lang attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <html lang="lorem"></html>
+  > 3 │ <html lang="en-babab"></html>
+      │            ^^^^^^^^^^
+    4 │ <html lang="en-GB-something"></html>
+    5 │ <html lang="zh-Xxxx"></html>
+  
+
+```
+
+```
+invalid.vue:4:12 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the lang attribute.
+  
+    2 │ <html lang="lorem"></html>
+    3 │ <html lang="en-babab"></html>
+  > 4 │ <html lang="en-GB-something"></html>
+      │            ^^^^^^^^^^^^^^^^^
+    5 │ <html lang="zh-Xxxx"></html>
+    6 │ <html lang="zh-Hans-ZZ"></html>
+  
+  i Some of valid scripts:
+  
+  - Arab
+  - Armn
+  - Beng
+  - Cyrl
+  - Deva
+  - Ethi
+  - Grek
+  - Gujr
+  - Guru
+  - Hang
+  - Hani
+  - Hans
+  - Hant
+  - Hebr
+  - Hira
+  
+
+```
+
+```
+invalid.vue:5:12 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the lang attribute.
+  
+    3 │ <html lang="en-babab"></html>
+    4 │ <html lang="en-GB-something"></html>
+  > 5 │ <html lang="zh-Xxxx"></html>
+      │            ^^^^^^^^^
+    6 │ <html lang="zh-Hans-ZZ"></html>
+    7 │ <html lang="en-US-GB-Extra"></html>
+  
+  i Some of valid scripts:
+  
+  - Arab
+  - Armn
+  - Beng
+  - Cyrl
+  - Deva
+  - Ethi
+  - Grek
+  - Gujr
+  - Guru
+  - Hang
+  - Hani
+  - Hans
+  - Hant
+  - Hebr
+  - Hira
+  
+
+```
+
+```
+invalid.vue:6:12 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the lang attribute.
+  
+    4 │ <html lang="en-GB-something"></html>
+    5 │ <html lang="zh-Xxxx"></html>
+  > 6 │ <html lang="zh-Hans-ZZ"></html>
+      │            ^^^^^^^^^^^^
+    7 │ <html lang="en-US-GB-Extra"></html>
+    8 │ 
+  
+  i Some of valid countries:
+  
+  - AF
+  - AL
+  - DZ
+  - AS
+  - AD
+  - AO
+  - AI
+  - AQ
+  - AG
+  - AR
+  - AM
+  - AW
+  - AU
+  - AT
+  - AZ
+  
+
+```
+
+```
+invalid.vue:7:12 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the lang attribute.
+  
+    5 │ <html lang="zh-Xxxx"></html>
+    6 │ <html lang="zh-Hans-ZZ"></html>
+  > 7 │ <html lang="en-US-GB-Extra"></html>
+      │            ^^^^^^^^^^^^^^^^
+    8 │ 
+  
+
+```

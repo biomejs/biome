@@ -7,8 +7,8 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, AnyJsxAttributeValue,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::is_redundant_alt;
 use biome_rule_options::no_redundant_alt::NoRedundantAltOptions;
-use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Enforce `img` alt prop does not contain the word "image", "picture", or "photo".
@@ -141,13 +141,4 @@ impl Rule for NoRedundantAlt {
             }),
         )
     }
-}
-
-const REDUNDANT_WORDS: [&str; 3] = ["image", "photo", "picture"];
-
-fn is_redundant_alt(alt: &str) -> bool {
-    REDUNDANT_WORDS.into_iter().any(|word| {
-        alt.split_whitespace()
-            .any(|x| x.to_ascii_lowercase_cow() == word)
-    })
 }

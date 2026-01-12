@@ -36,10 +36,12 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
 let c = [/* this */ ,];
 
 let c = [/* this */ ,];
+
 ```

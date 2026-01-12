@@ -174,6 +174,7 @@ impl Rule for UseSortedKeys {
                     let name = node
                         .name()
                         .ok()?
+                        .as_json_member_name()?
                         .inner_string_text()
                         .ok()
                         .map(ComparableToken::new)?;
@@ -190,6 +191,7 @@ impl Rule for UseSortedKeys {
                 |node| {
                     node.name()
                         .ok()?
+                        .as_json_member_name()?
                         .inner_string_text()
                         .ok()
                         .map(ComparableToken::new)
@@ -246,6 +248,7 @@ impl Rule for UseSortedKeys {
                     let name = node
                         .name()
                         .ok()?
+                        .as_json_member_name()?
                         .inner_string_text()
                         .ok()
                         .map(ComparableToken::new)?;
@@ -261,6 +264,7 @@ impl Rule for UseSortedKeys {
                 |node| {
                     node.name()
                         .ok()?
+                        .as_json_member_name()?
                         .inner_string_text()
                         .ok()
                         .map(ComparableToken::new)

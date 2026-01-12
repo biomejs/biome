@@ -21,7 +21,7 @@ expression: redactor(content)
 import { sure } from "sure.js";
 import z from "zod";
 
-const schema = z.object().optional();
+let schema = z.object().optional();
 schema + sure();
 </script>
 

@@ -960,3 +960,138 @@ fn vue_compiler_macros_as_globals() {
         result,
     ));
 }
+
+#[test]
+fn embedded_bindings_are_tracked_correctly() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script>
+import { Component } from "./component.vue";
+let hello = "Hello World";
+</script>
+
+<script>
+let greeting = "Hello World";
+</script>
+
+
+<template>
+    <span>{hello}</span>
+    <span>{notDefined}</span>
+    <span>{greeting}</span>
+    <Component />
+</template>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "embedded_bindings_are_tracked_correctly",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_const_not_triggered_in_snippet_sources() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script>
+let hello = "Hello World";
+</script>
+
+<template>
+    <span>{hello}</span>
+</template>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useConst", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_const_not_triggered_in_snippet_sources",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_unused_imports_is_not_triggered_in_snippet_sources() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script>
+import Component from "./Component.vue"
+</script>
+
+<template>
+    <Component />
+</template>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedImports", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_imports_is_not_triggered_in_snippet_sources",
+        fs,
+        console,
+        result,
+    ));
+}

@@ -97,6 +97,8 @@ impl<'app> CliSession<'app> {
                 json_parser,
                 css_parser,
                 log_options,
+                only,
+                skip,
             } => run_command(
                 self,
                 &log_options,
@@ -118,6 +120,8 @@ impl<'app> CliSession<'app> {
                     format_with_errors,
                     json_parser,
                     css_parser,
+                    only,
+                    skip,
                 }),
             ),
             BiomeCommand::Lint {
@@ -186,6 +190,8 @@ impl<'app> CliSession<'app> {
                 css_parser,
                 json_parser,
                 log_options,
+                only,
+                skip,
                 ..
             } => run_command(
                 self,
@@ -203,6 +209,8 @@ impl<'app> CliSession<'app> {
                     format_with_errors,
                     css_parser,
                     json_parser,
+                    only,
+                    skip,
                 }),
             ),
             BiomeCommand::Format {
