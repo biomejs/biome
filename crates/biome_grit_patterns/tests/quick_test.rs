@@ -32,8 +32,8 @@ fn test_explicit_file_pattern() {
     let GritQueryResult { effects, logs, .. } =
         query.execute(file).expect("could not execute query");
 
-    println!("Logs explicit: {:?}", logs);
-    println!("Effects explicit: {effects:#?}");
+    dbg!(&logs);
+    dbg!(&effects);
 
     // Should have a match since the filename ends with .ts
     assert!(
@@ -73,8 +73,8 @@ fn test_filename_binding() {
     let GritQueryResult { effects, logs, .. } =
         query.execute(file).expect("could not execute query");
 
-    println!("Logs: {:?}", logs);
-    println!("Effects: {effects:#?}");
+    dbg!(&logs);
+    dbg!(&effects);
 
     // Should have a match since the filename ends with .ts
     assert!(
