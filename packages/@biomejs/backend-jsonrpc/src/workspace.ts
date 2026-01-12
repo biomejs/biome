@@ -1944,6 +1944,11 @@ See <https://biomejs.dev/linter/rules/no-excessive-lines-per-file>
 	 */
 	noExcessiveLinesPerFile?: NoExcessiveLinesPerFileConfiguration;
 	/**
+	* Succinct description of the rule.
+See <https://biomejs.dev/linter/rules/no-floating-classes> 
+	 */
+	noFloatingClasses?: NoFloatingClassesConfiguration;
+	/**
 	* Require Promise-like statements to be handled appropriately.
 See <https://biomejs.dev/linter/rules/no-floating-promises> 
 	 */
@@ -3772,6 +3777,9 @@ export type NoEqualsToNullConfiguration =
 export type NoExcessiveLinesPerFileConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveLinesPerFileOptions;
+export type NoFloatingClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoFloatingClassesOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
@@ -5278,6 +5286,10 @@ export interface RuleWithNoExcessiveLinesPerFileOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveLinesPerFileOptions;
 }
+export interface RuleWithNoFloatingClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoFloatingClassesOptions;
+}
 export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6709,6 +6721,7 @@ export interface NoExcessiveLinesPerFileOptions {
 	 */
 	skipBlankLines?: boolean;
 }
+export type NoFloatingClassesOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export interface NoImportCyclesOptions {
@@ -7630,13 +7643,20 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDuplicateArgumentNames"
 	| "lint/nursery/noDuplicateAttributes"
 	| "lint/nursery/noDuplicateDependencies"
+	| "lint/nursery/noDuplicateEnumValueNames"
 	| "lint/nursery/noDuplicateEnumValues"
+	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateGraphqlOperationName"
+	| "lint/nursery/noDuplicateInputFieldNames"
+	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noExcessiveLinesPerFile"
+	| "lint/nursery/noFloatingClasses"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noImplicitCoercion"
@@ -7697,12 +7717,6 @@ export type Category =
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
-	| "lint/nursery/noDuplicateArgumentNames"
-	| "lint/nursery/noDuplicateEnumValueNames"
-	| "lint/nursery/noDuplicateFieldDefinitionNames"
-	| "lint/nursery/noDuplicateGraphqlOperationName"
-	| "lint/nursery/noDuplicateInputFieldNames"
-	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentVBindStyle"
 	| "lint/nursery/useVueConsistentVOnStyle"
