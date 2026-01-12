@@ -11,5 +11,13 @@
 <video>
     <track kind="subtitles" src="subtitles.vtt" />
 </video>
+<!-- track with missing kind attribute -->
+<video>
+    <track src="captions.vtt" />
+</video>
+<!-- track with empty kind attribute -->
+<video>
+    <track kind="" src="captions.vtt" />
+</video>
 <!-- muted audio still requires captions -->
 <audio muted src="audio.mp3"></audio>
