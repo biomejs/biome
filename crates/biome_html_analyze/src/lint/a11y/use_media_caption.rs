@@ -82,7 +82,11 @@ impl Rule for UseMediaCaption {
 
         // Check for track element with kind="captions" in children
         let html_element = node.as_html_element()?;
-        if html_element.opening_element().is_ok() && has_caption_track(&html_element.children()) {
+        // Skip analysis if we can't fully parse the element to avoid false positives
+        if html_element.opening_element().is_err() {
+            return None;
+        }
+        if has_caption_track(&html_element.children()) {
             return None;
         }
 
