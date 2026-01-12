@@ -124,7 +124,7 @@ hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.12.1" }
 insta                        = "1.43.2"
-jiff                         = "0.2.17"
+jiff                         = "0.2.18"
 libc                         = "0.2.179"
 mimalloc                     = "0.1.48"
 papaya                       = "0.2.3"
