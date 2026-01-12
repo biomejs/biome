@@ -89,7 +89,6 @@ impl GritQuery {
         let mut state = State::new(var_registry.into(), file_registry);
         let mut logs = Vec::new().into();
 
-
         let mut effects: Vec<GritQueryEffect> = Vec::new();
         if self
             .pattern

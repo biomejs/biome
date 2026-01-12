@@ -75,7 +75,14 @@ impl<'a> NodeCompilationContext<'a> {
         global_vars: &'a mut BTreeMap<String, usize>,
         diagnostics: &'a mut Vec<CompilerDiagnostic>,
     ) -> Self {
-        Self::new_with_scope(compilation_context, vars, vars_array, global_vars, diagnostics, 0)
+        Self::new_with_scope(
+            compilation_context,
+            vars,
+            vars_array,
+            global_vars,
+            diagnostics,
+            0,
+        )
     }
 
     pub(crate) fn new_with_scope(

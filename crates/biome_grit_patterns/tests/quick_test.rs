@@ -36,7 +36,10 @@ fn test_explicit_file_pattern() {
     println!("Effects explicit: {effects:#?}");
 
     // Should have a match since the filename ends with .ts
-    assert!(!effects.is_empty(), "Expected matches with explicit file pattern");
+    assert!(
+        !effects.is_empty(),
+        "Expected matches with explicit file pattern"
+    );
 }
 
 // Test that $filename is properly bound in where clauses (auto-wrapped)
@@ -74,7 +77,10 @@ fn test_filename_binding() {
     println!("Effects: {effects:#?}");
 
     // Should have a match since the filename ends with .ts
-    assert!(!effects.is_empty(), "Expected matches since filename is test.ts");
+    assert!(
+        !effects.is_empty(),
+        "Expected matches since filename is test.ts"
+    );
 }
 
 // Use this test to quickly execute a Grit query against a source snippet.
