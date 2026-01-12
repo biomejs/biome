@@ -59,6 +59,11 @@ impl HtmlWord {
     pub(crate) fn is_single_character(&self) -> bool {
         self.text.chars().count() == 1
     }
+
+    #[expect(dead_code)]
+    pub(crate) fn text(&self) -> &str {
+        &self.text
+    }
 }
 
 impl Format<HtmlFormatContext> for HtmlWord {

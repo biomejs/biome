@@ -475,7 +475,7 @@ impl FormatHtmlElementList {
                                     HtmlChild::Whitespace
                                     | HtmlChild::Newline
                                     | HtmlChild::EmptyLine,
-                                ) => match children_iter.peek() {
+                                ) => match children_iter.peek_next() {
                                     Some(HtmlChild::Word(_)) => {
                                         // consume the whitespace/newline/emptyline
                                         children_iter.next();
@@ -485,7 +485,7 @@ impl FormatHtmlElementList {
                                         | HtmlChild::Newline
                                         | HtmlChild::EmptyLine,
                                     ) => {
-                                        children_iter.next();
+                                        break;
                                     }
                                     _ => {
                                         break;
