@@ -4,7 +4,10 @@ use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{
     CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, format_args, write,
 };
-use biome_html_syntax::{HtmlElement, HtmlElementFields, HtmlRoot};
+use biome_html_syntax::{
+    HtmlElement, HtmlElementFields, HtmlElementList, HtmlRoot, HtmlSelfClosingElement,
+};
+use biome_rowan::SyntaxNodeCast;
 use biome_string_case::StrLikeExtension;
 
 use super::{
@@ -17,25 +20,6 @@ use super::{
 ///
 const HTML_VERBATIM_TAGS: &[&str] = &["script", "style", "pre"];
 
-/// Determines if an element should force line breaks between all its children.
-///
-/// Elements that force break children should NOT borrow tokens because their
-/// children are always formatted on multiple lines, not inline.
-///
-/// Prettier source: src/language-html/utilities/index.js:271-278
-fn should_force_break_children(tag_name: &str) -> bool {
-    let tag_lower = tag_name.to_ascii_lowercase_cow();
-
-    // These elements always break children
-    if matches!(tag_lower.as_ref(), "html" | "head" | "ul" | "ol" | "select") {
-        return true;
-    }
-
-    // Table-related elements (except table-cell) break children
-    let display = get_css_display(&tag_lower);
-    display.is_table_like() && !matches!(display, CssDisplay::TableCell)
-}
-
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElement;
 
@@ -46,6 +30,8 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             children,
             closing_element,
         } = node.as_fields();
+
+        let should_force_break_content = should_force_break_content(node);
 
         let closing_element = closing_element?;
         let opening_element = opening_element?;
@@ -122,10 +108,8 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         //
         // Elements that force break children (like `select`, `ul`, `ol`, table elements)
         // should NOT borrow tokens because their children are always multiline.
-        let forces_break_children = tag_name
-            .as_ref()
-            .is_some_and(|t| should_force_break_children(t.text()))
-            || (is_root_element_list && is_template_element);
+        let forces_break_children =
+            should_force_break_content || (is_root_element_list && is_template_element);
 
         let should_borrow_opening_r_angle = is_element_internally_whitespace_sensitive
             && !children.is_empty()
@@ -220,4 +204,63 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
 
         Ok(())
     }
+}
+
+/// Determines if an element should force line breaks between all its children.
+///
+/// Elements that force break children should NOT borrow tokens because their
+/// children are always formatted on multiple lines, not inline.
+///
+/// This is equivalent to Prettier's `function forceBreakChildren()`.
+///
+/// Prettier source: src/language-html/utilities/index.js:271-278
+fn should_force_break_children(tag_name: &str) -> bool {
+    let tag_lower = tag_name.to_ascii_lowercase_cow();
+
+    // These elements always break children
+    if matches!(tag_lower.as_ref(), "html" | "head" | "ul" | "ol" | "select") {
+        return true;
+    }
+
+    // Table-related elements (except table-cell) break children
+    let display = get_css_display(&tag_lower);
+    display.is_table_like() && !matches!(display, CssDisplay::TableCell)
+}
+
+/// Determines if the content of an element should be forcefully broken into multiple lines.
+///
+/// This is equivalent to Prettier's `function forceBreakContent()`.
+fn should_force_break_content(node: &HtmlElement) -> bool {
+    let Some(tag_name) = node.tag_name() else {
+        return false;
+    };
+    if (should_force_break_children(&tag_name)) {
+        return true;
+    }
+
+    // prettier also considers `<script>` and `<style>` here, but we handle those elsewhere.
+    // if its a `<body>` or if the grandchildren contain non-text nodes
+    if !node.children().is_empty() && tag_name.eq_ignore_ascii_case("body")
+        || node.children().iter().any(|child| {
+            if let Some(element) = child.as_html_element() {
+                has_non_text_child(&element.children())
+            } else {
+                false
+            }
+        })
+    {
+        return true;
+    }
+
+    // at this point, prettier would do some additional checks related to whitespace sensitivity,
+    // but I'm pretty sure we handle that elsewhere. Remains to be seen.
+
+    false
+}
+
+fn has_non_text_child(node: &HtmlElementList) -> bool {
+    node.iter().any(|child| {
+        HtmlElement::can_cast(child.syntax().kind())
+            || HtmlSelfClosingElement::can_cast(child.syntax().kind())
+    })
 }
