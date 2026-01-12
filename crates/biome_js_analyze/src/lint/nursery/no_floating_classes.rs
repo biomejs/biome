@@ -1,4 +1,6 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_js_syntax::{JsNewExpression, JsSyntaxKind};
 use biome_rowan::{AstNode, SyntaxNodeOptionExt};
@@ -40,6 +42,7 @@ declare_lint_rule! {
         name: "noFloatingClasses",
         language: "js",
         recommended: false,
+        sources: &[RuleSource::Eslint("no-new").same()],
     }
 }
 
