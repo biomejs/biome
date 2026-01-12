@@ -30,7 +30,7 @@ const PeopleCountQuery = graphql(`
 `);
 ```
 
-This feature is in experimental and must be enabled explicitly in the configuration:
+This feature is experimental and must be enabled explicitly in the configuration:
 
 ```json
 {
