@@ -43,16 +43,16 @@ element.fillStyle = 'currentColor'
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,30 +1,27 @@
+@@ -1,4 +1,4 @@
 -<!doctype html>
 +<!DOCTYPE html>
  <html>
    <head>
      <title>SVG</title>
-   </head>
--  <body>
--    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
--      <script>
+@@ -6,25 +6,24 @@
+   <body>
+     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+       <script>
 -        document.addEventListener("DOMContentLoaded", () => {
 -          const element = document.getElementById("foo");
 -          if (element) {
@@ -60,12 +60,6 @@ element.fillStyle = 'currentColor'
 -          }
 -        });
 -      </script>
--      <style>
--        polygon {
--          fill: black;
--        }
-+  <body><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-+    <script>
 +document.addEventListener(
 +'DOMContentLoaded', () => {
 +  const element = document.getElementById('foo')
@@ -74,7 +68,10 @@ element.fillStyle = 'currentColor'
 +}
 +});
 +</script>
-+    <style>
+       <style>
+-        polygon {
+-          fill: black;
+-        }
 +    polygon { fill: black }
  
 -        div {
@@ -84,8 +81,6 @@ element.fillStyle = 'currentColor'
 -          overflow: auto;
 -        }
 -      </style>
--    </svg>
--  </body>
 +    div {
 +  color: white;
 +      font:18px serif;
@@ -93,7 +88,8 @@ element.fillStyle = 'currentColor'
 +      overflow: auto;
 +    }
 +  </style>
-+  </svg></body>
+     </svg>
+   </body>
  </html>
 ```
 
@@ -105,8 +101,9 @@ element.fillStyle = 'currentColor'
   <head>
     <title>SVG</title>
   </head>
-  <body><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-    <script>
+  <body>
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <script>
 document.addEventListener(
 'DOMContentLoaded', () => {
   const element = document.getElementById('foo')
@@ -115,7 +112,7 @@ element.fillStyle = 'currentColor'
 }
 });
 </script>
-    <style>
+      <style>
     polygon { fill: black }
 
     div {
@@ -125,6 +122,7 @@ element.fillStyle = 'currentColor'
       overflow: auto;
     }
   </style>
-  </svg></body>
+    </svg>
+  </body>
 </html>
 ```
