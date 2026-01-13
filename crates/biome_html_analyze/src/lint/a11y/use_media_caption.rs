@@ -127,7 +127,7 @@ impl Rule for UseMediaCaption {
 fn has_caption_track(html_child_list: &HtmlElementList, source_type: HtmlFileSource) -> bool {
     html_child_list
         .into_iter()
-        .filter_map(|child| {
+        .find_map(|child| {
             let name = child.name()?;
             let is_track = if source_type.is_html() {
                 name.text().eq_ignore_ascii_case("track")
@@ -149,6 +149,5 @@ fn has_caption_track(html_child_list: &HtmlElementList, source_type: HtmlFileSou
                 None
             }
         })
-        .next()
         .is_some()
 }
