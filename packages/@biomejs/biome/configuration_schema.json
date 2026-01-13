@@ -3021,6 +3021,29 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithNoDuplicateClassesOptions" }
+			]
+		},
+		"NoDuplicateClassesOptions": {
+			"description": "Options for the `noDuplicateClasses` assist action.\n\nControls which JSX attributes and utility functions are checked for duplicate classes.",
+			"type": "object",
+			"properties": {
+				"attributes": {
+					"description": "Additional attributes that will be checked for duplicate classes.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"functions": {
+					"description": "Names of the functions or tagged templates that will be checked for duplicate classes.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoDuplicateCustomPropertiesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6187,6 +6210,14 @@
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
 		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["off", "on"] },
+		"RuleAssistWithNoDuplicateClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateClassesOptions" }
+			},
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithOrganizeImportsOptions": {
 			"type": "object",
 			"properties": {
@@ -6200,14 +6231,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseSortedAttributesOptions" }
-			},
-			"required": ["level", "options"]
-		},
-		"RuleAssistWithUseSortedClassesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseSortedClassesOptions" }
 			},
 			"required": ["level", "options"]
 		},
@@ -10429,7 +10452,7 @@
 				"noDuplicateClasses": {
 					"description": "Remove duplicate CSS classes.\nSee <https://biomejs.dev/assist/actions/no-duplicate-classes>",
 					"anyOf": [
-						{ "$ref": "#/$defs/UseSortedClassesConfiguration" },
+						{ "$ref": "#/$defs/NoDuplicateClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},

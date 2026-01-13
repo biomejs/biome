@@ -36,8 +36,8 @@ declare_source_rule! {
     ///
     /// ## Options
     ///
-    /// Uses the same options as [`useSortedClasses`](https://biomejs.dev/linter/rules/use-sorted-classes/)
-    /// to control which attributes and functions are checked.
+    /// Use the `attributes` option to specify additional JSX attributes to check.
+    /// Use the `functions` option to specify utility functions to check (e.g., `clsx`, `cn`, `cva`).
     ///
     pub NoDuplicateClasses {
         version: "next",

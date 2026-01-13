@@ -38,7 +38,7 @@ declare_source_rule! {
         version: "next",
         name: "noDuplicateClasses",
         language: "html",
-        sources: &[RuleSource::EslintBetterTailwindcss("no-duplicate-classes").same()],
+        sources: &[RuleSource::EslintBetterTailwindcss("no-duplicate-classes").inspired()],
         recommended: false,
         fix_kind: FixKind::Safe,
     }
