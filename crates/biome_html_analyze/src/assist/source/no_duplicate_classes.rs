@@ -1,44 +1,37 @@
+use std::borrow::Cow;
+use std::collections::HashSet;
+
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
+    declare_source_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::{Applicability, category};
 use biome_html_factory::make;
 use biome_html_syntax::{
     HtmlAttribute, HtmlString, HtmlSyntaxKind, HtmlSyntaxToken, inner_string_text,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
-use std::collections::HashSet;
 
 use crate::HtmlRuleAction;
 
-declare_lint_rule! {
-    /// Disallow duplicate CSS classes.
+declare_source_rule! {
+    /// Remove duplicate CSS classes.
     ///
     /// Detects and removes duplicate CSS classes in HTML `class` attributes.
     ///
-    /// This rule helps keep your class strings clean by detecting and removing duplicates.
+    /// This action helps keep your class strings clean by detecting and removing duplicates.
+    ///
+    /// Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
     ///
     /// ## Examples
     ///
-    /// ### Invalid
-    ///
-    /// ```html,expect_diagnostic
+    /// ```html,expect_diff
     /// <div class="flex flex"></div>
     /// ```
     ///
-    /// ```html,expect_diagnostic
+    /// ```html,expect_diff
     /// <div class="p-4 text-red-500 p-4 bg-white"></div>
-    /// ```
-    ///
-    /// ### Valid
-    ///
-    /// ```html
-    /// <div class="flex p-4"></div>
-    /// ```
-    ///
-    /// ```html
-    /// <div class="p-4 text-red-500 bg-white"></div>
     /// ```
     ///
     pub NoDuplicateClasses {
@@ -67,7 +60,7 @@ impl Rule for NoDuplicateClasses {
     type Query = Ast<HtmlAttribute>;
     type State = DuplicateClassesState;
     type Signals = Option<Self::State>;
-    type Options = NoDuplicateClassesOptions;
+    type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let attribute = ctx.query();
@@ -186,10 +179,10 @@ impl Rule for NoDuplicateClasses {
 
         let diagnostic = if state.duplicates.len() == 1 {
             RuleDiagnostic::new(
-                rule_category!(),
+                category!("assist/source/noDuplicateClasses"),
                 node.range(),
                 markup! {
-                    "This "<Emphasis>"class"</Emphasis>" attribute contains a duplicate class."
+                    "This class string contains a duplicate class."
                 },
             )
             .note(markup! {
@@ -204,10 +197,10 @@ impl Rule for NoDuplicateClasses {
                 .join(", ");
 
             RuleDiagnostic::new(
-                rule_category!(),
+                category!("assist/source/noDuplicateClasses"),
                 node.range(),
                 markup! {
-                    "This "<Emphasis>"class"</Emphasis>" attribute contains duplicate classes."
+                    "This class string contains duplicate classes."
                 },
             )
             .note(markup! {
@@ -233,9 +226,9 @@ impl Rule for NoDuplicateClasses {
         let new_html_string = make::html_string(new_token);
         mutation.replace_node(state.html_string.clone(), new_html_string);
 
-        Some(HtmlRuleAction::new(
-            ctx.metadata().action_category(ctx.category(), ctx.group()),
-            ctx.metadata().applicability(),
+        Some(RuleAction::new(
+            rule_action_category!(),
+            Applicability::Always,
             markup! {
                 "Remove the duplicate classes."
             }

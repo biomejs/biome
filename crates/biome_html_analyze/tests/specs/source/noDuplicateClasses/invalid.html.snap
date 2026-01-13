@@ -41,9 +41,9 @@ foo"></div>
 
 # Diagnostics
 ```
-invalid.html:2:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:2:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This class attribute contains a duplicate class.
+  i This class string contains a duplicate class.
   
     1 │ <!-- Invalid: exact duplicates -->
   > 2 │ <div class="flex flex"></div>
@@ -55,8 +55,6 @@ invalid.html:2:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     2 │ <div·class="flex·flex"></div>
@@ -65,9 +63,9 @@ invalid.html:2:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.html:3:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:3:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This class attribute contains a duplicate class.
+  i This class string contains a duplicate class.
   
     1 │ <!-- Invalid: exact duplicates -->
     2 │ <div class="flex flex"></div>
@@ -80,8 +78,6 @@ invalid.html:3:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     3 │ <div·class="p-4·text-red-500·p-4·bg-white"></div>
@@ -90,9 +86,9 @@ invalid.html:3:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.html:6:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:6:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This class attribute contains duplicate classes.
+  i This class string contains duplicate classes.
   
     5 │ <!-- Invalid: multiple duplicates -->
   > 6 │ <div class="flex p-4 flex m-2 p-4"></div>
@@ -104,8 +100,6 @@ invalid.html:6:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     6 │ <div·class="flex·p-4·flex·m-2·p-4"></div>
@@ -114,9 +108,9 @@ invalid.html:6:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.html:9:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:9:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This class attribute contains a duplicate class.
+  i This class string contains a duplicate class.
   
      8 │ <!-- Invalid: duplicates with complex classes -->
    > 9 │ <div class="hover:focus:m-2 foo hover:focus:m-2"></div>
@@ -128,8 +122,6 @@ invalid.html:9:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     9 │ <div·class="hover:focus:m-2·foo·hover:focus:m-2"></div>
@@ -138,9 +130,9 @@ invalid.html:9:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.html:12:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:12:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This class attribute contains a duplicate class.
+  i This class string contains a duplicate class.
   
     11 │ <!-- Invalid: duplicates in the middle -->
   > 12 │ <div class="text-lg text-center text-lg font-bold"></div>
@@ -152,8 +144,6 @@ invalid.html:12:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     12 │ <div·class="text-lg·text-center·text-lg·font-bold"></div>
@@ -162,9 +152,9 @@ invalid.html:12:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.html:15:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:15:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This class attribute contains a duplicate class.
+  i This class string contains a duplicate class.
   
     14 │ <!-- Invalid: single-quoted strings (should preserve quotes) -->
   > 15 │ <div class='mt-4 mt-4'></div>
@@ -176,8 +166,6 @@ invalid.html:15:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     15 │ <div·class='mt-4·mt-4'></div>
@@ -186,9 +174,9 @@ invalid.html:15:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.html:18:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:18:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This class attribute contains a duplicate class.
+  i This class string contains a duplicate class.
   
     17 │ <!-- Invalid: duplicates with newlines (preserves original whitespace) -->
   > 18 │ <div class="foo
@@ -202,8 +190,6 @@ invalid.html:18:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   i The class foo appears multiple times.
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the duplicate classes.
   
@@ -219,9 +205,9 @@ invalid.html:18:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.html:23:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:23:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This class attribute contains a duplicate class.
+  i This class string contains a duplicate class.
   
     22 │ <!-- Invalid: duplicates with tabs -->
   > 23 │ <div class="flex	p-4	flex"></div>
@@ -233,8 +219,6 @@ invalid.html:23:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     23 │ <div·class="flex→ p-4→ flex"></div>
@@ -243,9 +227,9 @@ invalid.html:23:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.html:26:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:26:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This class attribute contains a duplicate class.
+  i This class string contains a duplicate class.
   
     25 │ <!-- Invalid: multiple spaces (should preserve spacing) -->
   > 26 │ <div class="flex  p-4  flex"></div>
@@ -257,8 +241,6 @@ invalid.html:26:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     26 │ <div·class="flex··p-4··flex"></div>
@@ -267,9 +249,9 @@ invalid.html:26:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.html:29:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:29:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This class attribute contains a duplicate class.
+  i This class string contains a duplicate class.
   
     28 │ <!-- Invalid: leading/trailing whitespace (should preserve) -->
   > 29 │ <div class=" flex flex "></div>
@@ -281,8 +263,6 @@ invalid.html:29:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the duplicate classes.
   
     29 │ <div·class="·flex·flex·"></div>
@@ -291,9 +271,9 @@ invalid.html:29:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.html:32:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:32:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This class attribute contains a duplicate class.
+  i This class string contains a duplicate class.
   
     31 │ <!-- Invalid: triple duplicate -->
   > 32 │ <div class="flex flex flex"></div>
@@ -303,8 +283,6 @@ invalid.html:32:6 lint/nursery/noDuplicateClasses  FIXABLE  ━━━━━━�
   i The class flex appears multiple times.
   
   i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the duplicate classes.
   
