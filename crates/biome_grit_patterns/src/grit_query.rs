@@ -134,13 +134,8 @@ impl GritQuery {
             function_definition_info,
         };
 
-        // Scope 0: Global variables only ($new_files, $program, $filename, $absolute_filename)
-        // Scope 1 (created by NodeCompilationContext::new): Local pattern variables
-        // This separation ensures that when the auto-wrap bubble enters scope 1,
-        // it resets local variables but preserves global variables in scope 0.
-        let mut vars_array = vec![
-            // Scope 0: Global variables
-            GLOBAL_VARS
+        // Global variables are in scope 0, local pattern variables will be in scope 1.
+        let mut vars_array = vec![GLOBAL_VARS
                 .iter()
                 .map(|global_var| VariableSource::Compiled {
                     name: global_var.0.to_string(),
@@ -156,11 +151,8 @@ impl GritQuery {
             .map(|(global_var, index)| ((*global_var).to_string(), *index))
             .collect();
         let mut diagnostics = Vec::new();
-
-        // Local variables map - used for pattern variables in scope 1
         let mut vars = BTreeMap::new();
 
-        // NodeCompilationContext::new will push scope 1 and use it for local pattern variables
         let mut node_context = NodeCompilationContext::new(
             &context,
             &mut vars,

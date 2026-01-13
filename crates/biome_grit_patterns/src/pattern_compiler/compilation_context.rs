@@ -75,8 +75,6 @@ impl<'a> NodeCompilationContext<'a> {
         global_vars: &'a mut BTreeMap<String, usize>,
         diagnostics: &'a mut Vec<CompilerDiagnostic>,
     ) -> Self {
-        // Use vars_array length as scope index, matching original GritQL implementation
-        // See: https://github.com/biomejs/gritql/blob/main/crates/core/src/pattern_compiler/mod.rs#L8-L15
         let scope_index = vars_array.len();
         vars_array.push(Vec::new());
         Self {
