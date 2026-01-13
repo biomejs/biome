@@ -124,3 +124,7 @@ export default component$(() => {
     </div>
   );
 });
+
+new Map([
+    ["None", [<TriangleDownIcon sx={{ fontSize: "1.25rem", color: "error.main" }} />]],
+]);
