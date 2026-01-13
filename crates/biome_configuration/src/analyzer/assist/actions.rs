@@ -65,6 +65,7 @@ impl std::fmt::Display for RuleGroup {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum ActionName {
+    NoDuplicateClasses,
     OrganizeImports,
     UseSortedAttributes,
     UseSortedInterfaceMembers,
@@ -74,6 +75,7 @@ pub enum ActionName {
 impl ActionName {
     pub const fn as_str(self) -> &'static str {
         match self {
+            Self::NoDuplicateClasses => "noDuplicateClasses",
             Self::OrganizeImports => "organizeImports",
             Self::UseSortedAttributes => "useSortedAttributes",
             Self::UseSortedInterfaceMembers => "useSortedInterfaceMembers",
@@ -83,6 +85,7 @@ impl ActionName {
     }
     pub const fn group(self) -> RuleGroup {
         match self {
+            Self::NoDuplicateClasses => RuleGroup::Source,
             Self::OrganizeImports => RuleGroup::Source,
             Self::UseSortedAttributes => RuleGroup::Source,
             Self::UseSortedInterfaceMembers => RuleGroup::Source,
@@ -95,6 +98,7 @@ impl std::str::FromStr for ActionName {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "noDuplicateClasses" => Ok(Self::NoDuplicateClasses),
             "organizeImports" => Ok(Self::OrganizeImports),
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
             "useSortedInterfaceMembers" => Ok(Self::UseSortedInterfaceMembers),
@@ -185,6 +189,13 @@ pub struct Source {
     #[doc = r" Enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
+    #[doc = "Remove duplicate CSS classes.\nSee <https://biomejs.dev/assist/actions/no-duplicate-classes>"]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_duplicate_classes: Option<
+        RuleAssistConfiguration<
+            biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions,
+        >,
+    >,
     #[doc = "Provides a code action to sort the imports and exports in the file using a built-in or custom order.\nSee <https://biomejs.dev/assist/actions/organize-imports>"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub organize_imports: Option<
@@ -219,6 +230,7 @@ pub struct Source {
 impl Source {
     const GROUP_NAME: &'static str = "source";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
+        "noDuplicateClasses",
         "organizeImports",
         "useSortedAttributes",
         "useSortedInterfaceMembers",
@@ -226,7 +238,7 @@ impl Source {
         "useSortedProperties",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] =
-        &[RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0])];
+        &[RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1])];
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
@@ -239,59 +251,69 @@ impl Source {
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.organize_imports.as_ref()
+        if let Some(rule) = self.no_duplicate_classes.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
         }
-        if let Some(rule) = self.use_sorted_attributes.as_ref()
+        if let Some(rule) = self.organize_imports.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
         }
-        if let Some(rule) = self.use_sorted_interface_members.as_ref()
+        if let Some(rule) = self.use_sorted_attributes.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
         }
-        if let Some(rule) = self.use_sorted_keys.as_ref()
+        if let Some(rule) = self.use_sorted_interface_members.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
         }
-        if let Some(rule) = self.use_sorted_properties.as_ref()
+        if let Some(rule) = self.use_sorted_keys.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
+        }
+        if let Some(rule) = self.use_sorted_properties.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
         }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.organize_imports.as_ref()
+        if let Some(rule) = self.no_duplicate_classes.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
         }
-        if let Some(rule) = self.use_sorted_attributes.as_ref()
+        if let Some(rule) = self.organize_imports.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
         }
-        if let Some(rule) = self.use_sorted_interface_members.as_ref()
+        if let Some(rule) = self.use_sorted_attributes.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
         }
-        if let Some(rule) = self.use_sorted_keys.as_ref()
+        if let Some(rule) = self.use_sorted_interface_members.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
         }
-        if let Some(rule) = self.use_sorted_properties.as_ref()
+        if let Some(rule) = self.use_sorted_keys.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
+        }
+        if let Some(rule) = self.use_sorted_properties.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
         }
         index_set
     }
@@ -314,6 +336,10 @@ impl Source {
         rule_name: &str,
     ) -> Option<(RuleAssistPlainConfiguration, Option<RuleOptions>)> {
         match rule_name {
+            "noDuplicateClasses" => self
+                .no_duplicate_classes
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "organizeImports" => self
                 .organize_imports
                 .as_ref()

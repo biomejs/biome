@@ -981,6 +981,11 @@ export type VcsClientKind = "git";
  */
 export interface Source {
 	/**
+	* Remove duplicate CSS classes.
+See <https://biomejs.dev/assist/actions/no-duplicate-classes> 
+	 */
+	noDuplicateClasses?: UseSortedClassesConfiguration;
+	/**
 	* Provides a code action to sort the imports and exports in the file using a built-in or custom order.
 See <https://biomejs.dev/assist/actions/organize-imports> 
 	 */
@@ -1175,6 +1180,9 @@ export interface OverrideLinterConfiguration {
 	 */
 	rules?: Rules;
 }
+export type UseSortedClassesConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedClassesOptions;
 export type OrganizeImportsConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithOrganizeImportsOptions;
@@ -1982,11 +1990,6 @@ See <https://biomejs.dev/linter/rules/no-continue>
 See <https://biomejs.dev/linter/rules/no-deprecated-imports> 
 	 */
 	noDeprecatedImports?: NoDeprecatedImportsConfiguration;
-	/**
-	* Disallow duplicate CSS classes.
-See <https://biomejs.dev/linter/rules/no-duplicate-classes> 
-	 */
-	noDuplicateClasses?: NoDuplicateClassesConfiguration;
 	/**
 	* Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
 See <https://biomejs.dev/linter/rules/no-duplicate-dependencies> 
@@ -3335,6 +3338,10 @@ See <https://biomejs.dev/linter/rules/use-strict-mode>
 }
 export type Glob = string;
 export type RuleAssistPlainConfiguration = "off" | "on";
+export interface RuleAssistWithUseSortedClassesOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedClassesOptions;
+}
 export interface RuleAssistWithOrganizeImportsOptions {
 	level: RuleAssistPlainConfiguration;
 	options: OrganizeImportsOptions;
@@ -3811,9 +3818,6 @@ export type NoContinueConfiguration =
 export type NoDeprecatedImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDeprecatedImportsOptions;
-export type NoDuplicateClassesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoDuplicateClassesOptions;
 export type NoDuplicateDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateDependenciesOptions;
@@ -4595,6 +4599,16 @@ export type UseStaticResponseMethodsConfiguration =
 export type UseStrictModeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStrictModeOptions;
+export interface UseSortedClassesOptions {
+	/**
+	 * Additional attributes that will be sorted.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be sorted.
+	 */
+	functions?: string[];
+}
 export interface OrganizeImportsOptions {
 	groups?: ImportGroups;
 	identifierOrder?: SortOrder;
@@ -5291,11 +5305,6 @@ export interface RuleWithNoContinueOptions {
 export interface RuleWithNoDeprecatedImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDeprecatedImportsOptions;
-}
-export interface RuleWithNoDuplicateClassesOptions {
-	fix?: FixKind;
-	level: RulePlainConfiguration;
-	options?: NoDuplicateClassesOptions;
 }
 export interface RuleWithNoDuplicateDependenciesOptions {
 	level: RulePlainConfiguration;
@@ -6731,7 +6740,6 @@ export interface NoAmbiguousAnchorTextOptions {
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
-export type NoDuplicateClassesOptions = {};
 export type NoDuplicateDependenciesOptions = {};
 export type NoDuplicatedSpreadPropsOptions = {};
 export interface NoEmptySourceOptions {
@@ -6857,16 +6865,6 @@ export interface UseRequiredScriptsOptions {
 	 * List of script names that must be present in package.json
 	 */
 	requiredScripts?: string[];
-}
-export interface UseSortedClassesOptions {
-	/**
-	 * Additional attributes that will be sorted.
-	 */
-	attributes?: string[];
-	/**
-	 * Names of the functions or tagged templates that will be sorted.
-	 */
-	functions?: string[];
 }
 export type UseSpreadOptions = {};
 export type UseUniqueArgumentNamesOptions = {};
@@ -7687,7 +7685,6 @@ export type Category =
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noDuplicatedSpreadProps"
-	| "lint/nursery/noDuplicateClasses"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noFloatingPromises"
@@ -7961,6 +7958,7 @@ export type Category =
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
+	| "assist/source/noDuplicateClasses"
 	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"
