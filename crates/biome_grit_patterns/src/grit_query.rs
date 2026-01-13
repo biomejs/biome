@@ -135,7 +135,8 @@ impl GritQuery {
         };
 
         // Global variables are in scope 0, local pattern variables will be in scope 1.
-        let mut vars_array = vec![GLOBAL_VARS
+        let mut vars_array = vec![
+            GLOBAL_VARS
                 .iter()
                 .map(|global_var| VariableSource::Compiled {
                     name: global_var.0.to_string(),
