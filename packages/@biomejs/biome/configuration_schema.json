@@ -3028,16 +3028,15 @@
 			]
 		},
 		"NoDuplicateClassesOptions": {
-			"description": "Options for the `noDuplicateClasses` assist action.\n\nControls which JSX attributes and utility functions are checked for duplicate classes.",
 			"type": "object",
 			"properties": {
 				"attributes": {
-					"description": "Additional attributes that will be checked for duplicate classes.",
+					"description": "Additional attributes that will be sorted.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"functions": {
-					"description": "Names of the functions or tagged templates that will be checked for duplicate classes.",
+					"description": "Names of the functions or tagged templates that will be sorted.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}

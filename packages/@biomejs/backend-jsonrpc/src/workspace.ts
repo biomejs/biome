@@ -4599,19 +4599,13 @@ export type UseStaticResponseMethodsConfiguration =
 export type UseStrictModeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStrictModeOptions;
-/**
-	* Options for the `noDuplicateClasses` assist action.
-
-This action uses the same options as `useSortedClasses` to control which
-JSX attributes and utility functions are checked for duplicate classes. 
-	 */
 export interface NoDuplicateClassesOptions {
 	/**
-	 * Additional attributes that will be checked for duplicate classes.
+	 * Additional attributes that will be sorted.
 	 */
 	attributes?: string[];
 	/**
-	 * Names of the functions or tagged templates that will be checked for duplicate classes.
+	 * Names of the functions or tagged templates that will be sorted.
 	 */
 	functions?: string[];
 }
