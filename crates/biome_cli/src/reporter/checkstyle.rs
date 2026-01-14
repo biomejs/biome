@@ -1,7 +1,7 @@
-use crate::reporter::{Reporter, ReporterVisitor};
+use crate::reporter::{Reporter, ReporterVisitor, ReporterWriter};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
-use biome_console::{Console, ConsoleExt, markup};
+use biome_console::markup;
 use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, PrintDescription, Resource, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -17,9 +17,14 @@ pub struct CheckstyleReporter<'a> {
 }
 
 impl Reporter for CheckstyleReporter<'_> {
-    fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_summary(self.execution, self.summary, self.verbose)?;
+    fn write(
+        self,
+        writer: &mut dyn ReporterWriter,
+        visitor: &mut dyn ReporterVisitor,
+    ) -> io::Result<()> {
+        visitor.report_summary(writer, self.execution, self.summary, self.verbose)?;
         visitor.report_diagnostics(
+            writer,
             self.execution,
             self.diagnostics_payload,
             self.verbose,
@@ -29,19 +34,12 @@ impl Reporter for CheckstyleReporter<'_> {
     }
 }
 
-pub struct CheckstyleReporterVisitor<'a> {
-    console: &'a mut dyn Console,
-}
+pub struct CheckstyleReporterVisitor;
 
-impl<'a> CheckstyleReporterVisitor<'a> {
-    pub fn new(console: &'a mut dyn Console) -> Self {
-        Self { console }
-    }
-}
-
-impl<'a> ReporterVisitor for CheckstyleReporterVisitor<'a> {
+impl ReporterVisitor for CheckstyleReporterVisitor {
     fn report_summary(
         &mut self,
+        _writer: &mut dyn ReporterWriter,
         _execution: &dyn Execution,
         _summary: TraversalSummary,
         _verbose: bool,
@@ -51,6 +49,7 @@ impl<'a> ReporterVisitor for CheckstyleReporterVisitor<'a> {
 
     fn report_diagnostics(
         &mut self,
+        writer: &mut dyn ReporterWriter,
         _execution: &dyn Execution,
         payload: &DiagnosticsPayload,
         verbose: bool,
@@ -109,7 +108,7 @@ impl<'a> ReporterVisitor for CheckstyleReporterVisitor<'a> {
             writeln!(output, "  </file>")?;
         }
         writeln!(output, "</checkstyle>")?;
-        self.console.log(markup! {{
+        writer.log(markup! {{
             (String::from_utf8_lossy(&output))
         }});
         Ok(())

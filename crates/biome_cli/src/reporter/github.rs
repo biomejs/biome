@@ -1,7 +1,7 @@
-use crate::reporter::{Reporter, ReporterVisitor};
+use crate::reporter::{Reporter, ReporterVisitor, ReporterWriter};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
-use biome_console::{Console, ConsoleExt, markup};
+use biome_console::markup;
 use biome_diagnostics::PrintGitHubDiagnostic;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::io;
@@ -14,8 +14,14 @@ pub(crate) struct GithubReporter<'a> {
 }
 
 impl Reporter for GithubReporter<'_> {
-    fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
+    fn write(
+        self,
+        writer: &mut dyn ReporterWriter,
+
+        visitor: &mut dyn ReporterVisitor,
+    ) -> io::Result<()> {
         visitor.report_diagnostics(
+            writer,
             self.execution,
             self.diagnostics_payload,
             self.verbose,
@@ -24,11 +30,12 @@ impl Reporter for GithubReporter<'_> {
         Ok(())
     }
 }
-pub(crate) struct GithubReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
+pub(crate) struct GithubReporterVisitor;
 
-impl ReporterVisitor for GithubReporterVisitor<'_> {
+impl ReporterVisitor for GithubReporterVisitor {
     fn report_summary(
         &mut self,
+        _writer: &mut dyn ReporterWriter,
         _execution: &dyn Execution,
         _summary: TraversalSummary,
         _verbose: bool,
@@ -38,6 +45,7 @@ impl ReporterVisitor for GithubReporterVisitor<'_> {
 
     fn report_diagnostics(
         &mut self,
+        writer: &mut dyn ReporterWriter,
         _execution: &dyn Execution,
         diagnostics_payload: &DiagnosticsPayload,
         verbose: bool,
@@ -46,9 +54,9 @@ impl ReporterVisitor for GithubReporterVisitor<'_> {
         for diagnostic in &diagnostics_payload.diagnostics {
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() && verbose {
-                    self.0.log(markup! {{PrintGitHubDiagnostic(diagnostic)}});
+                    writer.log(markup! {{PrintGitHubDiagnostic(diagnostic)}});
                 } else if !verbose {
-                    self.0.log(markup! {{PrintGitHubDiagnostic(diagnostic)}});
+                    writer.log(markup! {{PrintGitHubDiagnostic(diagnostic)}});
                 }
             }
         }

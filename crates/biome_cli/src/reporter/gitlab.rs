@@ -1,8 +1,8 @@
-use crate::reporter::{Reporter, ReporterVisitor};
+use crate::reporter::{Reporter, ReporterVisitor, ReporterWriter};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{Console, ConsoleExt, markup};
+use biome_console::markup;
 use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, PrintDescription, Resource, Severity};
 use biome_rowan::{TextRange, TextSize};
@@ -24,8 +24,14 @@ pub struct GitLabReporter<'a> {
 }
 
 impl Reporter for GitLabReporter<'_> {
-    fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
+    fn write(
+        self,
+        writer: &mut dyn ReporterWriter,
+
+        visitor: &mut dyn ReporterVisitor,
+    ) -> std::io::Result<()> {
         visitor.report_diagnostics(
+            writer,
             self.execution,
             self.diagnostics_payload,
             self.verbose,
@@ -35,8 +41,7 @@ impl Reporter for GitLabReporter<'_> {
     }
 }
 
-pub(crate) struct GitLabReporterVisitor<'a> {
-    console: &'a mut dyn Console,
+pub(crate) struct GitLabReporterVisitor {
     repository_root: Option<Utf8PathBuf>,
 }
 
@@ -59,18 +64,16 @@ impl GitLabHasher {
     }
 }
 
-impl<'a> GitLabReporterVisitor<'a> {
-    pub fn new(console: &'a mut dyn Console, repository_root: Option<Utf8PathBuf>) -> Self {
-        Self {
-            console,
-            repository_root,
-        }
+impl GitLabReporterVisitor {
+    pub fn new(repository_root: Option<Utf8PathBuf>) -> Self {
+        Self { repository_root }
     }
 }
 
-impl ReporterVisitor for GitLabReporterVisitor<'_> {
+impl ReporterVisitor for GitLabReporterVisitor {
     fn report_summary(
         &mut self,
+        _writer: &mut dyn ReporterWriter,
         _: &dyn Execution,
         _: TraversalSummary,
         _verbose: bool,
@@ -80,6 +83,7 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
 
     fn report_diagnostics(
         &mut self,
+        writer: &mut dyn ReporterWriter,
         _execution: &dyn Execution,
         payload: &DiagnosticsPayload,
         verbose: bool,
@@ -92,7 +96,7 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
             path: self.repository_root.as_deref(),
             verbose,
         };
-        self.console.log(markup!({ diagnostics }));
+        writer.log(markup!({ diagnostics }));
         Ok(())
     }
 }

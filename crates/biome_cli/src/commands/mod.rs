@@ -1,5 +1,5 @@
 use crate::changed::{get_changed_files, get_staged_files};
-use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
+use crate::cli_options::{CliOptions, CliReporterKind, ColorsArg, cli_options};
 use crate::logging::log_options;
 use crate::logging::{LogOptions, LoggingKind};
 use crate::{CliDiagnostic, LoggingLevel, VERSION};
@@ -700,7 +700,11 @@ impl BiomeCommand {
         match self.cli_options() {
             Some(cli_options) => {
                 // To properly display GitHub annotations we need to disable colors
-                if cli_options.reporter.contains(&CliReporter::GitHub) {
+                if cli_options
+                    .cli_reporter
+                    .iter()
+                    .any(|r| r.kind == CliReporterKind::GitHub)
+                {
                     return Some(&ColorsArg::Off);
                 }
                 // We want force colors in CI, to give e better UX experience

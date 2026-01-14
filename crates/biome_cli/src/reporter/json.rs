@@ -1,11 +1,11 @@
-use crate::reporter::{Reporter, ReporterVisitor};
+use crate::reporter::{Reporter, ReporterVisitor, ReporterWriter};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::display::{SourceFile, markup_to_string};
 use biome_diagnostics::{
-    Category, Diagnostic, Error, Location, LogCategory, PrintDescription, Severity, Visit,
+    Category, Error, Location, LogCategory, PrintDescription, Severity, Visit,
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
@@ -28,7 +28,7 @@ impl JsonReporterVisitor {
     }
 }
 
-impl biome_console::fmt::Display for JsonReporterVisitor {
+impl Display for JsonReporterVisitor {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         let content = serde_json::to_string(&self)?;
         fmt.write_str(content.as_str())
@@ -44,9 +44,14 @@ pub struct JsonReporter<'a> {
 }
 
 impl Reporter for JsonReporter<'_> {
-    fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
-        visitor.report_summary(self.execution, self.summary, self.verbose)?;
+    fn write(
+        self,
+        writer: &mut dyn ReporterWriter,
+        visitor: &mut dyn ReporterVisitor,
+    ) -> std::io::Result<()> {
+        visitor.report_summary(writer, self.execution, self.summary, self.verbose)?;
         visitor.report_diagnostics(
+            writer,
             self.execution,
             self.diagnostics_payload,
             self.verbose,
@@ -60,6 +65,7 @@ impl Reporter for JsonReporter<'_> {
 impl ReporterVisitor for JsonReporterVisitor {
     fn report_summary(
         &mut self,
+        _writer: &mut dyn ReporterWriter,
         execution: &dyn Execution,
         summary: TraversalSummary,
         _verbose: bool,
@@ -72,6 +78,7 @@ impl ReporterVisitor for JsonReporterVisitor {
 
     fn report_diagnostics(
         &mut self,
+        _writer: &mut dyn ReporterWriter,
         _execution: &dyn Execution,
         payload: &DiagnosticsPayload,
         verbose: bool,
@@ -98,9 +105,11 @@ fn to_json_report(diagnostic: &biome_diagnostics::Error) -> JsonReport {
     let message = PrintDescription(diagnostic).to_string();
     let location = diagnostic.location();
     let location = to_location(&location).or_else(|| {
-        let location = location.resource?;
+        let location = location
+            .resource
+            .and_then(|location| location.as_file().map(|f| f.to_string()))?;
         Some(LocationReport {
-            path: location.to_string(),
+            path: location,
             start: LocationSpan { column: 0, line: 0 },
             end: LocationSpan { column: 0, line: 0 },
         })

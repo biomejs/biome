@@ -1,10 +1,8 @@
-use std::collections::{BTreeMap, HashSet};
-
-use crate::reporter::{Reporter, ReporterVisitor};
+use crate::reporter::{Reporter, ReporterVisitor, ReporterWriter};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_analyze::{GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup};
-use biome_console::{Console, ConsoleExt, markup};
+use biome_console::markup;
 use biome_css_syntax::CssLanguage;
 use biome_diagnostics::{Error, Location, PrintDescription, Severity, display::SourceFile};
 use biome_graphql_syntax::GraphqlLanguage;
@@ -14,6 +12,7 @@ use biome_json_syntax::JsonLanguage;
 use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
+use std::collections::{BTreeMap, HashSet};
 
 pub(crate) struct SarifReporter<'a> {
     pub(crate) diagnostics_payload: &'a DiagnosticsPayload,
@@ -23,8 +22,13 @@ pub(crate) struct SarifReporter<'a> {
 }
 
 impl Reporter for SarifReporter<'_> {
-    fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
+    fn write(
+        self,
+        writer: &mut dyn ReporterWriter,
+        visitor: &mut dyn ReporterVisitor,
+    ) -> std::io::Result<()> {
         visitor.report_diagnostics(
+            writer,
             self.execution,
             self.diagnostics_payload,
             self.verbose,
@@ -35,14 +39,12 @@ impl Reporter for SarifReporter<'_> {
 }
 
 pub(crate) struct SarifReporterVisitor<'a> {
-    console: &'a mut dyn Console,
     rule_descriptions: BTreeMap<&'static str, &'a str>,
 }
 
 impl<'a> SarifReporterVisitor<'a> {
-    pub fn new(console: &'a mut dyn Console) -> Self {
+    pub fn new() -> Self {
         let mut visitor = Self {
-            console,
             rule_descriptions: BTreeMap::new(),
         };
 
@@ -124,6 +126,7 @@ impl RegistryVisitor<HtmlLanguage> for SarifReporterVisitor<'_> {
 impl ReporterVisitor for SarifReporterVisitor<'_> {
     fn report_summary(
         &mut self,
+        _writer: &mut dyn ReporterWriter,
         _execution: &dyn Execution,
         _summary: TraversalSummary,
         _verbose: bool,
@@ -133,6 +136,7 @@ impl ReporterVisitor for SarifReporterVisitor<'_> {
 
     fn report_diagnostics(
         &mut self,
+        writer: &mut dyn ReporterWriter,
         _execution: &dyn Execution,
         payload: &DiagnosticsPayload,
         verbose: bool,
@@ -192,7 +196,7 @@ impl ReporterVisitor for SarifReporterVisitor<'_> {
 
         let result = serde_json::to_string_pretty(&report)?;
 
-        self.console.log(markup! {
+        writer.log(markup! {
             {result}
         });
 

@@ -45,7 +45,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Biome" tests="22" failures="22" errors="16" time="<TIME>">
+<testsuites name="Biome" tests="19" failures="19" errors="16" time="<TIME>">
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.correctness.noUnusedImports" line="1" column="8">
             <failure message="This import is unused.">line 1, col 8, This import is unused.</failure>
@@ -69,21 +69,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.correctness.noUnusedImports" line="1" column="8">
             <failure message="This import is unused.">line 1, col 8, This import is unused.</failure>
-        </testcase>
-    </testsuite>
-    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
-        <testcase name="org.biome.lint.correctness.noUnusedImports" line="2" column="10">
-            <failure message="Several of these imports are unused.">line 2, col 10, Several of these imports are unused.</failure>
-        </testcase>
-    </testsuite>
-    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
-        <testcase name="org.biome.lint.correctness.noUnusedVariables" line="8" column="5">
-            <failure message="This variable f is unused.">line 8, col 5, This variable f is unused.</failure>
-        </testcase>
-    </testsuite>
-    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
-        <testcase name="org.biome.lint.correctness.noUnusedVariables" line="9" column="7">
-            <failure message="This variable f is unused.">line 9, col 7, This variable f is unused.</failure>
         </testcase>
     </testsuite>
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">

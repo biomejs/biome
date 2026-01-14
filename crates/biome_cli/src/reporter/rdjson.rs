@@ -1,8 +1,8 @@
-use crate::reporter::{Reporter, ReporterVisitor};
+use crate::reporter::{Reporter, ReporterVisitor, ReporterWriter};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{Console, ConsoleExt, MarkupBuf, markup};
+use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::display::{SourceFile, markup_to_string};
 use biome_diagnostics::{Error, Location, LogCategory, PrintDescription, Visit};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -16,8 +16,13 @@ pub(crate) struct RdJsonReporter<'a> {
 }
 
 impl Reporter for RdJsonReporter<'_> {
-    fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
+    fn write(
+        self,
+        writer: &mut dyn ReporterWriter,
+        visitor: &mut dyn ReporterVisitor,
+    ) -> std::io::Result<()> {
         visitor.report_diagnostics(
+            writer,
             self.execution,
             self.diagnostics_payload,
             self.verbose,
@@ -27,11 +32,12 @@ impl Reporter for RdJsonReporter<'_> {
     }
 }
 
-pub(crate) struct RdJsonReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
+pub(crate) struct RdJsonReporterVisitor;
 
-impl ReporterVisitor for RdJsonReporterVisitor<'_> {
+impl ReporterVisitor for RdJsonReporterVisitor {
     fn report_summary(
         &mut self,
+        _writer: &mut dyn ReporterWriter,
         _execution: &dyn Execution,
         _summary: TraversalSummary,
         _verbose: bool,
@@ -41,6 +47,7 @@ impl ReporterVisitor for RdJsonReporterVisitor<'_> {
 
     fn report_diagnostics(
         &mut self,
+        writer: &mut dyn ReporterWriter,
         _execution: &dyn Execution,
         payload: &DiagnosticsPayload,
         verbose: bool,
@@ -76,7 +83,7 @@ impl ReporterVisitor for RdJsonReporterVisitor<'_> {
 
         let result = serde_json::to_string_pretty(&report)?;
 
-        self.0.log(markup! {
+        writer.log(markup! {
             {result}
         });
 
