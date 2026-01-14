@@ -191,16 +191,13 @@ info: html/tags/tags.html
  </div>
  <div>
    Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-@@ -190,8 +186,10 @@
- <div>Should not insert empty line before this div</div>
+@@ -191,7 +187,7 @@
  
  <!-- self-closing -->
--<span><input type="checkbox" /> </span>
- <span
+ <span><input type="checkbox" /> </span>
+-<span
 -  ><span><input type="checkbox" /></span
 -></span>
-+  ><input type="checkbox" />
-+</span>
 +<span>
 +  <span><input type="checkbox" /></span>
 +</span>
@@ -398,9 +395,7 @@ info: html/tags/tags.html
 <div>Should not insert empty line before this div</div>
 
 <!-- self-closing -->
-<span
-  ><input type="checkbox" />
-</span>
+<span><input type="checkbox" /> </span>
 <span>
   <span><input type="checkbox" /></span>
 </span>

@@ -25,6 +25,44 @@ pub(crate) struct FormatHtmlElement;
 
 impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
     fn fmt_fields(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
+        let formatted_element = format_with(|f| self.fmt_inner(node, f));
+
+        let surrounding_group_id = f.group_id("element");
+        write!(
+            f,
+            [group(&formatted_element).with_group_id(Some(surrounding_group_id))]
+        )?;
+
+        Ok(())
+    }
+
+    fn fmt_trailing_comments(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
+        // If there is leading whitespace before a leading comment, we need to preserve it because it's probably indentation.
+        // See prettier test case: crates/biome_html_formatter/tests/specs/prettier/html/comments/hidden.html
+        // The current implementation for `biome_formatter::FormatTrailingComments` actually has a ton of js specific behavior that we don't want in the html formatter.
+
+        let comments = f.context().comments().clone();
+        let trailing_comments = comments.trailing_comments(node.syntax());
+        for comment in trailing_comments {
+            let format_comment = FormatRefWithRule::new(
+                comment,
+                <HtmlFormatContext as CstFormatContext>::CommentRule::default(),
+            );
+            match comment.lines_before() {
+                0 => {}
+                1 => write!(f, [hard_line_break()])?,
+                _ => write!(f, [empty_line()])?,
+            }
+            write!(f, [format_comment])?;
+            comment.mark_formatted();
+        }
+
+        Ok(())
+    }
+}
+
+impl FormatHtmlElement {
+    fn fmt_inner(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
         let HtmlElementFields {
             opening_element,
             children,
@@ -177,30 +215,6 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             &closing_element,
             f,
         )?;
-
-        Ok(())
-    }
-
-    fn fmt_trailing_comments(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
-        // If there is leading whitespace before a leading comment, we need to preserve it because it's probably indentation.
-        // See prettier test case: crates/biome_html_formatter/tests/specs/prettier/html/comments/hidden.html
-        // The current implementation for `biome_formatter::FormatTrailingComments` actually has a ton of js specific behavior that we don't want in the html formatter.
-
-        let comments = f.context().comments().clone();
-        let trailing_comments = comments.trailing_comments(node.syntax());
-        for comment in trailing_comments {
-            let format_comment = FormatRefWithRule::new(
-                comment,
-                <HtmlFormatContext as CstFormatContext>::CommentRule::default(),
-            );
-            match comment.lines_before() {
-                0 => {}
-                1 => write!(f, [hard_line_break()])?,
-                _ => write!(f, [empty_line()])?,
-            }
-            write!(f, [format_comment])?;
-            comment.mark_formatted();
-        }
 
         Ok(())
     }
