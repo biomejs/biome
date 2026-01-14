@@ -1,6 +1,6 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
-expression: invalid_vue.vue
+expression: invalid.vue
 ---
 # Input
 ```html
@@ -18,7 +18,7 @@ expression: invalid_vue.vue
 
 # Diagnostics
 ```
-invalid_vue.vue:3:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:3:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
@@ -41,7 +41,7 @@ invalid_vue.vue:3:3 lint/a11y/useAnchorContent ━━━━━━━━━━━
 ```
 
 ```
-invalid_vue.vue:4:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:4:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
@@ -64,7 +64,7 @@ invalid_vue.vue:4:3 lint/a11y/useAnchorContent ━━━━━━━━━━━
 ```
 
 ```
-invalid_vue.vue:5:3 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:5:3 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
@@ -91,7 +91,7 @@ invalid_vue.vue:5:3 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid_vue.vue:6:3 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:6:3 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
@@ -118,7 +118,7 @@ invalid_vue.vue:6:3 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid_vue.vue:7:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:7:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
@@ -141,7 +141,7 @@ invalid_vue.vue:7:3 lint/a11y/useAnchorContent ━━━━━━━━━━━
 ```
 
 ```
-invalid_vue.vue:8:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:8:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   

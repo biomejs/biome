@@ -1,6 +1,6 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
-expression: valid_vue.vue
+expression: valid.vue
 ---
 # Input
 ```html

@@ -1,9 +1,13 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
-expression: invalid_svelte.svelte
+expression: invalid.astro
 ---
 # Input
 ```html
+---
+// Astro frontmatter
+---
+
 <!-- Native anchors without accessible content should trigger -->
 <a></a>
 <a>    </a>
@@ -16,15 +20,15 @@ expression: invalid_svelte.svelte
 
 # Diagnostics
 ```
-invalid_svelte.svelte:2:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:6:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    1 │ <!-- Native anchors without accessible content should trigger -->
-  > 2 │ <a></a>
+    5 │ <!-- Native anchors without accessible content should trigger -->
+  > 6 │ <a></a>
       │ ^^^^^^^
-    3 │ <a>    </a>
-    4 │ <a aria-hidden="true">content</a>
+    7 │ <a>    </a>
+    8 │ <a aria-hidden="true">content</a>
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -38,16 +42,16 @@ invalid_svelte.svelte:2:1 lint/a11y/useAnchorContent ━━━━━━━━━
 ```
 
 ```
-invalid_svelte.svelte:3:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:7:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    1 │ <!-- Native anchors without accessible content should trigger -->
-    2 │ <a></a>
-  > 3 │ <a>    </a>
+    5 │ <!-- Native anchors without accessible content should trigger -->
+    6 │ <a></a>
+  > 7 │ <a>    </a>
       │ ^^^^^^^^^^^
-    4 │ <a aria-hidden="true">content</a>
-    5 │ <a aria-hidden>content</a>
+    8 │ <a aria-hidden="true">content</a>
+    9 │ <a aria-hidden>content</a>
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -61,16 +65,16 @@ invalid_svelte.svelte:3:1 lint/a11y/useAnchorContent ━━━━━━━━━
 ```
 
 ```
-invalid_svelte.svelte:4:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:8:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    2 │ <a></a>
-    3 │ <a>    </a>
-  > 4 │ <a aria-hidden="true">content</a>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ <a aria-hidden>content</a>
-    6 │ <a><span aria-hidden="true">content</span></a>
+     6 │ <a></a>
+     7 │ <a>    </a>
+   > 8 │ <a aria-hidden="true">content</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <a aria-hidden>content</a>
+    10 │ <a><span aria-hidden="true">content</span></a>
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -82,22 +86,22 @@ invalid_svelte.svelte:4:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━�
   
   i Unsafe fix: Remove the aria-hidden attribute to allow the anchor element and its content visible to assistive technologies.
   
-    4 │ <a·aria-hidden="true">content</a>
+    8 │ <a·aria-hidden="true">content</a>
       │    ------------------            
 
 ```
 
 ```
-invalid_svelte.svelte:5:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:9:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    3 │ <a>    </a>
-    4 │ <a aria-hidden="true">content</a>
-  > 5 │ <a aria-hidden>content</a>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ <a><span aria-hidden="true">content</span></a>
-    7 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
+     7 │ <a>    </a>
+     8 │ <a aria-hidden="true">content</a>
+   > 9 │ <a aria-hidden>content</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ <a><span aria-hidden="true">content</span></a>
+    11 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -109,22 +113,22 @@ invalid_svelte.svelte:5:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━�
   
   i Unsafe fix: Remove the aria-hidden attribute to allow the anchor element and its content visible to assistive technologies.
   
-    5 │ <a·aria-hidden>content</a>
+    9 │ <a·aria-hidden>content</a>
       │    -----------            
 
 ```
 
 ```
-invalid_svelte.svelte:6:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:10:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    4 │ <a aria-hidden="true">content</a>
-    5 │ <a aria-hidden>content</a>
-  > 6 │ <a><span aria-hidden="true">content</span></a>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
-    8 │ 
+     8 │ <a aria-hidden="true">content</a>
+     9 │ <a aria-hidden>content</a>
+  > 10 │ <a><span aria-hidden="true">content</span></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
+    12 │ 
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -138,15 +142,15 @@ invalid_svelte.svelte:6:1 lint/a11y/useAnchorContent ━━━━━━━━━
 ```
 
 ```
-invalid_svelte.svelte:7:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:11:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    5 │ <a aria-hidden>content</a>
-    6 │ <a><span aria-hidden="true">content</span></a>
-  > 7 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ 
+     9 │ <a aria-hidden>content</a>
+    10 │ <a><span aria-hidden="true">content</span></a>
+  > 11 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
   
   i All links on a page should have content that is accessible to screen readers.
   
