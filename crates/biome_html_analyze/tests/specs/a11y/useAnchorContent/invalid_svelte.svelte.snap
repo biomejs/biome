@@ -1,0 +1,160 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_svelte.svelte
+---
+# Input
+```html
+<!-- Native anchors without accessible content should trigger -->
+<a></a>
+<a>    </a>
+<a aria-hidden="true">content</a>
+<a aria-hidden>content</a>
+<a><span aria-hidden="true">content</span></a>
+<a><div aria-hidden="true"><span>nested content</span></div></a>
+
+```
+
+# Diagnostics
+```
+invalid_svelte.svelte:2:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    1 │ <!-- Native anchors without accessible content should trigger -->
+  > 2 │ <a></a>
+      │ ^^^^^^^
+    3 │ <a>    </a>
+    4 │ <a aria-hidden="true">content</a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid_svelte.svelte:3:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    1 │ <!-- Native anchors without accessible content should trigger -->
+    2 │ <a></a>
+  > 3 │ <a>    </a>
+      │ ^^^^^^^^^^^
+    4 │ <a aria-hidden="true">content</a>
+    5 │ <a aria-hidden>content</a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid_svelte.svelte:4:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    2 │ <a></a>
+    3 │ <a>    </a>
+  > 4 │ <a aria-hidden="true">content</a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <a aria-hidden>content</a>
+    6 │ <a><span aria-hidden="true">content</span></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+  i Unsafe fix: Remove the aria-hidden attribute to allow the anchor element and its content visible to assistive technologies.
+  
+    4 │ <a·aria-hidden="true">content</a>
+      │    ------------------            
+
+```
+
+```
+invalid_svelte.svelte:5:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    3 │ <a>    </a>
+    4 │ <a aria-hidden="true">content</a>
+  > 5 │ <a aria-hidden>content</a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <a><span aria-hidden="true">content</span></a>
+    7 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+  i Unsafe fix: Remove the aria-hidden attribute to allow the anchor element and its content visible to assistive technologies.
+  
+    5 │ <a·aria-hidden>content</a>
+      │    -----------            
+
+```
+
+```
+invalid_svelte.svelte:6:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    4 │ <a aria-hidden="true">content</a>
+    5 │ <a aria-hidden>content</a>
+  > 6 │ <a><span aria-hidden="true">content</span></a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
+    8 │ 
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid_svelte.svelte:7:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    5 │ <a aria-hidden>content</a>
+    6 │ <a><span aria-hidden="true">content</span></a>
+  > 7 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
