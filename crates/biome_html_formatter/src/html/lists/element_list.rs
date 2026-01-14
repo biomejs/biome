@@ -673,7 +673,7 @@ impl FormatHtmlElementList {
 
                     // Verbatim content (suppressed formatting)
                     HtmlChild::Verbatim(element) => {
-                        let format_verbatim = format_html_verbatim_node(element.syntax());
+                        let format_verbatim = format_verbatim_skipped(element.syntax());
 
                         let line_mode = match children_iter.peek() {
                             Some(HtmlChild::NonText(_) | HtmlChild::Verbatim(_)) => {
