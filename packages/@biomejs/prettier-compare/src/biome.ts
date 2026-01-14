@@ -96,6 +96,14 @@ export async function formatWithBiome(
 	const { projectKey } = biome.openProject();
 
 	try {
+		biome.applyConfiguration(projectKey, {
+			html: {
+				formatter: {
+					selfCloseVoidElements: "always",
+				},
+			},
+		});
+
 		const result = biome.formatContent(projectKey, code, {
 			filePath,
 			debug: true,
