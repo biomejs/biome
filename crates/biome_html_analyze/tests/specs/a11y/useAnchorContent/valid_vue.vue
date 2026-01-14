@@ -1,0 +1,19 @@
+<template>
+  <!-- Custom components should not trigger the rule -->
+  <Link></Link>
+  <CustomAnchor></CustomAnchor>
+  <RouterLink></RouterLink>
+
+  <!-- Native anchors with accessible content -->
+  <a>content</a>
+  <a><span>content</span></a>
+  <a><span aria-hidden="true"></span>content</a>
+  <a><div aria-hidden="true"></div>content</a>
+  <a aria-hidden="false">content</a>
+  <a><span aria-hidden="false">content</span></a>
+  <a><img alt="description" /></a>
+  <a title="Home">Home</a>
+  <!-- Accessible via aria-label or title alone -->
+  <a aria-label="Navigate to dashboard"></a>
+  <a title="Go to settings page"></a>
+</template>
