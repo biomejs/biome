@@ -7,7 +7,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_semantic::{CanBeImportedExported, Capture, SemanticModel};
+use biome_js_semantic::{CanBeImportedExported, ClosureExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, AnyJsObjectBindingPatternMember,
@@ -557,10 +557,9 @@ fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> 
 
         if let Some(computed_member_expression) = JsComputedMemberExpression::cast_ref(&parent)
             && let Ok(object) = computed_member_expression.object()
+            && !prev_node.eq(object.syntax())
         {
-            if !prev_node.eq(object.syntax()) {
-                return result;
-            }
+            return result;
         }
 
         if matches!(
@@ -585,15 +584,14 @@ fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> 
 // Test if a capture needs to be in the dependency list
 // of a React hook call
 fn capture_needs_to_be_in_the_dependency_list(
-    capture: &Capture,
-    expression_candidates: &Vec<AnyExpressionCandidate>,
+    capture_node: &JsSyntaxNode,
+    expression_candidates: &[AnyExpressionCandidate],
     component_function_range: &TextRange,
     model: &SemanticModel,
     options: &HookConfigMaps,
 ) -> bool {
     // Ignore if referenced in TS typeof
-    if capture
-        .node()
+    if capture_node
         .ancestors()
         .any(|a| TsTypeofType::can_cast(a.kind()))
     {
@@ -638,7 +636,7 @@ fn capture_needs_to_be_in_the_dependency_list(
 /// The `depth` parameter prevents infinite recursion and stack overflow.
 fn is_stable_binding(
     binding: &AnyJsIdentifierBinding,
-    member: Option<ReactHookResultMember>,
+    member: Option<&ReactHookResultMember>,
     component_function_range: &TextRange,
     model: &SemanticModel,
     options: &HookConfigMaps,
@@ -711,7 +709,7 @@ fn is_stable_binding(
                     }
                     is_stable_expression(
                         &initializer_expression,
-                        Some(pattern_member),
+                        Some(&pattern_member),
                         component_function_range,
                         model,
                         options,
@@ -770,7 +768,7 @@ fn is_stable_binding(
 /// The `depth` parameter prevents infinite recursion and stack overflow.
 fn is_stable_expression(
     expression: &AnyJsExpression,
-    member: Option<ReactHookResultMember>,
+    member: Option<&ReactHookResultMember>,
     component_function_range: &TextRange,
     model: &SemanticModel,
     options: &HookConfigMaps,
@@ -814,7 +812,7 @@ fn is_stable_expression(
             };
             is_stable_expression(
                 &object,
-                Some(ReactHookResultMember::Index(index)),
+                Some(&ReactHookResultMember::Index(index)),
                 component_function_range,
                 model,
                 options,
@@ -838,7 +836,7 @@ fn is_stable_expression(
             };
             is_stable_expression(
                 &object,
-                Some(ReactHookResultMember::Key(key)),
+                Some(&ReactHookResultMember::Key(key)),
                 component_function_range,
                 model,
                 options,
@@ -1096,6 +1094,72 @@ fn compare_member_depth(a: &JsSyntaxNode, b: &JsSyntaxNode) -> (bool, bool) {
     }
 }
 
+/// Returns capture nodes for the given React hook call.
+///
+/// If the closure is an inline function expression, returns its captures.
+/// If the closure is a function reference (identifier), resolves the function
+/// and returns its captures. For identifiers that aren't functions (like props),
+/// returns the identifier itself as it should be in the dependency list.
+///
+/// Bindings declared outside the component function range are treated as:
+/// - Stable (ignored) if they're truly global or module-level
+/// - Unstable (included) if they're function parameters (props)
+fn get_relevant_capture_nodes(
+    result: &ReactCallWithDependencyResult,
+    model: &SemanticModel,
+    component_function_range: &TextRange,
+) -> Vec<JsSyntaxNode> {
+    let Some(closure_expression) = result
+        .closure_node
+        .as_ref()
+        .and_then(|node| node.inner_expression())
+    else {
+        return vec![];
+    };
+
+    if let AnyJsExpression::JsIdentifierExpression(identifier) = &closure_expression
+        && let Ok(identifier_name) = identifier.name()
+        && let Some(binding) = model.binding(&identifier_name)
+        && let AnyJsIdentifierBinding::JsIdentifierBinding(identifier_binding) = binding.tree()
+        && let Some(declaration) = identifier_binding.declaration()
+    {
+        if identifier_binding
+            .range()
+            .intersect(*component_function_range)
+            .is_none_or(TextRange::is_empty)
+        {
+            return vec![];
+        }
+
+        let closure = match declaration {
+            AnyJsBindingDeclaration::JsFunctionDeclaration(decl) => Some(decl.closure(model)),
+            AnyJsBindingDeclaration::JsVariableDeclarator(decl) => decl
+                .initializer()
+                .and_then(|init| init.expression().ok())
+                .and_then(|expr| AnyJsFunctionExpression::try_from(expr).ok())
+                .map(|expr| expr.closure(model)),
+
+            _ => None,
+        };
+
+        if let Some(new_closure) = closure {
+            all_captures_in_closure(&new_closure)
+                .map(|capture| capture.node().clone())
+                .collect()
+        } else {
+            // Not a function - treat the identifier itself as a capture
+            // (e.g., a prop that is a function)
+            vec![identifier_name.syntax().clone()]
+        }
+    } else if let Ok(function_expression) = AnyJsFunctionExpression::try_from(closure_expression) {
+        all_captures_in_closure(&function_expression.closure(model))
+            .map(|capture| capture.node().clone())
+            .collect()
+    } else {
+        vec![]
+    }
+}
+
 impl Rule for UseExhaustiveDependencies {
     type Query = Semantic<JsCallExpression>;
     type State = Fix;
@@ -1138,26 +1202,27 @@ impl Rule for UseExhaustiveDependencies {
 
         let component_function_range = component_function.text_range_with_trivia();
 
-        let captures: Vec<_> = result
-            .all_captures(model)
-            .filter_map(|capture| {
-                let expression_candidates = get_expression_candidates(capture.node().clone());
-                if capture_needs_to_be_in_the_dependency_list(
-                    &capture,
-                    &expression_candidates,
-                    &component_function_range,
-                    model,
-                    &hook_config_maps,
-                ) {
-                    // Latest expression candidate is the longest expression
-                    return Some(expression_candidates.last().map_or_else(
-                        || capture.node().clone(),
-                        |expression| expression.syntax().clone(),
-                    ));
-                }
-                None
-            })
-            .collect();
+        let captures: Vec<_> =
+            get_relevant_capture_nodes(&result, model, &component_function_range)
+                .iter()
+                .filter_map(|capture_node| {
+                    let expression_candidates = get_expression_candidates(capture_node.clone());
+                    if capture_needs_to_be_in_the_dependency_list(
+                        capture_node,
+                        &expression_candidates,
+                        &component_function_range,
+                        model,
+                        &hook_config_maps,
+                    ) {
+                        // Latest expression candidate is the longest expression
+                        return Some(expression_candidates.last().map_or_else(
+                            || capture_node.clone(),
+                            |expression| expression.syntax().clone(),
+                        ));
+                    }
+                    None
+                })
+                .collect();
 
         let deps: Vec<_> = result.all_dependencies().collect();
         let mut add_deps: BTreeMap<Box<str>, Vec<JsSyntaxNode>> = BTreeMap::new();

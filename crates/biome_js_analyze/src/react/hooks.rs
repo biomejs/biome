@@ -26,7 +26,7 @@ pub enum AnyJsFunctionExpression {
 }
 
 impl AnyJsFunctionExpression {
-    fn closure(&self, model: &SemanticModel) -> Closure {
+    pub fn closure(&self, model: &SemanticModel) -> Closure {
         match self {
             Self::JsArrowFunctionExpression(arrow_function) => arrow_function.closure(model),
             Self::JsFunctionExpression(function) => function.closure(model),
@@ -50,29 +50,20 @@ impl TryFrom<AnyJsExpression> for AnyJsFunctionExpression {
     }
 }
 
-impl ReactCallWithDependencyResult {
-    /// Returns all [Reference] captured by the closure argument of the React hook.
-    /// See [react_hook_with_dependency].
-    pub fn all_captures(&self, model: &SemanticModel) -> impl Iterator<Item = Capture> + use<> {
-        self.closure_node
-            .as_ref()
-            .and_then(|node| node.inner_expression())
-            .and_then(|node| AnyJsFunctionExpression::try_from(node.clone()).ok())
-            .map(|function_expression| {
-                let closure = function_expression.closure(model);
-                let range = closure.closure_range();
-                closure
-                    .descendents()
-                    .flat_map(|closure| closure.all_captures())
-                    .filter(move |capture| {
-                        !range.contains(capture.declaration_range().start())
-                            && range.contains(capture.node().text_range().start())
-                    })
-            })
-            .into_iter()
-            .flatten()
-    }
+/// Returns all captures in the given closure and nested closures which are defined within the
+/// range of the specified closure.
+pub fn all_captures_in_closure(closure: &Closure) -> impl Iterator<Item = Capture> + use<> {
+    let range = closure.closure_range();
+    closure
+        .descendents()
+        .flat_map(|closure| closure.all_captures())
+        .filter(move |capture| {
+            !range.contains(capture.declaration_range().start())
+                && range.contains(capture.node().text_range().start())
+        })
+}
 
+impl ReactCallWithDependencyResult {
     /// Returns all dependencies of a React hook.
     /// See [react_hook_with_dependency]
     pub fn all_dependencies(&self) -> impl Iterator<Item = AnyJsExpression> + use<> {
@@ -264,7 +255,7 @@ pub enum ReactHookResultMember {
 /// ```
 pub fn is_react_hook_call_stable(
     call_expression: &JsCallExpression,
-    member: Option<ReactHookResultMember>,
+    member: Option<&ReactHookResultMember>,
     model: &SemanticModel,
     stable_config: &FxHashSet<StableReactHookConfiguration>,
 ) -> bool {
@@ -356,7 +347,7 @@ mod test {
             let call_expression = r
                 .syntax()
                 .descendants()
-                .find_map(|node| JsCallExpression::cast(node))
+                .find_map(JsCallExpression::cast)
                 .unwrap();
 
             let config = FxHashSet::from_iter([
@@ -389,7 +380,7 @@ mod test {
             let call_expression = r
                 .syntax()
                 .descendants()
-                .find_map(|node| JsCallExpression::cast(node))
+                .find_map(JsCallExpression::cast)
                 .unwrap();
 
             let config = FxHashSet::from_iter([
