@@ -199,7 +199,7 @@ fn reports_diagnostics_junit_check_command_file() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "reports_diagnostics_junit_check_command",
+        "reports_diagnostics_junit_check_command_file",
         fs,
         console,
         result,
