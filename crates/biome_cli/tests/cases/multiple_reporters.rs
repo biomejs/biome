@@ -108,3 +108,61 @@ fn two_report_to_console() {
         result,
     ));
 }
+
+#[test]
+fn first_file_then_reporter_name() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path1 = Utf8Path::new("main.ts");
+    fs.insert(file_path1.into(), MAIN_1.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--reporter-file=file.json",
+                "--reporter=rdjson",
+                file_path1.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "first_file_then_reporter_name",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn only_report_file() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path1 = Utf8Path::new("main.ts");
+    fs.insert(file_path1.into(), MAIN_1.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--reporter-file=file.txt", file_path1.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "only_report_file",
+        fs,
+        console,
+        result,
+    ));
+}
