@@ -120,13 +120,8 @@ where
     fn clear(&mut self) {}
 }
 
+#[derive(Debug, Default)]
 pub(crate) struct FileReporterWriter(FileBufferConsole);
-
-impl Default for FileReporterWriter {
-    fn default() -> Self {
-        Self(FileBufferConsole::default())
-    }
-}
 
 impl ReporterWriter for FileReporterWriter {
     fn log(&mut self, message: Markup) {

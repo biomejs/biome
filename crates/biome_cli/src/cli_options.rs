@@ -162,7 +162,7 @@ pub enum CliReporterKind {
 
 impl CliReporter {
     pub(crate) const fn is_default(&self) -> bool {
-        matches!(self.kind, CliReporterKind::Default { .. })
+        matches!(self.kind, CliReporterKind::Default)
     }
 }
 
