@@ -188,6 +188,7 @@ use crate::{
     utils::{
         children::{HtmlChild, HtmlChildrenIterator, html_split_children},
         css_display::{CssDisplay, get_css_display},
+        metadata::get_element_css_display,
     },
     verbatim::format_html_verbatim_node,
 };
@@ -716,15 +717,6 @@ impl FormatHtmlElementList {
         } else {
             write!(f, [&soft_block_indent(&formatted_children)])
         }
-    }
-}
-
-/// Gets the CSS display value for an HTML element.
-fn get_element_css_display(element: &AnyHtmlElement) -> CssDisplay {
-    if let Some(tag_name) = element.name() {
-        get_css_display(&tag_name)
-    } else {
-        CssDisplay::Inline
     }
 }
 

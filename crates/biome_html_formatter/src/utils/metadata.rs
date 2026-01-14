@@ -777,17 +777,17 @@ pub(crate) fn is_element_whitespace_sensitive_from_element(
     sensitivity.is_css() && is_whitespace_sensitive || sensitivity.is_strict()
 }
 
-/// Gets the CSS display value for an element.
-///
-/// This is useful when you need more granular control than just inline/block.
-pub(crate) fn get_element_css_display(
-    element: &AnyHtmlElement,
-) -> crate::utils::css_display::CssDisplay {
-    let Some(name) = element.name() else {
-        return CssDisplay::Inline;
-    };
+/// Gets the CSS display value for an HTML element.
+pub(crate) fn get_element_css_display(element: &AnyHtmlElement) -> CssDisplay {
+    if element.is_svelte_block() {
+        return CssDisplay::Block;
+    }
 
-    get_css_display(&name)
+    if let Some(tag_name) = element.name() {
+        get_css_display(&tag_name)
+    } else {
+        CssDisplay::Inline
+    }
 }
 
 /// CSS whitespace handling modes.
