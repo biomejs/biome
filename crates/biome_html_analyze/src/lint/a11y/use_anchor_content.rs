@@ -275,7 +275,7 @@ fn is_accessible_text_content(content: &AnyHtmlContent) -> bool {
     match content {
         AnyHtmlContent::HtmlContent(html_content) => html_content
             .value_token()
-            .is_ok_and(|token| !token.text_trimmed().trim().is_empty()),
+            .is_ok_and(|token| !token.text_trimmed().is_empty()),
         // Text expressions (e.g., {{ variable }}) are considered accessible
         AnyHtmlContent::AnyHtmlTextExpression(_) => true,
         // Embedded content is treated as potentially accessible to avoid false positives
