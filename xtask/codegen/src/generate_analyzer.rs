@@ -54,6 +54,7 @@ fn generate_html_analyzer() -> Result<()> {
     let base_path = project_root().join("crates/biome_html_analyze/src");
     let mut analyzers = BTreeMap::new();
     generate_category("lint", &mut analyzers, &base_path)?;
+    generate_category("assist", &mut analyzers, &base_path)?;
 
     update_html_registry_builder(analyzers)
 }
