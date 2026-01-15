@@ -181,16 +181,12 @@
 //! + This will get condensed into a single line because its just text.
 //! ```
 
-use std::cell::RefCell;
-
 use crate::{
     prelude::*,
     utils::{
         children::{HtmlChild, HtmlChildrenIterator, html_split_children},
-        css_display::{CssDisplay, get_css_display},
         metadata::get_element_css_display,
     },
-    verbatim::format_html_verbatim_node,
 };
 use biome_formatter::{FormatRuleWithOptions, GroupId, prelude::*};
 use biome_formatter::{VecBuffer, format_args, write};
@@ -199,7 +195,6 @@ use biome_html_syntax::{
     HtmlElementList, HtmlRoot, HtmlSyntaxToken,
 };
 use biome_rowan::AstNode;
-use biome_string_case::StrLikeExtension;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
@@ -208,8 +203,6 @@ pub(crate) struct FormatHtmlElementList {
     is_container_whitespace_sensitive: bool,
 
     borrowed_tokens: BorrowedTokens,
-
-    group: Option<GroupId>,
 
     opening_tag_group: Option<GroupId>,
 }
@@ -714,7 +707,7 @@ impl FormatHtmlElementList {
                             // This makes the line break happen BEFORE the element when it doesn't fit.
                             // Pattern: group([line, group([element, line?])])
                             // The trailing line inside the inner group handles "element whitespace text" cases.
-                            let mut memoized = non_text.format().memoized();
+                            let memoized = non_text.format().memoized();
                             let inner_group_id = f.group_id("inner");
 
                             if needs_trailing_line_in_inner {

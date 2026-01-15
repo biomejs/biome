@@ -1,13 +1,10 @@
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
 use crate::utils::css_display::{CssDisplay, get_css_display, get_css_display_from_tag};
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
-use biome_formatter::{
-    CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, format_args, write,
-};
+use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
 use biome_html_syntax::{
     HtmlElement, HtmlElementFields, HtmlElementList, HtmlRoot, HtmlSelfClosingElement,
 };
-use biome_rowan::SyntaxNodeCast;
 use biome_string_case::StrLikeExtension;
 
 use super::{
