@@ -600,6 +600,7 @@ impl FormatHtmlElementList {
 
                     // Any non-text child (elements)
                     HtmlChild::NonText(non_text) => {
+                        let non_text_group_id = f.group_id("non text child");
                         let css_display = get_element_css_display(non_text);
                         let line_mode = match children_iter.peek() {
                             Some(HtmlChild::Word(_)) => {
@@ -657,7 +658,14 @@ impl FormatHtmlElementList {
                         });
 
                         if force_multiline {
-                            write!(f, [group(&non_text.format()), format_separator])?;
+                            write!(
+                                f,
+                                [
+                                    group(&non_text.format())
+                                        .with_group_id(Some(non_text_group_id)),
+                                    format_separator
+                                ]
+                            )?;
                         } else {
                             let mut memoized = non_text.format().memoized();
 
@@ -667,7 +675,13 @@ impl FormatHtmlElementList {
                             if is_block_like && memoized.inspect(f)?.will_break() {
                                 force_multiline = true;
                             }
-                            write!(f, [group(&memoized), format_separator])?;
+                            write!(
+                                f,
+                                [
+                                    group(&memoized).with_group_id(Some(non_text_group_id)),
+                                    format_separator
+                                ]
+                            )?;
                         }
                     }
 
