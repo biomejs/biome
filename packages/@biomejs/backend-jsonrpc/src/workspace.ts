@@ -2203,6 +2203,11 @@ See https://biomejs.dev/linter/rules/use-spread
 	 */
 	useSpread?: UseSpreadConfiguration;
 	/**
+	* Enforce the use of the u or v flag for regular expressions.
+See https://biomejs.dev/linter/rules/use-unicode-regex 
+	 */
+	useUnicodeRegex?: UseUnicodeRegexConfiguration;
+	/**
 	* Enforce consistent defineProps declaration style.
 See https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration 
 	 */
@@ -3925,6 +3930,9 @@ export type UseSortedClassesConfiguration =
 export type UseSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSpreadOptions;
+export type UseUnicodeRegexConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUnicodeRegexOptions;
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
@@ -5493,6 +5501,11 @@ export interface RuleWithUseSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: UseSpreadOptions;
 }
+export interface RuleWithUseUnicodeRegexOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseUnicodeRegexOptions;
+}
 export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentDefinePropsDeclarationOptions;
@@ -6854,6 +6867,7 @@ export interface UseSortedClassesOptions {
 	functions?: string[];
 }
 export type UseSpreadOptions = {};
+export type UseUnicodeRegexOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
 }
@@ -7630,9 +7644,15 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDuplicateArgumentNames"
 	| "lint/nursery/noDuplicateAttributes"
 	| "lint/nursery/noDuplicateDependencies"
+	| "lint/nursery/noDuplicateEnumValueNames"
 	| "lint/nursery/noDuplicateEnumValues"
+	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateGraphqlOperationName"
+	| "lint/nursery/noDuplicateInputFieldNames"
+	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"
@@ -7697,12 +7717,7 @@ export type Category =
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
-	| "lint/nursery/noDuplicateArgumentNames"
-	| "lint/nursery/noDuplicateEnumValueNames"
-	| "lint/nursery/noDuplicateFieldDefinitionNames"
-	| "lint/nursery/noDuplicateGraphqlOperationName"
-	| "lint/nursery/noDuplicateInputFieldNames"
-	| "lint/nursery/noDuplicateVariableNames"
+	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentVBindStyle"
 	| "lint/nursery/useVueConsistentVOnStyle"
