@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList};
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource};
 use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::HtmlRuleAction;
@@ -14,6 +14,13 @@ declare_lint_rule! {
     /// Accessible means the content is not hidden using the `aria-hidden` attribute.
     /// Anchor tags should have text content that describes the link destination for screen reader users.
     /// Alternatively, the anchor can have an accessible name via the `aria-label` or `title` attribute.
+    ///
+    /// :::note
+    /// In `.html` files, this rule matches element names case-insensitively (e.g., `<A>`, `<a>`).
+    ///
+    /// In component-based frameworks (Vue, Svelte, Astro), only lowercase element names are checked.
+    /// PascalCase variants like `<A>` are assumed to be custom components and are ignored.
+    /// :::
     ///
     /// ## Examples
     ///
@@ -87,9 +94,17 @@ impl Rule for UseAnchorContent {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        // Check if element is an anchor tag (case-insensitive for HTML)
+        // Check if element is an anchor tag
+        // In HTML files, tag names are case-insensitive
+        // In component frameworks (Vue, Svelte, Astro), only lowercase is checked
         let element_name = node.name()?;
-        if !element_name.text().eq_ignore_ascii_case("a") {
+        let source_type = ctx.source_type::<HtmlFileSource>();
+        let is_anchor = if source_type.is_html() {
+            element_name.text().eq_ignore_ascii_case("a")
+        } else {
+            element_name.text() == "a"
+        };
+        if !is_anchor {
             return None;
         }
 
