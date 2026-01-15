@@ -250,8 +250,7 @@ fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
             }
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
-            // Self-closing elements might provide accessible content (e.g., <img alt="...">)
-            // Consider self-closing elements without aria-hidden as potentially accessible
+            // Check if element is hidden with aria-hidden
             let has_aria_hidden =
                 element
                     .find_attribute_by_name("aria-hidden")
@@ -262,8 +261,72 @@ fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
                             .and_then(|value| value.string_value())
                             .is_none_or(|value| !value.eq_ignore_ascii_case("false"))
                     });
+            if has_aria_hidden {
+                return false;
+            }
 
-            !has_aria_hidden
+            // Check for explicit accessible name via aria-label or title
+            let has_aria_label = element
+                .find_attribute_by_name("aria-label")
+                .is_some_and(|attr| {
+                    attr.initializer()
+                        .and_then(|init| init.value().ok())
+                        .and_then(|value| value.string_value())
+                        .is_some_and(|s| !s.trim().is_empty())
+                });
+            if has_aria_label {
+                return true;
+            }
+
+            let has_title = element.find_attribute_by_name("title").is_some_and(|attr| {
+                attr.initializer()
+                    .and_then(|init| init.value().ok())
+                    .and_then(|value| value.string_value())
+                    .is_some_and(|s| !s.trim().is_empty())
+            });
+            if has_title {
+                return true;
+            }
+
+            // Check tag-specific accessible content
+            let tag_name = element.name().ok().and_then(|n| n.value_token().ok());
+            let tag_text = tag_name.as_ref().map(|t| t.text_trimmed());
+
+            match tag_text {
+                // <img> requires non-empty alt attribute
+                Some(name) if name.eq_ignore_ascii_case("img") => element
+                    .find_attribute_by_name("alt")
+                    .is_some_and(|attr| {
+                        attr.initializer()
+                            .and_then(|init| init.value().ok())
+                            .and_then(|value| value.string_value())
+                            .is_some_and(|s| !s.trim().is_empty())
+                    }),
+                // Void elements without meaningful content are not accessible
+                Some(name)
+                    if name.eq_ignore_ascii_case("br")
+                        || name.eq_ignore_ascii_case("hr")
+                        || name.eq_ignore_ascii_case("wbr")
+                        || name.eq_ignore_ascii_case("meta")
+                        || name.eq_ignore_ascii_case("link")
+                        || name.eq_ignore_ascii_case("base")
+                        || name.eq_ignore_ascii_case("col") =>
+                {
+                    false
+                }
+                // <input type="hidden"> is not accessible, other inputs may be
+                Some(name) if name.eq_ignore_ascii_case("input") => {
+                    let is_hidden = element.find_attribute_by_name("type").is_some_and(|attr| {
+                        attr.initializer()
+                            .and_then(|init| init.value().ok())
+                            .and_then(|value| value.string_value())
+                            .is_some_and(|s| s.eq_ignore_ascii_case("hidden"))
+                    });
+                    !is_hidden
+                }
+                // Other self-closing elements without explicit accessible name are not accessible
+                _ => false,
+            }
         }
         // Bogus elements and CDATA sections - treat as potentially accessible to avoid false positives
         AnyHtmlElement::HtmlBogusElement(_) | AnyHtmlElement::HtmlCdataSection(_) => true,

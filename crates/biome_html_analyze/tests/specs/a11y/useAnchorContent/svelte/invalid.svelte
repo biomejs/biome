@@ -5,3 +5,16 @@
 <a aria-hidden>content</a>
 <a><span aria-hidden="true">content</span></a>
 <a><div aria-hidden="true"><span>nested content</span></div></a>
+
+<!-- Image without alt attribute -->
+<a><img /></a>
+
+<!-- Image with empty alt attribute -->
+<a><img alt="" /></a>
+
+<!-- Void elements that never provide accessible content -->
+<a><br /></a>
+<a><hr /></a>
+
+<!-- Hidden input is not accessible -->
+<a><input type="hidden" /></a>

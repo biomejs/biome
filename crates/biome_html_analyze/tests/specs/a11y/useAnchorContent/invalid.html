@@ -35,3 +35,22 @@
 
 <!-- Whitespace-only title should still be invalid -->
 <a title="   "></a>
+
+<!-- Image without alt attribute -->
+<a><img /></a>
+
+<!-- Image with empty alt attribute -->
+<a><img alt="" /></a>
+
+<!-- Image with whitespace-only alt attribute -->
+<a><img alt="   " /></a>
+
+<!-- Void elements that never provide accessible content -->
+<a><br /></a>
+
+<a><hr /></a>
+
+<a><wbr /></a>
+
+<!-- Hidden input is not accessible -->
+<a><input type="hidden" /></a>

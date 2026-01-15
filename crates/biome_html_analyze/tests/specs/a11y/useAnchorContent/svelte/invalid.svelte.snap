@@ -12,6 +12,19 @@ expression: invalid.svelte
 <a><span aria-hidden="true">content</span></a>
 <a><div aria-hidden="true"><span>nested content</span></div></a>
 
+<!-- Image without alt attribute -->
+<a><img /></a>
+
+<!-- Image with empty alt attribute -->
+<a><img alt="" /></a>
+
+<!-- Void elements that never provide accessible content -->
+<a><br /></a>
+<a><hr /></a>
+
+<!-- Hidden input is not accessible -->
+<a><input type="hidden" /></a>
+
 ```
 
 # Diagnostics
@@ -147,6 +160,117 @@ invalid.svelte:7:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
   > 7 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ 
+    9 │ <!-- Image without alt attribute -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.svelte:10:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+     9 │ <!-- Image without alt attribute -->
+  > 10 │ <a><img /></a>
+       │ ^^^^^^^^^^^^^^
+    11 │ 
+    12 │ <!-- Image with empty alt attribute -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.svelte:13:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    12 │ <!-- Image with empty alt attribute -->
+  > 13 │ <a><img alt="" /></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ <!-- Void elements that never provide accessible content -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.svelte:16:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    15 │ <!-- Void elements that never provide accessible content -->
+  > 16 │ <a><br /></a>
+       │ ^^^^^^^^^^^^^
+    17 │ <a><hr /></a>
+    18 │ 
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.svelte:17:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    15 │ <!-- Void elements that never provide accessible content -->
+    16 │ <a><br /></a>
+  > 17 │ <a><hr /></a>
+       │ ^^^^^^^^^^^^^
+    18 │ 
+    19 │ <!-- Hidden input is not accessible -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.svelte:20:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    19 │ <!-- Hidden input is not accessible -->
+  > 20 │ <a><input type="hidden" /></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
   
   i All links on a page should have content that is accessible to screen readers.
   
