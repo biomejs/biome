@@ -13,6 +13,13 @@ declare_lint_rule! {
     /// or translation of the dialogue, sound effects, musical cues, and other relevant
     /// audio information.
     ///
+    /// :::note
+    /// In `.html` files, this rule matches element names case-insensitively (e.g., `<VIDEO>`, `<video>`).
+    ///
+    /// In component-based frameworks (Vue, Svelte, Astro), only lowercase element names are checked.
+    /// PascalCase variants like `<Video>` are assumed to be custom components and are ignored.
+    /// :::
+    ///
     /// ## Examples
     ///
     /// ### Invalid
