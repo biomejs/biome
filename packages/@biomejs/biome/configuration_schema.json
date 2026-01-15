@@ -5796,6 +5796,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useUnicodeRegex": {
+					"description": "Enforce the use of the u or v flag for regular expressions.\nSee https://biomejs.dev/linter/rules/use-unicode-regex",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUnicodeRegexConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueConsistentDefinePropsDeclaration": {
 					"description": "Enforce consistent defineProps declaration style.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
 					"anyOf": [
@@ -10123,6 +10130,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseUnicodeRegexOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUnicodeRegexOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseUnifiedTypeSignaturesOptions": {
 			"type": "object",
 			"properties": {
@@ -13233,6 +13250,16 @@
 			]
 		},
 		"UseTrimStartEndOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseUnicodeRegexConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUnicodeRegexOptions" }
+			]
+		},
+		"UseUnicodeRegexOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
