@@ -97,6 +97,10 @@ export async function formatWithBiome(
 
 	try {
 		biome.applyConfiguration(projectKey, {
+			formatter: {
+				indentStyle: "space",
+				indentWidth: 2,
+			},
 			html: {
 				formatter: {
 					selfCloseVoidElements: "always",

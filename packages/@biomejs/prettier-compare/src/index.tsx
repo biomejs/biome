@@ -5,18 +5,22 @@
  *   prettier-compare "const x = 1"           # Format a snippet
  *   prettier-compare -f file.ts              # Format from file
  *   echo "const x = 1" | prettier-compare    # Format from stdin
- *   prettier-compare -w "const x = 1"        # Watch mode
+ *   prettier-compare -w "const x = 1"        # Watch mode (fancy TUI)
  */
 
 import { program } from "commander";
-import { createCliRenderer } from "@opentui/core";
-import { createRoot } from "@opentui/react";
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import React from "react";
-import { App } from "./components/App.js";
-import { detectLanguage, getSupportedLanguages } from "./languages.js";
+import {
+	detectLanguage,
+	getSupportedLanguages,
+	getLanguageConfig,
+} from "./languages.js";
+import { formatWithBiome, reloadBiome } from "./biome.js";
+import { formatWithPrettier } from "./prettier.js";
+import { rebuildWasm } from "./watch.js";
+import { printComparison } from "./plainOutput.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -86,48 +90,80 @@ program
 
 		const language = options.language ?? detectedLang ?? "js";
 
-		// Create the TUI renderer
-		const renderer = await createCliRenderer({
-			targetFps: options.watch ? 30 : 1,
-		});
-
-		const handleExit = () => {
-			renderer.stop();
-			process.exit(0);
-		};
-
-		// Create React root and render the app
-		const root = createRoot(renderer);
-		root.render(
-			<App
-				code={code}
-				language={language}
-				watchMode={options.watch ?? false}
-				rootDir={ROOT_DIR}
-				onExit={handleExit}
-				irOnly={options.irOnly}
-				outputOnly={options.outputOnly}
-				rebuild={options.rebuild}
-			/>,
-		);
-
 		if (options.watch) {
-			// Interactive watch mode
+			// Watch mode: Use fancy TUI with React/OpenTUI
+			const { createCliRenderer } = await import("@opentui/core");
+			const { createRoot } = await import("@opentui/react");
+			const React = await import("react");
+			const { App } = await import("./components/App.js");
+
+			const renderer = await createCliRenderer({
+				targetFps: 30,
+			});
+
+			const handleExit = () => {
+				renderer.stop();
+				process.exit(0);
+			};
+
+			const root = createRoot(renderer);
+			root.render(
+				React.createElement(App, {
+					code,
+					language,
+					watchMode: true,
+					rootDir: ROOT_DIR,
+					onExit: handleExit,
+					irOnly: options.irOnly,
+					outputOnly: options.outputOnly,
+					rebuild: options.rebuild,
+				}),
+			);
+
 			renderer.start();
 
 			// Handle Ctrl+C
 			process.on("SIGINT", handleExit);
 			process.on("SIGTERM", handleExit);
 		} else {
-			// Non-interactive: render once and exit after async work completes
-			// We need a small delay to let React effects run and async formatting complete
-			setTimeout(() => {
-				// Re-render to show final state
-				setTimeout(() => {
-					renderer.stop();
-					process.exit(0);
-				}, 100);
-			}, 500);
+			// Non-watch mode: Plain sequential output to stdout
+			const config = getLanguageConfig(language);
+
+			// Optionally rebuild WASM first
+			if (options.rebuild) {
+				console.log("Rebuilding WASM...");
+				try {
+					await rebuildWasm(ROOT_DIR);
+					await reloadBiome();
+					console.log("WASM rebuilt successfully.\n");
+				} catch (err) {
+					console.error(
+						`WASM rebuild failed: ${err instanceof Error ? err.message : err}`,
+					);
+					process.exit(1);
+				}
+			}
+
+			// Run formatting
+			try {
+				const [biomeResult, prettierResult] = await Promise.all([
+					formatWithBiome(code, config.biomeFilePath),
+					formatWithPrettier(code, config.prettierParser),
+				]);
+
+				printComparison({
+					biomeResult,
+					prettierResult,
+					language,
+					irOnly: options.irOnly,
+					outputOnly: options.outputOnly,
+				});
+			} catch (err) {
+				console.error(
+					`Formatting failed: ${err instanceof Error ? err.message : err}`,
+				);
+				process.exit(1);
+			}
 		}
 	});
 

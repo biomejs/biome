@@ -167,7 +167,6 @@ export function App({
 
 			{error && <text fg="#FF6600">Warning: {error}</text>}
 
-			{/* Scrollable content area */}
 			<scrollbox focused={watchMode} flexGrow={1}>
 				<box flexDirection="column" gap={1}>
 					{/* Formatted output comparison */}
