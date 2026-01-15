@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Improve RuleName ordering in CLI summary output and update related snapshots. Fixes [#8730](https://github.com/biomejs/biome/issues/8730)
+Fix the `--reporter=summary` output incorrectly merging and displaying wrong issue counts for different rules. Fixes [#8730](https://github.com/biomejs/biome/issues/8730)
