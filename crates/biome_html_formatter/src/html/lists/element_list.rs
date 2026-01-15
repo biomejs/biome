@@ -507,11 +507,18 @@ impl FormatHtmlElementList {
                                 // <a>link</a>more text
                                 // ```
                                 if !css_display.is_externally_whitespace_sensitive() {
-                                    // add a line break after the word
-                                    if force_multiline {
-                                        write!(f, [hard_line_break()])?;
-                                    } else {
-                                        write!(f, [soft_line_break()])?;
+                                    // For inline elements, we don't add a line break here.
+                                    // Instead, we'll wrap the element in an outer group with a line
+                                    // before it in the NonText handling code below. This matches
+                                    // Prettier's behavior where the line break happens BEFORE the
+                                    // element rather than after the text.
+                                    if !css_display.is_inline_like() {
+                                        // add a line break after the word for non-inline elements
+                                        if force_multiline {
+                                            write!(f, [hard_line_break()])?;
+                                        } else {
+                                            write!(f, [soft_line_break()])?;
+                                        }
                                     }
                                 }
                             }
@@ -551,10 +558,39 @@ impl FormatHtmlElementList {
                         //   This is HTML5 Boilerplate.
                         // </p>
                         // ```
-                        if let Some(HtmlChild::NonText(last)) = last
-                            && is_br_element(last)
+                        if let Some(HtmlChild::NonText(last_elem)) = last
+                            && is_br_element(last_elem)
                         {
                             write!(f, [hard_line_break()])?;
+                        } else if let Some(HtmlChild::NonText(last_elem)) = last
+                            && let Some(HtmlChild::NonText(next)) = children_iter.peek()
+                        {
+                            // Whitespace between two elements
+                            let last_css_display = get_element_css_display(last_elem);
+                            let next_css_display = get_element_css_display(next);
+                            if last_css_display.is_inline_like()
+                                && next_css_display.is_inline_like()
+                            {
+                                // Both are inline - the outer group pattern handles the space
+                                // via the trailing line in the inner group from the previous element
+                            } else {
+                                write!(f, [space()])?;
+                            }
+                        } else if let Some(HtmlChild::NonText(last_elem)) = last {
+                            // Whitespace AFTER an inline element (followed by text or end)
+                            // This is handled by the outer group pattern's trailing line in inner group
+                            let last_css_display = get_element_css_display(last_elem);
+                            if !last_css_display.is_inline_like() {
+                                write!(f, [space()])?;
+                            }
+                        } else if let Some(HtmlChild::NonText(next)) = children_iter.peek() {
+                            // Whitespace BEFORE an inline element (preceded by text)
+                            // Don't write space here - the NonText case will wrap the element
+                            // in an outer group with a `line` before it
+                            let next_css_display = get_element_css_display(next);
+                            if !next_css_display.is_inline_like() {
+                                write!(f, [space()])?;
+                            }
                         } else {
                             write!(f, [space()])?;
                         }
@@ -602,6 +638,22 @@ impl FormatHtmlElementList {
                     HtmlChild::NonText(non_text) => {
                         let non_text_group_id = f.group_id("non text child");
                         let css_display = get_element_css_display(non_text);
+
+                        // Check if this inline element was preceded by whitespace (text context).
+                        // If so, we need to wrap it in an outer group with `line` before it.
+                        // This matches Prettier's "outer/inner" group pattern where the line break
+                        // happens BEFORE the element rather than inside it.
+                        let needs_outer_group = css_display.is_inline_like()
+                            && matches!(last, Some(HtmlChild::Whitespace));
+
+                        // For the outer group pattern, check if we need a trailing line inside the inner group.
+                        // This handles cases like `<a>link</a> more` where there's whitespace then text after.
+                        let needs_trailing_line_in_inner = needs_outer_group
+                            && matches!(
+                                children_iter.peek(),
+                                Some(HtmlChild::Whitespace | HtmlChild::Newline)
+                            );
+
                         let line_mode = match children_iter.peek() {
                             Some(HtmlChild::Word(_)) => {
                                 if css_display.is_externally_whitespace_sensitive() {
@@ -657,7 +709,36 @@ impl FormatHtmlElementList {
                             format_with(move |f| f.write_element(FormatElement::Line(mode)))
                         });
 
-                        if force_multiline {
+                        if needs_outer_group {
+                            // Wrap inline element in outer group with `line` before it.
+                            // This makes the line break happen BEFORE the element when it doesn't fit.
+                            // Pattern: group([line, group([element, line?])])
+                            // The trailing line inside the inner group handles "element whitespace text" cases.
+                            let mut memoized = non_text.format().memoized();
+                            let inner_group_id = f.group_id("inner");
+
+                            if needs_trailing_line_in_inner {
+                                write!(
+                                    f,
+                                    [group(&format_args![
+                                        soft_line_break_or_space(),
+                                        group(&format_args![&memoized, soft_line_break_or_space()])
+                                            .with_group_id(Some(inner_group_id)),
+                                    ])
+                                    .with_group_id(Some(non_text_group_id))]
+                                )?;
+                            } else {
+                                write!(
+                                    f,
+                                    [group(&format_args![
+                                        soft_line_break_or_space(),
+                                        group(&memoized).with_group_id(Some(inner_group_id)),
+                                        format_separator
+                                    ])
+                                    .with_group_id(Some(non_text_group_id))]
+                                )?;
+                            }
+                        } else if force_multiline {
                             write!(
                                 f,
                                 [
