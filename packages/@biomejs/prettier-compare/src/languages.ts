@@ -95,6 +95,11 @@ export const LANGUAGES: Record<string, LanguageConfig> = {
 		prettierParser: "yaml",
 		displayName: "YAML",
 	},
+	svelte: {
+		biomeFilePath: "file.svelte",
+		prettierParser: "svelte",
+		displayName: "Svelte",
+	},
 };
 
 /**

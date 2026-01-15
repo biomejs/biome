@@ -3,6 +3,7 @@
  */
 
 import * as prettier from "prettier";
+import * as prettierPluginSvelte from "prettier-plugin-svelte";
 
 export interface PrettierResult {
 	/** The formatted output */
@@ -20,6 +21,16 @@ interface PrettierDebugApi {
 }
 
 /**
+ * Get the plugins array for a given parser.
+ */
+function getPluginsForParser(parser: string): prettier.Plugin[] {
+	if (parser === "svelte") {
+		return [prettierPluginSvelte];
+	}
+	return [];
+}
+
+/**
  * Format code using Prettier and return the result with IR.
  *
  * @param code - The source code to format
@@ -31,8 +42,11 @@ export async function formatWithPrettier(
 	parser: string,
 ): Promise<PrettierResult> {
 	try {
+		const plugins = getPluginsForParser(parser);
+		const options: prettier.Options = { parser, plugins };
+
 		// Get formatted output
-		const output = await prettier.format(code, { parser });
+		const output = await prettier.format(code, options);
 
 		// Get IR using Prettier's debug API
 		let ir = "";
@@ -40,7 +54,7 @@ export async function formatWithPrettier(
 			const debugApi = (prettier as unknown as { __debug: PrettierDebugApi })
 				.__debug;
 			if (debugApi?.printToDoc && debugApi?.formatDoc) {
-				const doc = await debugApi.printToDoc(code, { parser });
+				const doc = await debugApi.printToDoc(code, options);
 				ir = await debugApi.formatDoc(doc, {});
 			}
 		} catch {
