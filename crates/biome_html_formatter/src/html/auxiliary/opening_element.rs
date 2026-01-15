@@ -53,12 +53,6 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
 
         let bracket_same_line = f.options().bracket_same_line().value();
 
-        // if this isn't whitespace sensitive, and there is a comment trivia
-        // we must add a newline right after the comment.
-        if !is_whitespace_sensitive && l_angle_token.has_leading_comments() {
-            write!(f, [hard_line_break()])?;
-        }
-
         write!(
             f,
             [&group(&format_with(|f| {

@@ -154,31 +154,16 @@ info: html/tags/tags.html
  <div>
    <div>string</div>
  
-@@ -131,19 +127,18 @@
+@@ -131,8 +127,7 @@
  
  <label
    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 -></label>
 -|
-+></label> |
++></label>|
  <span></span>
  <br />
--<button xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>12345678901234567890</button>
--<br /><br />
-+<button xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>12345678901234567890</button> <br
-+/><br />
- 
- <button bind-disabled="isUnchanged" on-click="onSave($event)">
-   Disabled Cancel
- </button>
- <br /><br />
--<button xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>12345678901234567890</button>
--<br /><br />
-+<button xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>12345678901234567890</button> <br
-+/><br />
- 
- <button bind-disabled="isUnchanged" on-click="onSave($event)">
-   Disabled Cancel
+ <button xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>12345678901234567890</button>
 @@ -170,8 +165,9 @@
    ><span>tag name in other namespace should also lower cased</span></x:root
  >
@@ -336,18 +321,18 @@ info: html/tags/tags.html
 
 <label
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-></label> |
+></label>|
 <span></span>
 <br />
-<button xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>12345678901234567890</button> <br
-/><br />
+<button xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>12345678901234567890</button>
+<br /><br />
 
 <button bind-disabled="isUnchanged" on-click="onSave($event)">
   Disabled Cancel
 </button>
 <br /><br />
-<button xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>12345678901234567890</button> <br
-/><br />
+<button xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>12345678901234567890</button>
+<br /><br />
 
 <button bind-disabled="isUnchanged" on-click="onSave($event)">
   Disabled Cancel
