@@ -3,7 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource};
+use biome_html_syntax::{
+    AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource,
+};
 use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::HtmlRuleAction;
