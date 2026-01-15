@@ -830,7 +830,7 @@ fn is_stable_expression(
                     .member()
                     .ok()
                     .and_then(|member| member.value_token().ok())
-                    .map(|value_token| value_token.text_trimmed().to_owned()),
+                    .map(|value_token| value_token.token_text_trimmed()),
             ) else {
                 return false;
             };
@@ -926,7 +926,7 @@ fn get_single_pattern_member(
                         .member()
                         .ok()
                         .and_then(|member| member.name())
-                        .map(|name| ReactHookResultMember::Key(name.to_string()))
+                        .map(ReactHookResultMember::Key)
                 }
                 Ok(AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
                     shorthand_property,
@@ -934,9 +934,7 @@ fn get_single_pattern_member(
                     .identifier()
                     .ok()
                     .and_then(|identifier| identifier.as_js_identifier_binding()?.name_token().ok())
-                    .map(|name_token| {
-                        ReactHookResultMember::Key(name_token.text_trimmed().to_owned())
-                    }),
+                    .map(|name_token| ReactHookResultMember::Key(name_token.token_text_trimmed())),
                 // Shouldn't happen because of the previous check
                 _ => None,
             }) else {

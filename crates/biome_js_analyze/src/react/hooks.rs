@@ -5,7 +5,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression,
     JsFunctionExpression, TextRange, static_value::StaticValue,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 
@@ -235,7 +235,7 @@ impl StableReactHookConfiguration {
 /// Represents a potentially stable React hook result member.
 #[derive(Clone)]
 pub enum ReactHookResultMember {
-    Key(String),
+    Key(TokenText),
     Index(u8),
 }
 
@@ -282,7 +282,9 @@ pub fn is_react_hook_call_stable(
             (StableHookResult::Indices(indices), Some(ReactHookResultMember::Index(i))) => {
                 indices.contains(i)
             }
-            (StableHookResult::Keys(keys), Some(ReactHookResultMember::Key(k))) => keys.contains(k),
+            (StableHookResult::Keys(keys), Some(ReactHookResultMember::Key(k))) => {
+                keys.iter().any(|key| key == k.text())
+            }
             _ => false,
         }
     })
