@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList};
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::HtmlRuleAction;
 
@@ -229,7 +229,7 @@ fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
                 false
             } else {
                 // Element is not hidden, check if it has accessible content recursively
-                has_accessible_content(&element.children()) || is_non_empty_element(element)
+                has_accessible_content(&element.children())
             }
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
@@ -264,9 +264,4 @@ fn is_accessible_text_content(content: &AnyHtmlContent) -> bool {
         // Embedded content is treated as potentially accessible to avoid false positives
         AnyHtmlContent::HtmlEmbeddedContent(_) => true,
     }
-}
-
-/// Checks if an element is non-empty (has any children or text).
-fn is_non_empty_element(element: &biome_html_syntax::HtmlElement) -> bool {
-    !element.children().is_empty()
 }
