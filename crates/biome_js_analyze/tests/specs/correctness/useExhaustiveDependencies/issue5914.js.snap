@@ -1,0 +1,106 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: issue5914.js
+---
+# Input
+```js
+import { useMemo } from "react";
+
+function Component1() {
+    const
+        varA = Math.random(),
+        // Incorrect diagnostic reported: varA should be removed from deps.
+        varB = useMemo(() => varA, [varA]);
+}
+
+function Component2() {
+    const
+        varA = Math.random(),
+        // Missing diagnostic reported: varA should be added to deps.
+        varB = useMemo(() => varA, [])
+}
+
+function Component3() {
+    const varA = Math.random();
+    // Diagnostic is not expected to be generated here.
+    const varB = useMemo(() => varA, [varA]);
+}
+
+function Component4() {
+    const varA = Math.random();
+    // Diagnostic is properly generated here.
+    const varB = useMemo(() => varA, []);
+}
+
+
+```
+
+# Diagnostics
+```
+issue5914.js:14:16 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on varA.
+  
+    12 │         varA = Math.random(),
+    13 │         // Missing diagnostic reported: varA should be added to deps.
+  > 14 │         varB = useMemo(() => varA, [])
+       │                ^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    12 │         varA = Math.random(),
+    13 │         // Missing diagnostic reported: varA should be added to deps.
+  > 14 │         varB = useMemo(() => varA, [])
+       │                              ^^^^
+    15 │ }
+    16 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    14 │ ········varB·=·useMemo(()·=>·varA,·[varA])
+       │                                     ++++  
+
+```
+
+```
+issue5914.js:26:18 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on varA.
+  
+    24 │     const varA = Math.random();
+    25 │     // Diagnostic is properly generated here.
+  > 26 │     const varB = useMemo(() => varA, []);
+       │                  ^^^^^^^
+    27 │ }
+    28 │ 
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    24 │     const varA = Math.random();
+    25 │     // Diagnostic is properly generated here.
+  > 26 │     const varB = useMemo(() => varA, []);
+       │                                ^^^^
+    27 │ }
+    28 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    26 │ ····const·varB·=·useMemo(()·=>·varA,·[varA]);
+       │                                       ++++   
+
+```
