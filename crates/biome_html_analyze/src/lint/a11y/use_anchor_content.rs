@@ -294,14 +294,14 @@ fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
 
             match tag_text {
                 // <img> requires non-empty alt attribute
-                Some(name) if name.eq_ignore_ascii_case("img") => element
-                    .find_attribute_by_name("alt")
-                    .is_some_and(|attr| {
+                Some(name) if name.eq_ignore_ascii_case("img") => {
+                    element.find_attribute_by_name("alt").is_some_and(|attr| {
                         attr.initializer()
                             .and_then(|init| init.value().ok())
                             .and_then(|value| value.string_value())
                             .is_some_and(|s| !s.trim().is_empty())
-                    }),
+                    })
+                }
                 // Void elements without meaningful content are not accessible
                 Some(name)
                     if name.eq_ignore_ascii_case("br")
