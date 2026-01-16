@@ -10,6 +10,15 @@ expression: invalid.html
 	<title></title>
 	<circle />
 </svg>
+<svg>
+	<rect />
+	<rect />
+	<g>
+		<title>foo</title>
+		<circle />
+		<circle />
+	</g>
+</svg>
 <svg role="img" title="title">
 	<span id="">foo</span>
 </svg>
@@ -18,6 +27,12 @@ expression: invalid.html
 </svg>
 <svg role="">
 	<span>implicit role</span>
+</svg>
+<svg role="graphics-symbol">
+	<rect />
+</svg>
+<svg role="img presentation">
+	<rect />
 </svg>
 
 ```
@@ -52,8 +67,8 @@ invalid.html:3:1 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━�
   > 5 │ 	<circle />
   > 6 │ </svg>
       │ ^^^^^^
-    7 │ <svg role="img" title="title">
-    8 │ 	<span id="">foo</span>
+    7 │ <svg>
+    8 │ 	<rect />
   
   i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
   
@@ -67,52 +82,114 @@ invalid.html:7:1 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━�
   
      5 │ 	<circle />
      6 │ </svg>
-   > 7 │ <svg role="img" title="title">
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   > 8 │ 	<span id="">foo</span>
-   > 9 │ </svg>
-       │ ^^^^^^
-    10 │ <svg role="img" aria-labelledby="title">
-    11 │ 	<span id="title2">foo</span>
-  
-  i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
-  
-
-```
-
-```
-invalid.html:10:1 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Alternative text title element cannot be empty
-  
-     8 │ 	<span id="">foo</span>
-     9 │ </svg>
-  > 10 │ <svg role="img" aria-labelledby="title">
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 11 │ 	<span id="title2">foo</span>
-  > 12 │ </svg>
-       │ ^^^^^^
-    13 │ <svg role="">
-    14 │ 	<span>implicit role</span>
-  
-  i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
-  
-
-```
-
-```
-invalid.html:13:1 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Alternative text title element cannot be empty
-  
-    11 │ 	<span id="title2">foo</span>
-    12 │ </svg>
-  > 13 │ <svg role="">
-       │ ^^^^^^^^^^^^^
-  > 14 │ 	<span>implicit role</span>
+   > 7 │ <svg>
+       │ ^^^^^
+   > 8 │ 	<rect />
+        ...
+  > 14 │ 	</g>
   > 15 │ </svg>
        │ ^^^^^^
-    16 │ 
+    16 │ <svg role="img" title="title">
+    17 │ 	<span id="">foo</span>
+  
+  i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
+  
+
+```
+
+```
+invalid.html:16:1 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Alternative text title element cannot be empty
+  
+    14 │ 	</g>
+    15 │ </svg>
+  > 16 │ <svg role="img" title="title">
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 17 │ 	<span id="">foo</span>
+  > 18 │ </svg>
+       │ ^^^^^^
+    19 │ <svg role="img" aria-labelledby="title">
+    20 │ 	<span id="title2">foo</span>
+  
+  i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
+  
+
+```
+
+```
+invalid.html:19:1 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Alternative text title element cannot be empty
+  
+    17 │ 	<span id="">foo</span>
+    18 │ </svg>
+  > 19 │ <svg role="img" aria-labelledby="title">
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 20 │ 	<span id="title2">foo</span>
+  > 21 │ </svg>
+       │ ^^^^^^
+    22 │ <svg role="">
+    23 │ 	<span>implicit role</span>
+  
+  i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
+  
+
+```
+
+```
+invalid.html:22:1 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Alternative text title element cannot be empty
+  
+    20 │ 	<span id="title2">foo</span>
+    21 │ </svg>
+  > 22 │ <svg role="">
+       │ ^^^^^^^^^^^^^
+  > 23 │ 	<span>implicit role</span>
+  > 24 │ </svg>
+       │ ^^^^^^
+    25 │ <svg role="graphics-symbol">
+    26 │ 	<rect />
+  
+  i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
+  
+
+```
+
+```
+invalid.html:25:1 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Alternative text title element cannot be empty
+  
+    23 │ 	<span>implicit role</span>
+    24 │ </svg>
+  > 25 │ <svg role="graphics-symbol">
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 26 │ 	<rect />
+  > 27 │ </svg>
+       │ ^^^^^^
+    28 │ <svg role="img presentation">
+    29 │ 	<rect />
+  
+  i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
+  
+
+```
+
+```
+invalid.html:28:1 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Alternative text title element cannot be empty
+  
+    26 │ 	<rect />
+    27 │ </svg>
+  > 28 │ <svg role="img presentation">
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 29 │ 	<rect />
+  > 30 │ </svg>
+       │ ^^^^^^
+    31 │ 
   
   i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
   
