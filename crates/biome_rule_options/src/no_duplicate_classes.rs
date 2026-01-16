@@ -68,10 +68,8 @@ impl schemars::JsonSchema for NoDuplicateClassesOptions {
 
     fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         // Generate schema based on the inner UseSortedClassesOptions but with our type name
-        let inner_schema = UseSortedClassesOptions::json_schema(generator);
-
         // The schema is already correct, we just need the distinct type name (handled by schema_name)
-        inner_schema
+        UseSortedClassesOptions::json_schema(generator)
     }
 }
 
