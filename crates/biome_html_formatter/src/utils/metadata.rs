@@ -763,20 +763,6 @@ pub(crate) fn is_canonical_html_attribute(
     is_canonical_html_attribute_name(tag_name.text_trimmed(), attribute_name.text_trimmed())
 }
 
-/// Whether an element should be considered whitespace sensitive, considering the element's tag name and the
-/// formatter's whitespace sensitivity options.
-pub(crate) fn is_element_whitespace_sensitive_from_element(
-    f: &HtmlFormatter,
-    element: &AnyHtmlElement,
-) -> bool {
-    let Some(tag_name) = element.name() else {
-        return false;
-    };
-    let is_whitespace_sensitive = get_css_display(&tag_name).is_inline_like();
-    let sensitivity = f.options().whitespace_sensitivity();
-    sensitivity.is_css() && is_whitespace_sensitive || sensitivity.is_strict()
-}
-
 /// Gets the CSS display value for an HTML element.
 pub(crate) fn get_element_css_display(element: &AnyHtmlElement) -> CssDisplay {
     if element.is_svelte_block() {
