@@ -499,7 +499,7 @@ impl FormatHtmlElementList {
                                 // ```html
                                 // <a>link</a>more text
                                 // ```
-                                if !css_display.is_externally_whitespace_sensitive() {
+                                if !css_display.is_externally_whitespace_sensitive(f) {
                                     // For inline elements, we don't add a line break here.
                                     // Instead, we'll wrap the element in an outer group with a line
                                     // before it in the NonText handling code below. This matches
@@ -649,7 +649,7 @@ impl FormatHtmlElementList {
 
                         let line_mode = match children_iter.peek() {
                             Some(HtmlChild::Word(_)) => {
-                                if css_display.is_externally_whitespace_sensitive() {
+                                if css_display.is_externally_whitespace_sensitive(f) {
                                     // not allowed to add whitespace if the next one is externally whitespace sensitive
                                     // ```html
                                     // <a>link</a>more text
@@ -662,8 +662,8 @@ impl FormatHtmlElementList {
 
                             Some(HtmlChild::NonText(non_text_next)) => {
                                 let next_css_display = get_element_css_display(non_text_next);
-                                if css_display.is_externally_whitespace_sensitive()
-                                    && next_css_display.is_externally_whitespace_sensitive()
+                                if css_display.is_externally_whitespace_sensitive(f)
+                                    && next_css_display.is_externally_whitespace_sensitive(f)
                                 {
                                     // not allowed to add whitespace if the next one is externally whitespace sensitive
                                     // ```html
@@ -676,7 +676,7 @@ impl FormatHtmlElementList {
                             }
 
                             Some(HtmlChild::Comment(_)) => {
-                                if css_display.is_externally_whitespace_sensitive() {
+                                if css_display.is_externally_whitespace_sensitive(f) {
                                     // not allowed to add whitespace if the next one is externally whitespace sensitive
                                     // ```html
                                     // <a>link</a><!-- comment -->

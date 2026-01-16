@@ -73,7 +73,7 @@ impl FormatHtmlElement {
         let tag_name = opening_element.name()?;
         let css_display = get_css_display_from_tag(&tag_name);
         let is_element_internally_whitespace_sensitive =
-            css_display.is_internally_whitespace_sensitive();
+            css_display.is_internally_whitespace_sensitive(f);
         let is_root_element_list = node
             .syntax()
             .ancestors()

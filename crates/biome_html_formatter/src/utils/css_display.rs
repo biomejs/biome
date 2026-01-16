@@ -8,6 +8,8 @@
 //! - The `html-ua-styles` npm package used by Prettier
 //! - HTML WHATWG spec: <https://html.spec.whatwg.org/multipage/rendering.html#the-css-user-agent-style-sheet-and-presentational-hints>
 
+use crate::HtmlFormatter;
+use crate::context::WhitespaceSensitivity;
 use biome_html_syntax::HtmlTagName;
 use biome_string_case::StrLikeExtension;
 
@@ -133,15 +135,28 @@ impl CssDisplay {
     }
 
     /// Whether elements with this display value are considered
-    /// whitespace-sensitive on the inside (i.e., their children).
-    pub fn is_internally_whitespace_sensitive(&self) -> bool {
-        !self.is_block_like() && *self != Self::InlineBlock
+    /// whitespace-sensitive on the inside (i.e., their children), respecting
+    /// the formatter's whitespace sensitivity setting.
+    ///
+    /// - `Css`: Only inline-like elements (not block-like and not inline-block) are whitespace-sensitive.
+    /// - `Strict`: All elements are whitespace-sensitive.
+    /// - `Ignore`: No elements are whitespace-sensitive.
+    pub fn is_internally_whitespace_sensitive(&self, f: &HtmlFormatter) -> bool {
+        let sensitivity = f.options().whitespace_sensitivity();
+        sensitivity.is_css() && !self.is_block_like() && *self != Self::InlineBlock
+            || sensitivity.is_strict()
     }
 
     /// Whether elements with this display value are considered
-    /// whitespace-sensitive on the outside (i.e., around the element, to siblings).
-    pub fn is_externally_whitespace_sensitive(&self) -> bool {
-        self.is_inline_like()
+    /// whitespace-sensitive on the outside (i.e., around the element, to siblings),
+    /// respecting the formatter's whitespace sensitivity setting.
+    ///
+    /// - `Css`: Only inline-like elements are whitespace-sensitive.
+    /// - `Strict`: All elements are whitespace-sensitive.
+    /// - `Ignore`: No elements are whitespace-sensitive.
+    pub fn is_externally_whitespace_sensitive(&self, f: &HtmlFormatter) -> bool {
+        let sensitivity = f.options().whitespace_sensitivity();
+        sensitivity.is_css() && self.is_inline_like() || sensitivity.is_strict()
     }
 }
 
