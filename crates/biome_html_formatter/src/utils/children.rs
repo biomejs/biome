@@ -4,12 +4,13 @@ use std::{
 };
 
 use biome_formatter::{
-    Buffer, Format, FormatElement, FormatResult, format_args, prelude::*, write,
+    Buffer, Format, FormatElement, FormatResult, comments::CommentStyle, format_args, prelude::*,
+    write,
 };
 use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlClosingElement};
 use biome_rowan::{AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText};
 
-use crate::{HtmlFormatter, context::HtmlFormatContext};
+use crate::{HtmlFormatter, comments::HtmlCommentStyle, context::HtmlFormatContext};
 
 pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = [b' ', b'\n', b'\t', b'\r'];
 
@@ -302,7 +303,12 @@ where
                             .slice(TextRange::at(relative_start, word.text_len()));
                         let source_position = value_token.text_range().start() + relative_start;
 
-                        builder.entry(HtmlChild::Comment(HtmlWord::new(text, source_position)));
+                        // Skip suppression comments here - they will be formatted as part of the
+                        // verbatim output for the next (suppressed) element. This prevents the
+                        // comment from being printed twice.
+                        if !HtmlCommentStyle::is_suppression(text.text()) {
+                            builder.entry(HtmlChild::Comment(HtmlWord::new(text, source_position)));
+                        }
                     }
                 }
                 prev_chunk_was_comment = matches!(chunk, (_, HtmlTextChunk::Comment(_)));

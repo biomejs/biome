@@ -765,8 +765,26 @@ pub(crate) fn is_canonical_html_attribute(
 
 /// Gets the CSS display value for an HTML element.
 pub(crate) fn get_element_css_display(element: &AnyHtmlElement) -> CssDisplay {
-    if element.is_svelte_block() {
-        return CssDisplay::Block;
+    use biome_html_syntax::AnySvelteBlock;
+
+    // Check for Svelte blocks and classify them appropriately
+    if let Some(svelte_block) = element.clone().as_svelte_block() {
+        return match svelte_block {
+            // {@html ...} and {@render ...} are "tag" expressions that inject content inline
+            // They should be treated as inline elements for whitespace sensitivity purposes
+            AnySvelteBlock::SvelteHtmlBlock(_) | AnySvelteBlock::SvelteRenderBlock(_) => {
+                CssDisplay::Inline
+            }
+            // Control flow blocks ({#if}, {#each}, etc.) and other constructs are block-level
+            AnySvelteBlock::SvelteIfBlock(_)
+            | AnySvelteBlock::SvelteEachBlock(_)
+            | AnySvelteBlock::SvelteAwaitBlock(_)
+            | AnySvelteBlock::SvelteKeyBlock(_)
+            | AnySvelteBlock::SvelteSnippetBlock(_)
+            | AnySvelteBlock::SvelteConstBlock(_)
+            | AnySvelteBlock::SvelteDebugBlock(_)
+            | AnySvelteBlock::SvelteBogusBlock(_) => CssDisplay::Block,
+        };
     }
 
     if let Some(tag_name) = element.name() {

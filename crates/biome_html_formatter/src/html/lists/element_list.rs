@@ -410,14 +410,25 @@ impl FormatHtmlElementList {
                 || children_meta.multiple_block_elements;
             let mut children_iter = HtmlChildrenIterator::new(children.iter());
 
-            // Trim leading new lines
+            // Trim leading new lines, but track if there were any
+            let mut had_leading_newline = false;
             if !self.is_container_whitespace_sensitive {
                 while matches!(
                     children_iter.peek(),
                     Some(HtmlChild::Newline | HtmlChild::EmptyLine)
                 ) {
+                    had_leading_newline = true;
                     children_iter.next();
                 }
+            }
+
+            // Force multiline if there was a leading newline AND there are block elements
+            // This respects the user's intent to break when they have:
+            // <div>
+            //   <div>...</div>
+            // </div>
+            if had_leading_newline && children_meta.has_block_element {
+                force_multiline = true;
             }
 
             if force_multiline {
@@ -681,7 +692,21 @@ impl FormatHtmlElementList {
                                 HtmlChild::Whitespace | HtmlChild::Newline | HtmlChild::EmptyLine,
                             ) => None,
 
-                            Some(HtmlChild::Verbatim(_)) => Some(LineMode::Hard),
+                            Some(HtmlChild::Verbatim(verbatim_element)) => {
+                                let verbatim_css_display =
+                                    get_element_css_display(verbatim_element);
+                                if css_display.is_externally_whitespace_sensitive(f)
+                                    && verbatim_css_display.is_externally_whitespace_sensitive(f)
+                                {
+                                    // not allowed to add whitespace if the next one is externally whitespace sensitive
+                                    // ```html
+                                    // <span>1</span><!--biome-ignore format: reason--><span>2</span>
+                                    // ```
+                                    None
+                                } else {
+                                    Some(LineMode::Hard)
+                                }
+                            }
 
                             None => None,
                         };

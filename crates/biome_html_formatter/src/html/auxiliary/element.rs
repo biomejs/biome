@@ -1,5 +1,6 @@
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
 use crate::utils::css_display::{CssDisplay, get_css_display, get_css_display_from_tag};
+use crate::verbatim::{format_html_leading_comments, format_html_leading_comments_for_block};
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
 use biome_html_syntax::{
@@ -31,6 +32,27 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         )?;
 
         Ok(())
+    }
+
+    fn fmt_leading_comments(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
+        // For block elements, use hard line break after leading comments even if
+        // there's no newline in the source. This ensures proper formatting like:
+        // <!-- comment -->
+        // <div>...</div>
+        // Instead of:
+        // <!-- comment --> <div>...</div>
+        let css_display = node
+            .opening_element()
+            .ok()
+            .and_then(|opening| opening.name().ok())
+            .map(|tag| get_css_display_from_tag(&tag))
+            .unwrap_or(CssDisplay::Block);
+
+        if css_display.is_block_like() {
+            format_html_leading_comments_for_block(node.syntax()).fmt(f)
+        } else {
+            format_html_leading_comments(node.syntax()).fmt(f)
+        }
     }
 
     fn fmt_trailing_comments(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
