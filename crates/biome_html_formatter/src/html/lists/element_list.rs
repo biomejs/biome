@@ -425,6 +425,9 @@ impl FormatHtmlElementList {
             }
 
             let mut last: Option<&HtmlChild> = None;
+            // Tracks whether the last NonText element already had its trailing whitespace
+            // handled by the outer group pattern (needs_trailing_line_in_inner).
+            let mut last_nontext_had_trailing_line = false;
 
             let mut is_first_child = true;
 
@@ -559,10 +562,16 @@ impl FormatHtmlElementList {
                                 write!(f, [space()])?;
                             }
                         } else if let Some(HtmlChild::NonText(last_elem)) = last {
-                            // Whitespace AFTER a whitespace sensitive element (followed by text or end)
-                            // This is handled by the outer group pattern's trailing line in inner group
+                            // Whitespace AFTER an element (followed by text or end)
                             let last_css_display = get_element_css_display(last_elem);
-                            if !last_css_display.is_externally_whitespace_sensitive(f) {
+                            if last_nontext_had_trailing_line {
+                                // The outer group pattern already added the trailing space
+                                // Don't add another one
+                            } else if last_css_display.is_externally_whitespace_sensitive(f) {
+                                // For whitespace-sensitive elements, use soft_line_break_or_space
+                                // so the space is preserved in flat mode
+                                write!(f, [soft_line_break_or_space()])?;
+                            } else {
                                 write!(f, [space()])?;
                             }
                         } else {
@@ -701,6 +710,7 @@ impl FormatHtmlElementList {
                                     ])
                                     .with_group_id(Some(non_text_group_id))]
                                 )?;
+                                last_nontext_had_trailing_line = true;
                             } else {
                                 write!(
                                     f,
@@ -711,6 +721,7 @@ impl FormatHtmlElementList {
                                     ])
                                     .with_group_id(Some(non_text_group_id))]
                                 )?;
+                                last_nontext_had_trailing_line = false;
                             }
                         } else if force_multiline {
                             write!(
@@ -721,6 +732,7 @@ impl FormatHtmlElementList {
                                     format_separator
                                 ]
                             )?;
+                            last_nontext_had_trailing_line = false;
                         } else {
                             let mut memoized = non_text.format().memoized();
 
@@ -738,6 +750,7 @@ impl FormatHtmlElementList {
                                     format_separator
                                 ]
                             )?;
+                            last_nontext_had_trailing_line = false;
                         }
                     }
 
