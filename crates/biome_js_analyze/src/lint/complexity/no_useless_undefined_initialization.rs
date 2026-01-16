@@ -51,7 +51,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// Exported variables are not flagged because in some frameworks (e.g., Svelte),
+    /// Exported variables are not flagged because in some frameworks (e.g., Svelte 4),
     /// initializing exported variables to `undefined` is used to declare optional props.
     ///
     /// ```js
@@ -111,7 +111,7 @@ impl Rule for NoUselessUndefinedInitialization {
 
             if keyword.is_undefined() {
                 // Skip if the variable is exported.
-                // In frameworks like Svelte, exported variables with `undefined`
+                // In frameworks like Svelte 4, exported variables with `undefined`
                 // initialization are used to declare optional props.
                 let is_exported = decl
                     .id()

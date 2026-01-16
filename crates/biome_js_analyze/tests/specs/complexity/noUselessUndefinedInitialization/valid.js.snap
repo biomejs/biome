@@ -18,7 +18,7 @@ class Foo {
 }
 
 // Exported variables should not be flagged.
-// In frameworks like Svelte, exported variables with undefined initialization
+// In frameworks like Svelte 4, exported variables with undefined initialization
 // are used to declare optional props.
 
 // Direct export
