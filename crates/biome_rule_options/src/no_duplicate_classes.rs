@@ -17,11 +17,11 @@ pub struct NoDuplicateClassesOptions(UseSortedClassesOptions);
 
 impl NoDuplicateClassesOptions {
     /// Create new options with the given attributes and functions.
-    pub fn new(
-        attributes: Option<Box<[Box<str>]>>,
-        functions: Option<Box<[Box<str>]>>,
-    ) -> Self {
-        Self(UseSortedClassesOptions { attributes, functions })
+    pub fn new(attributes: Option<Box<[Box<str>]>>, functions: Option<Box<[Box<str>]>>) -> Self {
+        Self(UseSortedClassesOptions {
+            attributes,
+            functions,
+        })
     }
 }
 
