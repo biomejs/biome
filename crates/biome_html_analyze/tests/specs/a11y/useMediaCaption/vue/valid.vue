@@ -1,0 +1,15 @@
+<!-- should not generate diagnostics -->
+<video><track kind="captions" /></video>
+<audio><track kind="captions" /></audio>
+<!-- muted videos don't need captions -->
+<video muted></video>
+<video muted>
+    <source src="video.webm" type="video/webm" />
+</video>
+<!-- case insensitive kind check -->
+<video><track kind="Captions" /></video>
+<!-- custom components should be ignored -->
+<Video />
+<Audio />
+<VideoPlayer />
+<AudioPlayer />

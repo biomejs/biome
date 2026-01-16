@@ -1,0 +1,24 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<video src="video.mp4">
+    <track kind="captions" src="captions.vtt" />
+</video>
+<audio src="audio.mp3">
+    <track kind="captions" src="captions.vtt" />
+</audio>
+<!-- muted videos don't need captions -->
+<video muted src="video.mp4"></video>
+<video muted>
+    <source src="video.webm" type="video/webm" />
+</video>
+<!-- case insensitive kind check -->
+<video>
+    <track kind="Captions" src="captions.vtt" />
+</video>
+
+```

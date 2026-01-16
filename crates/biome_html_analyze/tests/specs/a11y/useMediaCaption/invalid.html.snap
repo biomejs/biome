@@ -1,0 +1,181 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<video src="video.mp4"></video>
+<audio src="audio.mp3"></audio>
+<video>
+    <source src="video.webm" type="video/webm" />
+</video>
+<audio>
+    <source src="audio.ogg" type="audio/ogg" />
+</audio>
+<!-- track without kind="captions" -->
+<video>
+    <track kind="subtitles" src="subtitles.vtt" />
+</video>
+<!-- track with missing kind attribute -->
+<video>
+    <track src="captions.vtt" />
+</video>
+<!-- track with empty kind attribute -->
+<video>
+    <track kind="" src="captions.vtt" />
+</video>
+<!-- muted audio still requires captions -->
+<audio muted src="audio.mp3"></audio>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <video src="video.mp4"></video>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <audio src="audio.mp3"></audio>
+    4 │ <video>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.html:3:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <video src="video.mp4"></video>
+  > 3 │ <audio src="audio.mp3"></audio>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <video>
+    5 │     <source src="video.webm" type="video/webm" />
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.html:4:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+    2 │ <video src="video.mp4"></video>
+    3 │ <audio src="audio.mp3"></audio>
+  > 4 │ <video>
+      │ ^^^^^^^
+  > 5 │     <source src="video.webm" type="video/webm" />
+  > 6 │ </video>
+      │ ^^^^^^^^
+    7 │ <audio>
+    8 │     <source src="audio.ogg" type="audio/ogg" />
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.html:7:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+     5 │     <source src="video.webm" type="video/webm" />
+     6 │ </video>
+   > 7 │ <audio>
+       │ ^^^^^^^
+   > 8 │     <source src="audio.ogg" type="audio/ogg" />
+   > 9 │ </audio>
+       │ ^^^^^^^^
+    10 │ <!-- track without kind="captions" -->
+    11 │ <video>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.html:11:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+     9 │ </audio>
+    10 │ <!-- track without kind="captions" -->
+  > 11 │ <video>
+       │ ^^^^^^^
+  > 12 │     <track kind="subtitles" src="subtitles.vtt" />
+  > 13 │ </video>
+       │ ^^^^^^^^
+    14 │ <!-- track with missing kind attribute -->
+    15 │ <video>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.html:15:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+    13 │ </video>
+    14 │ <!-- track with missing kind attribute -->
+  > 15 │ <video>
+       │ ^^^^^^^
+  > 16 │     <track src="captions.vtt" />
+  > 17 │ </video>
+       │ ^^^^^^^^
+    18 │ <!-- track with empty kind attribute -->
+    19 │ <video>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.html:19:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+    17 │ </video>
+    18 │ <!-- track with empty kind attribute -->
+  > 19 │ <video>
+       │ ^^^^^^^
+  > 20 │     <track kind="" src="captions.vtt" />
+  > 21 │ </video>
+       │ ^^^^^^^^
+    22 │ <!-- muted audio still requires captions -->
+    23 │ <audio muted src="audio.mp3"></audio>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.html:23:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a track for captions when using audio or video elements.
+  
+    21 │ </video>
+    22 │ <!-- muted audio still requires captions -->
+  > 23 │ <audio muted src="audio.mp3"></audio>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
