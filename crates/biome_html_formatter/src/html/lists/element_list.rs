@@ -527,18 +527,7 @@ impl FormatHtmlElementList {
 
                     // HTML comment
                     HtmlChild::Comment(comment) => {
-                        let separator = match children_iter.peek() {
-                            Some(HtmlChild::Word(_)) => Some(WordSeparator::BetweenWords),
-                            Some(HtmlChild::NonText(_)) => Some(WordSeparator::EndOfText {
-                                is_soft_line_break: true,
-                            }),
-                            _ => None,
-                        };
-
                         write!(f, [comment])?;
-                        if let Some(separator) = separator {
-                            write!(f, [separator])?;
-                        }
                     }
 
                     // Whitespace between children
@@ -754,23 +743,7 @@ impl FormatHtmlElementList {
 
                     // Verbatim content (suppressed formatting)
                     HtmlChild::Verbatim(element) => {
-                        let format_verbatim = format_verbatim_skipped(element.syntax());
-
-                        let line_mode = match children_iter.peek() {
-                            Some(HtmlChild::NonText(_) | HtmlChild::Verbatim(_)) => {
-                                Some(LineMode::Hard)
-                            }
-                            Some(HtmlChild::Word(_)) => Some(LineMode::Soft),
-                            _ => None,
-                        };
-
-                        child_breaks = line_mode.is_some_and(|mode| mode.is_hard());
-
-                        let format_separator = line_mode.map(|mode| {
-                            format_with(move |f| f.write_element(FormatElement::Line(mode)))
-                        });
-
-                        write!(f, [format_verbatim, format_separator])?;
+                        write!(f, [format_verbatim_skipped(element.syntax())])?;
                     }
                 }
 
@@ -811,31 +784,6 @@ fn is_br_element(element: &AnyHtmlElement) -> bool {
     element
         .name()
         .is_some_and(|name| name.text().eq_ignore_ascii_case("br"))
-}
-
-/// Separator between words in text content.
-#[derive(Copy, Clone, Debug)]
-enum WordSeparator {
-    /// Separator between two words. Creates a soft line break or space.
-    BetweenWords,
-
-    /// A separator at the end of text content, before an element.
-    EndOfText { is_soft_line_break: bool },
-}
-
-impl Format<HtmlFormatContext> for WordSeparator {
-    fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
-        match self {
-            Self::BetweenWords => soft_line_break_or_space().fmt(f),
-            Self::EndOfText { is_soft_line_break } => {
-                if *is_soft_line_break {
-                    soft_line_break().fmt(f)
-                } else {
-                    hard_line_break().fmt(f)
-                }
-            }
-        }
-    }
 }
 
 fn format_partial_closing_tag(
