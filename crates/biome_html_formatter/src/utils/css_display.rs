@@ -58,6 +58,9 @@ impl CssDisplay {
     ///
     /// Block-like elements are NOT whitespace-sensitive in the CSS whitespace mode.
     /// This includes `block`, `list-item`, `table`, `table-row`, etc.
+    ///
+    /// **Note: For formatting purposes, you MUST use [`Self::is_internally_whitespace_sensitive`] or
+    /// [`Self::is_externally_whitespace_sensitive`] to determine if an element is whitespace-sensitive.**
     pub fn is_block_like(self) -> bool {
         matches!(
             self,
@@ -80,8 +83,8 @@ impl CssDisplay {
     /// Inline-like elements ARE whitespace-sensitive in the CSS whitespace mode.
     /// This includes `inline`, `inline-block`, `ruby`, etc.
     ///
-    /// Note: For formatting purposes, use `is_strictly_inline()` if you need
-    /// to distinguish between pure inline elements and inline-block elements.
+    /// **Note: For formatting purposes, you MUST use [`Self::is_internally_whitespace_sensitive`] or
+    /// [`Self::is_externally_whitespace_sensitive`] to determine if an element is whitespace-sensitive.**
     pub fn is_inline_like(self) -> bool {
         matches!(
             self,
@@ -105,8 +108,8 @@ impl CssDisplay {
     /// Use this for whitespace sensitivity decisions in formatting where
     /// inline-block and table elements should be treated more like block elements.
     ///
-    /// Note: Table cells (td, th) have inline content but are not themselves
-    /// inline elements for formatting purposes.
+    /// **Note: For formatting purposes, you MUST use [`Self::is_internally_whitespace_sensitive`] or
+    /// [`Self::is_externally_whitespace_sensitive`] to determine if an element is whitespace-sensitive.**
     pub fn is_strictly_inline(self) -> bool {
         matches!(
             self,
@@ -119,6 +122,9 @@ impl CssDisplay {
     /// This is used for determining if children should be forced to multiline.
     /// Prettier forces line breaks between children of table-like elements
     /// (except table-cell).
+    ///
+    /// **Note: For formatting purposes, you MUST use [`Self::is_internally_whitespace_sensitive`] or
+    /// [`Self::is_externally_whitespace_sensitive`] to determine if an element is whitespace-sensitive.**
     pub fn is_table_like(self) -> bool {
         matches!(
             self,

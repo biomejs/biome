@@ -437,7 +437,7 @@ impl FormatHtmlElementList {
                 // For whitespace-sensitive containers (like <span>), leading/trailing
                 // whitespace (including newlines) should be converted to a space in flat mode.
                 // This matches Prettier's behavior where `<span>\n123</span>` becomes `<span> 123</span>`.
-                if self.is_container_whitespace_sensitive && child.is_whitespace() {
+                if self.is_container_whitespace_sensitive && child.is_any_whitespace() {
                     if is_first_child {
                         // Leading whitespace: becomes a space in flat mode
                         write!(f, [soft_line_break_or_space()])?;
@@ -561,8 +561,8 @@ impl FormatHtmlElementList {
                             // Whitespace between two elements
                             let last_css_display = get_element_css_display(last_elem);
                             let next_css_display = get_element_css_display(next);
-                            if last_css_display.is_inline_like()
-                                && next_css_display.is_inline_like()
+                            if last_css_display.is_externally_whitespace_sensitive(f)
+                                && next_css_display.is_externally_whitespace_sensitive(f)
                             {
                                 // Both are inline - the outer group pattern handles the space
                                 // via the trailing line in the inner group from the previous element
@@ -570,18 +570,10 @@ impl FormatHtmlElementList {
                                 write!(f, [space()])?;
                             }
                         } else if let Some(HtmlChild::NonText(last_elem)) = last {
-                            // Whitespace AFTER an inline element (followed by text or end)
+                            // Whitespace AFTER a whitespace sensitive element (followed by text or end)
                             // This is handled by the outer group pattern's trailing line in inner group
                             let last_css_display = get_element_css_display(last_elem);
-                            if !last_css_display.is_inline_like() {
-                                write!(f, [space()])?;
-                            }
-                        } else if let Some(HtmlChild::NonText(next)) = children_iter.peek() {
-                            // Whitespace BEFORE an inline element (preceded by text)
-                            // Don't write space here - the NonText case will wrap the element
-                            // in an outer group with a `line` before it
-                            let next_css_display = get_element_css_display(next);
-                            if !next_css_display.is_inline_like() {
+                            if !last_css_display.is_externally_whitespace_sensitive(f) {
                                 write!(f, [space()])?;
                             }
                         } else {
@@ -636,7 +628,7 @@ impl FormatHtmlElementList {
                         // If so, we need to wrap it in an outer group with `line` before it.
                         // This matches Prettier's "outer/inner" group pattern where the line break
                         // happens BEFORE the element rather than inside it.
-                        let needs_outer_group = css_display.is_inline_like()
+                        let needs_outer_group = css_display.is_externally_whitespace_sensitive(f)
                             && matches!(last, Some(HtmlChild::Whitespace));
 
                         // For the outer group pattern, check if we need a trailing line inside the inner group.
@@ -745,8 +737,9 @@ impl FormatHtmlElementList {
 
                             // Only propagate breaks from block-like elements.
                             // Inline elements can break internally without forcing the parent to multiline.
-                            let is_block_like = get_element_css_display(non_text).is_block_like();
-                            if is_block_like && memoized.inspect(f)?.will_break() {
+                            let internally_sensitive = get_element_css_display(non_text)
+                                .is_internally_whitespace_sensitive(f);
+                            if !internally_sensitive && memoized.inspect(f)?.will_break() {
                                 force_multiline = true;
                             }
                             write!(
@@ -828,17 +821,6 @@ enum WordSeparator {
 
     /// A separator at the end of text content, before an element.
     EndOfText { is_soft_line_break: bool },
-}
-
-impl WordSeparator {
-    fn will_break(&self) -> bool {
-        matches!(
-            self,
-            Self::EndOfText {
-                is_soft_line_break: false,
-            }
-        )
-    }
 }
 
 impl Format<HtmlFormatContext> for WordSeparator {

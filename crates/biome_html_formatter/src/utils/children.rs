@@ -138,7 +138,7 @@ impl HtmlChild {
         matches!(self, Self::EmptyLine | Self::Newline)
     }
 
-    pub(crate) const fn is_whitespace(&self) -> bool {
+    pub(crate) const fn is_any_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::EmptyLine | Self::Newline)
     }
 }
