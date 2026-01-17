@@ -1,5 +1,14 @@
 use rustc_hash::FxHashSet;
 
+/// Returns true if the character is HTML ASCII whitespace.
+///
+/// Per the HTML spec, ASCII whitespace is: U+0009 TAB, U+000A LF, U+000C FF, U+000D CR, U+0020 SPACE.
+/// Note: This excludes U+000B (vertical tab) which `is_ascii_whitespace()` includes.
+#[inline]
+const fn is_html_whitespace(c: char) -> bool {
+    matches!(c, '\t' | '\n' | '\x0C' | '\r' | ' ')
+}
+
 /// Result of analyzing a class string for duplicates.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ClassDedupResult {
@@ -50,9 +59,9 @@ pub fn find_duplicate_classes(value_str: &str) -> Option<ClassDedupResult> {
     while pos < value_str.len() {
         let prefix_start = pos;
 
-        // Skip ASCII whitespace (per HTML spec, class tokens are separated by ASCII whitespace only)
+        // Skip HTML whitespace (per HTML spec: TAB, LF, FF, CR, SPACE)
         for c in value_str[pos..].chars() {
-            if !c.is_ascii_whitespace() {
+            if !is_html_whitespace(c) {
                 break;
             }
             pos += c.len_utf8();
@@ -64,9 +73,9 @@ pub fn find_duplicate_classes(value_str: &str) -> Option<ClassDedupResult> {
 
         let class_start = pos;
 
-        // Read class name (non-ASCII-whitespace characters)
+        // Read class name (non-HTML-whitespace characters)
         for c in value_str[pos..].chars() {
-            if c.is_ascii_whitespace() {
+            if is_html_whitespace(c) {
                 break;
             }
             pos += c.len_utf8();
