@@ -149,7 +149,7 @@ declare_lint_rule! {
     /// ```json,options
     /// {
     ///  "options": {
-    ///    "style": "method",
+    ///    "style": "method"
     ///  }
     /// }
     /// ```
@@ -248,7 +248,7 @@ impl Rule for UseConsistentMethodSignatures {
 declare_node_union! {
     /// Node union representing anything that _might_ be a method signature within a type alias or interface.
     ///
-    /// (In reality, most property signatures aren't actually function declarations, depending on the type annotatation in question.)
+    /// (In reality, most property signatures aren't actually function declarations, depending on the type annotation in question.)
     pub AnyTsMethodSignatureLike = TsMethodSignatureTypeMember | TsPropertySignatureTypeMember
 }
 
