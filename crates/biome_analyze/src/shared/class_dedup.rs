@@ -14,7 +14,7 @@ pub struct ClassDedupResult {
 
 /// Analyzes a class string and returns deduplication info if duplicates exist.
 ///
-/// Preserves original whitespace (spaces, tabs, newlines) around kept classes.
+/// Preserves original whitespace around kept classes.
 /// Returns `None` if no duplicates are found.
 ///
 /// # Examples
