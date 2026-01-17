@@ -83,6 +83,11 @@ jobs:
           npm pkg set name='@biomejs/wasm-web'
           npm pkg set version='0.0.0-rev.${{ github.event.head_commit.id }}'
 
+      - name: Verify WASM artifact exists
+        working-directory: packages/@biomejs/wasm-web
+        run: |
+          test -f biome_wasm_bg.wasm && echo "Found wasm artifact biome_wasm_bg.wasm"
+
       - name: Publish
         working-directory: packages/@biomejs/wasm-web
         run: pnpx pkg-pr-new publish
