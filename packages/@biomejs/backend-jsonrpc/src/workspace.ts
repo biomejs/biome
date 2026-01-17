@@ -2168,6 +2168,11 @@ See https://biomejs.dev/linter/rules/use-find
 	 */
 	useFind?: UseFindConfiguration;
 	/**
+	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
+See https://biomejs.dev/linter/rules/use-inline-script-id 
+	 */
+	useInlineScriptId?: UseInlineScriptIdConfiguration;
+	/**
 	* Require queries, mutations, subscriptions or fragments each to be located in separate files.
 See https://biomejs.dev/linter/rules/use-lone-executable-definition 
 	 */
@@ -3909,6 +3914,9 @@ export type UseExplicitTypeConfiguration =
 export type UseFindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFindOptions;
+export type UseInlineScriptIdConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseInlineScriptIdOptions;
 export type UseLoneExecutableDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneExecutableDefinitionOptions;
@@ -5471,6 +5479,10 @@ export interface RuleWithUseFindOptions {
 	level: RulePlainConfiguration;
 	options?: UseFindOptions;
 }
+export interface RuleWithUseInlineScriptIdOptions {
+	level: RulePlainConfiguration;
+	options?: UseInlineScriptIdOptions;
+}
 export interface RuleWithUseLoneExecutableDefinitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneExecutableDefinitionOptions;
@@ -6840,6 +6852,7 @@ export interface UseErrorCauseOptions {
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
+export type UseInlineScriptIdOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
 export interface UseMaxParamsOptions {
 	/**
@@ -7702,6 +7715,7 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useMaxParams"
