@@ -2187,7 +2187,7 @@ See <https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions>
 	 */
 	useConsistentGraphqlDescriptions?: UseConsistentGraphqlDescriptionsConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Enforce consistent use of either method signatures or function properties within interfaces and type aliases.
 See <https://biomejs.dev/linter/rules/use-consistent-method-signatures> 
 	 */
 	useConsistentMethodSignatures?: UseConsistentMethodSignaturesConfiguration;
@@ -6834,7 +6834,17 @@ export interface UseConsistentGraphqlDescriptionsOptions {
 	 */
 	style?: UseConsistentGraphqlDescriptionsStyle;
 }
-export type UseConsistentMethodSignaturesOptions = {};
+/**
+ * Options type for `useConsistentMethodSignatures`.
+ */
+export interface UseConsistentMethodSignaturesOptions {
+	/**
+	* The style of method signatures whose usage will be enforced.
+
+Default: "property" 
+	 */
+	style?: MethodSignatureStyle;
+}
 export interface UseDeprecatedDateOptions {
 	argumentName?: string;
 }
@@ -7311,6 +7321,7 @@ export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
  * The GraphQL description style to enforce.
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
+export type MethodSignatureStyle = "property" | "method";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
 export type VueDirectiveStyle2 = "shorthand" | "longhand";

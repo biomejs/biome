@@ -1,4 +1,6 @@
-use biome_analyze::{Ast, RuleSource, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_js_syntax::{TsMethodSignatureTypeMember, TsPropertySignatureTypeMember};
 use biome_rowan::{AstNode, declare_node_union};
@@ -209,9 +211,15 @@ impl Rule for UseConsistentMethodSignatures {
         })
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &InconsistentMethodSignatureState) -> Option<RuleDiagnostic> {
+    fn diagnostic(
+        ctx: &RuleContext<Self>,
+        state: &InconsistentMethodSignatureState,
+    ) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let InconsistentMethodSignatureState { target_style, node_style } = *state;
+        let InconsistentMethodSignatureState {
+            target_style,
+            node_style,
+        } = *state;
 
         let mut diagnostic = RuleDiagnostic::new(
                 rule_category!(),
@@ -254,8 +262,10 @@ impl AnyTsMethodSignatureLike {
             Self::TsPropertySignatureTypeMember(prop) => prop
                 .type_annotation()
                 .and_then(|annotation| annotation.ty().ok())
-                .and_then(|ty| ty.as_ts_function_type()
-                    .map(|_| MethodSignatureStyle::Property))
+                .and_then(|ty| {
+                    ty.as_ts_function_type()
+                        .map(|_| MethodSignatureStyle::Property)
+                }),
         }
     }
 }

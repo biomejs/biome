@@ -2462,6 +2462,20 @@
 			"additionalProperties": false
 		},
 		"MaxSize": { "type": "integer", "format": "uint64", "minimum": 1 },
+		"MethodSignatureStyle": {
+			"oneOf": [
+				{
+					"description": "Enforce use of property-style signatures (`methodName: (args) => returnType`).",
+					"type": "string",
+					"const": "property"
+				},
+				{
+					"description": "Enforce use of method-style signatures (`methodName(args): returnType`).",
+					"type": "string",
+					"const": "method"
+				}
+			]
+		},
 		"Modifiers": {
 			"type": "array",
 			"items": { "$ref": "#/$defs/RestrictedModifier" },
@@ -5541,7 +5555,7 @@
 					]
 				},
 				"useConsistentMethodSignatures": {
-					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/use-consistent-method-signatures>",
+					"description": "Enforce consistent use of either method signatures or function properties within interfaces and type aliases.\nSee <https://biomejs.dev/linter/rules/use-consistent-method-signatures>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentMethodSignaturesConfiguration" },
 						{ "type": "null" }
@@ -12035,7 +12049,17 @@
 			]
 		},
 		"UseConsistentMethodSignaturesOptions": {
+			"description": "Options type for `useConsistentMethodSignatures`.",
 			"type": "object",
+			"properties": {
+				"style": {
+					"description": "The style of method signatures whose usage will be enforced.\n\nDefault: \"property\"",
+					"anyOf": [
+						{ "$ref": "#/$defs/MethodSignatureStyle" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseConsistentObjectDefinitionsConfiguration": {
