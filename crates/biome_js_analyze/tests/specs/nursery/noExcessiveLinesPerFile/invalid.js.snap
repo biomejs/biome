@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+const a = 1;
+const b = 2;
+const c = 3;
+const d = 4;
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noExcessiveLinesPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file has too many lines (4). Maximum allowed is 2.
+  
+  > 1 │ const a = 1;
+      │ ^^^^^^^^^^^^
+  > 2 │ const b = 2;
+  > 3 │ const c = 3;
+  > 4 │ const d = 4;
+      │ ^^^^^^^^^^^^
+    5 │ 
+  
+  i Consider splitting this file into smaller files.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

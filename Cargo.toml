@@ -23,6 +23,7 @@ biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version 
 # not publish
 biome_cli                    = { path = "./crates/biome_cli" }
 biome_configuration          = { path = "./crates/biome_configuration" }
+biome_configuration_macros   = { path = "./crates/biome_configuration_macros" }
 biome_console                = { path = "./crates/biome_console", version = "0.5.7" }
 biome_control_flow           = { path = "./crates/biome_control_flow", version = "0.5.7" }
 biome_css_analyze            = { path = "./crates/biome_css_analyze", version = "0.5.7" }
@@ -123,23 +124,23 @@ hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.12.1" }
 insta                        = "1.43.2"
-jiff                         = "0.2.17"
-libc                         = "0.2.178"
+jiff                         = "0.2.18"
+libc                         = "0.2.180"
 mimalloc                     = "0.1.48"
 papaya                       = "0.2.3"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 proc-macro-error2            = { version = "2.0.1", default-features = false }
-proc-macro2                  = "1.0.104"
+proc-macro2                  = "1.0.105"
 quickcheck                   = "1.0.3"
 quickcheck_macros            = "1.1.0"
-quote                        = "1.0.42"
+quote                        = "1.0.43"
 rayon                        = "1.11.0"
 regex                        = "1.12.2"
 rust-lapper                  = "1.2.0"
 rustc-hash                   = "2.1.1"
 schemars                     = { version = "1.1.0", features = ["indexmap2", "smallvec1"] }
 serde                        = { version = "1.0.228", features = ["derive"] }
-serde_json                   = "1.0.148"
+serde_json                   = "1.0.149"
 similar                      = "2.7.0"
 smallvec                     = { version = "1.15.1", features = ["const_new", "serde", "union"] }
 static_assertions            = "1.1"
@@ -156,7 +157,7 @@ tracing-subscriber           = "0.3.22"
 unicode-bom                  = "2.0.3"
 unicode-width                = "0.1.12"
 ureq                         = "3.1.4"
-url                          = "2.5.7"
+url                          = "2.5.8"
 walkdir                      = "2.5.0"
 web-time                     = "1.1.0"
 windows                      = "0.62.2"

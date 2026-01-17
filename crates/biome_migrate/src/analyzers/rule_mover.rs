@@ -47,6 +47,11 @@ const RULE_RENAMING: &[(&str, RuleName)] = &[
     ("useForComponent", RuleName::UseSolidForComponent),
     ("useJsonImportAttribute", RuleName::UseJsonImportAttributes),
     ("useUnifiedTypeSignature", RuleName::UseUnifiedTypeSignatures),
+    ("useUniqueArgumentNames", RuleName::NoDuplicateArgumentNames),
+    ("useUniqueFieldDefinitionNames", RuleName::NoDuplicateFieldDefinitionNames),
+    ("useUniqueGraphqlOperationName", RuleName::NoDuplicateGraphqlOperationName),
+    ("useUniqueInputFieldNames", RuleName::NoDuplicateInputFieldNames),
+    ("useUniqueVariableNames", RuleName::NoDuplicateVariableNames),
 ];
 
 /// Assist actions that have been renamed.

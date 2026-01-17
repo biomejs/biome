@@ -1,0 +1,108 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: issue8427.js
+---
+# Input
+```js
+import { useEffect } from "react";
+
+// Missing diagnostic reported: fe should be included in the deps.
+export const Component1 = ({id, fetchEntity}) => {
+    const fe = fetchEntity;
+    useEffect(() => {
+        fe(id);
+    }, [id]);
+};
+
+// This correctly produces a diagnostic as fetchEntity is not included in the dependency array
+export const Component2 = ({id, fetchEntity}) => {
+    useEffect(() => {
+        fetchEntity(id);
+    }, [id])
+};
+
+function globalFetchEntity() {}
+
+// This correctly doesn't produce a diagnostic as fe references to a global function
+export const Component3 = ({id}) => {
+    const fe = globalFetchEntity;
+    useEffect(() => {
+        fe(id);
+    }, [id])
+};
+
+// This correctly doesn't produce a diagnostic as fe references to something unknown
+export const Component4 = ({id}) => {
+    const fe = globalFetchEntityUndefined;
+    useEffect(() => {
+        fe(id);
+    }, [id])
+};
+
+```
+
+# Diagnostics
+```
+issue8427.js:6:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on fe.
+  
+    4 │ export const Component1 = ({id, fetchEntity}) => {
+    5 │     const fe = fetchEntity;
+  > 6 │     useEffect(() => {
+      │     ^^^^^^^^^
+    7 │         fe(id);
+    8 │     }, [id]);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    5 │     const fe = fetchEntity;
+    6 │     useEffect(() => {
+  > 7 │         fe(id);
+      │         ^^
+    8 │     }, [id]);
+    9 │ };
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    8 │ ····},·[id,·fe]);
+      │           ++++   
+
+```
+
+```
+issue8427.js:13:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on fetchEntity.
+  
+    11 │ // This correctly produces a diagnostic as fetchEntity is not included in the dependency array
+    12 │ export const Component2 = ({id, fetchEntity}) => {
+  > 13 │     useEffect(() => {
+       │     ^^^^^^^^^
+    14 │         fetchEntity(id);
+    15 │     }, [id])
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    12 │ export const Component2 = ({id, fetchEntity}) => {
+    13 │     useEffect(() => {
+  > 14 │         fetchEntity(id);
+       │         ^^^^^^^^^^^
+    15 │     }, [id])
+    16 │ };
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    15 │ ····},·[id,·fetchEntity])
+       │           +++++++++++++  
+
+```
