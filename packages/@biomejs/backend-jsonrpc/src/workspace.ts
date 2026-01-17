@@ -2187,6 +2187,11 @@ See <https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions>
 	 */
 	useConsistentGraphqlDescriptions?: UseConsistentGraphqlDescriptionsConfiguration;
 	/**
+	* Succinct description of the rule.
+See <https://biomejs.dev/linter/rules/use-consistent-method-signatures> 
+	 */
+	useConsistentMethodSignatures?: UseConsistentMethodSignaturesConfiguration;
+	/**
 	* Require the @deprecated directive to specify a deletion date.
 See <https://biomejs.dev/linter/rules/use-deprecated-date> 
 	 */
@@ -3926,6 +3931,9 @@ export type UseConsistentArrowReturnConfiguration =
 export type UseConsistentGraphqlDescriptionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentGraphqlDescriptionsOptions;
+export type UseConsistentMethodSignaturesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentMethodSignaturesOptions;
 export type UseDeprecatedDateConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDeprecatedDateOptions;
@@ -5453,6 +5461,10 @@ export interface RuleWithUseConsistentGraphqlDescriptionsOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentGraphqlDescriptionsOptions;
 }
+export interface RuleWithUseConsistentMethodSignaturesOptions {
+	level: RulePlainConfiguration;
+	options?: UseConsistentMethodSignaturesOptions;
+}
 export interface RuleWithUseDeprecatedDateOptions {
 	level: RulePlainConfiguration;
 	options?: UseDeprecatedDateOptions;
@@ -6822,6 +6834,7 @@ export interface UseConsistentGraphqlDescriptionsOptions {
 	 */
 	style?: UseConsistentGraphqlDescriptionsStyle;
 }
+export type UseConsistentMethodSignaturesOptions = {};
 export interface UseDeprecatedDateOptions {
 	argumentName?: string;
 }
@@ -7717,6 +7730,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
+	| "lint/nursery/useConsistentMethodSignatures"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useDestructuring"
@@ -7745,7 +7759,6 @@ export type Category =
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/nursery/useVueVForKey"
-	| "lint/nursery/useVueVapor"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"
 	| "lint/nursery/useVueValidVCloak"
@@ -7759,6 +7772,7 @@ export type Category =
 	| "lint/nursery/useVueValidVOnce"
 	| "lint/nursery/useVueValidVPre"
 	| "lint/nursery/useVueValidVText"
+	| "lint/nursery/useVueVapor"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"

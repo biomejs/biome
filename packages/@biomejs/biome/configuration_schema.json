@@ -5540,6 +5540,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentMethodSignatures": {
+					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/use-consistent-method-signatures>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentMethodSignaturesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useDeprecatedDate": {
 					"description": "Require the @deprecated directive to specify a deletion date.\nSee <https://biomejs.dev/linter/rules/use-deprecated-date>",
 					"anyOf": [
@@ -9036,6 +9043,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentMethodSignaturesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentMethodSignaturesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentObjectDefinitionsOptions": {
 			"type": "object",
 			"properties": {
@@ -12010,6 +12026,16 @@
 					"anyOf": [{ "$ref": "#/$defs/Accessibility" }, { "type": "null" }]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseConsistentMethodSignaturesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentMethodSignaturesOptions" }
+			]
+		},
+		"UseConsistentMethodSignaturesOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseConsistentObjectDefinitionsConfiguration": {
