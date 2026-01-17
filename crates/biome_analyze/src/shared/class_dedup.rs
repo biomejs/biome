@@ -1,14 +1,5 @@
 use rustc_hash::FxHashSet;
 
-/// Returns true if the character is HTML ASCII whitespace.
-///
-/// Per the HTML spec, ASCII whitespace is: U+0009 TAB, U+000A LF, U+000C FF, U+000D CR, U+0020 SPACE.
-/// Note: This excludes U+000B (vertical tab) which `is_ascii_whitespace()` includes.
-#[inline]
-const fn is_html_whitespace(c: char) -> bool {
-    matches!(c, '\t' | '\n' | '\x0C' | '\r' | ' ')
-}
-
 /// Result of analyzing a class string for duplicates.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ClassDedupResult {
@@ -59,9 +50,9 @@ pub fn find_duplicate_classes(value_str: &str) -> Option<ClassDedupResult> {
     while pos < value_str.len() {
         let prefix_start = pos;
 
-        // Skip HTML whitespace (per HTML spec: TAB, LF, FF, CR, SPACE)
+        // Skip whitespace
         for c in value_str[pos..].chars() {
-            if !is_html_whitespace(c) {
+            if !c.is_whitespace() {
                 break;
             }
             pos += c.len_utf8();
@@ -73,9 +64,9 @@ pub fn find_duplicate_classes(value_str: &str) -> Option<ClassDedupResult> {
 
         let class_start = pos;
 
-        // Read class name (non-HTML-whitespace characters)
+        // Read class name
         for c in value_str[pos..].chars() {
-            if is_html_whitespace(c) {
+            if c.is_whitespace() {
                 break;
             }
             pos += c.len_utf8();
@@ -265,17 +256,12 @@ mod tests {
     }
 
     #[test]
-    fn unicode_whitespace_not_separator() {
-        // Per HTML spec, only ASCII whitespace separates classes.
-        // Non-ASCII whitespace (non-breaking space U+00A0, ideographic space U+3000) becomes
-        // part of the class name, so this string is a single class with no duplicates.
-        assert!(find_duplicate_classes("foo\u{00A0}bar\u{3000}baz").is_none());
-
-        // But if the same "class" (containing non-ASCII whitespace) appears twice with
-        // ASCII whitespace between them, it's a duplicate
-        let result = find_duplicate_classes("foo\u{00A0}bar foo\u{00A0}bar").unwrap();
+    fn unicode_whitespace() {
+        // Unicode whitespace (non-breaking space U+00A0, ideographic space U+3000)
+        // is treated as a separator
+        let result = find_duplicate_classes("foo\u{00A0}bar\u{3000}foo").unwrap();
         assert_eq!(result.deduplicated, "foo\u{00A0}bar");
-        assert_eq!(result.duplicates, vec!["foo\u{00A0}bar"]);
+        assert_eq!(result.duplicates, vec!["foo"]);
     }
 
     #[test]
