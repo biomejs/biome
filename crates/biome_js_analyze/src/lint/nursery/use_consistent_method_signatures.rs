@@ -53,9 +53,9 @@ declare_lint_rule! {
     /// }
     /// ```
     /// In the above example, `SpecialEmitter.methodFunc` is compatible with `Emitter.methodFunc` under _bivariant_[^1] checks,
-    /// as `SpecialEvent` is a subtype of `Event` (i.e. all `SpecialEvent`s are `Event`s). \
+    /// as `SpecialEvent` is assignable to `Event` (i.e. all `SpecialEvent`s are guaranteed to be valid `Event`s). \
     /// On the other hand, the strict _contravariant_ checks for function properties produce errors on `propFunc` as the reverse is not guaranteed —
-    /// `Event` is not assignable to `SpecialEvent` (i.e. any `Event`s passed to the  `SpecialEvent`s).
+    /// `Event` is not assignable to `SpecialEvent` (i.e. not all `Event`s are guaranteed to be valid `SpecialEvent`s).
     ///
     /// The full rationale for this behavior can be found in the [TypeScript handbook](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#function-parameter-bivariance).
     ///
@@ -114,8 +114,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```ts
-    /// type Thing<T, U> = {
-    ///   genericProp<T, U>: (arg: T) => U;
+    /// type Thing<T> = {
+    ///   genericProp: <U>(arg: U) => T;
     /// }
     /// ```
     ///
@@ -246,9 +246,9 @@ impl Rule for UseConsistentMethodSignatures {
 }
 
 declare_node_union! {
-    /// Node union representing anything that _might_ be a method signature within a type alias orinterface.
+    /// Node union representing anything that _might_ be a method signature within a type alias or interface.
     ///
-    /// (In reality, most property signatures aren't function declarations, as it depends on the value of `ty`.)
+    /// (In reality, most property signatures aren't actually function declarations, depending on the type annotatation in question.)
     pub AnyTsMethodSignatureLike = TsMethodSignatureTypeMember | TsPropertySignatureTypeMember
 }
 
