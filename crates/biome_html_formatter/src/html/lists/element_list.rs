@@ -297,16 +297,6 @@ pub(crate) struct BorrowedTokens {
     borrowed_closing_tag: Option<HtmlClosingElement>,
 }
 
-/// Layout mode for multiline content
-#[derive(Copy, Clone, Debug, Default)]
-enum MultilineLayout {
-    /// Use fill layout for text content wrapping
-    Fill,
-    /// Don't use fill, just regular line breaks
-    #[default]
-    NoFill,
-}
-
 #[derive(Copy, Clone, Debug, Default)]
 pub(crate) enum HtmlChildListLayout {
     /// Let the formatter decide between flat and multiline based on content
@@ -376,13 +366,6 @@ impl FormatHtmlElementList {
         )?;
 
         let children_meta = self.children_meta(&children);
-
-        // Determine multiline layout based on whether there's meaningful text
-        let multiline_layout = if children_meta.meaningful_text {
-            MultilineLayout::Fill
-        } else {
-            MultilineLayout::NoFill
-        };
 
         // Trim trailing new lines from children
         let mut children = children;

@@ -168,6 +168,9 @@ impl FormatHtmlElement {
                 .ok()
                 .is_some_and(|tok| tok.has_leading_whitespace_or_newline());
 
+        let forces_break_children =
+            should_force_break_content || (is_root_element_list && is_template_element);
+
         // "Borrowing" in this context refers to tokens in nodes that would normally be
         // formatted by that node's formatter, but are instead formatted by a sibling
         // formatter. In this case, the opening tag's `>` and the closing tag can be
@@ -192,9 +195,6 @@ impl FormatHtmlElement {
         //
         // Elements that force break children (like `select`, `ul`, `ol`, table elements)
         // should NOT borrow tokens because their children are always multiline.
-        let forces_break_children =
-            should_force_break_content || (is_root_element_list && is_template_element);
-
         let should_borrow_opening_r_angle = is_element_internally_whitespace_sensitive
             && !children.is_empty()
             && !content_has_leading_whitespace
