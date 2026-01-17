@@ -305,6 +305,11 @@ mod tests {
     }
 
     #[test]
+    fn test_tr_is_table_like() {
+        assert!(get_css_display("tr").is_table_like());
+    }
+
+    #[test]
     fn test_case_insensitive() {
         assert_eq!(get_css_display("DIV"), CssDisplay::Block);
         assert_eq!(get_css_display("Span"), CssDisplay::Inline);
