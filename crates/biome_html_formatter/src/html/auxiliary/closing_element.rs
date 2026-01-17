@@ -11,10 +11,15 @@ pub(crate) struct FormatHtmlClosingElement {
     /// [FormatHtmlElementList]: crate::html::lists::element_list::FormatHtmlElementList
     /// [HtmlElementList]: biome_html_syntax::HtmlElementList
     tag_borrowed: bool,
+    /// Whether or not the closing `>` is borrowed by an adjacent sibling element.
+    /// When true, the `>` will be printed by the next sibling element instead of this closing tag.
+    r_angle_borrowed: bool,
 }
 pub(crate) struct FormatHtmlClosingElementOptions {
     /// Whether or not the `</tag` part of this tag is borrowed, and therefore managed by a different formatter.
     pub tag_borrowed: bool,
+    /// Whether or not the closing `>` is borrowed by an adjacent sibling element.
+    pub r_angle_borrowed: bool,
 }
 
 impl FormatRuleWithOptions<HtmlClosingElement> for FormatHtmlClosingElement {
@@ -22,6 +27,7 @@ impl FormatRuleWithOptions<HtmlClosingElement> for FormatHtmlClosingElement {
 
     fn with_options(mut self, options: Self::Options) -> Self {
         self.tag_borrowed = options.tag_borrowed;
+        self.r_angle_borrowed = options.r_angle_borrowed;
         self
     }
 }
@@ -56,7 +62,10 @@ impl FormatNodeRule<HtmlClosingElement> for FormatHtmlClosingElement {
             )?;
         }
 
-        write!(f, [r_angle_token.format()])?;
+        // When r_angle_borrowed is true, the `>` will be printed by the next sibling element
+        if !self.r_angle_borrowed {
+            write!(f, [r_angle_token.format()])?;
+        }
 
         Ok(())
     }

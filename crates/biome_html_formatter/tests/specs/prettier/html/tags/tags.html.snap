@@ -139,32 +139,7 @@ info: html/tags/tags.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -101,12 +101,8 @@
-     </div>
-   </div>
- </div>
--<div>
--  <div>string</div>
--</div>
--<div>
--  <div>string</div>
--</div>
-+<div><div>string</div></div>
-+<div><div>string</div></div>
- <div>
-   <div>string</div>
- 
-@@ -131,8 +127,7 @@
- 
- <label
-   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
--></label>
--|
-+></label>|
- <span></span>
- <br />
- <button xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>12345678901234567890</button>
-@@ -170,8 +165,9 @@
+@@ -170,8 +170,9 @@
    ><span>tag name in other namespace should also lower cased</span></x:root
  >
  <div>
@@ -176,16 +151,14 @@ info: html/tags/tags.html
  </div>
  <div>
    Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-@@ -191,7 +187,7 @@
- 
+@@ -192,6 +193,6 @@
  <!-- self-closing -->
  <span><input type="checkbox" /> </span>
--<span
+ <span
 -  ><span><input type="checkbox" /></span
 -></span>
-+<span>
-+  <span><input type="checkbox" /></span>
-+</span>
++  ><span><input type="checkbox" /></span></span
++>
  <span><input type="checkbox" /></span>
 ```
 
@@ -295,8 +268,12 @@ info: html/tags/tags.html
     </div>
   </div>
 </div>
-<div><div>string</div></div>
-<div><div>string</div></div>
+<div>
+  <div>string</div>
+</div>
+<div>
+  <div>string</div>
+</div>
 <div>
   <div>string</div>
 
@@ -321,7 +298,8 @@ info: html/tags/tags.html
 
 <label
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-></label>|
+></label>
+|
 <span></span>
 <br />
 <button xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>12345678901234567890</button>
@@ -381,9 +359,9 @@ info: html/tags/tags.html
 
 <!-- self-closing -->
 <span><input type="checkbox" /> </span>
-<span>
-  <span><input type="checkbox" /></span>
-</span>
+<span
+  ><span><input type="checkbox" /></span></span
+>
 <span><input type="checkbox" /></span>
 ```
 
@@ -395,6 +373,6 @@ info: html/tags/tags.html
    31:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-attribute
    36:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-attribute="value"
    41:   attribute="very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value"
-  120:   src="longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
-  149:   12345678901234567890123456789012345678901234567890123456789012345678901234567890
+  124:   src="longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
+  154:   12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```

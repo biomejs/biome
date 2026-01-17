@@ -5,6 +5,7 @@ use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
 use biome_html_syntax::{
     HtmlElement, HtmlElementFields, HtmlElementList, HtmlRoot, HtmlSelfClosingElement,
+    HtmlSyntaxToken,
 };
 use biome_string_case::StrLikeExtension;
 
@@ -19,7 +20,33 @@ use super::{
 const HTML_VERBATIM_TAGS: &[&str] = &["script", "style", "pre"];
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatHtmlElement;
+pub(crate) struct FormatHtmlElement {
+    /// Whether the closing `>` should be borrowed by an adjacent sibling element.
+    /// When true, this element will not print its closing `>`, which will instead
+    /// be printed by the next sibling element.
+    closing_r_angle_borrowed: bool,
+    /// A `>` token borrowed from the previous sibling element's closing tag.
+    /// This is printed at the start of this element's opening tag group.
+    borrowed_sibling_r_angle: Option<HtmlSyntaxToken>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub(crate) struct FormatHtmlElementOptions {
+    /// Whether the closing `>` should be borrowed by an adjacent sibling element.
+    pub closing_r_angle_borrowed: bool,
+    /// A `>` token borrowed from the previous sibling element's closing tag.
+    pub borrowed_sibling_r_angle: Option<HtmlSyntaxToken>,
+}
+
+impl FormatRuleWithOptions<HtmlElement> for FormatHtmlElement {
+    type Options = FormatHtmlElementOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.closing_r_angle_borrowed = options.closing_r_angle_borrowed;
+        self.borrowed_sibling_r_angle = options.borrowed_sibling_r_angle;
+        self
+    }
+}
 
 impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
     fn fmt_fields(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
@@ -172,14 +199,12 @@ impl FormatHtmlElement {
             && !children.is_empty()
             && !content_has_leading_whitespace
             && !should_be_verbatim
-            && !should_format_embedded_nodes
-            && !forces_break_children;
+            && !should_format_embedded_nodes;
         let should_borrow_closing_tag = is_element_internally_whitespace_sensitive
             && !children.is_empty()
             && !content_has_trailing_whitespace
             && !should_be_verbatim
-            && !should_format_embedded_nodes
-            && !forces_break_children;
+            && !should_format_embedded_nodes;
 
         let borrowed_r_angle = if should_borrow_opening_r_angle {
             opening_element.r_angle_token().ok()
@@ -197,6 +222,7 @@ impl FormatHtmlElement {
             &FormatHtmlOpeningElement::default().with_options(FormatHtmlOpeningElementOptions {
                 r_angle_is_borrowed: borrowed_r_angle.is_some(),
                 attr_group_id,
+                borrowed_sibling_r_angle: self.borrowed_sibling_r_angle.clone(),
             }),
             &opening_element,
             f,
@@ -230,6 +256,7 @@ impl FormatHtmlElement {
         FormatNodeRule::fmt(
             &FormatHtmlClosingElement::default().with_options(FormatHtmlClosingElementOptions {
                 tag_borrowed: should_borrow_closing_tag,
+                r_angle_borrowed: self.closing_r_angle_borrowed,
             }),
             &closing_element,
             f,
@@ -267,7 +294,7 @@ fn should_force_break_content(node: &HtmlElement) -> bool {
     let Some(tag_name) = node.tag_name() else {
         return false;
     };
-    if (should_force_break_children(&tag_name)) {
+    if should_force_break_children(&tag_name) {
         return true;
     }
 

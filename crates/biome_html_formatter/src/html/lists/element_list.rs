@@ -182,6 +182,7 @@
 //! ```
 
 use crate::{
+    html::auxiliary::element::{FormatHtmlElement, FormatHtmlElementOptions},
     prelude::*,
     utils::{
         children::{HtmlChild, HtmlChildrenIterator, html_split_children},
@@ -439,6 +440,16 @@ impl FormatHtmlElementList {
             // Tracks whether the last NonText element already had its trailing whitespace
             // handled by the outer group pattern (needs_trailing_line_in_inner).
             let mut last_nontext_had_trailing_line = false;
+            // Tracks the group ID of the previous inline element when it's directly followed
+            // by another inline element (no whitespace between them). This is used to implement
+            // Prettier's `ifBreak("", softline)` pattern where we conditionally add a line break
+            // before the current element only if the previous element's group fits on a single line.
+            let mut prev_inline_group_id: Option<GroupId> = None;
+            // Tracks the borrowed `>` token from the previous sibling's closing tag.
+            // When two inline elements are adjacent with no whitespace (`</span><span`),
+            // Prettier borrows the `>` from the first element's closing tag and prints it
+            // as part of the next element's opening tag group. This ensures they stay "touching".
+            let mut borrowed_sibling_r_angle: Option<HtmlSyntaxToken> = None;
 
             let mut is_first_child = true;
 
@@ -648,6 +659,18 @@ impl FormatHtmlElementList {
                                 Some(HtmlChild::Whitespace | HtmlChild::Newline)
                             );
 
+                        // Check if the next child is also an inline element with no whitespace between.
+                        // If so, we'll set prev_inline_group_id so the next element can use it for
+                        // conditional line breaks.
+                        let next_is_adjacent_inline =
+                            if let Some(HtmlChild::NonText(non_text_next)) = children_iter.peek() {
+                                let next_css_display = get_element_css_display(non_text_next);
+                                css_display.is_externally_whitespace_sensitive(f)
+                                    && next_css_display.is_externally_whitespace_sensitive(f)
+                            } else {
+                                false
+                            };
+
                         let line_mode = match children_iter.peek() {
                             Some(HtmlChild::Word(_)) => {
                                 if css_display.is_externally_whitespace_sensitive(f) {
@@ -717,12 +740,30 @@ impl FormatHtmlElementList {
                             format_with(move |f| f.write_element(FormatElement::Line(mode)))
                         });
 
+                        // When the previous element was an inline element directly followed by this
+                        // inline element (no whitespace), we need to conditionally add a line break.
+                        // This implements Prettier's `ifBreak("", softline)` pattern:
+                        // - If the previous element's group broke: print nothing (keep elements touching)
+                        // - If the previous element's group fits: print a soft line break
+                        // We store the group ID and use it when writing the element below.
+                        let conditional_leading_break_group_id = prev_inline_group_id.take();
+
+                        // Take any borrowed `>` from the previous sibling element
+                        let current_borrowed_r_angle = borrowed_sibling_r_angle.take();
+
+                        // Create the element formatter with borrowing options
+                        let element_format = format_element_with_borrowing(
+                            non_text,
+                            current_borrowed_r_angle,
+                            next_is_adjacent_inline,
+                        );
+
                         if needs_outer_group {
                             // Wrap inline element in outer group with `line` before it.
                             // This makes the line break happen BEFORE the element when it doesn't fit.
                             // Pattern: group([line, group([element, line?])])
                             // The trailing line inside the inner group handles "element whitespace text" cases.
-                            let memoized = non_text.format().memoized();
+                            let memoized = element_format.memoized();
                             let inner_group_id = f.group_id("inner");
 
                             if needs_trailing_line_in_inner {
@@ -749,17 +790,32 @@ impl FormatHtmlElementList {
                                 last_nontext_had_trailing_line = false;
                             }
                         } else if force_multiline {
-                            write!(
-                                f,
-                                [
-                                    group(&non_text.format())
-                                        .with_group_id(Some(non_text_group_id)),
-                                    format_separator
-                                ]
-                            )?;
+                            // When force_multiline is true, wrap conditional break with element in a group
+                            // to match Prettier's pattern: group([ifBreak("", softline), element])
+                            if let Some(prev_id) = conditional_leading_break_group_id {
+                                write!(
+                                    f,
+                                    [group(&format_args![
+                                        if_group_fits_on_line(&soft_line_break())
+                                            .with_group_id(Some(prev_id)),
+                                        group(&element_format)
+                                            .with_group_id(Some(non_text_group_id)),
+                                        format_separator
+                                    ])]
+                                )?;
+                            } else {
+                                write!(
+                                    f,
+                                    [
+                                        group(&element_format)
+                                            .with_group_id(Some(non_text_group_id)),
+                                        format_separator
+                                    ]
+                                )?;
+                            }
                             last_nontext_had_trailing_line = false;
                         } else {
-                            let mut memoized = non_text.format().memoized();
+                            let mut memoized = element_format.memoized();
 
                             // Only propagate breaks from block-like elements.
                             // Inline elements can break internally without forcing the parent to multiline.
@@ -768,14 +824,37 @@ impl FormatHtmlElementList {
                             if !internally_sensitive && memoized.inspect(f)?.will_break() {
                                 force_multiline = true;
                             }
-                            write!(
-                                f,
-                                [
-                                    group(&memoized).with_group_id(Some(non_text_group_id)),
-                                    format_separator
-                                ]
-                            )?;
+                            // Wrap conditional break with element in a group
+                            // to match Prettier's pattern: group([ifBreak("", softline), element])
+                            if let Some(prev_id) = conditional_leading_break_group_id {
+                                write!(
+                                    f,
+                                    [group(&format_args![
+                                        if_group_fits_on_line(&soft_line_break())
+                                            .with_group_id(Some(prev_id)),
+                                        group(&memoized).with_group_id(Some(non_text_group_id)),
+                                        format_separator
+                                    ])]
+                                )?;
+                            } else {
+                                write!(
+                                    f,
+                                    [
+                                        group(&memoized).with_group_id(Some(non_text_group_id)),
+                                        format_separator
+                                    ]
+                                )?;
+                            }
                             last_nontext_had_trailing_line = false;
+                        }
+
+                        // Track this element's group ID if it's followed by another adjacent inline element
+                        if next_is_adjacent_inline {
+                            prev_inline_group_id = Some(non_text_group_id);
+                            // Store the closing r_angle token from this element for the next sibling
+                            borrowed_sibling_r_angle = non_text.closing_r_angle_token();
+                        } else {
+                            prev_inline_group_id = None;
                         }
                     }
 
@@ -839,4 +918,37 @@ fn format_partial_closing_tag(
         f,
         [l_angle_token.format(), slash_token.format(), name.format(),]
     )
+}
+
+/// Helper to format an AnyHtmlElement with sibling borrowing options.
+///
+/// This is used when formatting adjacent inline elements to implement Prettier's
+/// `>` borrowing pattern where the closing `>` from one element is printed at the
+/// start of the next element's opening tag group.
+///
+/// # Arguments
+/// * `element` - The element to format
+/// * `borrowed_sibling_r_angle` - The `>` token borrowed from the previous sibling's closing tag
+/// * `closing_r_angle_borrowed` - Whether this element's closing `>` should be borrowed by the next sibling
+fn format_element_with_borrowing(
+    element: &AnyHtmlElement,
+    borrowed_sibling_r_angle: Option<HtmlSyntaxToken>,
+    closing_r_angle_borrowed: bool,
+) -> impl Format<HtmlFormatContext> + '_ {
+    format_with(move |f| {
+        // Only HtmlElement supports the borrowing pattern (has opening/closing tags)
+        if let AnyHtmlElement::HtmlElement(html_element) = element {
+            FormatNodeRule::fmt(
+                &FormatHtmlElement::default().with_options(FormatHtmlElementOptions {
+                    closing_r_angle_borrowed,
+                    borrowed_sibling_r_angle: borrowed_sibling_r_angle.clone(),
+                }),
+                html_element,
+                f,
+            )
+        } else {
+            // For other element types (self-closing, etc.), use default formatting
+            write!(f, [element.format()])
+        }
+    })
 }

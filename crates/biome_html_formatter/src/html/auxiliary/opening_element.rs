@@ -4,7 +4,7 @@ use crate::{
     utils::{css_display::get_css_display_from_tag, metadata::should_lowercase_html_tag},
 };
 use biome_formatter::{FormatRuleWithOptions, GroupId, write};
-use biome_html_syntax::{HtmlOpeningElement, HtmlOpeningElementFields};
+use biome_html_syntax::{HtmlOpeningElement, HtmlOpeningElementFields, HtmlSyntaxToken};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlOpeningElement {
     /// Whether or not the r_angle is borrowed by the children of the element (aka [`HtmlElementList`][HtmlElementList]). See also: [`FormatHtmlElementList`][FormatHtmlElementList]
@@ -17,6 +17,12 @@ pub(crate) struct FormatHtmlOpeningElement {
     r_angle_is_borrowed: bool,
 
     attr_group_id: Option<GroupId>,
+
+    /// A `>` token borrowed from the previous sibling element's closing tag.
+    /// When two inline elements are adjacent with no whitespace (`</span><span`),
+    /// Prettier borrows the `>` from the first element's closing tag and prints it
+    /// at the start of the next element's opening tag group to keep them "touching".
+    borrowed_sibling_r_angle: Option<HtmlSyntaxToken>,
 }
 
 pub(crate) struct FormatHtmlOpeningElementOptions {
@@ -24,6 +30,9 @@ pub(crate) struct FormatHtmlOpeningElementOptions {
     pub r_angle_is_borrowed: bool,
 
     pub attr_group_id: GroupId,
+
+    /// A `>` token borrowed from the previous sibling element's closing tag.
+    pub borrowed_sibling_r_angle: Option<HtmlSyntaxToken>,
 }
 
 impl FormatRuleWithOptions<HtmlOpeningElement> for FormatHtmlOpeningElement {
@@ -32,6 +41,7 @@ impl FormatRuleWithOptions<HtmlOpeningElement> for FormatHtmlOpeningElement {
     fn with_options(mut self, options: Self::Options) -> Self {
         self.r_angle_is_borrowed = options.r_angle_is_borrowed;
         self.attr_group_id = Some(options.attr_group_id);
+        self.borrowed_sibling_r_angle = options.borrowed_sibling_r_angle;
         self
     }
 }
@@ -53,9 +63,18 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
 
         let bracket_same_line = f.options().bracket_same_line().value();
 
+        // Capture the borrowed sibling r_angle for use in the closure
+        let borrowed_sibling_r_angle = self.borrowed_sibling_r_angle.clone();
+
         write!(
             f,
             [&group(&format_with(|f| {
+                // Print borrowed `>` from previous sibling's closing tag at the start of this group.
+                // This implements Prettier's pattern: group([">", "<span", ...attrs])
+                // where the `>` is borrowed from `</span>` of the previous sibling element.
+                if let Some(ref borrowed_r_angle) = borrowed_sibling_r_angle {
+                    write!(f, [borrowed_r_angle.format()])?;
+                }
                 write!(f, [l_angle_token.format(), name.format()])?;
                 attributes
                     .format()
