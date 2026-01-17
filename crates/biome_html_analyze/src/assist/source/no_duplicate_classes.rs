@@ -1,5 +1,4 @@
 use std::borrow::Cow;
-use std::collections::HashSet;
 
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
@@ -12,6 +11,7 @@ use biome_html_syntax::{
     HtmlAttribute, HtmlString, HtmlSyntaxKind, HtmlSyntaxToken, inner_string_text,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::class_dedup::find_duplicate_classes;
 
 use crate::HtmlRuleAction;
 
@@ -82,94 +82,16 @@ impl Rule for NoDuplicateClasses {
         // Check if single-quoted
         let is_single_quote = value_text.starts_with('\'');
 
-        // Get the inner string (without quotes) and parse into tokens,
-        // preserving whitespace positions for minimal-change fixes.
+        // Get the inner string (without quotes) and find duplicates
         let inner_text = inner_string_text(&value_token);
         let value_str = inner_text.text();
 
-        struct Token<'a> {
-            prefix_start: usize,
-            text_end: usize,
-            class: &'a str,
-        }
-
-        let mut tokens: Vec<Token<'_>> = Vec::new();
-        let mut pos = 0;
-
-        while pos < value_str.len() {
-            let prefix_start = pos;
-
-            // Skip whitespace
-            for c in value_str[pos..].chars() {
-                if !c.is_whitespace() {
-                    break;
-                }
-                pos += c.len_utf8();
-            }
-
-            if pos >= value_str.len() {
-                break;
-            }
-
-            let class_start = pos;
-
-            // Read class name
-            for c in value_str[pos..].chars() {
-                if c.is_whitespace() {
-                    break;
-                }
-                pos += c.len_utf8();
-            }
-
-            tokens.push(Token {
-                prefix_start,
-                text_end: pos,
-                class: &value_str[class_start..pos],
-            });
-        }
-
-        // Identify duplicates and track which tokens to keep.
-        // Use a Vec to track duplicates in order of first occurrence for deterministic output,
-        // plus a HashSet for O(1) dedup checking.
-        let mut seen: HashSet<&str> = HashSet::new();
-        let mut duplicate_set: HashSet<&str> = HashSet::new();
-        let mut duplicates_in_order: Vec<&str> = Vec::new();
-        let mut kept_indices: Vec<usize> = Vec::new();
-
-        for (idx, token) in tokens.iter().enumerate() {
-            if seen.contains(token.class) {
-                // Only add to the ordered list if this is the first time we see it as a duplicate
-                if duplicate_set.insert(token.class) {
-                    duplicates_in_order.push(token.class);
-                }
-            } else {
-                seen.insert(token.class);
-                kept_indices.push(idx);
-            }
-        }
-
-        if duplicates_in_order.is_empty() {
-            return None;
-        }
-
-        // Reconstruct the string, preserving original whitespace around kept classes
-        let mut deduplicated = String::new();
-        for &idx in &kept_indices {
-            let token = &tokens[idx];
-            deduplicated.push_str(&value_str[token.prefix_start..token.text_end]);
-        }
-
-        // Preserve trailing whitespace from the original string
-        if let Some(last) = tokens.last() {
-            deduplicated.push_str(&value_str[last.text_end..]);
-        }
-
-        let duplicates: Vec<Box<str>> = duplicates_in_order.into_iter().map(Into::into).collect();
+        let result = find_duplicate_classes(value_str)?;
 
         Some(DuplicateClassesState {
             html_string,
-            deduplicated: deduplicated.into(),
-            duplicates: duplicates.into_boxed_slice(),
+            deduplicated: result.deduplicated.into(),
+            duplicates: result.duplicates.into_iter().map(Into::into).collect(),
             is_single_quote,
         })
     }

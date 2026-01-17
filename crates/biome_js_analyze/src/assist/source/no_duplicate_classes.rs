@@ -13,8 +13,8 @@ use biome_js_factory::make::{
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::class_dedup::find_duplicate_classes;
 use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
-use rustc_hash::FxHashSet;
 
 declare_source_rule! {
     /// Remove duplicate CSS classes.
@@ -75,91 +75,11 @@ impl Rule for NoDuplicateClasses {
         let value = node.value()?;
         let value_str = value.text();
 
-        // Parse the class string into tokens, preserving whitespace positions.
-        // Each token tracks: where its preceding whitespace starts, where the class ends,
-        // and the class name itself.
-        struct Token<'a> {
-            prefix_start: usize,
-            text_end: usize,
-            class: &'a str,
-        }
-
-        let mut tokens: Vec<Token<'_>> = Vec::new();
-        let mut pos = 0;
-
-        while pos < value_str.len() {
-            let prefix_start = pos;
-
-            // Skip whitespace
-            for c in value_str[pos..].chars() {
-                if !c.is_whitespace() {
-                    break;
-                }
-                pos += c.len_utf8();
-            }
-
-            if pos >= value_str.len() {
-                break;
-            }
-
-            let class_start = pos;
-
-            // Read class name
-            for c in value_str[pos..].chars() {
-                if c.is_whitespace() {
-                    break;
-                }
-                pos += c.len_utf8();
-            }
-
-            tokens.push(Token {
-                prefix_start,
-                text_end: pos,
-                class: &value_str[class_start..pos],
-            });
-        }
-
-        // Identify duplicates and track which tokens to keep.
-        // Use a Vec to track duplicates in order of first occurrence for deterministic output,
-        // plus a HashSet for O(1) dedup checking.
-        let mut seen: FxHashSet<&str> = FxHashSet::default();
-        let mut duplicate_set: FxHashSet<&str> = FxHashSet::default();
-        let mut duplicates_in_order: Vec<&str> = Vec::new();
-        let mut kept_indices: Vec<usize> = Vec::new();
-
-        for (idx, token) in tokens.iter().enumerate() {
-            if seen.contains(token.class) {
-                // Only add to the ordered list if this is the first time we see it as a duplicate
-                if duplicate_set.insert(token.class) {
-                    duplicates_in_order.push(token.class);
-                }
-            } else {
-                seen.insert(token.class);
-                kept_indices.push(idx);
-            }
-        }
-
-        if duplicates_in_order.is_empty() {
-            return None;
-        }
-
-        // Reconstruct the string, preserving original whitespace around kept classes
-        let mut deduplicated = String::new();
-        for &idx in &kept_indices {
-            let token = &tokens[idx];
-            deduplicated.push_str(&value_str[token.prefix_start..token.text_end]);
-        }
-
-        // Preserve trailing whitespace from the original string
-        if let Some(last) = tokens.last() {
-            deduplicated.push_str(&value_str[last.text_end..]);
-        }
-
-        let duplicates: Vec<Box<str>> = duplicates_in_order.into_iter().map(Into::into).collect();
+        let result = find_duplicate_classes(value_str)?;
 
         Some(DuplicateClassesState {
-            deduplicated: deduplicated.into(),
-            duplicates: duplicates.into_boxed_slice(),
+            deduplicated: result.deduplicated.into(),
+            duplicates: result.duplicates.into_iter().map(Into::into).collect(),
         })
     }
 
