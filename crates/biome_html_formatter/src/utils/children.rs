@@ -615,12 +615,12 @@ impl<I: Iterator> HtmlChildrenIterator<I> {
         }
     }
 
-    pub(crate) fn peek(&mut self) -> Option<&I::Item> {
+    pub fn peek(&mut self) -> Option<&I::Item> {
         let iter = &mut self.iter;
         self.peeked.get_or_insert_with(|| iter.next()).as_ref()
     }
 
-    pub(crate) fn peek_next(&mut self) -> Option<&I::Item> {
+    pub fn peek_next(&mut self) -> Option<&I::Item> {
         let iter = &mut self.iter;
         let peeked = &mut self.peeked;
 
@@ -632,7 +632,7 @@ impl<I: Iterator> HtmlChildrenIterator<I> {
             .as_ref()
     }
 
-    pub(crate) fn peek_next_next(&mut self) -> Option<&I::Item> {
+    pub fn peek_next_next(&mut self) -> Option<&I::Item> {
         let iter = &mut self.iter;
         let peeked = &mut self.peeked;
         let peeked_next = &mut self.peeked_next;
