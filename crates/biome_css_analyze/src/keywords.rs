@@ -927,8 +927,9 @@ pub const RESOURCE_STATE_PSEUDO_CLASSES: [&str; 7] = [
     "volume-locked",
 ];
 
-pub const OTHER_PSEUDO_CLASSES: [&str; 51] = [
+pub const OTHER_PSEUDO_CLASSES: [&str; 52] = [
     "active",
+    "active-view-transition",
     "any-link",
     "autofill",
     "blank",
