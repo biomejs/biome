@@ -13,18 +13,18 @@ var f = function() { return /=foo/; };
 ```
 invalid.js:2:29 lint/nursery/noDivRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i A regular expression literal can be confused with '/='.
+  i Avoid using an equal sign directly after the slash at the beginning of a regular expression literal.
   
     1 │ /* should generate diagnostics */
   > 2 │ var f = function() { return /=foo/; };
       │                             ^^^^^^
     3 │ 
   
-  i The characters `/=` can be confused with a division assignment operator. Replace with `[=]` to prevent confusion.
+  i The characters /= can be confused with a division assignment operator. Replace the equal sign (=) with [=] to prevent confusion.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Replace with `[=]`.
+  i Safe fix: Replace with [=].
   
     2 │ var·f·=·function()·{·return·/[=]foo/;·};
       │                              + +        

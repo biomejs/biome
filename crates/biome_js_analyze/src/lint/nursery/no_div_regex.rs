@@ -71,11 +71,11 @@ impl Rule for NoDivRegex {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "A regular expression literal can be confused with '/='."
+                    "Avoid using an equal sign directly after the slash at the beginning of a regular expression literal."
                 },
             )
             .note(markup! {
-                "The characters `/=` can be confused with a division assignment operator. Replace with `[=]` to prevent confusion."
+                "The characters "<Emphasis>"/="</Emphasis>" can be confused with a division assignment operator. Replace the equal sign ("<Emphasis>"="</Emphasis>") with "<Emphasis>"[=]"</Emphasis>" to prevent confusion."
             }),
         )
     }
@@ -100,7 +100,7 @@ impl Rule for NoDivRegex {
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
-                "Replace with `[=]`."
+                "Replace with "<Emphasis>"[=]"</Emphasis>"."
             }
             .to_owned(),
             mutation,
