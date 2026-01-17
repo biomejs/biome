@@ -11,7 +11,7 @@ use biome_html_syntax::{
     HtmlAttribute, HtmlString, HtmlSyntaxKind, HtmlSyntaxToken, inner_string_text,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_rule_options::class_dedup::find_duplicate_classes;
+use biome_analyze::shared::class_dedup::find_duplicate_classes;
 
 use crate::HtmlRuleAction;
 

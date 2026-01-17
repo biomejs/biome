@@ -17,6 +17,7 @@ mod query;
 mod registry;
 mod rule;
 mod services;
+pub mod shared;
 mod signals;
 mod suppression_action;
 mod suppressions;

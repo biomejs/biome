@@ -1,6 +1,5 @@
 use biome_string_case::StrLikeExtension;
 
-pub mod class_dedup;
 pub mod restricted_regex;
 pub mod sort_order;
 

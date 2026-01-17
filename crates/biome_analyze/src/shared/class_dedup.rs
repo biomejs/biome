@@ -20,7 +20,7 @@ pub struct ClassDedupResult {
 /// # Examples
 ///
 /// ```
-/// use biome_rule_options::class_dedup::find_duplicate_classes;
+/// use biome_analyze::shared::class_dedup::find_duplicate_classes;
 ///
 /// // No duplicates returns None
 /// assert!(find_duplicate_classes("foo bar baz").is_none());
