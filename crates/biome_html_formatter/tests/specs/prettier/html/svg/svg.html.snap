@@ -55,14 +55,17 @@ info: html/svg/svg.html
  <html>
    <head>
      <title>SVG</title>
-@@ -19,7 +19,6 @@
+@@ -18,9 +18,7 @@
+ </html>
  
  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-   <defs />
+-  <defs />
 -
-   <g>
+-  <g>
++  <defs /> <g>
      <g>
        <polygon points="5,5 195,10 185,185 10,195" />
+       <text>Text</text>
 ```
 
 # Output
@@ -88,8 +91,7 @@ info: html/svg/svg.html
 </html>
 
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <defs />
-  <g>
+  <defs /> <g>
     <g>
       <polygon points="5,5 195,10 185,185 10,195" />
       <text>Text</text>
@@ -111,5 +113,5 @@ info: html/svg/svg.html
 
 # Lines exceeding max width of 80 characters
 ```
-   32:       In the context of SVG embeded into HTML, the XHTML namespace could be avoided, but it is mandatory in the context of an SVG document
+   31:       In the context of SVG embeded into HTML, the XHTML namespace could be avoided, but it is mandatory in the context of an SVG document
 ```

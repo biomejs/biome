@@ -5,7 +5,7 @@ use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
 use crate::{
     HtmlFormatter,
-    utils::css_display::{CssDisplay, get_css_display, get_css_display_from_tag},
+    utils::css_display::{CssDisplay, get_css_display},
 };
 
 /// HTML tags that have a "block" layout, or anything that is not inline by default.
@@ -698,6 +698,102 @@ pub static HTML_ATTRIBUTES_BY_TAG: LazyLock<HashMap<&str, &[&str]>> = LazyLock::
     attributes_by_tag.iter().map(|(k, v)| (*k, *v)).collect()
 });
 
+pub static SVG_ALL_TAGS: &[&str] = &[
+    "animate",
+    "animatemotion",
+    "animatetransform",
+    "circle",
+    "clippath",
+    "defs",
+    "desc",
+    "ellipse",
+    "feBlend",
+    "feColorMatrix",
+    "feComponentTransfer",
+    "feComposite",
+    "feConvolveMatrix",
+    "feDiffuseLighting",
+    "feDisplacementMap",
+    "feDistantLight",
+    "feDropShadow",
+    "feFlood",
+    "feFuncA",
+    "feFuncB",
+    "feFuncG",
+    "feFuncR",
+    "feGaussianBlur",
+    "feImage",
+    "feMerge",
+    "feMergeNode",
+    "feMorphology",
+    "feOffset",
+    "fePointLight",
+    "feSpecularLighting",
+    "feSpotLight",
+    "feTile",
+    "feTurbulence",
+    "filter",
+    "foreignobject",
+    "g",
+    "image",
+    "line",
+    "lineargradient",
+    "marker",
+    "mask",
+    "metadata",
+    "mpath",
+    "path",
+    "pattern",
+    "polygon",
+    "polyline",
+    "radialgradient",
+    "rect",
+    "set",
+    "stop",
+    "switch",
+    "symbol",
+    "text",
+    "textpath",
+    "tspan",
+    "use",
+    "view",
+];
+
+pub static MATHML_ALL_TAGS: &[&str] = &[
+    "annotation",
+    "annotation-xml",
+    "maction",
+    "math",
+    "menclose",
+    "merror",
+    "mfenced",
+    "mfrac",
+    "mi",
+    "mmultiscripts",
+    "mn",
+    "mo",
+    "mover",
+    "mpadded",
+    "mphantom",
+    "mprescripts",
+    "mroot",
+    "mrow",
+    "ms",
+    "mspace",
+    "msqrt",
+    "mstyle",
+    "msub",
+    "msubsup",
+    "msup",
+    "mtable",
+    "mtd",
+    "mtext",
+    "mtr",
+    "munder",
+    "munderover",
+    "semantics",
+];
+
 /// Whether the given tag name is a known HTML element. See also: [`HTML_ALL_TAGS`].
 pub(crate) fn is_canonical_html_tag_name(tag_name: &str) -> bool {
     match tag_name.to_ascii_lowercase_cow() {
@@ -798,6 +894,7 @@ pub(crate) fn get_element_css_display(element: &AnyHtmlElement) -> CssDisplay {
 ///
 /// Directly corresponds to [`white-space` CSS property values](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/white-space).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[expect(dead_code)]
 pub(crate) enum CssWhitespace {
     #[default]
     Normal,
@@ -809,6 +906,7 @@ pub(crate) enum CssWhitespace {
     PreserveNoWrap,
 }
 
+#[cfg_attr(not(test), expect(dead_code))]
 pub(crate) fn get_css_whitespace(tag_name: &str) -> CssWhitespace {
     // Mirrors Prettier's CSS white-space lookup:
     // prettier/src/language-html/constants.evaluate.js
@@ -841,11 +939,11 @@ mod tests {
 
     // Enforce this invariant to allow for binary search.
     #[test]
-    fn all_tags_is_sorted() {
+    fn html_all_tags_is_sorted() {
         if !HTML_ALL_TAGS.is_sorted() {
             let mut sorted = HTML_ALL_TAGS.to_vec();
             sorted.sort_unstable();
-            panic!("All tags array is not sorted. Here it is sorted {sorted:?}",);
+            panic!("All tags array is not sorted. Here it is sorted {sorted:?}");
         }
     }
 
@@ -871,6 +969,26 @@ mod tests {
                 );
             }
         });
+    }
+
+    // Enforce this invariant to allow for binary search.
+    #[test]
+    fn svg_all_tags_is_sorted() {
+        if !SVG_ALL_TAGS.is_sorted() {
+            let mut sorted = SVG_ALL_TAGS.to_vec();
+            sorted.sort_unstable();
+            panic!("SVG tags array is not sorted. Here it is sorted {sorted:?}");
+        }
+    }
+
+    // Enforce this invariant to allow for binary search.
+    #[test]
+    fn mathml_all_tags_is_sorted() {
+        if !MATHML_ALL_TAGS.is_sorted() {
+            let mut sorted = MATHML_ALL_TAGS.to_vec();
+            sorted.sort_unstable();
+            panic!("MathML tags array is not sorted. Here it is sorted {sorted:?}");
+        }
     }
 
     #[test]

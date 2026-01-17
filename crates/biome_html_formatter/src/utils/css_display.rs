@@ -10,6 +10,7 @@
 
 use crate::HtmlFormatter;
 use crate::context::WhitespaceSensitivity;
+use crate::utils::metadata::{MATHML_ALL_TAGS, SVG_ALL_TAGS};
 use biome_html_syntax::HtmlTagName;
 use biome_string_case::StrLikeExtension;
 
@@ -219,7 +220,7 @@ pub fn get_css_display(tag_name: &str) -> CssDisplay {
 
         // Media elements - these have special handling but are essentially block-like
         // for formatting purposes when considering children
-        "audio" | "video" | "object" => CssDisplay::InlineBlock,
+        "audio" | "video" | "object" | "svg" => CssDisplay::InlineBlock,
         "param" => CssDisplay::Block,
 
         // Form elements - inline-block
@@ -248,7 +249,15 @@ pub fn get_css_display(tag_name: &str) -> CssDisplay {
         "option" | "optgroup" => CssDisplay::Block,
 
         // Unknown elements default to inline (CSS default behavior)
-        _ => CssDisplay::Inline,
+        other => {
+            if SVG_ALL_TAGS.binary_search(&other).is_ok()
+                || MATHML_ALL_TAGS.binary_search(&other).is_ok()
+            {
+                CssDisplay::Block
+            } else {
+                CssDisplay::Inline
+            }
+        }
     }
 }
 
