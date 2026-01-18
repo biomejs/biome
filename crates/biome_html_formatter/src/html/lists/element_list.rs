@@ -579,6 +579,11 @@ impl FormatHtmlElementList {
                             } else {
                                 write!(f, [space()])?;
                             }
+                        } else if children_iter.peek().is_none()
+                            && last.is_some()
+                            && !self.is_container_whitespace_sensitive
+                        {
+                            // If the container is not whitespace sensitive, we trim trailing whitespace
                         } else {
                             write!(f, [space()])?;
                         }

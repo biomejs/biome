@@ -25,7 +25,7 @@ info: html/tags/tags2.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,28 +1,26 @@
+@@ -1,14 +1,12 @@
  <div>
 -  before<noscript>noscript long long long long long long long long</noscript
 -  >after
@@ -40,17 +40,11 @@ info: html/tags/tags2.html
 -    <summary>summary long long long long</summary>
 -    details
 -  </details>
-+  <details><summary>summary long long long long </summary>details</details>
++  <details><summary>summary long long long long</summary>details</details>
    after
  </div>
  
- <div>
-   before
--  <dialog open>dialog long long long long long long long long</dialog>
-+  <dialog open>dialog long long long long long long long long </dialog>
-   after
- </div>
- 
+@@ -21,8 +19,8 @@
  <div>
    before<object data="horse.wav">
      <param name="autoplay" value="true" />
@@ -84,13 +78,13 @@ info: html/tags/tags2.html
 
 <div>
   before
-  <details><summary>summary long long long long </summary>details</details>
+  <details><summary>summary long long long long</summary>details</details>
   after
 </div>
 
 <div>
   before
-  <dialog open>dialog long long long long long long long long </dialog>
+  <dialog open>dialog long long long long long long long long</dialog>
   after
 </div>
 

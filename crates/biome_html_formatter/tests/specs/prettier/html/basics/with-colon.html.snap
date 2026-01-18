@@ -141,14 +141,14 @@ e-wrap </html:textarea>
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,19 +4,13 @@
-     <div>
+@@ -5,18 +5,12 @@
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
      </div>
--    <div>block</div>
+     <div>block</div>
 -    <div>BLOCK</div>
--    <div>block</div>
--    <div>block</div>
++    <div>BLOCK</div> <div>block</div>
+     <div>block</div>
+     <div>block</div>
 -    <div>block</div>
 -    <pre>
 - pre pr
@@ -158,25 +158,21 @@ e-wrap </html:textarea>
 - pre-wrap pr
 -e-wrap </textarea
 -    >
-+    <div>block </div>
-+    <div>BLOCK </div> <div>block </div>
-+    <div>block </div>
-+    <div>block </div>
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap </textarea>
++    <textarea>pre-wrap pr e-wrap</textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -44,19 +38,13 @@
-     <div>
+@@ -45,18 +39,12 @@
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
      </div>
--    <div>block</div>
+     <div>block</div>
 -    <div>BLOCK</div>
 -    <div>block</div>
--    <div>block</div>
--    <div>block</div>
++    <div>BLOCK</div> <div>block</div>
+     <div>block</div>
+     <div>block</div>
 -    <pre>
 - pre pr
 -e</pre
@@ -185,25 +181,21 @@ e-wrap </html:textarea>
 - pre-wrap pr
 -e-wrap </textarea
 -    >
-+    <div>block </div>
-+    <div>BLOCK </div> <div>block </div>
-+    <div>block </div>
-+    <div>block </div>
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap </textarea>
++    <textarea>pre-wrap pr e-wrap</textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -84,19 +72,13 @@
-     <div>
+@@ -85,18 +73,12 @@
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
      </div>
--    <div>block</div>
+     <div>block</div>
 -    <div>BLOCK</div>
 -    <div>block</div>
--    <div>block</div>
--    <div>block</div>
++    <div>BLOCK</div> <div>block</div>
+     <div>block</div>
+     <div>block</div>
 -    <pre>
 - pre pr
 -e</pre
@@ -212,25 +204,21 @@ e-wrap </html:textarea>
 - pre-wrap pr
 -e-wrap </textarea
 -    >
-+    <div>block </div>
-+    <div>BLOCK </div> <div>block </div>
-+    <div>block </div>
-+    <div>block </div>
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap </textarea>
++    <textarea>pre-wrap pr e-wrap</textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -124,19 +106,13 @@
-     <div>
+@@ -125,18 +107,12 @@
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
      </div>
--    <div>block</div>
+     <div>block</div>
 -    <div>BLOCK</div>
 -    <div>block</div>
--    <div>block</div>
--    <div>block</div>
++    <div>BLOCK</div> <div>block</div>
+     <div>block</div>
+     <div>block</div>
 -    <pre>
 - pre pr
 -e</pre
@@ -239,25 +227,21 @@ e-wrap </html:textarea>
 - pre-wrap pr
 -e-wrap </textarea
 -    >
-+    <div>block </div>
-+    <div>BLOCK </div> <div>block </div>
-+    <div>block </div>
-+    <div>block </div>
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap </textarea>
++    <textarea>pre-wrap pr e-wrap</textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -164,19 +140,13 @@
-     <div>
+@@ -165,18 +141,12 @@
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
      </div>
--    <div>block</div>
+     <div>block</div>
 -    <div>BLOCK</div>
 -    <div>block</div>
--    <div>block</div>
--    <div>block</div>
++    <div>BLOCK</div> <div>block</div>
+     <div>block</div>
+     <div>block</div>
 -    <pre>
 - pre pr
 -e</pre
@@ -266,13 +250,9 @@ e-wrap </html:textarea>
 - pre-wrap pr
 -e-wrap </textarea
 -    >
-+    <div>block </div>
-+    <div>BLOCK </div> <div>block </div>
-+    <div>block </div>
-+    <div>block </div>
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap </textarea>
++    <textarea>pre-wrap pr e-wrap</textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
@@ -349,13 +329,13 @@ e-wrap </html:textarea>
     <div>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </div>
-    <div>block </div>
-    <div>BLOCK </div> <div>block </div>
-    <div>block </div>
-    <div>block </div>
+    <div>block</div>
+    <div>BLOCK</div> <div>block</div>
+    <div>block</div>
+    <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap </textarea>
+    <textarea>pre-wrap pr e-wrap</textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -383,13 +363,13 @@ e</pre>
     <div>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </div>
-    <div>block </div>
-    <div>BLOCK </div> <div>block </div>
-    <div>block </div>
-    <div>block </div>
+    <div>block</div>
+    <div>BLOCK</div> <div>block</div>
+    <div>block</div>
+    <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap </textarea>
+    <textarea>pre-wrap pr e-wrap</textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -417,13 +397,13 @@ e</pre>
     <div>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </div>
-    <div>block </div>
-    <div>BLOCK </div> <div>block </div>
-    <div>block </div>
-    <div>block </div>
+    <div>block</div>
+    <div>BLOCK</div> <div>block</div>
+    <div>block</div>
+    <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap </textarea>
+    <textarea>pre-wrap pr e-wrap</textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -451,13 +431,13 @@ e</pre>
     <div>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </div>
-    <div>block </div>
-    <div>BLOCK </div> <div>block </div>
-    <div>block </div>
-    <div>block </div>
+    <div>block</div>
+    <div>BLOCK</div> <div>block</div>
+    <div>block</div>
+    <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap </textarea>
+    <textarea>pre-wrap pr e-wrap</textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -485,13 +465,13 @@ e</pre>
     <div>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </div>
-    <div>block </div>
-    <div>BLOCK </div> <div>block </div>
-    <div>block </div>
-    <div>block </div>
+    <div>block</div>
+    <div>BLOCK</div> <div>block</div>
+    <div>block</div>
+    <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap </textarea>
+    <textarea>pre-wrap pr e-wrap</textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
