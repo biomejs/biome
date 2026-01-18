@@ -277,13 +277,6 @@ mod tests {
         }
     }
 
-    // #[test]
-    // fn test_table_cells_are_inline_like() {
-    //     // Table cells contain inline content and are whitespace-sensitive
-    //     assert!(get_css_display("td").is_inline_like());
-    //     assert!(get_css_display("th").is_inline_like());
-    // }
-
     #[test]
     fn test_tr_is_table_like() {
         assert!(get_css_display("tr").is_table_like());
