@@ -141,36 +141,8 @@ e-wrap </html:textarea>
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,18 +5,12 @@
-       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
-     </div>
+@@ -9,14 +9,9 @@
      <div>block</div>
--    <div>BLOCK</div>
-+    <div>BLOCK</div> <div>block</div>
-     <div>block</div>
-     <div>block</div>
--    <div>block</div>
--    <pre>
-- pre pr
--e</pre
--    >
--    <textarea>
-- pre-wrap pr
--e-wrap </textarea
--    >
-+    <pre> pre pr
-+e</pre>
-+    <textarea>pre-wrap pr e-wrap</textarea>
-     <span>
-       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
-     </span>
-@@ -45,18 +39,12 @@
-       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
-     </div>
-     <div>block</div>
--    <div>BLOCK</div>
--    <div>block</div>
-+    <div>BLOCK</div> <div>block</div>
      <div>block</div>
      <div>block</div>
 -    <pre>
@@ -187,13 +159,8 @@ e-wrap </html:textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -85,18 +73,12 @@
-       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
-     </div>
+@@ -49,14 +44,9 @@
      <div>block</div>
--    <div>BLOCK</div>
--    <div>block</div>
-+    <div>BLOCK</div> <div>block</div>
      <div>block</div>
      <div>block</div>
 -    <pre>
@@ -210,13 +177,8 @@ e-wrap </html:textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -125,18 +107,12 @@
-       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
-     </div>
+@@ -89,14 +79,9 @@
      <div>block</div>
--    <div>BLOCK</div>
--    <div>block</div>
-+    <div>BLOCK</div> <div>block</div>
      <div>block</div>
      <div>block</div>
 -    <pre>
@@ -233,13 +195,8 @@ e-wrap </html:textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -165,18 +141,12 @@
-       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
-     </div>
+@@ -129,14 +114,9 @@
      <div>block</div>
--    <div>BLOCK</div>
--    <div>block</div>
-+    <div>BLOCK</div> <div>block</div>
      <div>block</div>
      <div>block</div>
 -    <pre>
@@ -256,7 +213,25 @@ e-wrap </html:textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -206,53 +176,25 @@
+@@ -169,14 +149,9 @@
+     <div>block</div>
+     <div>block</div>
+     <div>block</div>
+-    <pre>
+- pre pr
+-e</pre
+-    >
+-    <textarea>
+- pre-wrap pr
+-e-wrap </textarea
+-    >
++    <pre> pre pr
++e</pre>
++    <textarea>pre-wrap pr e-wrap</textarea>
+     <span>
+       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
+     </span>
+@@ -206,53 +181,25 @@
      </h1>
    </div>
    <script>
@@ -330,7 +305,8 @@ e-wrap </html:textarea>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </div>
     <div>block</div>
-    <div>BLOCK</div> <div>block</div>
+    <div>BLOCK</div>
+    <div>block</div>
     <div>block</div>
     <div>block</div>
     <pre> pre pr
@@ -364,7 +340,8 @@ e</pre>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </div>
     <div>block</div>
-    <div>BLOCK</div> <div>block</div>
+    <div>BLOCK</div>
+    <div>block</div>
     <div>block</div>
     <div>block</div>
     <pre> pre pr
@@ -398,7 +375,8 @@ e</pre>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </div>
     <div>block</div>
-    <div>BLOCK</div> <div>block</div>
+    <div>BLOCK</div>
+    <div>block</div>
     <div>block</div>
     <div>block</div>
     <pre> pre pr
@@ -432,7 +410,8 @@ e</pre>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </div>
     <div>block</div>
-    <div>BLOCK</div> <div>block</div>
+    <div>BLOCK</div>
+    <div>block</div>
     <div>block</div>
     <div>block</div>
     <pre> pre pr
@@ -466,7 +445,8 @@ e</pre>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </div>
     <div>block</div>
-    <div>BLOCK</div> <div>block</div>
+    <div>BLOCK</div>
+    <div>block</div>
     <div>block</div>
     <div>block</div>
     <pre> pre pr

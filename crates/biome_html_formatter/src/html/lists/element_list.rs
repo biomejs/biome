@@ -564,7 +564,7 @@ impl FormatHtmlElementList {
                                 // Both are inline - the outer group pattern handles the space
                                 // via the trailing line in the inner group from the previous element
                             } else {
-                                write!(f, [space()])?;
+                                write!(f, [soft_line_break_or_space()])?;
                             }
                         } else if let Some(HtmlChild::NonText(last_elem)) = last {
                             // Whitespace AFTER an element (followed by text or end)
