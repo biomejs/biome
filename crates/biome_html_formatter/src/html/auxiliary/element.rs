@@ -69,11 +69,8 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         // Instead of:
         // <!-- comment --> <div>...</div>
         let css_display = node
-            .opening_element()
-            .ok()
-            .and_then(|opening| opening.name().ok())
-            .map(|tag| get_css_display_from_tag(&tag))
-            .unwrap_or(CssDisplay::Block);
+            .tag_name()
+            .map_or(CssDisplay::Block, |tag| get_css_display(&tag));
 
         if css_display.is_block_like() {
             format_html_leading_comments_for_block(node.syntax()).fmt(f)
