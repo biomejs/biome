@@ -3306,6 +3306,25 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoExcessiveClassesPerFileConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExcessiveClassesPerFileOptions" }
+			]
+		},
+		"NoExcessiveClassesPerFileOptions": {
+			"type": "object",
+			"properties": {
+				"maxClasses": {
+					"description": "The maximum number of classes allowed in a file.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 1
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoExcessiveCognitiveComplexityConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5462,6 +5481,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveClassesPerFile": {
+					"description": "Enforce a maximum number of classes per file.\nSee https://biomejs.dev/linter/rules/no-excessive-classes-per-file",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveClassesPerFileConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveLinesPerFile": {
 					"description": "Restrict the number of lines in a file.\nSee https://biomejs.dev/linter/rules/no-excessive-lines-per-file",
 					"anyOf": [
@@ -7292,6 +7318,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoEvolvingTypesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoExcessiveClassesPerFileOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExcessiveClassesPerFileOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

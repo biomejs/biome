@@ -1944,6 +1944,11 @@ See https://biomejs.dev/linter/rules/no-equals-to-null
 	 */
 	noEqualsToNull?: NoEqualsToNullConfiguration;
 	/**
+	* Enforce a maximum number of classes per file.
+See https://biomejs.dev/linter/rules/no-excessive-classes-per-file 
+	 */
+	noExcessiveClassesPerFile?: NoExcessiveClassesPerFileConfiguration;
+	/**
 	* Restrict the number of lines in a file.
 See https://biomejs.dev/linter/rules/no-excessive-lines-per-file 
 	 */
@@ -3792,6 +3797,9 @@ export type NoEmptySourceConfiguration =
 export type NoEqualsToNullConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEqualsToNullOptions;
+export type NoExcessiveClassesPerFileConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveClassesPerFileOptions;
 export type NoExcessiveLinesPerFileConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveLinesPerFileOptions;
@@ -5311,6 +5319,10 @@ export interface RuleWithNoEqualsToNullOptions {
 	level: RulePlainConfiguration;
 	options?: NoEqualsToNullOptions;
 }
+export interface RuleWithNoExcessiveClassesPerFileOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveClassesPerFileOptions;
+}
 export interface RuleWithNoExcessiveLinesPerFileOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveLinesPerFileOptions;
@@ -6749,6 +6761,12 @@ export interface NoEmptySourceOptions {
 	allowComments?: boolean;
 }
 export type NoEqualsToNullOptions = {};
+export interface NoExcessiveClassesPerFileOptions {
+	/**
+	 * The maximum number of classes allowed in a file.
+	 */
+	maxClasses?: number;
+}
 export interface NoExcessiveLinesPerFileOptions {
 	/**
 	 * The maximum number of lines allowed in a file.
@@ -7696,6 +7714,7 @@ export type Category =
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"
+	| "lint/nursery/noExcessiveClassesPerFile"
 	| "lint/nursery/noExcessiveLinesPerFile"
 	| "lint/nursery/noFloatingClasses"
 	| "lint/nursery/noFloatingPromises"

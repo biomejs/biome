@@ -180,6 +180,7 @@ define_categories! {
     "lint/nursery/noDuplicatedSpreadProps": "https://biomejs.dev/linter/rules/no-duplicated-spread-props",
     "lint/nursery/noEmptySource": "https://biomejs.dev/linter/rules/no-empty-source",
     "lint/nursery/noEqualsToNull": "https://biomejs.dev/linter/rules/no-equals-to-null",
+    "lint/nursery/noExcessiveClassesPerFile": "https://biomejs.dev/linter/rules/no-excessive-classes-per-file",
     "lint/nursery/noExcessiveLinesPerFile": "https://biomejs.dev/linter/rules/no-excessive-lines-per-file",
     "lint/nursery/noFloatingClasses": "https://biomejs.dev/linter/rules/no-floating-classes",
     "lint/nursery/noFloatingPromises": "https://biomejs.dev/linter/rules/no-floating-promises",
