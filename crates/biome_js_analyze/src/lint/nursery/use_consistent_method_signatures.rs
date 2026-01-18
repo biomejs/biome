@@ -178,6 +178,7 @@ declare_lint_rule! {
         name: "useConsistentMethodSignatures",
         language: "ts",
         recommended: false,
+        issue_number: Some("8780"),
         sources: &[RuleSource::EslintTypeScript("method-signature-style").same()],
         // TODO: Implement fix to convert between method/property
         // This will need to handle transforming overloads into intersections of function properties
