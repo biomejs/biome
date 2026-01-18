@@ -55,13 +55,11 @@ impl Rule for NoFloatingClasses {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if let Some(kind) = node.syntax().parent().kind()
-            && kind == JsSyntaxKind::JS_EXPRESSION_STATEMENT
-        {
-            return Some(());
-        }
-
-        None
+        node.syntax()
+            .parent()
+            .kind()
+            .is_some_and(|kind| kind == JsSyntaxKind::JS_EXPRESSION_STATEMENT)
+            .then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
