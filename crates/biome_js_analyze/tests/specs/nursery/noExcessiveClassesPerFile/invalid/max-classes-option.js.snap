@@ -1,27 +1,29 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: multi-class.js
+expression: max-classes-option.js
 ---
 # Input
 ```js
 /* should generate diagnostics */
 class InvalidClass1 { }
 class InvalidClass2 { }
+class InvalidClass3 { }
 
 ```
 
 # Diagnostics
 ```
-multi-class.js:2:1 lint/nursery/noExcessiveClassesPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+max-classes-option.js:2:1 lint/nursery/noExcessiveClassesPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i File exceeds the maximum of 1 class, found 2 classes.
+  i File exceeds the maximum of 2 classes, found 3 classes.
   
     1 │ /* should generate diagnostics */
   > 2 │ class InvalidClass1 { }
       │ ^^^^^^^^^^^^^^^^^^^^^^^
   > 3 │ class InvalidClass2 { }
+  > 4 │ class InvalidClass3 { }
       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ 
+    5 │ 
   
   i Files containing multiple classes can often result in a less navigable and poorly structured codebase. Extract the excessive classes into a separate file.
   

@@ -14,7 +14,7 @@ const InvalidClassExpr2 = class { }
 ```
 multi-class-expr.js:2:1 lint/nursery/noExcessiveClassesPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i File exceeds the maximum of 1 classes.
+  i File exceeds the maximum of 1 class, found 2 classes.
   
     1 │ /* should generate diagnostics */
   > 2 │ const InvalidClassExpr1 = class { }

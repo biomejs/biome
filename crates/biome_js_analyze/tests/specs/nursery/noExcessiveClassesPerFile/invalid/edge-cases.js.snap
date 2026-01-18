@@ -21,7 +21,7 @@ class Outer {
 ```
 edge-cases.js:2:1 lint/nursery/noExcessiveClassesPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i File exceeds the maximum of 1 classes.
+  i File exceeds the maximum of 1 class, found 3 classes.
   
      1 │ /* should generate diagnostics */
    > 2 │ class Outer {

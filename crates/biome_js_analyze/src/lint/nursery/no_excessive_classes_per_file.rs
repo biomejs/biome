@@ -63,7 +63,7 @@ declare_lint_rule! {
 
 impl Rule for NoExcessiveClassesPerFile {
     type Query = Ast<AnyJsRoot>;
-    type State = ();
+    type State = usize;
     type Signals = Option<Self::State>;
     type Options = NoExcessiveClassesPerFileOptions;
 
@@ -86,13 +86,13 @@ impl Rule for NoExcessiveClassesPerFile {
             .count();
 
         if count > max_classes.get().into() {
-            return Some(());
+            return Some(count);
         }
 
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         let max_classes = ctx.options().max_classes();
         Some(
@@ -100,7 +100,7 @@ impl Rule for NoExcessiveClassesPerFile {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "File exceeds the maximum of "{{max_classes.to_string()}}" classes."
+                    "File exceeds the maximum of "{{max_classes.to_string()}}" class"{{if max_classes.get() > 1 { "es" } else { "" }}}", found "{{state}}" classes."
                 },
             )
             .note(markup! {
