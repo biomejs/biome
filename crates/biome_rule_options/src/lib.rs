@@ -48,6 +48,7 @@ pub mod no_delete;
 pub mod no_deprecated_imports;
 pub mod no_descending_specificity;
 pub mod no_distracting_elements;
+pub mod no_div_regex;
 pub mod no_document_cookie;
 pub mod no_document_import_in_page;
 pub mod no_done_callback;
