@@ -3452,6 +3452,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoFloatingClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoFloatingClassesOptions" }
+			]
+		},
+		"NoFloatingClassesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoFloatingPromisesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5459,6 +5469,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noFloatingClasses": {
+					"description": "Disallow new operators outside of assignments or comparisons.\nSee https://biomejs.dev/linter/rules/no-floating-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoFloatingClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFloatingPromises": {
 					"description": "Require Promise-like statements to be handled appropriately.\nSee https://biomejs.dev/linter/rules/no-floating-promises",
 					"anyOf": [
@@ -7377,6 +7394,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoFlatMapIdentityOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoFloatingClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoFloatingClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

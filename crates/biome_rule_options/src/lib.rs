@@ -98,6 +98,7 @@ pub mod no_extra_boolean_cast;
 pub mod no_extra_non_null_assertion;
 pub mod no_fallthrough_switch_clause;
 pub mod no_flat_map_identity;
+pub mod no_floating_classes;
 pub mod no_floating_promises;
 pub mod no_focused_tests;
 pub mod no_for_each;
