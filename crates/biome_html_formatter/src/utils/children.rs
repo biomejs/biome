@@ -4,8 +4,7 @@ use std::{
 };
 
 use biome_formatter::{
-    Buffer, Format, FormatElement, FormatResult, comments::CommentStyle, format_args, prelude::*,
-    write,
+    Buffer, Format, FormatElement, FormatResult, comments::CommentStyle, prelude::*,
 };
 use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlClosingElement};
 use biome_rowan::{AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText};

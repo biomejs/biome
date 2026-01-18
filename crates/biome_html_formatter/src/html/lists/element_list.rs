@@ -190,7 +190,7 @@ use crate::{
     },
 };
 use biome_formatter::{FormatRuleWithOptions, GroupId, prelude::*};
-use biome_formatter::{VecBuffer, format_args, write};
+use biome_formatter::{format_args, write};
 use biome_html_syntax::{
     AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElement,
     HtmlElementList, HtmlRoot, HtmlSyntaxToken,

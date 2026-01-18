@@ -9,7 +9,6 @@
 //! - HTML WHATWG spec: <https://html.spec.whatwg.org/multipage/rendering.html#the-css-user-agent-style-sheet-and-presentational-hints>
 
 use crate::HtmlFormatter;
-use crate::context::WhitespaceSensitivity;
 use crate::utils::metadata::{MATHML_ALL_TAGS, SVG_ALL_TAGS};
 use biome_html_syntax::HtmlTagName;
 use biome_string_case::StrLikeExtension;
@@ -100,22 +99,6 @@ impl CssDisplay {
 
     pub fn is_inline_block(self) -> bool {
         matches!(self, Self::InlineBlock)
-    }
-
-    /// Returns true if this is a strictly inline display value.
-    ///
-    /// This is more restrictive than `is_inline_like()` and only includes
-    /// elements that are purely inline (not inline-block or table-cell).
-    /// Use this for whitespace sensitivity decisions in formatting where
-    /// inline-block and table elements should be treated more like block elements.
-    ///
-    /// **Note: For formatting purposes, you MUST use [`Self::is_internally_whitespace_sensitive`] or
-    /// [`Self::is_externally_whitespace_sensitive`] to determine if an element is whitespace-sensitive.**
-    pub fn is_strictly_inline(self) -> bool {
-        matches!(
-            self,
-            Self::Inline | Self::Ruby | Self::RubyBase | Self::RubyText
-        )
     }
 
     /// Returns true if this is a table-related display value.
