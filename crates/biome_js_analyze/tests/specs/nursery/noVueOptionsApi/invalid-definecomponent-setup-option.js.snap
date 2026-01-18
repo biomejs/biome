@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-definecomponent-setup-option.js
+---
+# Input
+```js
+// should generate diagnostics
+// defineComponent with setup option inside object is still Options API style
+// Use defineComponent with function signature instead for Vapor Mode
+import { defineComponent, ref } from "vue";
+
+export default defineComponent({
+  setup() {
+    const count = ref(0);
+    return { count };
+  }
+});
+
+```
+
+# Diagnostics
+```
+invalid-definecomponent-setup-option.js:6:32 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the Options API is not allowed.
+  
+     4 │ import { defineComponent, ref } from "vue";
+     5 │ 
+   > 6 │ export default defineComponent({
+       │                                ^
+   > 7 │   setup() {
+   > 8 │     const count = ref(0);
+   > 9 │     return { count };
+  > 10 │   }
+  > 11 │ });
+       │ ^
+    12 │ 
+  
+  i Although the Options API is still supported by Vue, using the Composition API is recommended, and makes it possible to use Vue's Vapor mode for better performance.
+  
+  i Use <script setup> or defineComponent with a function signature to use the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
