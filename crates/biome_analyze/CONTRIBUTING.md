@@ -356,7 +356,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
 6. Implement the `diagnostic` function to define what the user will see.
 
    Follow the [guidelines & pillars](#what-a-rule-should-say-to-the-user) when writing the messages.
-   Please also keep [Biome's technical principals](https://biomejs.dev/internals/philosophy/#technical) in mind when writing those messages and implementing your diagnostic rule.
+   Please also keep [Biome's technical principles](https://biomejs.dev/internals/philosophy/#technical) in mind when writing those messages and implementing your diagnostic rule.
 
    ```rust
    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic>
