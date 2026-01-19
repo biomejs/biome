@@ -60,28 +60,28 @@ type NormalizedCliOptions = {
 function printHelp() {
 	const languages = getSupportedLanguages().slice(0, 8).join(", ");
 
-	console.log(
+	console.info(
 		"Compare Biome and Prettier formatting output and IR side-by-side.\n",
 	);
-	console.log("Usage:");
-	console.log('  prettier-compare "const x = 1"           # Format a snippet');
-	console.log("  prettier-compare -f file.ts              # Format from file");
-	console.log('  echo "const x = 1" | prettier-compare    # Format from stdin');
-	console.log('  prettier-compare -w "const x = 1"        # Watch mode (fancy TUI)');
-	console.log("\nOptions:");
-	console.log("  -f, --file <path>        Read input from file");
-	console.log(
+	console.info("Usage:");
+	console.info('  prettier-compare "const x = 1"           # Format a snippet');
+	console.info("  prettier-compare -f file.ts              # Format from file");
+	console.info('  echo "const x = 1" | prettier-compare    # Format from stdin');
+	console.info('  prettier-compare -w "const x = 1"        # Watch mode (fancy TUI)');
+	console.info("\nOptions:");
+	console.info("  -f, --file <path>        Read input from file");
+	console.info(
 		`  -l, --language <lang>    Language (${languages}, ...)`,
 	);
-	console.log(
+	console.info(
 		"  -w, --watch              Watch mode: rebuild WASM on Rust file changes",
 	);
-	console.log("  -r, --rebuild            Rebuild WASM before running");
-	console.log(
+	console.info("  -r, --rebuild            Rebuild WASM before running");
+	console.info(
 		"      --ir-only            Only show IR comparison, not formatted output",
 	);
-	console.log("      --output-only        Only show formatted output, not IR");
-	console.log("  -h, --help               Show this help message");
+	console.info("      --output-only        Only show formatted output, not IR");
+	console.info("  -h, --help               Show this help message");
 }
 
 function parseCliArgs(): { snippet?: string; options: NormalizedCliOptions } {
@@ -203,10 +203,10 @@ async function run() {
 
 		// Optionally rebuild WASM first
 		if (options.rebuild) {
-			console.log("Rebuilding WASM...");
+			console.info("Rebuilding WASM...");
 			try {
 				await rebuildWasm(ROOT_DIR);
-				console.log("WASM rebuilt successfully.\n");
+				console.info("WASM rebuilt successfully.\n");
 			} catch (err) {
 				console.error(
 					`WASM rebuild failed: ${err instanceof Error ? err.message : err}`,
