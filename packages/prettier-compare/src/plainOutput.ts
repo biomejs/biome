@@ -6,8 +6,8 @@
 import { styleText } from "node:util";
 
 import type { BiomeResult } from "./biome.js";
-import type { PrettierResult } from "./prettier.js";
 import { getLanguageConfig } from "./languages.js";
+import type { PrettierResult } from "./prettier.js";
 
 function header(text: string): string {
 	return styleText(["bold", "cyan"], text);
@@ -89,9 +89,7 @@ export function printComparison({
 
 		if (prettierResult.error) {
 			console.info(styleText("magenta", "Prettier:"));
-			console.info(
-				`  ${styleText("red", "[error]")} ${prettierResult.error}`,
-			);
+			console.info(`  ${styleText("red", "[error]")} ${prettierResult.error}`);
 		}
 
 		console.info();

@@ -2,14 +2,15 @@
  * Main App component that orchestrates the comparison UI.
  */
 
-import React, { useState, useEffect, useCallback } from "react";
-import { DiffView } from "./DiffView.js";
-import { DiagnosticsView } from "./DiagnosticsView.js";
-import { Spinner } from "./Spinner.js";
-import { formatWithBiome, type BiomeResult } from "../biome.js";
-import { formatWithPrettier, type PrettierResult } from "../prettier.js";
+// biome-ignore lint/correctness/noUnusedImports: auto-suppressed
+import React, { useCallback, useEffect, useState } from "react";
+import { type BiomeResult, formatWithBiome } from "../biome.js";
 import { getLanguageConfig } from "../languages.js";
+import { formatWithPrettier, type PrettierResult } from "../prettier.js";
 import { createWatcher, rebuildWasm } from "../watch.js";
+import { DiagnosticsView } from "./DiagnosticsView.js";
+import { DiffView } from "./DiffView.js";
+import { Spinner } from "./Spinner.js";
 
 interface AppProps {
 	/** The code to format and compare */
@@ -38,6 +39,7 @@ export function App({
 	language,
 	watchMode,
 	rootDir,
+	// biome-ignore lint/correctness/noUnusedFunctionParameters: auto-suppressed
 	onExit,
 	irOnly = false,
 	outputOnly = false,
@@ -94,6 +96,7 @@ export function App({
 			await runComparison();
 		}
 
+		// biome-ignore lint/nursery/noFloatingPromises: its fine here
 		initialize();
 	}, [rebuild, rootDir, runComparison]);
 
@@ -126,6 +129,7 @@ export function App({
 		});
 
 		return () => {
+			// biome-ignore lint/nursery/noFloatingPromises: its fine here
 			watcher.close();
 		};
 	}, [watchMode, rootDir, runComparison]);

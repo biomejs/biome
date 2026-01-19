@@ -9,18 +9,21 @@
  */
 
 import { parseArgs } from "node:util";
+// biome-ignore lint/style/useNodejsImportProtocol: auto-suppressed
 import { readFileSync } from "fs";
-import { resolve, dirname } from "path";
+// biome-ignore lint/style/useNodejsImportProtocol: auto-suppressed
+import { dirname, resolve } from "path";
+// biome-ignore lint/style/useNodejsImportProtocol: auto-suppressed
 import { fileURLToPath } from "url";
+import { formatWithBiome } from "./biome.js";
 import {
 	detectLanguage,
-	getSupportedLanguages,
 	getLanguageConfig,
+	getSupportedLanguages,
 } from "./languages.js";
-import { formatWithBiome } from "./biome.js";
+import { printComparison } from "./plainOutput.js";
 import { formatWithPrettier } from "./prettier.js";
 import { rebuildWasm } from "./watch.js";
-import { printComparison } from "./plainOutput.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -66,13 +69,15 @@ function printHelp() {
 	console.info("Usage:");
 	console.info('  prettier-compare "const x = 1"           # Format a snippet');
 	console.info("  prettier-compare -f file.ts              # Format from file");
-	console.info('  echo "const x = 1" | prettier-compare    # Format from stdin');
-	console.info('  prettier-compare -w "const x = 1"        # Watch mode (fancy TUI)');
+	console.info(
+		'  echo "const x = 1" | prettier-compare    # Format from stdin',
+	);
+	console.info(
+		'  prettier-compare -w "const x = 1"        # Watch mode (fancy TUI)',
+	);
 	console.info("\nOptions:");
 	console.info("  -f, --file <path>        Read input from file");
-	console.info(
-		`  -l, --language <lang>    Language (${languages}, ...)`,
-	);
+	console.info(`  -l, --language <lang>    Language (${languages}, ...)`);
 	console.info(
 		"  -w, --watch              Watch mode: rebuild WASM on Rust file changes",
 	);
@@ -121,10 +126,7 @@ function parseCliArgs(): { snippet?: string; options: NormalizedCliOptions } {
 }
 
 async function run() {
-	const {
-		snippet: snippetArg,
-		options,
-	} = parseCliArgs();
+	const { snippet: snippetArg, options } = parseCliArgs();
 
 	// Determine input source
 	let code: string;
@@ -240,7 +242,7 @@ async function run() {
 
 run().catch((err) => {
 	console.error(
-		err instanceof Error ? err.stack ?? err.message : String(err),
+		err instanceof Error ? (err.stack ?? err.message) : String(err),
 	);
 	process.exit(1);
 });

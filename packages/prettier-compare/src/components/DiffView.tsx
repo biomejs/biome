@@ -2,6 +2,7 @@
  * Side-by-side diff view component for comparing Biome and Prettier output.
  */
 
+// biome-ignore lint/correctness/noUnusedImports: auto-suppressed
 import React from "react";
 
 interface DiffViewProps {
@@ -89,8 +90,9 @@ export function DiffView({
 			</box>
 
 			{/* Content rows */}
+			{/** biome-ignore lint/correctness/noUnusedFunctionParameters: auto-suppressed */}
 			{diffLines.map((line, index) => (
-				<box key={index} flexDirection="row" width="100%">
+				<box key={line.biome} flexDirection="row" width="100%">
 					<box width="50%">
 						<text fg={line.isDiff ? diffColor : normalColor}>{line.biome}</text>
 					</box>

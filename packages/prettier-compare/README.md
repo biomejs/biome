@@ -1,4 +1,4 @@
-# `@biomejs/prettier-compare` Package
+# `prettier-compare` Package
 
 ## Overview
 
@@ -7,7 +7,7 @@ A CLI tool that compares Prettier and Biome formatting output and IR side-by-sid
 ## Architecture
 
 ```
-packages/@biomejs/prettier-compare/
+packages/prettier-compare/
 ├── src/
 │   ├── index.tsx         # Main CLI entry point + React TUI app
 │   ├── biome.ts          # Biome formatting via @biomejs/js-api

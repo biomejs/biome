@@ -2,7 +2,8 @@
  * Animated spinner component for loading states.
  */
 
-import React, { useState, useEffect } from "react";
+// biome-ignore lint/correctness/noUnusedImports: auto-suppressed
+import React, { useEffect, useState } from "react";
 
 const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 

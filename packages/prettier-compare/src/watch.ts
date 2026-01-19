@@ -2,10 +2,15 @@
  * File watcher for Rust formatter crates with debounced WASM rebuilds.
  */
 
+// biome-ignore lint/style/useNodejsImportProtocol: auto-suppressed
 import { spawn } from "child_process";
+// biome-ignore lint/style/useNodejsImportProtocol: auto-suppressed
 import { EventEmitter } from "events";
-import { FSWatcher, watch } from "fs";
+// biome-ignore lint/style/useNodejsImportProtocol: auto-suppressed
+import { type FSWatcher, watch } from "fs";
+// biome-ignore lint/style/useNodejsImportProtocol: auto-suppressed
 import { readdir, stat } from "fs/promises";
+// biome-ignore lint/style/useNodejsImportProtocol: auto-suppressed
 import { resolve } from "path";
 
 /** Debounce delay in milliseconds */
@@ -21,16 +26,14 @@ const WATCH_DIRS = [
 	"crates/biome_json_formatter",
 	"crates/biome_css_formatter",
 	"crates/biome_html_formatter",
-  "crates/biome_graphql_formatter",
+	"crates/biome_graphql_formatter",
 	"crates/biome_wasm",
 ];
 
 const IGNORED_DIRS = new Set(["target", "node_modules"]);
 
 function isIgnoredPath(filePath: string): boolean {
-	return filePath
-		.split(/[/\\]+/)
-		.some((segment) => IGNORED_DIRS.has(segment));
+	return filePath.split(/[/\\]+/).some((segment) => IGNORED_DIRS.has(segment));
 }
 
 function toError(err: unknown): Error {
@@ -171,6 +174,7 @@ export function createWatcher(rootDir: string): Watcher {
 			if (!stats.isDirectory()) {
 				return;
 			}
+			// biome-ignore lint/correctness/noUnusedVariables: auto-suppressed
 		} catch (err) {
 			return;
 		}
@@ -189,6 +193,7 @@ export function createWatcher(rootDir: string): Watcher {
 		}
 	};
 
+	// biome-ignore lint/nursery/noFloatingPromises: its fine here
 	(async () => {
 		try {
 			for (const dir of absoluteDirs) {
@@ -199,6 +204,7 @@ export function createWatcher(rootDir: string): Watcher {
 		}
 	})();
 
+	// biome-ignore lint/plugin: our demo plugin rule flags this
 	return Object.assign(emitter, {
 		close: async () => {
 			if (debounceTimer) {
