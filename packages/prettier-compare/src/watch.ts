@@ -2,26 +2,18 @@
  * File watcher for Rust formatter crates with debounced WASM rebuilds.
  */
 
-import chokidar from "chokidar";
 import { spawn } from "child_process";
 import { EventEmitter } from "events";
+import { FSWatcher, watch } from "fs";
+import { readdir, stat } from "fs/promises";
 import { resolve } from "path";
 
 /** Debounce delay in milliseconds */
 const DEBOUNCE_MS = 500;
 
-/** Enable debug logging via environment variable */
-const DEBUG = process.env.DEBUG_WATCH === "1" || process.env.DEBUG === "1";
-
-function debug(...args: unknown[]) {
-	if (DEBUG) {
-		console.log("[watch]", ...args);
-	}
-}
-
 /**
  * Directories containing Rust files that affect the formatter.
- * Note: chokidar v4 doesn't support glob patterns, so we watch directories directly.
+ * We watch directories directly because `fs.watch` can't subscribe to glob patterns.
  */
 const WATCH_DIRS = [
 	"crates/biome_formatter",
@@ -29,9 +21,21 @@ const WATCH_DIRS = [
 	"crates/biome_json_formatter",
 	"crates/biome_css_formatter",
 	"crates/biome_html_formatter",
-	"crates/biome_graphql_formatter",
+  "crates/biome_graphql_formatter",
 	"crates/biome_wasm",
 ];
+
+const IGNORED_DIRS = new Set(["target", "node_modules"]);
+
+function isIgnoredPath(filePath: string): boolean {
+	return filePath
+		.split(/[/\\]+/)
+		.some((segment) => IGNORED_DIRS.has(segment));
+}
+
+function toError(err: unknown): Error {
+	return err instanceof Error ? err : new Error(String(err));
+}
 
 export interface WatcherEvents {
 	/** Emitted when a rebuild is starting */
@@ -55,71 +59,159 @@ export interface Watcher extends WatcherEvents {
  */
 export function createWatcher(rootDir: string): Watcher {
 	const emitter = new EventEmitter();
+	const watchers = new Map<string, FSWatcher>();
 	let debounceTimer: NodeJS.Timeout | null = null;
 	let isRebuilding = false;
+	let lastChangedFile: string | null = null;
 
-	// Convert relative directories to absolute paths
 	const absoluteDirs = WATCH_DIRS.map((dir) => resolve(rootDir, dir));
 
-	debug("Creating watcher for directories:", absoluteDirs);
+	const scheduleRebuild = (changedFile: string) => {
+		lastChangedFile = changedFile;
 
-	const watcher = chokidar.watch(absoluteDirs, {
-		ignoreInitial: true,
-		// Ignore build artifacts and non-source files
-		ignored: ["**/target/**", "**/node_modules/**"],
-	});
-
-	watcher.on("ready", () => {
-		debug("Watcher ready");
-		const watched = watcher.getWatched();
-		debug("Watching", Object.keys(watched).length, "directories");
-	});
-
-	// Listen to all events (add, change, unlink) and filter for .rs files
-	watcher.on("all", (event, path) => {
-		// Only react to Rust file changes
-		if (!path.endsWith(".rs")) {
-			return;
-		}
-
-		debug(`File ${event}:`, path);
-
-		// Clear any pending debounce timer
 		if (debounceTimer) {
 			clearTimeout(debounceTimer);
 		}
 
-		// Debounce rapid file changes
 		debounceTimer = setTimeout(async () => {
+			debounceTimer = null;
+
 			if (isRebuilding) {
-				debug("Already rebuilding, skipping");
+				return;
+			}
+
+			if (!lastChangedFile) {
 				return;
 			}
 
 			isRebuilding = true;
-			emitter.emit("rebuilding", path);
+			emitter.emit("rebuilding", lastChangedFile);
 
 			try {
 				await rebuildWasm(rootDir);
 				emitter.emit("rebuilt");
 			} catch (err) {
-				emitter.emit(
-					"error",
-					err instanceof Error ? err : new Error(String(err)),
-				);
+				emitter.emit("error", toError(err));
 			} finally {
 				isRebuilding = false;
+				lastChangedFile = null;
 			}
 		}, DEBOUNCE_MS);
-	});
+	};
 
-	watcher.on("error", (err) => {
-		debug("Watcher error:", err);
-		emitter.emit("error", err);
-	});
+	const handleWatcherEvent = (
+		baseDir: string,
+		eventType: string,
+		filename?: string | Buffer,
+	) => {
+		if (!filename) {
+			return;
+		}
+
+		const fullPath = resolve(baseDir, filename.toString());
+
+		if (isIgnoredPath(fullPath)) {
+			return;
+		}
+
+		(async () => {
+			if (eventType === "rename") {
+				try {
+					const stats = await stat(fullPath);
+					if (stats.isDirectory()) {
+						await visitDirectory(fullPath);
+					}
+				} catch {
+					// File or directory might have been removed; ignore.
+				}
+			}
+
+			if (fullPath.endsWith(".rs")) {
+				scheduleRebuild(fullPath);
+			}
+		})().catch((err) => {
+			const error = toError(err);
+			emitter.emit("error", error);
+		});
+	};
+
+	const startDirWatcher = async (dir: string): Promise<void> => {
+		if (watchers.has(dir)) {
+			return;
+		}
+
+		try {
+			const watcher = watch(dir, { persistent: true }, (eventType, filename) =>
+				handleWatcherEvent(dir, eventType, filename),
+			);
+
+			watcher.on("error", (err) => {
+				const error = toError(err);
+				emitter.emit("error", error);
+				watcher.close();
+				watchers.delete(dir);
+			});
+
+			watchers.set(dir, watcher);
+		} catch (err) {
+			const error = toError(err);
+			emitter.emit("error", error);
+		}
+	};
+
+	const visitDirectory = async (dir: string): Promise<void> => {
+		const normalized = resolve(dir);
+
+		if (isIgnoredPath(normalized) || watchers.has(normalized)) {
+			return;
+		}
+
+		try {
+			const stats = await stat(normalized);
+			if (!stats.isDirectory()) {
+				return;
+			}
+		} catch (err) {
+			return;
+		}
+
+		await startDirWatcher(normalized);
+
+		try {
+			const entries = await readdir(normalized, { withFileTypes: true });
+			await Promise.all(
+				entries
+					.filter((entry) => entry.isDirectory())
+					.map((entry) => visitDirectory(resolve(normalized, entry.name))),
+			);
+		} catch (err) {
+			console.error("Failed to read directory:", normalized, err);
+		}
+	};
+
+	(async () => {
+		try {
+			for (const dir of absoluteDirs) {
+				await visitDirectory(dir);
+			}
+		} catch (err) {
+			emitter.emit("error", toError(err));
+		}
+	})();
 
 	return Object.assign(emitter, {
-		close: () => watcher.close(),
+		close: async () => {
+			if (debounceTimer) {
+				clearTimeout(debounceTimer);
+				debounceTimer = null;
+			}
+
+			for (const watcher of watchers.values()) {
+				watcher.close();
+			}
+
+			watchers.clear();
+		},
 	}) as Watcher;
 }
 
@@ -130,7 +222,7 @@ export function createWatcher(rootDir: string): Watcher {
  * @returns A promise that resolves when the build completes
  */
 export function rebuildWasm(rootDir: string): Promise<void> {
-	debug("Starting WASM rebuild...");
+	console.info("Starting WASM rebuild...");
 
 	return new Promise((resolve, reject) => {
 		const proc = spawn("just", ["build-wasm-node-dev"], {
@@ -144,26 +236,19 @@ export function rebuildWasm(rootDir: string): Promise<void> {
 			stderr += data.toString();
 		});
 
-		proc.stdout?.on("data", (data) => {
-			debug("[build]", data.toString().trim());
-		});
-
 		proc.on("close", (code) => {
 			if (code === 0) {
-				debug("WASM rebuild completed successfully");
 				resolve();
 			} else {
 				const error = new Error(
 					`WASM build failed with code ${code}:\n${stderr.trim()}`,
 				);
-				debug("WASM rebuild failed:", error.message);
 				reject(error);
 			}
 		});
 
 		proc.on("error", (err) => {
 			const error = new Error(`Failed to start build process: ${err.message}`);
-			debug("Failed to start build:", error.message);
 			reject(error);
 		});
 	});
