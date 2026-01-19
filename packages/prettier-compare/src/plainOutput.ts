@@ -3,35 +3,21 @@
  * Prints comparison results sequentially to stdout with basic ANSI colors.
  */
 
+import { styleText } from "node:util";
+
 import type { BiomeResult } from "./biome.js";
 import type { PrettierResult } from "./prettier.js";
 import { getLanguageConfig } from "./languages.js";
 
-// ANSI color codes
-const colors = {
-	reset: "\x1b[0m",
-	bold: "\x1b[1m",
-	cyan: "\x1b[36m",
-	green: "\x1b[32m",
-	yellow: "\x1b[33m",
-	red: "\x1b[31m",
-	gray: "\x1b[90m",
-	magenta: "\x1b[35m",
-};
-
 function header(text: string): string {
-	return `${colors.bold}${colors.cyan}${text}${colors.reset}`;
-}
-
-function subHeader(text: string, color: string): string {
-	return `${color}${text}${colors.reset}`;
+	return styleText(["bold", "cyan"], text);
 }
 
 function matchIndicator(isMatch: boolean): string {
 	if (isMatch) {
-		return `${colors.green}[MATCH]${colors.reset}`;
+		return styleText("green", "[MATCH]");
 	}
-	return `${colors.yellow}[DIFF]${colors.reset}`;
+	return styleText("yellow", "[DIFF]");
 }
 
 interface PrintComparisonOptions {
@@ -57,30 +43,30 @@ export function printComparison({
 
 	// Formatted output comparison
 	if (!irOnly) {
-		console.log(
+		console.info(
 			`${header("=== Formatted Output ===")}  ${matchIndicator(outputMatch)}`,
 		);
-		console.log();
+		console.info();
 
-		console.log(subHeader("--- Biome ---", colors.cyan));
-		console.log(biomeResult.output);
+		console.info(styleText("cyan", "--- Biome ---"));
+		console.info(biomeResult.output);
 
-		console.log(subHeader("--- Prettier ---", colors.magenta));
-		console.log(prettierResult.output);
+		console.info(styleText("magenta", "--- Prettier ---"));
+		console.info(prettierResult.output);
 	}
 
 	// IR comparison
 	if (!outputOnly) {
-		console.log(header("=== IR (Intermediate Representation) ==="));
-		console.log();
+		console.info(header("=== IR (Intermediate Representation) ==="));
+		console.info();
 
-		console.log(subHeader("--- Biome ---", colors.cyan));
-		console.log(biomeResult.ir || "(no IR available)");
-		console.log();
+		console.info(styleText("cyan", "--- Biome ---"));
+		console.info(biomeResult.ir || "(no IR available)");
+		console.info();
 
-		console.log(subHeader("--- Prettier ---", colors.magenta));
-		console.log(prettierResult.ir || "(no IR available)");
-		console.log();
+		console.info(styleText("magenta", "--- Prettier ---"));
+		console.info(prettierResult.ir || "(no IR available)");
+		console.info();
 	}
 
 	// Diagnostics
@@ -88,31 +74,34 @@ export function printComparison({
 		biomeResult.diagnostics.length > 0 || prettierResult.error;
 
 	if (hasDiagnostics) {
-		console.log(header("=== Diagnostics ==="));
-		console.log();
+		console.info(header("=== Diagnostics ==="));
+		console.info();
 
 		if (biomeResult.diagnostics.length > 0) {
-			console.log(subHeader("Biome:", colors.cyan));
+			console.info(styleText("cyan", "Biome:"));
 			for (const d of biomeResult.diagnostics) {
-				const color = d.severity === "error" ? colors.red : colors.yellow;
-				console.log(
-					`  ${color}[${d.severity}]${colors.reset} ${d.description}`,
+				const severityStyle = d.severity === "error" ? "red" : "yellow";
+				console.info(
+					`  ${styleText(severityStyle, `[${d.severity}]`)} ${d.description}`,
 				);
 			}
 		}
 
 		if (prettierResult.error) {
-			console.log(subHeader("Prettier:", colors.magenta));
-			console.log(
-				`  ${colors.red}[error]${colors.reset} ${prettierResult.error}`,
+			console.info(styleText("magenta", "Prettier:"));
+			console.info(
+				`  ${styleText("red", "[error]")} ${prettierResult.error}`,
 			);
 		}
 
-		console.log();
+		console.info();
 	}
 
 	// Language info
-	console.log(
-		`${colors.gray}Language: ${config.displayName} | Prettier parser: ${config.prettierParser}${colors.reset}`,
+	console.info(
+		styleText(
+			"gray",
+			`Language: ${config.displayName} | Prettier parser: ${config.prettierParser}`,
+		),
 	);
 }
