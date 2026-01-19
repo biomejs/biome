@@ -7,6 +7,26 @@ use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
 use biome_parser::{diagnostic::ParseDiagnostic, token_source::TokenSourceCheckpoint};
 use biome_rowan::{TextRange, TriviaPieceKind};
 
+/// Find the start position of the current line in source text.
+///
+/// Given a slice of text, finds the byte offset where the current line begins
+/// (after the last newline, handling CRLF).
+fn find_line_start(before: &str) -> usize {
+    let last_newline_pos = before.rfind(['\n', '\r']);
+    match last_newline_pos {
+        Some(pos) => {
+            let bytes = before.as_bytes();
+            // Handle CRLF: if we found \r and next char is \n, skip both
+            if bytes.get(pos) == Some(&b'\r') && bytes.get(pos + 1) == Some(&b'\n') {
+                pos + 2
+            } else {
+                pos + 1
+            }
+        }
+        None => 0,
+    }
+}
+
 pub(crate) struct MarkdownTokenSource<'source> {
     lexer: BufferedLexer<MarkdownSyntaxKind, MarkdownLexer<'source>>,
 
@@ -94,21 +114,7 @@ impl<'source> MarkdownTokenSource<'source> {
         let start: usize = range.start().into();
 
         let source = self.lexer.source();
-        let before_token = &source[..start];
-
-        // Find the last newline before current token
-        let last_newline_pos = before_token.rfind(['\n', '\r']);
-        let line_start = match last_newline_pos {
-            Some(pos) => {
-                let bytes = before_token.as_bytes();
-                if bytes.get(pos) == Some(&b'\r') && bytes.get(pos + 1) == Some(&b'\n') {
-                    pos + 2
-                } else {
-                    pos + 1
-                }
-            }
-            None => 0,
-        };
+        let line_start = find_line_start(&source[..start]);
 
         let line = &source[line_start..];
         let mut count = 0usize;
@@ -131,19 +137,7 @@ impl<'source> MarkdownTokenSource<'source> {
 
         let source = self.lexer.source();
         let before_token = &source[..start];
-
-        let last_newline_pos = before_token.rfind(['\n', '\r']);
-        let line_start = match last_newline_pos {
-            Some(pos) => {
-                let bytes = before_token.as_bytes();
-                if bytes.get(pos) == Some(&b'\r') && bytes.get(pos + 1) == Some(&b'\n') {
-                    pos + 2
-                } else {
-                    pos + 1
-                }
-            }
-            None => 0,
-        };
+        let line_start = find_line_start(before_token);
 
         source[line_start..start]
             .chars()

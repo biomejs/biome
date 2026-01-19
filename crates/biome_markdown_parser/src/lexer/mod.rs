@@ -883,15 +883,22 @@ impl<'src> MarkdownLexer<'src> {
 
     /// Consume hash character(s).
     ///
-    /// Emits HASH tokens for ATX headers and trailing header markers.
+    /// Emits a single HASH token containing all consecutive `#` characters.
+    /// The parser can determine the heading level by checking the token's length.
+    ///
+    /// Per CommonMark §4.2: ATX headings use 1-6 `#` characters.
     fn consume_hash(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
-        // In all other cases, emit HASH
-        // - At line start for ATX headers (# Header)
-        // - After other hashes for multi-level headers (### Header)
-        // - For trailing hashes (# Header #)
-        self.advance(1);
+        // Count consecutive hash characters
+        let mut count = 0;
+        while let Some(b'#') = self.byte_at(count) {
+            count += 1;
+        }
+
+        // Emit all consecutive hashes as a single HASH token
+        // The parser determines heading level from token length
+        self.advance(count);
         HASH
     }
 

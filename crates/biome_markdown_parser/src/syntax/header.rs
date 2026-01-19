@@ -61,20 +61,27 @@ pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
         return Absent;
     }
 
+    // Check hash count BEFORE starting to parse (via lookahead).
+    // The lexer emits all consecutive `#` chars as a single HASH token,
+    // so we need to verify the token length doesn't exceed 6 before consuming it.
+    let hash_count = p.lookahead(|p| {
+        p.skip_line_indent(3);
+        if p.at(T![#]) { p.cur_text().len() } else { 0 }
+    });
+
+    // Validate hash count (must be 1-6)
+    // Diagnostic for >6 hashes is emitted in parse_any_block before try_parse
+    if hash_count > MAX_HEADER_HASHES {
+        // Not a valid header - let it be parsed as paragraph
+        return Absent;
+    }
+
     let m = p.start();
 
     p.skip_line_indent(3);
 
     // Parse opening hashes (MdHashList containing MdHash nodes)
-    let hash_count = parse_hash_list(p);
-
-    // Validate hash count (must be 1-6)
-    // Diagnostic for >6 hashes is emitted in parse_any_block before try_parse
-    if hash_count > MAX_HEADER_HASHES {
-        // Not a valid header - abandon and let it be parsed as paragraph
-        m.abandon(p);
-        return Absent;
-    }
+    parse_hash_list(p);
 
     // Per CommonMark §4.2: opening hashes must be followed by space, tab, or end of line.
     // `#foo` is NOT a valid header; `# foo`, `#\tfoo`, or `#\n` are valid.
@@ -103,19 +110,26 @@ pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
     Present(m.complete(p, MD_HEADER))
 }
 
-/// Parse a list of hash tokens as MdHashList containing MdHash nodes.
-/// Returns the number of hashes parsed.
+/// Parse the opening hash sequence for an ATX header.
+///
+/// The lexer emits all consecutive `#` characters as a single HASH token.
+/// We determine the heading level from the token's text length.
+///
+/// Creates MdHashList containing a single MdHash node that wraps the token.
+///
+/// Returns the number of hashes (heading level).
 fn parse_hash_list(p: &mut MarkdownParser) -> usize {
     let m = p.start();
-    let mut count = 0;
-
-    while p.at(T![#]) {
+    let count = if p.at(T![#]) {
+        let len = p.cur_text().len();
+        // Wrap the HASH token in an MdHash node to match grammar
         let hash_m = p.start();
         p.bump(T![#]);
         hash_m.complete(p, MD_HASH);
-        count += 1;
-    }
-
+        len
+    } else {
+        0
+    };
     m.complete(p, MD_HASH_LIST);
     count
 }
@@ -167,8 +181,8 @@ fn parse_header_content(p: &mut MarkdownParser) {
 /// (NEWLINE or EOF), and NOT preceded by a line break (which would
 /// indicate a new block, not trailing hashes).
 ///
-/// Note: NEWLINE is an explicit token, so we check `at_inline_end()` after
-/// consuming hashes to see if we've reached end of line.
+/// Note: The lexer emits all consecutive `#` characters as a single HASH token,
+/// so we just need to consume that one token and check for end of line.
 fn is_trailing_hash_sequence(p: &mut MarkdownParser) -> bool {
     if !p.at(T![#]) {
         return false;
@@ -176,10 +190,10 @@ fn is_trailing_hash_sequence(p: &mut MarkdownParser) -> bool {
 
     let checkpoint = p.checkpoint();
 
-    while p.at(T![#]) {
-        p.bump(T![#]);
-    }
+    // Consume the single HASH token (contains all consecutive hashes)
+    p.bump(T![#]);
 
+    // Skip any trailing whitespace after hashes
     while p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text.chars().all(|c| c == ' ' || c == '\t') {
@@ -218,10 +232,14 @@ fn at_trailing_hashes_start(p: &mut MarkdownParser) -> bool {
 ///
 /// Per CommonMark spec, a closing sequence of `#` characters is optional.
 /// It must be at the end of the line, preceded by optional whitespace.
+///
+/// The lexer emits all consecutive `#` characters as a single HASH token.
+/// We wrap it in an MdHash node to match the grammar.
 fn parse_trailing_hashes(p: &mut MarkdownParser) {
     let m = p.start();
 
     if at_trailing_hashes_start(p) {
+        // Skip whitespace before trailing hashes
         while p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
             if text.chars().all(|c| c == ' ' || c == '\t') {
@@ -231,9 +249,8 @@ fn parse_trailing_hashes(p: &mut MarkdownParser) {
             }
         }
 
-        // Only parse hashes that are on the same line
-        // Stop if we hit end of line (NEWLINE, EOF, or preceding line break)
-        while p.at(T![#]) && !p.at_inline_end() {
+        // Consume the trailing hash token and wrap in MdHash node
+        if p.at(T![#]) && !p.at_inline_end() {
             let hash_m = p.start();
             p.bump(T![#]);
             hash_m.complete(p, MD_HASH);

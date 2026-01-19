@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 131
 expression: snapshot
 ---
 ## Input
@@ -58,10 +57,7 @@ MdDocument {
         MdHeader {
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@13..14 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@14..15 "#" [] [],
+                    hash_token: HASH@13..15 "##" [] [],
                 },
             ],
             content: MdParagraph {
@@ -83,13 +79,7 @@ MdDocument {
         MdHeader {
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@27..28 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@28..29 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@29..30 "#" [] [],
+                    hash_token: HASH@27..30 "###" [] [],
                 },
             ],
             content: MdParagraph {
@@ -111,16 +101,7 @@ MdDocument {
         MdHeader {
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@42..43 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@43..44 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@44..45 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@45..46 "#" [] [],
+                    hash_token: HASH@42..46 "####" [] [],
                 },
             ],
             content: MdParagraph {
@@ -142,19 +123,7 @@ MdDocument {
         MdHeader {
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@58..59 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@59..60 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@60..61 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@61..62 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@62..63 "#" [] [],
+                    hash_token: HASH@58..63 "#####" [] [],
                 },
             ],
             content: MdParagraph {
@@ -176,22 +145,7 @@ MdDocument {
         MdHeader {
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@75..76 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@76..77 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@77..78 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@78..79 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@79..80 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@80..81 "#" [] [],
+                    hash_token: HASH@75..81 "######" [] [],
                 },
             ],
             content: MdParagraph {
@@ -239,10 +193,7 @@ MdDocument {
         MdHeader {
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@112..113 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@113..114 "#" [] [],
+                    hash_token: HASH@112..114 "##" [] [],
                 },
             ],
             content: MdParagraph {
@@ -255,10 +206,7 @@ MdDocument {
             },
             after: MdHashList [
                 MdHash {
-                    hash_token: HASH@132..134 "#" [Skipped(" ")] [],
-                },
-                MdHash {
-                    hash_token: HASH@134..135 "#" [] [],
+                    hash_token: HASH@132..135 "##" [Skipped(" ")] [],
                 },
             ],
         },
@@ -271,13 +219,7 @@ MdDocument {
         MdHeader {
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@137..138 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@138..139 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@139..140 "#" [] [],
+                    hash_token: HASH@137..140 "###" [] [],
                 },
             ],
             content: MdParagraph {
@@ -292,22 +234,13 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@148..157 " content " [] [],
                     },
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@157..158 "#" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@158..159 "#" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@157..159 "##" [] [],
                     },
                     MdTextual {
                         value_token: MD_TEXTUAL_LITERAL@159..165 " with " [] [],
                     },
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@165..166 "#" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@166..167 "#" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@167..168 "#" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@165..168 "###" [] [],
                     },
                     MdTextual {
                         value_token: MD_TEXTUAL_LITERAL@168..177 " trailing" [] [],
@@ -317,16 +250,7 @@ MdDocument {
             },
             after: MdHashList [
                 MdHash {
-                    hash_token: HASH@177..179 "#" [Skipped(" ")] [],
-                },
-                MdHash {
-                    hash_token: HASH@179..180 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@180..181 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@181..182 "#" [] [],
+                    hash_token: HASH@177..182 "####" [Skipped(" ")] [],
                 },
             ],
         },
@@ -360,10 +284,8 @@ MdDocument {
       0: NEWLINE@12..13 "\n" [] []
     3: MD_HEADER@13..25
       0: MD_HASH_LIST@13..15
-        0: MD_HASH@13..14
-          0: HASH@13..14 "#" [] []
-        1: MD_HASH@14..15
-          0: HASH@14..15 "#" [] []
+        0: MD_HASH@13..15
+          0: HASH@13..15 "##" [] []
       1: MD_PARAGRAPH@15..25
         0: MD_INLINE_ITEM_LIST@15..25
           0: MD_TEXTUAL@15..25
@@ -376,12 +298,8 @@ MdDocument {
       0: NEWLINE@26..27 "\n" [] []
     6: MD_HEADER@27..40
       0: MD_HASH_LIST@27..30
-        0: MD_HASH@27..28
-          0: HASH@27..28 "#" [] []
-        1: MD_HASH@28..29
-          0: HASH@28..29 "#" [] []
-        2: MD_HASH@29..30
-          0: HASH@29..30 "#" [] []
+        0: MD_HASH@27..30
+          0: HASH@27..30 "###" [] []
       1: MD_PARAGRAPH@30..40
         0: MD_INLINE_ITEM_LIST@30..40
           0: MD_TEXTUAL@30..40
@@ -394,14 +312,8 @@ MdDocument {
       0: NEWLINE@41..42 "\n" [] []
     9: MD_HEADER@42..56
       0: MD_HASH_LIST@42..46
-        0: MD_HASH@42..43
-          0: HASH@42..43 "#" [] []
-        1: MD_HASH@43..44
-          0: HASH@43..44 "#" [] []
-        2: MD_HASH@44..45
-          0: HASH@44..45 "#" [] []
-        3: MD_HASH@45..46
-          0: HASH@45..46 "#" [] []
+        0: MD_HASH@42..46
+          0: HASH@42..46 "####" [] []
       1: MD_PARAGRAPH@46..56
         0: MD_INLINE_ITEM_LIST@46..56
           0: MD_TEXTUAL@46..56
@@ -414,16 +326,8 @@ MdDocument {
       0: NEWLINE@57..58 "\n" [] []
     12: MD_HEADER@58..73
       0: MD_HASH_LIST@58..63
-        0: MD_HASH@58..59
-          0: HASH@58..59 "#" [] []
-        1: MD_HASH@59..60
-          0: HASH@59..60 "#" [] []
-        2: MD_HASH@60..61
-          0: HASH@60..61 "#" [] []
-        3: MD_HASH@61..62
-          0: HASH@61..62 "#" [] []
-        4: MD_HASH@62..63
-          0: HASH@62..63 "#" [] []
+        0: MD_HASH@58..63
+          0: HASH@58..63 "#####" [] []
       1: MD_PARAGRAPH@63..73
         0: MD_INLINE_ITEM_LIST@63..73
           0: MD_TEXTUAL@63..73
@@ -436,18 +340,8 @@ MdDocument {
       0: NEWLINE@74..75 "\n" [] []
     15: MD_HEADER@75..91
       0: MD_HASH_LIST@75..81
-        0: MD_HASH@75..76
-          0: HASH@75..76 "#" [] []
-        1: MD_HASH@76..77
-          0: HASH@76..77 "#" [] []
-        2: MD_HASH@77..78
-          0: HASH@77..78 "#" [] []
-        3: MD_HASH@78..79
-          0: HASH@78..79 "#" [] []
-        4: MD_HASH@79..80
-          0: HASH@79..80 "#" [] []
-        5: MD_HASH@80..81
-          0: HASH@80..81 "#" [] []
+        0: MD_HASH@75..81
+          0: HASH@75..81 "######" [] []
       1: MD_PARAGRAPH@81..91
         0: MD_INLINE_ITEM_LIST@81..91
           0: MD_TEXTUAL@81..91
@@ -476,32 +370,24 @@ MdDocument {
       0: NEWLINE@111..112 "\n" [] []
     21: MD_HEADER@112..135
       0: MD_HASH_LIST@112..114
-        0: MD_HASH@112..113
-          0: HASH@112..113 "#" [] []
-        1: MD_HASH@113..114
-          0: HASH@113..114 "#" [] []
+        0: MD_HASH@112..114
+          0: HASH@112..114 "##" [] []
       1: MD_PARAGRAPH@114..132
         0: MD_INLINE_ITEM_LIST@114..132
           0: MD_TEXTUAL@114..132
             0: MD_TEXTUAL_LITERAL@114..132 " Multiple trailing" [] []
         1: (empty)
       2: MD_HASH_LIST@132..135
-        0: MD_HASH@132..134
-          0: HASH@132..134 "#" [Skipped(" ")] []
-        1: MD_HASH@134..135
-          0: HASH@134..135 "#" [] []
+        0: MD_HASH@132..135
+          0: HASH@132..135 "##" [Skipped(" ")] []
     22: MD_NEWLINE@135..136
       0: NEWLINE@135..136 "\n" [] []
     23: MD_NEWLINE@136..137
       0: NEWLINE@136..137 "\n" [] []
     24: MD_HEADER@137..182
       0: MD_HASH_LIST@137..140
-        0: MD_HASH@137..138
-          0: HASH@137..138 "#" [] []
-        1: MD_HASH@138..139
-          0: HASH@138..139 "#" [] []
-        2: MD_HASH@139..140
-          0: HASH@139..140 "#" [] []
+        0: MD_HASH@137..140
+          0: HASH@137..140 "###" [] []
       1: MD_PARAGRAPH@140..177
         0: MD_INLINE_ITEM_LIST@140..177
           0: MD_TEXTUAL@140..147
@@ -510,30 +396,18 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@147..148 "#" [] []
           2: MD_TEXTUAL@148..157
             0: MD_TEXTUAL_LITERAL@148..157 " content " [] []
-          3: MD_TEXTUAL@157..158
-            0: MD_TEXTUAL_LITERAL@157..158 "#" [] []
-          4: MD_TEXTUAL@158..159
-            0: MD_TEXTUAL_LITERAL@158..159 "#" [] []
-          5: MD_TEXTUAL@159..165
+          3: MD_TEXTUAL@157..159
+            0: MD_TEXTUAL_LITERAL@157..159 "##" [] []
+          4: MD_TEXTUAL@159..165
             0: MD_TEXTUAL_LITERAL@159..165 " with " [] []
-          6: MD_TEXTUAL@165..166
-            0: MD_TEXTUAL_LITERAL@165..166 "#" [] []
-          7: MD_TEXTUAL@166..167
-            0: MD_TEXTUAL_LITERAL@166..167 "#" [] []
-          8: MD_TEXTUAL@167..168
-            0: MD_TEXTUAL_LITERAL@167..168 "#" [] []
-          9: MD_TEXTUAL@168..177
+          5: MD_TEXTUAL@165..168
+            0: MD_TEXTUAL_LITERAL@165..168 "###" [] []
+          6: MD_TEXTUAL@168..177
             0: MD_TEXTUAL_LITERAL@168..177 " trailing" [] []
         1: (empty)
       2: MD_HASH_LIST@177..182
-        0: MD_HASH@177..179
-          0: HASH@177..179 "#" [Skipped(" ")] []
-        1: MD_HASH@179..180
-          0: HASH@179..180 "#" [] []
-        2: MD_HASH@180..181
-          0: HASH@180..181 "#" [] []
-        3: MD_HASH@181..182
-          0: HASH@181..182 "#" [] []
+        0: MD_HASH@177..182
+          0: HASH@177..182 "####" [Skipped(" ")] []
     25: MD_NEWLINE@182..183
       0: NEWLINE@182..183 "\n" [] []
   2: EOF@183..183 "" [] []

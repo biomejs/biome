@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 131
 expression: snapshot
 ---
 ## Input
@@ -76,10 +75,7 @@ MdDocument {
         MdHeader {
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@86..87 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@87..88 "#" [] [],
+                    hash_token: HASH@86..88 "##" [] [],
                 },
             ],
             content: MdParagraph {
@@ -142,10 +138,7 @@ MdDocument {
         MdHeader {
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@197..198 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@198..199 "#" [] [],
+                    hash_token: HASH@197..199 "##" [] [],
                 },
             ],
             content: MdParagraph {
@@ -301,10 +294,7 @@ MdDocument {
         MdHeader {
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@507..508 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@508..509 "#" [] [],
+                    hash_token: HASH@507..509 "##" [] [],
                 },
             ],
             content: MdParagraph {
@@ -454,10 +444,8 @@ MdDocument {
       0: NEWLINE@85..86 "\n" [] []
     5: MD_HEADER@86..107
       0: MD_HASH_LIST@86..88
-        0: MD_HASH@86..87
-          0: HASH@86..87 "#" [] []
-        1: MD_HASH@87..88
-          0: HASH@87..88 "#" [] []
+        0: MD_HASH@86..88
+          0: HASH@86..88 "##" [] []
       1: MD_PARAGRAPH@88..107
         0: MD_INLINE_ITEM_LIST@88..107
           0: MD_TEXTUAL@88..107
@@ -497,10 +485,8 @@ MdDocument {
       0: NEWLINE@196..197 "\n" [] []
     9: MD_HEADER@197..213
       0: MD_HASH_LIST@197..199
-        0: MD_HASH@197..198
-          0: HASH@197..198 "#" [] []
-        1: MD_HASH@198..199
-          0: HASH@198..199 "#" [] []
+        0: MD_HASH@197..199
+          0: HASH@197..199 "##" [] []
       1: MD_PARAGRAPH@199..213
         0: MD_INLINE_ITEM_LIST@199..213
           0: MD_TEXTUAL@199..213
@@ -602,10 +588,8 @@ MdDocument {
       0: NEWLINE@506..507 "\n" [] []
     13: MD_HEADER@507..526
       0: MD_HASH_LIST@507..509
-        0: MD_HASH@507..508
-          0: HASH@507..508 "#" [] []
-        1: MD_HASH@508..509
-          0: HASH@508..509 "#" [] []
+        0: MD_HASH@507..509
+          0: HASH@507..509 "##" [] []
       1: MD_PARAGRAPH@509..526
         0: MD_INLINE_ITEM_LIST@509..526
           0: MD_TEXTUAL@509..526

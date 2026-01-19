@@ -38,6 +38,95 @@ use super::quote::{consume_quote_prefix, has_quote_prefix};
 /// Minimum number of fence characters required per CommonMark §4.5.
 const MIN_FENCE_LENGTH: usize = 3;
 
+/// Consume indent whitespace (spaces/tabs) from source bytes.
+///
+/// Tracks column width where tabs expand to next multiple of 4.
+/// Returns `Some(new_idx)` on success, or `None` if required indent wasn't met.
+fn consume_indent(source: &[u8], mut idx: usize, limit: usize, required: bool) -> Option<usize> {
+    let mut column = 0usize;
+    while column < limit {
+        match source.get(idx).copied() {
+            Some(b' ') => {
+                column += 1;
+                idx += 1;
+            }
+            Some(b'\t') => {
+                let tab_width = 4 - (column % 4);
+                // For optional indent, don't exceed limit with tab
+                if !required && column + tab_width > limit {
+                    break;
+                }
+                column += tab_width;
+                idx += 1;
+            }
+            _ => {
+                if required {
+                    return None;
+                }
+                break;
+            }
+        }
+    }
+    Some(idx)
+}
+
+/// Get parser source context with bounds checking.
+///
+/// Returns `Some((start_position, source_text))` if the current position is valid,
+/// or `None` if the position is out of bounds.
+fn get_source_context<'a>(p: &'a MarkdownParser) -> Option<(usize, &'a str)> {
+    let start: usize = p.cur_range().start().into();
+    let source = p.source().text();
+    if start > source.len() {
+        return None;
+    }
+    Some((start, source))
+}
+
+/// Check if the prefix from line_start to start is all whitespace.
+///
+/// Returns `true` if the prefix contains only spaces/tabs.
+fn is_whitespace_prefix(source: &str, start: usize, line_start: usize) -> bool {
+    source[line_start..start]
+        .chars()
+        .all(|c| c == ' ' || c == '\t')
+}
+
+/// Bump a fence token (``` or ~~~), remapping if necessary.
+fn bump_fence(p: &mut MarkdownParser, is_tilde_fence: bool) {
+    if is_tilde_fence {
+        if p.at(TRIPLE_TILDE) {
+            p.bump(TRIPLE_TILDE);
+        } else {
+            p.bump_remap(TRIPLE_TILDE);
+        }
+    } else if p.at(T!["```"]) {
+        p.bump(T!["```"]);
+    } else {
+        p.bump_remap(T!["```"]);
+    }
+}
+
+/// Find the start position of the current line in the source text.
+///
+/// Given a slice of text before the current position, finds the byte offset
+/// where the current line begins (after the last newline, handling CRLF).
+fn find_line_start(before: &str) -> usize {
+    let last_newline_pos = before.rfind(['\n', '\r']);
+    match last_newline_pos {
+        Some(pos) => {
+            let bytes = before.as_bytes();
+            // Handle CRLF: if we found \r and next char is \n, skip both
+            if bytes.get(pos) == Some(&b'\r') && bytes.get(pos + 1) == Some(&b'\n') {
+                pos + 2
+            } else {
+                pos + 1
+            }
+        }
+        None => 0,
+    }
+}
+
 /// Detect a code fence at the start of a string.
 ///
 /// Per CommonMark §4.5: "A code fence is a sequence of at least three
@@ -122,17 +211,7 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     let opening_range = p.cur_range();
 
     // Opening fence (``` or ~~~)
-    if is_tilde_fence {
-        if p.at(TRIPLE_TILDE) {
-            p.bump(TRIPLE_TILDE);
-        } else {
-            p.bump_remap(TRIPLE_TILDE);
-        }
-    } else if p.at(T!["```"]) {
-        p.bump(T!["```"]);
-    } else {
-        p.bump_remap(T!["```"]);
-    }
+    bump_fence(p, is_tilde_fence);
 
     // Optional language info string (MdCodeNameList)
     parse_code_name_list(p);
@@ -149,17 +228,7 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
             p.skip_line_indent(p.state().list_item_required_indent);
         }
         p.skip_line_indent(3);
-        if is_tilde_fence {
-            if p.at(TRIPLE_TILDE) {
-                p.bump(TRIPLE_TILDE);
-            } else {
-                p.bump_remap(TRIPLE_TILDE);
-            }
-        } else if p.at(T!["```"]) {
-            p.bump(T!["```"]);
-        } else {
-            p.bump_remap(T!["```"]);
-        }
+        bump_fence(p, is_tilde_fence);
     } else {
         // Emit diagnostic for unterminated code block
         p.error(unterminated_fenced_code(p, opening_range, fence_type));
@@ -219,7 +288,7 @@ fn parse_code_content(
 
         if p.at_line_start() && fence_indent > 0 {
             skip_fenced_content_indent(p, fence_indent);
-            if at_closing_fence_after_indent(p, is_tilde_fence, fence_len) {
+            if at_closing_fence(p, is_tilde_fence, fence_len) {
                 break;
             }
         }
@@ -231,10 +300,6 @@ fn parse_code_content(
     }
 
     m.complete(p, MD_INLINE_ITEM_LIST);
-}
-
-fn is_valid_closing_fence(p: &mut MarkdownParser, is_tilde_fence: bool, fence_len: usize) -> bool {
-    line_has_closing_fence(p, is_tilde_fence, fence_len)
 }
 
 pub(crate) fn info_string_has_backtick(p: &mut MarkdownParser) -> bool {
@@ -263,15 +328,7 @@ pub(crate) fn info_string_has_backtick(p: &mut MarkdownParser) -> bool {
 }
 
 fn at_closing_fence(p: &mut MarkdownParser, is_tilde_fence: bool, fence_len: usize) -> bool {
-    p.lookahead(|p| is_valid_closing_fence(p, is_tilde_fence, fence_len))
-}
-
-fn at_closing_fence_after_indent(
-    p: &mut MarkdownParser,
-    is_tilde_fence: bool,
-    fence_len: usize,
-) -> bool {
-    p.lookahead(|p| is_valid_closing_fence(p, is_tilde_fence, fence_len))
+    p.lookahead(|p| line_has_closing_fence(p, is_tilde_fence, fence_len))
 }
 
 fn skip_fenced_content_indent(p: &mut MarkdownParser, indent: usize) {
@@ -298,66 +355,26 @@ fn skip_fenced_content_indent(p: &mut MarkdownParser, indent: usize) {
 }
 
 fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: usize) -> bool {
-    let start: usize = p.cur_range().start().into();
-    let source = p.source().text();
-    if start > source.len() {
+    let Some((start, source)) = get_source_context(p) else {
         return false;
-    }
-
-    let before = &source[..start];
-    let last_newline_pos = before.rfind(['\n', '\r']);
-    let line_start = match last_newline_pos {
-        Some(pos) => {
-            let bytes = before.as_bytes();
-            if bytes.get(pos) == Some(&b'\r') && bytes.get(pos + 1) == Some(&b'\n') {
-                pos + 2
-            } else {
-                pos + 1
-            }
-        }
-        None => 0,
     };
 
-    let prefix = &source[line_start..start];
-    if !prefix.chars().all(|c| c == ' ' || c == '\t') {
+    let line_start = find_line_start(&source[..start]);
+
+    if !is_whitespace_prefix(source, start, line_start) {
         return false;
     }
 
-    let mut idx = line_start;
-    let mut column = 0usize;
     let list_indent = p.state().list_item_required_indent;
 
-    while column < list_indent {
-        match source.as_bytes().get(idx).copied() {
-            Some(b' ') => {
-                column += 1;
-                idx += 1;
-            }
-            Some(b'\t') => {
-                column += 4 - (column % 4);
-                idx += 1;
-            }
-            _ => return false,
-        }
-    }
+    // Skip required list indent (must have enough whitespace)
+    let Some(idx) = consume_indent(source.as_bytes(), line_start, list_indent, true) else {
+        return false;
+    };
 
-    let mut extra = 0usize;
-    while extra < 3 {
-        match source.as_bytes().get(idx).copied() {
-            Some(b' ') => {
-                extra += 1;
-                idx += 1;
-            }
-            Some(b'\t') => {
-                extra += 4 - (extra % 4);
-                if extra > 3 {
-                    break;
-                }
-                idx += 1;
-            }
-            _ => break,
-        }
-    }
+    // Skip optional extra indent (up to 3 spaces per CommonMark)
+    // This always succeeds since required=false
+    let idx = consume_indent(source.as_bytes(), idx, 3, false).unwrap();
 
     let fence_char = if is_tilde_fence { b'~' } else { b'`' };
     let mut fence_count = 0usize;
@@ -382,37 +399,20 @@ fn is_line_start_within_indent(p: &MarkdownParser, max_indent: usize) -> bool {
         return true;
     }
 
-    let start: usize = p.cur_range().start().into();
-    let source = p.source().text();
-    if start > source.len() {
+    let Some((start, source)) = get_source_context(p) else {
         return false;
-    }
+    };
 
     let virtual_start: usize = match p.state().virtual_line_start {
         Some(virtual_start) => virtual_start.into(),
-        None => {
-            let before = &source[..start];
-            let last_newline_pos = before.rfind(['\n', '\r']);
-            match last_newline_pos {
-                Some(pos) => {
-                    let bytes = before.as_bytes();
-                    if bytes.get(pos) == Some(&b'\r') && bytes.get(pos + 1) == Some(&b'\n') {
-                        pos + 2
-                    } else {
-                        pos + 1
-                    }
-                }
-                None => 0,
-            }
-        }
+        None => find_line_start(&source[..start]),
     };
 
-    let prefix = &source[virtual_start..start];
-    if !prefix.chars().all(|c| c == ' ' || c == '\t') {
+    if !is_whitespace_prefix(source, start, virtual_start) {
         return false;
     }
 
-    let mut indent = prefix
+    let mut indent = source[virtual_start..start]
         .chars()
         .fold(0usize, |count, c| count + if c == '\t' { 4 } else { 1 });
 

@@ -174,12 +174,10 @@ fn hash_token() {
 
 #[test]
 fn multiple_hashes() {
-    // Multiple hashes for different header levels
+    // Multiple hashes emitted as a single token - parser determines level from length
     assert_lex! {
         "###",
-        HASH:1,
-        HASH:1,
-        HASH:1,
+        HASH:3,
     }
 }
 
@@ -549,5 +547,30 @@ fn link_reference_definition_tokens() {
         R_BRACK:1,
         COLON:1,
         MD_TEXTUAL_LITERAL:20, // " https://example.com" (with leading space)
+    }
+}
+
+#[test]
+fn block_quote_with_header() {
+    // Block quote with header inside
+    assert_lex! {
+        "> # Foo\n",
+        R_ANGLE:1,
+        MD_TEXTUAL_LITERAL:1, // " "
+        HASH:1, // "#"
+        MD_TEXTUAL_LITERAL:4, // " Foo"
+        NEWLINE:1,
+    }
+}
+
+#[test]
+fn block_quote_simple() {
+    // Simple block quote without header
+    assert_lex! {
+        "> This is a quote\n",
+        R_ANGLE:1,
+        MD_TEXTUAL_LITERAL:1, // " "
+        MD_TEXTUAL_LITERAL:15, // "This is a quote"
+        NEWLINE:1,
     }
 }

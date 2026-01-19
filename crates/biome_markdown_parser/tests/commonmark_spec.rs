@@ -104,7 +104,6 @@ fn commonmark_spec_compliance() {
         std::collections::HashMap::new();
 
     let log_progress = std::env::var("CMARK_PROGRESS").is_ok();
-    let mut bogus_count = 0;
     for (index, test) in tests.iter().enumerate() {
         if log_progress {
             println!(
@@ -119,7 +118,6 @@ fn commonmark_spec_compliance() {
 
         // Handle bogus nodes gracefully - count as failure instead of panicking
         let Some(document) = MdDocument::cast(parsed.syntax()) else {
-            bogus_count += 1;
             let section_entry = section_stats.entry(test.section.clone()).or_insert((0, 0));
             section_entry.1 += 1;
             failed.push(FailedTest {
@@ -259,7 +257,7 @@ fn debug_single_example() {
     let tests: Vec<SpecTest> = serde_json::from_str(SPEC_JSON).expect("Failed to parse spec.json");
 
     // Change this to debug a specific example
-    let example_num = 259;
+    let example_num = 228;
 
     if let Some(test) = tests.iter().find(|t| t.example == example_num) {
         println!("Example {}: {}", test.example, test.section);
@@ -268,12 +266,20 @@ fn debug_single_example() {
 
         let parsed = parse_markdown(&test.markdown);
 
-        println!("AST:");
-        println!("{:#?}", parsed.tree());
+        println!("CST (raw syntax):");
+        println!("{:#?}", parsed.syntax());
         println!();
 
-        println!("CST:");
-        println!("{:#?}", parsed.syntax());
+        println!("AST:");
+        if parsed.syntax().kind() == biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT {
+            println!("{:#?}", parsed.tree());
+        } else {
+            println!(
+                "Cannot cast to MdDocument - root is {:?}",
+                parsed.syntax().kind()
+            );
+        }
+        println!();
         println!();
 
         if parsed.has_errors() {

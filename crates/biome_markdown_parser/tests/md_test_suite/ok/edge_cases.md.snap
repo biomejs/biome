@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 131
 expression: snapshot
 ---
 ## Input
@@ -66,10 +65,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@17..18 "#" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@18..19 "#" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@17..19 "##" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@19..30 "AlsoNoSpace" [] [],
@@ -197,10 +193,7 @@ MdDocument {
         MdHeader {
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@197..198 "#" [] [],
-                },
-                MdHash {
-                    hash_token: HASH@198..199 "#" [] [],
+                    hash_token: HASH@197..199 "##" [] [],
                 },
             ],
             content: MdParagraph {
@@ -385,13 +378,11 @@ MdDocument {
       0: NEWLINE@16..17 "\n" [] []
     2: MD_PARAGRAPH@17..31
       0: MD_INLINE_ITEM_LIST@17..31
-        0: MD_TEXTUAL@17..18
-          0: MD_TEXTUAL_LITERAL@17..18 "#" [] []
-        1: MD_TEXTUAL@18..19
-          0: MD_TEXTUAL_LITERAL@18..19 "#" [] []
-        2: MD_TEXTUAL@19..30
+        0: MD_TEXTUAL@17..19
+          0: MD_TEXTUAL_LITERAL@17..19 "##" [] []
+        1: MD_TEXTUAL@19..30
           0: MD_TEXTUAL_LITERAL@19..30 "AlsoNoSpace" [] []
-        3: MD_TEXTUAL@30..31
+        2: MD_TEXTUAL@30..31
           0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
       1: (empty)
     3: MD_NEWLINE@31..32
@@ -470,10 +461,8 @@ MdDocument {
       0: NEWLINE@196..197 "\n" [] []
     13: MD_HEADER@197..224
       0: MD_HASH_LIST@197..199
-        0: MD_HASH@197..198
-          0: HASH@197..198 "#" [] []
-        1: MD_HASH@198..199
-          0: HASH@198..199 "#" [] []
+        0: MD_HASH@197..199
+          0: HASH@197..199 "##" [] []
       1: MD_PARAGRAPH@199..224
         0: MD_INLINE_ITEM_LIST@199..224
           0: MD_TEXTUAL@199..224

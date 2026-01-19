@@ -421,7 +421,7 @@ impl MdParagraphBuilder {
         ))
     }
 }
-pub fn md_quote(marker_token: SyntaxToken, content: AnyMdBlock) -> MdQuote {
+pub fn md_quote(marker_token: SyntaxToken, content: MdBlockList) -> MdQuote {
     MdQuote::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_QUOTE,
         [

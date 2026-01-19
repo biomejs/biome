@@ -156,7 +156,7 @@ MdLinkBlock = label: MdTextual
 
 MdQuote =
 	marker: '>'
-	content: AnyMdBlock
+	content: MdBlockList
 
 MdBulletListItem = MdBulletList
 MdOrderedListItem = MdBulletList

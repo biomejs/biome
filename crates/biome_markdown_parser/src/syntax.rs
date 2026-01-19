@@ -1360,18 +1360,13 @@ fn check_too_many_hashes(p: &mut MarkdownParser) -> Option<(biome_rowan::TextRan
             return None;
         }
 
-        let start = p.cur_range().start();
-        let mut count = 0;
-
-        while p.at(T![#]) {
-            p.bump(T![#]);
-            count += 1;
-        }
-
-        let end = p.cur_range().start();
+        // The lexer emits all consecutive `#` as a single HASH token.
+        // Get the count from token text length.
+        let range = p.cur_range();
+        let count = p.cur_text().len();
 
         if count > 6 {
-            Some((biome_rowan::TextRange::new(start, end), count))
+            Some((range, count))
         } else {
             None
         }
@@ -1384,18 +1379,20 @@ fn is_valid_atx_heading_start(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
         p.skip_line_indent(3);
 
-        let mut hash_count = 0;
-
-        // Count consecutive hashes (must be 1-6)
-        while p.at(T![#]) && hash_count <= 6 {
-            p.bump(T![#]);
-            hash_count += 1;
+        // The lexer emits all consecutive `#` as a single HASH token.
+        // Count hash characters from the token's text length.
+        if !p.at(T![#]) {
+            return false;
         }
 
-        // Too many hashes - not a valid heading
+        let hash_count = p.cur_text().len();
+
+        // Too many hashes - not a valid heading (must be 1-6)
         if hash_count > 6 {
             return false;
         }
+
+        p.bump(T![#]);
 
         // Check if followed by space, tab, or EOL/EOF per CommonMark §4.2
         // In Markdown, whitespace is significant and included in token text.

@@ -478,7 +478,17 @@ fn strip_paragraph_indent(content: &str) -> String {
 
 /// Render an ATX header (# style).
 fn render_atx_header(header: &MdHeader, ctx: &HtmlRenderContext, out: &mut String) {
-    let level = header.before().len().clamp(1, 6);
+    // Count total hash characters in the before list.
+    // The lexer emits all consecutive `#` chars as a single HASH token,
+    // so we sum the text lengths of all hash tokens.
+    // Use text_trimmed() to exclude any leading trivia (skipped indentation spaces).
+    let level = header
+        .before()
+        .iter()
+        .filter_map(|h| h.hash_token().ok())
+        .map(|tok| tok.text_trimmed().len())
+        .sum::<usize>()
+        .clamp(1, 6);
 
     out.push_str("<h");
     out.push_str(&level.to_string());
