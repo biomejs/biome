@@ -158,14 +158,26 @@ importers:
         specifier: '*'
         version: link:../biome
 
-  packages/@biomejs/prettier-compare:
+  packages/@biomejs/wasm-bundler: {}
+
+  packages/@biomejs/wasm-nodejs: {}
+
+  packages/@biomejs/wasm-web: {}
+
+  packages/aria-data:
+    dependencies:
+      happy-dom:
+        specifier: ^20.3.1
+        version: 20.3.3
+
+  packages/prettier-compare:
     dependencies:
       '@biomejs/js-api':
         specifier: workspace:*
-        version: link:../js-api
+        version: link:../@biomejs/js-api
       '@biomejs/wasm-nodejs':
         specifier: workspace:*
-        version: link:../wasm-nodejs
+        version: link:../@biomejs/wasm-nodejs
       '@opentui/core':
         specifier: ^0.1.72
         version: 0.1.72(stage-js@1.0.0-alpha.17)(typescript@5.7.3)(web-tree-sitter@0.25.10)
@@ -197,18 +209,6 @@ importers:
       typescript:
         specifier: 5.7.3
         version: 5.7.3
-
-  packages/@biomejs/wasm-bundler: {}
-
-  packages/@biomejs/wasm-nodejs: {}
-
-  packages/@biomejs/wasm-web: {}
-
-  packages/aria-data:
-    dependencies:
-      happy-dom:
-        specifier: ^20.3.1
-        version: 20.3.3
 
   packages/tailwindcss-config-analyzer:
     dependencies:
@@ -2966,7 +2966,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 22.19.5
 
   '@typescript-eslint/eslint-plugin@8.50.1(@typescript-eslint/parser@8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
