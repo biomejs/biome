@@ -104,6 +104,7 @@ export async function formatWithBiome(
 			html: {
 				experimentalFullSupportEnabled: true,
 				formatter: {
+					enabled: true,
 					selfCloseVoidElements: "always",
 				},
 			},
