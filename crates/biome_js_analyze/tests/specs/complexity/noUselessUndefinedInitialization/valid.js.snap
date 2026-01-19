@@ -28,7 +28,7 @@ export let directExport = undefined;
 let namedExport = undefined;
 export { namedExport };
 
-// Renamed export (Svelte pattern for reserved words like "class")
+// Renamed export (Svelte 4 pattern for reserved words like "class")
 let className = undefined;
 export { className as class };
 

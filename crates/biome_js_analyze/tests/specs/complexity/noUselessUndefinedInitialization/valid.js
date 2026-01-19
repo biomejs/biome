@@ -12,7 +12,7 @@ class Foo {
 }
 
 // Exported variables should not be flagged.
-// In frameworks like Svelte, exported variables with undefined initialization
+// In frameworks like Svelte 4, exported variables with undefined initialization
 // are used to declare optional props.
 
 // Direct export
@@ -22,7 +22,7 @@ export let directExport = undefined;
 let namedExport = undefined;
 export { namedExport };
 
-// Renamed export (Svelte pattern for reserved words like "class")
+// Renamed export (Svelte 4 pattern for reserved words like "class")
 let className = undefined;
 export { className as class };
 
