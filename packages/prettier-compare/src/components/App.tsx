@@ -6,7 +6,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { DiffView } from "./DiffView.js";
 import { DiagnosticsView } from "./DiagnosticsView.js";
 import { Spinner } from "./Spinner.js";
-import { formatWithBiome, reloadBiome, type BiomeResult } from "../biome.js";
+import { formatWithBiome, type BiomeResult } from "../biome.js";
 import { formatWithPrettier, type PrettierResult } from "../prettier.js";
 import { getLanguageConfig } from "../languages.js";
 import { createWatcher, rebuildWasm } from "../watch.js";
@@ -80,7 +80,7 @@ export function App({
 				setIsRebuilding(true);
 				try {
 					await rebuildWasm(rootDir);
-					await reloadBiome();
+					// reloading biome is handled by bun hot reloading
 					setStatusMessage(null);
 				} catch (err) {
 					setError(
@@ -111,7 +111,7 @@ export function App({
 
 		watcher.on("rebuilt", async () => {
 			setStatusMessage("Reloading Biome...");
-			await reloadBiome();
+			// reloading biome is handled by bun hot reloading
 			setStatusMessage(null);
 			await runComparison();
 			setIsRebuilding(false);

@@ -17,7 +17,7 @@ import {
 	getSupportedLanguages,
 	getLanguageConfig,
 } from "./languages.js";
-import { formatWithBiome, reloadBiome } from "./biome.js";
+import { formatWithBiome } from "./biome.js";
 import { formatWithPrettier } from "./prettier.js";
 import { rebuildWasm } from "./watch.js";
 import { printComparison } from "./plainOutput.js";
