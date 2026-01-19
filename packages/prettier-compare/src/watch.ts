@@ -142,7 +142,7 @@ export function createWatcher(rootDir: string): Watcher {
 
 		try {
 			const watcher = watch(dir, { persistent: true }, (eventType, filename) =>
-				handleWatcherEvent(dir, eventType, filename),
+				handleWatcherEvent(dir, eventType, filename ?? undefined),
 			);
 
 			watcher.on("error", (err) => {
