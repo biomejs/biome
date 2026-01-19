@@ -512,6 +512,7 @@ declare_source_rule! {
     /// ```ts,ignore
     /// import type { T1 } from "package";
     /// import type { T2 } from "package";
+    /// import { type T3, V1 } from "package";
     /// import * as ns from "package";
     /// import D1 from "package";
     /// import D2 from "package";
@@ -523,6 +524,52 @@ declare_source_rule! {
     ///
     /// ```ts,ignore
     /// import type { T1, T2 } from "package";
+    /// import { type T3, V1 } from "package";
+    /// import D1, * as ns from "package";
+    /// import D2, { A, B } from "package";
+    /// ```
+    ///
+    /// You may want to merge the first two imports.
+    /// To allow this, you have to enable the linter rule [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/)
+    /// and to set its option `style` to `inlineType`.
+    /// Also you may want to [make the code fix of the rule safe](https://biomejs.dev/linter/#configure-the-code-fix) to automatically
+    /// apply it when you run `biome check --write` or [apply safe fixes on save in your editor](https://biomejs.dev/reference/vscode/#code-fixing).
+    ///
+    /// With the following configuration...
+    ///
+    /// ```json
+    /// {
+    ///   "linter": {
+    ///     "enabled": true,
+    ///     "rules": {
+    ///       "style": {
+    ///         "useImportType": {
+    ///           "fix": "safe",
+    ///           "options": { "style": "inlineType" }
+    ///         }
+    ///       }
+    ///     }
+    ///   },
+    ///   "assist": {
+    ///     "enabled": true,
+    ///     "actions": { "source": { "organizeImports": "on" } }
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// The previous imports are merged as follows:
+    ///
+    /// ```ts,ignore
+    /// import { type T1, type T2, type T3, V1 } from "package";
+    /// import D1, * as ns from "package";
+    /// import D2, { A, B } from "package";
+    /// ```
+    ///
+    /// Note that if you set `style` to `separatedType` you will get the following merge:
+    ///
+    /// ```ts,ignore
+    /// import type { T1, T2, T3 } from "package";
+    /// import { V1 } from "package";
     /// import D1, * as ns from "package";
     /// import D2, { A, B } from "package";
     /// ```
