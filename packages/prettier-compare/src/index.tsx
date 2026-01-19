@@ -8,7 +8,7 @@
  *   prettier-compare -w "const x = 1"        # Watch mode (fancy TUI)
  */
 
-import { program } from "commander";
+import { parseArgs } from "node:util";
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
@@ -24,8 +24,8 @@ import { printComparison } from "./plainOutput.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Find biome repo root (package is in packages/@biomejs/prettier-compare)
-const ROOT_DIR = resolve(__dirname, "../../../..");
+// Find biome repo root (package is in packages/prettier-compare)
+const ROOT_DIR = resolve(__dirname, "../../..");
 
 /**
  * Read all input from stdin.
@@ -38,133 +38,209 @@ async function readStdin(): Promise<string> {
 	return Buffer.concat(chunks).toString("utf-8");
 }
 
-program
-	.name("prettier-compare")
-	.description(
-		"Compare Biome and Prettier formatting output and IR side-by-side",
-	)
-	.argument("[snippet]", "Code snippet to format")
-	.option("-f, --file <path>", "Read input from file")
-	.option(
-		"-l, --language <lang>",
-		`Language (${getSupportedLanguages().slice(0, 8).join(", ")}, ...)`,
-	)
-	.option("-w, --watch", "Watch mode: rebuild WASM on Rust file changes")
-	.option("-r, --rebuild", "Rebuild WASM before running")
-	.option("--ir-only", "Only show IR comparison, not formatted output")
-	.option("--output-only", "Only show formatted output, not IR")
-	.action(async (snippet, options) => {
-		// Determine input source
-		let code: string;
-		let detectedLang: string | undefined;
+type RawCliOptionValues = {
+	file?: string;
+	language?: string;
+	watch?: boolean;
+	rebuild?: boolean;
+	"ir-only"?: boolean;
+	"output-only"?: boolean;
+	help?: boolean;
+};
 
-		if (options.file) {
-			// Read from file
-			try {
-				code = readFileSync(options.file, "utf-8");
-				detectedLang = detectLanguage(options.file);
-			} catch (err) {
-				console.error(
-					`Error reading file: ${err instanceof Error ? err.message : err}`,
-				);
-				process.exit(1);
-			}
-		} else if (snippet) {
-			// Use provided snippet
-			code = snippet;
-		} else if (!process.stdin.isTTY) {
-			// Read from stdin
-			code = await readStdin();
-		} else {
-			// No input provided
+type NormalizedCliOptions = {
+	file?: string;
+	language?: string;
+	watch: boolean;
+	rebuild: boolean;
+	irOnly: boolean;
+	outputOnly: boolean;
+};
+
+function printHelp() {
+	const languages = getSupportedLanguages().slice(0, 8).join(", ");
+
+	console.log(
+		"Compare Biome and Prettier formatting output and IR side-by-side.\n",
+	);
+	console.log("Usage:");
+	console.log('  prettier-compare "const x = 1"           # Format a snippet');
+	console.log("  prettier-compare -f file.ts              # Format from file");
+	console.log('  echo "const x = 1" | prettier-compare    # Format from stdin');
+	console.log('  prettier-compare -w "const x = 1"        # Watch mode (fancy TUI)');
+	console.log("\nOptions:");
+	console.log("  -f, --file <path>        Read input from file");
+	console.log(
+		`  -l, --language <lang>    Language (${languages}, ...)`,
+	);
+	console.log(
+		"  -w, --watch              Watch mode: rebuild WASM on Rust file changes",
+	);
+	console.log("  -r, --rebuild            Rebuild WASM before running");
+	console.log(
+		"      --ir-only            Only show IR comparison, not formatted output",
+	);
+	console.log("      --output-only        Only show formatted output, not IR");
+	console.log("  -h, --help               Show this help message");
+}
+
+function parseCliArgs(): { snippet?: string; options: NormalizedCliOptions } {
+	const { values, positionals } = parseArgs({
+		args: process.argv.slice(2),
+		allowPositionals: true,
+		options: {
+			file: { type: "string", short: "f" },
+			language: { type: "string", short: "l" },
+			watch: { type: "boolean", short: "w", default: false },
+			rebuild: { type: "boolean", short: "r", default: false },
+			"ir-only": { type: "boolean", default: false },
+			"output-only": { type: "boolean", default: false },
+			help: { type: "boolean", short: "h", default: false },
+		},
+	}) as {
+		values: RawCliOptionValues;
+		positionals: string[];
+	};
+
+	if (values.help) {
+		printHelp();
+		process.exit(0);
+	}
+
+	return {
+		snippet: positionals[0],
+		options: {
+			file: values.file,
+			language: values.language,
+			watch: values.watch ?? false,
+			rebuild: values.rebuild ?? false,
+			irOnly: values["ir-only"] ?? false,
+			outputOnly: values["output-only"] ?? false,
+		},
+	};
+}
+
+async function run() {
+	const {
+		snippet: snippetArg,
+		options,
+	} = parseCliArgs();
+
+	// Determine input source
+	let code: string;
+	let detectedLang: string | undefined;
+
+	if (options.file) {
+		// Read from file
+		try {
+			code = readFileSync(options.file, "utf-8");
+			detectedLang = detectLanguage(options.file);
+		} catch (err) {
 			console.error(
-				"Error: No input provided. Pass a snippet, use --file, or pipe to stdin.",
+				`Error reading file: ${err instanceof Error ? err.message : err}`,
 			);
-			console.error("");
-			console.error("Examples:");
-			console.error('  prettier-compare "const x = { a: 1 }"');
-			console.error("  prettier-compare -f src/example.ts");
-			console.error("  echo 'const x = 1' | prettier-compare");
 			process.exit(1);
 		}
+	} else if (snippetArg) {
+		// Use provided snippet
+		code = snippetArg;
+	} else if (!process.stdin.isTTY) {
+		// Read from stdin
+		code = await readStdin();
+	} else {
+		// No input provided
+		console.error(
+			"Error: No input provided. Pass a snippet, use --file, or pipe to stdin.",
+		);
+		console.error("");
+		console.error("Examples:");
+		console.error('  prettier-compare "const x = { a: 1 }"');
+		console.error("  prettier-compare -f src/example.ts");
+		console.error("  echo 'const x = 1' | prettier-compare");
+		process.exit(1);
+	}
 
-		const language = options.language ?? detectedLang ?? "js";
+	const language = options.language ?? detectedLang ?? "js";
 
-		if (options.watch) {
-			// Watch mode: Use fancy TUI with React/OpenTUI
-			const { createCliRenderer } = await import("@opentui/core");
-			const { createRoot } = await import("@opentui/react");
-			const React = await import("react");
-			const { App } = await import("./components/App.js");
+	if (options.watch) {
+		// Watch mode: Use fancy TUI with React/OpenTUI
+		const { createCliRenderer } = await import("@opentui/core");
+		const { createRoot } = await import("@opentui/react");
+		const React = await import("react");
+		const { App } = await import("./components/App.js");
 
-			const renderer = await createCliRenderer({
-				targetFps: 30,
-			});
+		const renderer = await createCliRenderer({
+			targetFps: 30,
+		});
 
-			const handleExit = () => {
-				renderer.stop();
-				process.exit(0);
-			};
+		const handleExit = () => {
+			renderer.stop();
+			process.exit(0);
+		};
 
-			const root = createRoot(renderer);
-			root.render(
-				React.createElement(App, {
-					code,
-					language,
-					watchMode: true,
-					rootDir: ROOT_DIR,
-					onExit: handleExit,
-					irOnly: options.irOnly,
-					outputOnly: options.outputOnly,
-					rebuild: options.rebuild,
-				}),
-			);
+		const root = createRoot(renderer);
+		root.render(
+			React.createElement(App, {
+				code,
+				language,
+				watchMode: true,
+				rootDir: ROOT_DIR,
+				onExit: handleExit,
+				irOnly: options.irOnly,
+				outputOnly: options.outputOnly,
+				rebuild: options.rebuild,
+			}),
+		);
 
-			renderer.start();
+		renderer.start();
 
-			// Handle Ctrl+C
-			process.on("SIGINT", handleExit);
-			process.on("SIGTERM", handleExit);
-		} else {
-			// Non-watch mode: Plain sequential output to stdout
-			const config = getLanguageConfig(language);
+		// Handle Ctrl+C
+		process.on("SIGINT", handleExit);
+		process.on("SIGTERM", handleExit);
+	} else {
+		// Non-watch mode: Plain sequential output to stdout
+		const config = getLanguageConfig(language);
 
-			// Optionally rebuild WASM first
-			if (options.rebuild) {
-				console.log("Rebuilding WASM...");
-				try {
-					await rebuildWasm(ROOT_DIR);
-					await reloadBiome();
-					console.log("WASM rebuilt successfully.\n");
-				} catch (err) {
-					console.error(
-						`WASM rebuild failed: ${err instanceof Error ? err.message : err}`,
-					);
-					process.exit(1);
-				}
-			}
-
-			// Run formatting
+		// Optionally rebuild WASM first
+		if (options.rebuild) {
+			console.log("Rebuilding WASM...");
 			try {
-				const [biomeResult, prettierResult] = await Promise.all([
-					formatWithBiome(code, config.biomeFilePath),
-					formatWithPrettier(code, config.prettierParser),
-				]);
-
-				printComparison({
-					biomeResult,
-					prettierResult,
-					language,
-					irOnly: options.irOnly,
-					outputOnly: options.outputOnly,
-				});
+				await rebuildWasm(ROOT_DIR);
+				console.log("WASM rebuilt successfully.\n");
 			} catch (err) {
 				console.error(
-					`Formatting failed: ${err instanceof Error ? err.message : err}`,
+					`WASM rebuild failed: ${err instanceof Error ? err.message : err}`,
 				);
 				process.exit(1);
 			}
 		}
-	});
 
-program.parse();
+		// Run formatting
+		try {
+			const [biomeResult, prettierResult] = await Promise.all([
+				formatWithBiome(code, config.biomeFilePath),
+				formatWithPrettier(code, config.prettierParser),
+			]);
+
+			printComparison({
+				biomeResult,
+				prettierResult,
+				language,
+				irOnly: options.irOnly,
+				outputOnly: options.outputOnly,
+			});
+		} catch (err) {
+			console.error(
+				`Formatting failed: ${err instanceof Error ? err.message : err}`,
+			);
+			process.exit(1);
+		}
+	}
+}
+
+run().catch((err) => {
+	console.error(
+		err instanceof Error ? err.stack ?? err.message : String(err),
+	);
+	process.exit(1);
+});
