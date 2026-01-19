@@ -91,7 +91,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@3522286d40783523f9c7880e33f785905b4c20d0 # v2.66.1
+        uses: taiki-e/install-action@542cebaaed782771e619bd5609d97659d109c492 # v2.66.7
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -253,9 +253,9 @@ jobs:
           path: packages/@biomejs
 
       - name: Install Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
-          node-version: 24.12.0
+          node-version: 24.13.0
           registry-url: 'https://registry.npmjs.org'
 
       - name: Set release infos
