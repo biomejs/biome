@@ -35,6 +35,33 @@ use biome_parser::{
 use super::parse_error::unterminated_fenced_code;
 use super::quote::{consume_quote_prefix, has_quote_prefix};
 
+/// Minimum number of fence characters required per CommonMark §4.5.
+const MIN_FENCE_LENGTH: usize = 3;
+
+/// Detect a code fence at the start of a string.
+///
+/// Per CommonMark §4.5: "A code fence is a sequence of at least three
+/// consecutive backtick characters (`) or tildes (~)."
+///
+/// Returns `Some((fence_char, length))` if a valid fence is found,
+/// where `length` is the actual number of fence characters (3 or more).
+/// Returns `None` if no valid fence is present.
+fn detect_fence(s: &str) -> Option<(char, usize)> {
+    let first_char = s.chars().next()?;
+
+    if first_char != '`' && first_char != '~' {
+        return None;
+    }
+
+    let len = s.chars().take_while(|&c| c == first_char).count();
+
+    if len >= MIN_FENCE_LENGTH {
+        Some((first_char, len))
+    } else {
+        None
+    }
+}
+
 /// Check if we're at a fenced code block (``` or ~~~).
 pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
@@ -44,12 +71,10 @@ pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
         p.skip_line_indent(3);
 
         let rest = p.source_after_current();
-        let is_backtick_fence = rest.starts_with("```");
-        let is_tilde_fence = rest.starts_with("~~~");
-        if !is_backtick_fence && !is_tilde_fence {
+        let Some((fence_char, _)) = detect_fence(rest) else {
             return false;
-        }
-        if is_backtick_fence && info_string_has_backtick(p) {
+        };
+        if fence_char == '`' && info_string_has_backtick(p) {
             return false;
         }
         true
@@ -87,13 +112,11 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     }
     p.skip_line_indent(3);
 
-    // Track which fence type we opened with (must close with same type per CommonMark)
+    // Detect fence type and length (must close with same type and >= length per CommonMark §4.5)
     let text = p.cur_text();
-    let is_textual_tilde_fence = p.at(MD_TEXTUAL_LITERAL) && text.starts_with("~~~");
-    let is_tilde_fence =
-        p.at(TRIPLE_TILDE) || (p.at(TILDE) && p.cur_text().len() >= 3) || is_textual_tilde_fence;
+    let (fence_char, fence_len) = detect_fence(text).unwrap_or(('`', MIN_FENCE_LENGTH));
+    let is_tilde_fence = fence_char == '~';
     let fence_type = if is_tilde_fence { "~~~" } else { "```" };
-    let fence_len = fence_prefix_len(p.cur_text(), if is_tilde_fence { '~' } else { '`' });
 
     // Record opening fence range for diagnostic
     let opening_range = p.cur_range();
@@ -143,10 +166,6 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     }
 
     Present(m.complete(p, MD_FENCED_CODE_BLOCK))
-}
-
-fn fence_prefix_len(text: &str, fence_char: char) -> usize {
-    text.chars().take_while(|c| *c == fence_char).count()
 }
 
 /// Parse the code name list (language info string).

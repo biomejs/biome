@@ -6,6 +6,8 @@
 //! Run with: `cargo test -p biome_markdown_parser --test commonmark_spec -- --nocapture`
 
 use biome_markdown_parser::{document_to_html, parse_markdown};
+use biome_markdown_syntax::MdDocument;
+use biome_rowan::AstNode;
 use serde::Deserialize;
 
 /// Embedded CommonMark spec test cases.
@@ -102,6 +104,7 @@ fn commonmark_spec_compliance() {
         std::collections::HashMap::new();
 
     let log_progress = std::env::var("CMARK_PROGRESS").is_ok();
+    let mut bogus_count = 0;
     for (index, test) in tests.iter().enumerate() {
         if log_progress {
             println!(
@@ -113,8 +116,24 @@ fn commonmark_spec_compliance() {
             );
         }
         let parsed = parse_markdown(&test.markdown);
+
+        // Handle bogus nodes gracefully - count as failure instead of panicking
+        let Some(document) = MdDocument::cast(parsed.syntax()) else {
+            bogus_count += 1;
+            let section_entry = section_stats.entry(test.section.clone()).or_insert((0, 0));
+            section_entry.1 += 1;
+            failed.push(FailedTest {
+                example: test.example,
+                section: test.section.clone(),
+                markdown: test.markdown.clone(),
+                expected: test.html.clone(),
+                actual: format!("<BOGUS NODE: {:?}>", parsed.syntax().kind()),
+            });
+            continue;
+        };
+
         let actual = document_to_html(
-            &parsed.tree(),
+            &document,
             parsed.list_tightness(),
             parsed.list_item_indents(),
             parsed.quote_indents(),
