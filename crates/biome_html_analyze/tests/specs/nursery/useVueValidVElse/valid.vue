@@ -36,4 +36,11 @@
     v-if="condition"
   ></div>
   <div v-else></div>
+
+  <!-- Multiline conditional elements with comments -->
+  <div
+    v-if="condition"
+  ></div>
+  <!-- comment between multiline elements -->
+  <div v-else></div>
 </template>
