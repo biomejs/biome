@@ -32,10 +32,13 @@
 //! - A line that starts another block-level construct (header, code, list, etc.)
 
 use biome_markdown_syntax::T;
-use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
+use biome_markdown_syntax::kind::MarkdownSyntaxKind::{self, *};
 use biome_parser::Parser;
+use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 
+use super::is_paragraph_like;
 use super::parse_error::quote_nesting_too_deep;
 use crate::MarkdownParser;
 
@@ -115,72 +118,114 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
     Present(completed)
 }
 
-fn parse_quote_block_list(p: &mut MarkdownParser) {
-    let m = p.start();
-    let mut first_line = true;
-    let depth = p.state().block_quote_depth;
-    let mut last_block_was_paragraph = false;
+/// Struct implementing `ParseNodeList` for quote block content.
+struct QuoteBlockList {
+    depth: usize,
+    first_line: bool,
+    last_block_was_paragraph: bool,
+    line_started_with_prefix: bool,
+}
 
-    loop {
+impl QuoteBlockList {
+    fn new(depth: usize) -> Self {
+        Self {
+            depth,
+            first_line: true,
+            last_block_was_paragraph: false,
+            line_started_with_prefix: true, // First line implicitly has prefix
+        }
+    }
+}
+
+impl ParseNodeList for QuoteBlockList {
+    type Kind = MarkdownSyntaxKind;
+    type Parser<'source> = MarkdownParser<'source>;
+
+    const LIST_KIND: Self::Kind = MD_BLOCK_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        // Handle quote depth exceeded
         if p.state().quote_depth_exceeded {
             p.state_mut().quote_depth_exceeded = false;
-            break;
+            return Absent;
         }
 
-        if p.at(T![EOF]) {
-            break;
-        }
-
-        let mut line_started_with_prefix = first_line;
-        if !first_line && !p.at(NEWLINE) && (p.at_line_start() || p.has_preceding_line_break()) {
-            if has_quote_prefix(p, depth) {
-                consume_quote_prefix(p, depth);
-                line_started_with_prefix = true;
+        // Check/consume quote prefix for non-first lines
+        self.line_started_with_prefix = self.first_line;
+        if !self.first_line && !p.at(NEWLINE) && (p.at_line_start() || p.has_preceding_line_break())
+        {
+            if has_quote_prefix(p, self.depth) {
+                consume_quote_prefix(p, self.depth);
+                self.line_started_with_prefix = true;
             } else {
-                break;
+                return Absent;
             }
         }
-        first_line = false;
+        self.first_line = false;
 
+        // Handle NEWLINE tokens
         if p.at(NEWLINE) {
-            if !line_started_with_prefix && line_has_quote_prefix_at_current(p, depth) {
-                line_started_with_prefix = true;
+            if !self.line_started_with_prefix && line_has_quote_prefix_at_current(p, self.depth) {
+                self.line_started_with_prefix = true;
             }
-            if p.at_blank_line() && !line_started_with_prefix {
-                break;
+            if (p.at_blank_line() || has_empty_line_before(p) || self.last_block_was_paragraph)
+                && !self.line_started_with_prefix
+            {
+                return Absent;
             }
-            if has_empty_line_before(p) && !line_started_with_prefix {
-                break;
-            }
-            if last_block_was_paragraph && !line_started_with_prefix {
-                break;
-            }
-            if !line_started_with_prefix {
+            if !self.line_started_with_prefix {
                 let has_next_prefix = p.lookahead(|p| {
                     p.bump(NEWLINE);
-                    has_quote_prefix(p, depth)
+                    has_quote_prefix(p, self.depth)
                 });
                 if !has_next_prefix {
-                    break;
+                    return Absent;
                 }
             }
             let text_m = p.start();
             p.bump(NEWLINE);
-            text_m.complete(p, MD_NEWLINE);
-            continue;
+            return Present(text_m.complete(p, MD_NEWLINE));
         }
 
+        // Handle indented code blocks inside quotes
         if at_quote_indented_code_start(p) {
-            parse_quote_indented_code_block(p, depth);
-            last_block_was_paragraph = false;
-            continue;
+            let parsed = parse_quote_indented_code_block(p, self.depth);
+            self.last_block_was_paragraph = false;
+            return parsed;
         }
 
-        let parsed_kind = super::parse_any_block_with_indent_code_policy(p, true);
-        last_block_was_paragraph = parsed_kind == super::ParsedBlockKind::Paragraph;
+        // Parse regular block
+        let parsed = super::parse_any_block_with_indent_code_policy(p, true);
+        if let Present(ref marker) = parsed {
+            self.last_block_was_paragraph = is_paragraph_like(marker.kind(p));
+        } else {
+            self.last_block_was_paragraph = false;
+        }
+
+        parsed
     }
 
-    m.complete(p, MD_BLOCK_LIST);
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![EOF]) || p.state().quote_depth_exceeded
+    }
+
+    fn recover(
+        &mut self,
+        _p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        // No recovery needed - Absent means we're done
+        match parsed_element {
+            Present(marker) => RecoveryResult::Ok(marker),
+            Absent => RecoveryResult::Err(biome_parser::parse_recovery::RecoveryError::Eof),
+        }
+    }
+}
+
+fn parse_quote_block_list(p: &mut MarkdownParser) {
+    let depth = p.state().block_quote_depth;
+    let mut list = QuoteBlockList::new(depth);
+    list.parse_list(p);
 }
 
 fn line_has_quote_prefix_at_current(p: &MarkdownParser, depth: usize) -> bool {
@@ -250,7 +295,7 @@ fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
     column >= 4
 }
 
-fn parse_quote_indented_code_block(p: &mut MarkdownParser, depth: usize) {
+fn parse_quote_indented_code_block(p: &mut MarkdownParser, depth: usize) -> ParsedSyntax {
     let m = p.start();
     let content = p.start();
 
@@ -288,7 +333,7 @@ fn parse_quote_indented_code_block(p: &mut MarkdownParser, depth: usize) {
     }
 
     content.complete(p, MD_INLINE_ITEM_LIST);
-    m.complete(p, MD_INDENT_CODE_BLOCK);
+    Present(m.complete(p, MD_INDENT_CODE_BLOCK))
 }
 
 fn skip_optional_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bool {

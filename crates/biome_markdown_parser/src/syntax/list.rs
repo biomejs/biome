@@ -45,7 +45,7 @@ use biome_rowan::TextRange;
 
 use super::fenced_code_block::parse_fenced_code_block;
 use super::parse_error::list_nesting_too_deep;
-use super::{ParsedBlockKind, at_block_interrupt, at_indent_code_block};
+use super::{at_block_interrupt, at_indent_code_block, is_paragraph_like};
 use crate::MarkdownParser;
 use crate::syntax::parse_any_block_with_indent_code_policy;
 
@@ -1305,8 +1305,12 @@ fn parse_list_item_block_content(
                     }
                 };
                 if parsed.is_absent() {
-                    let parsed_kind = parse_any_block_with_indent_code_policy(p, true);
-                    last_block_was_paragraph = parsed_kind == ParsedBlockKind::Paragraph;
+                    let parsed = parse_any_block_with_indent_code_policy(p, true);
+                    last_block_was_paragraph = if let Present(ref marker) = parsed {
+                        is_paragraph_like(marker.kind(p))
+                    } else {
+                        false
+                    };
                 } else {
                     last_block_was_paragraph = false;
                 }
@@ -1404,8 +1408,12 @@ fn parse_list_item_block_content(
         // parse_any_block_with_indent_code_policy handles paragraphs, code blocks, etc.
         // It consumes newlines as MdNewline if they are blank lines.
         let allow_indent_code_block = !last_block_was_paragraph || prev_was_blank;
-        let parsed_kind = parse_any_block_with_indent_code_policy(p, allow_indent_code_block);
-        last_block_was_paragraph = parsed_kind == ParsedBlockKind::Paragraph;
+        let parsed = parse_any_block_with_indent_code_policy(p, allow_indent_code_block);
+        last_block_was_paragraph = if let Present(ref marker) = parsed {
+            is_paragraph_like(marker.kind(p))
+        } else {
+            false
+        };
         if let Some(prev_virtual) = restore_virtual_line_start {
             p.state_mut().virtual_line_start = prev_virtual;
         }

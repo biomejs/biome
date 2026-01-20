@@ -72,33 +72,35 @@ pub(crate) fn parse_block_list(p: &mut MarkdownParser) -> ParsedSyntax {
     let m = p.start();
 
     while !p.at(T![EOF]) {
-        parse_any_block(p);
+        let _ = parse_any_block(p);
     }
     Present(m.complete(p, MD_BLOCK_LIST))
 }
 
-pub(crate) fn parse_any_block(p: &mut MarkdownParser) {
-    let _ = parse_any_block_with_indent_code_policy(p, true);
+pub(crate) fn parse_any_block(p: &mut MarkdownParser) -> ParsedSyntax {
+    parse_any_block_with_indent_code_policy(p, true)
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub(crate) enum ParsedBlockKind {
-    Paragraph,
-    Other,
+/// Check if a syntax kind represents a paragraph-like block.
+///
+/// This is used for lazy continuation logic in block quotes and lists.
+/// Both paragraphs and setext headings are considered "paragraph-like"
+/// because they share continuation behavior.
+pub(crate) fn is_paragraph_like(kind: biome_markdown_syntax::MarkdownSyntaxKind) -> bool {
+    matches!(kind, MD_PARAGRAPH | MD_SETEXT_HEADER)
 }
 
 pub(crate) fn parse_any_block_with_indent_code_policy(
     p: &mut MarkdownParser,
     allow_indent_code_block: bool,
-) -> ParsedBlockKind {
+) -> ParsedSyntax {
     let start = p.cur_range().start();
     // Handle standalone NEWLINE tokens as MdNewline nodes.
     // This prevents inter-block NEWLINEs from becoming "newline-only paragraphs".
     if p.at(NEWLINE) {
         let m = p.start();
         p.bump(NEWLINE);
-        m.complete(p, MD_NEWLINE);
-        return ParsedBlockKind::Other;
+        return Present(m.complete(p, MD_NEWLINE));
     }
     if at_blank_line_start(p) {
         while p.at(MD_TEXTUAL_LITERAL) {
@@ -112,20 +114,18 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         if p.at(NEWLINE) {
             let m = p.start();
             p.bump(NEWLINE);
-            m.complete(p, MD_NEWLINE);
+            return Present(m.complete(p, MD_NEWLINE));
         }
-        return ParsedBlockKind::Other;
+        // Blank line with no trailing newline (e.g., end of file)
+        return Absent;
     }
 
-    let kind = if allow_indent_code_block && at_indent_code_block(p) {
-        parse_indent_code_block(p);
-        ParsedBlockKind::Other
+    let parsed = if allow_indent_code_block && at_indent_code_block(p) {
+        parse_indent_code_block(p)
     } else if at_fenced_code_block(p) {
-        let _ = parse_fenced_code_block(p);
-        ParsedBlockKind::Other
+        parse_fenced_code_block(p)
     } else if line_starts_with_fence(p) {
-        let _ = parse_fenced_code_block_force(p);
-        ParsedBlockKind::Other
+        parse_fenced_code_block_force(p)
     } else if at_thematic_break_block(p) {
         let break_block = try_parse(p, |p| {
             let break_block = parse_thematic_break_block(p);
@@ -134,11 +134,10 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             }
             Ok(break_block)
         });
-        if break_block.is_err() {
-            parse_paragraph(p);
-            ParsedBlockKind::Paragraph
+        if let Ok(parsed) = break_block {
+            parsed
         } else {
-            ParsedBlockKind::Other
+            parse_paragraph(p)
         }
     } else if at_header(p) {
         // Check for too many hashes BEFORE try_parse (which would lose diagnostics on rewind)
@@ -150,23 +149,20 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             }
             Ok(header)
         });
-        if header_result.is_err() {
+        if let Ok(parsed) = header_result {
+            parsed
+        } else {
             // Emit diagnostic for too many hashes (outside try_parse to persist)
             if let Some((range, count)) = too_many {
                 p.error(parse_error::too_many_hashes(p, range, count));
             }
             // Not a valid header, parse as paragraph
-            parse_paragraph(p);
-            ParsedBlockKind::Paragraph
-        } else {
-            ParsedBlockKind::Other
+            parse_paragraph(p)
         }
     } else if at_quote(p) {
-        let _ = parse_quote(p);
-        ParsedBlockKind::Other
+        parse_quote(p)
     } else if at_bullet_list_item(p) {
-        let _ = parse_bullet_list_item(p);
-        ParsedBlockKind::Other
+        parse_bullet_list_item(p)
     } else if at_order_list_item(p) || at_order_list_item_textual(p) {
         let forced = if !at_order_list_item(p) && at_order_list_item_textual(p) {
             p.set_force_ordered_list_marker(true);
@@ -180,15 +176,12 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             p.set_force_ordered_list_marker(false);
         }
         if parsed.is_absent() {
-            parse_paragraph(p);
-            ParsedBlockKind::Paragraph
+            parse_paragraph(p)
         } else {
-            ParsedBlockKind::Other
+            parsed
         }
     } else if at_html_block(p) {
-        // Parse as HTML block
-        let _ = parse_html_block(p);
-        ParsedBlockKind::Other
+        parse_html_block(p)
     } else if at_link_block(p) {
         // Try to parse as link reference definition
         // Use try_parse to fall back to paragraph if not a valid definition
@@ -199,11 +192,10 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             }
             Ok(link)
         });
-        if link_result.is_err() {
-            parse_paragraph(p);
-            ParsedBlockKind::Paragraph
+        if let Ok(parsed) = link_result {
+            parsed
         } else {
-            ParsedBlockKind::Other
+            parse_paragraph(p)
         }
     } else if at_block_interrupt(p) {
         // We see a block interrupt but didn't match a concrete block above.
@@ -217,10 +209,9 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             p.state_mut().list_item_required_indent = prev_required;
             p.state_mut().virtual_line_start = prev_virtual;
             if parsed.is_present() {
-                ParsedBlockKind::Other
+                parsed
             } else {
-                parse_paragraph(p);
-                ParsedBlockKind::Paragraph
+                parse_paragraph(p)
             }
         } else if at_order_list_item_at_any_indent(p) {
             let prev_required = p.state().list_item_required_indent;
@@ -231,19 +222,16 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             p.state_mut().list_item_required_indent = prev_required;
             p.state_mut().virtual_line_start = prev_virtual;
             if parsed.is_present() {
-                ParsedBlockKind::Other
+                parsed
             } else {
-                parse_paragraph(p);
-                ParsedBlockKind::Paragraph
+                parse_paragraph(p)
             }
         } else {
-            parse_paragraph(p);
-            ParsedBlockKind::Paragraph
+            parse_paragraph(p)
         }
     } else {
         // Default fallback: parse as paragraph
-        parse_paragraph(p);
-        ParsedBlockKind::Paragraph
+        parse_paragraph(p)
     };
 
     if start == p.cur_range().start() {
@@ -253,17 +241,17 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
                 "parse_any_block made no progress at {:?} {:?} => {:?}",
                 p.cur(),
                 p.cur_text(),
-                kind
+                parsed
             );
         }
         p.error(parse_error::parse_any_block_no_progress(p, range));
         if !p.at(T![EOF]) {
             p.bump_any();
         }
-        return ParsedBlockKind::Other;
+        return Absent;
     }
 
-    kind
+    parsed
 }
 
 fn with_virtual_line_start<F, R>(p: &mut MarkdownParser, start: TextSize, op: F) -> R
@@ -311,9 +299,9 @@ pub(crate) fn at_indent_code_block(p: &mut MarkdownParser) -> bool {
 ///
 /// NEWLINE is an explicit token. We consume tokens until NEWLINE,
 /// then check if the next line has proper indentation.
-pub(crate) fn parse_indent_code_block(p: &mut MarkdownParser) {
+pub(crate) fn parse_indent_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
     if !at_indent_code_block(p) {
-        return;
+        return Absent;
     }
 
     let m = p.start();
@@ -360,7 +348,7 @@ pub(crate) fn parse_indent_code_block(p: &mut MarkdownParser) {
     }
 
     content.complete(p, MD_INLINE_ITEM_LIST);
-    m.complete(p, MD_INDENT_CODE_BLOCK);
+    Present(m.complete(p, MD_INDENT_CODE_BLOCK))
 }
 
 fn has_following_indented_code_line(p: &mut MarkdownParser) -> bool {
@@ -465,7 +453,7 @@ fn consume_blank_line(p: &mut MarkdownParser) {
 ///
 /// Grammar: MdParagraph = list: MdInlineItemList hard_line: MdHardLine?
 /// Grammar: MdSetextHeader = content: MdInlineItemList underline: 'md_setext_underline_literal'
-pub(crate) fn parse_paragraph(p: &mut MarkdownParser) {
+pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
     let m = p.start();
 
     let inline_start: usize = p.cur_range().start().into();
@@ -478,17 +466,18 @@ pub(crate) fn parse_paragraph(p: &mut MarkdownParser) {
     // Check if this paragraph is followed by a setext heading underline
     // MD_SETEXT_UNDERLINE_LITERAL is for `=` underlines
     // MD_THEMATIC_BREAK_LITERAL with only `-` is also a setext underline (H2)
-    if allow_setext && p.at(MD_SETEXT_UNDERLINE_LITERAL) {
+    let completed = if allow_setext && p.at(MD_SETEXT_UNDERLINE_LITERAL) {
         // This is a setext heading (H1 with `=`) - consume the underline
         p.bump(MD_SETEXT_UNDERLINE_LITERAL);
-        m.complete(p, MD_SETEXT_HEADER);
+        m.complete(p, MD_SETEXT_HEADER)
     } else if allow_setext && p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p) {
         // This is a setext heading (H2 with `-`) - remap token and consume
         p.bump_remap(MD_SETEXT_UNDERLINE_LITERAL);
-        m.complete(p, MD_SETEXT_HEADER);
+        m.complete(p, MD_SETEXT_HEADER)
     } else {
-        m.complete(p, MD_PARAGRAPH);
-    }
+        m.complete(p, MD_PARAGRAPH)
+    };
+    Present(completed)
 }
 
 fn inline_has_non_whitespace(p: &MarkdownParser, start: usize, end: usize) -> bool {
