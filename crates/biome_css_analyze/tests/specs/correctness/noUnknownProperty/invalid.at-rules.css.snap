@@ -1,0 +1,142 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.at-rules.css
+---
+# Input
+```css
+/* should generate diagnostics */
+@media screen {
+	a {
+		foo: 1;
+	}
+}
+
+@supports (display: grid) {
+	a {
+		foo: 1;
+	}
+}
+
+@layer {
+	foo: 1;
+}
+
+@supports (display:grid) {
+	@media (min-width: 10px) {
+		foo: 1;
+	}
+}
+
+@supports (display:grid) {
+	@media (min-width: 10px) {
+		a {
+			foo: 1;
+		}
+	}
+}
+
+@layer {
+	a {
+		foo: 1;
+	}
+}
+
+```
+
+_Note: The parser emitted 3 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.at-rules.css:4:3 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    2 │ @media screen {
+    3 │ 	a {
+  > 4 │ 		foo: 1;
+      │ 		^^^
+    5 │ 	}
+    6 │ }
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.at-rules.css:10:3 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+     8 │ @supports (display: grid) {
+     9 │ 	a {
+  > 10 │ 		foo: 1;
+       │ 		^^^
+    11 │ 	}
+    12 │ }
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.at-rules.css:20:3 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    18 │ @supports (display:grid) {
+    19 │ 	@media (min-width: 10px) {
+  > 20 │ 		foo: 1;
+       │ 		^^^
+    21 │ 	}
+    22 │ }
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.at-rules.css:27:4 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    25 │ 	@media (min-width: 10px) {
+    26 │ 		a {
+  > 27 │ 			foo: 1;
+       │ 			^^^
+    28 │ 		}
+    29 │ 	}
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.at-rules.css:34:3 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    32 │ @layer {
+    33 │ 	a {
+  > 34 │ 		foo: 1;
+       │ 		^^^
+    35 │ 	}
+    36 │ }
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```

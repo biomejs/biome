@@ -1,0 +1,36 @@
+/* should generate diagnostics */
+@media screen {
+	a {
+		foo: 1;
+	}
+}
+
+@supports (display: grid) {
+	a {
+		foo: 1;
+	}
+}
+
+@layer {
+	foo: 1;
+}
+
+@supports (display:grid) {
+	@media (min-width: 10px) {
+		foo: 1;
+	}
+}
+
+@supports (display:grid) {
+	@media (min-width: 10px) {
+		a {
+			foo: 1;
+		}
+	}
+}
+
+@layer {
+	a {
+		foo: 1;
+	}
+}

@@ -1,0 +1,20 @@
+/* should not generate diagnostics */
+@font-feature-values "Test" {
+	@styleset {
+		some-feature: 1;
+	}
+}
+
+@font-face {
+	foo: 0;
+}
+
+@position-try --foo {
+	@supports (bar: 0) {
+		bar: 0
+	}
+}
+
+@foo {
+	bar: 0;
+}

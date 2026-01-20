@@ -1,0 +1,30 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.at-rules.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+@font-feature-values "Test" {
+	@styleset {
+		some-feature: 1;
+	}
+}
+
+@font-face {
+	foo: 0;
+}
+
+@position-try --foo {
+	@supports (bar: 0) {
+		bar: 0
+	}
+}
+
+@foo {
+	bar: 0;
+}
+
+```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._
