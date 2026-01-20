@@ -32,7 +32,10 @@ pub mod parse_error;
 pub mod quote;
 pub mod thematic_break_block;
 
+use biome_markdown_syntax::kind::MarkdownSyntaxKind;
 use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
+use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::{
     Parser,
     prelude::ParsedSyntax::{self, *},
@@ -69,12 +72,37 @@ pub(crate) fn parse_document(p: &mut MarkdownParser) {
 }
 
 pub(crate) fn parse_block_list(p: &mut MarkdownParser) -> ParsedSyntax {
-    let m = p.start();
+    let mut list = DocumentBlockList;
+    Present(list.parse_list(p))
+}
 
-    while !p.at(T![EOF]) {
-        let _ = parse_any_block(p);
+/// Struct implementing `ParseNodeList` for document-level block content.
+struct DocumentBlockList;
+
+impl ParseNodeList for DocumentBlockList {
+    type Kind = MarkdownSyntaxKind;
+    type Parser<'source> = MarkdownParser<'source>;
+
+    const LIST_KIND: Self::Kind = MD_BLOCK_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_any_block(p)
     }
-    Present(m.complete(p, MD_BLOCK_LIST))
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![EOF])
+    }
+
+    fn recover(
+        &mut self,
+        _p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        match parsed_element {
+            Present(marker) => RecoveryResult::Ok(marker),
+            Absent => RecoveryResult::Err(biome_parser::parse_recovery::RecoveryError::Eof),
+        }
+    }
 }
 
 pub(crate) fn parse_any_block(p: &mut MarkdownParser) -> ParsedSyntax {
