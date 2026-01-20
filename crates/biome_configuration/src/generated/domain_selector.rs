@@ -10,6 +10,7 @@ static NEXT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noBeforeInteractiveScriptOutsideDocument"),
         RuleFilter::Rule("nursery", "noNextAsyncClientComponent"),
         RuleFilter::Rule("nursery", "noSyncScripts"),
+        RuleFilter::Rule("nursery", "useInlineScriptId"),
         RuleFilter::Rule("performance", "noImgElement"),
         RuleFilter::Rule("performance", "noUnwantedPolyfillio"),
         RuleFilter::Rule("performance", "useGoogleFontPreconnect"),
@@ -97,6 +98,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noVueDataObjectDeclaration"),
         RuleFilter::Rule("nursery", "noVueDuplicateKeys"),
+        RuleFilter::Rule("nursery", "noVueOptionsApi"),
         RuleFilter::Rule("nursery", "noVueReservedKeys"),
         RuleFilter::Rule("nursery", "noVueReservedProps"),
         RuleFilter::Rule("nursery", "noVueSetupPropsReactivityLoss"),

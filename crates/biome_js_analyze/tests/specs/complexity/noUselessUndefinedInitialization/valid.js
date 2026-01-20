@@ -10,3 +10,22 @@ const { bar = undefined } = baz;
 class Foo {
 	bar = undefined;
 }
+
+// Exported variables should not be flagged.
+// In frameworks like Svelte 4, exported variables with undefined initialization
+// are used to declare optional props.
+
+// Direct export
+export let directExport = undefined;
+
+// Named export
+let namedExport = undefined;
+export { namedExport };
+
+// Renamed export (Svelte 4 pattern for reserved words like "class")
+let className = undefined;
+export { className as class };
+
+// Export default
+let defaultExport = undefined;
+export default defaultExport;

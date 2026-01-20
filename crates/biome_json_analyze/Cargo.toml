@@ -18,36 +18,31 @@ harness = false
 name    = "json_analyzer"
 
 [dependencies]
-biome_analyze       = { workspace = true }
-# biome_configuration is optional because the codegen disables it. The codegen generates the configuration schema, and it depends on this crate to to that. It's kinda like a circular dependency. A chicken and egg problem, if you will.
-biome_configuration = { workspace = true, optional = true }
-biome_console       = { workspace = true }
-biome_diagnostics   = { workspace = true }
-biome_json_factory  = { workspace = true }
-biome_json_syntax   = { workspace = true }
-biome_rowan         = { workspace = true }
-biome_rule_options  = { workspace = true }
-biome_string_case   = { workspace = true }
-biome_suppression   = { workspace = true }
-camino              = { workspace = true }
-rustc-hash          = { workspace = true }
+biome_analyze      = { workspace = true }
+biome_console      = { workspace = true }
+biome_diagnostics  = { workspace = true }
+biome_json_factory = { workspace = true }
+biome_json_syntax  = { workspace = true }
+biome_rowan        = { workspace = true }
+biome_rule_options = { workspace = true }
+biome_string_case  = { workspace = true }
+biome_suppression  = { workspace = true }
+camino             = { workspace = true }
+rustc-hash         = { workspace = true }
 
 [dev-dependencies]
-biome_json_parser = { path = "../biome_json_parser" }
-biome_test_utils  = { path = "../biome_test_utils" }
-criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
-insta             = { workspace = true, features = ["glob"] }
-tests_macros      = { path = "../tests_macros" }
+biome_configuration = { workspace = true }
+biome_json_parser   = { path = "../biome_json_parser" }
+biome_test_utils    = { path = "../biome_test_utils" }
+criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+insta               = { workspace = true, features = ["glob"] }
+tests_macros        = { path = "../tests_macros" }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }
-
-[features]
-default       = ["configuration"]
-configuration = ["dep:biome_configuration"]
 
 [lints]
 workspace = true
