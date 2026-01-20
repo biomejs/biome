@@ -2,7 +2,9 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{AnyVueDirective, HtmlElement, HtmlSelfClosingElement, VueDirective};
+use biome_html_syntax::{
+    AnyVueDirective, HtmlElement, HtmlSelfClosingElement, HtmlSyntaxKind, VueDirective,
+};
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::use_vue_valid_v_else::UseVueValidVElseOptions;
 
@@ -201,7 +203,7 @@ fn has_v_if_or_else_if_directives(element: &AnyHtmlElement) -> bool {
             AnyVueDirective::try_cast(attribute.syntax().clone())
             && let Ok(name_token) = vue_dir.name_token()
         {
-            let name = name_token.text();
+            let name = name_token.text_trimmed();
             if name == "v-if" || name == "v-else-if" {
                 return true;
             }
@@ -212,12 +214,19 @@ fn has_v_if_or_else_if_directives(element: &AnyHtmlElement) -> bool {
 }
 
 fn has_previous_sibling_with_v_if_or_else_if(element: &AnyHtmlElement) -> bool {
-    if let Some(sibling) = element
-        .syntax()
-        .prev_sibling()
-        .and_then(|s| AnyHtmlElement::cast_ref(&s))
-    {
-        return has_v_if_or_else_if_directives(&sibling);
+    let mut prev = element.syntax().prev_sibling();
+    while let Some(node) = prev {
+        if let Some(sibling) = AnyHtmlElement::cast_ref(&node) {
+            return has_v_if_or_else_if_directives(&sibling);
+        }
+
+        // Skip comments and purely whitespace nodes
+        if matches!(node.kind(), HtmlSyntaxKind::COMMENT) || node.text_trimmed().is_empty() {
+            prev = node.prev_sibling();
+            continue;
+        }
+
+        return false;
     }
 
     false

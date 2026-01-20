@@ -30,4 +30,10 @@
   <div v-else></div>
   <span v-if="cond2"></span>
   <span v-else></span>
+
+  <!-- Multiline conditional elements -->
+  <div
+    v-if="condition"
+  ></div>
+  <div v-else></div>
 </template>

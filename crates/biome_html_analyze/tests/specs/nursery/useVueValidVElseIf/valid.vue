@@ -48,4 +48,10 @@
   <div v-if="user.age >= 18 && user.hasPermission"></div>
   <div v-else-if="user.age >= 13 && user.parentalConsent"></div>
   <div v-else></div>
+
+  <!-- Multiline conditional elements -->
+  <div
+    v-if="condition"
+  ></div>
+  <div v-else-if="other"></div>
 </template>
