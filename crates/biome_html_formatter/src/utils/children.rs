@@ -403,7 +403,7 @@ where
     // of what is within the element so that we can properly classify what whitespace is meaningful
     // and what isn't.
     //
-    // The reason this is necessary is because the trivia adjacent to the closing tag is attacked to
+    // The reason this is necessary is because the trivia adjacent to the closing tag is attached to
     // the closing tag's leading trivia, not the content's trailing trivia.
     if let Some(closing_element) = closing_element
         && let Ok(l_angle_token) = closing_element.l_angle_token()
