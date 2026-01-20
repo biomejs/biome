@@ -1969,6 +1969,11 @@ See https://biomejs.dev/linter/rules/no-for-in
 	 */
 	noForIn?: NoForInConfiguration;
 	/**
+	* Disallow the use of eval()-like methods.
+See https://biomejs.dev/linter/rules/no-implied-eval 
+	 */
+	noImpliedEval?: NoImpliedEvalConfiguration;
+	/**
 	* Prevent import cycles.
 See https://biomejs.dev/linter/rules/no-import-cycles 
 	 */
@@ -3812,6 +3817,9 @@ export type NoFloatingPromisesConfiguration =
 export type NoForInConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoForInOptions;
+export type NoImpliedEvalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoImpliedEvalOptions;
 export type NoImportCyclesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImportCyclesOptions;
@@ -5340,6 +5348,10 @@ export interface RuleWithNoForInOptions {
 	level: RulePlainConfiguration;
 	options?: NoForInOptions;
 }
+export interface RuleWithNoImpliedEvalOptions {
+	level: RulePlainConfiguration;
+	options?: NoImpliedEvalOptions;
+}
 export interface RuleWithNoImportCyclesOptions {
 	level: RulePlainConfiguration;
 	options?: NoImportCyclesOptions;
@@ -6780,6 +6792,7 @@ export interface NoExcessiveLinesPerFileOptions {
 export type NoFloatingClassesOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
+export type NoImpliedEvalOptions = {};
 export interface NoImportCyclesOptions {
 	/**
 	* Ignores type-only imports when finding an import cycle. A type-only import (`import type`)
@@ -7720,6 +7733,7 @@ export type Category =
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noImplicitCoercion"
+	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxLiterals"

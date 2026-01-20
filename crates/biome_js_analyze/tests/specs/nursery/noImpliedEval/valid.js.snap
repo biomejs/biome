@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// Function argument (correct usage)
+setTimeout(function() {
+    alert('Hi!');
+}, 100);
+
+setInterval(() => {
+    alert('Hi!');
+}, 100);
+
+// Shadowed by local variable
+function foo(setTimeout) {
+    setTimeout("alert('Hi!');", 100);
+}
+
+const bar = (setInterval) => {
+    setInterval("alert('Hi!');", 100);
+};
+
+// Non-global object
+const obj = { setTimeout: function() {} };
+obj.setTimeout("alert('Hi!');", 100);
+
+// Different function name
+setTimeout(callback, 100);
+
+// Template with substitution
+const code = "alert('Hi!');";
+setTimeout(`${code}`, 100);
+
+// Non-string argument
+setTimeout(123, 100);
+setTimeout(null, 100);
+setTimeout(undefined, 100);
+
+// Function as first argument
+setTimeout(function() {}, 100);
+
+```
