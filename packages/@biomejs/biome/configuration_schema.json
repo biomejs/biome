@@ -2913,6 +2913,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDivRegexConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDivRegexOptions" }
+			]
+		},
+		"NoDivRegexOptions": { "type": "object", "additionalProperties": false },
 		"NoDocumentCookieConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3299,6 +3306,25 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoExcessiveClassesPerFileConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExcessiveClassesPerFileOptions" }
+			]
+		},
+		"NoExcessiveClassesPerFileOptions": {
+			"type": "object",
+			"properties": {
+				"maxClasses": {
+					"description": "The maximum number of classes allowed in a file.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 1
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoExcessiveCognitiveComplexityConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3442,6 +3468,16 @@
 			]
 		},
 		"NoFlatMapIdentityOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoFloatingClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoFloatingClassesOptions" }
+			]
+		},
+		"NoFloatingClassesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5354,6 +5390,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDivRegex": {
+					"description": "Disallow equal signs explicitly at the beginning of regular expressions.\nSee https://biomejs.dev/linter/rules/no-div-regex",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDivRegexConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateArgumentNames": {
 					"description": "Require all argument names for fields & directives to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-argument-names",
 					"anyOf": [
@@ -5438,10 +5481,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveClassesPerFile": {
+					"description": "Enforce a maximum number of classes per file.\nSee https://biomejs.dev/linter/rules/no-excessive-classes-per-file",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveClassesPerFileConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveLinesPerFile": {
 					"description": "Restrict the number of lines in a file.\nSee https://biomejs.dev/linter/rules/no-excessive-lines-per-file",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoExcessiveLinesPerFileConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noFloatingClasses": {
+					"description": "Disallow new operators outside of assignments or comparisons.\nSee https://biomejs.dev/linter/rules/no-floating-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoFloatingClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5754,6 +5811,20 @@
 					"description": "Enforce the use of Array.prototype.find() over Array.prototype.filter() followed by [0] when looking for a single result.\nSee https://biomejs.dev/linter/rules/use-find",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseFindConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useInlineScriptId": {
+					"description": "Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.\nSee https://biomejs.dev/linter/rules/use-inline-script-id",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseInlineScriptIdConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useLoneAnonymousOperation": {
+					"description": "Disallow anonymous operations when more than one operation specified in document.\nSee https://biomejs.dev/linter/rules/use-lone-anonymous-operation",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseLoneAnonymousOperationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6901,6 +6972,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoDivRegexOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDivRegexOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoDocumentCookieOptions": {
 			"type": "object",
 			"properties": {
@@ -7248,6 +7329,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoExcessiveClassesPerFileOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExcessiveClassesPerFileOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoExcessiveCognitiveComplexityOptions": {
 			"type": "object",
 			"properties": {
@@ -7346,6 +7436,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoFlatMapIdentityOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoFloatingClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoFloatingClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9668,6 +9767,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseInlineScriptIdOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseInlineScriptIdOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseIsArrayOptions": {
 			"type": "object",
 			"properties": {
@@ -9749,6 +9857,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseLiteralKeysOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseLoneAnonymousOperationOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseLoneAnonymousOperationOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12682,6 +12799,16 @@
 			]
 		},
 		"UseIndexOfOptions": { "type": "object", "additionalProperties": false },
+		"UseInlineScriptIdConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseInlineScriptIdOptions" }
+			]
+		},
+		"UseInlineScriptIdOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseIsArrayConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12769,6 +12896,16 @@
 			]
 		},
 		"UseLiteralKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseLoneAnonymousOperationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseLoneAnonymousOperationOptions" }
+			]
+		},
+		"UseLoneAnonymousOperationOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

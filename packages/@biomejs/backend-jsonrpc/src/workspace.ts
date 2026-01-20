@@ -1879,6 +1879,11 @@ See https://biomejs.dev/linter/rules/no-deprecated-imports
 	 */
 	noDeprecatedImports?: NoDeprecatedImportsConfiguration;
 	/**
+	* Disallow equal signs explicitly at the beginning of regular expressions.
+See https://biomejs.dev/linter/rules/no-div-regex 
+	 */
+	noDivRegex?: NoDivRegexConfiguration;
+	/**
 	* Require all argument names for fields & directives to be unique.
 See https://biomejs.dev/linter/rules/no-duplicate-argument-names 
 	 */
@@ -1939,10 +1944,20 @@ See https://biomejs.dev/linter/rules/no-equals-to-null
 	 */
 	noEqualsToNull?: NoEqualsToNullConfiguration;
 	/**
+	* Enforce a maximum number of classes per file.
+See https://biomejs.dev/linter/rules/no-excessive-classes-per-file 
+	 */
+	noExcessiveClassesPerFile?: NoExcessiveClassesPerFileConfiguration;
+	/**
 	* Restrict the number of lines in a file.
 See https://biomejs.dev/linter/rules/no-excessive-lines-per-file 
 	 */
 	noExcessiveLinesPerFile?: NoExcessiveLinesPerFileConfiguration;
+	/**
+	* Disallow new operators outside of assignments or comparisons.
+See https://biomejs.dev/linter/rules/no-floating-classes 
+	 */
+	noFloatingClasses?: NoFloatingClassesConfiguration;
 	/**
 	* Require Promise-like statements to be handled appropriately.
 See https://biomejs.dev/linter/rules/no-floating-promises 
@@ -2167,6 +2182,16 @@ See https://biomejs.dev/linter/rules/use-explicit-type
 See https://biomejs.dev/linter/rules/use-find 
 	 */
 	useFind?: UseFindConfiguration;
+	/**
+	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
+See https://biomejs.dev/linter/rules/use-inline-script-id 
+	 */
+	useInlineScriptId?: UseInlineScriptIdConfiguration;
+	/**
+	* Disallow anonymous operations when more than one operation specified in document.
+See https://biomejs.dev/linter/rules/use-lone-anonymous-operation 
+	 */
+	useLoneAnonymousOperation?: UseLoneAnonymousOperationConfiguration;
 	/**
 	* Require queries, mutations, subscriptions or fragments each to be located in separate files.
 See https://biomejs.dev/linter/rules/use-lone-executable-definition 
@@ -3738,6 +3763,9 @@ export type NoContinueConfiguration =
 export type NoDeprecatedImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDeprecatedImportsOptions;
+export type NoDivRegexConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDivRegexOptions;
 export type NoDuplicateArgumentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateArgumentNamesOptions;
@@ -3774,9 +3802,15 @@ export type NoEmptySourceConfiguration =
 export type NoEqualsToNullConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEqualsToNullOptions;
+export type NoExcessiveClassesPerFileConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveClassesPerFileOptions;
 export type NoExcessiveLinesPerFileConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveLinesPerFileOptions;
+export type NoFloatingClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoFloatingClassesOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
@@ -3909,6 +3943,12 @@ export type UseExplicitTypeConfiguration =
 export type UseFindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFindOptions;
+export type UseInlineScriptIdConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseInlineScriptIdOptions;
+export type UseLoneAnonymousOperationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLoneAnonymousOperationOptions;
 export type UseLoneExecutableDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneExecutableDefinitionOptions;
@@ -5233,6 +5273,11 @@ export interface RuleWithNoDeprecatedImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDeprecatedImportsOptions;
 }
+export interface RuleWithNoDivRegexOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoDivRegexOptions;
+}
 export interface RuleWithNoDuplicateArgumentNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateArgumentNamesOptions;
@@ -5282,9 +5327,17 @@ export interface RuleWithNoEqualsToNullOptions {
 	level: RulePlainConfiguration;
 	options?: NoEqualsToNullOptions;
 }
+export interface RuleWithNoExcessiveClassesPerFileOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveClassesPerFileOptions;
+}
 export interface RuleWithNoExcessiveLinesPerFileOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveLinesPerFileOptions;
+}
+export interface RuleWithNoFloatingClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoFloatingClassesOptions;
 }
 export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
@@ -5470,6 +5523,14 @@ export interface RuleWithUseExplicitTypeOptions {
 export interface RuleWithUseFindOptions {
 	level: RulePlainConfiguration;
 	options?: UseFindOptions;
+}
+export interface RuleWithUseInlineScriptIdOptions {
+	level: RulePlainConfiguration;
+	options?: UseInlineScriptIdOptions;
+}
+export interface RuleWithUseLoneAnonymousOperationOptions {
+	level: RulePlainConfiguration;
+	options?: UseLoneAnonymousOperationOptions;
 }
 export interface RuleWithUseLoneExecutableDefinitionOptions {
 	level: RulePlainConfiguration;
@@ -6694,6 +6755,7 @@ export interface NoAmbiguousAnchorTextOptions {
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
+export type NoDivRegexOptions = {};
 export type NoDuplicateArgumentNamesOptions = {};
 export type NoDuplicateAttributesOptions = {};
 export type NoDuplicateDependenciesOptions = {};
@@ -6711,6 +6773,12 @@ export interface NoEmptySourceOptions {
 	allowComments?: boolean;
 }
 export type NoEqualsToNullOptions = {};
+export interface NoExcessiveClassesPerFileOptions {
+	/**
+	 * The maximum number of classes allowed in a file.
+	 */
+	maxClasses?: number;
+}
 export interface NoExcessiveLinesPerFileOptions {
 	/**
 	 * The maximum number of lines allowed in a file.
@@ -6721,6 +6789,7 @@ export interface NoExcessiveLinesPerFileOptions {
 	 */
 	skipBlankLines?: boolean;
 }
+export type NoFloatingClassesOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export interface NoImportCyclesOptions {
@@ -6840,6 +6909,8 @@ export interface UseErrorCauseOptions {
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
+export type UseInlineScriptIdOptions = {};
+export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
 export interface UseMaxParamsOptions {
 	/**
@@ -7643,13 +7714,22 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDivRegex"
+	| "lint/nursery/noDuplicateArgumentNames"
 	| "lint/nursery/noDuplicateAttributes"
 	| "lint/nursery/noDuplicateDependencies"
+	| "lint/nursery/noDuplicateEnumValueNames"
 	| "lint/nursery/noDuplicateEnumValues"
+	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateGraphqlOperationName"
+	| "lint/nursery/noDuplicateInputFieldNames"
+	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"
+	| "lint/nursery/noExcessiveClassesPerFile"
 	| "lint/nursery/noExcessiveLinesPerFile"
+	| "lint/nursery/noFloatingClasses"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noImplicitCoercion"
@@ -7702,21 +7782,17 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useMaxParams"
+	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
-	| "lint/nursery/noDuplicateArgumentNames"
-	| "lint/nursery/noDuplicateEnumValueNames"
-	| "lint/nursery/noDuplicateFieldDefinitionNames"
-	| "lint/nursery/noDuplicateGraphqlOperationName"
-	| "lint/nursery/noDuplicateInputFieldNames"
-	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentVBindStyle"
 	| "lint/nursery/useVueConsistentVOnStyle"

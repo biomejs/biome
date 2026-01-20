@@ -1,0 +1,4 @@
+query Foo { id }
+query Bar { id }
+query Baz { id }
+query Qux { id }

@@ -107,7 +107,7 @@ biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = 
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
 boa_engine                   = "0.21.0"
 boxcar                       = "0.2.14"
-bpaf                         = { version = "0.9.20", features = ["derive"] }
+bpaf                         = { version = "0.9.22", features = ["derive"] }
 camino                       = "1.2.2"
 cfg-if                       = "1.0.4"
 countme                      = "3.0.1"
@@ -122,7 +122,7 @@ grit-pattern-matcher         = "0.5.1"
 grit-util                    = "0.5.1"
 hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
-indexmap                     = { version = "2.12.1" }
+indexmap                     = { version = "2.13.0" }
 insta                        = "1.43.2"
 jiff                         = "0.2.18"
 libc                         = "0.2.180"
@@ -150,7 +150,7 @@ terminal_size                = "0.4.3"
 tests_macros                 = { path = "./crates/tests_macros" }
 tikv-jemallocator            = "0.6.1"
 tokio                        = "1.48.0"
-tower                        = "0.5.2"
+tower                        = "0.5.3"
 tower-lsp-server             = "0.23.0"
 tracing                      = { version = "0.1.44", default-features = false, features = ["attributes", "std"] }
 tracing-subscriber           = "0.3.22"
