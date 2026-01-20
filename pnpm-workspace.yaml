@@ -2,6 +2,7 @@ linkWorkspacePackages: true
 packages:
   - "packages/aria-data"
   - "packages/tailwindcss-config-analyzer"
+  - "packages/prettier-compare"
   - "crates/biome_formatter_test/src/prettier"
   - "benchmark"
   - "packages/@biomejs/*"
