@@ -4654,6 +4654,13 @@
 		},
 		"NoUnknownFunctionOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown function names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownMediaFeatureNameConfiguration": {
@@ -4674,6 +4681,13 @@
 		},
 		"NoUnknownPropertyOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown property names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownPseudoClassConfiguration": {
@@ -4684,6 +4698,13 @@
 		},
 		"NoUnknownPseudoClassOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown pseudo-class names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownPseudoElementConfiguration": {
@@ -4694,6 +4715,13 @@
 		},
 		"NoUnknownPseudoElementOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown pseudo-element names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownTypeSelectorConfiguration": {
