@@ -1,0 +1,42 @@
+[build-system]
+requires = ["maturin>=1.9,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "biome-js"
+version = "2.3.11"
+description = "A toolchain for web projects, aimed to provide functionalities to maintain them. Biome offers formatter and linter, usable via CLI and LSP."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE-APACHE", "LICENSE-MIT"]
+keywords = ["javascript", "linter", "formatter"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: JavaScript",
+    "Programming Language :: Rust",
+    "Topic :: Software Development :: Quality Assurance",
+]
+authors = [{ name = "Biome Developers and Contributors" }]
+
+[project.urls]
+Homepage = "https://biomejs.dev/"
+Documentation = "https://biomejs.dev/guides/getting-started/"
+Repository = "https://github.com/biomejs/biome"
+Issues = "https://github.com/biomejs/biome/issues"
+Changelog = "https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/CHANGELOG.md"
+
+[tool.maturin]
+bindings = "bin"
+manifest-path = "crates/biome_cli/Cargo.toml"
+module-name = "biome_js"
+python-source = "python"
+strip = true
+include = [
+  "crates/**",
+  "packages/aria-data/*.json",
+  "Cargo.toml",
+  "Cargo.lock",
+]
