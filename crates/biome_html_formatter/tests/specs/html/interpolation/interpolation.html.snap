@@ -31,9 +31,7 @@ Self close void elements: never
 -----
 
 ```html
-<div>
-	{{ $interpolation }}
-</div>
+<div>{{ $interpolation }}</div>
 ```
 
 ## Output 1
@@ -51,7 +49,5 @@ Self close void elements: never
 -----
 
 ```html
-<div>
-	{{ $interpolation }}
-</div>
+<div>{{ $interpolation }}</div>
 ```

@@ -315,7 +315,7 @@ HtmlRoot {
                                                 },
                                                 initializer: HtmlAttributeInitializerClause {
                                                     eq_token: EQ@352..353 "=" [] [],
-                                                    value: HtmlSingleTextExpression {
+                                                    value: HtmlAttributeSingleTextExpression {
                                                         l_curly_token: L_CURLY@353..354 "{" [] [],
                                                         expression: HtmlTextExpression {
                                                             html_literal_token: HTML_LITERAL@354..359 "retry" [] [],
@@ -570,7 +570,7 @@ HtmlRoot {
                           0: HTML_LITERAL@344..352 "on:click" [] []
                         1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@352..360
                           0: EQ@352..353 "=" [] []
-                          1: HTML_SINGLE_TEXT_EXPRESSION@353..360
+                          1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@353..360
                             0: L_CURLY@353..354 "{" [] []
                             1: HTML_TEXT_EXPRESSION@354..359
                               0: HTML_LITERAL@354..359 "retry" [] []
