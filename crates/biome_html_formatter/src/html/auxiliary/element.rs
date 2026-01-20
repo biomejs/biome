@@ -123,6 +123,9 @@ impl FormatHtmlElement {
         let is_root_element_list = node
             .syntax()
             .ancestors()
+            // get the third element (index 2)
+            // because the first one is Self (`HtmlElement`), 2nd one is the `HtmlElementList`
+            // third one is either `HtmlRoot` or another `HtmlElement`
             .nth(2)
             .is_some_and(|ancestor| HtmlRoot::can_cast(ancestor.kind()));
         // If `<template>` is at the root level, force multiline formatting of its children.
