@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: max-classes-option.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+class InvalidClass1 { }
+class InvalidClass2 { }
+
+```

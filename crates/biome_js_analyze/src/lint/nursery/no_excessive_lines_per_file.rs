@@ -1,5 +1,6 @@
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    utils::count_lines_in_file,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsRoot, JsSyntaxKind};
@@ -127,24 +128,11 @@ impl Rule for NoExcessiveLinesPerFile {
         let node = ctx.query();
         let options = ctx.options();
 
-        let file_lines_count = node
-            .syntax()
-            .descendants()
-            .flat_map(|descendant| descendant.tokens().collect::<Vec<_>>())
-            .filter(|token| token.kind() != JsSyntaxKind::EOF)
-            .fold(0, |acc, token| {
-                if options.skip_blank_lines() {
-                    return acc + token.has_leading_newline() as usize;
-                };
-
-                acc + token
-                    .trim_trailing_trivia()
-                    .leading_trivia()
-                    .pieces()
-                    .filter(|piece| piece.is_newline())
-                    .count()
-            })
-            + 1; // Add 1 for the first line
+        let file_lines_count = count_lines_in_file(
+            node.syntax(),
+            |token| token.kind() == JsSyntaxKind::EOF,
+            options.skip_blank_lines(),
+        );
 
         if file_lines_count > options.max_lines().get().into() {
             return Some(file_lines_count);
