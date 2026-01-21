@@ -101,7 +101,7 @@ pub fn html_cdata_section(
 pub fn html_closing_element(
     l_angle_token: SyntaxToken,
     slash_token: SyntaxToken,
-    name: HtmlTagName,
+    name: AnyHtmlTagName,
     r_angle_token: SyntaxToken,
 ) -> HtmlClosingElement {
     HtmlClosingElement::unwrap_cast(SyntaxNode::new_detached(
@@ -218,7 +218,7 @@ pub fn html_embedded_content(value_token: SyntaxToken) -> HtmlEmbeddedContent {
 }
 pub fn html_opening_element(
     l_angle_token: SyntaxToken,
-    name: HtmlTagName,
+    name: AnyHtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
 ) -> HtmlOpeningElement {
@@ -230,6 +230,12 @@ pub fn html_opening_element(
             Some(SyntaxElement::Node(attributes.into_syntax())),
             Some(SyntaxElement::Token(r_angle_token)),
         ],
+    ))
+}
+pub fn html_reference_identifier(value_token: SyntaxToken) -> HtmlReferenceIdentifier {
+    HtmlReferenceIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_REFERENCE_IDENTIFIER,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn html_root(html: HtmlElementList, eof_token: SyntaxToken) -> HtmlRootBuilder {
@@ -278,7 +284,7 @@ impl HtmlRootBuilder {
 }
 pub fn html_self_closing_element(
     l_angle_token: SyntaxToken,
-    name: HtmlTagName,
+    name: AnyHtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
 ) -> HtmlSelfClosingElementBuilder {
@@ -292,7 +298,7 @@ pub fn html_self_closing_element(
 }
 pub struct HtmlSelfClosingElementBuilder {
     l_angle_token: SyntaxToken,
-    name: HtmlTagName,
+    name: AnyHtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
     slash_token: Option<SyntaxToken>,

@@ -496,6 +496,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlOpeningElement {
         )
     }
 }
+impl FormatRule<biome_html_syntax::HtmlReferenceIdentifier>
+    for crate::html::auxiliary::reference_identifier::FormatHtmlReferenceIdentifier
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlReferenceIdentifier,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlReferenceIdentifier>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlReferenceIdentifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlReferenceIdentifier,
+        crate::html::auxiliary::reference_identifier::FormatHtmlReferenceIdentifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::reference_identifier::FormatHtmlReferenceIdentifier::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlReferenceIdentifier {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlReferenceIdentifier,
+        crate::html::auxiliary::reference_identifier::FormatHtmlReferenceIdentifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::reference_identifier::FormatHtmlReferenceIdentifier::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::HtmlRoot> for crate::html::auxiliary::root::FormatHtmlRoot {
     type Context = HtmlFormatContext;
     #[inline(always)]
@@ -3273,6 +3311,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlElement {
         FormatOwnedWithRule::new(
             self,
             crate::html::any::element::FormatAnyHtmlElement::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlTagName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyHtmlTagName,
+        crate::html::any::tag_name::FormatAnyHtmlTagName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::any::tag_name::FormatAnyHtmlTagName::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlTagName {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyHtmlTagName,
+        crate::html::any::tag_name::FormatAnyHtmlTagName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::any::tag_name::FormatAnyHtmlTagName::default(),
         )
     }
 }

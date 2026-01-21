@@ -289,7 +289,7 @@ fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
             }
 
             // Check tag-specific accessible content
-            let tag_name = element.name().ok().and_then(|n| n.value_token().ok());
+            let tag_name = element.name().ok().and_then(|n| n.name_value_token().ok());
             let tag_text = tag_name.as_ref().map(|t| t.text_trimmed());
 
             match tag_text {

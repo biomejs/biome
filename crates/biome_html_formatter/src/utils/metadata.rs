@@ -1,6 +1,6 @@
 use std::{borrow::Cow, collections::HashMap, sync::LazyLock};
 
-use biome_html_syntax::{AnyHtmlElement, HtmlAttributeName, HtmlTagName};
+use biome_html_syntax::{AnyHtmlElement, AnyHtmlTagName, HtmlAttributeName};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
 use crate::{
@@ -803,8 +803,8 @@ pub(crate) fn is_canonical_html_tag_name(tag_name: &str) -> bool {
 }
 
 /// Whether the given tag name is a known HTML element. See also: [`HTML_ALL_TAGS`].
-pub(crate) fn is_canonical_html_tag(tag_name: &HtmlTagName) -> bool {
-    let Ok(tag_name) = tag_name.value_token() else {
+pub(crate) fn is_canonical_html_tag(tag_name: &AnyHtmlTagName) -> bool {
+    let Ok(tag_name) = tag_name.name_value_token() else {
         return false;
     };
     is_canonical_html_tag_name(tag_name.text_trimmed())
@@ -814,7 +814,7 @@ pub(crate) fn is_canonical_html_tag(tag_name: &HtmlTagName) -> bool {
 ///
 /// Returns `true` only for canonical HTML tags in pure HTML files (.html).
 /// Component frameworks preserve tag name casing.
-pub(crate) fn should_lowercase_html_tag(f: &HtmlFormatter, tag_name: &HtmlTagName) -> bool {
+pub(crate) fn should_lowercase_html_tag(f: &HtmlFormatter, tag_name: &AnyHtmlTagName) -> bool {
     f.options().file_source().is_html() && is_canonical_html_tag(tag_name)
 }
 
@@ -847,10 +847,10 @@ pub(crate) fn is_canonical_html_attribute_name(tag_name: &str, attribute_name: &
 ///
 /// See [`HTML_ATTRIBUTES_BY_TAG`], [`HTML_GLOBAL_ATTRIBUTES`].
 pub(crate) fn is_canonical_html_attribute(
-    tag_name: &HtmlTagName,
+    tag_name: &AnyHtmlTagName,
     attribute_name: &HtmlAttributeName,
 ) -> bool {
-    let Ok(tag_name) = tag_name.value_token() else {
+    let Ok(tag_name) = tag_name.name_value_token() else {
         return false;
     };
     let Ok(attribute_name) = attribute_name.value_token() else {

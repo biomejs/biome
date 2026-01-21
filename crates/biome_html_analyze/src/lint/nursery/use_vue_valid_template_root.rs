@@ -69,7 +69,7 @@ impl Rule for UseVueValidTemplateRoot {
                 el.opening_element()
                     .ok()
                     .and_then(|op| op.name().ok())
-                    .and_then(|name| name.value_token().ok())
+                    .and_then(|name| name.name_value_token().ok())
                     .is_some_and(|tok| tok.text_trimmed() == "template")
             })?;
 

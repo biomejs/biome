@@ -75,7 +75,7 @@ impl Rule for NoAmbiguousAnchorText {
         let words = ctx.options().words();
 
         let name = binding.name().ok()?;
-        let value_token = name.value_token().ok()?;
+        let value_token = name.name_value_token().ok()?;
         if value_token.text_trimmed() != "a" {
             return None;
         }
@@ -120,7 +120,7 @@ fn get_aria_label(node: &AnyHtmlTagElement) -> Option<String> {
 
 fn get_img_alt(node: &AnyHtmlTagElement) -> Option<String> {
     let name = node.name().ok()?;
-    let value_token = name.value_token().ok()?;
+    let value_token = name.name_value_token().ok()?;
     if value_token.text_trimmed() != "img" {
         return None;
     }

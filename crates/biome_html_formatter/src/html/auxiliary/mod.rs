@@ -11,6 +11,7 @@ pub(crate) mod double_text_expression;
 pub(crate) mod element;
 pub(crate) mod embedded_content;
 pub(crate) mod opening_element;
+pub(crate) mod reference_identifier;
 pub(crate) mod root;
 pub(crate) mod self_closing_element;
 pub(crate) mod single_text_expression;

@@ -69,6 +69,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlOpeningElement::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_REFERENCE_IDENTIFIER => {
+                    let $pattern = unsafe { $crate::HtmlReferenceIdentifier::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ROOT => {
                     let $pattern = unsafe { $crate::HtmlRoot::new_unchecked(node) };
                     $body

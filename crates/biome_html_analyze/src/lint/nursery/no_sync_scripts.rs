@@ -46,7 +46,7 @@ impl Rule for NoSyncScripts {
         let binding = ctx.query();
 
         let name = binding.name().ok()?;
-        let value_token = name.value_token().ok()?;
+        let value_token = name.name_value_token().ok()?;
         if value_token.text_trimmed() != "script" {
             return None;
         }

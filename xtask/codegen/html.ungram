@@ -109,7 +109,7 @@ HtmlTextExpression = 'html_literal'
 // <a />
 HtmlSelfClosingElement =
 	'<'
-	name: HtmlTagName
+	name: AnyHtmlTagName
 	attributes: HtmlAttributeList
 	'/'?
 	'>'
@@ -124,7 +124,7 @@ HtmlElement =
 // ^^        ^
 HtmlOpeningElement =
 	'<'
-	name: HtmlTagName
+	name: AnyHtmlTagName
 	attributes: HtmlAttributeList
 	'>'
 
@@ -132,7 +132,7 @@ HtmlOpeningElement =
 HtmlClosingElement =
 	'<'
 	'/'
-	name: HtmlTagName
+	name: AnyHtmlTagName
 	'>'
 
 // <![CDATA[example]]>
@@ -584,6 +584,11 @@ HtmlTagName = value: 'html_literal'
 HtmlAttributeName = value: 'html_literal'
 HtmlContent = value: 'html_literal'
 HtmlEmbeddedContent = value: 'html_literal'
+HtmlReferenceIdentifier = value: 'ident'
+
+AnyHtmlTagName =
+	HtmlTagName
+	| HtmlReferenceIdentifier
 
 // ==================================
 // Vue
