@@ -929,6 +929,10 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         services.set_embedded_bindings(embedded_bindings.bindings)
     }
 
+    if let Some(value_refs) = params.document_services.embedded_value_references() {
+        services.set_embedded_value_references(value_refs.references)
+    }
+
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,
