@@ -7,7 +7,7 @@ use biome_css_syntax::{
     CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, TwApplyAtRule,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unknown_property::NoUnknownPropertyOptions;
 use biome_string_case::StrLikeExtension;
 
@@ -79,15 +79,9 @@ impl Rule for NoUnknownProperty {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let is_at_rule_supporting_descriptors = node.syntax().ancestors().any(|ancestor| {
+        let is_at_rule_supporting_descriptors = node.syntax().ancestors().skip(1).any(|ancestor| {
             if AnyCssAtRule::can_cast(ancestor.kind())
-                && !(TwApplyAtRule::can_cast(ancestor.kind())
-                    || CssContainerAtRule::can_cast(ancestor.kind())
-                    || CssLayerAtRule::can_cast(ancestor.kind())
-                    || CssMediaAtRule::can_cast(ancestor.kind())
-                    || CssScopeAtRule::can_cast(ancestor.kind())
-                    || CssStartingStyleAtRule::can_cast(ancestor.kind())
-                    || CssSupportsAtRule::can_cast(ancestor.kind()))
+                && !DescriptorSupportingAtRules::can_cast(ancestor.kind())
             {
                 return true;
             }
@@ -128,4 +122,13 @@ impl Rule for NoUnknownProperty {
             })
         )
     }
+}
+
+declare_node_union! {
+    pub DescriptorSupportingAtRules = TwApplyAtRule | CssContainerAtRule
+                    | CssLayerAtRule
+                    | CssMediaAtRule
+                    | CssScopeAtRule
+                    | CssStartingStyleAtRule
+                    | CssSupportsAtRule
 }

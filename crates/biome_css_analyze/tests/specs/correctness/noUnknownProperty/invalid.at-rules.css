@@ -12,7 +12,9 @@
 }
 
 @layer {
-	foo: 1;
+	a {
+		foo: 1;
+	}
 }
 
 @supports (display:grid) {

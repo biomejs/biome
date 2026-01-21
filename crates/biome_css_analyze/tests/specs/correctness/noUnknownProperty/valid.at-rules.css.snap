@@ -16,9 +16,7 @@ expression: valid.at-rules.css
 }
 
 @position-try --foo {
-	@supports (bar: 0) {
-		bar: 0
-	}
+	bar: 0
 }
 
 @foo {
@@ -26,5 +24,3 @@ expression: valid.at-rules.css
 }
 
 ```
-
-_Note: The parser emitted 2 diagnostics which are not shown here._
