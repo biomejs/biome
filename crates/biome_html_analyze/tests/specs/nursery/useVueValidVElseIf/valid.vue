@@ -61,4 +61,10 @@
   ></div>
   <!-- comment between multiline elements -->
   <div v-else-if="other"></div>
+
+  <!-- Nested conditionals -->
+  <div v-if="cond1"></div>
+  <div v-else-if="cond2">
+    <span v-if="cond3" />
+  </div>
 </template>

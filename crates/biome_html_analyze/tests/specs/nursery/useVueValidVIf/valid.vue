@@ -5,3 +5,9 @@
 <div v-else-if="b"></div>
 <div v-else></div>
 <div id="x" class="y" v-if="flag"></div>
+
+<!-- Nested conditionals -->
+<div v-if="cond1"></div>
+<div v-else>
+  <span v-if="cond2"/>
+</div>
