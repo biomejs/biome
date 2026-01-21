@@ -69,53 +69,65 @@ impl CommentStyle for HtmlCommentStyle {
         &self,
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
-        // Fix trailing comments that are right before EOF being assigned to the wrong node.
-        //
-        // The issue is demonstrated in the example below.
-        // ```html
-        // Foo
-        //
-        // <!-- This comment gets assigned to the text node, despite it being actually attached to the EOF token. -->
-        // ```
-        if let Some(token) = comment.following_token()
-            && token.kind() == HtmlSyntaxKind::EOF
-        {
-            return CommentPlacement::trailing(comment.enclosing_node().clone(), comment);
-        }
-
-        // Move comments placed between opening and closing tags to be dangling comments of the opening tag
-        // (if empty element) or trailing comments of the previous sibling.
-        // This MUST be checked before the same-line check below to avoid incorrectly making
-        // these comments leading comments of the closing element.
-        //
-        // For whitespace-sensitive elements like <span><!-- comment --></span>, we don't want
-        // the comment to become a leading comment of </span> because that would add unwanted
-        // formatting (like spaces) between the comment and the closing tag.
-        if let Some(_closing_tag) = comment
-            .following_node()
-            .and_then(|node| node.clone().cast::<HtmlClosingElement>())
-        {
-            if let Some(_preceding_opening_tag) = comment
-                .preceding_node()
-                .and_then(|node| node.clone().cast::<HtmlOpeningElement>())
+        handle_global_suppression(comment).or_else(|comment| {
+            // Fix trailing comments that are right before EOF being assigned to the wrong node.
+            //
+            // The issue is demonstrated in the example below.
+            // ```html
+            // Foo
+            //
+            // <!-- This comment gets assigned to the text node, despite it being actually attached to the EOF token. -->
+            // ```
+            if let Some(token) = comment.following_token()
+                && token.kind() == HtmlSyntaxKind::EOF
             {
                 return CommentPlacement::trailing(comment.enclosing_node().clone(), comment);
             }
 
-        // Fix trailing comments that should actually be leading comments for the next node.
-        // ```html
-        // 123<!--biome-ignore format: prettier ignore-->456
-        // ```
-        // This fix will ensure that the ignore comment is assigned to the 456 node instead of the 123 node.
-        if let Some(following_node) = comment.following_node()
-            && comment.text_position().is_same_line()
-        {
-            return CommentPlacement::leading(following_node.clone(), comment);
-        }
+            // Move comments placed between opening and closing tags to be dangling comments of the opening tag
+            // (if empty element) or trailing comments of the previous sibling.
+            // This MUST be checked before the same-line check below to avoid incorrectly making
+            // these comments leading comments of the closing element.
+            //
+            // For whitespace-sensitive elements like <span><!-- comment --></span>, we don't want
+            // the comment to become a leading comment of </span> because that would add unwanted
+            // formatting (like spaces) between the comment and the closing tag.
+            if let Some(_closing_tag) = comment
+                .following_node()
+                .and_then(|node| node.clone().cast::<HtmlClosingElement>())
+            {
+                if let Some(_preceding_opening_tag) = comment
+                    .preceding_node()
+                    .and_then(|node| node.clone().cast::<HtmlOpeningElement>())
+                {
+                    return CommentPlacement::dangling(
+                        comment.preceding_node().unwrap().clone(),
+                        comment,
+                    );
+                } else {
+                    return CommentPlacement::trailing(
+                        comment.preceding_node().unwrap().clone(),
+                        comment,
+                    );
+                }
+            }
 
-        CommentPlacement::Default(comment)
+            // Fix trailing comments that should actually be leading comments for the next node.
+            // ```html
+            // 123<!--biome-ignore format: prettier ignore-->456
+            // ```
+            // This fix will ensure that the ignore comment is assigned to the 456 node instead of the 123 node.
+            if let Some(following_node) = comment.following_node()
+                && comment.text_position().is_same_line()
+            {
+                return CommentPlacement::leading(following_node.clone(), comment);
+            }
+
+            CommentPlacement::Default(comment)
+        })
     }
 }
+
 fn handle_global_suppression(
     comment: DecoratedComment<HtmlLanguage>,
 ) -> CommentPlacement<HtmlLanguage> {
