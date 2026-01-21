@@ -161,11 +161,11 @@ mod tests {
 
     #[test]
     fn test_error_size() {
-        assert_eq!(size_of::<Error>(), size_of::<u128>());
+        assert_eq!(size_of::<Error>(), size_of::<usize>());
     }
 
     #[test]
     fn test_result_size() {
-        assert_eq!(size_of::<Result<()>>(), size_of::<u128>());
+        assert_eq!(size_of::<Result<()>>(), size_of::<usize>());
     }
 }
