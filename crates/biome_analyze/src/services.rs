@@ -61,3 +61,13 @@ impl FromServices for () {
         Ok(())
     }
 }
+
+/// Trait for providing information about extended configurations.
+///
+/// This allows analyzers to query configuration information without depending
+/// on the full `biome_configuration` crate, breaking circular dependencies.
+pub trait ExtendedConfigurationProvider: Send + Sync + std::fmt::Debug {
+    /// Returns `true` if any extended configuration has `files.includes`
+    /// where the first pattern is the catch-all `**`.
+    fn any_extended_starts_with_catch_all(&self) -> bool;
+}

@@ -1,0 +1,14 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+assertion_line: 94
+expression: filenameMatch
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "1:1-1:37",
+        "2:1-2:33",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

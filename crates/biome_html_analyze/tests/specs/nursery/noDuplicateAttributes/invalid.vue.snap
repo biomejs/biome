@@ -1,0 +1,141 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<template>
+	<div foo :foo="bar" />
+	<div v-bind:foo="a" :foo="b" />
+
+	<!-- event handlers are ignored -->
+	<div v-on:click="a" @click="b" />
+
+	<div class class :class="a" />
+	<div style style :style="a" />
+
+	<!-- dynamic arguments are ignored -->
+	<div foo :[foo]="a" />
+	<div v-on:[evt]="a" @click="b" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:11 lint/nursery/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate attribute 'foo'.
+  
+    3 │ <template>
+  > 4 │ 	<div foo :foo="bar" />
+      │ 	         ^^^^^^^^^^
+    5 │ 	<div v-bind:foo="a" :foo="b" />
+    6 │ 
+  
+  i This is the first occurrence of the attribute.
+  
+    3 │ <template>
+  > 4 │ 	<div foo :foo="bar" />
+      │ 	     ^^^
+    5 │ 	<div v-bind:foo="a" :foo="b" />
+    6 │ 
+  
+  i Each attribute name must be unique within a single element. Duplicate attributes are invalid and can lead to unexpected browser behavior.
+  
+  i Consider removing or renaming the duplicate 'foo' attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:22 lint/nursery/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate attribute 'foo'.
+  
+    3 │ <template>
+    4 │ 	<div foo :foo="bar" />
+  > 5 │ 	<div v-bind:foo="a" :foo="b" />
+      │ 	                    ^^^^^^^^
+    6 │ 
+    7 │ 	<!-- event handlers are ignored -->
+  
+  i This is the first occurrence of the attribute.
+  
+    3 │ <template>
+    4 │ 	<div foo :foo="bar" />
+  > 5 │ 	<div v-bind:foo="a" :foo="b" />
+      │ 	            ^^^
+    6 │ 
+    7 │ 	<!-- event handlers are ignored -->
+  
+  i Each attribute name must be unique within a single element. Duplicate attributes are invalid and can lead to unexpected browser behavior.
+  
+  i Consider removing or renaming the duplicate 'foo' attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:13 lint/nursery/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate attribute 'class'.
+  
+     8 │ 	<div v-on:click="a" @click="b" />
+     9 │ 
+  > 10 │ 	<div class class :class="a" />
+       │ 	           ^^^^^
+    11 │ 	<div style style :style="a" />
+    12 │ 
+  
+  i This is the first occurrence of the attribute.
+  
+     8 │ 	<div v-on:click="a" @click="b" />
+     9 │ 
+  > 10 │ 	<div class class :class="a" />
+       │ 	     ^^^^^
+    11 │ 	<div style style :style="a" />
+    12 │ 
+  
+  i Each attribute name must be unique within a single element. Duplicate attributes are invalid and can lead to unexpected browser behavior.
+  
+  i Consider removing or renaming the duplicate 'class' attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:13 lint/nursery/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate attribute 'style'.
+  
+    10 │ 	<div class class :class="a" />
+  > 11 │ 	<div style style :style="a" />
+       │ 	           ^^^^^
+    12 │ 
+    13 │ 	<!-- dynamic arguments are ignored -->
+  
+  i This is the first occurrence of the attribute.
+  
+    10 │ 	<div class class :class="a" />
+  > 11 │ 	<div style style :style="a" />
+       │ 	     ^^^^^
+    12 │ 
+    13 │ 	<!-- dynamic arguments are ignored -->
+  
+  i Each attribute name must be unique within a single element. Duplicate attributes are invalid and can lead to unexpected browser behavior.
+  
+  i Consider removing or renaming the duplicate 'style' attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

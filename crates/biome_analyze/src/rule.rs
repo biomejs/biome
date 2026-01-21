@@ -170,6 +170,8 @@ pub enum RuleSource {
     Stylelint(&'static str),
     /// Rules from [Eslint Plugin Turbo](https://github.com/vercel/turborepo/tree/main/packages/eslint-plugin-turbo)
     EslintTurbo(&'static str),
+    /// Rules from [html-eslint](https://html-eslint.org/)
+    HtmlEslint(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -221,6 +223,7 @@ impl std::fmt::Display for RuleSource {
             Self::GraphqlSchemaLinter(_) => write!(f, "graphql-schema-linter"),
             Self::Stylelint(_) => write!(f, "Stylelint"),
             Self::EslintTurbo(_) => write!(f, "eslint-plugin-turbo"),
+            Self::HtmlEslint(_) => write!(f, "@html-eslint/eslint-plugin"),
         }
     }
 }
@@ -301,7 +304,8 @@ impl RuleSource {
             | Self::EslintVueJs(rule_name)
             | Self::GraphqlSchemaLinter(rule_name)
             | Self::Stylelint(rule_name)
-            | Self::EslintTurbo(rule_name) => rule_name,
+            | Self::EslintTurbo(rule_name)
+            | Self::HtmlEslint(rule_name) => rule_name,
         }
     }
 
@@ -347,6 +351,7 @@ impl RuleSource {
             Self::EslintVitest(rule_name) => format!("vitest/{rule_name}"),
             Self::EslintVueJs(rule_name) => format!("vue/{rule_name}"),
             Self::EslintTurbo(rule_name) => format!("turbo/{rule_name}"),
+            Self::HtmlEslint(rule_name) => format!("@html-eslint/{rule_name}"),
         }
     }
 
@@ -388,6 +393,7 @@ impl RuleSource {
             Self::GraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
             Self::EslintTurbo(rule_name) => format!("https://github.com/vercel/turborepo/blob/main/packages/eslint-plugin-turbo/docs/rules/{rule_name}.md"),
+            Self::HtmlEslint(rule_name) => format!("https://html-eslint.org/docs/rules/{rule_name}"),
         }
     }
 

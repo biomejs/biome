@@ -86,18 +86,8 @@ impl Rule for NoBiomeFirstException {
         let root = ctx.query();
         let file_path = ctx.file_path();
 
-        // we check if and extended package starts with `**`
-        #[cfg(feature = "configuration")]
-        let extends_starts_with_catch_all = ctx.extends().is_some_and(|mut extends| {
-            extends.any(|c| {
-                c.files
-                    .as_ref()
-                    .and_then(|files| files.includes.as_deref())
-                    .is_some_and(|globs| globs.first().is_some_and(|glob| glob.as_str() == "**"))
-            })
-        });
-        #[cfg(not(feature = "configuration"))]
-        let extends_starts_with_catch_all = false;
+        // we check if an extended package starts with `**`
+        let extends_starts_with_catch_all = ctx.any_extended_starts_with_catch_all();
         // we use ends_with so it works only during testing
         if !file_path
             .file_name()
