@@ -1,0 +1,388 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+// Invalid cases for useArraySome
+
+// .filter().length
+[1, 2, 3].filter((x) => x > 1).length > 0;
+[1, 2, 3].filter((x) => x > 1).length !== 0;
+[1, 2, 3].filter((x) => x > 1).length != 0;
+[1, 2, 3].filter((x) => x > 1).length >= 1;
+!![1, 2, 3].filter((x) => x > 1).length;
+
+// .find() / .findLast()
+[1, 2, 3].find((x) => x > 1) !== undefined;
+[1, 2, 3].find((x) => x > 1) != null;
+[1, 2, 3].findLast((x) => x > 1) !== undefined;
+[1, 2, 3].findLast((x) => x > 1) != null;
+
+// .findIndex() / .findLastIndex()
+[1, 2, 3].findIndex((x) => x > 1) !== -1;
+[1, 2, 3].findIndex((x) => x > 1) > -1;
+[1, 2, 3].findLastIndex((x) => x > 1) !== -1;
+[1, 2, 3].findLastIndex((x) => x > 1) > -1;
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+    3 │ // .filter().length
+  > 4 │ [1, 2, 3].filter((x) => x > 1).length > 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ [1, 2, 3].filter((x) => x > 1).length !== 0;
+    6 │ [1, 2, 3].filter((x) => x > 1).length != 0;
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+     2  2 │   
+     3  3 │   // .filter().length
+     4    │ - [1,·2,·3].filter((x)·=>·x·>·1).length·>·0;
+        4 │ + [1,·2,·3].some((x)·=>·x·>·1);
+     5  5 │   [1, 2, 3].filter((x) => x > 1).length !== 0;
+     6  6 │   [1, 2, 3].filter((x) => x > 1).length != 0;
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+    3 │ // .filter().length
+    4 │ [1, 2, 3].filter((x) => x > 1).length > 0;
+  > 5 │ [1, 2, 3].filter((x) => x > 1).length !== 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ [1, 2, 3].filter((x) => x > 1).length != 0;
+    7 │ [1, 2, 3].filter((x) => x > 1).length >= 1;
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+     3  3 │   // .filter().length
+     4  4 │   [1, 2, 3].filter((x) => x > 1).length > 0;
+     5    │ - [1,·2,·3].filter((x)·=>·x·>·1).length·!==·0;
+        5 │ + [1,·2,·3].some((x)·=>·x·>·1);
+     6  6 │   [1, 2, 3].filter((x) => x > 1).length != 0;
+     7  7 │   [1, 2, 3].filter((x) => x > 1).length >= 1;
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+    4 │ [1, 2, 3].filter((x) => x > 1).length > 0;
+    5 │ [1, 2, 3].filter((x) => x > 1).length !== 0;
+  > 6 │ [1, 2, 3].filter((x) => x > 1).length != 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ [1, 2, 3].filter((x) => x > 1).length >= 1;
+    8 │ !![1, 2, 3].filter((x) => x > 1).length;
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+     4  4 │   [1, 2, 3].filter((x) => x > 1).length > 0;
+     5  5 │   [1, 2, 3].filter((x) => x > 1).length !== 0;
+     6    │ - [1,·2,·3].filter((x)·=>·x·>·1).length·!=·0;
+        6 │ + [1,·2,·3].some((x)·=>·x·>·1);
+     7  7 │   [1, 2, 3].filter((x) => x > 1).length >= 1;
+     8  8 │   !![1, 2, 3].filter((x) => x > 1).length;
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+    5 │ [1, 2, 3].filter((x) => x > 1).length !== 0;
+    6 │ [1, 2, 3].filter((x) => x > 1).length != 0;
+  > 7 │ [1, 2, 3].filter((x) => x > 1).length >= 1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ !![1, 2, 3].filter((x) => x > 1).length;
+    9 │ 
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+     5  5 │   [1, 2, 3].filter((x) => x > 1).length !== 0;
+     6  6 │   [1, 2, 3].filter((x) => x > 1).length != 0;
+     7    │ - [1,·2,·3].filter((x)·=>·x·>·1).length·>=·1;
+        7 │ + [1,·2,·3].some((x)·=>·x·>·1);
+     8  8 │   !![1, 2, 3].filter((x) => x > 1).length;
+     9  9 │   
+  
+
+```
+
+```
+invalid.ts:8:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+     6 │ [1, 2, 3].filter((x) => x > 1).length != 0;
+     7 │ [1, 2, 3].filter((x) => x > 1).length >= 1;
+   > 8 │ !![1, 2, 3].filter((x) => x > 1).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // .find() / .findLast()
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+     6  6 │   [1, 2, 3].filter((x) => x > 1).length != 0;
+     7  7 │   [1, 2, 3].filter((x) => x > 1).length >= 1;
+     8    │ - !![1,·2,·3].filter((x)·=>·x·>·1).length;
+        8 │ + [1,·2,·3].some((x)·=>·x·>·1);
+     9  9 │   
+    10 10 │   // .find() / .findLast()
+  
+
+```
+
+```
+invalid.ts:11:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+    10 │ // .find() / .findLast()
+  > 11 │ [1, 2, 3].find((x) => x > 1) !== undefined;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ [1, 2, 3].find((x) => x > 1) != null;
+    13 │ [1, 2, 3].findLast((x) => x > 1) !== undefined;
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+     9  9 │   
+    10 10 │   // .find() / .findLast()
+    11    │ - [1,·2,·3].find((x)·=>·x·>·1)·!==·undefined;
+       11 │ + [1,·2,·3].some((x)·=>·x·>·1);
+    12 12 │   [1, 2, 3].find((x) => x > 1) != null;
+    13 13 │   [1, 2, 3].findLast((x) => x > 1) !== undefined;
+  
+
+```
+
+```
+invalid.ts:12:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+    10 │ // .find() / .findLast()
+    11 │ [1, 2, 3].find((x) => x > 1) !== undefined;
+  > 12 │ [1, 2, 3].find((x) => x > 1) != null;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ [1, 2, 3].findLast((x) => x > 1) !== undefined;
+    14 │ [1, 2, 3].findLast((x) => x > 1) != null;
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+    10 10 │   // .find() / .findLast()
+    11 11 │   [1, 2, 3].find((x) => x > 1) !== undefined;
+    12    │ - [1,·2,·3].find((x)·=>·x·>·1)·!=·null;
+       12 │ + [1,·2,·3].some((x)·=>·x·>·1);
+    13 13 │   [1, 2, 3].findLast((x) => x > 1) !== undefined;
+    14 14 │   [1, 2, 3].findLast((x) => x > 1) != null;
+  
+
+```
+
+```
+invalid.ts:13:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+    11 │ [1, 2, 3].find((x) => x > 1) !== undefined;
+    12 │ [1, 2, 3].find((x) => x > 1) != null;
+  > 13 │ [1, 2, 3].findLast((x) => x > 1) !== undefined;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ [1, 2, 3].findLast((x) => x > 1) != null;
+    15 │ 
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+    11 11 │   [1, 2, 3].find((x) => x > 1) !== undefined;
+    12 12 │   [1, 2, 3].find((x) => x > 1) != null;
+    13    │ - [1,·2,·3].findLast((x)·=>·x·>·1)·!==·undefined;
+       13 │ + [1,·2,·3].some((x)·=>·x·>·1);
+    14 14 │   [1, 2, 3].findLast((x) => x > 1) != null;
+    15 15 │   
+  
+
+```
+
+```
+invalid.ts:14:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+    12 │ [1, 2, 3].find((x) => x > 1) != null;
+    13 │ [1, 2, 3].findLast((x) => x > 1) !== undefined;
+  > 14 │ [1, 2, 3].findLast((x) => x > 1) != null;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // .findIndex() / .findLastIndex()
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+    12 12 │   [1, 2, 3].find((x) => x > 1) != null;
+    13 13 │   [1, 2, 3].findLast((x) => x > 1) !== undefined;
+    14    │ - [1,·2,·3].findLast((x)·=>·x·>·1)·!=·null;
+       14 │ + [1,·2,·3].some((x)·=>·x·>·1);
+    15 15 │   
+    16 16 │   // .findIndex() / .findLastIndex()
+  
+
+```
+
+```
+invalid.ts:17:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+    16 │ // .findIndex() / .findLastIndex()
+  > 17 │ [1, 2, 3].findIndex((x) => x > 1) !== -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ [1, 2, 3].findIndex((x) => x > 1) > -1;
+    19 │ [1, 2, 3].findLastIndex((x) => x > 1) !== -1;
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+    15 15 │   
+    16 16 │   // .findIndex() / .findLastIndex()
+    17    │ - [1,·2,·3].findIndex((x)·=>·x·>·1)·!==·-1;
+       17 │ + [1,·2,·3].some((x)·=>·x·>·1);
+    18 18 │   [1, 2, 3].findIndex((x) => x > 1) > -1;
+    19 19 │   [1, 2, 3].findLastIndex((x) => x > 1) !== -1;
+  
+
+```
+
+```
+invalid.ts:18:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+    16 │ // .findIndex() / .findLastIndex()
+    17 │ [1, 2, 3].findIndex((x) => x > 1) !== -1;
+  > 18 │ [1, 2, 3].findIndex((x) => x > 1) > -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ [1, 2, 3].findLastIndex((x) => x > 1) !== -1;
+    20 │ [1, 2, 3].findLastIndex((x) => x > 1) > -1;
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+    16 16 │   // .findIndex() / .findLastIndex()
+    17 17 │   [1, 2, 3].findIndex((x) => x > 1) !== -1;
+    18    │ - [1,·2,·3].findIndex((x)·=>·x·>·1)·>·-1;
+       18 │ + [1,·2,·3].some((x)·=>·x·>·1);
+    19 19 │   [1, 2, 3].findLastIndex((x) => x > 1) !== -1;
+    20 20 │   [1, 2, 3].findLastIndex((x) => x > 1) > -1;
+  
+
+```
+
+```
+invalid.ts:19:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+    17 │ [1, 2, 3].findIndex((x) => x > 1) !== -1;
+    18 │ [1, 2, 3].findIndex((x) => x > 1) > -1;
+  > 19 │ [1, 2, 3].findLastIndex((x) => x > 1) !== -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ [1, 2, 3].findLastIndex((x) => x > 1) > -1;
+    21 │ 
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+    17 17 │   [1, 2, 3].findIndex((x) => x > 1) !== -1;
+    18 18 │   [1, 2, 3].findIndex((x) => x > 1) > -1;
+    19    │ - [1,·2,·3].findLastIndex((x)·=>·x·>·1)·!==·-1;
+       19 │ + [1,·2,·3].some((x)·=>·x·>·1);
+    20 20 │   [1, 2, 3].findLastIndex((x) => x > 1) > -1;
+    21 21 │   
+  
+
+```
+
+```
+invalid.ts:20:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using .some() over other methods when checking for the existence of an element.
+  
+    18 │ [1, 2, 3].findIndex((x) => x > 1) > -1;
+    19 │ [1, 2, 3].findLastIndex((x) => x > 1) !== -1;
+  > 20 │ [1, 2, 3].findLastIndex((x) => x > 1) > -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+  
+  i Using .some() is more readable and efficient.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use .some() instead.
+  
+    18 18 │   [1, 2, 3].findIndex((x) => x > 1) > -1;
+    19 19 │   [1, 2, 3].findLastIndex((x) => x > 1) !== -1;
+    20    │ - [1,·2,·3].findLastIndex((x)·=>·x·>·1)·>·-1;
+       20 │ + [1,·2,·3].some((x)·=>·x·>·1);
+    21 21 │   
+  
+
+```

@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// Should not trigger on other methods
+[1, 2, 3].some(x => x > 1);
+
+// Should not trigger on length comparisons that are not existence checks
+[1, 2, 3].filter(x => x > 1).length > 1;
+[1, 2, 3].filter(x => x > 1).length === 2;
+
+// Should not trigger on .find() when the result is used (not just for existence)
+const x = [1, 2, 3].find(x => x > 1) || 0;
+const y = [1, 2, 3].find(x => x > 1) ?? 0;
+
+// Should not trigger on comparisons with other values
+[1, 2, 3].findIndex(x => x > 1) === 0;
+[1, 2, 3].findIndex(x => x > 1) < 0; // This is actually equivalent to !some, but unicorn only specifies !== -1 and > -1 for positive existence
+
+```
