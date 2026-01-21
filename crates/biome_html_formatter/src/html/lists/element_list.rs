@@ -312,9 +312,6 @@ struct ChildrenMeta {
     /// `true` if children contains a block-like element
     has_block_element: bool,
 
-    /// `true` if any child contains meaningful text content
-    meaningful_text: bool,
-
     /// `true` if there are multiple non-text children
     multiple_block_elements: bool,
 }
@@ -335,13 +332,10 @@ impl FormatHtmlElementList {
                         block_element_count += 1;
                     }
                 }
-                HtmlChild::Word(_) | HtmlChild::Comment(_) => {
-                    meta.meaningful_text = true;
-                }
                 HtmlChild::Verbatim(_) => {
                     block_element_count += 1;
                 }
-                HtmlChild::Whitespace | HtmlChild::Newline | HtmlChild::EmptyLine => {}
+                _ => {}
             }
         }
 
@@ -390,7 +384,6 @@ impl FormatHtmlElementList {
             // - Children contain block elements
             // - There are multiple block elements
             let mut force_multiline = matches!(self.layout, HtmlChildListLayout::Multiline)
-                // || children_meta.has_block_element
                 || children_meta.multiple_block_elements;
             let mut children_iter = HtmlChildrenIterator::new(children.iter());
 
@@ -868,8 +861,7 @@ impl FormatHtmlElementList {
             }
 
             Ok(())
-        })
-        .memoized();
+        });
 
         if is_root {
             write!(f, [&formatted_children])
