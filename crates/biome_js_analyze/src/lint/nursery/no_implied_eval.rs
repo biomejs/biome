@@ -63,6 +63,11 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ## Resources
+    ///
+    /// - [MDN setTimeout() documentation](https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#the_string_problem)
+    /// - [MDN eval() documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#never_use_direct_eval!)
+    ///
     pub NoImpliedEval {
         version: "next",
         name: "noImpliedEval",
@@ -138,6 +143,7 @@ impl Rule for NoImpliedEval {
 /// - window.setTimeout (static member)
 /// - `window["setTimeout"]` (computed member)
 /// - globalThis.setTimeout (static member)
+/// - (0, setTimeout) (sequence expression)
 fn is_eval_like_function(
     callee: &AnyJsExpression,
     model: &biome_js_semantic::SemanticModel,
@@ -176,6 +182,24 @@ fn is_eval_like_function(
                 && let Some(name_text) = static_value.as_string_constant()
             {
                 return EVAL_LIKE_FUNCTIONS.contains(&name_text);
+            }
+            false
+        }
+
+        // Sequence expression: (0, setTimeout)(...)
+        AnyJsExpression::JsSequenceExpression(sequence) => {
+            // Get the last expression in the sequence
+            if let Ok(right) = sequence.right() {
+                return is_eval_like_function(&right, model);
+            }
+            false
+        }
+
+        // Parenthesized expression: may contain a sequence expression
+        AnyJsExpression::JsParenthesizedExpression(paren) => {
+            // Unwrap the parenthesized expression and check recursively
+            if let Ok(inner) = paren.expression() {
+                return is_eval_like_function(&inner, model);
             }
             false
         }

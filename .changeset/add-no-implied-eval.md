@@ -1,15 +1,15 @@
 ---
-"@biomejs/biome": minor
+"@biomejs/biome": patch
 ---
 
-Added new lint rule `noImpliedEval` to the nursery group.
+Added new lint rule [`noImpliedEval`](https://biomejs.dev/linter/rules/no-implied-eval/) to nursery.
 
 The rule detects implied `eval()` usage through functions like `setTimeout`, `setInterval`, and `setImmediate` when called with string arguments.
 
 ```js
-// Invalid - will be flagged
+// Invalid
 setTimeout("alert('Hello');", 100);
 
-// Valid - use a function instead
+// Valid
 setTimeout(() => alert('Hello'), 100);
 ```

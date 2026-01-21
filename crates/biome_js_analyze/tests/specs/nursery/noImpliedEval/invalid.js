@@ -1,3 +1,5 @@
+/* should generate diagnostics */
+
 // Direct calls
 setTimeout("alert('Hi!');", 100);
 setInterval("alert('Hi!');", 100);
@@ -27,3 +29,9 @@ setInterval("foo" + "bar", 10);
 // Sequence expression
 (0, setTimeout)("alert('Hi!');", 100);
 (0, window.setTimeout)("alert('Hi!');", 100);
+
+// Computed member on global object
+global["setTimeout"]("alert('Hi!');", 100);
+
+// Nested sequence expression
+(0, (0, setTimeout))("alert('Hi!');", 100);

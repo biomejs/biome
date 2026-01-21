@@ -43,4 +43,16 @@ setTimeout(undefined, 100);
 // Function as first argument
 setTimeout(function() {}, 100);
 
+// Computed member on non-global object
+const timer = { setTimeout: () => {} };
+timer["setTimeout"]("code", 100);
+
+// Unknown object (can't determine if global)
+someObject["setTimeout"]("code", 100);
+someObject.setInterval("code", 100);
+
+// Call with .call/.apply (different signature)
+setTimeout.call(null, function() {}, 100);
+setTimeout.apply(null, [function() {}, 100]);
+
 ```
