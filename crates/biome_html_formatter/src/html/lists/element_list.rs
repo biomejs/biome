@@ -2,7 +2,7 @@
 //!
 //! Although it might look a lot like `JsxChildList` formatter, the formatting logic for JSX and HTML
 //! differ in several key ways, primarily due to HTML's whitespace sensitivity. It may be tempting to
-//! reuse the JSX logic here, but doing so would leads to incorrect formatting in many scenarios.
+//! reuse the JSX logic here, but doing so would lead to incorrect formatting in many scenarios.
 //!
 //! # Formatting Rules
 //!
@@ -97,7 +97,7 @@
 //! of spaces, no space will be rendered.
 //! ```html
 //! Whitespace <b>must</b> be preserved around the inline elements, or it'll render
-//! <i>wierd</i>.
+//! <i>weird</i>.
 //! ```
 //!
 //! It's **very important** to note that whitespace doesn't just mean any number of space ` `
@@ -121,7 +121,7 @@
 //! >
 //! ```
 //!
-//! Biome acomplishes this by having the element list "borrow" the tokens from the container
+//! Biome accomplishes this by having the element list "borrow" the tokens from the container
 //! to include inside the element list's group.
 //!
 //! ### Inline-Block Elements
