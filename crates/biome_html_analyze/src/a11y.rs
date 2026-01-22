@@ -1,4 +1,5 @@
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
 
 /// Check the element is hidden from screen reader.
 ///
@@ -19,4 +20,119 @@ pub(crate) fn is_hidden_from_screen_reader(element: &AnyHtmlTagElement) -> bool 
             .is_some_and(|value| value.text() == "hidden"),
         _ => false,
     }
+}
+
+/// Strict check: returns `true` only when `aria-hidden="true"` (case-sensitive).
+///
+/// Ref: <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden>
+pub(crate) fn is_aria_hidden_true(element: &AnyHtmlElement) -> bool {
+    element
+        .find_attribute_by_name("aria-hidden")
+        .is_some_and(|attribute| {
+            attribute
+                .initializer()
+                .and_then(|init| init.value().ok())
+                .and_then(|value| value.string_value())
+                .is_some_and(|value| value == "true")
+        })
+}
+
+/// Returns the `aria-hidden` attribute if it has a truthy value.
+///
+/// Returns `Some` if present and not "false" (case-insensitive), `None` otherwise.
+/// Useful for code fixes that need to reference the attribute.
+///
+/// Ref: <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden>
+pub(crate) fn get_truthy_aria_hidden_attribute(element: &AnyHtmlElement) -> Option<HtmlAttribute> {
+    let attribute = element.find_attribute_by_name("aria-hidden")?;
+    let is_truthy = attribute
+        .initializer()
+        .and_then(|init| init.value().ok())
+        .and_then(|value| value.string_value())
+        .is_none_or(|value| !value.eq_ignore_ascii_case("false"));
+
+    if is_truthy { Some(attribute) } else { None }
+}
+
+/// Returns `true` if attribute exists with non-empty trimmed value.
+pub(crate) fn has_non_empty_attribute(element: &AnyHtmlElement, name: &str) -> bool {
+    element.find_attribute_by_name(name).is_some_and(|attribute| {
+        attribute
+            .initializer()
+            .and_then(|init| init.value().ok())
+            .and_then(|value| value.string_value())
+            .is_some_and(|value| !value.trim().is_empty())
+    })
+}
+
+/// Returns `true` if element has `aria-label` or `title` with non-empty value.
+pub(crate) fn has_accessible_name(element: &AnyHtmlElement) -> bool {
+    has_non_empty_attribute(element, "aria-label") || has_non_empty_attribute(element, "title")
+}
+
+// Type-specific variants avoid wrapping/cloning for performance in recursive code
+
+/// Type-specific variant for `HtmlElement`. Checks truthy `aria-hidden`.
+pub(crate) fn html_element_has_truthy_aria_hidden(
+    element: &biome_html_syntax::HtmlElement,
+) -> bool {
+    element
+        .find_attribute_by_name("aria-hidden")
+        .is_some_and(|attribute| {
+            attribute
+                .initializer()
+                .and_then(|init| init.value().ok())
+                .and_then(|value| value.string_value())
+                .is_none_or(|value| !value.eq_ignore_ascii_case("false"))
+        })
+}
+
+/// Type-specific variant for `HtmlSelfClosingElement`. Checks truthy `aria-hidden`.
+pub(crate) fn html_self_closing_element_has_truthy_aria_hidden(
+    element: &biome_html_syntax::HtmlSelfClosingElement,
+) -> bool {
+    element
+        .find_attribute_by_name("aria-hidden")
+        .is_some_and(|attribute| {
+            attribute
+                .initializer()
+                .and_then(|init| init.value().ok())
+                .and_then(|value| value.string_value())
+                .is_none_or(|value| !value.eq_ignore_ascii_case("false"))
+        })
+}
+
+/// Type-specific variant for `HtmlSelfClosingElement`. Checks accessible name.
+pub(crate) fn html_self_closing_element_has_accessible_name(
+    element: &biome_html_syntax::HtmlSelfClosingElement,
+) -> bool {
+    let has_aria_label = element.find_attribute_by_name("aria-label").is_some_and(|attr| {
+        attr.initializer()
+            .and_then(|init| init.value().ok())
+            .and_then(|value| value.string_value())
+            .is_some_and(|value| !value.trim().is_empty())
+    });
+
+    let has_title = element.find_attribute_by_name("title").is_some_and(|attr| {
+        attr.initializer()
+            .and_then(|init| init.value().ok())
+            .and_then(|value| value.string_value())
+            .is_some_and(|value| !value.trim().is_empty())
+    });
+
+    has_aria_label || has_title
+}
+
+/// Type-specific variant for `HtmlSelfClosingElement`. Checks non-empty attribute.
+pub(crate) fn html_self_closing_element_has_non_empty_attribute(
+    element: &biome_html_syntax::HtmlSelfClosingElement,
+    name: &str,
+) -> bool {
+    element.find_attribute_by_name(name).is_some_and(|attribute| {
+        attribute
+            .initializer()
+            .and_then(|init| init.value().ok())
+            .and_then(|value| value.string_value())
+            .is_some_and(|value| !value.trim().is_empty())
+    })
 }
