@@ -591,10 +591,7 @@ mod tests {
         // CamelCase/PascalCase identifiers should have low entropy (below 4.1 threshold)
         // These are common programming identifiers that should NOT trigger false positives
         let entropy = calculate_entropy_with_case_and_classes("paddingBottom");
-        assert!(
-            entropy < 4.1,
-            "paddingBottom should not trigger: {entropy}"
-        );
+        assert!(entropy < 4.1, "paddingBottom should not trigger: {entropy}");
 
         let entropy = calculate_entropy_with_case_and_classes("IngestGatewayLogGroup");
         assert!(
@@ -619,7 +616,6 @@ mod tests {
             entropy < 4.1,
             "uncaughtException should not trigger: {entropy}"
         );
-
     }
 
     #[test]
