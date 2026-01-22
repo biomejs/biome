@@ -209,4 +209,3 @@ fn has_valid_alt_text(element: &AnyHtmlElement) -> bool {
     // If there's an initializer with a value, any value is valid
     element.find_attribute_by_name("alt").is_some()
 }
-

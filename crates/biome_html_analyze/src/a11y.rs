@@ -56,13 +56,15 @@ pub(crate) fn get_truthy_aria_hidden_attribute(element: &AnyHtmlElement) -> Opti
 
 /// Returns `true` if attribute exists with non-empty trimmed value.
 pub(crate) fn has_non_empty_attribute(element: &AnyHtmlElement, name: &str) -> bool {
-    element.find_attribute_by_name(name).is_some_and(|attribute| {
-        attribute
-            .initializer()
-            .and_then(|init| init.value().ok())
-            .and_then(|value| value.string_value())
-            .is_some_and(|value| !value.trim().is_empty())
-    })
+    element
+        .find_attribute_by_name(name)
+        .is_some_and(|attribute| {
+            attribute
+                .initializer()
+                .and_then(|init| init.value().ok())
+                .and_then(|value| value.string_value())
+                .is_some_and(|value| !value.trim().is_empty())
+        })
 }
 
 /// Returns `true` if element has `aria-label` or `title` with non-empty value.
@@ -106,12 +108,14 @@ pub(crate) fn html_self_closing_element_has_truthy_aria_hidden(
 pub(crate) fn html_self_closing_element_has_accessible_name(
     element: &biome_html_syntax::HtmlSelfClosingElement,
 ) -> bool {
-    let has_aria_label = element.find_attribute_by_name("aria-label").is_some_and(|attr| {
-        attr.initializer()
-            .and_then(|init| init.value().ok())
-            .and_then(|value| value.string_value())
-            .is_some_and(|value| !value.trim().is_empty())
-    });
+    let has_aria_label = element
+        .find_attribute_by_name("aria-label")
+        .is_some_and(|attr| {
+            attr.initializer()
+                .and_then(|init| init.value().ok())
+                .and_then(|value| value.string_value())
+                .is_some_and(|value| !value.trim().is_empty())
+        });
 
     let has_title = element.find_attribute_by_name("title").is_some_and(|attr| {
         attr.initializer()
@@ -128,11 +132,13 @@ pub(crate) fn html_self_closing_element_has_non_empty_attribute(
     element: &biome_html_syntax::HtmlSelfClosingElement,
     name: &str,
 ) -> bool {
-    element.find_attribute_by_name(name).is_some_and(|attribute| {
-        attribute
-            .initializer()
-            .and_then(|init| init.value().ok())
-            .and_then(|value| value.string_value())
-            .is_some_and(|value| !value.trim().is_empty())
-    })
+    element
+        .find_attribute_by_name(name)
+        .is_some_and(|attribute| {
+            attribute
+                .initializer()
+                .and_then(|init| init.value().ok())
+                .and_then(|value| value.string_value())
+                .is_some_and(|value| !value.trim().is_empty())
+        })
 }

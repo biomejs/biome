@@ -10,8 +10,8 @@ use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::HtmlRuleAction;
 use crate::a11y::{
-    get_truthy_aria_hidden_attribute, has_accessible_name,
-    html_element_has_truthy_aria_hidden, html_self_closing_element_has_accessible_name,
+    get_truthy_aria_hidden_attribute, has_accessible_name, html_element_has_truthy_aria_hidden,
+    html_self_closing_element_has_accessible_name,
     html_self_closing_element_has_non_empty_attribute,
     html_self_closing_element_has_truthy_aria_hidden,
 };
