@@ -20,6 +20,7 @@ pub mod javascript;
 pub mod json;
 pub mod max_size;
 mod overrides;
+pub mod provenance;
 pub mod vcs;
 
 use crate::analyzer::assist::{Actions, AssistConfiguration, Source, assist_configuration};
