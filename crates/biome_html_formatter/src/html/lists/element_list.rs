@@ -186,6 +186,7 @@ use crate::{
     prelude::*,
     utils::{
         children::{HtmlChild, HtmlChildrenIterator, html_split_children},
+        css_display::CssDisplay,
         metadata::get_element_css_display,
     },
 };
@@ -507,8 +508,23 @@ impl FormatHtmlElementList {
                                     // Prettier's behavior where the line break happens BEFORE the
                                     // element rather than after the text.
                                     if !css_display.is_inline_like() {
-                                        // add a line break after the word for non-inline elements
-                                        if force_multiline {
+                                        if css_display.is_block_like()
+                                            && css_display != CssDisplay::None
+                                        {
+                                            // A visible block-like element adjacent to text.
+                                            //
+                                            // Prettier always breaks in cases like:
+                                            // `<div>a<div>b</div> c</div>`.
+                                            child_breaks = true;
+                                            force_multiline = true;
+                                            write!(f, [hard_line_break()])?;
+                                        } else if css_display == CssDisplay::None {
+                                            // Avoid introducing whitespace around `display: none` elements if they are adjacent to whitespace sensitive children.
+                                            //
+                                            // ```html
+                                            // <div>123<meta attr />456</div>
+                                            // ```
+                                        } else if force_multiline {
                                             write!(f, [hard_line_break()])?;
                                         } else {
                                             write!(f, [soft_line_break()])?;
@@ -565,6 +581,14 @@ impl FormatHtmlElementList {
                             if last_nontext_had_trailing_line {
                                 // The outer group pattern already added the trailing space
                                 // Don't add another one
+                            } else if force_multiline
+                                && matches!(children_iter.peek(), Some(HtmlChild::Word(_)))
+                                && last_css_display.is_block_like()
+                                && last_css_display != CssDisplay::None
+                            {
+                                // If we're already multiline, keep words after block-like elements on their own line.
+                                child_breaks = true;
+                                write!(f, [hard_line_break()])?;
                             } else if last_css_display.is_externally_whitespace_sensitive(f) {
                                 // For whitespace-sensitive elements, use soft_line_break_or_space
                                 // so the space is preserved in flat mode
@@ -660,6 +684,13 @@ impl FormatHtmlElementList {
                                     // <a>link</a>more text
                                     // ```
                                     None
+                                } else if css_display.is_block_like()
+                                    && css_display != CssDisplay::None
+                                {
+                                    // Block-like elements followed by text should break before the text.
+                                    // This matches Prettier for cases like:
+                                    // `<div>a<div>b</div> c</div>` and `<details><summary>...</summary>details</details>`.
+                                    Some(LineMode::Hard)
                                 } else {
                                     Some(LineMode::Soft)
                                 }

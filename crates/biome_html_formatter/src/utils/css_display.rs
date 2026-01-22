@@ -62,6 +62,8 @@ impl CssDisplay {
     /// **Note: For formatting purposes, you MUST use [`Self::is_internally_whitespace_sensitive`] or
     /// [`Self::is_externally_whitespace_sensitive`] to determine if an element is whitespace-sensitive.**
     pub fn is_block_like(self) -> bool {
+        // FIXME: Prettier treats `display: none` as whitespace sensitive. So technically, this should not be included here.
+        // However, including it here simplifies some logic elsewhere.
         matches!(
             self,
             Self::Block
