@@ -42,11 +42,11 @@ pub(crate) fn unclosed_code_span(
 ) -> ParseDiagnostic {
     let backticks = "`".repeat(backtick_count);
     p.err_builder(
-        format!("Unclosed code span, expected closing `{backticks}`."),
+        format!("Unclosed code span, expected closing {backticks}."),
         opening_range,
     )
     .with_detail(opening_range, "code span started here")
-    .with_hint(format!("Add closing `{backticks}` to close the code span."))
+    .with_hint(format!("Add closing {backticks} to close the code span."))
 }
 
 /// Unclosed inline link.

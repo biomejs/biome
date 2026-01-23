@@ -69,7 +69,7 @@ MdDocument {
 ```
 unclosed_code_span.md:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unclosed code span, expected closing ```.
+  × Unclosed code span, expected closing `.
   
   > 1 │ This has `unclosed code
       │          ^
@@ -81,6 +81,6 @@ unclosed_code_span.md:1:10 parse ━━━━━━━━━━━━━━━�
       │          ^
     2 │ 
   
-  i Add closing ``` to close the code span.
+  i Add closing ` to close the code span.
   
 ```
