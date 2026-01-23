@@ -81,7 +81,7 @@ impl Rule for NoUnknownProperty {
         let node = ctx.query();
         let is_at_rule_supporting_descriptors = node.syntax().ancestors().skip(1).any(|ancestor| {
             if AnyCssAtRule::can_cast(ancestor.kind())
-                && !DescriptorSupportingAtRules::can_cast(ancestor.kind())
+                && !AnyDescriptorSupportingAtRules::can_cast(ancestor.kind())
             {
                 return true;
             }
@@ -125,7 +125,7 @@ impl Rule for NoUnknownProperty {
 }
 
 declare_node_union! {
-    pub DescriptorSupportingAtRules = TwApplyAtRule | CssContainerAtRule
+    pub AnyDescriptorSupportingAtRules = TwApplyAtRule | CssContainerAtRule
                     | CssLayerAtRule
                     | CssMediaAtRule
                     | CssScopeAtRule
