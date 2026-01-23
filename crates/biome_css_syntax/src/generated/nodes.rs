@@ -33801,62 +33801,6 @@ impl From<CssBogusCustomIdentifier> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusDashFunctionArgument {
-    syntax: SyntaxNode,
-}
-impl CssBogusDashFunctionArgument {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusDashFunctionArgument {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_DASH_FUNCTION_ARGUMENT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_DASH_FUNCTION_ARGUMENT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusDashFunctionArgument {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusDashFunctionArgument")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusDashFunctionArgument> for SyntaxNode {
-    fn from(n: CssBogusDashFunctionArgument) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusDashFunctionArgument> for SyntaxElement {
-    fn from(n: CssBogusDashFunctionArgument) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusDeclarationItem {
     syntax: SyntaxNode,
 }
@@ -35480,7 +35424,7 @@ impl From<CssValueAtRuleGenericValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusAttrName | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDashFunctionArgument | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusFunctionParameter | CssBogusIfBranch | CssBogusIfTest | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusSyntax | CssBogusSyntaxSingleComponent | CssBogusType | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
+biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusAttrName | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusFunctionParameter | CssBogusIfBranch | CssBogusIfTest | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusSyntax | CssBogusSyntaxSingleComponent | CssBogusType | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct CssAttrNameList {
     syntax_list: SyntaxList,

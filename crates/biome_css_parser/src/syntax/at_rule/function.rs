@@ -1,5 +1,5 @@
 use crate::syntax::at_rule::parse_error::{
-    expected_function_parameter, expected_parameter_default_value, expected_parameter_type,
+    expected_any_type, expected_function_parameter, expected_parameter_default_value,
 };
 use crate::syntax::block::parse_declaration_or_at_rule_list_block;
 use crate::syntax::parse_error::expected_dashed_identifier;
@@ -22,11 +22,21 @@ use biome_parser::{
     prelude::ParsedSyntax::Absent,
 };
 
+/// Checks if the current token in the parser is a `@function` at-rule.
 #[inline]
 pub(crate) fn is_at_function_at_rule(p: &mut CssParser) -> bool {
     p.at(T![function])
 }
 
+/// For more detailed information on the CSS `@function` syntax, refer to the
+/// [CSS Mixins Module](https://drafts.csswg.org/css-mixins-1/#function-rule) specification.
+///
+/// # Examples
+/// Basic usage in CSS:
+///
+/// ```css
+/// @function --transparent(--color, --alpha) {}
+/// ```
 #[inline]
 pub(crate) fn parse_function_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_function_at_rule(p) {
@@ -85,14 +95,7 @@ fn parse_function_parameter(p: &mut CssParser) -> ParsedSyntax {
         )
         .ok();
 
-    parse_any_type(p) //.or_add_diagnostic(p, expected_parameter_type);
-        .or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set![T![,], T![')'], T![:]]),
-            expected_parameter_type,
-        )
-        .ok();
-
+    parse_any_type(p).ok();
     parse_function_parameter_default_value(p).ok();
 
     Present(m.complete(p, CSS_FUNCTION_PARAMETER))
@@ -150,8 +153,13 @@ fn parse_returns_statement(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T![returns]);
 
-    // TODO: recover
-    parse_any_type(p).ok();
+    parse_any_type(p)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set![T!['{']]),
+            expected_any_type,
+        )
+        .ok();
 
     Present(m.complete(p, CSS_RETURNS_STATEMENT))
 }

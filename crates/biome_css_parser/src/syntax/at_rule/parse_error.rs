@@ -91,10 +91,10 @@ pub(crate) fn expected_function_parameter(p: &CssParser, range: TextRange) -> Pa
     expected_node("function parameter", range, p)
 }
 
-pub(crate) fn expected_parameter_type(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["type function", "syntax single component"], range, p)
-}
-
 pub(crate) fn expected_parameter_default_value(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("function parameter default value", range, p)
+}
+
+pub(crate) fn expected_any_type(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(&["type function", "syntax single component"], range, p)
 }

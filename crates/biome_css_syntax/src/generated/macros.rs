@@ -985,11 +985,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusCustomIdentifier::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_BOGUS_DASH_FUNCTION_ARGUMENT => {
-                    let $pattern =
-                        unsafe { $crate::CssBogusDashFunctionArgument::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_BOGUS_DECLARATION_ITEM => {
                     let $pattern = unsafe { $crate::CssBogusDeclarationItem::new_unchecked(node) };
                     $body

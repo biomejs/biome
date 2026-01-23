@@ -617,7 +617,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_ATTR_NAME",
         "CSS_BOGUS_FUNCTION_PARAMETER",
         "CSS_BOGUS_TYPE",
-        "CSS_BOGUS_DASH_FUNCTION_ARGUMENT",
         // Grit metavariable
         "CSS_METAVARIABLE",
     ],

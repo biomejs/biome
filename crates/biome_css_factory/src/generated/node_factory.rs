@@ -3910,16 +3910,6 @@ where
         slots,
     ))
 }
-pub fn css_bogus_dash_function_argument<I>(slots: I) -> CssBogusDashFunctionArgument
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssBogusDashFunctionArgument::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_BOGUS_DASH_FUNCTION_ARGUMENT,
-        slots,
-    ))
-}
 pub fn css_bogus_declaration_item<I>(slots: I) -> CssBogusDeclarationItem
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,

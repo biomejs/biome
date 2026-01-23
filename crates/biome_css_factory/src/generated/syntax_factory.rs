@@ -19,7 +19,6 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_ATTR_NAME
             | CSS_BOGUS_BLOCK
             | CSS_BOGUS_CUSTOM_IDENTIFIER
-            | CSS_BOGUS_DASH_FUNCTION_ARGUMENT
             | CSS_BOGUS_DECLARATION_ITEM
             | CSS_BOGUS_DOCUMENT_MATCHER
             | CSS_BOGUS_FONT_FAMILY_NAME

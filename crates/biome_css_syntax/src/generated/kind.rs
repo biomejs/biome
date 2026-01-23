@@ -584,7 +584,6 @@ pub enum CssSyntaxKind {
     CSS_BOGUS_ATTR_NAME,
     CSS_BOGUS_FUNCTION_PARAMETER,
     CSS_BOGUS_TYPE,
-    CSS_BOGUS_DASH_FUNCTION_ARGUMENT,
     CSS_METAVARIABLE,
     #[doc(hidden)]
     __LAST,

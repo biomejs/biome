@@ -68,7 +68,6 @@ CssBogusSyntaxSingleComponent = SyntaxElement*
 CssBogusAttrName = SyntaxElement*
 CssBogusFunctionParameter = SyntaxElement*
 CssBogusType = SyntaxElement*
-CssBogusDashFunctionArgument = SyntaxElement*
 
 AnyCssRoot =
 	CssRoot
