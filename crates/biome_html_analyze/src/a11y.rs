@@ -9,48 +9,36 @@
 
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
-use biome_rowan::Text;
 
 // ============================================================================
 // Core attribute value helpers (private)
 // ============================================================================
 
-/// Extracts the string value from an attribute's initializer.
-///
-/// This is the fundamental building block for all attribute value checks.
-/// Returns `None` if the attribute has no initializer or the value cannot be extracted.
-fn get_attribute_string_value(attribute: &HtmlAttribute) -> Option<Text> {
-    attribute
-        .initializer()
-        .and_then(|init| init.value().ok())
-        .and_then(|value| value.string_value())
-}
-
 /// Checks if an `aria-hidden` attribute has a truthy value.
 ///
-/// Per ARIA spec, `aria-hidden` is truthy when:
-/// - The attribute is present with no value (`aria-hidden`)
-/// - The value is anything other than "false" (case-insensitive)
+/// Per ARIA spec, `aria-hidden` accepts only `"true"` or `"false"` as valid values.
+/// An attribute present with any value other than `"false"` is treated as truthy
+/// (hiding the element from assistive technologies).
 ///
-/// This means `aria-hidden=""`, `aria-hidden="true"`, and `aria-hidden="yes"`
-/// are all considered truthy.
-fn is_truthy_aria_hidden_value(attribute: &HtmlAttribute) -> bool {
-    get_attribute_string_value(attribute).is_none_or(|value| !value.eq_ignore_ascii_case("false"))
+/// Ref: <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-hidden>
+fn is_aria_hidden_value_truthy(attribute: &HtmlAttribute) -> bool {
+    attribute
+        .value()
+        .is_none_or(|value| !value.eq_ignore_ascii_case("false"))
 }
 
 /// Checks if an attribute value equals `"true"` exactly (case-sensitive).
-///
-/// Used for strict boolean attribute checks where only the literal string
-/// `"true"` should match, not truthy values like `"yes"` or `"1"`.
 fn is_strict_true_value(attribute: &HtmlAttribute) -> bool {
-    get_attribute_string_value(attribute).is_some_and(|value| value == "true")
+    attribute.value().is_some_and(|value| value == "true")
 }
 
 /// Checks if an attribute has a non-empty value after trimming whitespace.
 ///
 /// Returns `false` for attributes with no value, empty strings, or whitespace-only values.
 fn has_non_empty_value(attribute: &HtmlAttribute) -> bool {
-    get_attribute_string_value(attribute).is_some_and(|value| !value.trim().is_empty())
+    attribute
+        .value()
+        .is_some_and(|value| !value.trim().is_empty())
 }
 
 /// Checks if an attribute value matches the expected string (case-insensitive).
@@ -61,7 +49,9 @@ pub(crate) fn attribute_value_equals_ignore_case(
     attribute: &HtmlAttribute,
     expected: &str,
 ) -> bool {
-    get_attribute_string_value(attribute).is_some_and(|value| value.eq_ignore_ascii_case(expected))
+    attribute
+        .value()
+        .is_some_and(|value| value.eq_ignore_ascii_case(expected))
 }
 
 // ============================================================================
@@ -93,8 +83,7 @@ pub(crate) fn is_hidden_from_screen_reader(element: &AnyHtmlTagElement) -> bool 
 
 /// Strict check: returns `true` only when `aria-hidden="true"` (case-sensitive).
 ///
-/// Unlike [`is_truthy_aria_hidden_value`], this only matches the exact string `"true"`,
-/// not other truthy values like `""` or `"yes"`.
+/// Unlike [`is_aria_hidden_value_truthy`], this only matches the exact string `"true"`.
 ///
 /// Ref: <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden>
 pub(crate) fn is_aria_hidden_true(element: &AnyHtmlElement) -> bool {
@@ -111,7 +100,7 @@ pub(crate) fn is_aria_hidden_true(element: &AnyHtmlElement) -> bool {
 /// Ref: <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden>
 pub(crate) fn get_truthy_aria_hidden_attribute(element: &AnyHtmlElement) -> Option<HtmlAttribute> {
     let attribute = element.find_attribute_by_name("aria-hidden")?;
-    if is_truthy_aria_hidden_value(&attribute) {
+    if is_aria_hidden_value_truthy(&attribute) {
         Some(attribute)
     } else {
         None
@@ -159,7 +148,7 @@ pub(crate) fn html_element_has_truthy_aria_hidden(
 ) -> bool {
     element
         .find_attribute_by_name("aria-hidden")
-        .is_some_and(|attr| is_truthy_aria_hidden_value(&attr))
+        .is_some_and(|attr| is_aria_hidden_value_truthy(&attr))
 }
 
 /// Type-specific variant of truthy `aria-hidden` check for [`HtmlSelfClosingElement`].
@@ -173,7 +162,7 @@ pub(crate) fn html_self_closing_element_has_truthy_aria_hidden(
 ) -> bool {
     element
         .find_attribute_by_name("aria-hidden")
-        .is_some_and(|attr| is_truthy_aria_hidden_value(&attr))
+        .is_some_and(|attr| is_aria_hidden_value_truthy(&attr))
 }
 
 /// Type-specific variant of accessible name check for [`HtmlSelfClosingElement`].
@@ -207,3 +196,7 @@ pub(crate) fn html_self_closing_element_has_non_empty_attribute(
         .find_attribute_by_name(name)
         .is_some_and(|attr| has_non_empty_value(&attr))
 }
+
+#[cfg(test)]
+#[path = "a11y_tests.rs"]
+mod tests;
