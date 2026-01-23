@@ -106,7 +106,7 @@ pub(crate) fn create_bogus_node_in_tree_diagnostic(node: JsSyntaxNode) -> ParseD
     .with_hint( "This bogus node is present in the parsed tree but the parser didn't emit a diagnostic for it. Change the parser to either emit a diagnostic, fix the grammar, or the parsing.")
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub(crate) struct TestCaseFiles {
     files: Vec<TestCaseFile>,
 }
@@ -185,6 +185,11 @@ pub(crate) trait TestSuite: Send + Sync {
     fn is_test(&self, path: &Path) -> bool;
     fn load_test(&self, path: &Path) -> Option<Box<dyn TestCase>>;
     fn checkout(&self) -> io::Result<()>;
+
+    /// Override to provide tests without filesystem scanning.
+    fn load_all(&self) -> Option<Vec<Box<dyn TestCase>>> {
+        None
+    }
 }
 
 pub(crate) struct TestSuiteInstance {
@@ -341,6 +346,17 @@ pub(crate) fn run_test_suite(
 }
 
 fn load_tests(suite: &dyn TestSuite, context: &mut TestRunContext) -> TestSuiteInstance {
+    if let Some(mut tests) = suite.load_all() {
+        if let Some(filter) = &context.filter {
+            tests.retain(|test| test.name().contains(filter.as_str()));
+        }
+        context.reporter.tests_discovered(suite, tests.len());
+        for _ in &tests {
+            context.reporter.test_loaded();
+        }
+        return TestSuiteInstance::new(suite, tests);
+    }
+
     let paths = WalkDir::new(suite.base_path())
         .into_iter()
         .filter_map(Result::ok)

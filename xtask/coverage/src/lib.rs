@@ -1,6 +1,7 @@
 pub mod compare;
 pub mod js;
 pub mod jsx;
+pub mod markdown;
 mod reporters;
 pub mod results;
 mod runner;
@@ -19,6 +20,7 @@ use crate::runner::{TestRunContext, TestSuite, run_test_suite};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_string_case::StrOnlyExtension;
 use jsx::jsx_babel::BabelJsxTestSuite;
+use markdown::commonmark::CommonMarkTestSuite;
 use serde::{Deserialize, Serialize};
 use std::any::Any;
 use symbols::msts::SymbolsMicrosoftTestSuite;
@@ -164,6 +166,7 @@ const ALL_JS_SUITES: &str = "js";
 const ALL_TS_SUITES: &str = "ts";
 const ALL_JSX_SUITES: &str = "jsx";
 const ALL_SYMBOLS_SUITES: &str = "symbols";
+const ALL_MARKDOWN_SUITES: &str = "markdown";
 
 fn get_test_suites(suites: Option<&str>) -> Vec<Box<dyn TestSuite>> {
     let suites = suites.unwrap_or("*").to_lowercase_cow();
@@ -177,13 +180,15 @@ fn get_test_suites(suites: Option<&str>) -> Vec<Box<dyn TestSuite>> {
             ALL_TS_SUITES | "typescript" => ids.extend(["ts/microsoft", "ts/babel"]),
             ALL_JSX_SUITES => ids.extend(["jsx/babel"]),
             ALL_SYMBOLS_SUITES => ids.extend(["symbols/microsoft"]),
-            ALL_SUITES => ids.extend(["js", "ts", "jsx", "symbols"]),
+            ALL_MARKDOWN_SUITES => ids.extend(["markdown/commonmark"]),
+            ALL_SUITES => ids.extend(["js", "ts", "jsx", "symbols", "markdown"]),
 
             "js/262" => suites.push(Box::new(Test262TestSuite)),
             "ts/microsoft" => suites.push(Box::new(MicrosoftTypescriptTestSuite)),
             "ts/babel" => suites.push(Box::new(BabelTypescriptTestSuite)),
             "jsx/babel" => suites.push(Box::new(BabelJsxTestSuite)),
             "symbols/microsoft" => suites.push(Box::new(SymbolsMicrosoftTestSuite)),
+            "markdown/commonmark" => suites.push(Box::new(CommonMarkTestSuite)),
 
             _ => {}
         }
