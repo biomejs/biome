@@ -75,6 +75,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
@@ -200,4 +201,5 @@ Quote style: Double Quotes
 ) returns <color> {
 	result: oklch(from var(--color) l c h / var(--alpha));
 }
+
 ```
