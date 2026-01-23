@@ -35,6 +35,13 @@ pub(crate) fn slotted_or_deep_not_allowed(p: &CssParser, range: TextRange) -> Pa
     .with_hint("These are valid pseudo selectors only when defined inside SFC vue files.")
 }
 
+/// This function generates a parsing diagnostic for the usage of the
+/// `v-bind()` function in CSS, which is a non-standard CSS feature.
+pub(crate) fn v_bind_not_allowed(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("`v-bind()` is not a standard CSS function.", range)
+        .with_hint("This is valid only when defined inside SFC vue files.")
+}
+
 pub(crate) fn expected_any_css_module_scope(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(&["global", "local"], range).into_diagnostic(p)
 }
