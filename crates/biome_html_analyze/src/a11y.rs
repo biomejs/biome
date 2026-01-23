@@ -91,9 +91,11 @@ pub(crate) fn has_non_empty_attribute(element: &AnyHtmlElement, name: &str) -> b
         .is_some_and(|attr| has_non_empty_value(&attr))
 }
 
-/// Returns `true` if element has `aria-label` or `title` with non-empty value.
+/// Returns `true` if element has `aria-label`, `aria-labelledby`, or `title` with non-empty value.
 pub(crate) fn has_accessible_name(element: &AnyHtmlElement) -> bool {
-    has_non_empty_attribute(element, "aria-label") || has_non_empty_attribute(element, "title")
+    has_non_empty_attribute(element, "aria-label")
+        || has_non_empty_attribute(element, "aria-labelledby")
+        || has_non_empty_attribute(element, "title")
 }
 
 // ============================================================================
@@ -125,10 +127,13 @@ pub(crate) fn html_self_closing_element_has_accessible_name(
     let has_aria_label = element
         .find_attribute_by_name("aria-label")
         .is_some_and(|attr| has_non_empty_value(&attr));
+    let has_aria_labelledby = element
+        .find_attribute_by_name("aria-labelledby")
+        .is_some_and(|attr| has_non_empty_value(&attr));
     let has_title = element
         .find_attribute_by_name("title")
         .is_some_and(|attr| has_non_empty_value(&attr));
-    has_aria_label || has_title
+    has_aria_label || has_aria_labelledby || has_title
 }
 
 /// Type-specific variant for `HtmlSelfClosingElement`. Checks non-empty attribute.
