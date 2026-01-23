@@ -52,3 +52,11 @@ setTimeout.apply(null, [function() {}, 100]);
 // Non-global member chain (window.foo is not global)
 window.foo.setTimeout("code", 100);
 globalThis.bar.setInterval("code", 100);
+
+// Optional chaining with non-global object
+obj?.setTimeout("code", 100);
+obj?.["setTimeout"]("code", 100);
+
+// Optional chaining with function argument
+window?.setTimeout(() => {}, 100);
+globalThis?.setInterval(function() {}, 100);
