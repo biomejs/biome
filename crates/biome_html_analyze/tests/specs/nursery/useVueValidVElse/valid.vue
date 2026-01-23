@@ -34,12 +34,16 @@
   <!-- Multiline conditional elements -->
   <div
     v-if="condition"
-  ></div>
+    data-attr1
+    data-attr2
+    data-attr3
+    data-attr4
+    data-attr5
+    data-attr6
+  />
   <div v-else></div>
 
-  <!-- Nested conditionals -->
+  <!-- Nested conditionals with self-closing tag -->
   <div v-if="cond1"></div>
-  <div v-else>
-    <span v-if="cond2" />
-  </div>
+  <div v-else><span v-if="cond2" /></div>
 </template>

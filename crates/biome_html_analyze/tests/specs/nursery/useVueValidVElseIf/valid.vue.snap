@@ -57,14 +57,18 @@ expression: valid.vue
 
   <!-- Multiline conditional elements -->
   <div
-    v-if="condition"
-  ></div>
-  <div v-else-if="other"></div>
+    v-if="cond1"
+    data-attr1
+    data-attr2
+    data-attr3
+    data-attr4
+    data-attr5
+    data-attr6
+  />
+  <div v-else-if="cond2"></div>
 
-  <!-- Nested conditionals -->
+  <!-- Nested conditionals with self-closing tag -->
   <div v-if="cond1"></div>
-  <div v-else-if="cond2">
-    <span v-if="cond3" />
-  </div>
+  <div v-else-if="cond2"><span v-if="cond3" /></div>
 </template>
 ```
