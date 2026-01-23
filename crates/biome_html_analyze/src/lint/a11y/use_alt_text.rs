@@ -7,7 +7,9 @@ use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_alt_text::UseAltTextOptions;
 
-use crate::a11y::{attribute_value_equals_ignore_case, has_non_empty_attribute, is_aria_hidden_true};
+use crate::a11y::{
+    attribute_value_equals_ignore_case, has_non_empty_attribute, is_aria_hidden_true,
+};
 
 declare_lint_rule! {
     /// Enforce that all elements that require alternative text have meaningful information to relay back to the end user.

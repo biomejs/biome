@@ -18,8 +18,7 @@ fn get_attribute_string_value(attribute: &HtmlAttribute) -> Option<Text> {
 /// Checks if an attribute has a truthy `aria-hidden` value.
 /// Returns `true` if value is not "false" (case-insensitive) or if no value is provided.
 fn is_truthy_aria_hidden_value(attribute: &HtmlAttribute) -> bool {
-    get_attribute_string_value(attribute)
-        .is_none_or(|value| !value.eq_ignore_ascii_case("false"))
+    get_attribute_string_value(attribute).is_none_or(|value| !value.eq_ignore_ascii_case("false"))
 }
 
 /// Checks if an attribute value equals "true" exactly (case-sensitive).
@@ -33,7 +32,10 @@ fn has_non_empty_value(attribute: &HtmlAttribute) -> bool {
 }
 
 /// Checks if an attribute value matches a specific string (case-insensitive).
-pub(crate) fn attribute_value_equals_ignore_case(attribute: &HtmlAttribute, expected: &str) -> bool {
+pub(crate) fn attribute_value_equals_ignore_case(
+    attribute: &HtmlAttribute,
+    expected: &str,
+) -> bool {
     get_attribute_string_value(attribute).is_some_and(|value| value.eq_ignore_ascii_case(expected))
 }
 
