@@ -97,15 +97,12 @@ impl Rule for NoImpliedEval {
         let call_expr = ctx.query();
         let model = ctx.model();
 
-        // Get the callee (function being called)
         let callee = call_expr.callee().ok()?;
 
-        // Check if it's one of the eval-like functions
         if !is_eval_like_function(&callee, model)? {
             return None;
         }
 
-        // Check if the first argument is a string
         let args = call_expr.arguments().ok()?;
         let first_arg = args.args().first()?.ok()?;
 
@@ -152,13 +149,7 @@ fn is_eval_like_function(
     callee: &AnyJsExpression,
     model: &biome_js_semantic::SemanticModel,
 ) -> Option<bool> {
-    // Unwrap parentheses and sequence expressions to get to the actual callee
     let unwrapped = unwrap_callee(callee);
-
-    // global_identifier handles:
-    // - setTimeout
-    // - window.setTimeout, globalThis.setTimeout
-    // - window.window.setTimeout, etc.
     let (reference, name) = global_identifier(&unwrapped)?;
 
     Some(model.binding(&reference).is_none() && EVAL_LIKE_FUNCTIONS.contains(&name.text()))
@@ -167,7 +158,6 @@ fn is_eval_like_function(
 /// Unwraps parentheses and sequence expressions to get the actual callee
 fn unwrap_callee(expr: &AnyJsExpression) -> AnyJsExpression {
     match expr {
-        // Sequence expression: (0, setTimeout)
         AnyJsExpression::JsSequenceExpression(sequence) => {
             if let Ok(right) = sequence.right() {
                 return unwrap_callee(&right);
@@ -175,7 +165,6 @@ fn unwrap_callee(expr: &AnyJsExpression) -> AnyJsExpression {
             expr.clone()
         }
 
-        // Parenthesized expression: ((setTimeout))
         AnyJsExpression::JsParenthesizedExpression(paren) => {
             if let Ok(inner) = paren.expression() {
                 return unwrap_callee(&inner);
@@ -190,10 +179,8 @@ fn unwrap_callee(expr: &AnyJsExpression) -> AnyJsExpression {
 /// Checks if the argument is a string (literal, template, or concatenation)
 fn is_string_argument(arg: &AnyJsExpression) -> bool {
     match arg {
-        // String literal: "code"
         AnyJsLiteralExpression(lit) => lit.as_js_string_literal_expression().is_some(),
 
-        // Template literal: `code`
         JsTemplateExpression(template) => {
             // Only flag templates with no substitutions
             template
@@ -202,11 +189,9 @@ fn is_string_argument(arg: &AnyJsExpression) -> bool {
                 .all(|element| element.as_js_template_chunk_element().is_some())
         }
 
-        // Binary expression: "a" + "b"
         JsBinaryExpression(bin) => {
             if let Ok(operator) = bin.operator() {
                 if matches!(operator, JsBinaryOperator::Plus) {
-                    // Check if either operand is a string
                     if let (Ok(left), Ok(right)) = (bin.left(), bin.right()) {
                         return is_string_argument(&left) || is_string_argument(&right);
                     }
