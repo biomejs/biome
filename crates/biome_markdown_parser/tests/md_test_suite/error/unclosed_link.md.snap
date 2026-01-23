@@ -74,13 +74,13 @@ unclosed_link.md:1:10 parse ━━━━━━━━━━━━━━━━━�
   × Unclosed link, expected `]` to close link text.
   
   > 1 │ This has [unclosed link
-      │          ^
+      │          ^^^^^^^^^^^^^^
     2 │ 
   
   i link started here
   
   > 1 │ This has [unclosed link
-      │          ^
+      │          ^^^^^^^^^^^^^^
     2 │ 
   
   i Format: [link text](url)

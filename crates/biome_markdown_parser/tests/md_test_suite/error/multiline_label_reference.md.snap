@@ -85,14 +85,14 @@ multiline_label_reference.md:1:1 parse ━━━━━━━━━━━━━�
   × Unclosed link, expected `]` to close link text.
   
   > 1 │ [foo
-      │ ^
+      │ ^^^^
     2 │ bar]
     3 │ 
   
   i link started here
   
   > 1 │ [foo
-      │ ^
+      │ ^^^^
     2 │ bar]
     3 │ 
   

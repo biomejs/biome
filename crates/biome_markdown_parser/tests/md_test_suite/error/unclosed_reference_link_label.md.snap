@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 131
 expression: snapshot
 ---
 ## Input
@@ -90,13 +89,13 @@ unclosed_reference_link_label.md:1:16 parse ━━━━━━━━━━━━
   × Unclosed link, expected `]` to close link text.
   
   > 1 │ This has [text][unclosed label
-      │                ^
+      │                ^^^^^^^^^^^^^^^
     2 │ 
   
   i link started here
   
   > 1 │ This has [text][unclosed label
-      │                ^
+      │                ^^^^^^^^^^^^^^^
     2 │ 
   
   i Format: [link text](url)

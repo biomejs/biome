@@ -76,13 +76,13 @@ unclosed_image.md:1:10 parse ━━━━━━━━━━━━━━━━━
   × Unclosed image, expected `]` to close alt text.
   
   > 1 │ This has ![unclosed image
-      │          ^
+      │          ^^^^^^^^^^^^^^^^
     2 │ 
   
   i image started here
   
   > 1 │ This has ![unclosed image
-      │          ^
+      │          ^^^^^^^^^^^^^^^^
     2 │ 
   
   i Format: ![alt text](image-url)

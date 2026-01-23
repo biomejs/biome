@@ -832,7 +832,9 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
     if !p.eat(R_BRACK) {
         if p.at_inline_end() {
             // Unclosed link/image at end of inline content - emit diagnostic
-            kind.report_unclosed_text(p, opening_range);
+            // Expand range to include the text content, not just the opening bracket
+            let full_range = TextRange::new(opening_range.start(), p.cur_range().start());
+            kind.report_unclosed_text(p, full_range);
             // Return as reference link/image (shortcut) with missing closing bracket
             return Present(m.complete(p, kind.reference_kind()));
         }
