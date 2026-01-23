@@ -45,9 +45,9 @@ mod aria_hidden_truthy {
     }
 
     #[test]
-    fn empty_string_is_truthy() {
+    fn empty_string_is_not_truthy() {
         let element = parse_first_element(r#"<div aria-hidden=""></div>"#);
-        assert!(get_truthy_aria_hidden_attribute(&element).is_some());
+        assert!(get_truthy_aria_hidden_attribute(&element).is_none());
     }
 
     #[test]
@@ -57,9 +57,9 @@ mod aria_hidden_truthy {
     }
 
     #[test]
-    fn whitespace_only_is_truthy() {
+    fn whitespace_only_is_not_truthy() {
         let element = parse_first_element(r#"<div aria-hidden="   "></div>"#);
-        assert!(get_truthy_aria_hidden_attribute(&element).is_some());
+        assert!(get_truthy_aria_hidden_attribute(&element).is_none());
     }
 
     #[test]
@@ -75,10 +75,10 @@ mod aria_hidden_truthy {
     }
 
     #[test]
-    fn false_with_whitespace_is_truthy() {
-        // " false " is not exactly "false", so it's truthy
+    fn false_with_whitespace_is_not_truthy() {
+        // " false " is trimmed to "false", so it's not truthy
         let element = parse_first_element(r#"<div aria-hidden=" false "></div>"#);
-        assert!(get_truthy_aria_hidden_attribute(&element).is_some());
+        assert!(get_truthy_aria_hidden_attribute(&element).is_none());
     }
 
     #[test]

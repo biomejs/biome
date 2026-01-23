@@ -17,14 +17,15 @@ use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
 /// Checks if an `aria-hidden` attribute has a truthy value.
 ///
 /// Per ARIA spec, `aria-hidden` accepts only `"true"` or `"false"` as valid values.
-/// An attribute present with any value other than `"false"` is treated as truthy
-/// (hiding the element from assistive technologies).
+/// Returns `true` only for non-empty values that are not `"false"` (case-insensitive).
+/// Missing values, empty strings, and whitespace-only values are considered falsy.
 ///
 /// Ref: <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-hidden>
 fn is_aria_hidden_value_truthy(attribute: &HtmlAttribute) -> bool {
-    attribute
-        .value()
-        .is_none_or(|value| !value.eq_ignore_ascii_case("false"))
+    attribute.value().is_some_and(|value| {
+        let trimmed = value.trim();
+        !trimmed.is_empty() && !trimmed.eq_ignore_ascii_case("false")
+    })
 }
 
 /// Checks if an attribute value equals `"true"` exactly (case-sensitive).
