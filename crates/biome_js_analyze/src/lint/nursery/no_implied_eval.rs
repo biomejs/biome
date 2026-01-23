@@ -221,10 +221,18 @@ fn is_global_object(expr: &AnyJsExpression, model: &biome_js_semantic::SemanticM
     }
 
     // Handle chained access: window.window, globalThis.globalThis
+    // Only recurse if the member name is also a global object
     if let AnyJsExpression::JsStaticMemberExpression(member) = expr
         && let Ok(object) = member.object()
+        && let Ok(member_name) = member.member()
+        && let Some(js_name) = member_name.as_js_name()
+        && let Ok(token) = js_name.value_token()
     {
-        return is_global_object(&object, model);
+        let name_text = token.text_trimmed();
+        // Only continue checking if the member is also a global object
+        if GLOBAL_OBJECTS.contains(&name_text) {
+            return is_global_object(&object, model);
+        }
     }
 
     false

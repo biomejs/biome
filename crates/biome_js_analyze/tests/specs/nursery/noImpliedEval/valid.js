@@ -48,3 +48,7 @@ someObject.setInterval("code", 100);
 // Call with .call/.apply (different signature)
 setTimeout.call(null, function() {}, 100);
 setTimeout.apply(null, [function() {}, 100]);
+
+// Non-global member chain (window.foo is not global)
+window.foo.setTimeout("code", 100);
+globalThis.bar.setInterval("code", 100);
