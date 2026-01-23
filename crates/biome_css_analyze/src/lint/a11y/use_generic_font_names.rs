@@ -88,6 +88,11 @@ impl Rule for UseGenericFontNames {
             return None;
         }
 
+        // Ignore `@supports` queries. See issue: https://github.com/biomejs/biome/issues/8845
+        if is_in_supports_at_rule(node) {
+            return None;
+        }
+
         let is_font_family = property_name == "font-family";
         let is_font = property_name == "font";
 
@@ -156,6 +161,15 @@ fn is_in_font_face_at_rule(node: &CssGenericProperty) -> bool {
         .and_then(|n| n.cast::<CssAtRule>())
         .and_then(|n| n.rule().ok())
         .is_some_and(|n| matches!(n, AnyCssAtRule::CssFontFaceAtRule(_)))
+}
+
+fn is_in_supports_at_rule(node: &CssGenericProperty) -> bool {
+    node.syntax()
+        .ancestors()
+        .find(|n| n.kind() == CssSyntaxKind::CSS_AT_RULE)
+        .and_then(|n| n.cast::<CssAtRule>())
+        .and_then(|n| n.rule().ok())
+        .is_some_and(|n| matches!(n, AnyCssAtRule::CssSupportsAtRule(_)))
 }
 
 fn is_shorthand_font_property_with_keyword(properties: &CssGenericComponentValueList) -> bool {
