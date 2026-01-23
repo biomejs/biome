@@ -58,6 +58,30 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `ignore`
+    ///
+    /// A list of unknown property names to ignore (case-insensitive).
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignore": [
+    ///       "custom-property"
+    ///     ]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```css,use_options
+    /// a {
+    ///   custom-property: black;
+    /// }
+    /// ```
+    ///
     pub NoUnknownProperty {
         version: "1.8.0",
         name: "noUnknownProperty",
@@ -92,6 +116,7 @@ impl Rule for NoUnknownProperty {
             && property_name_lower != "composes"
             && !is_known_properties(&property_name_lower)
             && !vendor_prefixed(&property_name_lower)
+            && !should_ignore(&property_name_lower, ctx.options())
         {
             return Some(node.name().ok()?.range());
         }
@@ -115,4 +140,13 @@ impl Rule for NoUnknownProperty {
             })
         )
     }
+}
+
+fn should_ignore(name: &str, options: &NoUnknownPropertyOptions) -> bool {
+    for ignore_pattern in &options.ignore {
+        if name.eq_ignore_ascii_case(ignore_pattern) {
+            return true;
+        }
+    }
+    false
 }

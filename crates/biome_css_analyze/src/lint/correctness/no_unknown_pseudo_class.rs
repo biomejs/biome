@@ -63,6 +63,28 @@ declare_lint_rule! {
     /// input:-moz-placeholder {}
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `ignore`
+    ///
+    /// A list of unknown pseudo-class names to ignore (case-insensitive).
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignore": [
+    ///       "custom-pseudo-class"
+    ///     ]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```css,use_options
+    /// a:custom-pseudo-class {}
+    /// ```
+    ///
     pub NoUnknownPseudoClass {
         version: "1.8.0",
         name: "noUnknownPseudoClass",
@@ -177,7 +199,9 @@ impl Rule for NoUnknownPseudoClass {
             }
         };
 
-        if is_valid_class || file_source.is_css_modules() && is_css_module_pseudo_class(lower_name)
+        if is_valid_class
+            || should_ignore(lower_name, ctx.options())
+            || file_source.is_css_modules() && is_css_module_pseudo_class(lower_name)
         {
             None
         } else {
@@ -221,4 +245,13 @@ impl Rule for NoUnknownPseudoClass {
         };
         Some(diag)
     }
+}
+
+fn should_ignore(name: &str, options: &NoUnknownPseudoClassOptions) -> bool {
+    for ignore_pattern in &options.ignore {
+        if name.eq_ignore_ascii_case(ignore_pattern) {
+            return true;
+        }
+    }
+    false
 }

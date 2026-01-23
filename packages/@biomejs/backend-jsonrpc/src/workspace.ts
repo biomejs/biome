@@ -6775,11 +6775,31 @@ export interface NoUndeclaredVariablesOptions {
 	 */
 	checkTypes?: boolean;
 }
-export type NoUnknownFunctionOptions = {};
+export interface NoUnknownFunctionOptions {
+	/**
+	 * A list of unknown function names to ignore (case-insensitive).
+	 */
+	ignore?: string[];
+}
 export type NoUnknownMediaFeatureNameOptions = {};
-export type NoUnknownPropertyOptions = {};
-export type NoUnknownPseudoClassOptions = {};
-export type NoUnknownPseudoElementOptions = {};
+export interface NoUnknownPropertyOptions {
+	/**
+	 * A list of unknown property names to ignore (case-insensitive).
+	 */
+	ignore?: string[];
+}
+export interface NoUnknownPseudoClassOptions {
+	/**
+	 * A list of unknown pseudo-class names to ignore (case-insensitive).
+	 */
+	ignore?: string[];
+}
+export interface NoUnknownPseudoElementOptions {
+	/**
+	 * A list of unknown pseudo-element names to ignore (case-insensitive).
+	 */
+	ignore?: string[];
+}
 export type NoUnknownTypeSelectorOptions = {};
 export type NoUnknownUnitOptions = {};
 export type NoUnmatchableAnbSelectorOptions = {};
@@ -7818,7 +7838,6 @@ export type Category =
 	| "lint/correctness/noUnknownMediaFeatureName"
 	| "lint/correctness/noUnknownProperty"
 	| "lint/correctness/noUnknownPseudoClass"
-	| "lint/correctness/noUnknownPseudoClassSelector"
 	| "lint/correctness/noUnknownPseudoElement"
 	| "lint/correctness/noUnknownTypeSelector"
 	| "lint/correctness/noUnknownUnit"
