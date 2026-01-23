@@ -198,29 +198,6 @@ invalid.js:11:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:12:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Implied eval() is not allowed.
-  
-    10 │ window.setInterval("foo = bar", 10);
-    11 │ globalThis.setTimeout("alert('Hi!');", 100);
-  > 12 │ global.setInterval("alert('Hi!');", 100);
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ 
-    14 │ // Computed member
-  
-  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
-  
-  i Use a function instead of a string.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
 invalid.js:15:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Implied eval() is not allowed.
@@ -410,28 +387,6 @@ invalid.js:31:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     32 │ 
     33 │ // Computed member on global object
-  
-  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
-  
-  i Use a function instead of a string.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:34:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Implied eval() is not allowed.
-  
-    33 │ // Computed member on global object
-  > 34 │ global["setTimeout"]("alert('Hi!');", 100);
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    35 │ 
-    36 │ // Nested sequence expression
   
   i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
   

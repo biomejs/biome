@@ -84,8 +84,6 @@ declare_lint_rule! {
 
 const EVAL_LIKE_FUNCTIONS: &[&str] = &["setTimeout", "setInterval", "setImmediate"];
 
-const GLOBAL_OBJECTS: &[&str] = &["window", "global", "globalThis"];
-
 impl Rule for NoImpliedEval {
     type Query = Semantic<JsCallExpression>;
     type State = ();
@@ -145,98 +143,47 @@ impl Rule for NoImpliedEval {
 /// - `window["setTimeout"]` (computed member)
 /// - globalThis.setTimeout (static member)
 /// - (0, setTimeout) (sequence expression)
+///
+/// Uses the `global_identifier` utility which handles window/globalThis chains automatically
 fn is_eval_like_function(
     callee: &AnyJsExpression,
     model: &biome_js_semantic::SemanticModel,
 ) -> bool {
-    match callee {
-        // Direct call: setTimeout(...)
-        AnyJsExpression::JsIdentifierExpression(_) => {
-            if let Some((reference, name)) = global_identifier(callee) {
-                let name_text = name.text();
-                // Check if it's a global binding and one of the eval-like functions
-                return model.binding(&reference).is_none()
-                    && EVAL_LIKE_FUNCTIONS.contains(&name_text);
-            }
-            false
-        }
+    // Unwrap parentheses and sequence expressions to get to the actual callee
+    let unwrapped = unwrap_callee(callee);
 
-        // Member access: window.setTimeout(...) or globalThis.setTimeout(...)
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            if let (Ok(object), Ok(member_name)) = (member.object(), member.member())
-                && let Some(js_name) = member_name.as_js_name()
-                && let Ok(token) = js_name.value_token()
-            {
-                let name_text = token.text_trimmed();
-                // Check if object is global and method is eval-like
-                return is_global_object(&object, model)
-                    && EVAL_LIKE_FUNCTIONS.contains(&name_text);
-            }
-            false
-        }
-
-        // Computed member: window["setTimeout"](...)
-        AnyJsExpression::JsComputedMemberExpression(member) => {
-            if let (Ok(object), Ok(member_expr)) = (member.object(), member.member())
-                && is_global_object(&object, model)
-                && let Some(static_value) = member_expr.as_static_value()
-                && let Some(name_text) = static_value.as_string_constant()
-            {
-                return EVAL_LIKE_FUNCTIONS.contains(&name_text);
-            }
-            false
-        }
-
-        // Sequence expression: (0, setTimeout)(...)
-        AnyJsExpression::JsSequenceExpression(sequence) => {
-            // Get the last expression in the sequence
-            if let Ok(right) = sequence.right() {
-                return is_eval_like_function(&right, model);
-            }
-            false
-        }
-
-        // Parenthesized expression: may contain a sequence expression
-        AnyJsExpression::JsParenthesizedExpression(paren) => {
-            // Unwrap the parenthesized expression and check recursively
-            if let Ok(inner) = paren.expression() {
-                return is_eval_like_function(&inner, model);
-            }
-            false
-        }
-
-        _ => false,
-    }
-}
-
-/// Checks if the expression is a global object (window, global, globalThis)
-fn is_global_object(expr: &AnyJsExpression, model: &biome_js_semantic::SemanticModel) -> bool {
-    // Handle direct identifiers: window, global, globalThis
-    if let Some((reference, name)) = global_identifier(expr) {
-        let name_text = name.text();
-
-        // Check if it's one of the global objects and is actually global
-        if GLOBAL_OBJECTS.contains(&name_text) && model.binding(&reference).is_none() {
-            return true;
-        }
-    }
-
-    // Handle chained access: window.window, globalThis.globalThis
-    // Only recurse if the member name is also a global object
-    if let AnyJsExpression::JsStaticMemberExpression(member) = expr
-        && let Ok(object) = member.object()
-        && let Ok(member_name) = member.member()
-        && let Some(js_name) = member_name.as_js_name()
-        && let Ok(token) = js_name.value_token()
-    {
-        let name_text = token.text_trimmed();
-        // Only continue checking if the member is also a global object
-        if GLOBAL_OBJECTS.contains(&name_text) {
-            return is_global_object(&object, model);
-        }
+    // global_identifier handles:
+    // - setTimeout
+    // - window.setTimeout, globalThis.setTimeout
+    // - window.window.setTimeout, etc.
+    if let Some((reference, name)) = global_identifier(&unwrapped) {
+        return model.binding(&reference).is_none() && EVAL_LIKE_FUNCTIONS.contains(&name.text());
     }
 
     false
+}
+
+/// Unwraps parentheses and sequence expressions to get the actual callee
+fn unwrap_callee(expr: &AnyJsExpression) -> AnyJsExpression {
+    match expr {
+        // Sequence expression: (0, setTimeout)
+        AnyJsExpression::JsSequenceExpression(sequence) => {
+            if let Ok(right) = sequence.right() {
+                return unwrap_callee(&right);
+            }
+            expr.clone()
+        }
+
+        // Parenthesized expression: ((setTimeout))
+        AnyJsExpression::JsParenthesizedExpression(paren) => {
+            if let Ok(inner) = paren.expression() {
+                return unwrap_callee(&inner);
+            }
+            expr.clone()
+        }
+
+        _ => expr.clone(),
+    }
 }
 
 /// Checks if the argument is a string (literal, template, or concatenation)
