@@ -51,3 +51,9 @@ globalThis?.["setInterval"]("alert('Hi!');", 100);
 
 // Parenthesized optional call
 ((0, setTimeout))?.("alert('Hi!');", 100);
+
+// Parenthesized string arguments
+setTimeout(("alert('Hi!');"), 100);
+setTimeout((("alert('Hi!');")), 100);
+setTimeout(("a" + "b"), 100);
+setTimeout((`alert('Hi!');`), 100);

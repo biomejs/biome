@@ -60,3 +60,7 @@ obj?.["setTimeout"]("code", 100);
 // Optional chaining with function argument
 window?.setTimeout(() => {}, 100);
 globalThis?.setInterval(function() {}, 100);
+
+// Parenthesized function arguments
+setTimeout((function() {}), 100);
+setTimeout((() => {}), 100);

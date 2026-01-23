@@ -178,7 +178,9 @@ fn unwrap_callee(expr: &AnyJsExpression) -> AnyJsExpression {
 
 /// Checks if the argument is a string (literal, template, or concatenation)
 fn is_string_argument(arg: &AnyJsExpression) -> bool {
-    match arg {
+    let unwrapped = arg.clone().omit_parentheses();
+
+    match unwrapped {
         AnyJsLiteralExpression(lit) => lit.as_js_string_literal_expression().is_some(),
 
         JsTemplateExpression(template) => {
@@ -190,12 +192,11 @@ fn is_string_argument(arg: &AnyJsExpression) -> bool {
         }
 
         JsBinaryExpression(bin) => {
-            if let Ok(operator) = bin.operator() {
-                if matches!(operator, JsBinaryOperator::Plus) {
-                    if let (Ok(left), Ok(right)) = (bin.left(), bin.right()) {
-                        return is_string_argument(&left) || is_string_argument(&right);
-                    }
-                }
+            if let Ok(operator) = bin.operator()
+                && matches!(operator, JsBinaryOperator::Plus)
+                && let (Ok(left), Ok(right)) = (bin.left(), bin.right())
+            {
+                return is_string_argument(&left) || is_string_argument(&right);
             }
             false
         }
