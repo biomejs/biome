@@ -8494,38 +8494,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusCustomIdentifier
         )
     }
 }
-impl FormatRule<biome_css_syntax::CssBogusDashFunctionArgument>
-    for crate::css::bogus::bogus_dash_function_argument::FormatCssBogusDashFunctionArgument
-{
-    type Context = CssFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_css_syntax::CssBogusDashFunctionArgument,
-        f: &mut CssFormatter,
-    ) -> FormatResult<()> {
-        FormatBogusNodeRule::<biome_css_syntax::CssBogusDashFunctionArgument>::fmt(self, node, f)
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusDashFunctionArgument {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::CssBogusDashFunctionArgument,
-        crate::css::bogus::bogus_dash_function_argument::FormatCssBogusDashFunctionArgument,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: css :: bogus :: bogus_dash_function_argument :: FormatCssBogusDashFunctionArgument :: default ())
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusDashFunctionArgument {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssBogusDashFunctionArgument,
-        crate::css::bogus::bogus_dash_function_argument::FormatCssBogusDashFunctionArgument,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: css :: bogus :: bogus_dash_function_argument :: FormatCssBogusDashFunctionArgument :: default ())
-    }
-}
 impl FormatRule<biome_css_syntax::CssBogusDeclarationItem>
     for crate::css::bogus::bogus_declaration_item::FormatCssBogusDeclarationItem
 {
