@@ -1,0 +1,103 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```astro
+---
+import Base from "$layouts/Base.astro";
+---
+
+<Base title="500">
+</Base>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..44 "import Base from \"$layouts/Base.astro\";\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@44..47 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@47..50 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@50..55 "Base" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@55..60 "title" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@60..61 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@61..66 "\"500\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@66..67 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@67..69 "<" [Newline("\n")] [],
+                slash_token: SLASH@69..70 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@70..74 "Base" [] [],
+                },
+                r_angle_token: R_ANGLE@74..75 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@75..76 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..76
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..47
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..44
+      0: HTML_LITERAL@3..44 "import Base from \"$layouts/Base.astro\";\n" [Newline("\n")] []
+    2: FENCE@44..47 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@47..75
+    0: HTML_ELEMENT@47..75
+      0: HTML_OPENING_ELEMENT@47..67
+        0: L_ANGLE@47..50 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@50..55
+          0: HTML_LITERAL@50..55 "Base" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@55..66
+          0: HTML_ATTRIBUTE@55..66
+            0: HTML_ATTRIBUTE_NAME@55..60
+              0: HTML_LITERAL@55..60 "title" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@60..66
+              0: EQ@60..61 "=" [] []
+              1: HTML_STRING@61..66
+                0: HTML_STRING_LITERAL@61..66 "\"500\"" [] []
+        3: R_ANGLE@66..67 ">" [] []
+      1: HTML_ELEMENT_LIST@67..67
+      2: HTML_CLOSING_ELEMENT@67..75
+        0: L_ANGLE@67..69 "<" [Newline("\n")] []
+        1: SLASH@69..70 "/" [] []
+        2: HTML_TAG_NAME@70..74
+          0: HTML_LITERAL@70..74 "Base" [] []
+        3: R_ANGLE@74..75 ">" [] []
+  4: EOF@75..76 "" [Newline("\n")] []
+
+```

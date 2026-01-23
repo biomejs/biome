@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: issue3685.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import { useMemo } from "react";
+
+export function useWithNonNullAssertionOperator() {
+    const myObj = useMyObj();
+    // Bug report: diagnostic is generated here, but should not be
+    useMemo(() => Boolean(myObj!.x), [myObj!.x]);
+    // Bug report: diagnostic is generated here, but should not be
+    useMemo(() => myObj!.x?.y === true, [myObj!.x?.y]);
+    // Bug report: diagnostic is generated here, but should not be
+    useMemo(() => myObj.x.y === true, [myObj!.x?.y]);
+    // Bug report: diagnostic is generated here, but should not be
+    useMemo(() => myObj!.x?.y === true, [myObj.x.y]);
+}
+
+function useMyObj() {
+    return { x: undefined } as { x?: { y?: boolean } } | null
+}
+
+```
+
+

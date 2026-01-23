@@ -215,7 +215,7 @@ const JS_TREESITTER_PATTERNS: &[TreeSitterPattern] = &[
     TreeSitterPattern {
         name: "arrow_function",
         biome_kind: "JS_ARROW_FUNCTION_EXPRESSION",
-        slots: &[("body", 5)],
+        slots: &[("parameters", 2), ("body", 5)],
     },
     TreeSitterPattern {
         name: "object",

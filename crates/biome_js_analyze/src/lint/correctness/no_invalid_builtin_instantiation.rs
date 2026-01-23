@@ -42,7 +42,7 @@ declare_lint_rule! {
     /// - WeakRef
     /// - WeakSet
     ///
-    /// Conversely, the following builtins cannot be instaiated with `new`:
+    /// Conversely, the following builtins cannot be instantiated with `new`:
     ///
     /// - BigInt
     /// - Symbol

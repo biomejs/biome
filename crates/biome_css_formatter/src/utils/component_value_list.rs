@@ -8,6 +8,134 @@ use biome_rowan::{AstNode, AstNodeList, TextSize};
 use biome_string_case::StrLikeExtension;
 use std::cmp;
 
+/// Returns `true` if the node is a top-level comma delimiter in a component value list.
+///
+/// Note: commas inside nested constructs (e.g. function arguments like `rgba(0, 0, 0, 0.5)`)
+/// are represented by different lists in the AST and won't be seen by this helper when scanning
+/// the *outer* declaration value list.
+fn is_comma_delimiter<I>(node: &I) -> bool
+where
+    I: AstNode<Language = CssLanguage>,
+{
+    let token_kind = CssGenericDelimiter::cast_ref(node.syntax())
+        .and_then(|node| node.value().ok())
+        .map(|token| token.kind());
+
+    matches!(token_kind, Some(CssSyntaxKind::COMMA))
+}
+
+/// Applies a Prettier-like wrapping strategy for comma-separated *declaration values* when using
+/// `ValueListLayout::Fill`.
+///
+/// `Fill` may break at any `soft_line_break_or_space()`, which can split a comma-group across lines.
+/// For declaration values with **top-level commas**, we instead group on commas and fill **groups**
+/// so wrapping prefers breaking between groups (at commas).
+///
+/// Example:
+/// ```css
+/// /* Before (can break inside a group) */
+/// --shadow: 0 2px 4px rgba(...), 0 8px
+///   16px rgba(...);
+///
+/// /* After (prefer breaking at the comma) */
+/// --shadow:
+///   0 2px 4px rgba(...),
+///   0 8px 16px rgba(...);
+/// ```
+fn try_write_fill_comma_groups<N, I>(
+    node: &N,
+    layout: ValueListLayout,
+    f: &mut Formatter<'_, CssFormatContext>,
+) -> Option<FormatResult<()>>
+where
+    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+{
+    if !matches!(layout, ValueListLayout::Fill) {
+        return None;
+    }
+
+    // Only apply this behaviour for declaration values.
+    // This prevents the comma-group logic from leaking into unrelated list-like constructs.
+    let is_declaration_value_list = node.parent::<CssGenericProperty>().is_some();
+    if !is_declaration_value_list {
+        return None;
+    }
+
+    let has_top_level_comma = node.iter().any(|element| is_comma_delimiter(&element));
+    if !has_top_level_comma {
+        return None;
+    }
+
+    Some(write_fill_comma_groups(node, f))
+}
+
+/// Formats a comma-separated declaration value as a sequence of comma-groups.
+///
+/// Each comma-group is formatted using a nested `Fill`, and the groups themselves are then
+/// `Fill`-joined with `soft_line_break_or_space()`. This means:
+/// - If the whole value fits on one line, it stays inline.
+/// - If it doesn't fit, wrapping prefers splitting between groups (at commas), while still allowing
+///   a single long group to wrap internally if necessary.
+fn write_fill_comma_groups<N, I>(
+    node: &N,
+    f: &mut Formatter<'_, CssFormatContext>,
+) -> FormatResult<()>
+where
+    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+{
+    let mut groups: Vec<Vec<I>> = Vec::new();
+    let mut current_group: Vec<I> = Vec::new();
+
+    for element in node.iter() {
+        let is_comma = is_comma_delimiter(&element);
+        // Keep the comma token in the current group so we print `group1,` before breaking to `group2`.
+        current_group.push(element);
+
+        if is_comma {
+            groups.push(current_group);
+            current_group = Vec::new();
+        }
+    }
+
+    if !current_group.is_empty() {
+        groups.push(current_group);
+    }
+
+    let group_separator = soft_line_break_or_space();
+    let mut outer_fill = f.fill();
+
+    for group_items in &groups {
+        let content = format_with(|f: &mut Formatter<'_, CssFormatContext>| {
+            let mut inner_fill = f.fill();
+
+            for element in group_items {
+                let is_comma = is_comma_delimiter(element);
+                let formatted = element.clone().into_format();
+
+                inner_fill.entry(
+                    &format_once(|f| {
+                        // Avoid inserting a separator before commas (e.g. `value , value`).
+                        if !is_comma {
+                            write!(f, [soft_line_break_or_space()])?;
+                        }
+                        Ok(())
+                    }),
+                    &formatted,
+                );
+            }
+
+            inner_fill.finish()
+        });
+
+        // Group each comma-group so wrapping prefers breaking between groups (at commas).
+        outer_fill.entry(&group_separator, &group(&content));
+    }
+
+    outer_fill.finish()
+}
+
 pub(crate) fn write_component_value_list<N, I>(node: &N, f: &mut CssFormatter) -> FormatResult<()>
 where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
@@ -39,6 +167,13 @@ where
 
             builder.finish()
         } else {
+            // Prefer breaking at top-level commas in declaration values (Prettier-like)
+            // by filling comma-separated groups instead of individual tokens.
+            // This prevents line wraps inside groups like `0px 8px\n16px` for `box-shadow`-like values.
+            if let Some(result) = try_write_fill_comma_groups(node, layout, f) {
+                return result;
+            }
+
             let mut fill = f.fill();
             let mut at_group_boundary = false;
 
@@ -49,11 +184,7 @@ where
                         // Consider the CSS example: `font: first , second;`
                         // The desired format is: `font: first, second;`
                         // A separator should not be added before the comma because the comma acts as a `CssGenericDelimiter`.
-                        let token_kind = CssGenericDelimiter::cast_ref(element.syntax())
-                            .and_then(|node| node.value().ok())
-                            .map(|token| token.kind());
-
-                        let is_comma = matches!(token_kind, Some(CssSyntaxKind::COMMA));
+                        let is_comma = is_comma_delimiter(&element);
 
                         if !is_comma {
                             if matches!(

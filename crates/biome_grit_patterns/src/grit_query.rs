@@ -134,6 +134,7 @@ impl GritQuery {
             function_definition_info,
         };
 
+        // Global variables are in scope 0, local pattern variables will be in scope 1.
         let mut vars_array = vec![
             GLOBAL_VARS
                 .iter()
@@ -151,9 +152,6 @@ impl GritQuery {
             .map(|(global_var, index)| ((*global_var).to_string(), *index))
             .collect();
         let mut diagnostics = Vec::new();
-
-        // We're not in a local scope yet, so this map is kinda useless.
-        // It's just there because all node compilers expect one.
         let mut vars = BTreeMap::new();
 
         let mut node_context = NodeCompilationContext::new(

@@ -900,6 +900,10 @@ fn format_embedded(
         }
     });
 
+    // Propagate expand flags again after inserting embedded content,
+    // so that groups inside the embedded documents properly expand.
+    formatted.propagate_expand();
+
     match formatted.print() {
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),

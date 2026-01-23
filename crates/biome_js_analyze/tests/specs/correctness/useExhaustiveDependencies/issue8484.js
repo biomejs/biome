@@ -1,0 +1,25 @@
+import { useMemo } from "react";
+
+// Destructuring works fine
+function Component1() {
+    const {value, stableValue} = useStable();
+    return useMemo(() => {
+        if (value === stableValue) {
+            return stableValue;
+        }
+
+        return value;
+    }, [value]);
+}
+
+function Component2() {
+    const stableObj = useStable();
+    // Incorrect diagnostic reported: stableObj.value should be added to deps.
+    return useMemo(() => {
+        if (stableObj.value === stableObj.stableValue) {
+            return stableObj.stableValue;
+        }
+
+        return stableObj.value;
+    }, [stableObj.value]);
+}

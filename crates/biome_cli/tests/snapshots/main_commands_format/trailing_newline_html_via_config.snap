@@ -23,7 +23,9 @@ expression: redactor(content)
 ```html
 <!doctype html>
 <html>
-	<body>Hello</body>
+	<body>
+		Hello
+	</body>
 </html>
 ```
 

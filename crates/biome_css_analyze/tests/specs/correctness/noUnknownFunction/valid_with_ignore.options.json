@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnknownFunction": {
+          "level": "error",
+          "options": {
+            "ignore": [
+              "custom-function",
+              "MyCustomFunction",
+              "another-custom-function"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

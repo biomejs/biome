@@ -29,7 +29,7 @@ jobs:
 
       - name: Warm up wasm cache
         id: cache-restore
-        uses: actions/cache/restore@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         with:
           path: |
             ./target
@@ -60,7 +60,7 @@ jobs:
         continue-on-error: true
 
       - name: Save new wasm cache
-        uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache/save@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         with:
           path: |
             ./target
@@ -72,9 +72,9 @@ jobs:
         run: npm i -g --force corepack && corepack enable
 
       - name: Setup node
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
-          node-version: 24.12.0
+          node-version: 24.13.0
           cache: pnpm
 
       - name: Update package.json
@@ -82,6 +82,11 @@ jobs:
         run: |
           npm pkg set name='@biomejs/wasm-web'
           npm pkg set version='0.0.0-rev.${{ github.event.head_commit.id }}'
+
+      - name: Verify WASM artifact exists
+        working-directory: packages/@biomejs/wasm-web
+        run: |
+          test -f biome_wasm_bg.wasm && echo "Found wasm artifact biome_wasm_bg.wasm"
 
       - name: Publish
         working-directory: packages/@biomejs/wasm-web

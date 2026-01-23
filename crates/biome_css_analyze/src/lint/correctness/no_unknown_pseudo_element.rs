@@ -51,6 +51,28 @@ declare_lint_rule! {
     /// input::-moz-placeholder {}
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `ignore`
+    ///
+    /// A list of unknown pseudo-element names to ignore (case-insensitive).
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignore": [
+    ///       "custom-pseudo-element"
+    ///     ]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```css,use_options
+    /// ::custom-pseudo-element {}
+    /// ```
+    ///
     pub NoUnknownPseudoElement {
         version: "1.8.0",
         name: "noUnknownPseudoElement",
@@ -74,20 +96,30 @@ impl Rule for NoUnknownPseudoElement {
 
         let should_not_trigger = match &pseudo_element {
             AnyCssPseudoElement::CssBogusPseudoElement(element) => {
-                should_not_trigger(element.to_trimmed_text().text(), file_source)
+                should_not_trigger(element.to_trimmed_text().text(), file_source, ctx.options())
             }
             AnyCssPseudoElement::CssPseudoElementFunctionCustomIdentifier(ident) => {
-                should_not_trigger(ident.name().ok()?.to_trimmed_text().text(), file_source)
+                should_not_trigger(
+                    ident.name().ok()?.to_trimmed_text().text(),
+                    file_source,
+                    ctx.options(),
+                )
             }
-            AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => {
-                should_not_trigger(selector.name().ok()?.to_trimmed_text().text(), file_source)
-            }
-            AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => {
-                should_not_trigger(ident.name().ok()?.to_trimmed_text().text(), file_source)
-            }
-            AnyCssPseudoElement::CssPseudoElementFunction(ident) => {
-                should_not_trigger(ident.name().ok()?.to_trimmed_text().text(), file_source)
-            }
+            AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => should_not_trigger(
+                selector.name().ok()?.to_trimmed_text().text(),
+                file_source,
+                ctx.options(),
+            ),
+            AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => should_not_trigger(
+                ident.name().ok()?.to_trimmed_text().text(),
+                file_source,
+                ctx.options(),
+            ),
+            AnyCssPseudoElement::CssPseudoElementFunction(ident) => should_not_trigger(
+                ident.name().ok()?.to_trimmed_text().text(),
+                file_source,
+                ctx.options(),
+            ),
         };
 
         if should_not_trigger {
@@ -121,12 +153,28 @@ impl Rule for NoUnknownPseudoElement {
 }
 
 /// It doesn't trigger the rule if the pseudo-element name isn't a vendor prefix or is a pseudo-element
-fn should_not_trigger(pseudo_element_name: &str, file_source: &CssFileSource) -> bool {
+fn should_not_trigger(
+    pseudo_element_name: &str,
+    file_source: &CssFileSource,
+    options: &NoUnknownPseudoElementOptions,
+) -> bool {
+    let lowercase = pseudo_element_name.to_ascii_lowercase_cow();
+    let lowercase = &lowercase.as_ref();
+
     if file_source.is_css_modules() {
-        return ["global", "local"]
-            .contains(&pseudo_element_name.to_ascii_lowercase_cow().as_ref());
+        return ["global", "local"].contains(lowercase);
     }
 
     !vender_prefix(pseudo_element_name).is_empty()
-        || is_pseudo_elements(pseudo_element_name.to_ascii_lowercase_cow().as_ref())
+        || is_pseudo_elements(lowercase)
+        || should_ignore(pseudo_element_name, options)
+}
+
+fn should_ignore(name: &str, options: &NoUnknownPseudoElementOptions) -> bool {
+    for ignore_pattern in &options.ignore {
+        if name.eq_ignore_ascii_case(ignore_pattern) {
+            return true;
+        }
+    }
+    false
 }

@@ -1345,11 +1345,29 @@ impl AnyJsExpression {
             Self::TsNonNullAssertionExpression(expression) => expression.expression().ok(),
             Self::TsTypeAssertionExpression(expression) => expression.expression().ok(),
             Self::TsInstantiationExpression(expression) => expression.expression().ok(),
+            Self::JsSequenceExpression(expression) => expression.right().ok(),
             _ => return Some(self.clone()),
         })
         .as_ref()
         .and_then(Self::inner_expression)
     }
+}
+
+/// Returns `true` if this node is a transparent wrapper expression.
+///
+/// A transparent wrapper expression wraps another expression without
+/// affecting the result of the expression.
+pub fn is_transparent_expression_wrapper(node: &JsSyntaxNode) -> bool {
+    matches!(
+        node.kind(),
+        JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+            | JsSyntaxKind::JS_SEQUENCE_EXPRESSION
+            | JsSyntaxKind::TS_AS_EXPRESSION
+            | JsSyntaxKind::TS_SATISFIES_EXPRESSION
+            | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+            | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
+            | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
+    )
 }
 
 /// Iterator that returns the callee names in "top down order".

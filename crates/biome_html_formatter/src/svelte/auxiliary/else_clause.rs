@@ -22,10 +22,10 @@ impl FormatNodeRule<SvelteElseClause> for FormatSvelteElseClause {
                 r_curly_token.format(),
             ]
         )?;
-        let format_children = FormatHtmlElementList::default()
+        FormatHtmlElementList::default()
             .with_multiline()
-            .fmt_children(&children, f)?;
+            .fmt(&children, f)?;
 
-        write!(f, [format_children, hard_line_break(),])
+        write!(f, [hard_line_break(),])
     }
 }
