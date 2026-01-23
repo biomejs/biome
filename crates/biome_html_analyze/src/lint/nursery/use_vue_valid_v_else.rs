@@ -218,7 +218,6 @@ fn has_previous_sibling_with_v_if_or_else_if(element: &AnyHtmlElement) -> bool {
         .and_then(|s| AnyHtmlElement::cast_ref(&s))
     {
         return has_v_if_or_else_if_directives(&sibling);
-
     }
 
     false
