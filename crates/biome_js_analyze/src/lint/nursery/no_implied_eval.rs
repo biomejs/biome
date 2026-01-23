@@ -4,9 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression::{self, *},
-    JsBinaryOperator,
-    JsCallExpression,
-    global_identifier,
+    JsBinaryOperator, JsCallExpression, global_identifier,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
 use biome_rule_options::no_implied_eval::NoImpliedEvalOptions;
