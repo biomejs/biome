@@ -2,7 +2,12 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression, global_identifier};
+use biome_js_syntax::{
+    AnyJsExpression::{self, *},
+    JsBinaryOperator,
+    JsCallExpression,
+    global_identifier,
+};
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
 use biome_rule_options::no_implied_eval::NoImpliedEvalOptions;
 
@@ -188,8 +193,6 @@ fn unwrap_callee(expr: &AnyJsExpression) -> AnyJsExpression {
 
 /// Checks if the argument is a string (literal, template, or concatenation)
 fn is_string_argument(arg: &AnyJsExpression) -> bool {
-    use biome_js_syntax::AnyJsExpression::*;
-
     match arg {
         // String literal: "code"
         AnyJsLiteralExpression(lit) => lit.as_js_string_literal_expression().is_some(),
@@ -206,8 +209,7 @@ fn is_string_argument(arg: &AnyJsExpression) -> bool {
         // Binary expression: "a" + "b"
         JsBinaryExpression(bin) => {
             if let Ok(operator) = bin.operator() {
-                use biome_js_syntax::JsBinaryOperator::Plus;
-                if matches!(operator, Plus) {
+                if matches!(operator, JsBinaryOperator::Plus) {
                     // Check if either operand is a string
                     if let (Ok(left), Ok(right)) = (bin.left(), bin.right()) {
                         return is_string_argument(&left) || is_string_argument(&right);
