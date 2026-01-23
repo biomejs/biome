@@ -78,6 +78,7 @@ declare_lint_rule! {
         ],
         recommended: false,
         severity: Severity::Error,
+        issue_number: Some("8735"),
     }
 }
 
