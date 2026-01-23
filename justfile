@@ -230,6 +230,10 @@ test-crate name:
 test-doc:
 	cargo test --doc
 
+# Run CommonMark conformance tests for the markdown parser
+test-markdown-conformance:
+	cargo test -p biome_markdown_parser --test commonmark_spec -- --nocapture
+
 # Tests a lint rule. The name of the rule needs to be camel case
 test-lintrule name:
   just _touch crates/biome_js_analyze/tests/spec_tests.rs
