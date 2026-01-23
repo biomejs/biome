@@ -14,10 +14,10 @@ impl FormatNodeRule<SvelteKeyBlock> for FormatSvelteKeyBlock {
         } = node.as_fields();
 
         write!(f, [opening_block.format(),])?;
-        let format_children = FormatHtmlElementList::default()
+        FormatHtmlElementList::default()
             .with_multiline()
-            .fmt_children(&children, f)?;
+            .fmt(&children, f)?;
 
-        write!(f, [format_children, closing_block.format()])
+        write!(f, [closing_block.format()])
     }
 }

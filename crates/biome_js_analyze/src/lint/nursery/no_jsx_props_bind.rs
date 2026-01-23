@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ```
 
     pub NoJsxPropsBind {
-        version: "next",
+        version: "2.3.11",
         name: "noJsxPropsBind",
         language: "jsx",
         recommended: false,

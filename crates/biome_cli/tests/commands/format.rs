@@ -3967,7 +3967,7 @@ fn trailing_newline_html_via_config() {
     assert_file_contents(
         &fs,
         test,
-        "<!doctype html>\n<html>\n\t<body>Hello</body>\n</html>",
+        "<!doctype html>\n<html>\n\t<body>\n\t\tHello\n\t</body>\n</html>",
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -4023,7 +4023,7 @@ fn trailing_newline_html_via_cli() {
     assert_file_contents(
         &fs,
         test,
-        "<!doctype html>\n<html>\n\t<body>Hello</body>\n</html>",
+        "<!doctype html>\n<html>\n\t<body>\n\t\tHello\n\t</body>\n</html>",
     );
 
     assert_cli_snapshot(SnapshotPayload::new(

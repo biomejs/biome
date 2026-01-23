@@ -356,7 +356,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
 6. Implement the `diagnostic` function to define what the user will see.
 
    Follow the [guidelines & pillars](#what-a-rule-should-say-to-the-user) when writing the messages.
-   Please also keep [Biome's technical principals](https://biomejs.dev/internals/philosophy/#technical) in mind when writing those messages and implementing your diagnostic rule.
+   Please also keep [Biome's technical principles](https://biomejs.dev/internals/philosophy/#technical) in mind when writing those messages and implementing your diagnostic rule.
 
    ```rust
    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic>
@@ -1373,6 +1373,20 @@ The documentation needs to adhere to the following rules:
   /// }
   /// ```
   ````
+
+- **Callout blocks (Asides)**
+
+  You can use [Starlight asides](https://starlight.astro.build/guides/authoring-content/#asides) (also known as "admonitions" or "callouts") to highlight important notes, warnings, or tips in your rule documentation.
+
+  Example usage:
+
+  ````rust
+  /// :::caution
+  /// The rule doesn't support dependencies installed inside a monorepo.
+  /// :::
+  ````
+
+  Supported types: `:::note`, `:::tip`, `:::caution`, `:::danger`.
 
 - **Ordering of code block properties**
 

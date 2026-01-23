@@ -30,8 +30,11 @@ Trailing newline: true
 
 ```html
 <span>
-	hello <a>foo</a> <a>foo</a> <div>foo</div> <a>foo</a> <a>foo</a> <a>foo</a>
-	<b>bar</b><b>bar</b><b>bar</b> <a>foo</a> <a>foo</a> <a>foo</a> <div>foo</div>
+	hello <a>foo</a> <a>foo</a>
+	<div>foo</div>
+	<a>foo</a> <a>foo</a> <a>foo</a> <b>bar</b><b>bar</b><b>bar</b> <a>foo</a>
+	<a>foo</a> <a>foo</a>
+	<div>foo</div>
 	<a>foo</a> <a>foo</a>
 </span>
 
