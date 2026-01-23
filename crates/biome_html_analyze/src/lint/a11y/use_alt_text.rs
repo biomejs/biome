@@ -7,7 +7,7 @@ use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_alt_text::UseAltTextOptions;
 
-use crate::a11y::{has_non_empty_attribute, is_aria_hidden_true};
+use crate::a11y::{attribute_value_equals_ignore_case, has_non_empty_attribute, is_aria_hidden_true};
 
 declare_lint_rule! {
     /// Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
@@ -193,13 +193,7 @@ impl Rule for UseAltText {
 fn has_type_image_attribute(element: &AnyHtmlElement) -> bool {
     element
         .find_attribute_by_name("type")
-        .is_some_and(|attribute| {
-            attribute
-                .initializer()
-                .and_then(|init| init.value().ok())
-                .and_then(|value| value.string_value())
-                .is_some_and(|value| value.eq_ignore_ascii_case("image"))
-        })
+        .is_some_and(|attr| attribute_value_equals_ignore_case(&attr, "image"))
 }
 
 /// Check if the element has a valid alt attribute

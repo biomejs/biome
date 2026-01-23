@@ -1,36 +1,40 @@
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
+use biome_rowan::Text;
 
 // ============================================================================
 // Core attribute value helpers (shared logic extracted here)
 // ============================================================================
 
-/// Checks if an attribute has a truthy `aria-hidden` value.
-/// Returns `true` if value is not "false" (case-insensitive) or if no value is provided.
-fn is_truthy_aria_hidden_value(attribute: &HtmlAttribute) -> bool {
+/// Extracts the string value from an attribute's initializer.
+/// This is the fundamental building block for all attribute value checks.
+fn get_attribute_string_value(attribute: &HtmlAttribute) -> Option<Text> {
     attribute
         .initializer()
         .and_then(|init| init.value().ok())
         .and_then(|value| value.string_value())
+}
+
+/// Checks if an attribute has a truthy `aria-hidden` value.
+/// Returns `true` if value is not "false" (case-insensitive) or if no value is provided.
+fn is_truthy_aria_hidden_value(attribute: &HtmlAttribute) -> bool {
+    get_attribute_string_value(attribute)
         .is_none_or(|value| !value.eq_ignore_ascii_case("false"))
 }
 
 /// Checks if an attribute value equals "true" exactly (case-sensitive).
 fn is_strict_true_value(attribute: &HtmlAttribute) -> bool {
-    attribute
-        .initializer()
-        .and_then(|init| init.value().ok())
-        .and_then(|value| value.string_value())
-        .is_some_and(|value| value == "true")
+    get_attribute_string_value(attribute).is_some_and(|value| value == "true")
 }
 
 /// Checks if an attribute has a non-empty trimmed value.
 fn has_non_empty_value(attribute: &HtmlAttribute) -> bool {
-    attribute
-        .initializer()
-        .and_then(|init| init.value().ok())
-        .and_then(|value| value.string_value())
-        .is_some_and(|value| !value.trim().is_empty())
+    get_attribute_string_value(attribute).is_some_and(|value| !value.trim().is_empty())
+}
+
+/// Checks if an attribute value matches a specific string (case-insensitive).
+pub(crate) fn attribute_value_equals_ignore_case(attribute: &HtmlAttribute, expected: &str) -> bool {
+    get_attribute_string_value(attribute).is_some_and(|value| value.eq_ignore_ascii_case(expected))
 }
 
 // ============================================================================
@@ -44,16 +48,14 @@ fn has_non_empty_value(attribute: &HtmlAttribute) -> bool {
 /// - https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/hidden
 /// - https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isHiddenFromScreenReader.js
 pub(crate) fn is_hidden_from_screen_reader(element: &AnyHtmlTagElement) -> bool {
-    let is_aria_hidden = element.has_truthy_attribute("aria-hidden");
-    if is_aria_hidden {
+    if element.has_truthy_attribute("aria-hidden") {
         return true;
     }
 
     match element.name_value_token().ok() {
         Some(name) if name.text_trimmed() == "input" => element
             .find_attribute_by_name("type")
-            .and_then(|attribute| attribute.initializer()?.value().ok()?.string_value())
-            .is_some_and(|value| value.text() == "hidden"),
+            .is_some_and(|attr| attribute_value_equals_ignore_case(&attr, "hidden")),
         _ => false,
     }
 }
