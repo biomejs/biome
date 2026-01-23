@@ -103,7 +103,7 @@ impl Rule for NoImpliedEval {
         let callee = call_expr.callee().ok()?;
 
         // Check if it's one of the eval-like functions
-        if !is_eval_like_function(&callee, model) {
+        if !is_eval_like_function(&callee, model)? {
             return None;
         }
 
@@ -153,7 +153,7 @@ impl Rule for NoImpliedEval {
 fn is_eval_like_function(
     callee: &AnyJsExpression,
     model: &biome_js_semantic::SemanticModel,
-) -> bool {
+) -> Option<bool> {
     // Unwrap parentheses and sequence expressions to get to the actual callee
     let unwrapped = unwrap_callee(callee);
 
@@ -161,11 +161,9 @@ fn is_eval_like_function(
     // - setTimeout
     // - window.setTimeout, globalThis.setTimeout
     // - window.window.setTimeout, etc.
-    if let Some((reference, name)) = global_identifier(&unwrapped) {
-        return model.binding(&reference).is_none() && EVAL_LIKE_FUNCTIONS.contains(&name.text());
-    }
+    let (reference, name) = global_identifier(&unwrapped)?;
 
-    false
+    Some(model.binding(&reference).is_none() && EVAL_LIKE_FUNCTIONS.contains(&name.text()))
 }
 
 /// Unwraps parentheses and sequence expressions to get the actual callee
