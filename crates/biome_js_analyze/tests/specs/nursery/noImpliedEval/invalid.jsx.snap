@@ -1,0 +1,94 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+// JSX file test
+import React from 'react';
+
+function Component() {
+    // Direct call in component body
+    setTimeout("alert('Hi!');", 100);
+
+    // In useEffect
+    React.useEffect(() => {
+        setTimeout("alert('Hi!');", 100);
+    }, []);
+
+    // In event handler
+    return <div onClick={() => setTimeout("alert('Hi!');", 100)}>Test</div>;
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:8:5 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+     6 │ function Component() {
+     7 │     // Direct call in component body
+   > 8 │     setTimeout("alert('Hi!');", 100);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │     // In useEffect
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:9 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    10 │     // In useEffect
+    11 │     React.useEffect(() => {
+  > 12 │         setTimeout("alert('Hi!');", 100);
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │     }, []);
+    14 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:16:32 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    15 │     // In event handler
+  > 16 │     return <div onClick={() => setTimeout("alert('Hi!');", 100)}>Test</div>;
+       │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

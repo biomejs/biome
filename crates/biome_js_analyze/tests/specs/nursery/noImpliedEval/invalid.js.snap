@@ -1,0 +1,698 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Direct calls
+setTimeout("alert('Hi!');", 100);
+setInterval("alert('Hi!');", 100);
+setImmediate("alert('Hi!');");
+
+// Global object access
+window.setTimeout("count = 5", 10);
+window.setInterval("foo = bar", 10);
+globalThis.setTimeout("alert('Hi!');", 100);
+global.setInterval("alert('Hi!');", 100);
+
+// Computed member
+window["setTimeout"]("alert('Hi!');", 100);
+globalThis["setInterval"]("foo = bar", 10);
+
+// Chained global access
+window.window.setTimeout("alert('Hi!');", 100);
+globalThis.globalThis.setInterval("foo = bar", 10);
+
+// Template literals (no substitution)
+setTimeout(`alert('Hi!');`, 100);
+
+// String concatenation
+setTimeout("alert" + "('Hi!');", 100);
+setInterval("foo" + "bar", 10);
+
+// Sequence expression
+(0, setTimeout)("alert('Hi!');", 100);
+(0, window.setTimeout)("alert('Hi!');", 100);
+
+// Computed member on global object
+global["setTimeout"]("alert('Hi!');", 100);
+
+// Nested sequence expression
+(0, (0, setTimeout))("alert('Hi!');", 100);
+
+// Optional chaining on member access
+window?.setTimeout("alert('Hi!');", 100);
+window?.setInterval("alert('Hi!');", 100);
+globalThis?.setTimeout("alert('Hi!');", 100);
+
+// Optional chaining on computed member
+window?.["setTimeout"]("alert('Hi!');", 100);
+globalThis?.["setInterval"]("alert('Hi!');", 100);
+
+// Optional call on sequence expression
+(0, setTimeout)?.("alert('Hi!');", 100);
+(0, window.setTimeout)?.("alert('Hi!');", 100);
+
+// Parenthesized optional call
+((0, setTimeout))?.("alert('Hi!');", 100);
+
+// Parenthesized string arguments
+setTimeout(("alert('Hi!');"), 100);
+setTimeout((("alert('Hi!');")), 100);
+setTimeout(("a" + "b"), 100);
+setTimeout((`alert('Hi!');`), 100);
+
+```
+
+# Diagnostics
+```
+invalid.js:4:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    3 │ // Direct calls
+  > 4 │ setTimeout("alert('Hi!');", 100);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ setInterval("alert('Hi!');", 100);
+    6 │ setImmediate("alert('Hi!');");
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    3 │ // Direct calls
+    4 │ setTimeout("alert('Hi!');", 100);
+  > 5 │ setInterval("alert('Hi!');", 100);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ setImmediate("alert('Hi!');");
+    7 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    4 │ setTimeout("alert('Hi!');", 100);
+    5 │ setInterval("alert('Hi!');", 100);
+  > 6 │ setImmediate("alert('Hi!');");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Global object access
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+     8 │ // Global object access
+   > 9 │ window.setTimeout("count = 5", 10);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ window.setInterval("foo = bar", 10);
+    11 │ globalThis.setTimeout("alert('Hi!');", 100);
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+     8 │ // Global object access
+     9 │ window.setTimeout("count = 5", 10);
+  > 10 │ window.setInterval("foo = bar", 10);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ globalThis.setTimeout("alert('Hi!');", 100);
+    12 │ global.setInterval("alert('Hi!');", 100);
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+     9 │ window.setTimeout("count = 5", 10);
+    10 │ window.setInterval("foo = bar", 10);
+  > 11 │ globalThis.setTimeout("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ global.setInterval("alert('Hi!');", 100);
+    13 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    14 │ // Computed member
+  > 15 │ window["setTimeout"]("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ globalThis["setInterval"]("foo = bar", 10);
+    17 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    14 │ // Computed member
+    15 │ window["setTimeout"]("alert('Hi!');", 100);
+  > 16 │ globalThis["setInterval"]("foo = bar", 10);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ // Chained global access
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    18 │ // Chained global access
+  > 19 │ window.window.setTimeout("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ globalThis.globalThis.setInterval("foo = bar", 10);
+    21 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    18 │ // Chained global access
+    19 │ window.window.setTimeout("alert('Hi!');", 100);
+  > 20 │ globalThis.globalThis.setInterval("foo = bar", 10);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ // Template literals (no substitution)
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    22 │ // Template literals (no substitution)
+  > 23 │ setTimeout(`alert('Hi!');`, 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ // String concatenation
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    25 │ // String concatenation
+  > 26 │ setTimeout("alert" + "('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ setInterval("foo" + "bar", 10);
+    28 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    25 │ // String concatenation
+    26 │ setTimeout("alert" + "('Hi!');", 100);
+  > 27 │ setInterval("foo" + "bar", 10);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ // Sequence expression
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    29 │ // Sequence expression
+  > 30 │ (0, setTimeout)("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ (0, window.setTimeout)("alert('Hi!');", 100);
+    32 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    29 │ // Sequence expression
+    30 │ (0, setTimeout)("alert('Hi!');", 100);
+  > 31 │ (0, window.setTimeout)("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ // Computed member on global object
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    36 │ // Nested sequence expression
+  > 37 │ (0, (0, setTimeout))("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ // Optional chaining on member access
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    39 │ // Optional chaining on member access
+  > 40 │ window?.setTimeout("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ window?.setInterval("alert('Hi!');", 100);
+    42 │ globalThis?.setTimeout("alert('Hi!');", 100);
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    39 │ // Optional chaining on member access
+    40 │ window?.setTimeout("alert('Hi!');", 100);
+  > 41 │ window?.setInterval("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ globalThis?.setTimeout("alert('Hi!');", 100);
+    43 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    40 │ window?.setTimeout("alert('Hi!');", 100);
+    41 │ window?.setInterval("alert('Hi!');", 100);
+  > 42 │ globalThis?.setTimeout("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 
+    44 │ // Optional chaining on computed member
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    44 │ // Optional chaining on computed member
+  > 45 │ window?.["setTimeout"]("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ globalThis?.["setInterval"]("alert('Hi!');", 100);
+    47 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    44 │ // Optional chaining on computed member
+    45 │ window?.["setTimeout"]("alert('Hi!');", 100);
+  > 46 │ globalThis?.["setInterval"]("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ 
+    48 │ // Optional call on sequence expression
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    48 │ // Optional call on sequence expression
+  > 49 │ (0, setTimeout)?.("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ (0, window.setTimeout)?.("alert('Hi!');", 100);
+    51 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    48 │ // Optional call on sequence expression
+    49 │ (0, setTimeout)?.("alert('Hi!');", 100);
+  > 50 │ (0, window.setTimeout)?.("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ 
+    52 │ // Parenthesized optional call
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    52 │ // Parenthesized optional call
+  > 53 │ ((0, setTimeout))?.("alert('Hi!');", 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ 
+    55 │ // Parenthesized string arguments
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    55 │ // Parenthesized string arguments
+  > 56 │ setTimeout(("alert('Hi!');"), 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ setTimeout((("alert('Hi!');")), 100);
+    58 │ setTimeout(("a" + "b"), 100);
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:57:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    55 │ // Parenthesized string arguments
+    56 │ setTimeout(("alert('Hi!');"), 100);
+  > 57 │ setTimeout((("alert('Hi!');")), 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ setTimeout(("a" + "b"), 100);
+    59 │ setTimeout((`alert('Hi!');`), 100);
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:58:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    56 │ setTimeout(("alert('Hi!');"), 100);
+    57 │ setTimeout((("alert('Hi!');")), 100);
+  > 58 │ setTimeout(("a" + "b"), 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ setTimeout((`alert('Hi!');`), 100);
+    60 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:59:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Implied eval() is not allowed.
+  
+    57 │ setTimeout((("alert('Hi!');")), 100);
+    58 │ setTimeout(("a" + "b"), 100);
+  > 59 │ setTimeout((`alert('Hi!');`), 100);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ 
+  
+  i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
+  
+  i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
