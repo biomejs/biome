@@ -748,3 +748,56 @@ fn does_not_throw_parse_error_for_return_full_support() {
         result,
     ));
 }
+
+#[test]
+fn issue_7912() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "experimentalFullSupportEnabled": true, "formatter": { "enabled": true } } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        r#"---
+            const title = "Hello World";
+---
+
+<html>
+  <head>
+            <title>{title}</title>
+  </head>
+  <body>
+            <h1>{title}</h1>
+  </body>
+</html>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--write",
+                "--only=suspicious/noDebugger",
+                astro_file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_7912",
+        fs,
+        console,
+        result,
+    ));
+}

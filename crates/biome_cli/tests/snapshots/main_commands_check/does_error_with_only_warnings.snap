@@ -43,14 +43,14 @@ file.js:2:1 lint/suspicious/noClassAssign ━━━━━━━━━━━━�
 
   ! 'A' is a class.
   
-    1 │ class A {};
+    1 │ class A {}
   > 2 │ A = 0;
       │ ^
     3 │ 
   
   i 'A' is defined here.
   
-  > 1 │ class A {};
+  > 1 │ class A {}
       │       ^
     2 │ A = 0;
     3 │ 
@@ -63,7 +63,7 @@ file.js:1:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━
 
   ! This class A is unused.
   
-  > 1 │ class A {};
+  > 1 │ class A {}
       │       ^
     2 │ A = 0;
     3 │ 

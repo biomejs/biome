@@ -57,15 +57,15 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.astro:16:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:17:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
   
-    15 │ <style>
-  > 16 │ #id { font-family: comic-sans } .class { background: red}
-       │                    ^^^^^^^^^^
-    17 │ </style>
-    18 │ 
+    16 │ <style>#id {
+  > 17 │ 	font-family: comic-sans;
+       │ 	             ^^^^^^^^^^
+    18 │ }
+    19 │ .class {
   
   i Consider adding a generic font family as a fallback.
   

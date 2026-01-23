@@ -5,12 +5,12 @@ use biome_fs::{FileSystemExt, MemoryFileSystem};
 use bpaf::Args;
 use camino::Utf8Path;
 
-const SUPPRESS_BEFORE: &str = "(1 >= -0)";
+const SUPPRESS_BEFORE: &str = "1 >= -0;\n";
 const SUPPRESS_AFTER: &str =
-    "// biome-ignore lint/suspicious/noCompareNegZero: ignored using `--suppress`\n(1 >= -0)";
+    "// biome-ignore lint/suspicious/noCompareNegZero: ignored using `--suppress`\n1 >= -0;\n";
 
 const SUPPRESS_WITH_REASON: &str =
-    "// biome-ignore lint/suspicious/noCompareNegZero: We love Biome\n(1 >= -0)";
+    "// biome-ignore lint/suspicious/noCompareNegZero: We love Biome\n1 >= -0;\n";
 
 #[test]
 fn ok() {

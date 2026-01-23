@@ -1,13 +1,13 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 423
-expression: content
+expression: redactor(content)
 ---
 ## `fix.js`
 
 ```js
 // biome-ignore lint/suspicious/noCompareNegZero: ignored using `--suppress`
-(1 >= -0)
+1 >= -0;
+
 ```
 
 # Emitted Messages

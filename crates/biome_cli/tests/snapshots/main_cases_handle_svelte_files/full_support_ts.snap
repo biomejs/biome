@@ -62,15 +62,15 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.svelte:17:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:21:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
   
-    16 │ <style>
-  > 17 │ #id { font-family: comic-sans } .class { background: red}
-       │                    ^^^^^^^^^^
-    18 │ </style>
-    19 │ 
+    20 │ <style>#id {
+  > 21 │ 	font-family: comic-sans;
+       │ 	             ^^^^^^^^^^
+    22 │ }
+    23 │ .class {
   
   i Consider adding a generic font family as a fallback.
   

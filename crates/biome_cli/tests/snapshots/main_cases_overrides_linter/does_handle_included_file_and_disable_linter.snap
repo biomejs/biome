@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -23,7 +22,8 @@ snapshot_kind: text
 ## `test.js`
 
 ```js
-(1 >= 0)
+1 >= 0;
+
 ```
 
 # Emitted Messages

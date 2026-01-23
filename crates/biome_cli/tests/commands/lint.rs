@@ -38,7 +38,7 @@ const NO_DEBUGGER: &str = "debugger;";
 const NEW_SYMBOL: &str = "new Symbol(\"\");";
 
 const FIX_BEFORE: &str = "(1 >= -0)";
-const FIX_AFTER: &str = "(1 >= 0)";
+const FIX_AFTER: &str = "1 >= 0;\n";
 
 const APPLY_SUGGESTED_BEFORE: &str = "let a = 4;
 debugger;
@@ -306,7 +306,7 @@ function _f() { arguments; }
 
     let expected = "const a = 4;
 console.log(a);
-function _f() { arguments; }
+function _f() {\n\targuments;\n}
 ";
 
     let test1 = Utf8Path::new("test1.js");
@@ -516,7 +516,7 @@ fn should_disable_a_rule_group() {
         .read_to_string(&mut buffer)
         .unwrap();
 
-    assert_eq!(buffer, "(1 >= -0)");
+    assert_eq!(buffer, "1 >= -0;\n");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3593,7 +3593,7 @@ function _f() { arguments; }
 
     let expected = "const a = 4;
 console.log(a);
-function _f() { arguments; }
+function _f() {\n\targuments;\n}
 ";
     let test1 = Utf8Path::new("test1.js");
     fs.insert(test1.into(), source.as_bytes());

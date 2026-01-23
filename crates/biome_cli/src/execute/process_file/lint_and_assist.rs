@@ -73,7 +73,7 @@ pub(crate) fn analyze_with_guard<'ctx>(
             .guard()
             .fix_file(
                 *fix_mode,
-                false,
+                features_supported.supports_format(),
                 categories,
                 only.clone(),
                 skip.clone(),
