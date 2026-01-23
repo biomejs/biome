@@ -25,7 +25,7 @@ interface Props {
 	title: string;
 }
 
-let schema = z.object().optional();
+const schema = z.object().optional();
 schema + sure();
 const _props: Props = { title: "Hello" };
 </script>
@@ -62,32 +62,15 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.svelte:14:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide a lang attribute when using the html element.
-  
-    12 │ </script>
-    13 │ 
-  > 14 │ <html><head><title>Svelte</title></head><body></body></html>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    15 │ 
-    16 │ <style>
-  
-  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
-  
-
-```
-
-```block
-file.svelte:17:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:21:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
   
-    16 │ <style>
-  > 17 │ #id { font-family: comic-sans } .class { background: red}
-       │                    ^^^^^^^^^^
-    18 │ </style>
-    19 │ 
+    20 │ <style>#id {
+  > 21 │ 	font-family: comic-sans;
+       │ 	             ^^^^^^^^^^
+    22 │ }
+    23 │ .class {
   
   i Consider adding a generic font family as a fallback.
   
@@ -103,5 +86,5 @@ file.svelte:17:20 lint/a11y/useGenericFontNames ━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. Fixed 1 file.
-Found 2 errors.
+Found 1 error.
 ```

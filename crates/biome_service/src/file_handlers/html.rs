@@ -1060,7 +1060,6 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         let (action, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
             process_fix_all.process_signal(signal)
         });
-
         let result = process_fix_all.process_action(action, |root| {
             tree = match HtmlRoot::cast(root) {
                 Some(tree) => tree,
@@ -1078,7 +1077,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             &params.document_file_source,
                         ),
                         tree.syntax(),
-                        true,
+                        // NOTE: this is important that stays false. In this instance, the formatting of embedded
+                        // nodes has already happened, because the workspace during fix_all() process the embedded nodes
+                        // first, and then the root document. This means the embedded nodes don't need to be formatted and can
+                        // be printed verbatim by the formatter.
+                        false,
                     ))
                 } else {
                     Either::Right(tree.syntax().to_string())

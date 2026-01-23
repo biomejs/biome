@@ -21,7 +21,7 @@ expression: redactor(content)
 import { sure } from "sure.js";
 import z from "zod";
 
-let schema = z.object().optional();
+const schema = z.object().optional();
 schema + sure();
 </script>
 
@@ -38,9 +38,6 @@ schema + sure();
 }
 .class {
 	background: red;
-}
-:global(div) {
-	color: red;
 }
 </style>
 
@@ -60,32 +57,15 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.svelte:9:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide a lang attribute when using the html element.
-  
-     7 │ </script>
-     8 │ 
-   > 9 │ <html><head><title>Svelte</title></head><body></body></html>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    10 │ 
-    11 │ <style>
-  
-  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
-  
-
-```
-
-```block
-file.svelte:12:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:16:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
   
-    11 │ <style>
-  > 12 │ #id { font-family: comic-sans } .class { background: red}
-       │                    ^^^^^^^^^^
-    13 │ :global(div) {
-    14 │   color: red;
+    15 │ <style>#id {
+  > 16 │ 	font-family: comic-sans;
+       │ 	             ^^^^^^^^^^
+    17 │ }
+    18 │ .class {
   
   i Consider adding a generic font family as a fallback.
   
@@ -101,5 +81,5 @@ file.svelte:12:20 lint/a11y/useGenericFontNames ━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. Fixed 1 file.
-Found 2 errors.
+Found 1 error.
 ```
