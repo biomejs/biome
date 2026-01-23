@@ -5847,7 +5847,7 @@
 					]
 				},
 				"useConsistentMethodSignatures": {
-					"description": "Enforce consistent use of either method signatures or function properties within interfaces and type aliases.\nSee <https://biomejs.dev/linter/rules/use-consistent-method-signatures>",
+					"description": "Enforce consistent use of either method signatures or function properties within interfaces and type aliases.\nSee https://biomejs.dev/linter/rules/use-consistent-method-signatures",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentMethodSignaturesConfiguration" },
 						{ "type": "null" }

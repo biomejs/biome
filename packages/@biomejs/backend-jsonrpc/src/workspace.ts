@@ -2258,7 +2258,7 @@ See https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions
 	useConsistentGraphqlDescriptions?: UseConsistentGraphqlDescriptionsConfiguration;
 	/**
 	* Enforce consistent use of either method signatures or function properties within interfaces and type aliases.
-See <https://biomejs.dev/linter/rules/use-consistent-method-signatures> 
+See https://biomejs.dev/linter/rules/use-consistent-method-signatures 
 	 */
 	useConsistentMethodSignatures?: UseConsistentMethodSignaturesConfiguration;
 	/**
