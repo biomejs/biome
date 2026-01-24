@@ -8,6 +8,7 @@ impl FormatRule<AnyCssContainerQueryInParens> for FormatAnyCssContainerQueryInPa
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssContainerQueryInParens, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
+            AnyCssContainerQueryInParens::AnyCssValue(node) => node.format().fmt(f),
             AnyCssContainerQueryInParens::CssContainerQueryInParens(node) => node.format().fmt(f),
             AnyCssContainerQueryInParens::CssContainerSizeFeatureInParens(node) => {
                 node.format().fmt(f)

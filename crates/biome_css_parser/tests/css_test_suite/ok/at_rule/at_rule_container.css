@@ -36,3 +36,9 @@
 @container name not style(color: red) {}
 
 @container style (--responsive: true) {  }
+
+@container not scroll-state(stuck) {  }
+
+@container not (scroll-state(stuck)) {  }
+
+@container (not scroll-state(stuck)) {  }
