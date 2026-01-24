@@ -10,7 +10,7 @@
 //   just update-commonmark-spec <version>
 //
 // After updating, verify with:
-//   cargo run -p xtask_coverage -- --suites=markdown/commonmark
+//   just test-markdown-conformance
 
 use crate::runner::{TestCase, TestRunOutcome, TestSuite};
 use biome_markdown_parser::{document_to_html, parse_markdown};

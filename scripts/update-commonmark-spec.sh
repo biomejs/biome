@@ -13,7 +13,7 @@ set -euo pipefail
 #   ./scripts/update-commonmark-spec.sh 0.31.2
 #
 # After running, verify with:
-#   cargo run -p xtask_coverage -- --suites=markdown/commonmark
+#   just test-markdown-conformance
 
 SPEC_PATH="xtask/coverage/src/markdown/spec.json"
 RS_PATH="xtask/coverage/src/markdown/commonmark.rs"
@@ -34,7 +34,7 @@ This will:
   3. Update the provenance comment in commonmark.rs
 
 After updating, verify with:
-  cargo run -p xtask_coverage -- --suites=markdown/commonmark
+  just test-markdown-conformance
 EOF
 }
 
@@ -97,4 +97,4 @@ echo "  Downloaded: ${TODAY}"
 echo "  Examples: ${COUNT}"
 echo
 echo "Next step:"
-echo "  cargo run -p xtask_coverage -- --suites=markdown/commonmark"
+echo "  just test-markdown-conformance"
