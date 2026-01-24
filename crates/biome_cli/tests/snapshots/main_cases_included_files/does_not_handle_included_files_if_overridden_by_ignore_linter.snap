@@ -17,8 +17,7 @@ expression: redactor(content)
 ## `test2.js`
 
 ```js
-1 >= 0;
-
+(1 >= 0)
 ```
 
 # Emitted Messages

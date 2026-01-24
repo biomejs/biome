@@ -42,7 +42,6 @@ debugger;
 
 ```js
 ({ 1: 1 });
-
 ```
 
 # Emitted Messages

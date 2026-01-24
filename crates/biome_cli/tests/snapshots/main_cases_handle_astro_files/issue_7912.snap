@@ -17,18 +17,18 @@ expression: redactor(content)
 
 ```astro
 ---
-const title = "Hello World";
+            
+            const title = "Hello World";
 ---
 
 <html>
-	<head>
-		<title>{title}</title>
-	</head>
-	<body>
-		<h1>{title}</h1>
-	</body>
+  <head>
+            <title>{title}</title>
+  </head>
+  <body>
+            <h1>{title}</h1>
+  </body>
 </html>
-
 ```
 
 # Emitted Messages

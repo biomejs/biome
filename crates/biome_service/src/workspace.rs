@@ -127,6 +127,10 @@ pub struct SupportsFeatureParams {
 
     #[serde(default, skip_serializing_if = "is_false")]
     pub skip_ignore_check: bool,
+
+    /// Features that shouldn't be enabled
+    #[serde(default, skip_serializing_if = "FeatureName::is_empty")]
+    pub not_requested_features: FeatureName,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
@@ -244,6 +248,14 @@ impl FeaturesSupported {
         self
     }
 
+    #[inline]
+    pub fn with_not_requested_features(mut self, feature_name: FeatureName) -> Self {
+        for feature in feature_name.iter() {
+            self.insert(feature, SupportKind::NotRequested);
+        }
+        self
+    }
+
     /// The file will be ignored for all features
     #[inline]
     pub fn set_ignored_for_all_features(&mut self) {
@@ -270,6 +282,12 @@ impl FeaturesSupported {
     fn supports(&self, feature: FeatureKind) -> bool {
         let support_kind = self.0[feature.index()];
         matches!(support_kind, SupportKind::Supported)
+    }
+
+    #[inline]
+    pub fn feature_is_not_enabled(&self, feature: FeatureKind) -> bool {
+        let support_kind = self.0[feature.index()];
+        matches!(support_kind, SupportKind::FeatureNotEnabled)
     }
 
     pub fn supports_lint(&self) -> bool {
@@ -330,7 +348,9 @@ impl FeaturesSupported {
 
     /// The file is ignored only if all the features marked it as ignored
     pub fn is_ignored(&self) -> bool {
-        self.0.iter().all(|support_kind| support_kind.is_ignored())
+        self.0
+            .iter()
+            .all(|support_kind| support_kind.is_ignored() || support_kind.is_not_requested())
     }
 
     /// The file is protected only if all the features marked it as protected
@@ -521,6 +541,9 @@ pub enum SupportKind {
     FeatureNotEnabled,
     /// The file is not capable of having this feature
     FileNotSupported,
+    /// Particular state used when a client (e.g. CLI) doesn't require a particular feature.
+    /// It's very much ignore [SupportKind::Ignored], but it's silent
+    NotRequested,
 }
 
 impl Display for SupportKind {
@@ -531,6 +554,7 @@ impl Display for SupportKind {
             Self::Protected => write!(f, "Protected"),
             Self::FeatureNotEnabled => write!(f, "FeatureNotEnabled"),
             Self::FileNotSupported => write!(f, "FileNotSupported"),
+            Self::NotRequested => write!(f, "NotRequested"),
         }
     }
 }
@@ -550,6 +574,9 @@ impl SupportKind {
     }
     pub const fn is_protected(&self) -> bool {
         matches!(self, Self::Protected)
+    }
+    pub const fn is_not_requested(&self) -> bool {
+        matches!(self, Self::NotRequested)
     }
 }
 
@@ -623,6 +650,12 @@ impl FeatureKind {
     rename_all = "camelCase"
 )]
 pub struct FeatureName(BitFlags<FeatureKind>);
+
+impl Default for FeatureName {
+    fn default() -> Self {
+        Self::empty()
+    }
+}
 
 impl Display for FeatureName {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -713,6 +746,11 @@ impl FeaturesBuilder {
         self
     }
 
+    pub fn without_formatter(mut self) -> Self {
+        self.0.remove(FeatureKind::Format);
+        self
+    }
+
     pub fn with_linter(mut self) -> Self {
         self.0.insert(FeatureKind::Lint);
         self
@@ -733,6 +771,11 @@ impl FeaturesBuilder {
         self.0.insert(FeatureKind::Lint);
         self.0.insert(FeatureKind::Search);
         self.0.insert(FeatureKind::Assist);
+        self
+    }
+
+    pub fn without_search(mut self) -> Self {
+        self.0.remove(FeatureKind::Search);
         self
     }
 

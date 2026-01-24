@@ -41,6 +41,7 @@ pub(crate) fn format(
         features,
         inline_config: session.inline_config(),
         skip_ignore_check: false,
+        not_requested_features: FeaturesBuilder::new().with_search().build(),
     })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);
@@ -113,6 +114,7 @@ pub(crate) fn format_range(
         features,
         inline_config: session.inline_config(),
         skip_ignore_check: false,
+        not_requested_features: FeaturesBuilder::new().with_search().build(),
     })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);
@@ -208,6 +210,7 @@ pub(crate) fn format_on_type(
         features,
         inline_config: session.inline_config(),
         skip_ignore_check: false,
+        not_requested_features: FeaturesBuilder::new().with_search().build(),
     })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);

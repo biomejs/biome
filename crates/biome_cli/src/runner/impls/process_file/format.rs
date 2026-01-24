@@ -141,6 +141,10 @@ impl ProcessFile for FormatProcessFile {
             features: FeaturesBuilder::new().with_formatter().build(),
             inline_config: None,
             skip_ignore_check,
+            not_requested_features: FeaturesBuilder::new()
+                .with_all()
+                .without_formatter()
+                .build(),
         })?;
 
         if file_features.is_ignored() {

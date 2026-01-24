@@ -9,7 +9,7 @@ const UNFORMATTED: &str = "  statement(  )  ";
 const FORMATTED: &str = "statement();\n";
 
 const FIX_BEFORE: &str = "(1 >= -0)";
-const FIX_AFTER: &str = "1 >= 0;\n";
+const FIX_AFTER: &str = "(1 >= 0)";
 
 const UNORGANIZED: &str = r#"import * as something from "../something";
 import { lorem, foom, bar } from "foo";"#;

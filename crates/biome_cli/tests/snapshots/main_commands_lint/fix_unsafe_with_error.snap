@@ -7,9 +7,7 @@ expression: redactor(content)
 ```js
 const a = 4;
 console.log(a);
-function _f() {
-	arguments;
-}
+function _f() { arguments; }
 
 ```
 
@@ -18,25 +16,22 @@ function _f() {
 ```js
 const a = 4;
 console.log(a);
-function _f() {
-	arguments;
-}
+function _f() { arguments; }
 
 ```
 
 # Emitted Messages
 
 ```block
-test1.js:4:2 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test1.js:3:17 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   
+    1 │ const a = 4;
     2 │ console.log(a);
-    3 │ function _f() {
-  > 4 │ 	arguments;
-      │ 	^^^^^^^^^
-    5 │ }
-    6 │ 
+  > 3 │ function _f() { arguments; }
+      │                 ^^^^^^^^^
+    4 │ 
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
   
@@ -44,16 +39,15 @@ test1.js:4:2 lint/complexity/noArguments ━━━━━━━━━━━━━
 ```
 
 ```block
-test2.js:4:2 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test2.js:3:17 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   
+    1 │ const a = 4;
     2 │ console.log(a);
-    3 │ function _f() {
-  > 4 │ 	arguments;
-      │ 	^^^^^^^^^
-    5 │ }
-    6 │ 
+  > 3 │ function _f() { arguments; }
+      │                 ^^^^^^^^^
+    4 │ 
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
   

@@ -58,12 +58,12 @@ struct CiExecution {
 }
 
 impl Execution for CiExecution {
-    fn features(&self) -> FeatureName {
-        FeaturesBuilder::new()
-            .with_linter()
-            .with_formatter()
-            .with_assist()
-            .build()
+    fn wanted_features(&self) -> FeatureName {
+        FeaturesBuilder::new().with_all().without_search().build()
+    }
+
+    fn not_requested_features(&self) -> FeatureName {
+        FeaturesBuilder::new().without_search().build()
     }
 
     fn can_handle(&self, features: FeaturesSupported) -> bool {

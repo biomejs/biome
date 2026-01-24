@@ -1310,11 +1310,12 @@ impl Workspace for WorkspaceServer {
             fs: self.fs.as_ref(),
             project_key: params.project_key,
             path: &params.path,
-            features: params.features,
+            requested_features: params.features,
             language,
             capabilities: &capabilities,
             handle: &settings,
             skip_ignore_check: params.skip_ignore_check,
+            not_requested_features: params.not_requested_features,
         })
     }
 

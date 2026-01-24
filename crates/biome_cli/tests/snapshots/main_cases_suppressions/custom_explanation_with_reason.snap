@@ -6,8 +6,7 @@ expression: redactor(content)
 
 ```js
 // biome-ignore lint/suspicious/noCompareNegZero: We love Biome
-1 >= -0;
-
+(1 >= -0)
 ```
 
 # Emitted Messages

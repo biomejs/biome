@@ -11,11 +11,12 @@ expression: redactor(content)
 ## `check.js`
 
 ```js
-export const z = function (array) {
-	array.flatMap((sentence) => sentence.split(" "));
-	return 0;
-};
 
+    export const z = function (array) {
+        array.flatMap((sentence) => sentence.split(" "));
+        return 0;
+    };
+    
 ```
 
 # Emitted Messages

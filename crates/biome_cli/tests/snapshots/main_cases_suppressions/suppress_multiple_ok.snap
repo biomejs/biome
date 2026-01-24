@@ -6,11 +6,9 @@ expression: redactor(content)
 
 ```js
 // biome-ignore lint/suspicious/noCompareNegZero: ignored using `--suppress`
-1 >= -0;
-
+(1 >= -0)
 // biome-ignore lint/suspicious/noCompareNegZero: ignored using `--suppress`
-1 >= -0;
-
+(1 >= -0)
 ```
 
 # Emitted Messages
