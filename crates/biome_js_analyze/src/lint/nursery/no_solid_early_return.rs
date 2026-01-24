@@ -1,4 +1,7 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule
+};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsStatement, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsReturnStatement,
@@ -6,17 +9,15 @@ use biome_js_syntax::{
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
-    /// Disallow early returns in components.
+    /// Disallow early returns in Solid components.
     ///
     /// Solid components only run once, and so conditionals should be inside JSX.
-    ///
-    /// https://github.com/solidjs-community/eslint-plugin-solid/blob/main/docs/components-return-once.md
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// function Component() {
     ///   if (condition) {
     ///     return <div />;
@@ -27,18 +28,21 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// function Component() {
     ///   return <div />;
     /// }
     /// ```
     ///
-    pub ComponentsReturnOnce {
+    pub NoSolidEarlyReturn {
         version: "next",
-        name: "componentsReturnOnce",
+        name: "noSolidEarlyReturn",
         language: "js",
         sources: &[RuleSource::EslintSolid("components-return-once").same()],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Warning,
+        fix_kind: FixKind::Unsafe,
+        domains: &[RuleDomain::Solid],
     }
 }
 
@@ -71,8 +75,12 @@ pub enum ReturnType {
 impl ReturnType {
     pub fn get_message(&self) -> &str {
         match self {
-            Self::Conditional => "Solid components run once, so a conditional return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.",
-            Self::EarlyReturn =>  "Solid components run once, so an early return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />."
+            Self::Conditional => {
+                "Solid components run once, so a conditional return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />."
+            }
+            Self::EarlyReturn => {
+                "Solid components run once, so an early return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />."
+            }
         }
     }
 }
@@ -86,7 +94,10 @@ fn has_conditional_expression(expr: &AnyJsExpression) -> bool {
 }
 
 /// Collect return statements from a statement WITHOUT recursing into nested functions
-fn collect_return_statements_shallow(statement: &AnyJsStatement, returns: &mut Vec<JsReturnStatement>) {
+fn collect_return_statements_shallow(
+    statement: &AnyJsStatement,
+    returns: &mut Vec<JsReturnStatement>,
+) {
     match statement {
         AnyJsStatement::JsReturnStatement(ret) => {
             returns.push(ret.clone());
@@ -113,7 +124,7 @@ fn collect_return_statements_shallow(statement: &AnyJsStatement, returns: &mut V
     }
 }
 
-impl Rule for ComponentsReturnOnce {
+impl Rule for NoSolidEarlyReturn {
     type Query = Ast<AnyJsFunction>;
     type State = Vec<(ReturnType, JsReturnStatement)>;
     type Signals = Option<Self::State>;
@@ -156,11 +167,17 @@ impl Rule for ComponentsReturnOnce {
             for statement in body.statements() {
                 if let AnyJsStatement::JsIfStatement(if_stmt) = statement {
                     let mut if_returns = vec![];
-                    collect_return_statements_shallow(&AnyJsStatement::from(if_stmt.clone()), &mut if_returns);
-                    
+                    collect_return_statements_shallow(
+                        &AnyJsStatement::from(if_stmt.clone()),
+                        &mut if_returns,
+                    );
+
                     if !if_returns.is_empty() {
                         for ret in if_returns {
-                            if !problematic_returns.iter().any(|(_, r)| r.syntax() == ret.syntax()) {
+                            if !problematic_returns
+                                .iter()
+                                .any(|(_, r)| r.syntax() == ret.syntax())
+                            {
                                 problematic_returns.push((ReturnType::EarlyReturn, ret));
                             }
                         }

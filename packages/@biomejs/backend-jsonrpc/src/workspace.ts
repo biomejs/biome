@@ -1859,11 +1859,6 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
-	* Succinct description of the rule.
-See https://biomejs.dev/linter/rules/components-return-once 
-	 */
-	componentsReturnOnce?: ComponentsReturnOnceConfiguration;
-	/**
 	* Disallow ambiguous anchor descriptions.
 See https://biomejs.dev/linter/rules/no-ambiguous-anchor-text 
 	 */
@@ -2053,6 +2048,11 @@ See https://biomejs.dev/linter/rules/no-script-url
 See https://biomejs.dev/linter/rules/no-shadow 
 	 */
 	noShadow?: NoShadowConfiguration;
+	/**
+	* Disallow early returns in Solid components.
+See https://biomejs.dev/linter/rules/no-solid-early-return 
+	 */
+	noSolidEarlyReturn?: NoSolidEarlyReturnConfiguration;
 	/**
 	* Prevent the usage of synchronous scripts.
 See https://biomejs.dev/linter/rules/no-sync-scripts 
@@ -3761,9 +3761,6 @@ export type UseValidTypeofConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
-export type ComponentsReturnOnceConfiguration =
-	| RulePlainConfiguration
-	| RuleWithComponentsReturnOnceOptions;
 export type NoAmbiguousAnchorTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAmbiguousAnchorTextOptions;
@@ -3878,6 +3875,9 @@ export type NoScriptUrlConfiguration =
 export type NoShadowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShadowOptions;
+export type NoSolidEarlyReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSolidEarlyReturnOptions;
 export type NoSyncScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSyncScriptsOptions;
@@ -5273,10 +5273,6 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
-export interface RuleWithComponentsReturnOnceOptions {
-	level: RulePlainConfiguration;
-	options?: ComponentsReturnOnceOptions;
-}
 export interface RuleWithNoAmbiguousAnchorTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoAmbiguousAnchorTextOptions;
@@ -5434,6 +5430,10 @@ export interface RuleWithNoScriptUrlOptions {
 export interface RuleWithNoShadowOptions {
 	level: RulePlainConfiguration;
 	options?: NoShadowOptions;
+}
+export interface RuleWithNoSolidEarlyReturnOptions {
+	level: RulePlainConfiguration;
+	options?: NoSolidEarlyReturnOptions;
 }
 export interface RuleWithNoSyncScriptsOptions {
 	level: RulePlainConfiguration;
@@ -6770,7 +6770,6 @@ to a DOM element id.
 export type UseValidForDirectionOptions = {};
 export type UseValidTypeofOptions = {};
 export type UseYieldOptions = {};
-export type ComponentsReturnOnceOptions = {};
 export interface NoAmbiguousAnchorTextOptions {
 	/**
 	 * It allows users to modify the strings that can be checked for in the anchor text. Useful for specifying other words in other languages
@@ -6865,6 +6864,7 @@ The values of the list are case-insensitive.
 }
 export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
+export type NoSolidEarlyReturnOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
 export interface NoUndeclaredEnvVarsOptions {
@@ -7735,7 +7735,6 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
-	| "lint/nursery/componentsReturnOnce"
 	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
@@ -7777,6 +7776,7 @@ export type Category =
 	| "lint/nursery/noRootType"
 	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noSolidEarlyReturn"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noUndeclaredEnvVars"

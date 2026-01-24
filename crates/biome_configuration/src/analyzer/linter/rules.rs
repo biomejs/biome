@@ -89,7 +89,6 @@ impl std::fmt::Display for RuleGroup {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum RuleName {
-    ComponentsReturnOnce,
     NoAccessKey,
     NoAccumulatingSpread,
     NoAdjacentSpacesInRegex,
@@ -287,6 +286,7 @@ pub enum RuleName {
     NoShoutyConstants,
     NoSkippedTests,
     NoSolidDestructuredProps,
+    NoSolidEarlyReturn,
     NoSparseArray,
     NoStaticElementInteractions,
     NoStaticOnlyClass,
@@ -521,7 +521,6 @@ pub enum RuleName {
 impl RuleName {
     pub const fn as_str(self) -> &'static str {
         match self {
-            Self::ComponentsReturnOnce => "componentsReturnOnce",
             Self::NoAccessKey => "noAccessKey",
             Self::NoAccumulatingSpread => "noAccumulatingSpread",
             Self::NoAdjacentSpacesInRegex => "noAdjacentSpacesInRegex",
@@ -725,6 +724,7 @@ impl RuleName {
             Self::NoShoutyConstants => "noShoutyConstants",
             Self::NoSkippedTests => "noSkippedTests",
             Self::NoSolidDestructuredProps => "noSolidDestructuredProps",
+            Self::NoSolidEarlyReturn => "noSolidEarlyReturn",
             Self::NoSparseArray => "noSparseArray",
             Self::NoStaticElementInteractions => "noStaticElementInteractions",
             Self::NoStaticOnlyClass => "noStaticOnlyClass",
@@ -961,7 +961,6 @@ impl RuleName {
     }
     pub const fn group(self) -> RuleGroup {
         match self {
-            Self::ComponentsReturnOnce => RuleGroup::Nursery,
             Self::NoAccessKey => RuleGroup::A11y,
             Self::NoAccumulatingSpread => RuleGroup::Performance,
             Self::NoAdjacentSpacesInRegex => RuleGroup::Complexity,
@@ -1159,6 +1158,7 @@ impl RuleName {
             Self::NoShoutyConstants => RuleGroup::Style,
             Self::NoSkippedTests => RuleGroup::Suspicious,
             Self::NoSolidDestructuredProps => RuleGroup::Correctness,
+            Self::NoSolidEarlyReturn => RuleGroup::Nursery,
             Self::NoSparseArray => RuleGroup::Suspicious,
             Self::NoStaticElementInteractions => RuleGroup::A11y,
             Self::NoStaticOnlyClass => RuleGroup::Complexity,
@@ -1396,7 +1396,6 @@ impl std::str::FromStr for RuleName {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "componentsReturnOnce" => Ok(Self::ComponentsReturnOnce),
             "noAccessKey" => Ok(Self::NoAccessKey),
             "noAccumulatingSpread" => Ok(Self::NoAccumulatingSpread),
             "noAdjacentSpacesInRegex" => Ok(Self::NoAdjacentSpacesInRegex),
@@ -1602,6 +1601,7 @@ impl std::str::FromStr for RuleName {
             "noShoutyConstants" => Ok(Self::NoShoutyConstants),
             "noSkippedTests" => Ok(Self::NoSkippedTests),
             "noSolidDestructuredProps" => Ok(Self::NoSolidDestructuredProps),
+            "noSolidEarlyReturn" => Ok(Self::NoSolidEarlyReturn),
             "noSparseArray" => Ok(Self::NoSparseArray),
             "noStaticElementInteractions" => Ok(Self::NoStaticElementInteractions),
             "noStaticOnlyClass" => Ok(Self::NoStaticOnlyClass),
