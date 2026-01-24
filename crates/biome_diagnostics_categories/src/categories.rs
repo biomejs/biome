@@ -267,6 +267,7 @@ define_categories! {
     "lint/nursery/useVueValidVPre": "https://biomejs.dev/linter/rules/use-vue-valid-v-pre",
     "lint/nursery/useVueValidVText": "https://biomejs.dev/linter/rules/use-vue-valid-v-text",
     "lint/nursery/useVueVapor": "https://biomejs.dev/linter/rules/use-vue-vapor",
+    "lint/nursery/useGlobalThis": "https://biomejs.dev/linter/rules/use-global-this",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noAwaitInLoops": "https://biomejs.dev/linter/rules/no-await-in-loops",
     "lint/performance/noBarrelFile": "https://biomejs.dev/linter/rules/no-barrel-file",
