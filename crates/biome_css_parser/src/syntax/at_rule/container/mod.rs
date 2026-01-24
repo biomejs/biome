@@ -11,7 +11,8 @@ use crate::syntax::at_rule::error::{
 use crate::syntax::at_rule::feature::{expected_any_query_feature, parse_any_query_feature};
 use crate::syntax::block::parse_conditional_block;
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
-use crate::syntax::{is_at_declaration, parse_custom_identifier, parse_declaration};
+use crate::syntax::{is_at_declaration, parse_any_value, parse_custom_identifier, parse_declaration};
+use crate::syntax::value::function::{is_at_any_function, is_nth_at_function};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecovery;
@@ -233,6 +234,9 @@ pub(crate) fn parse_any_container_query_in_parens(p: &mut CssParser) -> ParsedSy
         parse_container_query_in_parens(p)
     } else if is_at_container_size_feature_in_parens(p) {
         parse_container_size_feature_in_parens(p)
+    } else if is_at_any_function(p) {
+        // <general-enclosed> allows functions for forward compatibility.
+        parse_any_value(p)
     } else {
         Absent
     }
@@ -240,7 +244,8 @@ pub(crate) fn parse_any_container_query_in_parens(p: &mut CssParser) -> ParsedSy
 
 #[inline]
 fn is_at_container_query_in_parens(p: &mut CssParser) -> bool {
-    p.at(T!['(']) && (p.nth_at(1, T![not]) || p.nth_at(1, T!['(']))
+    p.at(T!['('])
+        && (p.nth_at(1, T![not]) || p.nth_at(1, T!['(']) || is_nth_at_function(p, 1))
 }
 
 /// Parses a parenthesized container query.

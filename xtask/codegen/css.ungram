@@ -947,6 +947,7 @@ AnyCssContainerQueryInParens =
 	CssContainerQueryInParens
 	| CssContainerSizeFeatureInParens
 	| CssContainerStyleQueryInParens
+	| AnyCssValue // general-enclosed
 
 // ( <container-query> )
 // @container name (width <= 500px) and ((width <= 500px) or (width <= 500px)) {  }

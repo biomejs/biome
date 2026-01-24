@@ -10122,11 +10122,18 @@ impl AnyCssContainerQuery {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssContainerQueryInParens {
+    AnyCssValue(AnyCssValue),
     CssContainerQueryInParens(CssContainerQueryInParens),
     CssContainerSizeFeatureInParens(CssContainerSizeFeatureInParens),
     CssContainerStyleQueryInParens(CssContainerStyleQueryInParens),
 }
 impl AnyCssContainerQueryInParens {
+    pub fn as_any_css_value(&self) -> Option<&AnyCssValue> {
+        match &self {
+            Self::AnyCssValue(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_container_query_in_parens(&self) -> Option<&CssContainerQueryInParens> {
         match &self {
             Self::CssContainerQueryInParens(item) => Some(item),
@@ -25516,16 +25523,18 @@ impl From<CssContainerStyleQueryInParens> for AnyCssContainerQueryInParens {
 }
 impl AstNode for AnyCssContainerQueryInParens {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssContainerQueryInParens::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssValue::KIND_SET
+        .union(CssContainerQueryInParens::KIND_SET)
         .union(CssContainerSizeFeatureInParens::KIND_SET)
         .union(CssContainerStyleQueryInParens::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
+        match kind {
             CSS_CONTAINER_QUERY_IN_PARENS
-                | CSS_CONTAINER_SIZE_FEATURE_IN_PARENS
-                | CSS_CONTAINER_STYLE_QUERY_IN_PARENS
-        )
+            | CSS_CONTAINER_SIZE_FEATURE_IN_PARENS
+            | CSS_CONTAINER_STYLE_QUERY_IN_PARENS => true,
+            k if AnyCssValue::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -25538,7 +25547,12 @@ impl AstNode for AnyCssContainerQueryInParens {
             CSS_CONTAINER_STYLE_QUERY_IN_PARENS => {
                 Self::CssContainerStyleQueryInParens(CssContainerStyleQueryInParens { syntax })
             }
-            _ => return None,
+            _ => {
+                if let Some(any_css_value) = AnyCssValue::cast(syntax) {
+                    return Some(Self::AnyCssValue(any_css_value));
+                }
+                return None;
+            }
         };
         Some(res)
     }
@@ -25547,6 +25561,7 @@ impl AstNode for AnyCssContainerQueryInParens {
             Self::CssContainerQueryInParens(it) => it.syntax(),
             Self::CssContainerSizeFeatureInParens(it) => it.syntax(),
             Self::CssContainerStyleQueryInParens(it) => it.syntax(),
+            Self::AnyCssValue(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -25554,12 +25569,14 @@ impl AstNode for AnyCssContainerQueryInParens {
             Self::CssContainerQueryInParens(it) => it.into_syntax(),
             Self::CssContainerSizeFeatureInParens(it) => it.into_syntax(),
             Self::CssContainerStyleQueryInParens(it) => it.into_syntax(),
+            Self::AnyCssValue(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssContainerQueryInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
             Self::CssContainerQueryInParens(it) => std::fmt::Debug::fmt(it, f),
             Self::CssContainerSizeFeatureInParens(it) => std::fmt::Debug::fmt(it, f),
             Self::CssContainerStyleQueryInParens(it) => std::fmt::Debug::fmt(it, f),
@@ -25569,6 +25586,7 @@ impl std::fmt::Debug for AnyCssContainerQueryInParens {
 impl From<AnyCssContainerQueryInParens> for SyntaxNode {
     fn from(n: AnyCssContainerQueryInParens) -> Self {
         match n {
+            AnyCssContainerQueryInParens::AnyCssValue(it) => it.into_syntax(),
             AnyCssContainerQueryInParens::CssContainerQueryInParens(it) => it.into_syntax(),
             AnyCssContainerQueryInParens::CssContainerSizeFeatureInParens(it) => it.into_syntax(),
             AnyCssContainerQueryInParens::CssContainerStyleQueryInParens(it) => it.into_syntax(),
