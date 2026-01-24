@@ -166,10 +166,10 @@ fn is_in_font_face_at_rule(node: &CssGenericProperty) -> bool {
 fn is_in_supports_at_rule(node: &CssGenericProperty) -> bool {
     node.syntax()
         .ancestors()
-        .find(|n| n.kind() == CssSyntaxKind::CSS_AT_RULE)
-        .and_then(|n| n.cast::<CssAtRule>())
-        .and_then(|n| n.rule().ok())
-        .is_some_and(|n| matches!(n, AnyCssAtRule::CssSupportsAtRule(_)))
+        .filter(|n| n.kind() == CssSyntaxKind::CSS_AT_RULE)
+        .filter_map(|n| n.cast::<CssAtRule>())
+        .filter_map(|n| n.rule().ok())
+        .any(|n| matches!(n, AnyCssAtRule::CssSupportsAtRule(_)))
 }
 
 fn is_shorthand_font_property_with_keyword(properties: &CssGenericComponentValueList) -> bool {
