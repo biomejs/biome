@@ -13,8 +13,8 @@ use biome_formatter::{
     Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatRefWithRule,
     FormatResult, LINE_TERMINATORS, normalize_newlines,
 };
-use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode};
-use biome_rowan::{Direction, SyntaxElement, TextRange};
+use biome_html_syntax::{HtmlContent, HtmlEmbeddedContent, HtmlLanguage, HtmlSyntaxNode};
+use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
 /// a node "as is" is useful if a node contains syntax errors. Formatting a node with syntax errors
@@ -218,8 +218,34 @@ impl<'a> Format<HtmlFormatContext> for FormatHtmlLeadingComments<'a> {
     fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
         let comments = f.context().comments().clone();
         let leading_comments = comments.leading_comments(self.node);
-        format_leading_comments_impl(leading_comments, self.is_block_element, f)
+        format_leading_comments_impl(leading_comments, self.is_block_element, Some(self.node), f)
     }
+}
+
+/// Returns true if the comment is within the text content of the previous sibling.
+/// Such comments are already formatted as HtmlChild::Comment and should be skipped
+/// when formatting leading comments to prevent double-printing.
+fn is_comment_in_previous_sibling_content(
+    node: &HtmlSyntaxNode,
+    comment: &SourceComment<HtmlLanguage>,
+) -> bool {
+    let Some(prev_sibling) = node.prev_sibling() else {
+        return false;
+    };
+
+    // Check if previous sibling is a text content node (HtmlContent or HtmlEmbeddedContent)
+    let is_text_content = HtmlContent::can_cast(prev_sibling.kind())
+        || HtmlEmbeddedContent::can_cast(prev_sibling.kind());
+
+    if !is_text_content {
+        return false;
+    }
+
+    // Check if comment's text range falls within the previous sibling's text range
+    let comment_range = comment.piece().text_range();
+    let sibling_range = prev_sibling.text_range_with_trivia();
+
+    sibling_range.contains_range(comment_range)
 }
 
 /// Formats a slice of leading comments (used for verbatim node formatting).
@@ -228,18 +254,30 @@ pub struct FormatLeadingCommentsSlice<'a>(&'a [SourceComment<HtmlLanguage>]);
 
 impl<'a> Format<HtmlFormatContext> for FormatLeadingCommentsSlice<'a> {
     fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_leading_comments_impl(self.0, false, f)
+        format_leading_comments_impl(self.0, false, None, f)
     }
 }
 
 /// Shared implementation for formatting leading comments.
+///
+/// If `node` is provided, comments that are within the text content of the previous sibling
+/// will be skipped (they were already formatted as HtmlChild::Comment in children.rs).
 fn format_leading_comments_impl(
     leading_comments: &[SourceComment<HtmlLanguage>],
     is_block_element: bool,
+    node: Option<&HtmlSyntaxNode>,
     f: &mut HtmlFormatter,
 ) -> FormatResult<()> {
-    let leading_comments_iter = leading_comments.iter().peekable();
-    for comment in leading_comments_iter {
+    for comment in leading_comments.iter() {
+        // Skip comments that are within the text content of the previous sibling.
+        // These comments are already formatted as HtmlChild::Comment in children.rs.
+        if let Some(node) = node {
+            if is_comment_in_previous_sibling_content(node, comment) {
+                comment.mark_formatted();
+                continue;
+            }
+        }
+
         let format_comment = FormatRefWithRule::new(
             comment,
             <HtmlFormatContext as CstFormatContext>::CommentRule::default(),
@@ -247,24 +285,20 @@ fn format_leading_comments_impl(
         biome_formatter::write!(f, [format_comment])?;
 
         // Check if this is a suppression comment
-        let is_suppression = HtmlCommentStyle::is_suppression(comment.piece().text());
+        let _is_suppression = HtmlCommentStyle::is_suppression(comment.piece().text());
 
         match comment.kind() {
             CommentKind::Block | CommentKind::InlineBlock => {
                 // HTML comments are block comments (<!-- ... -->)
                 match comment.lines_after() {
                     0 => {
-                        // No newline after comment in source
-                        if is_suppression {
-                            // Don't add trailing whitespace after suppression comments -
-                            // the suppressed content should directly follow
-                        } else if is_block_element {
+                        // No newline after comment in source - don't add any whitespace.
+                        // This matches Prettier's behavior where `-->{{ 123 }}` stays together.
+                        if is_block_element {
                             // Block elements always get a line break after leading comments
                             biome_formatter::write!(f, [hard_line_break()])?;
-                        } else {
-                            // Inline elements get a space
-                            biome_formatter::write!(f, [space()])?;
                         }
+                        // For inline elements and suppression comments, don't add whitespace
                     }
                     1 => {
                         biome_formatter::write!(f, [hard_line_break()])?;

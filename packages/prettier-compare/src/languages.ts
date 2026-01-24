@@ -105,6 +105,11 @@ export const LANGUAGES: Record<string, LanguageConfig> = {
 		prettierParser: "astro",
 		displayName: "Astro",
 	},
+	vue: {
+		biomeFilePath: "file.vue",
+		prettierParser: "vue",
+		displayName: "Vue",
+	},
 };
 
 /**
