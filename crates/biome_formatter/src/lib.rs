@@ -1045,6 +1045,14 @@ impl<Context> Formatted<Context> {
         });
     }
 
+    /// Propagates the expand flags through the document.
+    ///
+    /// This must be called after [Self::format_embedded] to ensure that groups inside
+    /// embedded content properly propagate their expansion flags.
+    pub fn propagate_expand(&mut self) {
+        self.document.propagate_expand();
+    }
+
     /// Returns the formatted document.
     pub fn document(&self) -> &Document {
         &self.document

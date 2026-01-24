@@ -1,6 +1,6 @@
 use biome_analyze::{
-    ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, SourceActionKind, context::RuleContext,
-    declare_source_rule,
+    ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource, SourceActionKind,
+    context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::category;
@@ -517,12 +517,55 @@ declare_source_rule! {
     /// import D2 from "package";
     /// import { A } from "package";
     /// import { B } from "package";
+    /// import { type T3 } from "package";
     /// ```
     ///
     /// is merged as follows:
     ///
     /// ```ts,ignore
     /// import type { T1, T2 } from "package";
+    /// import D1, * as ns from "package";
+    /// import D2, { A, B, type T3 } from "package";
+    /// ```
+    ///
+    /// You may want to merge the first and the last imports.
+    /// To do this, you have to enable the linter rule [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/)
+    /// and to set its option `style` to `inlineType`.
+    ///
+    /// With the following configuration...
+    ///
+    /// ```json
+    /// {
+    ///   "linter": {
+    ///     "enabled": true,
+    ///     "rules": {
+    ///       "style": {
+    ///         "useImportType": {
+    ///           "level": "on",
+    ///           "options": { "style": "inlineType" }
+    ///         }
+    ///       }
+    ///     }
+    ///   },
+    ///   "assist": {
+    ///     "enabled": true,
+    ///     "actions": { "source": { "organizeImports": "on" } }
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// The previous imports are merged as follows:
+    ///
+    /// ```ts,ignore
+    /// import D1, * as ns from "package";
+    /// import D2, { A, B, type T1, type T2, type T3 } from "package";
+    /// ```
+    ///
+    /// Note that if you set `style` to `separatedType` you will get the following merge:
+    ///
+    /// ```ts,ignore
+    /// import type { T1, T2, T3 } from "package";
+    /// import { V1 } from "package";
     /// import D1, * as ns from "package";
     /// import D2, { A, B } from "package";
     /// ```
@@ -652,6 +695,7 @@ declare_source_rule! {
         language: "js",
         recommended: true,
         fix_kind: FixKind::Safe,
+        sources: &[RuleSource::Eslint("sort-imports").inspired(), RuleSource::Eslint("no-duplicate-imports").inspired()],
     }
 }
 

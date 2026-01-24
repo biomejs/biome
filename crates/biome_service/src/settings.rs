@@ -420,6 +420,10 @@ impl<'a, E> AsRef<Settings> for SettingsHandle<'a, E> {
 }
 
 impl<'a> SettingsHandle<'a, Option<Configuration>> {
+    pub(crate) fn full_source(&self) -> Option<Arc<ConfigurationSource>> {
+        self.as_ref().source.clone()
+    }
+
     fn as_merged_settings(&self) -> Settings {
         self.editor
             .as_ref()

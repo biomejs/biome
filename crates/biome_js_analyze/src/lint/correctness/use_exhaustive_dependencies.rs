@@ -7,19 +7,29 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_semantic::{Capture, SemanticModel};
+use biome_js_semantic::{CanBeImportedExported, ClosureExtensions, SemanticModel};
+use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, JsArrayExpression,
-    JsReferenceIdentifier, T, TsTypeofType,
+    AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, AnyJsObjectBindingPatternMember,
+    JsArrayBindingPattern, JsArrayBindingPatternElement, JsArrayBindingPatternElementList,
+    JsArrayExpression, JsComputedMemberExpression, JsObjectBindingPattern,
+    JsObjectBindingPatternPropertyList, JsReferenceIdentifier, JsVariableDeclarator, T,
+    TsTypeofType, is_transparent_expression_wrapper,
 };
 use biome_js_syntax::{
     JsCallExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TextRange,
     binding_ext::AnyJsBindingDeclaration,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
+use biome_rowan::{
+    AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind,
+    declare_node_union,
+};
 use biome_rule_options::use_exhaustive_dependencies::{
     StableHookResult, UseExhaustiveDependenciesOptions,
 };
+
+/// Maximum recursion depth for stability checking to prevent stack overflow
+const MAX_STABILITY_DEPTH: u8 = 10;
 
 use crate::JsRuleAction;
 use crate::react::hooks::*;
@@ -515,53 +525,145 @@ pub enum UnstableDependencyKind {
     ObjectLiteral,
 }
 
-fn get_whole_static_member_expression(reference: &JsSyntaxNode) -> Option<AnyJsMemberExpression> {
-    let root = reference
-        .ancestors()
-        .skip(1) // JS_REFERENCE_IDENTIFIER
-        .take_while(|x| {
-            x.parent().is_some_and(|parent| {
-                parent
-                    .cast::<AnyJsMemberExpression>()
-                    .is_some_and(|member_expr| {
-                        member_expr
-                            .object()
-                            .is_ok_and(|object| object.syntax() == x)
-                    })
-            })
-        })
-        .last()?
-        .parent()?;
+declare_node_union! {
+    pub AnyExpressionCandidate = AnyJsExpression | JsReferenceIdentifier
+}
 
-    root.cast()
+/// Returns expression candidates for a given reference for further checking.
+/// The latest candidate is the longest member access chain.
+/// Example: if the expression is `a.b[c]` it will return 3 candidates: `a`, `a.b`, `a.b[c]`
+fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> {
+    let mut result = Vec::new();
+    let mut prev_node = node;
+    while let Some(parent) = prev_node.parent() {
+        if matches!(
+            parent.kind(),
+            JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER
+        ) {
+            if let Some(sequence_expression) = AnyExpressionCandidate::cast_ref(&prev_node) {
+                result.push(sequence_expression.clone());
+            }
+            return result;
+        }
+
+        if matches!(parent.kind(), JsSyntaxKind::JS_SEQUENCE_EXPRESSION) {
+            return result;
+        }
+
+        if is_transparent_expression_wrapper(&parent) {
+            prev_node = parent;
+            continue;
+        }
+
+        if let Some(computed_member_expression) = JsComputedMemberExpression::cast_ref(&parent)
+            && let Ok(object) = computed_member_expression.object()
+            && !prev_node.eq(object.syntax())
+        {
+            return result;
+        }
+
+        if matches!(
+            parent.kind(),
+            JsSyntaxKind::JS_IDENTIFIER_EXPRESSION
+                | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
+                | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION
+        ) {
+            if let Some(sequence_expression) = AnyExpressionCandidate::cast_ref(&parent) {
+                result.push(sequence_expression.clone());
+            }
+        } else {
+            return result;
+        }
+
+        prev_node = parent;
+    }
+
+    result
 }
 
 // Test if a capture needs to be in the dependency list
-// of a react hook call
+// of a React hook call
 fn capture_needs_to_be_in_the_dependency_list(
-    capture: &Capture,
+    capture_node: &JsSyntaxNode,
+    expression_candidates: &[AnyExpressionCandidate],
     component_function_range: &TextRange,
     model: &SemanticModel,
     options: &HookConfigMaps,
 ) -> bool {
     // Ignore if referenced in TS typeof
-    if capture
-        .node()
+    if capture_node
         .ancestors()
         .any(|a| TsTypeofType::can_cast(a.kind()))
     {
         return false;
     }
 
-    let binding = capture.binding();
-
-    // Ignore if imported
-    if binding.is_imported() {
+    if expression_candidates.is_empty() {
         return false;
     }
-    let Some(decl) = binding.tree().declaration() else {
+
+    !expression_candidates
+        .iter()
+        .any(|expression_candidate| match &expression_candidate {
+            AnyExpressionCandidate::AnyJsExpression(expression) => is_stable_expression(
+                expression,
+                None,
+                component_function_range,
+                model,
+                options,
+                0,
+            ),
+            AnyExpressionCandidate::JsReferenceIdentifier(reference_identifier) => {
+                if let Some(binding) = model.binding(reference_identifier) {
+                    is_stable_binding(
+                        &binding.tree(),
+                        None,
+                        component_function_range,
+                        model,
+                        options,
+                        0,
+                    )
+                } else {
+                    true
+                }
+            }
+        })
+}
+
+/// Checks if a binding is stable within the component function.
+///
+/// Uses recursive calls to resolve variable references and member access.
+/// The `depth` parameter prevents infinite recursion and stack overflow.
+fn is_stable_binding(
+    binding: &AnyJsIdentifierBinding,
+    member: Option<&ReactHookResultMember>,
+    component_function_range: &TextRange,
+    model: &SemanticModel,
+    options: &HookConfigMaps,
+    depth: u8,
+) -> bool {
+    // Prevent excessive recursion by treating deeply nested checks as unstable
+    if depth >= MAX_STABILITY_DEPTH {
+        return false;
+    }
+
+    if binding.is_imported(model) {
+        return true;
+    }
+
+    // Any declarations outside the component function are considered stable
+    if binding
+        .range()
+        .intersect(*component_function_range)
+        .is_none_or(TextRange::is_empty)
+    {
+        return true;
+    }
+
+    let Some(decl) = binding.declaration() else {
         return false;
     };
+
     match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
         // These declarations are always stable
         AnyJsBindingDeclaration::JsClassDeclaration(_)
@@ -575,81 +677,61 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsInferType(_)
         | AnyJsBindingDeclaration::TsMappedType(_)
         | AnyJsBindingDeclaration::TsTypeParameter(_)
-        | AnyJsBindingDeclaration::TsEnumMember(_) => false,
-        // Function declarations are stable if ...
-        AnyJsBindingDeclaration::JsFunctionDeclaration(declaration) => {
-            let declaration_range = declaration.syntax().text_range_with_trivia();
+        | AnyJsBindingDeclaration::TsEnumMember(_) => true,
 
-            // ... they are declared outside of the component function
-            if component_function_range
-                .intersect(declaration_range)
-                .is_none_or(TextRange::is_empty)
-            {
-                return false;
-            }
-
-            // ... they are recursively used by the binding being created:
-            //
-            // function MyRecursiveElement() {
-            // 	 const children = useMemo(() => <MyRecursiveElement />, []);
-            // 	 return <div>{children}</div>;
-            // }
-            //
-            if capture
-                .node()
-                .ancestors()
-                .any(|ancestor| &ancestor == declaration.syntax())
-            {
-                return false;
-            }
-
-            true
-        }
-        // Variable declarators are stable if ...
         AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
             let Some(declaration) = declarator
                 .syntax()
                 .ancestors()
                 .find_map(JsVariableDeclaration::cast)
             else {
-                return false;
+                return true;
             };
-            let declaration_range = declaration.syntax().text_range_with_trivia();
 
-            // ... they are declared outside of the component function
-            if component_function_range
-                .intersect(declaration_range)
-                .is_none_or(TextRange::is_empty)
-            {
+            // Only `const` variables are considered stable
+            if !declaration.is_const() {
                 return false;
             }
 
-            if declaration.is_const() {
-                // ... they are `const` and their initializer is constant
-                if declarator
-                    .initializer()
-                    .and_then(|initializer| initializer.expression().ok())
-                    .is_none_or(|expr| model.is_constant(&expr))
-                {
-                    return false;
+            let Some(initializer_expression) = declarator
+                .initializer()
+                .and_then(|initializer| initializer.expression().ok())
+            else {
+                // This shouldn't happen because we check for `const` above
+                return true;
+            };
+
+            match get_single_pattern_member(binding, &declarator) {
+                GetSinglePatternMemberResult::Member(pattern_member) => {
+                    if member.is_some() {
+                        // Too deeply nested
+                        return false;
+                    }
+                    is_stable_expression(
+                        &initializer_expression,
+                        Some(&pattern_member),
+                        component_function_range,
+                        model,
+                        options,
+                        depth + 1,
+                    )
                 }
+                GetSinglePatternMemberResult::NoPattern => is_stable_expression(
+                    &initializer_expression,
+                    member,
+                    component_function_range,
+                    model,
+                    options,
+                    depth + 1,
+                ),
+                GetSinglePatternMemberResult::TooDeep => false,
+                GetSinglePatternMemberResult::Unknown => true,
             }
-
-            // ... they are recursively used by the binding being created
-            if capture
-                .node()
-                .ancestors()
-                .any(|ancestor| &ancestor == declaration.syntax())
-            {
-                return false;
-            }
-
-            // ... they are assign to stable returns of another React function
-            !is_binding_react_stable(&binding.tree(), model, &options.stable_config)
         }
 
         // all others need to be in the dependency list
-        AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+        AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+        | AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
         | AnyJsBindingDeclaration::JsFormalParameter(_)
         | AnyJsBindingDeclaration::JsRestParameter(_)
         | AnyJsBindingDeclaration::JsBogusParameter(_)
@@ -659,25 +741,232 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
         | AnyJsBindingDeclaration::JsClassExpression(_)
         | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
-        | AnyJsBindingDeclaration::JsCatchDeclaration(_) => true,
+        | AnyJsBindingDeclaration::JsCatchDeclaration(_) => false,
 
         // Ignore TypeScript `import <id> =`
-        AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => false,
+        AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => true,
 
         // This should be unreachable because we call `parent_binding_pattern_declaration`
         AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
         | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
         | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
         | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => false,
+        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => true,
 
         // This should be unreachable because of the test if the capture is imported
         AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => false,
+        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => true,
     }
+}
+
+/// Checks if the expression is stable within the component function.
+///
+/// Uses recursive calls to resolve member access and variable references.
+/// The `depth` parameter prevents infinite recursion and stack overflow.
+fn is_stable_expression(
+    expression: &AnyJsExpression,
+    member: Option<&ReactHookResultMember>,
+    component_function_range: &TextRange,
+    model: &SemanticModel,
+    options: &HookConfigMaps,
+    depth: u8,
+) -> bool {
+    // Prevent excessive recursion by treating deeply nested checks as unstable
+    if depth >= MAX_STABILITY_DEPTH {
+        return false;
+    }
+
+    if model.is_constant(expression) {
+        return true;
+    }
+    let Some(expression) = expression.inner_expression() else {
+        return false;
+    };
+    match &expression {
+        AnyJsExpression::JsCallExpression(call_expression) => {
+            is_react_hook_call_stable(call_expression, member, model, &options.stable_config)
+        }
+
+        AnyJsExpression::JsComputedMemberExpression(computed_member_expression) => {
+            // This rule handles only 1-level paths
+            if member.is_some() {
+                return false;
+            }
+            let (Ok(object), Some(index)) = (
+                computed_member_expression.object(),
+                computed_member_expression.member().ok().and_then(|member| {
+                    member
+                        .as_any_js_literal_expression()?
+                        .as_js_number_literal_expression()?
+                        .value_token()
+                        .ok()?
+                        .text_trimmed()
+                        .parse::<u8>()
+                        .ok()
+                }),
+            ) else {
+                return false;
+            };
+            is_stable_expression(
+                &object,
+                Some(&ReactHookResultMember::Index(index)),
+                component_function_range,
+                model,
+                options,
+                depth + 1,
+            )
+        }
+        AnyJsExpression::JsStaticMemberExpression(static_member_expression) => {
+            // This rule handles only 1-level paths
+            if member.is_some() {
+                return false;
+            }
+            let (Ok(object), Some(key)) = (
+                static_member_expression.object(),
+                static_member_expression
+                    .member()
+                    .ok()
+                    .and_then(|member| member.value_token().ok())
+                    .map(|value_token| value_token.token_text_trimmed()),
+            ) else {
+                return false;
+            };
+            is_stable_expression(
+                &object,
+                Some(&ReactHookResultMember::Key(key)),
+                component_function_range,
+                model,
+                options,
+                depth + 1,
+            )
+        }
+
+        AnyJsExpression::JsIdentifierExpression(identifier) => {
+            if let Ok(name) = identifier.name()
+                && let Some(binding) = model.binding(&name)
+            {
+                let binding = &binding.tree();
+                if let Some(declaration_node) =
+                    &binding.declaration().map(|decl| decl.syntax().clone())
+                    && identifier
+                        .syntax()
+                        .ancestors()
+                        .any(|ancestor| declaration_node == &ancestor)
+                {
+                    return true;
+                }
+
+                is_stable_binding(
+                    binding,
+                    member,
+                    component_function_range,
+                    model,
+                    options,
+                    depth + 1,
+                )
+            } else {
+                true
+            }
+        }
+
+        _ => false,
+    }
+}
+
+/// Returns a single pattern member.
+/// I.e., in the case of `const {x} = ...` returns `x`.
+/// For deeply nested, i.e. `const {y: {x}} = ...` returns TooDeep.
+/// For non-patterns returns NoPattern.
+/// In case of any inconsistency returns Unknown.
+fn get_single_pattern_member(
+    binding: &AnyJsIdentifierBinding,
+    declarator: &JsVariableDeclarator,
+) -> GetSinglePatternMemberResult {
+    let Some(parent_syntax) = binding.syntax().parent() else {
+        return GetSinglePatternMemberResult::Unknown;
+    };
+    let Some((parent_pattern, member)) = (match parent_syntax.kind() {
+        JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT => binding
+            .parent::<JsArrayBindingPatternElement>()
+            .and_then(|array_pattern_element| {
+                array_pattern_element
+                    .parent::<JsArrayBindingPatternElementList>()
+                    .and_then(|array_pattern_element_list| {
+                        array_pattern_element_list.parent::<JsArrayBindingPattern>()
+                    })
+                    .and_then(|array_pattern| {
+                        (array_pattern_element.syntax().index() / 2)
+                            .try_into()
+                            .ok()
+                            .map(|member| {
+                                (
+                                    array_pattern.syntax().clone(),
+                                    ReactHookResultMember::Index(member),
+                                )
+                            })
+                    })
+            }),
+        JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY
+        | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY => {
+            let Some(object_pattern) = parent_syntax
+                .parent()
+                .and_then(JsObjectBindingPatternPropertyList::cast)
+                .and_then(|object_property_list| {
+                    object_property_list.parent::<JsObjectBindingPattern>()
+                })
+            else {
+                return GetSinglePatternMemberResult::Unknown;
+            };
+            let Some(member) = (match AnyJsObjectBindingPatternMember::try_cast(parent_syntax) {
+                Ok(AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(property)) => {
+                    property
+                        .member()
+                        .ok()
+                        .and_then(|member| member.name())
+                        .map(ReactHookResultMember::Key)
+                }
+                Ok(AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                    shorthand_property,
+                )) => shorthand_property
+                    .identifier()
+                    .ok()
+                    .and_then(|identifier| identifier.as_js_identifier_binding()?.name_token().ok())
+                    .map(|name_token| ReactHookResultMember::Key(name_token.token_text_trimmed())),
+                // Shouldn't happen because of the previous check
+                _ => None,
+            }) else {
+                return GetSinglePatternMemberResult::Unknown;
+            };
+            Some((object_pattern.syntax().clone(), member))
+        }
+        JsSyntaxKind::JS_VARIABLE_DECLARATOR => {
+            return GetSinglePatternMemberResult::NoPattern;
+        }
+        _ => return GetSinglePatternMemberResult::Unknown,
+    }) else {
+        return GetSinglePatternMemberResult::Unknown;
+    };
+    if !parent_pattern
+        .parent()
+        .is_some_and(|syntax| syntax.eq(declarator.syntax()))
+    {
+        return GetSinglePatternMemberResult::TooDeep;
+    }
+    GetSinglePatternMemberResult::Member(member)
+}
+
+enum GetSinglePatternMemberResult {
+    /// The binding is part of a pattern 1 level deep
+    Member(ReactHookResultMember),
+    /// The binding is not part of a pattern
+    NoPattern,
+    /// The binding is part of a too deeply nested pattern
+    TooDeep,
+    /// Could not determine
+    Unknown,
 }
 
 // Find the function that is calling the hook
@@ -765,7 +1054,11 @@ fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> + use<>
                 if let Some(member_name) = member_name {
                     vec.push(member_name);
                 }
-                next = member_expr.object().ok().map(AstNode::into_syntax);
+                next = member_expr
+                    .object()
+                    .ok()
+                    .and_then(|expr| expr.inner_expression())
+                    .map(AstNode::into_syntax);
             }
             Err(node) => {
                 vec.push(node.text_trimmed().to_string());
@@ -796,6 +1089,72 @@ fn compare_member_depth(a: &JsSyntaxNode, b: &JsSyntaxNode) -> (bool, bool) {
             (None, Some(_)) => return (false, true),
             (None, None) => return (true, true),
         }
+    }
+}
+
+/// Returns capture nodes for the given React hook call.
+///
+/// If the closure is an inline function expression, returns its captures.
+/// If the closure is a function reference (identifier), resolves the function
+/// and returns its captures. For identifiers that aren't functions (like props),
+/// returns the identifier itself as it should be in the dependency list.
+///
+/// Bindings declared outside the component function range are treated as:
+/// - Stable (ignored) if they're truly global or module-level
+/// - Unstable (included) if they're function parameters (props)
+fn get_relevant_capture_nodes(
+    result: &ReactCallWithDependencyResult,
+    model: &SemanticModel,
+    component_function_range: &TextRange,
+) -> Vec<JsSyntaxNode> {
+    let Some(closure_expression) = result
+        .closure_node
+        .as_ref()
+        .and_then(|node| node.inner_expression())
+    else {
+        return vec![];
+    };
+
+    if let AnyJsExpression::JsIdentifierExpression(identifier) = &closure_expression
+        && let Ok(identifier_name) = identifier.name()
+        && let Some(binding) = model.binding(&identifier_name)
+        && let AnyJsIdentifierBinding::JsIdentifierBinding(identifier_binding) = binding.tree()
+        && let Some(declaration) = identifier_binding.declaration()
+    {
+        if identifier_binding
+            .range()
+            .intersect(*component_function_range)
+            .is_none_or(TextRange::is_empty)
+        {
+            return vec![];
+        }
+
+        let closure = match declaration {
+            AnyJsBindingDeclaration::JsFunctionDeclaration(decl) => Some(decl.closure(model)),
+            AnyJsBindingDeclaration::JsVariableDeclarator(decl) => decl
+                .initializer()
+                .and_then(|init| init.expression().ok())
+                .and_then(|expr| AnyJsFunctionExpression::try_from(expr).ok())
+                .map(|expr| expr.closure(model)),
+
+            _ => None,
+        };
+
+        if let Some(new_closure) = closure {
+            all_captures_in_closure(&new_closure)
+                .map(|capture| capture.node().clone())
+                .collect()
+        } else {
+            // Not a function - treat the identifier itself as a capture
+            // (e.g., a prop that is a function)
+            vec![identifier_name.syntax().clone()]
+        }
+    } else if let Ok(function_expression) = AnyJsFunctionExpression::try_from(closure_expression) {
+        all_captures_in_closure(&function_expression.closure(model))
+            .map(|capture| capture.node().clone())
+            .collect()
+    } else {
+        vec![]
     }
 }
 
@@ -841,21 +1200,27 @@ impl Rule for UseExhaustiveDependencies {
 
         let component_function_range = component_function.text_range_with_trivia();
 
-        let captures: Vec<_> = result
-            .all_captures(model)
-            .filter(|capture| {
-                capture_needs_to_be_in_the_dependency_list(
-                    capture,
-                    &component_function_range,
-                    model,
-                    &hook_config_maps,
-                )
-            })
-            .map(|capture| {
-                get_whole_static_member_expression(capture.node())
-                    .map_or_else(|| capture.node().clone(), |path| path.syntax().clone())
-            })
-            .collect();
+        let captures: Vec<_> =
+            get_relevant_capture_nodes(&result, model, &component_function_range)
+                .iter()
+                .filter_map(|capture_node| {
+                    let expression_candidates = get_expression_candidates(capture_node.clone());
+                    if capture_needs_to_be_in_the_dependency_list(
+                        capture_node,
+                        &expression_candidates,
+                        &component_function_range,
+                        model,
+                        &hook_config_maps,
+                    ) {
+                        // Latest expression candidate is the longest expression
+                        return Some(expression_candidates.last().map_or_else(
+                            || capture_node.clone(),
+                            |expression| expression.syntax().clone(),
+                        ));
+                    }
+                    None
+                })
+                .collect();
 
         let deps: Vec<_> = result.all_dependencies().collect();
         let mut add_deps: BTreeMap<Box<str>, Vec<JsSyntaxNode>> = BTreeMap::new();

@@ -2,12 +2,13 @@ use super::r#if::is_at_if_function;
 use super::parse_error::expected_expression;
 use super::url::{is_at_url_function, parse_url_function};
 use crate::parser::CssParser;
+use crate::syntax::css_modules::v_bind_not_allowed;
 use crate::syntax::parse_error::expected_declaration_item;
 use crate::syntax::value::attr::{is_at_attr_function, parse_attr_function};
 use crate::syntax::value::r#if::parse_if_function;
 use crate::syntax::{
-    CssComponentValueList, is_at_any_value, is_at_dashed_identifier, is_nth_at_identifier,
-    parse_dashed_identifier, parse_regular_identifier,
+    CssComponentValueList, CssSyntaxFeatures, is_at_any_value, is_at_dashed_identifier,
+    is_nth_at_identifier, parse_dashed_identifier, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -15,7 +16,7 @@ use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, TokenSet, token_set};
+use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 /// Checks if the current position in the `CssParser` is at the start of any recognized CSS function.
 ///
@@ -23,7 +24,11 @@ use biome_parser::{Parser, TokenSet, token_set};
 /// It's used to quickly determine if the parser is positioned at a relevant function.
 #[inline]
 pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
-    is_at_url_function(p) || is_at_if_function(p) || is_at_attr_function(p) || is_at_function(p)
+    is_at_url_function(p)
+        || is_at_if_function(p)
+        || is_at_attr_function(p)
+        || is_at_vue_v_bind_function(p)
+        || is_at_function(p)
 }
 
 /// Parses any recognized CSS function at the current position in the `CssParser`.
@@ -43,6 +48,12 @@ pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
         parse_if_function(p)
     } else if is_at_attr_function(p) {
         parse_attr_function(p)
+    } else if is_at_vue_v_bind_function(p) {
+        CssSyntaxFeatures::CssModulesWithVue.parse_exclusive_syntax(
+            p,
+            parse_function,
+            |p, marker| v_bind_not_allowed(p, marker.range(p)),
+        )
     } else {
         parse_function(p)
     }
@@ -60,6 +71,20 @@ pub(crate) fn is_at_function(p: &mut CssParser) -> bool {
 #[inline]
 pub(crate) fn is_nth_at_function(p: &mut CssParser, n: usize) -> bool {
     is_nth_at_identifier(p, n) && p.nth_at(n + 1, T!['('])
+}
+
+#[inline]
+fn is_at_vue_v_bind_function(p: &mut CssParser) -> bool {
+    if !is_nth_at_function(p, 0) {
+        return false;
+    }
+
+    let is_v_bind = p.cur_text() == "v-bind";
+    if !is_v_bind {
+        return false;
+    }
+
+    true
 }
 
 /// Parses a simple CSS function at the current position in the `CssParser`.

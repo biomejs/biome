@@ -45,6 +45,7 @@ a:defined { }
 ::-webkit-scrollbar-button:hover {}
 dialog:open {}
 custom-selector:state(checked) {}
+:active-view-transition * { transition-duration: 0s; }
 
 ```
 

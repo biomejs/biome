@@ -1356,6 +1356,8 @@ impl<'src> CssLexer<'src> {
                 }
                 kind
             }
+            BEO => self.consume_byte(T!['{']),
+            BEC => self.consume_byte(T!['}']),
             SEM => self.consume_byte(T![;]),
             _ => self.consume_tailwind_utility(),
         }
@@ -1368,7 +1370,7 @@ impl<'src> CssLexer<'src> {
         while let Some(current) = self.current_byte() {
             let dispatched = lookup_byte(current);
             match dispatched {
-                WHS | SEM => break,
+                WHS | SEM | BEC => break,
                 _ => {}
             }
             self.advance(1);

@@ -1,0 +1,18 @@
+/* should not generate diagnostics */
+import { useMemo } from "react";
+
+export function useWithNonNullAssertionOperator() {
+    const myObj = useMyObj();
+    // Bug report: diagnostic is generated here, but should not be
+    useMemo(() => Boolean(myObj!.x), [myObj!.x]);
+    // Bug report: diagnostic is generated here, but should not be
+    useMemo(() => myObj!.x?.y === true, [myObj!.x?.y]);
+    // Bug report: diagnostic is generated here, but should not be
+    useMemo(() => myObj.x.y === true, [myObj!.x?.y]);
+    // Bug report: diagnostic is generated here, but should not be
+    useMemo(() => myObj!.x?.y === true, [myObj.x.y]);
+}
+
+function useMyObj() {
+    return { x: undefined } as { x?: { y?: boolean } } | null
+}

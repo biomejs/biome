@@ -28,7 +28,7 @@ use biome_formatter::{
     TrailingNewline,
 };
 use biome_fs::{BiomePath, ConfigName};
-use biome_json_analyze::{JsonAnalyzeServices, analyze};
+use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices, analyze};
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
@@ -542,7 +542,10 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
     let services = JsonAnalyzeServices {
         file_source,
-        configuration_source: params.settings.as_ref().full_source(),
+        configuration_provider: params
+            .settings
+            .full_source()
+            .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
     };
     let (_, analyze_diagnostics) = analyze(
         &root,
@@ -623,7 +626,9 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     };
     let services = JsonAnalyzeServices {
         file_source,
-        configuration_source: workspace.as_ref().full_source(),
+        configuration_provider: workspace
+            .full_source()
+            .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
     };
     analyze(
         &tree,
@@ -696,7 +701,10 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     loop {
         let services = JsonAnalyzeServices {
             file_source,
-            configuration_source: params.settings.as_ref().full_source(),
+            configuration_provider: params
+                .settings
+                .full_source()
+                .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
         };
         let (action, _) = analyze(
             &tree,

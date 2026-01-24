@@ -68,6 +68,7 @@ pub(crate) struct NodeCompilationContext<'a> {
 }
 
 impl<'a> NodeCompilationContext<'a> {
+    /// Creates a new context. Ensures a global scope exists before creating the local scope.
     pub(crate) fn new(
         compilation_context: &'a CompilationContext,
         vars: &'a mut BTreeMap<String, usize>,
@@ -75,11 +76,16 @@ impl<'a> NodeCompilationContext<'a> {
         global_vars: &'a mut BTreeMap<String, usize>,
         diagnostics: &'a mut Vec<CompilerDiagnostic>,
     ) -> Self {
+        if vars_array.is_empty() {
+            vars_array.push(Vec::new());
+        }
+        let scope_index = vars_array.len();
+        vars_array.push(Vec::new());
         Self {
             compilation: compilation_context,
             vars,
             vars_array,
-            scope_index: 0,
+            scope_index,
             global_vars,
             diagnostics,
         }

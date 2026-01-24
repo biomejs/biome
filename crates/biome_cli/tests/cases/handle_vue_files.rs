@@ -522,6 +522,50 @@ schema + sure()
 }
 
 #[test]
+fn parse_vue_css_v_bind_function() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let vue_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        r#"<template>
+  <div class="red"></div>
+</template>
+
+<style>
+.red {
+  color: v-bind(color);
+}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", vue_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "parse_vue_css_v_bind_function",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn full_support_ts() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

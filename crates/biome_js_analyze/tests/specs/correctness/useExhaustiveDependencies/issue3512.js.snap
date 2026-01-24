@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: issue3512.js
+---
+# Input
+```js
+import { useState, useEffect } from 'react'
+
+// Problem
+function StateArrayDestructure() {
+    const [[x, y], setXY] = useState([1, 2]);
+    // Incorrect diagnostic reported: says "y" should be removed
+    useEffect(() => {
+        console.log(x, y)
+    }, [x, y]);
+
+    return null
+}
+
+// Problem
+function StateArrayDestructureWithMissing() {
+    const [[x, y], setXY] = useState([1, 2]);
+    // Missing diagnostic reported: should say "y" should be added
+    useEffect(() => {
+        console.log(x, y);
+    }, [x]);
+
+    return null
+}
+
+// Ok
+function ArrayDestructure() {
+    const [x, y] = [Math.random(), Math.random()];
+    useEffect(() => {
+        console.log(x, y)
+    }, [x, y]);
+
+    return null
+}
+
+// Ok
+function StateObjectDestructure() {
+    const [{ x, y }, setXY] = useState({ x: 1, y: 2 });
+    useEffect(() => {
+        console.log(x, y)
+    }, [x, y]);
+
+    return null
+}
+
+// Ok
+function ObjectDestructure() {
+    const {x, y} = { x: Math.random(), y: Math.random() };
+    useEffect(() => {
+        console.log(x, y)
+    }, [x, y]);
+
+    return null
+}
+
+// Ok
+function StateIndependentVariables() {
+    const [x, setX] = useState(1);
+    const [y, setY] = useState(2);
+    useEffect(() => {
+        console.log(x, y)
+    }, [x, y]);
+
+    return null
+}
+
+// Ok
+function IndependentVariables() {
+    const x = Math.random();
+    const y = Math.random();
+    useEffect(() => {
+        console.log(x, y)
+    }, [x, y]);
+
+    return null
+}
+
+```
+
+# Diagnostics
+```
+issue3512.js:18:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on y.
+  
+    16 │     const [[x, y], setXY] = useState([1, 2]);
+    17 │     // Missing diagnostic reported: should say "y" should be added
+  > 18 │     useEffect(() => {
+       │     ^^^^^^^^^
+    19 │         console.log(x, y);
+    20 │     }, [x]);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    17 │     // Missing diagnostic reported: should say "y" should be added
+    18 │     useEffect(() => {
+  > 19 │         console.log(x, y);
+       │                        ^
+    20 │     }, [x]);
+    21 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    20 │ ····},·[x,·y]);
+       │          +++   
+
+```

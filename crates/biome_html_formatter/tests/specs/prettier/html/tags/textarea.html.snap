@@ -53,14 +53,6 @@ info: html/tags/textarea.html
                          </textarea>
                        </div>
                      </div>
-@@ -27,4 +27,6 @@
- </div>
- <textarea></textarea>
- 
--<div><textarea>lorem ipsum</textarea></div>
-+<div>
-+  <textarea>lorem ipsum</textarea>
-+</div>
 ```
 
 # Output
@@ -95,7 +87,5 @@ info: html/tags/textarea.html
 </div>
 <textarea></textarea>
 
-<div>
-  <textarea>lorem ipsum</textarea>
-</div>
+<div><textarea>lorem ipsum</textarea></div>
 ```

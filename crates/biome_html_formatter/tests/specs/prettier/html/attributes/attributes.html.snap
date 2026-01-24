@@ -90,19 +90,11 @@ and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
 ```diff
 --- Prettier
 +++ Biome
-@@ -61,8 +61,14 @@
-   data-index-number="12314"
-   data-parent="cars"
- ></article>
--<X> </X>
--<X a="1"> </X>
--<X a="1" b="2"> </X>
--<X a="1" b="2" c="3"> </X>
+@@ -65,4 +65,10 @@
+ <X a="1"> </X>
+ <X a="1" b="2"> </X>
+ <X a="1" b="2" c="3"> </X>
 -<p class="foo bar baz"></p>
-+<X></X>
-+<X a="1"></X>
-+<X a="1" b="2"></X>
-+<X a="1" b="2" c="3"></X>
 +<p
 +  class="
 +    foo
@@ -178,10 +170,10 @@ and HTML5 Apps. It also documents Mozilla products, like Firefox OS."
   data-index-number="12314"
   data-parent="cars"
 ></article>
-<X></X>
-<X a="1"></X>
-<X a="1" b="2"></X>
-<X a="1" b="2" c="3"></X>
+<X> </X>
+<X a="1"> </X>
+<X a="1" b="2"> </X>
+<X a="1" b="2" c="3"> </X>
 <p
   class="
     foo

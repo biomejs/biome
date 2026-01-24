@@ -22,30 +22,31 @@ harness = false
 name    = "biome_json"
 
 [dependencies]
-biome_analyze            = { workspace = true, features = ["serde"] }
-biome_console            = { workspace = true }
-biome_deserialize        = { workspace = true }
-biome_deserialize_macros = { workspace = true }
-biome_diagnostics        = { workspace = true }
-biome_flags              = { workspace = true }
-biome_formatter          = { workspace = true, features = ["serde"] }
-biome_glob               = { workspace = true, features = ["schema"] }
-biome_html_formatter     = { workspace = true, features = ["serde"] }
-biome_html_syntax        = { workspace = true }
-biome_js_formatter       = { workspace = true, features = ["serde"] }
-biome_json_formatter     = { workspace = true, features = ["serde"] }
-biome_json_parser        = { workspace = true }
-biome_json_syntax        = { workspace = true }
-biome_plugin_loader      = { workspace = true }
-biome_resolver           = { workspace = true }
-biome_rowan              = { workspace = true, features = ["serde"] }
-biome_rule_options       = { workspace = true }
-bpaf                     = { workspace = true }
-camino                   = { workspace = true }
-regex                    = { workspace = true }
-rustc-hash               = { workspace = true }
-schemars                 = { workspace = true, optional = true }
-serde                    = { workspace = true, features = ["derive"] }
+biome_analyze              = { workspace = true, features = ["serde"] }
+biome_configuration_macros = { workspace = true }
+biome_console              = { workspace = true }
+biome_deserialize          = { workspace = true }
+biome_deserialize_macros   = { workspace = true }
+biome_diagnostics          = { workspace = true }
+biome_flags                = { workspace = true }
+biome_formatter            = { workspace = true, features = ["serde"] }
+biome_glob                 = { workspace = true, features = ["schema"] }
+biome_html_formatter       = { workspace = true, features = ["serde"] }
+biome_html_syntax          = { workspace = true }
+biome_js_formatter         = { workspace = true, features = ["serde"] }
+biome_json_formatter       = { workspace = true, features = ["serde"] }
+biome_json_parser          = { workspace = true }
+biome_json_syntax          = { workspace = true }
+biome_plugin_loader        = { workspace = true }
+biome_resolver             = { workspace = true }
+biome_rowan                = { workspace = true, features = ["serde"] }
+biome_rule_options         = { workspace = true }
+bpaf                       = { workspace = true }
+camino                     = { workspace = true }
+regex                      = { workspace = true }
+rustc-hash                 = { workspace = true }
+schemars                   = { workspace = true, optional = true }
+serde                      = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
 criterion    = { package = "codspeed-criterion-compat", version = "=3.0.5" }

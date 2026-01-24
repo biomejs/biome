@@ -1,0 +1,8 @@
+# should generate diagnostics
+enum A {
+	TEST
+	OTHER
+	TesT
+	ANOTHER
+	Test
+}

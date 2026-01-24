@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-04.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+import MyScript from 'next/script'
+
+export default function Page() {
+  return (
+    <MyScript {...{ strategy: "beforeInteractive" }}>{`console.log('Hello world!');`}</MyScript>
+  )
+}
+
+```
+
+# Diagnostics
+```
+invalid-04.jsx:6:5 lint/nursery/useInlineScriptId ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × next/script components have inline content or `dangerouslySetInnerHTML` without id attribute.
+  
+    4 │ export default function Page() {
+    5 │   return (
+  > 6 │     <MyScript {...{ strategy: "beforeInteractive" }}>{`console.log('Hello world!');`}</MyScript>
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   )
+    8 │ }
+  
+  i Next.js requires id attribute to track and optimize inline scripts. Without it, performance issues may occur.
+  
+  i See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

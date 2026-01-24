@@ -67,7 +67,7 @@ pub const LEGACY_TREESITTER_COMPATIBILITY_PATTERNS: &[LegacyTreeSitterPattern] =
     LegacyTreeSitterPattern {
         name: "arrow_function",
         kind: JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION,
-        slots: &[("body", 5)],
+        slots: &[("parameters", 2), ("body", 5)],
     },
     LegacyTreeSitterPattern {
         name: "object",
