@@ -29,6 +29,8 @@ pub(crate) enum HtmlLexContext {
     InsideTag,
     /// Like [InsideTag], but with Vue-specific tokens enabled.
     InsideTagVue,
+    /// Lexes Vue directive arguments inside `[]`.
+    VueDirectiveArgument,
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
