@@ -1,12 +1,17 @@
+use crate::JsRuleAction;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
+use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunction, AnyJsStatement, JsCallArgumentList, JsCallArguments,
-    JsCallExpression, JsReturnStatement,
+    AnyJsExpression, AnyJsFunction, AnyJsStatement, AnyJsxChild, AnyJsxTag, JsCallArgumentList,
+    JsCallArguments, JsCallExpression, JsConditionalExpression, JsLogicalExpression,
+    JsReturnStatement, T,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_lint_rule! {
     /// Disallow early returns in Solid components.
@@ -66,7 +71,11 @@ impl Rule for NoSolidEarlyReturn {
             return Vec::new();
         }
 
-        let Some(body) = func.body().ok().and_then(|b| b.as_js_function_body().cloned()) else {
+        let Some(body) = func
+            .body()
+            .ok()
+            .and_then(|b| b.as_js_function_body().cloned())
+        else {
             return Vec::new();
         };
 
@@ -79,10 +88,10 @@ impl Rule for NoSolidEarlyReturn {
         let mut problematic_returns = vec![];
 
         for ret in &all_returns {
-            if let Some(arg) = ret.argument() {
-                if has_conditional_expression(&arg) {
-                    problematic_returns.push((ReturnType::Conditional, ret.clone()));
-                }
+            if let Some(arg) = ret.argument()
+                && let Some(cond_type) = get_conditional_type(&arg)
+            {
+                problematic_returns.push((ReturnType::Conditional(cond_type), ret.clone()));
             }
         }
 
@@ -115,23 +124,66 @@ impl Rule for NoSolidEarlyReturn {
         let span = statement.return_token().ok()?.text_range();
 
         let message = match return_type {
-            ReturnType::Conditional => "This conditional return breaks reactivity.",
+            ReturnType::Conditional(_) => "This conditional return breaks reactivity.",
             ReturnType::EarlyReturn => "This early return breaks reactivity.",
         };
 
         Some(
-            RuleDiagnostic::new(rule_category!(), span, message)
-                .note("Solid components run once. Moving the condition inside JSX ensures reactivity is preserved."),
+            RuleDiagnostic::new(rule_category!(), span, message).note(
+                "Solid components run once. Moving the condition inside JSX ensures reactivity is preserved.",
+            ),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let (return_type, ret_stmt) = state;
+
+        // Only provide fixes for conditional expressions, not early returns
+        let cond_type = match return_type {
+            ReturnType::Conditional(cond_type) => cond_type,
+            ReturnType::EarlyReturn => return None,
+        };
+
+        let arg = ret_stmt.argument()?;
+        let mut mutation = ctx.root().begin();
+
+        // Create a fragment wrapping the conditional expression: <>{expr}</>
+        let opening_fragment = make::jsx_opening_fragment(make::token(T![<]), make::token(T![>]));
+        let closing_fragment =
+            make::jsx_closing_fragment(make::token(T![<]), make::token(T![/]), make::token(T![>]));
+
+        // Wrap the expression in a JsxExpressionChild: {expr}
+        let jsx_expr_child = make::jsx_expression_child(make::token(T!['{']), make::token(T!['}']))
+            .with_expression(arg.clone())
+            .build();
+
+        let children = make::jsx_child_list([AnyJsxChild::JsxExpressionChild(jsx_expr_child)]);
+
+        let fragment = make::jsx_fragment(opening_fragment, children, closing_fragment);
+
+        // Create a JsxTagExpression to wrap the fragment
+        let jsx_tag_expr = make::jsx_tag_expression(AnyJsxTag::JsxFragment(fragment));
+
+        // Replace the expression in the return statement
+        mutation.replace_node(arg, AnyJsExpression::JsxTagExpression(jsx_tag_expr));
+
+        let message = match cond_type {
+            ConditionalType::Ternary(_) => "Wrap the ternary expression in a fragment.",
+            ConditionalType::Logical(_) => "Wrap the logical expression in a fragment.",
+        };
+
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { {message} }.to_owned(),
+            mutation,
+        ))
     }
 }
 
 /// Returns `true` if the function is (probably) a component (because it is PascalCase)
 fn is_component_name(name: &str) -> bool {
-    name.chars()
-        .next()
-        .map(|x| x.is_uppercase())
-        .unwrap_or_default()
+    name.chars().next().is_some_and(|x| x.is_uppercase())
 }
 
 /// Check if the function is passed as an argument to a HOC (Higher Order Component)
@@ -148,16 +200,32 @@ fn is_argument_of_hoc(func: &AnyJsFunction) -> bool {
 }
 
 pub enum ReturnType {
-    Conditional,
+    /// Conditional expression (ternary or logical) in a return statement
+    Conditional(ConditionalType),
+    /// Early return in an if statement
     EarlyReturn,
 }
 
-/// Check if an expression contains a conditional (ternary) operator or logical operators
-fn has_conditional_expression(expr: &AnyJsExpression) -> bool {
-    matches!(
-        expr,
-        AnyJsExpression::JsConditionalExpression(_) | AnyJsExpression::JsLogicalExpression(_)
-    )
+/// The type of conditional expression found in a return statement
+pub enum ConditionalType {
+    /// A ternary expression: `condition ? consequent : alternate`
+    Ternary(JsConditionalExpression),
+    /// A logical expression: `a && b` or `a || b`
+    Logical(JsLogicalExpression),
+}
+
+/// Check if an expression is a conditional (ternary) operator or logical operator
+/// Returns the conditional type if found
+fn get_conditional_type(expr: &AnyJsExpression) -> Option<ConditionalType> {
+    match expr {
+        AnyJsExpression::JsConditionalExpression(cond) => {
+            Some(ConditionalType::Ternary(cond.clone()))
+        }
+        AnyJsExpression::JsLogicalExpression(logical) => {
+            Some(ConditionalType::Logical(logical.clone()))
+        }
+        _ => None,
+    }
 }
 
 /// Collect return statements from a statement WITHOUT recursing into nested functions
@@ -173,10 +241,10 @@ fn collect_return_statements_shallow(
             if let Ok(consequent) = if_stmt.consequent() {
                 collect_return_statements_shallow(&consequent, returns);
             }
-            if let Some(alternate) = if_stmt.else_clause() {
-                if let Ok(alternate_stmt) = alternate.alternate() {
-                    collect_return_statements_shallow(&alternate_stmt, returns);
-                }
+            if let Some(alternate) = if_stmt.else_clause()
+                && let Ok(alternate_stmt) = alternate.alternate()
+            {
+                collect_return_statements_shallow(&alternate_stmt, returns);
             }
         }
         AnyJsStatement::JsBlockStatement(block) => {
