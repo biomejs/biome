@@ -80,14 +80,20 @@ impl Rule for NoSolidEarlyReturn {
         };
 
         let mut all_returns = vec![];
+        let mut if_returns = vec![];
 
         for statement in body.statements() {
-            collect_return_statements_shallow(&statement, &mut all_returns);
+            if matches!(&statement, AnyJsStatement::JsIfStatement(_)) {
+                collect_return_statements_shallow(&statement, &mut if_returns);
+            } else {
+                collect_return_statements_shallow(&statement, &mut all_returns);
+            }
         }
 
+        let has_multiple_returns = all_returns.len() + if_returns.len() > 1;
         let mut problematic_returns = vec![];
 
-        for ret in &all_returns {
+        for ret in all_returns.iter().chain(if_returns.iter()) {
             if let Some(arg) = ret.argument()
                 && let Some(cond_type) = get_conditional_type(&arg)
             {
@@ -95,23 +101,14 @@ impl Rule for NoSolidEarlyReturn {
             }
         }
 
-        if all_returns.len() > 1 {
-            for statement in body.statements() {
-                if let AnyJsStatement::JsIfStatement(if_stmt) = statement {
-                    let mut if_returns = vec![];
-                    collect_return_statements_shallow(
-                        &AnyJsStatement::from(if_stmt.clone()),
-                        &mut if_returns,
-                    );
-
-                    for ret in if_returns {
-                        if !problematic_returns
-                            .iter()
-                            .any(|(_, r)| r.syntax() == ret.syntax())
-                        {
-                            problematic_returns.push((ReturnType::EarlyReturn, ret));
-                        }
-                    }
+        if has_multiple_returns {
+            for ret in if_returns {
+                // Skip if already added as a conditional return
+                if !problematic_returns
+                    .iter()
+                    .any(|(_, r)| r.syntax() == ret.syntax())
+                {
+                    problematic_returns.push((ReturnType::EarlyReturn, ret));
                 }
             }
         }
@@ -138,7 +135,6 @@ impl Rule for NoSolidEarlyReturn {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let (return_type, ret_stmt) = state;
 
-        // Only provide fixes for conditional expressions, not early returns
         let cond_type = match return_type {
             ReturnType::Conditional(cond_type) => cond_type,
             ReturnType::EarlyReturn => return None,
@@ -147,12 +143,10 @@ impl Rule for NoSolidEarlyReturn {
         let arg = ret_stmt.argument()?;
         let mut mutation = ctx.root().begin();
 
-        // Create a fragment wrapping the conditional expression: <>{expr}</>
         let opening_fragment = make::jsx_opening_fragment(make::token(T![<]), make::token(T![>]));
         let closing_fragment =
             make::jsx_closing_fragment(make::token(T![<]), make::token(T![/]), make::token(T![>]));
 
-        // Wrap the expression in a JsxExpressionChild: {expr}
         let jsx_expr_child = make::jsx_expression_child(make::token(T!['{']), make::token(T!['}']))
             .with_expression(arg.clone())
             .build();
@@ -160,11 +154,8 @@ impl Rule for NoSolidEarlyReturn {
         let children = make::jsx_child_list([AnyJsxChild::JsxExpressionChild(jsx_expr_child)]);
 
         let fragment = make::jsx_fragment(opening_fragment, children, closing_fragment);
-
-        // Create a JsxTagExpression to wrap the fragment
         let jsx_tag_expr = make::jsx_tag_expression(AnyJsxTag::JsxFragment(fragment));
 
-        // Replace the expression in the return statement
         mutation.replace_node(arg, AnyJsExpression::JsxTagExpression(jsx_tag_expr));
 
         let message = match cond_type {
@@ -254,7 +245,6 @@ fn collect_return_statements_shallow(
                 }
             }
         }
-        AnyJsStatement::JsVariableStatement(_) => {}
         _ => {}
     }
 }
