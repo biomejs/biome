@@ -2,6 +2,7 @@
 
 mod shared;
 pub use shared::*;
+pub mod components_return_once;
 pub mod no_access_key;
 pub mod no_accumulating_spread;
 pub mod no_adjacent_spaces_in_regex;

@@ -1859,6 +1859,11 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/components-return-once 
+	 */
+	componentsReturnOnce?: ComponentsReturnOnceConfiguration;
+	/**
 	* Disallow ambiguous anchor descriptions.
 See https://biomejs.dev/linter/rules/no-ambiguous-anchor-text 
 	 */
@@ -3756,6 +3761,9 @@ export type UseValidTypeofConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type ComponentsReturnOnceConfiguration =
+	| RulePlainConfiguration
+	| RuleWithComponentsReturnOnceOptions;
 export type NoAmbiguousAnchorTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAmbiguousAnchorTextOptions;
@@ -5265,6 +5273,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithComponentsReturnOnceOptions {
+	level: RulePlainConfiguration;
+	options?: ComponentsReturnOnceOptions;
+}
 export interface RuleWithNoAmbiguousAnchorTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoAmbiguousAnchorTextOptions;
@@ -6758,6 +6770,7 @@ to a DOM element id.
 export type UseValidForDirectionOptions = {};
 export type UseValidTypeofOptions = {};
 export type UseYieldOptions = {};
+export type ComponentsReturnOnceOptions = {};
 export interface NoAmbiguousAnchorTextOptions {
 	/**
 	 * It allows users to modify the strings that can be checked for in the anchor text. Useful for specifying other words in other languages
@@ -7722,6 +7735,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
+	| "lint/nursery/componentsReturnOnce"
 	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
@@ -7753,7 +7767,6 @@ export type Category =
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
-	| "lint/nursery/useConsistentEnumValueType"
 	| "lint/nursery/noMultiAssign"
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNextAsyncClientComponent"
@@ -7786,6 +7799,7 @@ export type Category =
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
+	| "lint/nursery/useConsistentEnumValueType"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useDeprecatedDate"
@@ -7798,9 +7812,9 @@ export type Category =
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useMaxParams"
-	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"

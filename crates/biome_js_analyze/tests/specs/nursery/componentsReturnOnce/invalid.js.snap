@@ -1,0 +1,213 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+function Component() {
+  if (condition) {
+    return <div />;
+  }
+  return <span />;
+};
+
+const Component = () => {
+  if (condition) {
+    return <div />;
+  }
+  return <span />;
+};
+
+function Component() {
+  return Math.random() > 0.5 ? <div>Big!</div> : <div>Small!</div>;
+};
+
+function Component() {
+  return Math.random() > 0.5 ? <div>Big!</div> : "Small!";
+};
+
+function Component() {
+  return Math.random() > 0.5 ? (
+    <div>Big! No, really big!</div>
+  ) : (
+    <div>Small!</div>
+  );
+};
+
+function Component(props) {
+  return props.cond1 ? (
+    <div>Condition 1</div>
+  ) : Boolean(props.cond2) ? (
+    <div>Not condition 1, but condition 2</div>
+  ) : (
+    <div>Neither condition 1 or 2</div>
+  );
+};
+
+function Component(props) {
+  return !!props.cond && <div>Conditional</div>;
+};
+
+function Component(props) {
+  return props.primary || <div>{props.secondaryText}</div>;
+};
+
+HOC(() => {
+  if (condition) {
+    return <div />;
+  }
+  return <div />;
+});
+```
+
+_Note: The parser emitted 30 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.js:2:19 lint/nursery/componentsReturnOnce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Solid components run once, so an early return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+  
+    1 │ function Component() {
+  > 2 │   if (condition) {
+      │                   
+  > 3 │     return <div />;
+      │     ^^^^^^^
+    4 │   }
+    5 │   return <span />;
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:19 lint/nursery/componentsReturnOnce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Solid components run once, so an early return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+  
+     8 │ const Component = () => {
+   > 9 │   if (condition) {
+       │                   
+  > 10 │     return <div />;
+       │     ^^^^^^^
+    11 │   }
+    12 │   return <span />;
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:23 lint/nursery/componentsReturnOnce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Solid components run once, so a conditional return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+  
+    13 │ };
+    14 │ 
+  > 15 │ function Component() {
+       │                       
+  > 16 │   return Math.random() > 0.5 ? <div>Big!</div> : <div>Small!</div>;
+       │   ^^^^^^^
+    17 │ };
+    18 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:23 lint/nursery/componentsReturnOnce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Solid components run once, so a conditional return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+  
+    17 │ };
+    18 │ 
+  > 19 │ function Component() {
+       │                       
+  > 20 │   return Math.random() > 0.5 ? <div>Big!</div> : "Small!";
+       │   ^^^^^^^
+    21 │ };
+    22 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:28 lint/nursery/componentsReturnOnce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Solid components run once, so a conditional return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+  
+    29 │ };
+    30 │ 
+  > 31 │ function Component(props) {
+       │                            
+  > 32 │   return props.cond1 ? (
+       │   ^^^^^^^
+    33 │     <div>Condition 1</div>
+    34 │   ) : Boolean(props.cond2) ? (
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:28 lint/nursery/componentsReturnOnce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Solid components run once, so a conditional return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+  
+    39 │ };
+    40 │ 
+  > 41 │ function Component(props) {
+       │                            
+  > 42 │   return !!props.cond && <div>Conditional</div>;
+       │   ^^^^^^^
+    43 │ };
+    44 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:28 lint/nursery/componentsReturnOnce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Solid components run once, so a conditional return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+  
+    43 │ };
+    44 │ 
+  > 45 │ function Component(props) {
+       │                            
+  > 46 │   return props.primary || <div>{props.secondaryText}</div>;
+       │   ^^^^^^^
+    47 │ };
+    48 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:19 lint/nursery/componentsReturnOnce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Solid components run once, so an early return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />.
+  
+    49 │ HOC(() => {
+  > 50 │   if (condition) {
+       │                   
+  > 51 │     return <div />;
+       │     ^^^^^^^
+    52 │   }
+    53 │   return <div />;
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

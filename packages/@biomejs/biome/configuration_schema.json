@@ -708,6 +708,16 @@
 			},
 			"additionalProperties": false
 		},
+		"ComponentsReturnOnceConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithComponentsReturnOnceOptions" }
+			]
+		},
+		"ComponentsReturnOnceOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"ConsistentArrayType": {
 			"oneOf": [
 				{
@@ -5360,6 +5370,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"componentsReturnOnce": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/components-return-once",
+					"anyOf": [
+						{ "$ref": "#/$defs/ComponentsReturnOnceConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAmbiguousAnchorText": {
 					"description": "Disallow ambiguous anchor descriptions.\nSee https://biomejs.dev/linter/rules/no-ambiguous-anchor-text",
 					"anyOf": [
@@ -6541,6 +6558,15 @@
 					"const": "error"
 				}
 			]
+		},
+		"RuleWithComponentsReturnOnceOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/ComponentsReturnOnceOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
 		},
 		"RuleWithNoAccessKeyOptions": {
 			"type": "object",

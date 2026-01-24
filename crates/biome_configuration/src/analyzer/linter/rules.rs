@@ -89,6 +89,7 @@ impl std::fmt::Display for RuleGroup {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum RuleName {
+    ComponentsReturnOnce,
     NoAccessKey,
     NoAccumulatingSpread,
     NoAdjacentSpacesInRegex,
@@ -520,6 +521,7 @@ pub enum RuleName {
 impl RuleName {
     pub const fn as_str(self) -> &'static str {
         match self {
+            Self::ComponentsReturnOnce => "componentsReturnOnce",
             Self::NoAccessKey => "noAccessKey",
             Self::NoAccumulatingSpread => "noAccumulatingSpread",
             Self::NoAdjacentSpacesInRegex => "noAdjacentSpacesInRegex",
@@ -959,6 +961,7 @@ impl RuleName {
     }
     pub const fn group(self) -> RuleGroup {
         match self {
+            Self::ComponentsReturnOnce => RuleGroup::Nursery,
             Self::NoAccessKey => RuleGroup::A11y,
             Self::NoAccumulatingSpread => RuleGroup::Performance,
             Self::NoAdjacentSpacesInRegex => RuleGroup::Complexity,
@@ -1393,6 +1396,7 @@ impl std::str::FromStr for RuleName {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "componentsReturnOnce" => Ok(Self::ComponentsReturnOnce),
             "noAccessKey" => Ok(Self::NoAccessKey),
             "noAccumulatingSpread" => Ok(Self::NoAccumulatingSpread),
             "noAdjacentSpacesInRegex" => Ok(Self::NoAdjacentSpacesInRegex),
