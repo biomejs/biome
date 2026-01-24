@@ -38,7 +38,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseLoneAnonymousOperation {
-        version: "next",
+        version: "2.3.12",
         name: "useLoneAnonymousOperation",
         language: "graphql",
         recommended: false,

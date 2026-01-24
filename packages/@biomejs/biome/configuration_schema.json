@@ -5765,6 +5765,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentEnumValueType": {
+					"description": "Disallow enums from having both number and string members.\nSee https://biomejs.dev/linter/rules/use-consistent-enum-value-type",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentEnumValueTypeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentGraphqlDescriptions": {
 					"description": "Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.\nSee https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
 					"anyOf": [
@@ -9360,6 +9367,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentEnumValueTypeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentEnumValueTypeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentGraphqlDescriptionsOptions": {
 			"type": "object",
 			"properties": {
@@ -12302,6 +12318,16 @@
 			]
 		},
 		"UseConsistentCurlyBracesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseConsistentEnumValueTypeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentEnumValueTypeOptions" }
+			]
+		},
+		"UseConsistentEnumValueTypeOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
