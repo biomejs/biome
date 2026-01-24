@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 use crate::JsRuleAction;
 use crate::lint::nursery::use_sorted_classes::any_class_string_like::AnyClassStringLike;
+use biome_analyze::shared::class_dedup::find_duplicate_classes;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_source_rule,
@@ -13,7 +14,6 @@ use biome_js_factory::make::{
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_analyze::shared::class_dedup::find_duplicate_classes;
 use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
 
 declare_source_rule! {

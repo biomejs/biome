@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use biome_analyze::shared::class_dedup::find_duplicate_classes;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_source_rule,
@@ -11,7 +12,6 @@ use biome_html_syntax::{
     HtmlAttribute, HtmlString, HtmlSyntaxKind, HtmlSyntaxToken, inner_string_text,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_analyze::shared::class_dedup::find_duplicate_classes;
 
 use crate::HtmlRuleAction;
 
