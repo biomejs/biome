@@ -207,7 +207,12 @@ fn parse_vue_modifier(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump_with_context(T![.], HtmlLexContext::InsideTagVue);
-    p.expect_with_context(HTML_LITERAL, HtmlLexContext::InsideTagVue);
+    if p.at(T![:]) {
+        // `:` is actually a valid modifier, for example `@keydown.:`
+        p.bump_remap_with_context(HTML_LITERAL, HtmlLexContext::InsideTagVue);
+    } else {
+        p.expect_with_context(HTML_LITERAL, HtmlLexContext::InsideTagVue);
+    }
 
     Present(m.complete(p, VUE_MODIFIER))
 }

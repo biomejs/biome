@@ -112,7 +112,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseErrorCause {
-        version: "next",
+        version: "2.3.12",
         name: "useErrorCause",
         language: "js",
         recommended: false,

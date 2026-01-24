@@ -41,6 +41,13 @@ const tailwindConfigOptions = {
 }
 export const url = 'https://www.nytimes.com/2024/03/05/arts/design/pritzker-prize-riken-yamamoto-architecture.html'
 
+// CamelCase/PascalCase identifiers - should NOT trigger (fix for #8809, #7985, #8136)
+const paddingBottomValue = "paddingBottom";
+const bgColorProperty = "backgroundColor";
+const rejectionHandler = "unhandledRejection";
+const exceptionType = "uncaughtException";
+const logGroupName = "IngestGatewayLogGroup";
+
 // TODO: Remove these false positives, they unfortunately hurt the user experience.
 // const NAMESPACE_CLASSNAME = 'Validation.JSONSchemaValidationUtilsImplFactory';
 // const BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";

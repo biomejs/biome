@@ -54,7 +54,7 @@ declare_lint_rule! {
     /// Default: `false`
     ///
     pub NoExcessiveLinesPerFile {
-        version: "next",
+        version: "2.3.12",
         name: "noExcessiveLinesPerFile",
         language: "css",
         recommended: false,

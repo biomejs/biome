@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDuplicateEnumValues {
-        version: "next",
+        version: "2.3.12",
         name: "noDuplicateEnumValues",
         language: "js",
         recommended: false,
