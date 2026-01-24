@@ -46,6 +46,86 @@ declare_lint_rule! {
     }
 }
 
+impl Rule for NoSolidEarlyReturn {
+    type Query = Ast<AnyJsFunction>;
+    type State = (ReturnType, JsReturnStatement);
+    type Signals = Vec<Self::State>;
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let func = ctx.query();
+
+        let is_component = func
+            .binding()
+            .and_then(|b| b.as_js_identifier_binding().cloned())
+            .and_then(|ident| ident.name_token().ok())
+            .is_some_and(|name| is_component_name(name.text()))
+            || is_argument_of_hoc(func);
+
+        if !is_component {
+            return Vec::new();
+        }
+
+        let Some(body) = func.body().ok().and_then(|b| b.as_js_function_body().cloned()) else {
+            return Vec::new();
+        };
+
+        let mut all_returns = vec![];
+
+        for statement in body.statements() {
+            collect_return_statements_shallow(&statement, &mut all_returns);
+        }
+
+        let mut problematic_returns = vec![];
+
+        for ret in &all_returns {
+            if let Some(arg) = ret.argument() {
+                if has_conditional_expression(&arg) {
+                    problematic_returns.push((ReturnType::Conditional, ret.clone()));
+                }
+            }
+        }
+
+        if all_returns.len() > 1 {
+            for statement in body.statements() {
+                if let AnyJsStatement::JsIfStatement(if_stmt) = statement {
+                    let mut if_returns = vec![];
+                    collect_return_statements_shallow(
+                        &AnyJsStatement::from(if_stmt.clone()),
+                        &mut if_returns,
+                    );
+
+                    for ret in if_returns {
+                        if !problematic_returns
+                            .iter()
+                            .any(|(_, r)| r.syntax() == ret.syntax())
+                        {
+                            problematic_returns.push((ReturnType::EarlyReturn, ret));
+                        }
+                    }
+                }
+            }
+        }
+
+        problematic_returns
+    }
+
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let (return_type, statement) = state;
+        let span = statement.return_token().ok()?.text_range();
+
+        let message = match return_type {
+            ReturnType::Conditional => "This conditional return breaks reactivity.",
+            ReturnType::EarlyReturn => "This early return breaks reactivity.",
+        };
+
+        Some(
+            RuleDiagnostic::new(rule_category!(), span, message)
+                .note("Solid components run once. Moving the condition inside JSX ensures reactivity is preserved."),
+        )
+    }
+}
+
 /// Returns `true` if the function is (probably) a component (because it is PascalCase)
 fn is_component_name(name: &str) -> bool {
     name.chars()
@@ -70,19 +150,6 @@ fn is_argument_of_hoc(func: &AnyJsFunction) -> bool {
 pub enum ReturnType {
     Conditional,
     EarlyReturn,
-}
-
-impl ReturnType {
-    pub fn get_message(&self) -> &str {
-        match self {
-            Self::Conditional => {
-                "Solid components run once, so a conditional return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />."
-            }
-            Self::EarlyReturn => {
-                "Solid components run once, so an early return breaks reactivity. Move the condition inside a JSX element, such as a fragment or <Show />."
-            }
-        }
-    }
 }
 
 /// Check if an expression contains a conditional (ternary) operator or logical operators
@@ -121,96 +188,5 @@ fn collect_return_statements_shallow(
         }
         AnyJsStatement::JsVariableStatement(_) => {}
         _ => {}
-    }
-}
-
-impl Rule for NoSolidEarlyReturn {
-    type Query = Ast<AnyJsFunction>;
-    type State = Vec<(ReturnType, JsReturnStatement)>;
-    type Signals = Option<Self::State>;
-    type Options = ();
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let func = ctx.query();
-
-        let is_component = func
-            .binding()
-            .and_then(|b| b.as_js_identifier_binding().cloned())
-            .and_then(|ident| ident.name_token().ok())
-            .is_some_and(|name| is_component_name(name.text()))
-            || is_argument_of_hoc(func);
-
-        if !is_component {
-            return None;
-        }
-
-        let body = func.body().ok()?;
-        let body = body.as_js_function_body()?;
-
-        let mut all_returns = vec![];
-
-        for statement in body.statements() {
-            collect_return_statements_shallow(&statement, &mut all_returns);
-        }
-
-        let mut problematic_returns = vec![];
-
-        for ret in &all_returns {
-            if let Some(arg) = ret.argument() {
-                if has_conditional_expression(&arg) {
-                    problematic_returns.push((ReturnType::Conditional, ret.clone()));
-                }
-            }
-        }
-
-        if all_returns.len() > 1 {
-            for statement in body.statements() {
-                if let AnyJsStatement::JsIfStatement(if_stmt) = statement {
-                    let mut if_returns = vec![];
-                    collect_return_statements_shallow(
-                        &AnyJsStatement::from(if_stmt.clone()),
-                        &mut if_returns,
-                    );
-
-                    if !if_returns.is_empty() {
-                        for ret in if_returns {
-                            if !problematic_returns
-                                .iter()
-                                .any(|(_, r)| r.syntax() == ret.syntax())
-                            {
-                                problematic_returns.push((ReturnType::EarlyReturn, ret));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if problematic_returns.is_empty() {
-            None
-        } else {
-            Some(problematic_returns)
-        }
-    }
-
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let mut issues = state.iter();
-
-        if let Some((return_type, statement)) = issues.next() {
-            let span = statement.return_token().ok()?.text_range();
-
-            let mut diagnostic =
-                RuleDiagnostic::new(rule_category!(), span, return_type.get_message());
-
-            for (return_type, statement) in issues {
-                if let Ok(token) = statement.return_token() {
-                    diagnostic = diagnostic.detail(token.text_range(), return_type.get_message());
-                }
-            }
-
-            Some(diagnostic)
-        } else {
-            None
-        }
     }
 }
