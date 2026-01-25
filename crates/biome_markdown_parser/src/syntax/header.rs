@@ -138,7 +138,7 @@ fn parse_hash_list(p: &mut MarkdownParser) -> usize {
 ///
 /// This stops at end of line (NEWLINE or EOF) or when trailing hashes are detected.
 /// Note: NEWLINE is an explicit token (not trivia), so we check `at_inline_end()`.
-fn parse_header_content(p: &mut MarkdownParser) {
+pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
     // Check if there's any content (not at EOF or NEWLINE)
     if p.at_inline_end() {
         return;
@@ -240,7 +240,7 @@ fn at_trailing_hashes_start(p: &mut MarkdownParser) -> bool {
 ///
 /// The lexer emits all consecutive `#` characters as a single HASH token.
 /// We wrap it in an MdHash node to match the grammar.
-fn parse_trailing_hashes(p: &mut MarkdownParser) {
+pub(crate) fn parse_trailing_hashes(p: &mut MarkdownParser) {
     let m = p.start();
 
     if at_trailing_hashes_start(p) {

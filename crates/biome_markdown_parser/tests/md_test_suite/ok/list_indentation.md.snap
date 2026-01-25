@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 131
 expression: snapshot
 ---
 ## Input
@@ -645,19 +644,19 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@721..722 "\n" [] [],
                                                 },
                                                 MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@722..725 " " [Skipped(" "), Skipped(" ")] [],
-                                                },
-                                                MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@725..726 " " [] [],
-                                                },
-                                                MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@726..741 "inner continued" [] [],
+                                                    value_token: MD_TEXTUAL_LITERAL@722..741 "inner continued" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
                                                 },
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@741..742 "\n" [] [],
                                                 },
                                                 MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@742..759 "outer continued" [Skipped(" "), Skipped(" ")] [],
+                                                    value_token: MD_TEXTUAL_LITERAL@742..743 " " [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@743..744 " " [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@744..759 "outer continued" [] [],
                                                 },
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@759..760 "\n" [] [],
@@ -1122,16 +1121,16 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@715..721 " inner" [] []
                         1: MD_TEXTUAL@721..722
                           0: MD_TEXTUAL_LITERAL@721..722 "\n" [] []
-                        2: MD_TEXTUAL@722..725
-                          0: MD_TEXTUAL_LITERAL@722..725 " " [Skipped(" "), Skipped(" ")] []
-                        3: MD_TEXTUAL@725..726
-                          0: MD_TEXTUAL_LITERAL@725..726 " " [] []
-                        4: MD_TEXTUAL@726..741
-                          0: MD_TEXTUAL_LITERAL@726..741 "inner continued" [] []
-                        5: MD_TEXTUAL@741..742
+                        2: MD_TEXTUAL@722..741
+                          0: MD_TEXTUAL_LITERAL@722..741 "inner continued" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+                        3: MD_TEXTUAL@741..742
                           0: MD_TEXTUAL_LITERAL@741..742 "\n" [] []
-                        6: MD_TEXTUAL@742..759
-                          0: MD_TEXTUAL_LITERAL@742..759 "outer continued" [Skipped(" "), Skipped(" ")] []
+                        4: MD_TEXTUAL@742..743
+                          0: MD_TEXTUAL_LITERAL@742..743 " " [] []
+                        5: MD_TEXTUAL@743..744
+                          0: MD_TEXTUAL_LITERAL@743..744 " " [] []
+                        6: MD_TEXTUAL@744..759
+                          0: MD_TEXTUAL_LITERAL@744..759 "outer continued" [] []
                         7: MD_TEXTUAL@759..760
                           0: MD_TEXTUAL_LITERAL@759..760 "\n" [] []
                       1: (empty)

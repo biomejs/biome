@@ -151,6 +151,7 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
         // This ensures the *next* token (after NEWLINE) has PRECEDING_LINE_BREAK set.
         if !kind.is_trivia()
             && kind != NEWLINE
+            && kind != MD_HARD_LINE_LITERAL
             && !(kind == MD_TEXTUAL_LITERAL
                 && self.after_newline
                 && self.current_text_is_whitespace())
@@ -876,21 +877,18 @@ impl<'src> MarkdownLexer<'src> {
         let start_position = self.position;
         let mut eq_count = 0;
 
-        // Consume all `=` and spaces
-        loop {
-            match self.current_byte() {
-                Some(b'=') => {
-                    self.advance(1);
-                    eq_count += 1;
-                }
-                Some(b' ') => {
-                    self.advance(1);
-                }
-                _ => break,
-            }
+        // Consume only `=` characters — no spaces between (CommonMark §4.3)
+        while let Some(b'=') = self.current_byte() {
+            self.advance(1);
+            eq_count += 1;
         }
 
-        // Must have at least one `=` and be followed by newline or EOF
+        // Allow optional trailing whitespace only
+        while matches!(self.current_byte(), Some(b' ' | b'\t')) {
+            self.advance(1);
+        }
+
+        // Must have at least one `=` and nothing else before newline or EOF
         if eq_count >= 1 && matches!(self.current_byte(), Some(b'\n' | b'\r') | None) {
             return MD_SETEXT_UNDERLINE_LITERAL;
         }

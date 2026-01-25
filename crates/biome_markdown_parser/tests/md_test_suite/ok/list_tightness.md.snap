@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 131
 expression: snapshot
 ---
 ## Input
@@ -594,25 +593,21 @@ MdDocument {
                                         MdNewline {
                                             value_token: NEWLINE@559..560 "\n" [] [],
                                         },
-                                        MdBulletListItem {
-                                            md_bullet_list: MdBulletList [
-                                                MdBullet {
-                                                    bullet: MINUS@560..563 "-" [Skipped(" "), Skipped(" ")] [],
-                                                    content: MdBlockList [
-                                                        MdParagraph {
-                                                            list: MdInlineItemList [
-                                                                MdTextual {
-                                                                    value_token: MD_TEXTUAL_LITERAL@563..571 " Inner 2" [] [],
-                                                                },
-                                                                MdTextual {
-                                                                    value_token: MD_TEXTUAL_LITERAL@571..572 "\n" [] [],
-                                                                },
-                                                            ],
-                                                            hard_line: missing (optional),
-                                                        },
-                                                    ],
+                                    ],
+                                },
+                                MdBullet {
+                                    bullet: MINUS@560..563 "-" [Skipped(" "), Skipped(" ")] [],
+                                    content: MdBlockList [
+                                        MdParagraph {
+                                            list: MdInlineItemList [
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@563..571 " Inner 2" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@571..572 "\n" [] [],
                                                 },
                                             ],
+                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -706,25 +701,21 @@ MdDocument {
                                             ],
                                             hard_line: missing (optional),
                                         },
-                                        MdBulletListItem {
-                                            md_bullet_list: MdBulletList [
-                                                MdBullet {
-                                                    bullet: MINUS@643..646 "-" [Skipped(" "), Skipped(" ")] [],
-                                                    content: MdBlockList [
-                                                        MdParagraph {
-                                                            list: MdInlineItemList [
-                                                                MdTextual {
-                                                                    value_token: MD_TEXTUAL_LITERAL@646..654 " Inner B" [] [],
-                                                                },
-                                                                MdTextual {
-                                                                    value_token: MD_TEXTUAL_LITERAL@654..655 "\n" [] [],
-                                                                },
-                                                            ],
-                                                            hard_line: missing (optional),
-                                                        },
-                                                    ],
+                                    ],
+                                },
+                                MdBullet {
+                                    bullet: MINUS@643..646 "-" [Skipped(" "), Skipped(" ")] [],
+                                    content: MdBlockList [
+                                        MdParagraph {
+                                            list: MdInlineItemList [
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@646..654 " Inner B" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@654..655 "\n" [] [],
                                                 },
                                             ],
+                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -1065,9 +1056,9 @@ MdDocument {
               1: (empty)
             1: MD_BULLET_LIST_ITEM@547..572
               0: MD_BULLET_LIST@547..572
-                0: MD_BULLET@547..572
+                0: MD_BULLET@547..560
                   0: MINUS@547..550 "-" [Skipped(" "), Skipped(" ")] []
-                  1: MD_BLOCK_LIST@550..572
+                  1: MD_BLOCK_LIST@550..560
                     0: MD_PARAGRAPH@550..559
                       0: MD_INLINE_ITEM_LIST@550..559
                         0: MD_TEXTUAL@550..558
@@ -1077,18 +1068,16 @@ MdDocument {
                       1: (empty)
                     1: MD_NEWLINE@559..560
                       0: NEWLINE@559..560 "\n" [] []
-                    2: MD_BULLET_LIST_ITEM@560..572
-                      0: MD_BULLET_LIST@560..572
-                        0: MD_BULLET@560..572
-                          0: MINUS@560..563 "-" [Skipped(" "), Skipped(" ")] []
-                          1: MD_BLOCK_LIST@563..572
-                            0: MD_PARAGRAPH@563..572
-                              0: MD_INLINE_ITEM_LIST@563..572
-                                0: MD_TEXTUAL@563..571
-                                  0: MD_TEXTUAL_LITERAL@563..571 " Inner 2" [] []
-                                1: MD_TEXTUAL@571..572
-                                  0: MD_TEXTUAL_LITERAL@571..572 "\n" [] []
-                              1: (empty)
+                1: MD_BULLET@560..572
+                  0: MINUS@560..563 "-" [Skipped(" "), Skipped(" ")] []
+                  1: MD_BLOCK_LIST@563..572
+                    0: MD_PARAGRAPH@563..572
+                      0: MD_INLINE_ITEM_LIST@563..572
+                        0: MD_TEXTUAL@563..571
+                          0: MD_TEXTUAL_LITERAL@563..571 " Inner 2" [] []
+                        1: MD_TEXTUAL@571..572
+                          0: MD_TEXTUAL_LITERAL@571..572 "\n" [] []
+                      1: (empty)
         1: MD_BULLET@572..582
           0: MINUS@572..573 "-" [] []
           1: MD_BLOCK_LIST@573..582
@@ -1136,9 +1125,9 @@ MdDocument {
               1: (empty)
             1: MD_BULLET_LIST_ITEM@631..655
               0: MD_BULLET_LIST@631..655
-                0: MD_BULLET@631..655
+                0: MD_BULLET@631..643
                   0: MINUS@631..634 "-" [Skipped(" "), Skipped(" ")] []
-                  1: MD_BLOCK_LIST@634..655
+                  1: MD_BLOCK_LIST@634..643
                     0: MD_PARAGRAPH@634..643
                       0: MD_INLINE_ITEM_LIST@634..643
                         0: MD_TEXTUAL@634..642
@@ -1146,18 +1135,16 @@ MdDocument {
                         1: MD_TEXTUAL@642..643
                           0: MD_TEXTUAL_LITERAL@642..643 "\n" [] []
                       1: (empty)
-                    1: MD_BULLET_LIST_ITEM@643..655
-                      0: MD_BULLET_LIST@643..655
-                        0: MD_BULLET@643..655
-                          0: MINUS@643..646 "-" [Skipped(" "), Skipped(" ")] []
-                          1: MD_BLOCK_LIST@646..655
-                            0: MD_PARAGRAPH@646..655
-                              0: MD_INLINE_ITEM_LIST@646..655
-                                0: MD_TEXTUAL@646..654
-                                  0: MD_TEXTUAL_LITERAL@646..654 " Inner B" [] []
-                                1: MD_TEXTUAL@654..655
-                                  0: MD_TEXTUAL_LITERAL@654..655 "\n" [] []
-                              1: (empty)
+                1: MD_BULLET@643..655
+                  0: MINUS@643..646 "-" [Skipped(" "), Skipped(" ")] []
+                  1: MD_BLOCK_LIST@646..655
+                    0: MD_PARAGRAPH@646..655
+                      0: MD_INLINE_ITEM_LIST@646..655
+                        0: MD_TEXTUAL@646..654
+                          0: MD_TEXTUAL_LITERAL@646..654 " Inner B" [] []
+                        1: MD_TEXTUAL@654..655
+                          0: MD_TEXTUAL_LITERAL@654..655 "\n" [] []
+                      1: (empty)
   2: EOF@655..655 "" [] []
 
 ```

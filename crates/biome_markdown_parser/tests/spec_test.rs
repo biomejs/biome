@@ -134,13 +134,32 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
 #[test]
 pub fn quick_test() {
-    let code = r#"**bold *and italic* text**
-"#;
+    use biome_markdown_parser::document_to_html;
+    use biome_markdown_syntax::MdDocument;
+    use biome_rowan::AstNode;
 
-    let root = parse_markdown(code);
-    let syntax = root.syntax();
-    dbg!(&syntax, root.diagnostics(), root.has_errors());
-    if has_bogus_nodes_or_empty_slots(&syntax) {
-        panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
+    // Example 128: Fenced code block inside blockquote
+    let input = "> ```\n> aaa\n\nbbb\n";
+    let expected = "<blockquote>\n<pre><code>aaa\n</code></pre>\n</blockquote>\n<p>bbb</p>\n";
+
+    let root = parse_markdown(input);
+    eprintln!("=== AST ===\n{:#?}", root.syntax());
+
+    let doc = MdDocument::cast(root.syntax()).unwrap();
+    let html = document_to_html(
+        &doc,
+        root.list_tightness(),
+        root.list_item_indents(),
+        root.quote_indents(),
+    );
+
+    eprintln!("=== HTML ===");
+    eprintln!("Expected:\n{}", expected);
+    eprintln!("Actual:\n{}", html);
+
+    if expected == html {
+        eprintln!("✓ PASS");
+    } else {
+        eprintln!("✗ FAIL");
     }
 }

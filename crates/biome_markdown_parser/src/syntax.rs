@@ -590,13 +590,25 @@ pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
     // MD_SETEXT_UNDERLINE_LITERAL is for `=` underlines
     // MD_THEMATIC_BREAK_LITERAL with only `-` is also a setext underline (H2)
     let completed = if allow_setext && p.at(MD_SETEXT_UNDERLINE_LITERAL) {
-        // This is a setext heading (H1 with `=`) - consume the underline
-        p.bump(MD_SETEXT_UNDERLINE_LITERAL);
-        m.complete(p, MD_SETEXT_HEADER)
+        let indent = real_line_indent_from_source(p);
+        if indent < 4 {
+            // This is a setext heading (H1 with `=`) - consume the underline
+            p.bump(MD_SETEXT_UNDERLINE_LITERAL);
+            m.complete(p, MD_SETEXT_HEADER)
+        } else {
+            // 4+ spaces of indent: not a setext underline (CommonMark §4.3)
+            m.complete(p, MD_PARAGRAPH)
+        }
     } else if allow_setext && p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p) {
-        // This is a setext heading (H2 with `-`) - remap token and consume
-        p.bump_remap(MD_SETEXT_UNDERLINE_LITERAL);
-        m.complete(p, MD_SETEXT_HEADER)
+        let indent = real_line_indent_from_source(p);
+        if indent < 4 {
+            // This is a setext heading (H2 with `-`) - remap token and consume
+            p.bump_remap(MD_SETEXT_UNDERLINE_LITERAL);
+            m.complete(p, MD_SETEXT_HEADER)
+        } else {
+            // 4+ spaces of indent: not a setext underline (CommonMark §4.3)
+            m.complete(p, MD_PARAGRAPH)
+        }
     } else {
         m.complete(p, MD_PARAGRAPH)
     };
@@ -618,17 +630,105 @@ fn inline_has_non_whitespace(p: &MarkdownParser, start: usize, end: usize) -> bo
         .is_empty()
 }
 
+/// Check if a thematic break text contains only dashes (used for setext H2 detection).
+pub(crate) fn is_dash_only_thematic_break_text(text: &str) -> bool {
+    !text.is_empty() && text.trim().chars().all(|c| c == '-')
+}
+
+/// Token-based check: is the current line a setext underline?
+///
+/// Call after consuming a NEWLINE token. Skips 0–3 columns of leading whitespace
+/// (tabs expand to the next tab stop per CommonMark §2.2), then checks for
+/// `MD_SETEXT_UNDERLINE_LITERAL` or a dash-only `MD_THEMATIC_BREAK_LITERAL`.
+///
+/// Returns `Some(bytes_consumed)` if the line is a setext underline, `None` otherwise.
+/// The byte count includes only the whitespace tokens consumed during the indent skip,
+/// NOT the underline token itself. Callers that track byte budgets must subtract this.
+///
+/// This is the single source of truth for setext detection in inline contexts.
+/// Used by `has_matching_code_span_closer`, `parse_inline_html`, and `parse_inline_item_list`.
+///
+/// Context safety: this function does NOT call `allow_setext_heading` because the token
+/// stream itself encodes context. In blockquotes, `R_ANGLE` tokens appear after NEWLINE
+/// before content, so the whitespace-only skip naturally rejects those lines. In list
+/// items, the indent reflected in the token stream is the raw line indent, and the
+/// `columns < 4` check correctly rejects lines with 4+ columns of leading whitespace.
+pub(crate) fn at_setext_underline_after_newline(p: &mut MarkdownParser) -> Option<usize> {
+    let mut columns = 0;
+    let mut bytes_consumed = 0;
+    while columns < INDENT_CODE_BLOCK_SPACES
+        && p.at(MD_TEXTUAL_LITERAL)
+        && p.cur_text().chars().all(|c| c == ' ' || c == '\t')
+    {
+        for c in p.cur_text().chars() {
+            match c {
+                ' ' => columns += 1,
+                '\t' => columns += 4 - (columns % 4),
+                _ => {}
+            }
+        }
+        bytes_consumed += p.cur_text().len();
+        p.bump(MD_TEXTUAL_LITERAL);
+    }
+    if columns >= INDENT_CODE_BLOCK_SPACES {
+        return None;
+    }
+    let is_setext = p.at(MD_SETEXT_UNDERLINE_LITERAL)
+        || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break_text(p.cur_text()));
+    if is_setext {
+        Some(bytes_consumed)
+    } else {
+        None
+    }
+}
+
+/// Token-based check: does an inline span of `byte_len` bytes cross a setext underline?
+///
+/// Walks tokens via lookahead. At each NEWLINE, delegates to
+/// [`at_setext_underline_after_newline`] — the same detection used by
+/// `has_matching_code_span_closer` and `parse_inline_item_list`.
+pub(crate) fn inline_span_crosses_setext(p: &mut MarkdownParser, byte_len: usize) -> bool {
+    p.lookahead(|p| {
+        let mut remaining = byte_len;
+        loop {
+            if remaining == 0 || p.at(T![EOF]) {
+                return false;
+            }
+            if p.at(NEWLINE) {
+                let nl_len = p.cur_text().len();
+                if nl_len > remaining {
+                    return false;
+                }
+                remaining -= nl_len;
+                p.bump(NEWLINE);
+                if let Some(ws_bytes) = at_setext_underline_after_newline(p) {
+                    // Only flag if the whitespace consumed is still within our span
+                    return ws_bytes <= remaining;
+                }
+                continue;
+            }
+            let tok_len = p.cur_text().len();
+            if tok_len > remaining {
+                return false;
+            }
+            remaining -= tok_len;
+            p.bump_any();
+        }
+    })
+}
+
 /// Check if the current thematic break token contains only dashes.
 /// This is used to detect H2 setext underlines.
 fn is_dash_only_thematic_break(p: &MarkdownParser) -> bool {
-    let text = p.cur_text();
-    !text.is_empty() && text.trim().chars().all(|c| c == '-')
+    is_dash_only_thematic_break_text(p.cur_text())
 }
 
 fn allow_setext_heading(p: &MarkdownParser) -> bool {
     let required_indent = p.state().list_item_required_indent;
     if required_indent > 0 {
-        let indent = p.line_start_leading_indent();
+        // Compute real indent from source text, since leading whitespace
+        // may have been consumed as trivia in list item context.
+        let indent = real_line_indent_from_source(p);
         if indent < required_indent {
             return false;
         }
@@ -647,6 +747,31 @@ fn allow_setext_heading(p: &MarkdownParser) -> bool {
     }
 
     line_has_quote_prefix(p, depth)
+}
+
+/// Compute the real leading indent of the current line from source text.
+/// This is needed because leading whitespace may have been consumed as trivia
+/// in list item context, making `line_start_leading_indent()` return 0.
+fn real_line_indent_from_source(p: &MarkdownParser) -> usize {
+    let source = p.source().source_text();
+    let pos: usize = p.cur_range().start().into();
+
+    // Find the start of the current line
+    let line_start = source[..pos]
+        .rfind('\n')
+        .map(|i| i + 1)
+        .unwrap_or(0);
+
+    // Count leading whitespace columns on this line
+    let mut column = 0;
+    for c in source[line_start..].chars() {
+        match c {
+            ' ' => column += 1,
+            '\t' => column += 4 - (column % 4),
+            _ => break,
+        }
+    }
+    column
 }
 
 fn line_has_quote_prefix(p: &MarkdownParser, depth: usize) -> bool {
@@ -804,13 +929,24 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
                 consume_partial_quote_prefix(p, quote_depth);
             }
 
-            // After crossing a line, check for block-level constructs and setext underlines
-            // Check if we're at a setext heading underline
+            // After crossing a line, check for setext underlines.
+            // For non-list paragraphs, we need to look past up to 3 spaces of indent
+            // to detect setext underlines (CommonMark §4.3).
+            if has_content && p.state().list_item_required_indent == 0 {
+                let is_setext = p.lookahead(|p| {
+                    at_setext_underline_after_newline(p).is_some()
+                });
+                if is_setext {
+                    // Skip the indent so parse_paragraph sees the underline
+                    p.skip_line_indent(INDENT_CODE_BLOCK_SPACES);
+                    break;
+                }
+            }
+
+            // Check if we're at a setext heading underline (already past indent)
             if has_content && p.at(MD_SETEXT_UNDERLINE_LITERAL) && allow_setext_heading(p) {
                 break;
             }
-
-            // Check if we're at a thematic break that could be a setext underline
             if has_content && p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p) {
                 break;
             }
@@ -820,6 +956,23 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
             // nested list markers like "\t - baz" to break out of the paragraph.
             let required_indent = p.state().list_item_required_indent;
             if required_indent > 0 {
+                // Check for setext underline after indent stripping.
+                // The `---` or `===` may be indented by the list item's required indent,
+                // so we need to look past that indent.
+                let real_indent = real_line_indent_from_source(p);
+                if real_indent >= required_indent {
+                    let is_setext = p.lookahead(|p| {
+                        p.skip_line_indent(required_indent);
+                        p.at(MD_SETEXT_UNDERLINE_LITERAL)
+                            || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p))
+                    });
+                    if is_setext && has_content {
+                        // Skip the indent so parse_paragraph sees the underline
+                        p.skip_line_indent(required_indent);
+                        break;
+                    }
+                }
+
                 let indent = p.line_start_leading_indent();
                 if indent >= required_indent {
                     let interrupts = p.lookahead(|p| {
@@ -886,13 +1039,22 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
         }
 
         // Check if we're at a setext heading underline (stop for paragraph to handle)
-        if has_content && p.at(MD_SETEXT_UNDERLINE_LITERAL) && allow_setext_heading(p) {
+        // Per CommonMark §4.3, setext underlines can be indented 0-3 spaces only.
+        if has_content
+            && p.at(MD_SETEXT_UNDERLINE_LITERAL)
+            && real_line_indent_from_source(p) < INDENT_CODE_BLOCK_SPACES
+            && allow_setext_heading(p)
+        {
             break;
         }
 
         // Check if we're at a thematic break that could be a setext underline
         // (dash-only thematic breaks following paragraph content are setext H2)
-        if has_content && p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p) {
+        if has_content
+            && p.at(MD_THEMATIC_BREAK_LITERAL)
+            && real_line_indent_from_source(p) < INDENT_CODE_BLOCK_SPACES
+            && is_dash_only_thematic_break(p)
+        {
             break;
         }
 
@@ -949,9 +1111,10 @@ fn set_inline_emphasis_context(
     };
     let base_offset = u32::from(p.cur_range().start()) as usize;
     // Create a reference checker closure that uses the parser's link reference definitions
-    let context = crate::syntax::inline::EmphasisContext::new(inline_source, base_offset, |label| {
-        p.has_link_reference_definition(label)
-    });
+    let context =
+        crate::syntax::inline::EmphasisContext::new(inline_source, base_offset, |label| {
+            p.has_link_reference_definition(label)
+        });
     p.set_emphasis_context(Some(context))
 }
 
@@ -1075,10 +1238,13 @@ fn line_starts_with_fence(p: &mut MarkdownParser) -> bool {
         }
         p.skip_line_indent(3);
         let rest = p.source_after_current();
-        if rest.starts_with("```") {
+        let Some((fence_char, _len)) = fenced_code_block::detect_fence(rest) else {
+            return false;
+        };
+        if fence_char == '`' {
             return !info_string_has_backtick(p);
         }
-        rest.starts_with("~~~")
+        true
     })
 }
 
@@ -1173,9 +1339,8 @@ pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
     }
 
     // Bullet list item (-, *, +)
-    // Per CommonMark §5.2: bullet lists can interrupt paragraphs if:
-    //   - The item has content, OR
-    //   - The item is empty but followed by a blank line
+    // Per CommonMark §5.2: bullet lists can interrupt paragraphs only if the
+    // item has content (non-empty). Empty markers cannot interrupt paragraphs.
     // When inside a list, we also need to check for list items at ANY indent
     // (not just at the current context's indent) because a less-indented list
     // marker would end the current list item and start a sibling/parent item.
@@ -1382,17 +1547,12 @@ fn at_order_list_item_textual(p: &mut MarkdownParser) -> bool {
 
 /// Check if a bullet list item can interrupt a top-level paragraph.
 ///
-/// Per CommonMark §5.2: A bullet list can interrupt a paragraph if:
-/// - The list item has content (at least one character after marker), OR
-/// - The list item is empty but is followed by a blank line
+/// Per CommonMark §5.2: "A bullet list can interrupt a paragraph only if
+/// it starts with a non-empty item (that is, a list item that contains
+/// some non-blank character)."
 ///
-/// This allows patterns like:
-/// ```markdown
-/// Paragraph text
-/// +
-///
-/// Next paragraph (interrupted by empty bullet + blank line)
-/// ```
+/// This means empty markers (marker followed by only whitespace/newline)
+/// cannot interrupt paragraphs, regardless of what follows.
 fn can_bullet_interrupt_paragraph(p: &mut MarkdownParser) -> bool {
     let checkpoint = p.checkpoint();
 
@@ -1414,19 +1574,22 @@ fn can_bullet_interrupt_paragraph(p: &mut MarkdownParser) -> bool {
     }
 
     // Check what follows the marker
+    // Per CommonMark §5.2: "A bullet list can interrupt a paragraph only if
+    // it starts with a non-empty item (that is, a list item that contains
+    // some non-blank character)."
     let result = if p.at(T![EOF]) {
-        // Empty item at EOF - cannot interrupt (no blank line follows)
+        // Empty item at EOF - cannot interrupt
         false
     } else if p.at(NEWLINE) {
-        // Empty item - check if followed by blank line
-        p.at_blank_line()
+        // Empty item (marker + newline) - cannot interrupt paragraphs
+        false
     } else if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-        p.bump(MD_TEXTUAL_LITERAL);
-        if p.at(NEWLINE) {
-            p.at_blank_line()
-        } else {
-            false
+        // Skip all whitespace tokens after marker
+        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+            p.bump(MD_TEXTUAL_LITERAL);
         }
+        // If only whitespace followed by newline/EOF, item is empty and cannot interrupt
+        !(p.at(NEWLINE) || p.at(T![EOF]))
     } else {
         // Has content after marker - can interrupt
         true

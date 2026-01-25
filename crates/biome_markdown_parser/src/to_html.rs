@@ -626,6 +626,9 @@ fn render_fenced_code_block(
     if content_indent > 0 {
         content = strip_indent_preserve_tabs(&content, content_indent);
     }
+    if quote_indent > 0 {
+        content = strip_quote_prefixes(&content, quote_indent);
+    }
 
     // Escape HTML but preserve the content structure
     out.push_str(&escape_html(&content));
@@ -715,16 +718,7 @@ fn render_bullet_list(
     quote_indent: usize,
 ) {
     let range = list.syntax().text_trimmed_range();
-    let mut is_tight = ctx.is_list_tight(range);
-    let has_blank_lines = list.md_bullet_list().iter().any(|bullet| {
-        bullet
-            .content()
-            .iter()
-            .any(|block| matches!(block, AnyMdBlock::AnyLeafBlock(AnyLeafBlock::MdNewline(_))))
-    });
-    if has_blank_lines {
-        is_tight = false;
-    }
+    let is_tight = ctx.is_list_tight(range);
 
     out.push_str("<ul>\n");
 
@@ -743,16 +737,7 @@ fn render_ordered_list(
     quote_indent: usize,
 ) {
     let range = list.syntax().text_trimmed_range();
-    let mut is_tight = ctx.is_list_tight(range);
-    let has_blank_lines = list.md_bullet_list().iter().any(|bullet| {
-        bullet
-            .content()
-            .iter()
-            .any(|block| matches!(block, AnyMdBlock::AnyLeafBlock(AnyLeafBlock::MdNewline(_))))
-    });
-    if has_blank_lines {
-        is_tight = false;
-    }
+    let is_tight = ctx.is_list_tight(range);
 
     // Get starting number from first item
     let start = list
@@ -797,17 +782,11 @@ fn render_list_item(
 
     let list_indent = ctx.list_item_indent(bullet.syntax().text_trimmed_range());
     let blocks: Vec<_> = bullet.content().iter().collect();
-    let item_has_blank_line = blocks.iter().enumerate().any(|(index, block)| {
-        if !is_newline_block(block) {
-            return false;
-        }
-
-        // Ignore the marker-line newline when content follows.
-        if index == 0 && blocks.iter().skip(1).any(|block| !is_newline_block(block)) {
-            return false;
-        }
-
-        true
+    // A blank line within an item requires two consecutive newline blocks
+    // (one ending the previous line, one for the blank line itself).
+    // A single MD_NEWLINE between blocks is just a structural separator.
+    let item_has_blank_line = blocks.windows(2).any(|pair| {
+        is_newline_block(&pair[0]) && is_newline_block(&pair[1])
     });
     let is_tight = is_tight && !item_has_blank_line;
 
@@ -879,6 +858,13 @@ fn render_list_item(
                     indent
                 };
                 render_block(block, ctx, out, true, block_indent, quote_indent);
+            }
+            // Remove trailing newline when the last content block is a paragraph
+            // (tight list paragraphs should not have trailing newlines)
+            if blocks.iter().rev().find(|b| !is_newline_block(b)).is_some_and(is_paragraph_block)
+                && out.ends_with('\n')
+            {
+                out.pop();
             }
         }
     } else {
@@ -1788,5 +1774,17 @@ mod tests {
             html,
             "<p><a href=\"/url\" title=\"title with &quot; quote\">a</a></p>\n"
         );
+    }
+
+    #[test]
+    fn test_hard_line_break_at_end_of_block_is_literal() {
+        let parsed = parse_markdown("foo\\\\\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(html, "<p>foo\\</p>\n");
     }
 }

@@ -647,8 +647,12 @@ fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -
     use crate::lexer::MarkdownLexContext;
 
     p.lookahead(|p| {
-        // Skip the opening backticks
-        p.bump(BACKTICK);
+        // Skip the opening backticks (handle both BACKTICK and TRIPLE_BACKTICK)
+        if p.at(T!["```"]) {
+            p.bump(T!["```"]);
+        } else {
+            p.bump(BACKTICK);
+        }
 
         loop {
             // EOF = no matching closer found
@@ -672,14 +676,18 @@ fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -
                 continue;
             }
 
-            // Found backticks - check if they match
-            if p.at(BACKTICK) {
+            // Found backticks - check if they match (handle both BACKTICK and TRIPLE_BACKTICK)
+            if p.at(BACKTICK) || p.at(T!["```"]) {
                 let closing_count = p.cur_text().len();
                 if closing_count == opening_count {
                     return true;
                 }
                 // Not matching - continue searching
-                p.bump(BACKTICK);
+                if p.at(T!["```"]) {
+                    p.bump(T!["```"]);
+                } else {
+                    p.bump(BACKTICK);
+                }
                 continue;
             }
 
@@ -701,7 +709,12 @@ fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -
 pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
     use crate::lexer::MarkdownLexContext;
 
-    if !p.at(BACKTICK) {
+    // Handle both BACKTICK and TRIPLE_BACKTICK (T!["```"]) as code span openers.
+    // TRIPLE_BACKTICK can appear when backticks are at line start but info string
+    // contains backticks, making it not a fenced code block (CommonMark examples 138, 145).
+    let is_backtick = p.at(BACKTICK);
+    let is_triple_backtick = p.at(T!["```"]);
+    if !is_backtick && !is_triple_backtick {
         return Absent;
     }
 
@@ -717,8 +730,12 @@ pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
     // We have a valid code span - now parse it
     let m = p.start();
 
-    // Opening backtick(s)
-    p.bump(BACKTICK);
+    // Opening backtick(s) - remap TRIPLE_BACKTICK to BACKTICK for consistency
+    if is_triple_backtick {
+        p.bump_remap(BACKTICK);
+    } else {
+        p.bump(BACKTICK);
+    }
 
     // Content - parse until we find matching closing backticks
     // Per CommonMark, code spans can span multiple lines (newlines become spaces in output)
@@ -744,8 +761,8 @@ pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
             continue;
         }
 
-        // Found matching closing backticks
-        if p.at(BACKTICK) && p.cur_text().len() == opening_count {
+        // Found matching closing backticks (handle both BACKTICK and TRIPLE_BACKTICK)
+        if (p.at(BACKTICK) || p.at(T!["```"])) && p.cur_text().len() == opening_count {
             break;
         }
 
@@ -757,7 +774,12 @@ pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
     content.complete(p, MD_INLINE_ITEM_LIST);
 
     // Closing backticks (guaranteed to exist due to lookahead check)
-    p.bump(BACKTICK);
+    // Remap TRIPLE_BACKTICK to BACKTICK for consistency
+    if p.at(T!["```"]) {
+        p.bump_remap(BACKTICK);
+    } else {
+        p.bump(BACKTICK);
+    }
 
     Present(m.complete(p, MD_INLINE_CODE))
 }
@@ -2527,8 +2549,10 @@ pub(crate) fn parse_autolink(p: &mut MarkdownParser) -> ParsedSyntax {
 pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
     if p.at(MD_HARD_LINE_LITERAL) {
         parse_hard_line(p)
-    } else if p.at(BACKTICK) {
-        // Try code span, fall back to literal text if no matching closer exists
+    } else if p.at(BACKTICK) || p.at(T!["```"]) {
+        // Try code span, fall back to literal text if no matching closer exists.
+        // T!["```"] can appear when backticks are at line start but info string
+        // contains backticks, making it not a fenced code block (CommonMark examples 138, 145).
         let result = parse_inline_code(p);
         if result.is_absent() {
             super::parse_textual(p)

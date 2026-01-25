@@ -195,7 +195,11 @@ impl ParseNodeList for QuoteBlockList {
         }
 
         // Parse regular block
+        // Treat content after '>' as column 0 for block parsing (fence detection).
+        let prev_virtual = p.state().virtual_line_start;
+        p.state_mut().virtual_line_start = Some(p.cur_range().start());
         let parsed = super::parse_any_block_with_indent_code_policy(p, true);
+        p.state_mut().virtual_line_start = prev_virtual;
         if let Present(ref marker) = parsed {
             self.last_block_was_paragraph = is_paragraph_like(marker.kind(p));
         } else {
@@ -222,13 +226,13 @@ impl ParseNodeList for QuoteBlockList {
     }
 }
 
-fn parse_quote_block_list(p: &mut MarkdownParser) {
+pub(crate) fn parse_quote_block_list(p: &mut MarkdownParser) {
     let depth = p.state().block_quote_depth;
     let mut list = QuoteBlockList::new(depth);
     list.parse_list(p);
 }
 
-fn line_has_quote_prefix_at_current(p: &MarkdownParser, depth: usize) -> bool {
+pub(crate) fn line_has_quote_prefix_at_current(p: &MarkdownParser, depth: usize) -> bool {
     if depth == 0 {
         return false;
     }
@@ -371,6 +375,7 @@ pub(crate) fn consume_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool
     consume_quote_prefix_impl(p, depth, true)
 }
 
+/// Check if a quote prefix starts at the current position.
 pub(crate) fn consume_quote_prefix_without_virtual(p: &mut MarkdownParser, depth: usize) -> bool {
     if depth == 0 || !has_quote_prefix(p, depth) {
         return false;

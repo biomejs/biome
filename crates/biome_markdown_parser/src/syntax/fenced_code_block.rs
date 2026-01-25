@@ -33,7 +33,6 @@ use biome_parser::{
 };
 
 use super::parse_error::unterminated_fenced_code;
-use super::quote::{consume_quote_prefix, has_quote_prefix};
 
 /// Minimum number of fence characters required per CommonMark §4.5.
 const MIN_FENCE_LENGTH: usize = 3;
@@ -135,7 +134,7 @@ fn find_line_start(before: &str) -> usize {
 /// Returns `Some((fence_char, length))` if a valid fence is found,
 /// where `length` is the actual number of fence characters (3 or more).
 /// Returns `None` if no valid fence is present.
-fn detect_fence(s: &str) -> Option<(char, usize)> {
+pub(crate) fn detect_fence(s: &str) -> Option<(char, usize)> {
     let first_char = s.chars().next()?;
 
     if first_char != '`' && first_char != '~' {
@@ -272,21 +271,60 @@ fn parse_code_content(
 ) {
     let m = p.start();
     let quote_depth = p.state().block_quote_depth;
+    let mut at_line_start = false;
 
     // Consume all tokens until we see the matching closing fence or EOF
     while !p.at(T![EOF]) {
-        if quote_depth > 0 && (p.at_line_start() || p.has_preceding_line_break()) {
-            if !has_quote_prefix(p, quote_depth) {
+        if at_line_start && quote_depth > 0 {
+            let prev_virtual = p.state().virtual_line_start;
+            p.state_mut().virtual_line_start = Some(p.cur_range().start());
+            p.skip_line_indent(3);
+            p.state_mut().virtual_line_start = prev_virtual;
+
+            let mut ok = true;
+            for _ in 0..quote_depth {
+                if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('>') {
+                    p.force_relex_regular();
+                }
+
+                if p.at(T![>]) {
+                    p.parse_as_skipped_trivia_tokens(|p| p.bump(T![>]));
+                } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
+                    p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![>]));
+                } else {
+                    ok = false;
+                    break;
+                }
+
+                if p.at(MD_TEXTUAL_LITERAL) {
+                    let text = p.cur_text();
+                    if text == " " || text == "\t" {
+                        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+                    }
+                }
+            }
+
+            if !ok {
                 break;
             }
-            consume_quote_prefix(p, quote_depth);
+            at_line_start = false;
+        }
+
+        if p.at(NEWLINE) {
+            // Preserve newlines as code content and reset virtual line start.
+            let text_m = p.start();
+            p.bump_remap(MD_TEXTUAL_LITERAL);
+            text_m.complete(p, MD_TEXTUAL);
+            p.set_virtual_line_start();
+            at_line_start = true;
+            continue;
         }
 
         if at_closing_fence(p, is_tilde_fence, fence_len) {
             break;
         }
 
-        if p.at_line_start() && fence_indent > 0 {
+        if at_line_start && fence_indent > 0 {
             skip_fenced_content_indent(p, fence_indent);
             if at_closing_fence(p, is_tilde_fence, fence_len) {
                 break;
@@ -297,6 +335,7 @@ fn parse_code_content(
         let text_m = p.start();
         p.bump_remap(MD_TEXTUAL_LITERAL);
         text_m.complete(p, MD_TEXTUAL);
+        at_line_start = false;
     }
 
     m.complete(p, MD_INLINE_ITEM_LIST);
@@ -317,7 +356,7 @@ pub(crate) fn info_string_has_backtick(p: &mut MarkdownParser) -> bool {
         }
 
         while !p.at_inline_end() {
-            if p.at(BACKTICK) {
+            if p.at(BACKTICK) || p.at(T!["```"]) {
                 return true;
             }
             p.bump(p.cur());
