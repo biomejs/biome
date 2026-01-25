@@ -66,7 +66,7 @@ _Note: The parser emitted 30 diagnostics which are not shown here._
 ```
 invalid.js:2:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This early return breaks reactivity.
+  × This early return breaks reactivity.
   
     1 │ function Component() {
   > 2 │   if (condition) {
@@ -86,7 +86,7 @@ invalid.js:2:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━�
 ```
 invalid.js:9:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This early return breaks reactivity.
+  × This early return breaks reactivity.
   
      8 │ const Component = () => {
    > 9 │   if (condition) {
@@ -106,7 +106,7 @@ invalid.js:9:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━�
 ```
 invalid.js:15:23 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This conditional return breaks reactivity.
+  × This conditional return breaks reactivity.
   
     13 │ };
     14 │ 
@@ -131,7 +131,7 @@ invalid.js:15:23 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━
 ```
 invalid.js:19:23 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This conditional return breaks reactivity.
+  × This conditional return breaks reactivity.
   
     17 │ };
     18 │ 
@@ -156,7 +156,7 @@ invalid.js:19:23 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━
 ```
 invalid.js:31:28 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This conditional return breaks reactivity.
+  × This conditional return breaks reactivity.
   
     29 │ };
     30 │ 
@@ -188,7 +188,7 @@ invalid.js:31:28 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━
 ```
 invalid.js:41:28 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This conditional return breaks reactivity.
+  × This conditional return breaks reactivity.
   
     39 │ };
     40 │ 
@@ -213,7 +213,7 @@ invalid.js:41:28 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━
 ```
 invalid.js:45:28 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This conditional return breaks reactivity.
+  × This conditional return breaks reactivity.
   
     43 │ };
     44 │ 
@@ -238,7 +238,7 @@ invalid.js:45:28 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━
 ```
 invalid.js:50:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This early return breaks reactivity.
+  × This early return breaks reactivity.
   
     49 │ HOC(() => {
   > 50 │   if (condition) {

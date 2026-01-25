@@ -16,7 +16,15 @@ use biome_rowan::{AstNode, BatchMutationExt};
 declare_lint_rule! {
     /// Disallow early returns in Solid components.
     ///
-    /// Solid components only run once, and so conditionals should be inside JSX.
+    /// Unlike React, Solid components rely on a fine-grained reactivity system where the
+    /// component function body runs only once during initialization. Reactive updates
+    /// happen through signal subscriptions, not by re-executing the entire component.
+    ///
+    /// Early returns prevent Solid from setting up the necessary subscriptions for all
+    /// reactive values, which means parts of your UI won't update when the underlying
+    /// data changes. To preserve reactivity, move conditions inside JSX using Solid's
+    /// `<Show>` or `<Switch>` components, or by using ternary/logical expressions within
+    /// the returned JSX.
     ///
     /// ## Examples
     ///
@@ -45,7 +53,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintSolid("components-return-once").same()],
         recommended: true,
-        severity: Severity::Warning,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
         domains: &[RuleDomain::Solid],
     }
@@ -54,7 +62,7 @@ declare_lint_rule! {
 impl Rule for NoSolidEarlyReturn {
     type Query = Ast<AnyJsFunction>;
     type State = (ReturnType, JsReturnStatement);
-    type Signals = Vec<Self::State>;
+    type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -68,7 +76,7 @@ impl Rule for NoSolidEarlyReturn {
             || is_argument_of_hoc(func);
 
         if !is_component {
-            return Vec::new();
+            return None;
         }
 
         let Some(body) = func
@@ -76,7 +84,7 @@ impl Rule for NoSolidEarlyReturn {
             .ok()
             .and_then(|b| b.as_js_function_body().cloned())
         else {
-            return Vec::new();
+            return None;
         };
 
         let mut all_returns = vec![];
@@ -91,29 +99,22 @@ impl Rule for NoSolidEarlyReturn {
         }
 
         let has_multiple_returns = all_returns.len() + if_returns.len() > 1;
-        let mut problematic_returns = vec![];
 
         for ret in all_returns.iter().chain(if_returns.iter()) {
             if let Some(arg) = ret.argument()
                 && let Some(cond_type) = get_conditional_type(&arg)
             {
-                problematic_returns.push((ReturnType::Conditional(cond_type), ret.clone()));
+                return Some((ReturnType::Conditional(cond_type), ret.clone()));
             }
         }
 
         if has_multiple_returns {
-            for ret in if_returns {
-                // Skip if already added as a conditional return
-                if !problematic_returns
-                    .iter()
-                    .any(|(_, r)| r.syntax() == ret.syntax())
-                {
-                    problematic_returns.push((ReturnType::EarlyReturn, ret));
-                }
+            if let Some(ret) = if_returns.into_iter().next() {
+                return Some((ReturnType::EarlyReturn, ret));
             }
         }
 
-        problematic_returns
+        None
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
