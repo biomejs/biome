@@ -1047,9 +1047,7 @@ fn render_inline_link(link: &MdInlineLink, ctx: &HtmlRenderContext, out: &mut St
 
 /// Render an inline image.
 fn render_inline_image(img: &MdInlineImage, ctx: &HtmlRenderContext, out: &mut String) {
-    let alt = render_inline_list(&img.alt(), ctx);
-    // Strip HTML tags from alt text
-    let alt = strip_html_tags(&alt);
+    let alt = extract_alt_text(&img.alt(), ctx);
 
     let dest = collect_inline_text(&img.destination());
     let dest = process_link_destination(&dest);
@@ -1109,8 +1107,7 @@ fn render_reference_link(link: &MdReferenceLink, ctx: &HtmlRenderContext, out: &
 
 /// Render a reference image.
 fn render_reference_image(img: &MdReferenceImage, ctx: &HtmlRenderContext, out: &mut String) {
-    let alt = render_inline_list(&img.alt(), ctx);
-    let alt = strip_html_tags(&alt);
+    let alt = extract_alt_text(&img.alt(), ctx);
     let alt_raw = collect_inline_text(&img.alt());
 
     render_reference_common(
@@ -1198,10 +1195,12 @@ fn render_autolink(autolink: &MdAutolink, out: &mut String) {
     // Check if it's an email autolink
     let is_email = content.contains('@') && !content.contains(':');
 
+    // Autolinks must NOT process backslash escapes or entity decoding.
+    // Only percent-encode for URL safety.
     let href = if is_email {
         format!("mailto:{}", content)
     } else {
-        process_link_destination(&content)
+        percent_encode_uri(&content)
     };
 
     out.push_str("<a href=\"");
@@ -1460,22 +1459,74 @@ fn escape_html_attribute(text: &str) -> String {
     escape_html(text)
 }
 
-/// Strip HTML tags from text (for image alt text).
-fn strip_html_tags(text: &str) -> String {
+/// Extract plain text for image alt attribute.
+/// Per CommonMark, the alt text is the content with inline formatting stripped
+/// but text from nested links/images preserved (recursively extracting their text).
+fn extract_alt_text(
+    list: &biome_markdown_syntax::MdInlineItemList,
+    ctx: &HtmlRenderContext,
+) -> String {
     let mut result = String::new();
-    let mut in_tag = false;
+    for item in list.iter() {
+        extract_alt_text_inline(&item, ctx, &mut result);
+    }
+    result
+}
 
-    for c in text.chars() {
-        if c == '<' {
-            in_tag = true;
-        } else if c == '>' {
-            in_tag = false;
-        } else if !in_tag {
-            result.push(c);
+fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &mut String) {
+    match inline {
+        AnyMdInline::MdTextual(text) => {
+            render_textual(text, out);
+        }
+        AnyMdInline::MdInlineEmphasis(em) => {
+            out.push_str(&extract_alt_text(&em.content(), ctx));
+        }
+        AnyMdInline::MdInlineItalic(italic) => {
+            out.push_str(&extract_alt_text(&italic.content(), ctx));
+        }
+        AnyMdInline::MdInlineCode(code) => {
+            // Plain text only — no <code> tags for alt attribute
+            let content = collect_raw_inline_text(&code.content());
+            let content = content.replace('\n', " ");
+            let content = if content.starts_with(' ')
+                && content.ends_with(' ')
+                && content.len() > 2
+                && content.chars().any(|c| c != ' ')
+            {
+                content[1..content.len() - 1].to_string()
+            } else {
+                content
+            };
+            out.push_str(&escape_html(&content));
+        }
+        AnyMdInline::MdInlineLink(link) => {
+            // Extract text content from link text
+            out.push_str(&extract_alt_text(&link.text(), ctx));
+        }
+        AnyMdInline::MdInlineImage(img) => {
+            // Recursively extract alt text from nested image
+            out.push_str(&extract_alt_text(&img.alt(), ctx));
+        }
+        AnyMdInline::MdReferenceLink(link) => {
+            out.push_str(&extract_alt_text(&link.text(), ctx));
+        }
+        AnyMdInline::MdReferenceImage(img) => {
+            out.push_str(&extract_alt_text(&img.alt(), ctx));
+        }
+        AnyMdInline::MdAutolink(autolink) => {
+            let content = collect_raw_inline_text(&autolink.value());
+            out.push_str(&escape_html(&content));
+        }
+        AnyMdInline::MdHardLine(_) | AnyMdInline::MdSoftBreak(_) => {
+            out.push(' ');
+        }
+        AnyMdInline::MdEntityReference(entity) => {
+            render_entity_reference(entity, out);
+        }
+        AnyMdInline::MdInlineHtml(_) | AnyMdInline::MdHtmlBlock(_) => {
+            // HTML tags are stripped in alt text
         }
     }
-
-    result
 }
 
 // ============================================================================
@@ -1588,6 +1639,80 @@ mod tests {
             parsed.quote_indents(),
         );
         assert_eq!(html, "<p><em>italic</em> and <strong>bold</strong></p>\n");
+    }
+
+    #[test]
+    fn test_emphasis_complex_cases() {
+        // Test: Nested
+        let parsed = parse_markdown("**bold *and italic* text**\n");
+        assert_eq!(
+            parsed.syntax().kind(),
+            biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT,
+            "Nested failed: {}",
+            parsed.syntax()
+        );
+
+        // Test: Rule of 3
+        let parsed = parse_markdown("***bold italic***\n");
+        assert_eq!(
+            parsed.syntax().kind(),
+            biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT,
+            "Rule of 3 failed: {}",
+            parsed.syntax()
+        );
+
+        // Test: Multiple runs
+        let parsed = parse_markdown("*a **b** c*\n");
+        assert_eq!(
+            parsed.syntax().kind(),
+            biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT,
+            "Multiple runs failed: {}",
+            parsed.syntax()
+        );
+
+        // Test: Overlapping
+        let parsed = parse_markdown("*foo**bar**baz*\n");
+        assert_eq!(
+            parsed.syntax().kind(),
+            biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT,
+            "Overlapping failed: {}",
+            parsed.syntax()
+        );
+
+        // Test: Unbalanced emphasis (CommonMark example 442)
+        // **foo* should produce *<em>foo</em>
+        let parsed = parse_markdown("**foo*\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<p>*<em>foo</em></p>\n",
+            "Unbalanced: {}",
+            parsed.syntax()
+        );
+    }
+
+    #[test]
+    fn test_example_431() {
+        // Test: Example 431 - nested emphasis with triple star closer
+        // **foo *bar*** should produce <strong>foo <em>bar</em></strong>
+        let parsed = parse_markdown("**foo *bar***\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<p><strong>foo <em>bar</em></strong></p>\n",
+            "Example 431: {}",
+            parsed.syntax()
+        );
     }
 
     #[test]

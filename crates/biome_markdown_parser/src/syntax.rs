@@ -908,9 +908,25 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
         }
 
         // Parse inline content (stops at NEWLINE via at_inline_end)
-        if parse_any_inline(p).is_absent() {
+        let parsed = parse_any_inline(p);
+        if parsed.is_absent() {
             break;
         }
+        let after_hard_break =
+            matches!(&parsed, Present(cm) if cm.kind(p) == MD_HARD_LINE);
+
+        // Per CommonMark §6.7: after a hard line break, leading spaces on the
+        // next line are ignored. Skip whitespace-only textual tokens as trivia.
+        if after_hard_break && p.at(MD_TEXTUAL_LITERAL) {
+            if p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+                while p.at(MD_TEXTUAL_LITERAL)
+                    && p.cur_text().chars().all(|c| c == ' ' || c == '\t')
+                {
+                    p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+                }
+            }
+        }
+
         let inline_end: usize = p.cur_range().start().into();
         has_content = inline_has_non_whitespace(p, inline_start, inline_end);
     }

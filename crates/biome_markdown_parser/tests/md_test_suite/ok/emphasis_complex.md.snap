@@ -103,20 +103,20 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@66..77 "Rule of 3: " [] [],
                 },
-                MdInlineEmphasis {
-                    l_fence: DOUBLE_STAR@77..79 "**" [] [],
+                MdInlineItalic {
+                    l_fence: STAR@77..78 "*" [] [],
                     content: MdInlineItemList [
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@79..80 "*" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@80..91 "bold italic" [] [],
+                        MdInlineEmphasis {
+                            l_fence: DOUBLE_STAR@78..80 "**" [] [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@80..91 "bold italic" [] [],
+                                },
+                            ],
+                            r_fence: DOUBLE_STAR@91..93 "**" [] [],
                         },
                     ],
-                    r_fence: DOUBLE_STAR@91..93 "**" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@93..94 "*" [] [],
+                    r_fence: STAR@93..94 "*" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@94..95 "\n" [] [],
@@ -301,17 +301,17 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@66..95
         0: MD_TEXTUAL@66..77
           0: MD_TEXTUAL_LITERAL@66..77 "Rule of 3: " [] []
-        1: MD_INLINE_EMPHASIS@77..93
-          0: DOUBLE_STAR@77..79 "**" [] []
-          1: MD_INLINE_ITEM_LIST@79..91
-            0: MD_TEXTUAL@79..80
-              0: MD_TEXTUAL_LITERAL@79..80 "*" [] []
-            1: MD_TEXTUAL@80..91
-              0: MD_TEXTUAL_LITERAL@80..91 "bold italic" [] []
-          2: DOUBLE_STAR@91..93 "**" [] []
-        2: MD_TEXTUAL@93..94
-          0: MD_TEXTUAL_LITERAL@93..94 "*" [] []
-        3: MD_TEXTUAL@94..95
+        1: MD_INLINE_ITALIC@77..94
+          0: STAR@77..78 "*" [] []
+          1: MD_INLINE_ITEM_LIST@78..93
+            0: MD_INLINE_EMPHASIS@78..93
+              0: DOUBLE_STAR@78..80 "**" [] []
+              1: MD_INLINE_ITEM_LIST@80..91
+                0: MD_TEXTUAL@80..91
+                  0: MD_TEXTUAL_LITERAL@80..91 "bold italic" [] []
+              2: DOUBLE_STAR@91..93 "**" [] []
+          2: STAR@93..94 "*" [] []
+        2: MD_TEXTUAL@94..95
           0: MD_TEXTUAL_LITERAL@94..95 "\n" [] []
       1: (empty)
     5: MD_NEWLINE@95..96

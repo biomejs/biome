@@ -41,8 +41,9 @@ use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
+use biome_unicode_table::is_unicode_punctuation;
 
-use biome_rowan::{TextRange, TextSize};
+use biome_rowan::TextRange;
 
 use crate::MarkdownParser;
 use crate::link_reference::normalize_reference_label;
@@ -71,6 +72,10 @@ struct DelimRun {
     can_close: bool,
     /// Byte offset in the source where this run starts
     start_offset: usize,
+    /// Bracket nesting depth for scoping emphasis within link text.
+    /// Delimiters inside brackets (links) should only match with each other,
+    /// not with delimiters outside the brackets. 0 = outside brackets.
+    label_id: usize,
 }
 
 /// A matched emphasis span (opener + closer)
@@ -89,45 +94,14 @@ fn is_whitespace(c: char) -> bool {
     c.is_whitespace()
 }
 
+fn is_emphasis_marker(c: char) -> bool {
+    matches!(c, '*' | '_')
+}
+
 /// Check if a character is Unicode punctuation for flanking rules.
 /// Per CommonMark spec, this includes ASCII punctuation and Unicode punctuation categories.
 fn is_punctuation(c: char) -> bool {
-    // ASCII punctuation + Unicode punctuation categories
-    matches!(
-        c,
-        '!' | '"'
-            | '#'
-            | '$'
-            | '%'
-            | '&'
-            | '\''
-            | '('
-            | ')'
-            | '*'
-            | '+'
-            | ','
-            | '-'
-            | '.'
-            | '/'
-            | ':'
-            | ';'
-            | '<'
-            | '='
-            | '>'
-            | '?'
-            | '@'
-            | '['
-            | '\\'
-            | ']'
-            | '^'
-            | '_'
-            | '`'
-            | '{'
-            | '|'
-            | '}'
-            | '~'
-    ) || c.is_ascii_punctuation()
-        || matches!(c, '\u{2000}'..='\u{206F}' | '\u{2E00}'..='\u{2E7F}')
+    is_unicode_punctuation(c)
 }
 
 /// Check if an opening delimiter is left-flanking per CommonMark rules.
@@ -138,6 +112,7 @@ fn is_left_flanking_delimiter(char_after: Option<char>, char_before: Option<char
     match char_after {
         None => false,                        // At end of input, can't be left-flanking
         Some(c) if is_whitespace(c) => false, // Followed by whitespace
+        Some(c) if is_emphasis_marker(c) => true,
         Some(c) if is_punctuation(c) => {
             // Followed by punctuation - only left-flanking if preceded by whitespace or punctuation
             match char_before {
@@ -157,6 +132,7 @@ fn is_right_flanking_delimiter(char_before: Option<char>, char_after: Option<cha
     match char_before {
         None => false,                        // At start of input, can't be right-flanking
         Some(c) if is_whitespace(c) => false, // Preceded by whitespace
+        Some(c) if is_emphasis_marker(c) => true,
         Some(c) if is_punctuation(c) => {
             // Preceded by punctuation - only right-flanking if followed by whitespace or punctuation
             match char_after {
@@ -209,13 +185,146 @@ fn can_underscore_close(char_before: Option<char>, char_after: Option<char>) -> 
 /// This is the first pass of the CommonMark emphasis algorithm. It scans
 /// the source text and identifies all potential delimiter runs (sequences
 /// of `*` or `_`), computing their flanking status.
-fn collect_delimiter_runs(source: &str) -> Vec<DelimRun> {
+/// Result of checking if a bracket forms a valid link.
+/// Contains the closing bracket position if found.
+struct BracketCheckResult {
+    /// Position of the closing `]` (or 0 if not found)
+    close_pos: usize,
+    /// Whether this is a valid inline link `[...](` or full reference `[...][`
+    is_inline_or_full_ref: bool,
+}
+
+/// Check if a bracket at position `start` forms a valid link pattern.
+/// Returns the closing bracket position and whether it's an inline link or full reference.
+fn check_bracket_pattern(bytes: &[u8], start: usize) -> Option<BracketCheckResult> {
+    if start >= bytes.len() || bytes[start] != b'[' {
+        return None;
+    }
+
+    // Find matching ] with proper nesting
+    let mut depth = 1;
+    let mut i = start + 1;
+    while i < bytes.len() && depth > 0 {
+        match bytes[i] {
+            b'[' => depth += 1,
+            b']' => depth -= 1,
+            b'\\' if i + 1 < bytes.len() => i += 1, // Skip escaped char
+            b'`' => {
+                // Skip code spans
+                let backtick_count = {
+                    let mut c = 1;
+                    while i + c < bytes.len() && bytes[i + c] == b'`' {
+                        c += 1;
+                    }
+                    c
+                };
+                i += backtick_count;
+                while i < bytes.len() {
+                    if bytes[i] == b'`' {
+                        let close_count = {
+                            let mut c = 1;
+                            while i + c < bytes.len() && bytes[i + c] == b'`' {
+                                c += 1;
+                            }
+                            c
+                        };
+                        i += close_count;
+                        if close_count == backtick_count {
+                            break;
+                        }
+                    } else {
+                        i += 1;
+                    }
+                }
+                continue;
+            }
+            b'<' => {
+                // Skip potential HTML/autolinks
+                i += 1;
+                while i < bytes.len() && bytes[i] != b'>' && bytes[i] != b'\n' {
+                    i += 1;
+                }
+                if i < bytes.len() && bytes[i] == b'>' {
+                    i += 1;
+                }
+                continue;
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+
+    if depth != 0 {
+        return None;
+    }
+
+    // i now points to position after `]`
+    let close_pos = i - 1;
+    let is_inline_or_full_ref = i < bytes.len() && (bytes[i] == b'(' || bytes[i] == b'[');
+
+    Some(BracketCheckResult {
+        close_pos,
+        is_inline_or_full_ref,
+    })
+}
+
+/// Extract label text from a bracket pattern for reference lookup.
+fn extract_label_text(source: &str, start: usize, close_pos: usize) -> &str {
+    if start < close_pos && close_pos <= source.len() {
+        &source[start + 1..close_pos]
+    } else {
+        ""
+    }
+}
+
+fn collect_delimiter_runs(source: &str, reference_checker: impl Fn(&str) -> bool) -> Vec<DelimRun> {
     let mut runs = Vec::new();
     let bytes = source.as_bytes();
     let mut i = 0;
 
+    // Pre-compute valid link bracket positions.
+    // A bracket is considered a valid link if:
+    // 1. It's followed by `(` (inline link) or `[` (full reference), OR
+    // 2. It's a shortcut reference with a defined reference (checked via reference_checker)
+    let mut link_bracket_starts = Vec::new();
+    for pos in 0..bytes.len() {
+        if bytes[pos] == b'['
+            && let Some(result) = check_bracket_pattern(bytes, pos)
+        {
+            if result.is_inline_or_full_ref {
+                // Inline link or full reference link
+                link_bracket_starts.push(pos);
+            } else {
+                // Could be a shortcut reference - check if definition exists
+                let label = extract_label_text(source, pos, result.close_pos);
+                let normalized = normalize_reference_label(label);
+                if !normalized.is_empty() && reference_checker(&normalized) {
+                    link_bracket_starts.push(pos);
+                }
+            }
+        }
+    }
+
+    // Track bracket depth, but only for valid link brackets
+    let mut bracket_depth = 0usize;
+    let mut active_link_brackets: Vec<usize> = Vec::new();
+
     while i < bytes.len() {
         let b = bytes[i];
+
+        // Track bracket depth for valid links only
+        if b == b'[' && link_bracket_starts.contains(&i) {
+            bracket_depth += 1;
+            active_link_brackets.push(i);
+            i += 1;
+            continue;
+        }
+        if b == b']' && !active_link_brackets.is_empty() {
+            bracket_depth = bracket_depth.saturating_sub(1);
+            active_link_brackets.pop();
+            i += 1;
+            continue;
+        }
 
         // Check for delimiter characters
         if b == b'*' || b == b'_' {
@@ -265,6 +374,10 @@ fn collect_delimiter_runs(source: &str) -> Vec<DelimRun> {
                 can_open,
                 can_close,
                 start_offset,
+                // Only scope by bracket depth when inside a valid link pattern.
+                // This prevents emphasis from spanning link boundaries, but allows
+                // emphasis to span brackets that don't form valid links.
+                label_id: bracket_depth,
             });
 
             i = end_offset;
@@ -330,41 +443,38 @@ fn match_delimiters(runs: &mut [DelimRun]) -> Vec<EmphasisMatch> {
         if runs[idx].can_close && runs[idx].count > 0 {
             loop {
                 let mut opener_stack_pos = None;
-                let prefer_strong = runs[idx].count >= 2;
 
-                for pass in 0..2 {
-                    for (pos, &opener_idx) in opener_stack.iter().enumerate().rev() {
-                        let opener = &runs[opener_idx];
-                        let closer = &runs[idx];
+                // Search backward for the closest matching opener.
+                // Per CommonMark spec, we find any matching opener first,
+                // then determine strong vs regular based on both counts.
+                for (pos, &opener_idx) in opener_stack.iter().enumerate().rev() {
+                    let opener = &runs[opener_idx];
+                    let closer = &runs[idx];
 
-                        if opener.kind != closer.kind || !opener.can_open || opener.count == 0 {
-                            continue;
-                        }
-
-                        if prefer_strong && pass == 0 && opener.count < 2 {
-                            continue;
-                        }
-
-                        // Rule of 3: if (opener_count + closer_count) % 3 == 0 and
-                        // the closer can open or the opener can close, skip unless
-                        // both counts are divisible by 3
-                        let opener_count = opener.count;
-                        let closer_count = closer.count;
-                        if ((opener.can_open && opener.can_close)
-                            || (closer.can_open && closer.can_close))
-                            && (opener_count + closer_count).is_multiple_of(3)
-                            && (!opener_count.is_multiple_of(3) || !closer_count.is_multiple_of(3))
-                        {
-                            continue;
-                        }
-
-                        opener_stack_pos = Some(pos);
-                        break;
+                    // Only match within same bracket scope (label_id).
+                    // This prevents emphasis from spanning link boundaries.
+                    if opener.label_id != closer.label_id {
+                        continue;
                     }
 
-                    if opener_stack_pos.is_some() {
-                        break;
+                    if opener.kind != closer.kind || !opener.can_open || opener.count == 0 {
+                        continue;
                     }
+
+                    // Rule of 3: if (opener_count + closer_count) % 3 == 0 and
+                    // the closer can open or the opener can close, skip unless
+                    // both counts are divisible by 3
+                    let opener_count = opener.count;
+                    let closer_count = closer.count;
+                    if (opener.can_close || closer.can_open)
+                        && !closer_count.is_multiple_of(3)
+                        && (opener_count + closer_count).is_multiple_of(3)
+                    {
+                        continue;
+                    }
+
+                    opener_stack_pos = Some(pos);
+                    break;
                 }
 
                 let Some(pos) = opener_stack_pos else { break };
@@ -375,7 +485,11 @@ fn match_delimiters(runs: &mut [DelimRun]) -> Vec<EmphasisMatch> {
                     1
                 };
 
-                let opener_start = runs[opener_idx].start_offset;
+                // Openers consume from END of run (leftover stays at beginning).
+                // This ensures for `***foo***`, the inner `**` is consumed leaving `*` at start.
+                let opener_start =
+                    runs[opener_idx].start_offset + runs[opener_idx].count - use_count;
+                // Closers consume from BEGINNING of what remains.
                 let closer_start = runs[idx].start_offset;
 
                 matches.push(EmphasisMatch {
@@ -384,8 +498,9 @@ fn match_delimiters(runs: &mut [DelimRun]) -> Vec<EmphasisMatch> {
                     is_strong: use_count == 2,
                 });
 
+                // Opener: reduce count but keep start_offset (leftover is at beginning)
                 runs[opener_idx].count -= use_count;
-                runs[opener_idx].start_offset += use_count;
+                // Closer: reduce count and advance start_offset (leftover is at end)
                 runs[idx].count -= use_count;
                 runs[idx].start_offset += use_count;
 
@@ -395,10 +510,10 @@ fn match_delimiters(runs: &mut [DelimRun]) -> Vec<EmphasisMatch> {
                     opener_stack.pop();
                 }
 
-                if use_count == 2 && runs[opener_idx].count > 0 && runs[idx].count > 0 {
-                    // Avoid crossing matches from odd-length runs (e.g. ***foo***).
-                    break;
-                }
+                // Note: With the "consume from END" algorithm for openers,
+                // crossing matches are no longer an issue because the leftover
+                // chars end up at the beginning of the opener run (wrapping
+                // around the inner match), not at the end (which would cross).
 
                 if runs[idx].count == 0 {
                     break;
@@ -426,10 +541,26 @@ pub(crate) struct EmphasisContext {
     base_offset: usize,
 }
 
+/// Information about a match found within a token's range.
+/// Used when the opener doesn't start at the exact token boundary.
+#[derive(Debug)]
+struct OpenerMatch<'a> {
+    /// The matched emphasis span
+    matched: &'a EmphasisMatch,
+    /// How many chars before opener_start (literal prefix to emit)
+    prefix_len: usize,
+}
+
 impl EmphasisContext {
-    /// Create a new emphasis context by analyzing the source text
-    pub(crate) fn new(source: &str, base_offset: usize) -> Self {
-        let mut runs = collect_delimiter_runs(source);
+    /// Create a new emphasis context by analyzing the source text.
+    /// The reference_checker function is used to determine if a bracket pattern
+    /// is a valid shortcut reference link.
+    pub(crate) fn new(
+        source: &str,
+        base_offset: usize,
+        reference_checker: impl Fn(&str) -> bool,
+    ) -> Self {
+        let mut runs = collect_delimiter_runs(source, reference_checker);
         let matches = match_delimiters(&mut runs);
         Self {
             matches,
@@ -437,12 +568,44 @@ impl EmphasisContext {
         }
     }
 
-    /// Check if there's an emphasis opener at the given offset
-    fn opener_at(&self, offset: usize) -> Option<&EmphasisMatch> {
-        let abs_offset = offset;
-        self.matches
-            .iter()
-            .find(|m| m.opener_start + self.base_offset == abs_offset)
+    /// Find the *earliest* match whose opener_start is within [token_start, token_end)
+    /// and matches the expected `is_strong` value.
+    /// Returns None if no match found, or the match plus prefix length.
+    ///
+    /// This is used instead of exact offset matching because with the "consume from END"
+    /// algorithm, an opener might start in the middle of a DOUBLE_STAR token.
+    fn opener_within(
+        &self,
+        token_start: usize,
+        token_len: usize,
+        expect_strong: bool,
+    ) -> Option<OpenerMatch<'_>> {
+        let token_end = token_start + token_len;
+        let mut best: Option<OpenerMatch<'_>> = None;
+
+        for m in &self.matches {
+            // Filter by expected emphasis type
+            if m.is_strong != expect_strong {
+                continue;
+            }
+
+            let abs_opener = m.opener_start + self.base_offset;
+            if abs_opener >= token_start && abs_opener < token_end {
+                let candidate = OpenerMatch {
+                    matched: m,
+                    prefix_len: abs_opener - token_start,
+                };
+                // Pick the earliest match (smallest prefix_len)
+                if best
+                    .as_ref()
+                    .is_none_or(|b| candidate.prefix_len < b.prefix_len)
+                {
+                    best = Some(candidate);
+                }
+            }
+        }
+
+        best
     }
 }
 
@@ -458,72 +621,143 @@ pub(crate) fn parse_hard_line(p: &mut MarkdownParser) -> ParsedSyntax {
         return Absent;
     }
 
+    let ends_block = p.lookahead(|p| {
+        p.bump(MD_HARD_LINE_LITERAL);
+        p.at(NEWLINE) || p.at(EOF)
+    });
+
+    if ends_block {
+        return super::parse_textual(p);
+    }
+
     let m = p.start();
     p.bump(MD_HARD_LINE_LITERAL);
     Present(m.complete(p, MD_HARD_LINE))
+}
+
+/// Check if there's a matching closing backtick sequence before EOF/blank line.
+///
+/// Per CommonMark §6.1, a code span opener must have a matching closer with the
+/// same number of backticks. If no match exists, the opener should be treated
+/// as literal text, not an unclosed code span.
+///
+/// Returns false if no match found (opener should become literal text).
+
+fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -> bool {
+    use crate::lexer::MarkdownLexContext;
+
+    p.lookahead(|p| {
+        // Skip the opening backticks
+        p.bump(BACKTICK);
+
+        loop {
+            // EOF = no matching closer found
+            if p.at(T![EOF]) {
+                return false;
+            }
+
+            // Blank line = paragraph boundary, terminates search
+            if p.at(NEWLINE) && p.at_blank_line() {
+                return false;
+            }
+
+            // Per CommonMark §4.3, setext heading underlines take priority over
+            // inline code spans. If crossing a newline would land on a setext
+            // underline, the code span is invalid — the underline forms a heading.
+            if p.at(NEWLINE) {
+                p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
+                if crate::syntax::at_setext_underline_after_newline(p).is_some() {
+                    return false;
+                }
+                continue;
+            }
+
+            // Found backticks - check if they match
+            if p.at(BACKTICK) {
+                let closing_count = p.cur_text().len();
+                if closing_count == opening_count {
+                    return true;
+                }
+                // Not matching - continue searching
+                p.bump(BACKTICK);
+                continue;
+            }
+
+            // Consume token and continue (use CodeSpan context for proper backslash handling)
+            p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
+        }
+    })
 }
 
 /// Parse inline code span (`` `code` `` or ``` `` `code` `` ```).
 ///
 /// Grammar: MdInlineCode = l_tick: '`' content: MdInlineItemList r_tick: '`'
 ///
-/// Per CommonMark, code spans can use multiple backticks to allow literal
-/// backticks inside: ``` `` `code` `` ``` wraps around code containing backticks.
-/// The opening and closing backtick strings must be the same length.
+/// Per CommonMark §6.1:
+/// - Code spans can use multiple backticks to allow literal backticks inside
+/// - The opening and closing backtick strings must be the same length
+/// - Backslash escapes are NOT processed inside code spans (\` is literal `\``)
+/// - If no matching closer exists, the opener is treated as literal text
 pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
+    use crate::lexer::MarkdownLexContext;
+
     if !p.at(BACKTICK) {
         return Absent;
     }
 
-    let m = p.start();
-
-    // Count opening backticks from token text
     let opening_count = p.cur_text().len();
-    let opening_range = p.cur_range();
+
+    // DESIGN PRINCIPLE #2 & #4: Check for matching closer BEFORE creating any nodes.
+    // If no match exists, return Absent so backticks become literal text.
+    // This avoids synthesizing MD_INLINE_CODE with missing r_tick_token.
+    if !has_matching_code_span_closer(p, opening_count) {
+        return Absent; // Caller will treat backtick as literal MD_TEXTUAL
+    }
+
+    // We have a valid code span - now parse it
+    let m = p.start();
 
     // Opening backtick(s)
     p.bump(BACKTICK);
 
-    // Content - parse until we find a BACKTICK with matching count, or EOF
+    // Content - parse until we find matching closing backticks
+    // Per CommonMark, code spans can span multiple lines (newlines become spaces in output)
+    // All content is lexed in CodeSpan context to keep backslash literal and avoid
+    // hard-line-break detection.
     let content = p.start();
-    let mut found_closing = false;
     loop {
-        if p.at_inline_end() {
+        // EOF should not happen (lookahead guaranteed a closer), but handle defensively
+        if p.at(T![EOF]) {
             break;
         }
 
-        // Check for matching closing backticks
-        if p.at(BACKTICK) {
-            let closing_count = p.cur_text().len();
-            if closing_count == opening_count {
-                // Found matching closing backticks
-                found_closing = true;
-                break;
+        // DESIGN PRINCIPLE #3: Terminate on blank line (paragraph boundary)
+        if p.at(NEWLINE) {
+            if p.at_blank_line() {
+                break; // Paragraph boundary - stop
             }
-            // Not matching - consume as content
+            // Soft line break - consume NEWLINE as content and continue
+            // Use CodeSpan context so next token is also lexed without escape processing
             let text_m = p.start();
-            p.bump_remap(MD_TEXTUAL_LITERAL);
+            p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
             text_m.complete(p, MD_TEXTUAL);
             continue;
         }
 
-        // Regular content
+        // Found matching closing backticks
+        if p.at(BACKTICK) && p.cur_text().len() == opening_count {
+            break;
+        }
+
+        // DESIGN PRINCIPLE #1: Use CodeSpan context so backslash is literal
         let text_m = p.start();
-        p.bump_remap(MD_TEXTUAL_LITERAL);
+        p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
         text_m.complete(p, MD_TEXTUAL);
     }
     content.complete(p, MD_INLINE_ITEM_LIST);
 
-    // Closing backtick(s) - emit custom diagnostic if missing
-    if found_closing {
-        p.bump(BACKTICK);
-    } else {
-        p.error(super::parse_error::unclosed_code_span(
-            p,
-            opening_range,
-            opening_count,
-        ));
-    }
+    // Closing backticks (guaranteed to exist due to lookahead check)
+    p.bump(BACKTICK);
 
     Present(m.complete(p, MD_INLINE_CODE))
 }
@@ -535,46 +769,95 @@ fn parse_emphasis_from_context(p: &mut MarkdownParser, expect_strong: bool) -> P
         None => return Absent,
     };
 
-    let offset = u32::from(p.cur_range().start()) as usize;
-    let matched = match context.opener_at(offset) {
-        Some(matched) => matched,
-        None => return Absent,
-    };
-
-    if matched.is_strong != expect_strong {
+    // Must be at an emphasis token
+    if !p.at(DOUBLE_STAR) && !p.at(DOUBLE_UNDERSCORE) && !p.at(T![*]) && !p.at(UNDERSCORE) {
         return Absent;
     }
 
-    let (opener_kind, closer_kind, opener_text) = if expect_strong {
-        if p.at(DOUBLE_STAR) {
-            (DOUBLE_STAR, DOUBLE_STAR, "**")
-        } else if p.at(DOUBLE_UNDERSCORE) {
-            (DOUBLE_UNDERSCORE, DOUBLE_UNDERSCORE, "__")
-        } else {
-            return Absent;
-        }
-    } else if p.at(T![*]) {
-        (T![*], T![*], "*")
-    } else if p.at(UNDERSCORE) {
-        (UNDERSCORE, UNDERSCORE, "_")
-    } else {
-        return Absent;
+    // Get current token info BEFORE any re-lex
+    let token_start = u32::from(p.cur_range().start()) as usize;
+    let token_len: usize = p.cur_range().len().into();
+
+    // Find match within current token's range that has the expected is_strong value
+    let opener_match = match context.opener_within(token_start, token_len, expect_strong) {
+        Some(m) => m,
+        None => return Absent,
     };
 
-    let closer_offset = matched.closer_start + context.base_offset;
+    // If the opener doesn't start at the exact token boundary, return Absent.
+    // The caller (parse_any_inline) will emit literal text, advancing the parser position.
+    // On subsequent calls, we'll eventually be at the correct position with prefix_len == 0.
+    if opener_match.prefix_len > 0 {
+        return Absent;
+    }
+
+    // Extract values before dropping the borrow on context
+    let use_count = if expect_strong { 2 } else { 1 };
+    let closer_offset = opener_match.matched.closer_start + context.base_offset;
+    // Use the correct delimiter character for error messages
+    let is_underscore = p.at(DOUBLE_UNDERSCORE) || p.at(UNDERSCORE);
+    let opener_text = match (expect_strong, is_underscore) {
+        (true, true) => "__",
+        (true, false) => "**",
+        (false, true) => "_",
+        (false, false) => "*",
+    };
+
     let m = p.start();
     let opening_range = p.cur_range();
 
-    p.bump(opener_kind);
+    // Consume opener tokens
+    // For strong emphasis (use_count=2), we can bump DOUBLE_* directly if at one.
+    // Only re-lex when we need to consume a partial token or single chars.
+    if use_count == 2 && (p.at(DOUBLE_STAR) || p.at(DOUBLE_UNDERSCORE)) {
+        // Bump the double token as a single unit
+        p.bump_any();
+    } else {
+        // Consume individual tokens
+        for _ in 0..use_count {
+            if p.at(DOUBLE_STAR) || p.at(DOUBLE_UNDERSCORE) {
+                p.force_relex_emphasis_inline();
+            }
+            p.bump_any();
+        }
+    }
 
+    // Parse content until we reach the closer
     let content = p.start();
     loop {
-        if p.at_inline_end() {
+        // EOF always ends content
+        if p.at(T![EOF]) {
             break;
         }
 
         let current_offset = u32::from(p.cur_range().start()) as usize;
-        if current_offset == closer_offset {
+        let current_len: usize = p.cur_range().len().into();
+
+        // Check if closer is AT or WITHIN current token
+        if closer_offset >= current_offset && closer_offset < current_offset + current_len {
+            break;
+        }
+
+        // Check if we've passed the closer (can happen when link parsing consumes past it)
+        if current_offset > closer_offset {
+            break;
+        }
+
+        // Handle NEWLINE: emphasis can span multiple lines per CommonMark
+        // But blank lines end paragraphs, so stop there
+        if p.at(NEWLINE) {
+            if p.at_blank_line() {
+                // Blank line = paragraph boundary, emphasis is unclosed
+                break;
+            }
+            if closer_offset > current_offset {
+                // Soft line break - consume NEWLINE as textual content and continue
+                let text_m = p.start();
+                p.bump_remap(MD_TEXTUAL_LITERAL);
+                text_m.complete(p, MD_TEXTUAL);
+                continue;
+            }
+            // Closer should have been at or before this newline - stop
             break;
         }
 
@@ -584,9 +867,45 @@ fn parse_emphasis_from_context(p: &mut MarkdownParser, expect_strong: bool) -> P
     }
     content.complete(p, MD_INLINE_ITEM_LIST);
 
-    if p.at(closer_kind) && u32::from(p.cur_range().start()) as usize == closer_offset {
-        p.bump(closer_kind);
+    // Consume closer tokens (1 or 2)
+    // Handle partial closer consumption (e.g., `*foo**` where closer might be at offset 4
+    // but token DOUBLE_STAR spans 4-6)
+    let current_offset = u32::from(p.cur_range().start()) as usize;
+    let closer_prefix_len = closer_offset.saturating_sub(current_offset);
+
+    if closer_prefix_len > 0 {
+        // Closer starts AFTER token start - emit prefix as literal
+        if p.at(DOUBLE_STAR) || p.at(DOUBLE_UNDERSCORE) {
+            p.force_relex_emphasis_inline();
+        }
+        for _ in 0..closer_prefix_len {
+            let text_m = p.start();
+            p.bump_remap(MD_TEXTUAL_LITERAL);
+            text_m.complete(p, MD_TEXTUAL);
+        }
+    }
+
+    // Now consume actual closer delimiters
+    // For strong emphasis (use_count=2), we can bump DOUBLE_* directly if at one.
+    let mut consumed_closer = 0;
+    if use_count == 2 && (p.at(DOUBLE_STAR) || p.at(DOUBLE_UNDERSCORE)) {
+        p.bump_any();
+        consumed_closer = 2;
     } else {
+        for _ in 0..use_count {
+            if p.at(DOUBLE_STAR) || p.at(DOUBLE_UNDERSCORE) {
+                p.force_relex_emphasis_inline();
+            }
+            if p.at(T![*]) || p.at(UNDERSCORE) || p.at(DOUBLE_STAR) || p.at(DOUBLE_UNDERSCORE) {
+                p.bump_any();
+                consumed_closer += 1;
+            } else {
+                break;
+            }
+        }
+    }
+
+    if consumed_closer < use_count {
         p.error(super::parse_error::unclosed_emphasis(
             p,
             opening_range,
@@ -633,6 +952,31 @@ fn parse_inline_item_list_until_no_links(p: &mut MarkdownParser, stop: MarkdownS
             break;
         }
 
+        // IMPORTANT: Parse constructs that can contain `]` BEFORE checking for stop token.
+        // Per CommonMark, `]` inside code spans, autolinks, and HTML doesn't terminate links.
+
+        // Code spans can contain `]`
+        if p.at(BACKTICK) {
+            if parse_inline_code(p).is_present() {
+                continue;
+            }
+            let _ = super::parse_textual(p);
+            continue;
+        }
+
+        // Autolinks and inline HTML can contain `]`
+        if p.at(L_ANGLE) {
+            if parse_autolink(p).is_present() {
+                continue;
+            }
+            if parse_inline_html(p).is_present() {
+                continue;
+            }
+            let _ = super::parse_textual(p);
+            continue;
+        }
+
+        // NOW check for stop token (after constructs that can contain it)
         if p.at(stop) {
             if bracket_depth == 0 {
                 break;
@@ -659,6 +1003,86 @@ fn parse_inline_item_list_until_no_links(p: &mut MarkdownParser, stop: MarkdownS
     m.complete(p, MD_INLINE_ITEM_LIST);
     p.set_emphasis_context(prev_context);
     has_nested_link
+}
+
+/// Parse inline items until `stop` token, allowing full inline parsing including links.
+/// Used for image alt text where nested links/images should be fully parsed
+/// so their text content can be extracted for the alt attribute.
+fn parse_inline_item_list_until(p: &mut MarkdownParser, stop: MarkdownSyntaxKind) {
+    let m = p.start();
+    let prev_context = set_inline_emphasis_context_until(p, stop);
+    let mut bracket_depth = 0usize;
+
+    loop {
+        if p.at(NEWLINE) {
+            if p.at_blank_line() {
+                break;
+            }
+            let _ = super::parse_textual(p);
+            continue;
+        }
+
+        if p.at(T![EOF]) {
+            break;
+        }
+
+        // Code spans can contain `]`
+        if p.at(BACKTICK) {
+            if parse_inline_code(p).is_present() {
+                continue;
+            }
+            let _ = super::parse_textual(p);
+            continue;
+        }
+
+        // Autolinks and inline HTML can contain `]`
+        if p.at(L_ANGLE) {
+            if parse_autolink(p).is_present() {
+                continue;
+            }
+            if parse_inline_html(p).is_present() {
+                continue;
+            }
+            let _ = super::parse_textual(p);
+            continue;
+        }
+
+        if p.at(stop) {
+            if bracket_depth == 0 {
+                break;
+            }
+            bracket_depth = bracket_depth.saturating_sub(1);
+            let _ = super::parse_textual(p);
+            continue;
+        }
+
+        // For image alt: allow full inline parsing including links and images
+        if p.at(L_BRACK) {
+            let result = parse_link_or_image(p, LinkParseKind::Link);
+            if result.is_present() {
+                continue;
+            }
+            bracket_depth += 1;
+            let _ = super::parse_textual(p);
+            continue;
+        }
+
+        if p.at(BANG) && p.nth_at(1, L_BRACK) {
+            let result = parse_link_or_image(p, LinkParseKind::Image);
+            if result.is_present() {
+                continue;
+            }
+            let _ = super::parse_textual(p);
+            continue;
+        }
+
+        if parse_any_inline(p).is_absent() {
+            break;
+        }
+    }
+
+    m.complete(p, MD_INLINE_ITEM_LIST);
+    p.set_emphasis_context(prev_context);
 }
 
 fn nested_link_starts_here(p: &mut MarkdownParser) -> bool {
@@ -720,7 +1144,10 @@ fn set_inline_emphasis_context_until(
         source
     };
     let base_offset = u32::from(p.cur_range().start()) as usize;
-    let context = EmphasisContext::new(inline_source, base_offset);
+    // Create a reference checker closure that uses the parser's link reference definitions
+    let context = EmphasisContext::new(inline_source, base_offset, |label| {
+        p.has_link_reference_definition(label)
+    });
     p.set_emphasis_context(Some(context))
 }
 
@@ -851,21 +1278,6 @@ impl LinkParseKind {
         }
     }
 
-    fn report_unclosed_text(self, p: &mut MarkdownParser, opening_range: TextRange) {
-        match self {
-            Self::Link => p.error(super::parse_error::unclosed_link(
-                p,
-                opening_range,
-                "expected `]` to close link text",
-            )),
-            Self::Image => p.error(super::parse_error::unclosed_image(
-                p,
-                opening_range,
-                "expected `]` to close alt text",
-            )),
-        }
-    }
-
     fn report_unclosed_destination(self, p: &mut MarkdownParser, opening_range: TextRange) {
         match self {
             Self::Link => p.error(super::parse_error::unclosed_link(
@@ -897,30 +1309,28 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
     kind.bump_opening(p);
 
     // Link text / alt text
-    let has_nested_link = parse_inline_item_list_until_no_links(p, R_BRACK);
+    let has_nested_link = if matches!(kind, LinkParseKind::Image) {
+        // For images, allow full inline parsing (including links) in alt text.
+        // This lets nested links/images be parsed so their text can be extracted for alt.
+        parse_inline_item_list_until(p, R_BRACK);
+        false
+    } else {
+        parse_inline_item_list_until_no_links(p, R_BRACK)
+    };
 
-    // ] - if missing at inline end, emit diagnostic; otherwise rewind
+    // ] - if missing, rewind and treat [ as literal text.
+    // Per CommonMark, if there's no valid ] to close the link (e.g., all ]
+    // characters are inside code spans or HTML), the [ is literal text.
+    // NOTE: We intentionally do NOT emit an "unclosed link" diagnostic here.
+    // CommonMark treats unmatched `[` as literal text, not an error.
     if !p.eat(R_BRACK) {
-        if matches!(kind, LinkParseKind::Link) && has_nested_link {
-            m.abandon(p);
-            p.rewind(checkpoint);
-            return Absent;
-        }
-        if p.at_inline_end() {
-            // Unclosed link/image at end of inline content - emit diagnostic
-            // Expand range to include the text content, not just the opening bracket
-            let full_range = TextRange::new(opening_range.start(), p.cur_range().start());
-            kind.report_unclosed_text(p, full_range);
-            // Return as reference link/image (shortcut) with missing closing bracket
-            return Present(m.complete(p, kind.reference_kind()));
-        }
-        // Not at inline end but missing ] - rewind and treat as text
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
     }
-    let text_end_offset = p.cur_range().start();
 
+    // Per CommonMark, a link (not image) whose text contains another link must fail.
+    // The inner link wins and the outer `[` becomes literal text.
     if matches!(kind, LinkParseKind::Link) && has_nested_link {
         m.abandon(p);
         p.rewind(checkpoint);
@@ -1007,7 +1417,10 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
         {
             m.abandon(p);
             p.rewind(checkpoint);
-            return consume_textual_until_offset(p, text_end_offset);
+            // Return Absent - the caller will treat `[` as textual.
+            // Don't consume the whole bracket sequence to avoid consuming
+            // past emphasis closers.
+            return Absent;
         }
 
         Present(m.complete(p, kind.reference_kind()))
@@ -1020,7 +1433,10 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
         {
             m.abandon(p);
             p.rewind(checkpoint);
-            return consume_textual_until_offset(p, text_end_offset);
+            // Return Absent - the caller will treat `[` as textual.
+            // Don't consume the whole bracket sequence to avoid consuming
+            // past emphasis closers.
+            return Absent;
         }
         Present(m.complete(p, kind.reference_kind()))
     }
@@ -1064,7 +1480,7 @@ fn lookahead_reference_common(
 
         p.bump(L_BRACK);
 
-        let link_text = collect_bracket_text(p)?;
+        let link_text = collect_link_text(p)?;
 
         // Link text must be non-empty after normalization (e.g., `[\n ]` normalizes to empty)
         let normalized_link = normalize_reference_label(&link_text);
@@ -1080,7 +1496,7 @@ fn lookahead_reference_common(
 
         if p.at(L_BRACK) {
             p.bump(L_BRACK);
-            let label_text = collect_bracket_text(p);
+            let label_text = collect_label_text_simple(p);
             if let Some(label_text) = label_text {
                 let label = if label_text.is_empty() {
                     link_text.clone()
@@ -1107,13 +1523,31 @@ fn lookahead_reference_common(
     })
 }
 
-fn collect_bracket_text(p: &mut MarkdownParser) -> Option<String> {
+/// Collect text for a link label (e.g., the `label` in `[text][label]`).
+///
+/// Per CommonMark §4.7, link labels have specific rules:
+/// - Unescaped square brackets are NOT allowed inside labels (see example 555)
+/// - Backslash escapes ARE allowed (e.g., `\]` is a literal `]` in the label)
+/// - No inline parsing (backticks, HTML, etc. are literal characters)
+///
+/// We stop at the first R_BRACK token (unescaped `]`). Escaped brackets like `\]`
+/// are lexed as MD_TEXTUAL_LITERAL, not R_BRACK, so they're included in the label.
+fn collect_label_text_simple(p: &mut MarkdownParser) -> Option<String> {
     let mut text = String::new();
+
     loop {
         if p.at(T![EOF]) || p.at_inline_end() {
             return None;
         }
 
+        // Blank lines terminate
+        if p.at(NEWLINE) && p.at_blank_line() {
+            return None;
+        }
+
+        // R_BRACK token = unescaped `]` closes the label.
+        // Note: Escaped brackets (`\]`) are lexed as MD_TEXTUAL_LITERAL,
+        // not R_BRACK, so they're correctly included in the label text.
         if p.at(R_BRACK) {
             return Some(text);
         }
@@ -1123,18 +1557,94 @@ fn collect_bracket_text(p: &mut MarkdownParser) -> Option<String> {
     }
 }
 
-fn consume_textual_until_offset(p: &mut MarkdownParser, end_offset: TextSize) -> ParsedSyntax {
-    let mut last = Absent;
+/// Collect text for link text (e.g., the `text` in `[text](url)` or `[text][label]`).
+/// Per CommonMark, link text CAN contain inline elements - code spans, autolinks, HTML.
+/// `]` inside these constructs does NOT close the link text.
+fn collect_link_text(p: &mut MarkdownParser) -> Option<String> {
+    let mut text = String::new();
+    let mut bracket_depth = 0usize;
 
-    while !p.at(T![EOF]) {
-        let end = p.cur_range().end();
-        last = super::parse_textual(p);
-        if end >= end_offset {
-            break;
+    loop {
+        if p.at(T![EOF]) || p.at_inline_end() {
+            return None;
         }
-    }
 
-    last
+        // Per CommonMark, blank lines terminate link text
+        if p.at(NEWLINE) && p.at_blank_line() {
+            return None;
+        }
+
+        // Code spans can contain `]` - skip them entirely.
+        // Per CommonMark, `]` inside code spans doesn't terminate link text.
+        if p.at(BACKTICK) {
+            let opening_count = p.cur_text().len();
+            text.push_str(p.cur_text());
+            p.bump(p.cur());
+
+            // Find matching closing backticks
+            let mut found_close = false;
+            while !p.at(T![EOF]) && !p.at_inline_end() {
+                if p.at(NEWLINE) && p.at_blank_line() {
+                    break; // Blank line terminates
+                }
+                if p.at(BACKTICK) && p.cur_text().len() == opening_count {
+                    text.push_str(p.cur_text());
+                    p.bump(p.cur());
+                    found_close = true;
+                    break;
+                }
+                text.push_str(p.cur_text());
+                p.bump(p.cur());
+            }
+            if !found_close {
+                // Unclosed code span - treat opening backticks as literal
+                // (already added to text, continue normally)
+            }
+            continue;
+        }
+
+        // Autolinks and inline HTML can contain `]` - skip them entirely.
+        // Per CommonMark, `]` inside `<...>` constructs doesn't terminate link text.
+        if p.at(L_ANGLE) {
+            text.push_str(p.cur_text());
+            p.bump(p.cur());
+
+            // Consume until `>` or newline
+            while !p.at(T![EOF]) && !p.at_inline_end() && !p.at(R_ANGLE) {
+                if p.at(NEWLINE) {
+                    // Newlines end autolinks/HTML tags
+                    break;
+                }
+                text.push_str(p.cur_text());
+                p.bump(p.cur());
+            }
+            if p.at(R_ANGLE) {
+                text.push_str(p.cur_text());
+                p.bump(p.cur());
+            }
+            continue;
+        }
+
+        if p.at(L_BRACK) {
+            bracket_depth += 1;
+            text.push_str(p.cur_text());
+            p.bump(p.cur());
+            continue;
+        }
+
+        if p.at(R_BRACK) {
+            if bracket_depth == 0 {
+                return Some(text);
+            }
+            bracket_depth -= 1;
+            text.push_str(p.cur_text());
+            p.bump(p.cur());
+            continue;
+        }
+
+        text.push_str(p.cur_text());
+        p.bump(p.cur());
+    }
 }
 
 fn bump_textual_link_def(p: &mut MarkdownParser) {
@@ -1522,19 +2032,30 @@ pub(crate) fn parse_inline_image(p: &mut MarkdownParser) -> ParsedSyntax {
 /// - Processing instructions: `<? ... ?>`
 /// - Declarations: `<! ... >`
 /// - CDATA: `<![CDATA[ ... ]]>`
-fn is_inline_html(text: &str) -> Option<usize> {
+pub(crate) fn is_inline_html(text: &str) -> Option<usize> {
     let bytes = text.as_bytes();
     if bytes.len() < 2 || bytes[0] != b'<' {
         return None;
     }
 
     // HTML comment: <!-- ... -->
+    // Per CommonMark 0.31.2 §6.8, an HTML comment consists of `<!--` + text + `-->`,
+    // where text does not start with `>` or `->`, and does not end with `-`.
+    // Additionally, `<!-->` and `<!--->` are valid (degenerate) comments.
     if bytes.starts_with(b"<!--") {
-        // Find closing -->
+        let rest = &bytes[4..];
+        // Handle degenerate comments: <!-->  and  <!--->
+        if rest.starts_with(b">") {
+            return Some(5); // <!-->
+        }
+        if rest.starts_with(b"->") {
+            return Some(6); // <!--->
+        }
+        // Find closing --> after <!--
         if let Some(pos) = text[4..].find("-->") {
             let body = &text[4..4 + pos];
-            // CommonMark: comment cannot start with '>' or '->', and must not contain "--"
-            if body.starts_with('>') || body.starts_with("->") || body.contains("--") {
+            // Body must not end with '-'
+            if body.ends_with('-') {
                 return None;
             }
             return Some(4 + pos + 3);
@@ -1658,8 +2179,17 @@ fn is_inline_html(text: &str) -> Option<usize> {
     let is_attr_name_continue =
         |b: u8| b.is_ascii_alphanumeric() || b == b'_' || b == b':' || b == b'.' || b == b'-';
 
+    let mut need_space = true;
+    // We already know the boundary char was whitespace, so first iteration has space.
+    let mut had_space = true;
+
     loop {
-        let had_space = skip_spaces(&mut i)?;
+        if need_space {
+            let s = skip_spaces(&mut i)?;
+            had_space = had_space || s;
+        }
+        need_space = true;
+
         if i >= bytes.len() {
             return None;
         }
@@ -1690,7 +2220,7 @@ fn is_inline_html(text: &str) -> Option<usize> {
         }
 
         // Optional whitespace and value
-        skip_spaces(&mut i)?;
+        had_space = skip_spaces(&mut i)?;
         if i < bytes.len() && bytes[i] == b'=' {
             i += 1;
             skip_spaces(&mut i)?;
@@ -1740,7 +2270,11 @@ fn is_inline_html(text: &str) -> Option<usize> {
                     }
                 }
             }
+            // After value, need to find whitespace at top of loop
+            had_space = false;
         }
+        // If no '=' was found, `had_space` from skip_spaces above carries over
+        // as the separator for the next attribute (boolean attribute case).
     }
 }
 
@@ -1784,6 +2318,12 @@ pub(crate) fn parse_inline_html(p: &mut MarkdownParser) -> ParsedSyntax {
         Some(len) => len,
         None => return Absent,
     };
+
+    // Per CommonMark §4.3, setext heading underlines take priority over inline HTML.
+    // If this HTML tag spans across a line that is a setext underline, treat `<` as literal.
+    if crate::syntax::inline_span_crosses_setext(p, html_len) {
+        return Absent;
+    }
 
     // Valid inline HTML - create the node
     // Use checkpoint so we can rewind if token boundaries don't align
@@ -1957,17 +2497,28 @@ pub(crate) fn parse_autolink(p: &mut MarkdownParser) -> ParsedSyntax {
     // <
     p.bump(L_ANGLE);
 
-    // Content as inline item list containing textual nodes
-    let content = p.start();
-    while !p.at(R_ANGLE) && !p.at_inline_end() {
+    // Content as inline item list containing textual nodes.
+    // Autolinks don't process backslash escapes, but the lexer may combine
+    // `\>` into a single escape token. We re-lex in CodeSpan context where
+    // backslash is literal, so `\` and `>` are separate tokens.
+    p.force_relex_code_span();
+
+    let content_m = p.start();
+    while !p.at(R_ANGLE) && !p.at(T![EOF]) && !p.at_inline_end() {
         let text_m = p.start();
-        p.bump_remap(MD_TEXTUAL_LITERAL);
+        p.bump_remap_with_context(
+            MD_TEXTUAL_LITERAL,
+            crate::lexer::MarkdownLexContext::CodeSpan,
+        );
         text_m.complete(p, MD_TEXTUAL);
     }
-    content.complete(p, MD_INLINE_ITEM_LIST);
+    content_m.complete(p, MD_INLINE_ITEM_LIST);
 
     // >
     p.expect(R_ANGLE);
+
+    // Re-lex back to regular context
+    p.force_relex_regular();
 
     Present(m.complete(p, MD_AUTOLINK))
 }
@@ -1977,15 +2528,29 @@ pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
     if p.at(MD_HARD_LINE_LITERAL) {
         parse_hard_line(p)
     } else if p.at(BACKTICK) {
-        parse_inline_code(p)
-    } else if p.at(DOUBLE_STAR) || p.at(DOUBLE_UNDERSCORE) {
-        // Try emphasis, fall back to literal text if flanking rules fail
-        let result = parse_inline_emphasis(p);
+        // Try code span, fall back to literal text if no matching closer exists
+        let result = parse_inline_code(p);
         if result.is_absent() {
             super::parse_textual(p)
         } else {
             result
         }
+    } else if p.at(DOUBLE_STAR) || p.at(DOUBLE_UNDERSCORE) {
+        // For cases like `***foo***`, the em match starts at the exact token boundary
+        // (prefix_len=0) while the strong match starts at offset 1 (prefix_len=1).
+        // Try italic first to handle nested emphasis correctly, then try strong.
+        let result = parse_inline_italic(p);
+        if result.is_present() {
+            return result;
+        }
+        let result = parse_inline_emphasis(p);
+        if result.is_present() {
+            return result;
+        }
+        // Neither matched - re-lex to single token and emit just one char as literal.
+        // This handles cases like `**foo*` where opener is at offset 1.
+        p.force_relex_emphasis_inline();
+        super::parse_textual(p)
     } else if p.at(T![*]) || p.at(UNDERSCORE) {
         // Try italic, fall back to literal text if flanking rules fail
         let result = parse_inline_italic(p);

@@ -150,8 +150,13 @@ fn parse_header_content(p: &mut MarkdownParser) {
 
     loop {
         if p.at(MD_HARD_LINE_LITERAL) {
-            // Trailing spaces before newline in ATX headings should be ignored.
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_HARD_LINE_LITERAL));
+            if p.cur_text().starts_with('\\') {
+                // Backslash at end of heading is literal text, not a hard break.
+                let _ = super::parse_textual(p);
+            } else {
+                // Trailing spaces before newline — skip as trivia.
+                p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_HARD_LINE_LITERAL));
+            }
             break;
         }
 

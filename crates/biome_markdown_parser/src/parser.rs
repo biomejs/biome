@@ -208,6 +208,28 @@ impl<'source> MarkdownParser<'source> {
             .force_relex_in_context(crate::lexer::MarkdownLexContext::Regular);
     }
 
+    /// Force re-lex the current token in CodeSpan context.
+    /// In this context, backslash is literal (not an escape character).
+    /// Used for autolinks where `\>` should be `\` + `>` as separate tokens.
+    pub(crate) fn force_relex_code_span(&mut self) {
+        self.source
+            .force_relex_in_context(crate::lexer::MarkdownLexContext::CodeSpan);
+    }
+
+    /// Re-lex the current token as single-char emphasis delimiter.
+    ///
+    /// Use this when the emphasis matching algorithm needs to partially consume
+    /// a DOUBLE_STAR or DOUBLE_UNDERSCORE token. After re-lexing, the token will
+    /// be either STAR or UNDERSCORE (single char).
+    ///
+    /// # Safety
+    /// Only call on the current token, NOT inside lookahead closures.
+    /// This invalidates any buffered lookahead, so ensure no lookahead is active.
+    pub(crate) fn force_relex_emphasis_inline(&mut self) -> MarkdownSyntaxKind {
+        self.source
+            .re_lex(crate::lexer::MarkdownReLexContext::EmphasisInline)
+    }
+
     pub(crate) fn set_force_ordered_list_marker(&mut self, value: bool) {
         self.source.set_force_ordered_list_marker(value);
     }
@@ -217,6 +239,7 @@ impl<'source> MarkdownParser<'source> {
     pub(crate) fn bump_link_definition(&mut self) {
         self.source.bump_link_definition();
     }
+
 
     pub fn checkpoint(&self) -> MarkdownParserCheckpoint {
         MarkdownParserCheckpoint {
