@@ -25,6 +25,7 @@ biome_rowan            = { workspace = true }
 biome_unicode_table    = { workspace = true }
 # Optional dependency for test_utils feature (HTML rendering for spec tests)
 htmlize                = { version = "1.0.6", features = ["unescape"], optional = true }
+percent-encoding       = { workspace = true, optional = true }
 tracing                = { workspace = true }
 unicode-bom            = { workspace = true }
 
@@ -44,7 +45,7 @@ tests_macros          = { path = "../tests_macros" }
 [features]
 # Enables test utilities (to_html module) for CommonMark spec compliance testing.
 # Not included in production builds to avoid unnecessary dependencies and code.
-test_utils = ["dep:htmlize"]
+test_utils = ["dep:htmlize", "dep:percent-encoding"]
 
 [lints]
 workspace = true

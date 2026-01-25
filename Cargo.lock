@@ -1301,6 +1301,7 @@ dependencies = [
  "biome_unicode_table",
  "htmlize",
  "insta",
+ "percent-encoding",
  "quickcheck",
  "quickcheck_macros",
  "serde",

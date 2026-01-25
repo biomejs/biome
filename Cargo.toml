@@ -130,6 +130,7 @@ libc                         = "0.2.180"
 mimalloc                     = "0.1.48"
 papaya                       = "0.2.3"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
+percent-encoding             = "2.3.2"
 phf                          = { version = "0.13.1", features = ["macros"] }
 proc-macro-error2            = { version = "2.0.1", default-features = false }
 proc-macro2                  = "1.0.106"

@@ -42,6 +42,7 @@ use biome_markdown_syntax::{
     MdReferenceImage, MdReferenceLink, MdSetextHeader, MdTextual,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, TextRange};
+use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use std::collections::HashMap;
 
 use crate::link_reference::normalize_reference_label;
@@ -446,7 +447,10 @@ fn render_paragraph(
     }
     // Trim both ends - leading whitespace can appear from parser including
     // the space after list markers in the paragraph content
-    let content = strip_paragraph_indent(content.trim());
+    let content = strip_paragraph_indent(
+        content
+            .trim_matches(|c| c == ' ' || c == '\n' || c == '\r')
+    );
 
     if in_tight_list {
         // In tight lists, paragraphs are rendered without <p> tags
@@ -602,10 +606,11 @@ fn render_fenced_code_block(
     // Extract just the language part (before first space) and process escapes
     let language = info_string.split_whitespace().next().unwrap_or("");
     let language = process_escapes(language);
+    let language = htmlize::unescape(&language);
 
     if !language.is_empty() {
         out.push_str(" class=\"language-");
-        out.push_str(&escape_html_attribute(&language));
+        out.push_str(&escape_html_attribute(language.as_ref()));
         out.push('"');
     }
 
@@ -1194,7 +1199,7 @@ fn render_autolink(autolink: &MdAutolink, out: &mut String) {
     let href = if is_email {
         format!("mailto:{}", content)
     } else {
-        content.clone()
+        process_link_destination(&content)
     };
 
     out.push_str("<a href=\"");
@@ -1361,7 +1366,9 @@ fn process_link_destination(dest: &str) -> String {
     };
 
     // Process escapes
-    process_escapes(dest)
+    let dest = process_escapes(dest);
+    let decoded = htmlize::unescape(&dest).into_owned();
+    percent_encode_uri(&decoded)
 }
 
 /// Process a link title (remove quotes, decode escapes).
@@ -1379,8 +1386,53 @@ fn process_link_title(title: &str) -> String {
     };
 
     // Process escapes
-    process_escapes(title)
+    let title = process_escapes(title);
+    htmlize::unescape(&title).into_owned()
 }
+
+fn percent_encode_uri(value: &str) -> String {
+    let mut result = String::new();
+    let mut last = 0;
+
+    for (i, c) in value.char_indices() {
+        if c == '%' {
+            let bytes = value.as_bytes();
+            if i + 2 < bytes.len()
+                && bytes[i + 1].is_ascii_alphanumeric()
+                && bytes[i + 2].is_ascii_alphanumeric()
+            {
+                if last < i {
+                    result.push_str(
+                        &utf8_percent_encode(&value[last..i], URI_ENCODE_SET).to_string(),
+                    );
+                }
+                result.push_str(&value[i..i + 3]);
+                last = i + 3;
+            }
+        }
+    }
+
+    if last < value.len() {
+        result.push_str(&utf8_percent_encode(&value[last..], URI_ENCODE_SET).to_string());
+    }
+
+    result
+}
+
+const URI_ENCODE_SET: &AsciiSet = &CONTROLS
+    .add(b' ')
+    .add(b'"')
+    .add(b'%')
+    .add(b'<')
+    .add(b'>')
+    .add(b'\\')
+    .add(b'[')
+    .add(b']')
+    .add(b'^')
+    .add(b'`')
+    .add(b'{')
+    .add(b'|')
+    .add(b'}');
 
 // ============================================================================
 // HTML Escaping
