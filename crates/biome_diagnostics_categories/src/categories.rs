@@ -167,6 +167,7 @@ define_categories! {
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
     "lint/nursery/noContinue": "https://biomejs.dev/linter/rules/no-continue",
     "lint/nursery/noDeprecatedImports": "https://biomejs.dev/linter/rules/no-deprecated-imports",
+    "lint/nursery/noDeprecatedMediaType": "https://biomejs.dev/linter/rules/no-deprecated-media-type",
     "lint/nursery/noDivRegex": "https://biomejs.dev/linter/rules/no-div-regex",
     "lint/nursery/noDuplicateArgumentNames": "https://biomejs.dev/linter/rules/no-duplicate-argument-names",
     "lint/nursery/noDuplicateAttributes": "https://biomejs.dev/linter/rules/no-duplicate-attributes",

@@ -1,0 +1,5 @@
+/* should not generate diagnostics */
+@media screen {}
+@media print and (min-resolution: 300dpi) {}
+@media (max-width: 600px) {}
+@media (min-width: 900px) {}
