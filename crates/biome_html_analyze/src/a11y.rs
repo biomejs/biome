@@ -70,7 +70,10 @@ pub(crate) fn attribute_value_equals_ignore_case(
 /// - <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/hidden>
 /// - <https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isHiddenFromScreenReader.js>
 pub(crate) fn is_hidden_from_screen_reader(element: &AnyHtmlTagElement) -> bool {
-    if element.has_truthy_attribute("aria-hidden") {
+    if element
+        .find_attribute_by_name("aria-hidden")
+        .is_some_and(|attr| is_aria_hidden_value_truthy(&attr))
+    {
         return true;
     }
 
@@ -110,38 +113,22 @@ pub(crate) fn get_truthy_aria_hidden_attribute(element: &AnyHtmlElement) -> Opti
 
 /// Returns `true` if the element has the named attribute with a non-empty value.
 ///
-/// The value is trimmed before checking, so whitespace-only values are considered empty.
+/// Whitespace-only values are considered empty.
 pub(crate) fn has_non_empty_attribute(element: &AnyHtmlElement, name: &str) -> bool {
     element
         .find_attribute_by_name(name)
         .is_some_and(|attr| has_non_empty_value(&attr))
 }
 
-/// Returns `true` if the element has an accessible name.
-///
-/// Per ARIA spec, an accessible name can come from:
-/// - `aria-label` attribute (direct label)
-/// - `aria-labelledby` attribute (references other elements)
-/// - `title` attribute (fallback)
-///
-/// Note: This does not check for name derived from element content or other sources.
+/// Returns `true` if the element has an accessible name via `aria-label`,
+/// `aria-labelledby`, or `title` attributes.
 pub(crate) fn has_accessible_name(element: &AnyHtmlElement) -> bool {
     has_non_empty_attribute(element, "aria-label")
         || has_non_empty_attribute(element, "aria-labelledby")
         || has_non_empty_attribute(element, "title")
 }
 
-// ============================================================================
-// Type-specific variants
-//
-// These variants accept concrete syntax types instead of `AnyHtmlElement`
-// to avoid the overhead of wrapping/cloning in recursive tree traversals.
-// ============================================================================
-
-/// Type-specific variant of truthy `aria-hidden` check for [`HtmlElement`].
-///
-/// Use this in recursive code where you have a concrete `HtmlElement` reference
-/// and want to avoid the cost of converting to `AnyHtmlElement`.
+/// Checks if an [`HtmlElement`] has a truthy `aria-hidden` attribute.
 ///
 /// [`HtmlElement`]: biome_html_syntax::HtmlElement
 pub(crate) fn html_element_has_truthy_aria_hidden(
@@ -152,10 +139,7 @@ pub(crate) fn html_element_has_truthy_aria_hidden(
         .is_some_and(|attr| is_aria_hidden_value_truthy(&attr))
 }
 
-/// Type-specific variant of truthy `aria-hidden` check for [`HtmlSelfClosingElement`].
-///
-/// Use this in recursive code where you have a concrete `HtmlSelfClosingElement` reference
-/// and want to avoid the cost of converting to `AnyHtmlElement`.
+/// Checks if an [`HtmlSelfClosingElement`] has a truthy `aria-hidden` attribute.
 ///
 /// [`HtmlSelfClosingElement`]: biome_html_syntax::HtmlSelfClosingElement
 pub(crate) fn html_self_closing_element_has_truthy_aria_hidden(
@@ -166,9 +150,8 @@ pub(crate) fn html_self_closing_element_has_truthy_aria_hidden(
         .is_some_and(|attr| is_aria_hidden_value_truthy(&attr))
 }
 
-/// Type-specific variant of accessible name check for [`HtmlSelfClosingElement`].
-///
-/// Checks for `aria-label`, `aria-labelledby`, or `title` attributes with non-empty values.
+/// Checks if an [`HtmlSelfClosingElement`] has an accessible name via `aria-label`,
+/// `aria-labelledby`, or `title` attributes.
 ///
 /// [`HtmlSelfClosingElement`]: biome_html_syntax::HtmlSelfClosingElement
 pub(crate) fn html_self_closing_element_has_accessible_name(
@@ -186,7 +169,7 @@ pub(crate) fn html_self_closing_element_has_accessible_name(
     has_aria_label || has_aria_labelledby || has_title
 }
 
-/// Type-specific variant of non-empty attribute check for [`HtmlSelfClosingElement`].
+/// Checks if an [`HtmlSelfClosingElement`] has the named attribute with a non-empty value.
 ///
 /// [`HtmlSelfClosingElement`]: biome_html_syntax::HtmlSelfClosingElement
 pub(crate) fn html_self_closing_element_has_non_empty_attribute(
