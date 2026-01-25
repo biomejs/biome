@@ -6438,6 +6438,8 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
+ "biome_markdown_parser",
+ "biome_markdown_syntax",
  "biome_parser",
  "biome_rowan",
  "biome_string_case",

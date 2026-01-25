@@ -5,29 +5,31 @@ edition = "2024"
 publish = false
 
 [dependencies]
-ascii_table        = "4.0.8"
-backtrace          = "0.3.76"
-biome_console      = { workspace = true }
-biome_diagnostics  = { workspace = true }
-biome_js_parser    = { workspace = true }
-biome_js_semantic  = { workspace = true }
-biome_js_syntax    = { workspace = true }
-biome_parser       = { workspace = true }
-biome_rowan        = { workspace = true }
-biome_string_case  = { workspace = true }
-camino             = { workspace = true }
-colored            = "3.0.0"
-indicatif          = { version = "0.18.3", features = ["improved_unicode"] }
-pico-args          = { version = "0.5.0", features = ["eq-separator"] }
-regex              = { workspace = true }
-serde              = { workspace = true, features = ["derive"] }
-serde_json         = { workspace = true }
-serde_yaml         = "0.9.34"
-tracing            = { workspace = true }
-tracing-subscriber = { workspace = true, features = ["env-filter", "std"] }
-walkdir            = { workspace = true }
-xtask_glue         = { workspace = true }
-yastl              = "0.1.2"
+ascii_table           = "4.0.8"
+backtrace             = "0.3.76"
+biome_console         = { workspace = true }
+biome_diagnostics     = { workspace = true }
+biome_js_parser       = { workspace = true }
+biome_js_semantic     = { workspace = true }
+biome_js_syntax       = { workspace = true }
+biome_markdown_parser = { workspace = true, features = ["test_utils"] }
+biome_markdown_syntax = { workspace = true }
+biome_parser          = { workspace = true }
+biome_rowan           = { workspace = true }
+biome_string_case     = { workspace = true }
+camino                = { workspace = true }
+colored               = "3.0.0"
+indicatif             = { version = "0.18.3", features = ["improved_unicode"] }
+pico-args             = { version = "0.5.0", features = ["eq-separator"] }
+regex                 = { workspace = true }
+serde                 = { workspace = true, features = ["derive"] }
+serde_json            = { workspace = true }
+serde_yaml            = "0.9.34"
+tracing               = { workspace = true }
+tracing-subscriber    = { workspace = true, features = ["env-filter", "std"] }
+walkdir               = { workspace = true }
+xtask_glue            = { workspace = true }
+yastl                 = "0.1.2"
 
 [lints]
 workspace = true
