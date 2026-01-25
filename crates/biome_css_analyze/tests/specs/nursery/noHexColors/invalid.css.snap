@@ -1,0 +1,98 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+a { color: #000; }
+a { color: #fff1aa; }
+a { color: #123456aa; }
+a { color: #0000000000000000; }
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.css:2:12 lint/nursery/noHexColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected hex color.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a { color: #000; }
+      │            ^^^^
+    3 │ a { color: #fff1aa; }
+    4 │ a { color: #123456aa; }
+  
+  i Hex colors are less readable and have limitations compared to other color models.
+  
+  i Consider using a named color or a color function like rgb(), hsl() or oklch(). See MDN Web Docs on CSS color values for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:3:12 lint/nursery/noHexColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected hex color.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a { color: #000; }
+  > 3 │ a { color: #fff1aa; }
+      │            ^^^^^^^
+    4 │ a { color: #123456aa; }
+    5 │ a { color: #0000000000000000; }
+  
+  i Hex colors are less readable and have limitations compared to other color models.
+  
+  i Consider using a named color or a color function like rgb(), hsl() or oklch(). See MDN Web Docs on CSS color values for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:4:12 lint/nursery/noHexColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected hex color.
+  
+    2 │ a { color: #000; }
+    3 │ a { color: #fff1aa; }
+  > 4 │ a { color: #123456aa; }
+      │            ^^^^^^^^^
+    5 │ a { color: #0000000000000000; }
+    6 │ 
+  
+  i Hex colors are less readable and have limitations compared to other color models.
+  
+  i Consider using a named color or a color function like rgb(), hsl() or oklch(). See MDN Web Docs on CSS color values for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:5:12 lint/nursery/noHexColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected hex color.
+  
+    3 │ a { color: #fff1aa; }
+    4 │ a { color: #123456aa; }
+  > 5 │ a { color: #0000000000000000; }
+      │            ^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Hex colors are less readable and have limitations compared to other color models.
+  
+  i Consider using a named color or a color function like rgb(), hsl() or oklch(). See MDN Web Docs on CSS color values for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -3613,6 +3613,13 @@
 			]
 		},
 		"NoHeaderScopeOptions": { "type": "object", "additionalProperties": false },
+		"NoHexColorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoHexColorsOptions" }
+			]
+		},
+		"NoHexColorsOptions": { "type": "object", "additionalProperties": false },
 		"NoImgElementConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5513,6 +5520,13 @@
 					"description": "Disallow iterating using a for-in loop.\nSee https://biomejs.dev/linter/rules/no-for-in",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoForInConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noHexColors": {
+					"description": "Disallow hex colors.\nSee https://biomejs.dev/linter/rules/no-hex-colors",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoHexColorsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7584,6 +7598,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoHeaderScopeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoHexColorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoHexColorsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

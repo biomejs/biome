@@ -1969,6 +1969,11 @@ See https://biomejs.dev/linter/rules/no-for-in
 	 */
 	noForIn?: NoForInConfiguration;
 	/**
+	* Disallow hex colors.
+See https://biomejs.dev/linter/rules/no-hex-colors 
+	 */
+	noHexColors?: NoHexColorsConfiguration;
+	/**
 	* Prevent import cycles.
 See https://biomejs.dev/linter/rules/no-import-cycles 
 	 */
@@ -3822,6 +3827,9 @@ export type NoFloatingPromisesConfiguration =
 export type NoForInConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoForInOptions;
+export type NoHexColorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoHexColorsOptions;
 export type NoImportCyclesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImportCyclesOptions;
@@ -5356,6 +5364,10 @@ export interface RuleWithNoForInOptions {
 	level: RulePlainConfiguration;
 	options?: NoForInOptions;
 }
+export interface RuleWithNoHexColorsOptions {
+	level: RulePlainConfiguration;
+	options?: NoHexColorsOptions;
+}
 export interface RuleWithNoImportCyclesOptions {
 	level: RulePlainConfiguration;
 	options?: NoImportCyclesOptions;
@@ -6804,6 +6816,7 @@ export interface NoExcessiveLinesPerFileOptions {
 export type NoFloatingClassesOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
+export type NoHexColorsOptions = {};
 export interface NoImportCyclesOptions {
 	/**
 	* Ignores type-only imports when finding an import cycle. A type-only import (`import type`)
@@ -7745,6 +7758,7 @@ export type Category =
 	| "lint/nursery/noFloatingClasses"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
+	| "lint/nursery/noHexColors"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noIncrementDecrement"
@@ -7753,7 +7767,6 @@ export type Category =
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
-	| "lint/nursery/useConsistentEnumValueType"
 	| "lint/nursery/noMultiAssign"
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNextAsyncClientComponent"
@@ -7786,6 +7799,7 @@ export type Category =
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
+	| "lint/nursery/useConsistentEnumValueType"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useDeprecatedDate"
@@ -7798,9 +7812,9 @@ export type Category =
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useMaxParams"
-	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"
