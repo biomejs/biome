@@ -611,13 +611,44 @@ pub(crate) fn parse_inline_italic(p: &mut MarkdownParser) -> ParsedSyntax {
     parse_emphasis_from_context(p, false)
 }
 
-fn parse_inline_item_list_until_no_links(p: &mut MarkdownParser, stop: MarkdownSyntaxKind) {
+fn parse_inline_item_list_until_no_links(p: &mut MarkdownParser, stop: MarkdownSyntaxKind) -> bool {
     let m = p.start();
     let prev_context = set_inline_emphasis_context_until(p, stop);
+    let mut bracket_depth = 0usize;
+    let mut has_nested_link = false;
 
     loop {
-        if p.at(stop) || p.at_inline_end() {
+        // Per CommonMark, link text can span lines, but blank lines end the link.
+        // Check for blank line (NEWLINE followed by NEWLINE or EOF after optional whitespace)
+        if p.at(NEWLINE) {
+            if p.at_blank_line() {
+                break; // Blank line ends link text
+            }
+            // Single newline inside link text - consume and continue
+            let _ = super::parse_textual(p);
+            continue;
+        }
+
+        if p.at(T![EOF]) {
             break;
+        }
+
+        if p.at(stop) {
+            if bracket_depth == 0 {
+                break;
+            }
+            bracket_depth = bracket_depth.saturating_sub(1);
+            let _ = super::parse_textual(p);
+            continue;
+        }
+
+        if p.at(L_BRACK) {
+            if !has_nested_link && nested_link_starts_here(p) {
+                has_nested_link = true;
+            }
+            bracket_depth += 1;
+            let _ = super::parse_textual(p);
+            continue;
         }
 
         if parse_any_inline_no_links(p).is_absent() {
@@ -627,11 +658,51 @@ fn parse_inline_item_list_until_no_links(p: &mut MarkdownParser, stop: MarkdownS
 
     m.complete(p, MD_INLINE_ITEM_LIST);
     p.set_emphasis_context(prev_context);
+    has_nested_link
+}
+
+fn nested_link_starts_here(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        if !p.at(L_BRACK) {
+            return false;
+        }
+
+        p.bump(L_BRACK);
+        let mut depth = 0usize;
+
+        loop {
+            if p.at(EOF) || p.at_inline_end() {
+                return false;
+            }
+
+            if p.at(L_BRACK) {
+                depth += 1;
+                p.bump(L_BRACK);
+                continue;
+            }
+
+            if p.at(R_BRACK) {
+                if depth > 0 {
+                    depth -= 1;
+                    p.bump(R_BRACK);
+                    continue;
+                }
+                p.bump(R_BRACK);
+                return p.at(L_PAREN) || p.at(L_BRACK);
+            }
+
+            p.bump(p.cur());
+        }
+    })
 }
 
 fn parse_any_inline_no_links(p: &mut MarkdownParser) -> ParsedSyntax {
-    if (p.at(BANG) && p.nth_at(1, L_BRACK)) || p.at(L_BRACK) {
+    if p.at(L_BRACK) {
         return super::parse_textual(p);
+    }
+
+    if p.at(BANG) && p.nth_at(1, L_BRACK) {
+        return parse_inline_image(p);
     }
 
     parse_any_inline(p)
@@ -826,10 +897,15 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
     kind.bump_opening(p);
 
     // Link text / alt text
-    parse_inline_item_list_until_no_links(p, R_BRACK);
+    let has_nested_link = parse_inline_item_list_until_no_links(p, R_BRACK);
 
     // ] - if missing at inline end, emit diagnostic; otherwise rewind
     if !p.eat(R_BRACK) {
+        if matches!(kind, LinkParseKind::Link) && has_nested_link {
+            m.abandon(p);
+            p.rewind(checkpoint);
+            return Absent;
+        }
         if p.at_inline_end() {
             // Unclosed link/image at end of inline content - emit diagnostic
             // Expand range to include the text content, not just the opening bracket
@@ -843,19 +919,50 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
         p.rewind(checkpoint);
         return Absent;
     }
+    let text_end_offset = p.cur_range().start();
+
+    if matches!(kind, LinkParseKind::Link) && has_nested_link {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
 
     // Now decide based on what follows ]
-    if p.at(L_PAREN) {
+    let link_validation = if p.at(L_PAREN) {
+        inline_link_is_valid(p)
+    } else {
+        InlineLinkValidation::Invalid
+    };
+
+    if matches!(
+        link_validation,
+        InlineLinkValidation::Valid | InlineLinkValidation::DepthExceeded
+    ) {
         // Inline link/image: [text](url) or ![alt](url)
         // Bump past ( and lex the following tokens in LinkDefinition context
         // so whitespace separates destination and title.
         p.expect_with_context(L_PAREN, crate::lexer::MarkdownLexContext::LinkDefinition);
 
         let destination = p.start();
-        parse_inline_link_destination_tokens(p);
+        let destination_result = parse_inline_link_destination_tokens(p);
+
+        // When depth exceeded, destination is truncated but link is still valid.
+        // Complete the destination and link immediately without looking for closing paren.
+        if destination_result == DestinationScanResult::DepthExceeded {
+            destination.complete(p, MD_INLINE_ITEM_LIST);
+            return Present(m.complete(p, kind.inline_kind()));
+        }
+
         let has_title = inline_title_starts_after_whitespace_tokens(p);
-        while is_whitespace_token(p) {
-            bump_textual_link_def(p);
+        while is_title_separator_token(p) {
+            bump_link_def_separator(p);
+        }
+        if destination_result == DestinationScanResult::Invalid {
+            destination.abandon(p);
+            m.abandon(p);
+            p.rewind(checkpoint);
+            p.force_relex_regular();
+            return Absent;
         }
         destination.complete(p, MD_INLINE_ITEM_LIST);
 
@@ -867,8 +974,20 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
             title_m.complete(p, MD_LINK_TITLE);
         }
 
+        // Skip trailing whitespace/newlines before closing paren without creating nodes
+        // (creating nodes would violate the MD_INLINE_LINK grammar which expects exactly 7 children)
+        while is_title_separator_token(p) {
+            skip_link_def_separator_tokens(p);
+        }
+
         if !p.eat(R_PAREN) {
-            kind.report_unclosed_destination(p, opening_range);
+            if p.at_inline_end() {
+                kind.report_unclosed_destination(p, opening_range);
+            }
+            m.abandon(p);
+            p.rewind(checkpoint);
+            p.force_relex_regular();
+            return Absent;
         }
 
         Present(m.complete(p, kind.inline_kind()))
@@ -888,7 +1007,7 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
         {
             m.abandon(p);
             p.rewind(checkpoint);
-            return consume_textual_until_offset(p, reference.end_offset);
+            return consume_textual_until_offset(p, text_end_offset);
         }
 
         Present(m.complete(p, kind.reference_kind()))
@@ -901,14 +1020,13 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
         {
             m.abandon(p);
             p.rewind(checkpoint);
-            return consume_textual_until_offset(p, reference.end_offset);
+            return consume_textual_until_offset(p, text_end_offset);
         }
         Present(m.complete(p, kind.reference_kind()))
     }
 }
 
 struct ReferenceLinkLookahead {
-    end_offset: TextSize,
     label_raw: String,
     is_shortcut: bool,
 }
@@ -947,7 +1065,13 @@ fn lookahead_reference_common(
         p.bump(L_BRACK);
 
         let link_text = collect_bracket_text(p)?;
-        let end_offset = p.cur_range().end();
+
+        // Link text must be non-empty after normalization (e.g., `[\n ]` normalizes to empty)
+        let normalized_link = normalize_reference_label(&link_text);
+        if normalized_link.is_empty() {
+            return None;
+        }
+
         p.bump(R_BRACK);
 
         if p.at(L_PAREN) {
@@ -961,12 +1085,15 @@ fn lookahead_reference_common(
                 let label = if label_text.is_empty() {
                     link_text.clone()
                 } else {
+                    // Explicit label must also normalize to non-empty
+                    let normalized_label = normalize_reference_label(&label_text);
+                    if normalized_label.is_empty() {
+                        return None;
+                    }
                     label_text
                 };
-                let end_offset = p.cur_range().end();
                 p.bump(R_BRACK);
                 return Some(ReferenceLinkLookahead {
-                    end_offset,
                     label_raw: label,
                     is_shortcut: false,
                 });
@@ -974,7 +1101,6 @@ fn lookahead_reference_common(
         }
 
         Some(ReferenceLinkLookahead {
-            end_offset,
             label_raw: link_text,
             is_shortcut: true,
         })
@@ -1025,48 +1151,307 @@ fn is_whitespace_token(p: &MarkdownParser) -> bool {
 
 fn inline_title_starts_after_whitespace_tokens(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
-        while is_whitespace_token(p) {
-            bump_textual_link_def(p);
+        let mut saw_whitespace = false;
+        while is_title_separator_token(p) {
+            bump_link_def_separator(p);
+            saw_whitespace = true;
         }
-        get_title_close_char(p).is_some()
+        saw_whitespace && get_title_close_char(p).is_some()
     })
 }
 
-fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) {
-    p.re_lex_link_definition();
+/// Result of validating an inline link.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum InlineLinkValidation {
+    /// Link is valid with complete destination
+    Valid,
+    /// Link is invalid
+    Invalid,
+    /// Link is valid but destination was truncated due to paren depth limit.
+    /// The link should be closed immediately without looking for `)`.
+    DepthExceeded,
+}
 
-    if p.at(L_ANGLE) {
-        bump_textual_link_def(p);
-        while !p.at(EOF) && !p.at(NEWLINE) {
-            if p.at(R_ANGLE) {
-                bump_textual_link_def(p);
-                break;
-            }
-            if is_whitespace_token(p) {
-                break;
-            }
-            bump_textual_link_def(p);
+fn inline_link_is_valid(p: &mut MarkdownParser) -> InlineLinkValidation {
+    p.lookahead(|p| {
+        if !p.at(L_PAREN) {
+            return InlineLinkValidation::Invalid;
         }
-        return;
+
+        p.bump(L_PAREN);
+        p.re_lex_link_definition();
+
+        let destination_result = scan_inline_link_destination_tokens(p);
+
+        // If depth exceeded, link is valid but truncated - no need to check for closing paren
+        if destination_result == DestinationScanResult::DepthExceeded {
+            return InlineLinkValidation::DepthExceeded;
+        }
+
+        if destination_result == DestinationScanResult::Invalid {
+            return InlineLinkValidation::Invalid;
+        }
+
+        let mut saw_separator = false;
+        while is_title_separator_token(p) {
+            skip_link_def_separator_tokens(p);
+            saw_separator = true;
+        }
+        let has_title = saw_separator && get_title_close_char(p).is_some();
+        while is_title_separator_token(p) {
+            skip_link_def_separator_tokens(p);
+        }
+
+        if has_title {
+            scan_title_content(p, get_title_close_char(p));
+        }
+
+        while is_title_separator_token(p) {
+            skip_link_def_separator_tokens(p);
+        }
+
+        if p.at(R_PAREN) {
+            InlineLinkValidation::Valid
+        } else {
+            InlineLinkValidation::Invalid
+        }
+    })
+}
+
+/// Result of scanning a link destination.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum DestinationScanResult {
+    /// Destination is valid and complete
+    Valid,
+    /// Destination is invalid (contains invalid characters, etc.)
+    Invalid,
+    /// Destination was truncated because paren depth exceeded the limit.
+    /// In this case, the link is considered valid but closed at the truncation point.
+    DepthExceeded,
+}
+
+fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationScanResult {
+    const MAX_PAREN_DEPTH: i32 = super::MAX_LINK_DESTINATION_PAREN_DEPTH;
+    // Skip leading whitespace to match parse_inline_link_destination_tokens behavior
+    while is_title_separator_token(p) {
+        skip_link_def_separator_tokens(p);
+    }
+    if p.at(L_ANGLE) {
+        p.bump_link_definition();
+        let mut pending_escape = false;
+        loop {
+            if p.at(EOF) || p.at(NEWLINE) {
+                return DestinationScanResult::Invalid;
+            }
+            if p.at(R_ANGLE) {
+                if pending_escape {
+                    if !super::validate_link_destination_text(
+                        p.cur_text(),
+                        super::LinkDestinationKind::Enclosed,
+                        &mut pending_escape,
+                    ) {
+                        return DestinationScanResult::Invalid;
+                    }
+                    p.bump_link_definition();
+                    continue;
+                }
+                p.bump_link_definition();
+                return DestinationScanResult::Valid;
+            }
+            if !super::validate_link_destination_text(
+                p.cur_text(),
+                super::LinkDestinationKind::Enclosed,
+                &mut pending_escape,
+            ) {
+                return DestinationScanResult::Invalid;
+            }
+            p.bump_link_definition();
+        }
     }
 
     let mut paren_depth: i32 = 0;
+    let mut pending_escape = false;
+    while !p.at(EOF) && !p.at(NEWLINE) {
+        if is_whitespace_token(p) {
+            break;
+        }
+        let text = p.cur_text();
+        if !super::validate_link_destination_text(
+            text,
+            super::LinkDestinationKind::Raw,
+            &mut pending_escape,
+        ) {
+            return DestinationScanResult::Invalid;
+        }
+        match super::try_update_paren_depth(text, paren_depth, MAX_PAREN_DEPTH) {
+            super::ParenDepthResult::Ok(next_depth) => {
+                paren_depth = next_depth;
+                p.bump_link_definition();
+            }
+            super::ParenDepthResult::DepthExceeded => {
+                // Paren depth exceeded - destination is truncated at this point.
+                // Per CommonMark/cmark, the link is still valid but closed here.
+                return DestinationScanResult::DepthExceeded;
+            }
+            super::ParenDepthResult::UnmatchedClose => {
+                // Unmatched closing paren - destination ends here normally.
+                // The `)` belongs to the enclosing construct (inline link closer).
+                break;
+            }
+        }
+    }
+    if p.at(EOF) {
+        return DestinationScanResult::Invalid;
+    }
+    if p.at(NEWLINE) {
+        return if p.at_blank_line() {
+            DestinationScanResult::Invalid
+        } else {
+            DestinationScanResult::Valid
+        };
+    }
+    DestinationScanResult::Valid
+}
+
+fn scan_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
+    let Some(close_char) = close_char else {
+        return;
+    };
+
+    let text = p.cur_text();
+    let is_complete = text.len() >= 2 && super::ends_with_unescaped_close(text, close_char);
+
+    p.bump_link_definition();
+    if is_complete {
+        return;
+    }
+
+    loop {
+        // Stop on EOF or blank line (titles cannot span blank lines per CommonMark)
+        if p.at(EOF) || p.at_blank_line() {
+            return;
+        }
+
+        // Continue through single newlines (titles can span non-blank lines)
+        if p.at(NEWLINE) {
+            skip_link_def_separator_tokens(p);
+            continue;
+        }
+
+        let text = p.cur_text();
+        if super::ends_with_unescaped_close(text, close_char) {
+            p.bump_link_definition();
+            return;
+        }
+
+        p.bump_link_definition();
+    }
+}
+
+fn skip_link_def_separator_tokens(p: &mut MarkdownParser) {
+    if p.at(NEWLINE) {
+        p.bump(NEWLINE);
+    } else {
+        p.bump_link_definition();
+    }
+}
+
+fn is_title_separator_token(p: &MarkdownParser) -> bool {
+    is_whitespace_token(p) || (p.at(NEWLINE) && !p.at_blank_line())
+}
+
+fn bump_link_def_separator(p: &mut MarkdownParser) {
+    if p.at(NEWLINE) {
+        let item = p.start();
+        p.bump_remap(MD_TEXTUAL_LITERAL);
+        item.complete(p, MD_TEXTUAL);
+    } else {
+        bump_textual_link_def(p);
+    }
+}
+
+fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationScanResult {
+    p.re_lex_link_definition();
+    const MAX_PAREN_DEPTH: i32 = super::MAX_LINK_DESTINATION_PAREN_DEPTH;
+
+    if p.at(L_ANGLE) {
+        bump_textual_link_def(p);
+        let mut pending_escape = false;
+        loop {
+            if p.at(EOF) || p.at(NEWLINE) {
+                return DestinationScanResult::Invalid;
+            }
+            if p.at(R_ANGLE) {
+                if pending_escape {
+                    if !super::validate_link_destination_text(
+                        p.cur_text(),
+                        super::LinkDestinationKind::Enclosed,
+                        &mut pending_escape,
+                    ) {
+                        return DestinationScanResult::Invalid;
+                    }
+                    bump_textual_link_def(p);
+                    continue;
+                }
+                bump_textual_link_def(p);
+                return DestinationScanResult::Valid;
+            }
+            if !super::validate_link_destination_text(
+                p.cur_text(),
+                super::LinkDestinationKind::Enclosed,
+                &mut pending_escape,
+            ) {
+                return DestinationScanResult::Invalid;
+            }
+            bump_textual_link_def(p);
+        }
+    }
+
+    let mut paren_depth: i32 = 0;
+    let mut pending_escape = false;
+    while is_title_separator_token(p) {
+        bump_link_def_separator(p);
+    }
     while !p.at(EOF) && !p.at(NEWLINE) {
         if is_whitespace_token(p) {
             break;
         }
 
-        if p.at(L_PAREN) {
-            paren_depth += 1;
-        } else if p.at(R_PAREN) {
-            if paren_depth == 0 {
+        let text = p.cur_text();
+        if !super::validate_link_destination_text(
+            text,
+            super::LinkDestinationKind::Raw,
+            &mut pending_escape,
+        ) {
+            return DestinationScanResult::Invalid;
+        }
+        match super::try_update_paren_depth(text, paren_depth, MAX_PAREN_DEPTH) {
+            super::ParenDepthResult::Ok(next_depth) => {
+                paren_depth = next_depth;
+                bump_textual_link_def(p);
+            }
+            super::ParenDepthResult::DepthExceeded => {
+                // Paren depth exceeded - destination is truncated at this point.
+                return DestinationScanResult::DepthExceeded;
+            }
+            super::ParenDepthResult::UnmatchedClose => {
+                // Unmatched closing paren - destination ends here normally.
+                // The `)` belongs to the enclosing construct (inline link closer).
                 break;
             }
-            paren_depth -= 1;
         }
-
-        bump_textual_link_def(p);
     }
+    if p.at(EOF) {
+        return DestinationScanResult::Invalid;
+    }
+    if p.at(NEWLINE) {
+        return if p.at_blank_line() {
+            DestinationScanResult::Invalid
+        } else {
+            DestinationScanResult::Valid
+        };
+    }
+    DestinationScanResult::Valid
 }
 
 fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
@@ -1088,9 +1473,7 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
     };
 
     let text = p.cur_text();
-    let is_complete = text.len() >= 2
-        && ((close_char == ')' && text.ends_with(')'))
-            || (close_char != ')' && text.ends_with(close_char)));
+    let is_complete = text.len() >= 2 && super::ends_with_unescaped_close(text, close_char);
 
     bump_textual_link_def(p);
     if is_complete {
@@ -1098,12 +1481,19 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
     }
 
     loop {
-        if p.at(EOF) || p.at(NEWLINE) {
+        // Stop on EOF or blank line (titles cannot span blank lines per CommonMark)
+        if p.at(EOF) || p.at_blank_line() {
             return;
         }
 
+        // Continue through single newlines (titles can span non-blank lines)
+        if p.at(NEWLINE) {
+            bump_link_def_separator(p);
+            continue;
+        }
+
         let text = p.cur_text();
-        if text.ends_with(close_char) {
+        if super::ends_with_unescaped_close(text, close_char) {
             bump_textual_link_def(p);
             return;
         }

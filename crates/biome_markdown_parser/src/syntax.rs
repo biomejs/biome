@@ -60,6 +60,9 @@ use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
 use crate::MarkdownParser;
 
+/// Maximum paren nesting allowed in link destinations per CommonMark.
+pub(crate) const MAX_LINK_DESTINATION_PAREN_DEPTH: i32 = 32;
+
 /// CommonMark requires 4 or more spaces for indented code blocks.
 const INDENT_CODE_BLOCK_SPACES: usize = 4;
 
@@ -69,6 +72,98 @@ pub(crate) fn parse_document(p: &mut MarkdownParser) {
     // Bump the EOF token - required by the grammar
     p.bump(T![EOF]);
     m.complete(p, MD_DOCUMENT);
+}
+
+/// Result of updating parenthesis depth when scanning link destinations.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ParenDepthResult {
+    /// Depth updated successfully, contains new depth value
+    Ok(i32),
+    /// Depth would exceed the maximum (too many nested opening parens).
+    /// Per cmark, this truncates the destination at this point.
+    DepthExceeded,
+    /// Unmatched closing paren (would go below 0).
+    /// This typically means the `)` belongs to the enclosing construct.
+    UnmatchedClose,
+}
+
+pub(crate) fn try_update_paren_depth(text: &str, depth: i32, max: i32) -> ParenDepthResult {
+    let mut depth = depth;
+    let mut chars = text.chars().peekable();
+
+    while let Some(c) = chars.next() {
+        if c == '\\' && matches!(chars.peek(), Some('(' | ')')) {
+            chars.next();
+            continue;
+        }
+
+        if c == '(' {
+            if depth == max {
+                return ParenDepthResult::DepthExceeded;
+            }
+            depth += 1;
+        } else if c == ')' {
+            if depth == 0 {
+                return ParenDepthResult::UnmatchedClose;
+            }
+            depth -= 1;
+        }
+    }
+
+    ParenDepthResult::Ok(depth)
+}
+
+pub(crate) enum LinkDestinationKind {
+    Enclosed,
+    Raw,
+}
+
+pub(crate) fn validate_link_destination_text(
+    text: &str,
+    kind: LinkDestinationKind,
+    pending_escape: &mut bool,
+) -> bool {
+    for c in text.chars() {
+        if *pending_escape {
+            if c.is_ascii_punctuation() {
+                *pending_escape = false;
+                continue;
+            }
+            *pending_escape = false;
+        }
+
+        if c == '\\' {
+            *pending_escape = true;
+            continue;
+        }
+
+        if c.is_ascii_control() {
+            return false;
+        }
+
+        if matches!(kind, LinkDestinationKind::Enclosed) && c == '<' {
+            return false;
+        }
+    }
+
+    true
+}
+
+pub(crate) fn ends_with_unescaped_close(text: &str, close_char: char) -> bool {
+    if !text.ends_with(close_char) {
+        return false;
+    }
+
+    let mut backslashes = 0;
+    for c in text.chars().rev().skip(1) {
+        if c == '\\' {
+            backslashes += 1;
+        } else {
+            break;
+        }
+    }
+
+    backslashes % 2 == 0
 }
 
 pub(crate) fn parse_block_list(p: &mut MarkdownParser) -> ParsedSyntax {
@@ -837,7 +932,10 @@ fn set_inline_emphasis_context(
         source
     };
     let base_offset = u32::from(p.cur_range().start()) as usize;
-    let context = crate::syntax::inline::EmphasisContext::new(inline_source, base_offset);
+    // Create a reference checker closure that uses the parser's link reference definitions
+    let context = crate::syntax::inline::EmphasisContext::new(inline_source, base_offset, |label| {
+        p.has_link_reference_definition(label)
+    });
     p.set_emphasis_context(Some(context))
 }
 

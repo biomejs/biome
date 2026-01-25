@@ -33,15 +33,11 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@14..15 "]" [] [],
                 },
-                MdReferenceLink {
-                    l_brack_token: L_BRACK@15..16 "[" [] [],
-                    text: MdInlineItemList [
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@16..30 "unclosed label" [] [],
-                        },
-                    ],
-                    r_brack_token: missing (required),
-                    label: missing (optional),
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@15..16 "[" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@16..30 "unclosed label" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
@@ -72,37 +68,13 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@11..14 "alt" [] []
         4: MD_TEXTUAL@14..15
           0: MD_TEXTUAL_LITERAL@14..15 "]" [] []
-        5: MD_REFERENCE_LINK@15..30
-          0: L_BRACK@15..16 "[" [] []
-          1: MD_INLINE_ITEM_LIST@16..30
-            0: MD_TEXTUAL@16..30
-              0: MD_TEXTUAL_LITERAL@16..30 "unclosed label" [] []
-          2: (empty)
-          3: (empty)
-        6: MD_TEXTUAL@30..31
+        5: MD_TEXTUAL@15..16
+          0: MD_TEXTUAL_LITERAL@15..16 "[" [] []
+        6: MD_TEXTUAL@16..30
+          0: MD_TEXTUAL_LITERAL@16..30 "unclosed label" [] []
+        7: MD_TEXTUAL@30..31
           0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
       1: (empty)
   2: EOF@31..31 "" [] []
 
-```
-
-## Diagnostics
-
-```
-unclosed_reference_image_label.md:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unclosed link, expected `]` to close link text.
-  
-  > 1 │ This has ![alt][unclosed label
-      │                ^^^^^^^^^^^^^^^
-    2 │ 
-  
-  i link started here
-  
-  > 1 │ This has ![alt][unclosed label
-      │                ^^^^^^^^^^^^^^^
-    2 │ 
-  
-  i Format: [link text](url)
-  
 ```

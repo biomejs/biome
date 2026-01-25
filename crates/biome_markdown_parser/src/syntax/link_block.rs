@@ -73,7 +73,9 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
     p.bump_any();
 
     // Parse label: consume tokens until ] or invalid state
+    // Also collect the label text for normalization check.
     let mut label_len = 0;
+    let mut label_text = String::new();
     loop {
         if p.at(EOF) {
             return false;
@@ -89,6 +91,8 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
         }
 
         let text = p.cur_text();
+        label_text.push_str(text);
+
         // Check for escape sequences
         if text.starts_with('\\') && text.len() > 1 {
             label_len += 1; // Count escaped char
@@ -107,6 +111,12 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
         return false;
     }
 
+    // Label must also be non-empty after normalization (e.g., `[\n ]` normalizes to empty)
+    let normalized = crate::link_reference::normalize_reference_label(&label_text);
+    if normalized.is_empty() {
+        return false;
+    }
+
     // Expect ]
     if !p.at(R_BRACK) {
         return false;
@@ -122,18 +132,31 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
     // Re-lex the current token in LinkDefinition context so whitespace is tokenized.
     p.re_lex_link_definition();
 
-    // Destination is required
-    if p.at(EOF) || p.at(NEWLINE) {
-        return false;
-    }
-
-    // Skip destination
-    if !skip_destination_tokens(p) {
-        return false;
-    }
-
-    // Skip optional whitespace after destination (lookahead only)
+    // Skip optional whitespace after colon (before destination or newline)
     skip_whitespace_tokens(p);
+
+    // Per CommonMark §4.7, destination can be on the next line if there's a
+    // single non-blank newline after the colon.
+    if p.at(NEWLINE) {
+        if p.at_blank_line() {
+            return false; // Blank line = no destination
+        }
+        // Single newline - allow destination on next line
+        p.bump_link_definition();
+        skip_whitespace_tokens(p);
+    }
+
+    // Destination is required (can be on same line or next line now)
+    if p.at(EOF) || p.at_blank_line() {
+        return false;
+    }
+
+    // Skip destination and track whether there was whitespace after it
+    let dest_result = skip_destination_tokens(p);
+    if dest_result == DestinationResult::Invalid {
+        return false;
+    }
+    let had_separator = dest_result == DestinationResult::ValidWithSeparator;
 
     // Check what follows destination
     if p.at(EOF) {
@@ -141,19 +164,27 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
     }
 
     if p.at(NEWLINE) {
-        // Check for title on next line
+        // Check for title on next line (newline counts as separator)
         p.bump_link_definition();
         skip_whitespace_tokens(p);
 
         if at_title_start(p) {
-            return skip_title_tokens(p);
+            // If title looks valid, it's included in the definition.
+            // If title has trailing content, it's invalid - but the definition
+            // is still valid (destination-only). The invalid title line will
+            // be parsed as a paragraph. Per CommonMark §4.7.
+            let _ = skip_title_tokens(p); // Ignore result - definition is valid either way
         }
-        // No title on next line - destination-only is valid
+        // Destination-only is valid, or destination+valid_title is valid
         return true;
     }
 
-    // Check for optional title on same line
+    // Check for optional title on same line - MUST be preceded by whitespace
     if at_title_start(p) {
+        if !had_separator {
+            // Title without preceding whitespace is invalid (e.g., `<bar>(baz)`)
+            return false;
+        }
         return skip_title_tokens(p);
     }
 
@@ -163,14 +194,22 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
 
 /// Skip whitespace tokens (spaces/tabs) in lookahead.
 fn skip_whitespace_tokens(p: &mut MarkdownParser) {
+    skip_whitespace_tokens_tracked(p);
+}
+
+/// Skip whitespace tokens (spaces/tabs) in lookahead and return whether any were skipped.
+fn skip_whitespace_tokens_tracked(p: &mut MarkdownParser) -> bool {
+    let mut skipped = false;
     while !p.at(EOF) && !p.at(NEWLINE) {
         let text = p.cur_text();
         if text.chars().all(|c| c == ' ' || c == '\t') && !text.is_empty() {
             p.bump_link_definition();
+            skipped = true;
         } else {
             break;
         }
     }
+    skipped
 }
 
 /// Check if at a title start token.
@@ -179,20 +218,65 @@ fn at_title_start(p: &MarkdownParser) -> bool {
     text.starts_with('"') || text.starts_with('\'') || p.at(L_PAREN)
 }
 
-/// Skip destination tokens in lookahead. Returns false if destination is invalid.
-fn skip_destination_tokens(p: &mut MarkdownParser) -> bool {
+/// Result of skipping destination tokens.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum DestinationResult {
+    /// Invalid destination
+    Invalid,
+    /// Valid destination, no trailing whitespace found before title
+    ValidNoSeparator,
+    /// Valid destination with trailing whitespace (separator before potential title)
+    ValidWithSeparator,
+}
+
+/// Skip destination tokens in lookahead. Returns the destination result.
+fn skip_destination_tokens(p: &mut MarkdownParser) -> DestinationResult {
+    // Skip optional leading whitespace before destination
+    while !p.at(EOF) && !p.at(NEWLINE) {
+        let text = p.cur_text();
+        if text.chars().all(|c| c == ' ' || c == '\t') && !text.is_empty() {
+            p.bump_link_definition();
+        } else {
+            break;
+        }
+    }
+
     if p.at(L_ANGLE) {
         // Angle-bracketed destination
         p.bump_link_definition();
+        let mut pending_escape = false;
         loop {
             if p.at(EOF) || p.at(NEWLINE) {
-                return false; // Unterminated angle bracket
+                return DestinationResult::Invalid; // Unterminated angle bracket
             }
             if p.at(R_ANGLE) {
-                p.bump_link_definition();
-                // Consume separator whitespace into destination
-                skip_whitespace_tokens(p);
-                return true;
+                if pending_escape {
+                    if !crate::syntax::validate_link_destination_text(
+                        p.cur_text(),
+                        crate::syntax::LinkDestinationKind::Enclosed,
+                        &mut pending_escape,
+                    ) {
+                        return DestinationResult::Invalid;
+                    }
+                    p.bump_link_definition();
+                    continue;
+                } else {
+                    p.bump_link_definition();
+                    // Check for trailing whitespace (separator)
+                    let had_sep = skip_whitespace_tokens_tracked(p);
+                    return if had_sep {
+                        DestinationResult::ValidWithSeparator
+                    } else {
+                        DestinationResult::ValidNoSeparator
+                    };
+                }
+            }
+            if !crate::syntax::validate_link_destination_text(
+                p.cur_text(),
+                crate::syntax::LinkDestinationKind::Enclosed,
+                &mut pending_escape,
+            ) {
+                return DestinationResult::Invalid;
             }
             p.bump_link_definition();
         }
@@ -201,6 +285,7 @@ fn skip_destination_tokens(p: &mut MarkdownParser) -> bool {
         let mut paren_depth = 0i32;
         let mut has_content = false;
         let mut saw_separator = false;
+        let mut pending_escape = false;
 
         while !p.at(EOF) && !p.at(NEWLINE) {
             let text = p.cur_text();
@@ -214,24 +299,43 @@ fn skip_destination_tokens(p: &mut MarkdownParser) -> bool {
             }
 
             if at_title_start(p) && has_content && saw_separator {
+                // Break here - we've found separator before title
                 break;
             }
 
-            if p.at(L_PAREN) {
-                paren_depth += 1;
-            } else if p.at(R_PAREN) {
-                if paren_depth > 0 {
-                    paren_depth -= 1;
-                } else {
-                    break; // Unbalanced ) ends destination
-                }
+            if !crate::syntax::validate_link_destination_text(
+                text,
+                crate::syntax::LinkDestinationKind::Raw,
+                &mut pending_escape,
+            ) {
+                return DestinationResult::Invalid;
             }
 
-            has_content = true;
-            saw_separator = false;
-            p.bump_link_definition();
+            match crate::syntax::try_update_paren_depth(
+                text,
+                paren_depth,
+                crate::syntax::MAX_LINK_DESTINATION_PAREN_DEPTH,
+            ) {
+                crate::syntax::ParenDepthResult::Ok(next_depth) => {
+                    has_content = true;
+                    saw_separator = false;
+                    paren_depth = next_depth;
+                    p.bump_link_definition();
+                }
+                crate::syntax::ParenDepthResult::DepthExceeded
+                | crate::syntax::ParenDepthResult::UnmatchedClose => {
+                    // For link reference definitions, both cases end the destination
+                    break;
+                }
+            }
         }
-        has_content
+        if !has_content {
+            DestinationResult::Invalid
+        } else if saw_separator {
+            DestinationResult::ValidWithSeparator
+        } else {
+            DestinationResult::ValidNoSeparator
+        }
     }
 }
 
@@ -249,17 +353,10 @@ fn skip_title_tokens(p: &mut MarkdownParser) -> bool {
 
     // Check if first token is complete (e.g., `"title"`)
     let first_text = p.cur_text();
-    if first_text.len() >= 2 {
-        let is_complete = if close_char == ')' {
-            first_text.ends_with(')')
-        } else {
-            first_text.ends_with(close_char)
-        };
-        if is_complete {
-            p.bump_link_definition();
-            skip_whitespace_tokens(p);
-            return p.at(EOF) || p.at(NEWLINE);
-        }
+    if first_text.len() >= 2 && crate::syntax::ends_with_unescaped_close(first_text, close_char) {
+        p.bump_link_definition();
+        skip_whitespace_tokens(p);
+        return p.at(EOF) || p.at(NEWLINE);
     }
 
     p.bump_link_definition();
@@ -271,11 +368,7 @@ fn skip_title_tokens(p: &mut MarkdownParser) -> bool {
         }
 
         // Check for closing delimiter
-        let is_close = if close_char == ')' {
-            p.at(R_PAREN)
-        } else {
-            p.cur_text().ends_with(close_char)
-        };
+        let is_close = crate::syntax::ends_with_unescaped_close(p.cur_text(), close_char);
 
         if is_close {
             p.bump_link_definition();
@@ -326,12 +419,35 @@ pub(crate) fn parse_link_block(p: &mut MarkdownParser) -> ParsedSyntax {
     parse_link_destination(p);
 
     // Optional title - can be on same line or next line per CommonMark §4.7
+    // First, check for title on same line (at_link_title skips whitespace in lookahead)
     if at_link_title(p) {
         parse_link_title(p);
-    } else if p.at(NEWLINE) && title_on_next_line(p) {
-        // Title is on the next line per CommonMark §4.7
-        // We parse the newline and whitespace as part of the title
-        parse_link_title_after_newline(p);
+    } else {
+        // Check for title on next line - need to skip trailing whitespace first
+        // Also validate that the title is complete and has no trailing content
+        let has_valid_title_after_newline = p.lookahead(|p| {
+            while is_whitespace_token(p) {
+                p.bump_link_definition();
+            }
+            if p.at(NEWLINE) && !p.at_blank_line() {
+                // Check if there's a title starter on next line
+                if !title_on_next_line(p) {
+                    return false;
+                }
+                // Also validate that the title is complete (no trailing content)
+                p.bump_link_definition(); // consume newline
+                skip_whitespace_tokens(p); // skip leading whitespace on title line
+                skip_title_tokens(p) // returns true only if title ends at EOL/EOF
+            } else {
+                false
+            }
+        });
+
+        if has_valid_title_after_newline {
+            // Title is on the next line per CommonMark §4.7
+            // Include trailing whitespace + newline + leading whitespace as part of title
+            parse_link_title_with_trailing_ws(p);
+        }
     }
 
     Present(m.complete(p, MD_LINK_REFERENCE_DEFINITION))
@@ -375,6 +491,14 @@ fn parse_link_destination(p: &mut MarkdownParser) {
         bump_textual_link_def(p);
     }
 
+    // Per CommonMark §4.7, destination can be on the next line
+    if p.at(NEWLINE) && !p.at_blank_line() {
+        bump_textual_link_def(p);
+        while is_whitespace_token(p) {
+            bump_textual_link_def(p);
+        }
+    }
+
     if p.at(L_ANGLE) {
         // Angle-bracketed: consume < ... >
         bump_textual_link_def(p);
@@ -393,17 +517,21 @@ fn parse_link_destination(p: &mut MarkdownParser) {
                 break; // Bare destination stops at first whitespace
             }
 
-            if p.at(L_PAREN) {
-                paren_depth += 1;
-            } else if p.at(R_PAREN) {
-                if paren_depth > 0 {
-                    paren_depth -= 1;
-                } else {
-                    break; // Unbalanced ) ends bare destination
+            let text = p.cur_text();
+            match crate::syntax::try_update_paren_depth(
+                text,
+                paren_depth,
+                crate::syntax::MAX_LINK_DESTINATION_PAREN_DEPTH,
+            ) {
+                crate::syntax::ParenDepthResult::Ok(next_depth) => {
+                    paren_depth = next_depth;
+                    bump_textual_link_def(p);
+                }
+                crate::syntax::ParenDepthResult::DepthExceeded
+                | crate::syntax::ParenDepthResult::UnmatchedClose => {
+                    break;
                 }
             }
-
-            bump_textual_link_def(p);
         }
     }
 
@@ -457,16 +585,24 @@ fn title_on_next_line(p: &MarkdownParser) -> bool {
     // Check for title starter
     trimmed.starts_with('"') || trimmed.starts_with('\'') || trimmed.starts_with('(')
 }
-
-/// Parse a link title that appears on the next line after a newline.
+/// Parse a link title that appears on next line, including trailing whitespace before newline.
 ///
-/// Per CommonMark §4.7, titles can appear on the line following the destination.
-fn parse_link_title_after_newline(p: &mut MarkdownParser) {
+/// This is used when there's trailing whitespace after the destination but before
+/// the newline that precedes the title. The trailing whitespace is included in the
+/// title node to maintain the grammar structure.
+fn parse_link_title_with_trailing_ws(p: &mut MarkdownParser) {
     let m = p.start();
     let list = p.start();
 
-    // Include the newline as textual content
-    bump_textual_link_def(p);
+    // Include trailing whitespace after destination
+    while is_whitespace_token(p) {
+        bump_textual_link_def(p);
+    }
+
+    // Include the newline
+    if p.at(NEWLINE) {
+        bump_textual_link_def(p);
+    }
 
     // Include leading whitespace on title line
     while is_whitespace_token(p) {
@@ -517,9 +653,10 @@ fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
     }
 }
 
-/// Parse title content until closing delimiter.
+/// Parse title content until closing delimiter, including trailing whitespace.
 ///
 /// Inside title quotes, we use Regular context so whitespace doesn't split tokens.
+/// Trailing whitespace after the title is also consumed to prevent spurious paragraphs.
 fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
     let Some(close_char) = close_char else {
         return;
@@ -535,6 +672,11 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
     bump_textual_link_def(p);
 
     if is_complete {
+        // Consume trailing whitespace after title (before newline)
+        p.re_lex_link_definition();
+        while is_whitespace_token(p) {
+            bump_textual_link_def(p);
+        }
         return;
     }
 
@@ -545,15 +687,20 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
             break;
         }
 
-        // Check for closing delimiter
+        // Check for closing delimiter (must be unescaped)
         let is_close = if close_char == ')' {
             p.at(R_PAREN)
         } else {
-            p.cur_text().ends_with(close_char)
+            crate::syntax::ends_with_unescaped_close(p.cur_text(), close_char)
         };
         if is_close {
             // Use Regular context for title content
             bump_textual(p);
+            // Consume trailing whitespace after title (before newline)
+            p.re_lex_link_definition();
+            while is_whitespace_token(p) {
+                bump_textual_link_def(p);
+            }
             break;
         }
 

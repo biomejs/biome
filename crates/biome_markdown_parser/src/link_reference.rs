@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 
+use biome_string_case::StrOnlyExtension;
+
 use biome_markdown_syntax::{MdLinkLabel, MdLinkReferenceDefinition};
 use biome_rowan::{AstNode, Direction};
 
@@ -8,19 +10,20 @@ use crate::MarkdownParseOptions;
 use crate::parser::MarkdownParser;
 use crate::syntax::parse_document;
 
+/// Normalize a reference label per CommonMark spec.
+///
+/// Per CommonMark, label normalization involves:
+/// 1. Collapsing consecutive whitespace into a single space
+/// 2. Case-folding (case-insensitive matching)
+///
+/// IMPORTANT: Backslash escapes are NOT stripped during normalization.
+/// This means `[foo\!]` does NOT match `[foo!]` - the backslash is preserved.
+/// This matches cmark's reference implementation behavior.
 pub(crate) fn normalize_reference_label(text: &str) -> String {
     let mut out = String::new();
-    let mut chars = text.chars().peekable();
     let mut saw_whitespace = false;
 
-    while let Some(c) = chars.next() {
-        if c == '\\' {
-            if let Some(next) = chars.next() {
-                push_normalized_char(&mut out, next, &mut saw_whitespace);
-            }
-            continue;
-        }
-
+    for c in text.chars() {
         if c.is_whitespace() {
             saw_whitespace = true;
             continue;
@@ -29,7 +32,7 @@ pub(crate) fn normalize_reference_label(text: &str) -> String {
         push_normalized_char(&mut out, c, &mut saw_whitespace);
     }
 
-    out
+    out.as_str().to_lowercase_cow().to_uppercase()
 }
 
 fn push_normalized_char(out: &mut String, c: char, saw_whitespace: &mut bool) {
@@ -37,9 +40,7 @@ fn push_normalized_char(out: &mut String, c: char, saw_whitespace: &mut bool) {
         out.push(' ');
     }
     *saw_whitespace = false;
-    for lower in c.to_lowercase() {
-        out.push(lower);
-    }
+    out.push(c);
 }
 
 pub(crate) fn collect_link_reference_definitions(

@@ -447,10 +447,8 @@ fn render_paragraph(
     }
     // Trim both ends - leading whitespace can appear from parser including
     // the space after list markers in the paragraph content
-    let content = strip_paragraph_indent(
-        content
-            .trim_matches(|c| c == ' ' || c == '\n' || c == '\r')
-    );
+    let content =
+        strip_paragraph_indent(content.trim_matches(|c| c == ' ' || c == '\n' || c == '\r'));
 
     if in_tight_list {
         // In tight lists, paragraphs are rendered without <p> tags
@@ -1160,7 +1158,11 @@ where
 {
     if let Some(node) = label_node {
         let text = label_text(&node);
-        (text.clone(), Some(text))
+        if text.trim().is_empty() {
+            (fallback, None)
+        } else {
+            (text.clone(), Some(text))
+        }
     } else {
         (fallback, None)
     }
@@ -1601,5 +1603,65 @@ mod tests {
         assert_eq!(decode_entity("&nbsp;"), Some("\u{00A0}".to_string()));
         // U+0000 should become replacement character
         assert_eq!(decode_entity("&#0;"), Some("\u{FFFD}".to_string()));
+    }
+
+    #[test]
+    fn test_percent_encode_uri() {
+        let input = format!("https://a{}b.c/%20/%", '\u{1F44D}');
+        let encoded = percent_encode_uri(&input);
+        assert_eq!(encoded, "https://a%F0%9F%91%8Db.c/%20/%25");
+    }
+
+    #[test]
+    fn test_process_link_destination_decodes_entities() {
+        let encoded = process_link_destination("https://example.com/&lt;");
+        assert_eq!(encoded, "https://example.com/%3C");
+    }
+
+    #[test]
+    fn test_paren_depth_limit_in_destination() {
+        let dest = format!("x{}y{}", "(".repeat(32), ")".repeat(32));
+        let input = format!("[a]({dest})\n");
+        let parsed = parse_markdown(&input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        let expected = format!("<p><a href=\"{dest}\">a</a></p>\n");
+        assert_eq!(html, expected);
+    }
+
+    #[test]
+    fn test_paren_depth_limit_exceeded_in_destination() {
+        let dest = format!("x{}y{}", "(".repeat(33), ")".repeat(33));
+        let input = format!("[a]({dest})\n");
+        let parsed = parse_markdown(&input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        let expected_dest = format!("x{}", "(".repeat(32));
+        let trailing = ")".repeat(34);
+        let expected = format!("<p><a href=\"{expected_dest}\">a</a>(y{trailing}</p>\n");
+        assert_eq!(html, expected);
+    }
+
+    #[test]
+    fn test_title_with_escaped_closing_quote() {
+        let parsed = parse_markdown("[a](/url \"title with \\\" quote\")\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<p><a href=\"/url\" title=\"title with &quot; quote\">a</a></p>\n"
+        );
     }
 }
