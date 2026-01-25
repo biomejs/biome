@@ -1,5 +1,326 @@
 # @biomejs/biome
 
+## 2.3.12
+
+### Patch Changes
+
+- [#8653](https://github.com/biomejs/biome/pull/8653) [`047576d`](https://github.com/biomejs/biome/commit/047576d1077f0399aca5eb13819863eefcdaf28c) Thanks [@dyc3](https://github.com/dyc3)! - Added new nursery rule [`noDuplicateAttributes`](https://biomejs.dev/linter/rules/no-duplicate-attributes/) to forbid duplicate attributes in HTML elements.
+
+- [#8648](https://github.com/biomejs/biome/pull/8648) [`96d09f4`](https://github.com/biomejs/biome/commit/96d09f4ff5a64828efafa2c2b99c22de913d000c) Thanks [@BaeSeokJae](https://github.com/BaeSeokJae)! - Added a new nursery rule [`noVueOptionsApi`](https://biomejs.dev/linter/rules/no-vue-options-api/).
+
+  Biome now reports Vue Options API usage, which is incompatible with Vue 3.6's Vapor Mode.
+  This rule detects Options API patterns in `<script>` blocks, `defineComponent()`, and `createApp()` calls,
+  helping prepare codebases for Vapor Mode adoption.
+
+  For example, the following now triggers this rule:
+
+  ```vue
+  <script>
+  export default {
+    data() {
+      return { count: 0 };
+    },
+  };
+  </script>
+  ```
+
+- [#8832](https://github.com/biomejs/biome/pull/8832) [`b08270b`](https://github.com/biomejs/biome/commit/b08270b21b5348e04457c7d6b621569952a744e1) Thanks [@Exudev](https://github.com/Exudev)! - Fixed [#8809](https://github.com/biomejs/biome/issues/8809), [#7985](https://github.com/biomejs/biome/issues/7985), and [#8136](https://github.com/biomejs/biome/issues/8136): the `noSecrets` rule no longer reports false positives on common CamelCase identifiers like `paddingBottom`, `backgroundColor`, `unhandledRejection`, `uncaughtException`, and `IngestGatewayLogGroup`.
+
+  The entropy calculation algorithm now uses "average run length" to distinguish between legitimate CamelCase patterns (which have longer runs of same-case letters) and suspicious alternating case patterns (which have short runs).
+
+- [#8793](https://github.com/biomejs/biome/pull/8793) [`c19fb0e`](https://github.com/biomejs/biome/commit/c19fb0e4c6b70f0604aa136d784696f8292f66ce) Thanks [@TheBaconWizard](https://github.com/TheBaconWizard)! - Properly handle `parameters` metavariables for `arrow_function` GritQL queries. The following `biome search` command no longer throws an error:
+
+  ```shell
+  biome search 'arrow_function(parameters=$parameters, body=$body)'
+  ```
+
+- [#8561](https://github.com/biomejs/biome/pull/8561) [`981affb`](https://github.com/biomejs/biome/commit/981affb8b6ad7970d081a1686b87f35c1a5a4455) Thanks [@wataryooou](https://github.com/wataryooou)! - Fixed `noUnusedVariables` to ignore type parameters declared in ambient contexts such as `declare module` blocks.
+
+- [#8817](https://github.com/biomejs/biome/pull/8817) [`652cfbb`](https://github.com/biomejs/biome/commit/652cfbb85ab1e7839721dca1f87cacf9577c40ea) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8765](https://github.com/biomejs/biome/issues/8765): The HTML parser can now parse directive modifiers with a single colon, e.g. `@keydown.:`.
+
+- [#8704](https://github.com/biomejs/biome/pull/8704) [`a1914d4`](https://github.com/biomejs/biome/commit/a1914d45c80efc90e58dee95b4fa34b3c8154831) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noRootType`](https://biomejs.dev/linter/rules/no-root-type).
+  Disallow the usage of specified root types. (e.g. `mutation` and/or `subscription`)
+
+  **Invalid:**
+
+  ```json
+  {
+    "options": {
+      "disallow": ["mutation"]
+    }
+  }
+  ```
+
+  ```graphql
+  type Mutation {
+    SetMessage(message: String): String
+  }
+  ```
+
+- [#8712](https://github.com/biomejs/biome/pull/8712) [`251b47b`](https://github.com/biomejs/biome/commit/251b47ba3e0f47ecaa818b547aeb61be83e1c59c) Thanks [@Netail](https://github.com/Netail)! - Renamed the following GraphQL nursery rules to match the Biome standard:
+  - `useUniqueArgumentNames` -> `noDuplicateArgumentNames`
+  - `useUniqueFieldDefinitionNames` -> `noDuplicateFieldDefinitionNames`
+  - `useUniqueGraphqlOperationName` -> `noDuplicateGraphqlOperationName`
+  - `useUniqueInputFieldNames` -> `noDuplicateInputFieldNames`
+  - `useUniqueVariableNames` -> `noDuplicateVariableNames`
+
+  Run the `biome migrate --write` command to automatically update the configuration file.
+
+- [#7602](https://github.com/biomejs/biome/pull/7602) [`957cd8e`](https://github.com/biomejs/biome/commit/957cd8e83cf543db300dba9fc85e52a3ef6226b5) Thanks [@kedevked](https://github.com/kedevked)! - Added the nursery lint rule `useErrorCause`.
+
+  This rule enforces that errors caught in a `catch` clause are not rethrown without wrapping them in a new `Error` object and specifying the original error as the `cause`. This helps preserve the error’s stack trace and context for better debugging.
+
+  It can be configured with the following option:
+  - `requireCatchParameter`: (default: `true`)
+    - When `true`, the rule requires that `catch` clauses have a parameter. If a `throw` statement appears inside a `catch` clause without a parameter, it will be flagged.
+
+  **Invalid examples**:
+
+  ```js
+  try {
+    foo();
+  } catch {
+    throw new Error("fail");
+  }
+  ```
+
+  ```js
+  try {
+    foo();
+  } catch (err) {
+    throw new Error(err.message);
+  }
+  ```
+
+  **Valid examples:**
+
+  ```js
+  try {
+    foo();
+  } catch (err) {
+    throw new Error("fail", { cause: err });
+  }
+  ```
+
+  ```js
+  try {
+    foo();
+  } catch (error) {
+    throw new Error("Something went wrong", { cause: error });
+  }
+  ```
+
+  **Valid example** when `requireCatchParameter` is `false`:
+
+  Valid:
+
+  ```js
+  try {
+    foo();
+  } catch {
+    throw new Error("fail");
+  }
+  ```
+
+- [#8725](https://github.com/biomejs/biome/pull/8725) [`95aba98`](https://github.com/biomejs/biome/commit/95aba98823d80b5581c3e55153d6a8804e690757) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8715](https://github.com/biomejs/biome/issues/8715): The CSS parser will now recover slightly better if a semicolon is missing from Tailwind's `@apply` at-rule.
+
+- [#8616](https://github.com/biomejs/biome/pull/8616) [`4ee3bda`](https://github.com/biomejs/biome/commit/4ee3bda49b45084c07051554267756262c201416) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`useLoneAnonymousOperation`](https://biomejs.dev/linter/rules/use-lone-anonymous-operation/). Disallow anonymous operations when more than one operation specified in document.
+
+  **Invalid:**
+
+  ```graphql
+  query {
+    fieldA
+  }
+
+  query B {
+    fieldB
+  }
+  ```
+
+- [#8624](https://github.com/biomejs/biome/pull/8624) [`291c9f2`](https://github.com/biomejs/biome/commit/291c9f2d42a0525e6f7c0b8759db5bb17a815543) Thanks [@taga3s](https://github.com/taga3s)! - Added the nursery rule [`useInlineScriptId`](https://biomejs.dev/linter/rules/use-inline-script-id/) to the Next.js domain.
+  This rule enforces `id` attribute on `next/script` components with inline content or `dangerouslySetInnerHTML`.
+
+  The following code is invalid:
+
+  ```jsx
+  import Script from "next/script";
+
+  export default function Page() {
+    return (
+      <Script>{`console.log('Hello');`}</Script> // must have `id` attribute
+    );
+  }
+  ```
+
+- [#8767](https://github.com/biomejs/biome/pull/8767) [`0d15370`](https://github.com/biomejs/biome/commit/0d1537037d96f559a04eb37f6cb5aafb16735ea6) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#3512](https://github.com/biomejs/biome/issues/3512):
+  [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now properly handles nested destructuring patterns
+  from hook results.
+
+  ```tsx
+  const [[x, y], setXY] = useState([1, 2]);
+  useEffect(() => {
+    console.log(x, y);
+  }, [x, y]); // x and y are now correctly recognized as unstable
+  ```
+
+- [#8757](https://github.com/biomejs/biome/pull/8757) [`17ed9d3`](https://github.com/biomejs/biome/commit/17ed9d368edd31ee572aaed92c0867ef1b305c0c) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noDivRegex`](https://biomejs.dev/linter/rules/no-div-regex). Disallow equal signs explicitly at the beginning of regular expressions.
+
+  **Invalid:**
+
+  ```js
+  var f = function () {
+    return /=foo/;
+  };
+  ```
+
+- [#8836](https://github.com/biomejs/biome/pull/8836) [`aab1d17`](https://github.com/biomejs/biome/commit/aab1d17aaa3619e53340e8f1376c31625f97a8ac) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#7858](https://github.com/biomejs/biome/issues/7858): Biome now parses Astro files with empty frontmatter blocks.
+
+- [#8755](https://github.com/biomejs/biome/pull/8755) [`3a15c29`](https://github.com/biomejs/biome/commit/3a15c295181ac6399c42017c4039a4ecb72e2dc3) Thanks [@arturalkaim](https://github.com/arturalkaim)! - Fixed [#6670](https://github.com/biomejs/biome/issues/6670). The `$filename` metavariable can now be used in GritQL `where` clauses to filter matches by filename.
+
+- [#8821](https://github.com/biomejs/biome/pull/8821) [`63e68a1`](https://github.com/biomejs/biome/commit/63e68a164ac247ad6c650934f2d2d9ec861eafe7) Thanks [@playhardgopro](https://github.com/playhardgopro)! - Fixed several bugs in Vue conditional rules (`useVueValidVIf`, `useVueValidVElse`, and `useVueValidVElseIf`) related to whitespace handling, newlines, and self-closing tags.
+
+- [#8767](https://github.com/biomejs/biome/pull/8767) [`0d15370`](https://github.com/biomejs/biome/commit/0d1537037d96f559a04eb37f6cb5aafb16735ea6) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#3685](https://github.com/biomejs/biome/issues/3685):
+  [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now properly handles transparent expression
+  wrappers like non-null assertions and type assertions in dependency comparisons.
+
+  ```tsx
+  useMemo(() => Boolean(myObj!.x), [myObj!.x]); // No longer reports incorrect diagnostics
+  useMemo(() => myObj!.x?.y === true, [myObj!.x?.y]); // Now correctly matches dependencies
+  ```
+
+- [#8597](https://github.com/biomejs/biome/pull/8597) [`f764007`](https://github.com/biomejs/biome/commit/f7640071fa356808947bb6a4c563a04890311cc0) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noDuplicateEnumValueNames`](https://biomejs.dev/linter/rules/no-duplicate-enum-value-names/). Enforce unique enum value names.
+
+  **Invalid:**
+
+  ```graphql
+  enum A {
+    TEST
+    TesT
+  }
+  ```
+
+- [#8679](https://github.com/biomejs/biome/pull/8679) [`33dfd7c`](https://github.com/biomejs/biome/commit/33dfd7c4eb657e7986040fc32e8840d14d0340ad) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#8678](https://github.com/biomejs/biome/issues/8678). Now Biome correctly parses components inside Vue, Svelte and Astro files when they have the same name of self-closing elements.
+
+- [#8617](https://github.com/biomejs/biome/pull/8617) [`31a9bfe`](https://github.com/biomejs/biome/commit/31a9bfe57d532183aaf146de892bb670908ad456) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`useLoneExecutableDefinition`](https://biomejs.dev/linter/rules/use-lone-executable-definition/). Require queries, mutations, subscriptions or fragments to be located in separate files.
+
+  **Invalid:**
+
+  ```graphql
+  query Foo {
+    id
+  }
+
+  fragment Bar on Baz {
+    id
+  }
+  ```
+
+- [#8697](https://github.com/biomejs/biome/pull/8697) [`8519669`](https://github.com/biomejs/biome/commit/8519669542b1d923b36afa72ed297f8db54659c8) Thanks [@Faizanq](https://github.com/Faizanq)! - Added the nursery lint rule [`noExcessiveLinesPerFile`](https://biomejs.dev/linter/rules/no-excessive-lines-per-file/) to CSS and GraphQL.
+
+- [#8711](https://github.com/biomejs/biome/pull/8711) [`365f7aa`](https://github.com/biomejs/biome/commit/365f7aa2631700e8379d8633aae676f5de8b0918) Thanks [@Netail](https://github.com/Netail)! - Added new nursery rule [`noDuplicateEnumValues`](https://biomejs.dev/linter/rules/no-duplicate-enum-values), which disallows defining an enum with multiple members initialized to the same value.
+
+- [#8767](https://github.com/biomejs/biome/pull/8767) [`0d15370`](https://github.com/biomejs/biome/commit/0d1537037d96f559a04eb37f6cb5aafb16735ea6) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#5914](https://github.com/biomejs/biome/issues/5914):
+  [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now properly handles variables declared in the same
+  statement.
+
+  ```tsx
+  const varA = Math.random(),
+    varB = useMemo(() => varA, [varA]); // varA is now correctly recognized as needed
+  ```
+
+- [#8767](https://github.com/biomejs/biome/pull/8767) [`0d15370`](https://github.com/biomejs/biome/commit/0d1537037d96f559a04eb37f6cb5aafb16735ea6) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#8427](https://github.com/biomejs/biome/issues/8427):
+  [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now properly resolves variable references to detect
+  captured dependencies.
+
+  ```tsx
+  const fe = fetchEntity;
+  useEffect(() => {
+    fe(id);
+  }, [id, fe]); // fe is now correctly detected as needed
+  ```
+
+- [#8767](https://github.com/biomejs/biome/pull/8767) [`0d15370`](https://github.com/biomejs/biome/commit/0d1537037d96f559a04eb37f6cb5aafb16735ea6) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#8484](https://github.com/biomejs/biome/issues/8484):
+  [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now properly handles member access on stable hook
+  results.
+
+  ```tsx
+  const stableObj = useStable();
+  useMemo(() => {
+    return stableObj.stableValue; // stableObj.stableValue is now correctly recognized as stable
+  }, []);
+  ```
+
+- [#8767](https://github.com/biomejs/biome/pull/8767) [`0d15370`](https://github.com/biomejs/biome/commit/0d1537037d96f559a04eb37f6cb5aafb16735ea6) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#7982](https://github.com/biomejs/biome/issues/7982):
+  [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now properly handles callback expressions with type
+  assertions.
+
+  ```tsx
+  const callback = useCallback(
+    (() => {
+      return count * 2;
+    }) as Function,
+    [count], // count is now correctly detected
+  );
+  ```
+
+- [#8766](https://github.com/biomejs/biome/pull/8766) [`39eb545`](https://github.com/biomejs/biome/commit/39eb545a9750d1b12b85c88fa052df9a334ba2b9) Thanks [@Netail](https://github.com/Netail)! - Fixed [#8761](https://github.com/biomejs/biome/issues/8761): Reverted wrapping the URL of rule descriptions with `<>`, causing broken URLs in VSCode.
+
+- [#8767](https://github.com/biomejs/biome/pull/8767) [`0d15370`](https://github.com/biomejs/biome/commit/0d1537037d96f559a04eb37f6cb5aafb16735ea6) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#3080](https://github.com/biomejs/biome/issues/3080):
+  [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now properly analyzes captures within referenced
+  functions passed to hooks.
+
+  ```tsx
+  function myEffect() {
+    console.log(foo, bar);
+  }
+  useEffect(myEffect, [foo, bar]); // foo and bar are now correctly detected
+  ```
+
+- [#8740](https://github.com/biomejs/biome/pull/8740) [`4962ed0`](https://github.com/biomejs/biome/commit/4962ed0d11bc5155aa9a89bf98fac9412f43c8f9) Thanks [@Netail](https://github.com/Netail)! - Extra rule source references. `biome migrate eslint` should do a bit better detecting rules in your eslint configurations.
+
+- [#8776](https://github.com/biomejs/biome/pull/8776) [`395746f`](https://github.com/biomejs/biome/commit/395746f9a0147ab766fc3cded3883857c02d9c16) Thanks [@codiini](https://github.com/codiini)! - Fixed [#6003](https://github.com/biomejs/biome/issues/6003): `noUselessUndefinedInitialization` no longer reports exported variables initialized to `undefined`. In Svelte 4, this pattern is used to declare optional component props.
+
+- [#8767](https://github.com/biomejs/biome/pull/8767) [`0d15370`](https://github.com/biomejs/biome/commit/0d1537037d96f559a04eb37f6cb5aafb16735ea6) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#4248](https://github.com/biomejs/biome/issues/4248):
+  [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now correctly handles function props passed as
+  callbacks.
+
+  ```tsx
+  const data = React.useMemo(getData, [getData]); // getData is now correctly recognized as needed
+  ```
+
+- [#8819](https://github.com/biomejs/biome/pull/8819) [`bc191ff`](https://github.com/biomejs/biome/commit/bc191ff7e515946d40d1e8440ede09cf9f291fa7) Thanks [@Netail](https://github.com/Netail)! - Fixed [#6567](https://github.com/biomejs/biome/issues/6567):
+  [`noUnknownProperty`](https://biomejs.dev/linter/rules/no-unknown-property/) now ignores unknown properties in at-rules which support descriptors.
+
+- [#8787](https://github.com/biomejs/biome/pull/8787) [`adb652f`](https://github.com/biomejs/biome/commit/adb652fe94788ded0c76ae7146206dd286035e15) Thanks [@tuyuritio](https://github.com/tuyuritio)! - Fixed [#8777](https://github.com/biomejs/biome/issues/8777): Add support for `:active-view-transition` pseudo-class.
+
+- [#8639](https://github.com/biomejs/biome/pull/8639) [`6577e32`](https://github.com/biomejs/biome/commit/6577e32ddf855bd1b1cc05b0f496b89001ce2925) Thanks [@ohnoah](https://github.com/ohnoah)! - Added the nursery lint rule [`noExcessiveLinesPerFile`](https://biomejs.dev/linter/rules/no-excessive-lines-per-file/).
+  Biome now reports files that exceed a configurable line limit.
+
+  ```js
+  // maxLines: 2
+  const a = 1;
+  const b = 2;
+  const c = 3;
+  ```
+
+- [#8753](https://github.com/biomejs/biome/pull/8753) [`71b5c6e`](https://github.com/biomejs/biome/commit/71b5c6e2ecf544e979527c79d41cfe85c148047d) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noExcessiveClassesPerFile`](https://biomejs.dev/linter/rules/no-excessive-classes-per-file). Enforce a maximum number of classes per file.
+
+  **Invalid:**
+
+  ```js
+  class Foo {}
+  class Bar {}
+  ```
+
+- [#8754](https://github.com/biomejs/biome/pull/8754) [`d6b2bda`](https://github.com/biomejs/biome/commit/d6b2bda038d0bfa5db040bef434741d09733b8fc) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noFloatingClasses`](https://biomejs.dev/linter/rules/no-floating-classes). Disallow `new` operators outside of assignments or comparisons.
+
+  **Invalid:**
+
+  ```js
+  new Date();
+  ```
+
 ## 2.3.11
 
 ### Patch Changes

@@ -3,6 +3,7 @@
  */
 
 import * as prettier from "prettier";
+import * as prettierPluginAstro from "prettier-plugin-astro";
 import * as prettierPluginSvelte from "prettier-plugin-svelte";
 
 export interface PrettierResult {
@@ -24,6 +25,9 @@ interface PrettierDebugApi {
  * Get the plugins array for a given parser.
  */
 function getPluginsForParser(parser: string): prettier.Plugin[] {
+	if (parser === "astro") {
+		return [prettierPluginAstro];
+	}
 	if (parser === "svelte") {
 		return [prettierPluginSvelte];
 	}

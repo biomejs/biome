@@ -13,6 +13,7 @@
     "@opentui/core": "^0.1.72",
     "@opentui/react": "^0.1.72",
     "prettier": "^3.7.0",
+    "prettier-plugin-astro": "^0.14.0",
     "prettier-plugin-svelte": "^3.4.0",
     "react": "^19.0.0"
   },

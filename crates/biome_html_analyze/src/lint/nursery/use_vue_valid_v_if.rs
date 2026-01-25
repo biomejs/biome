@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{AnyVueDirective, HtmlElement, VueDirective};
+use biome_html_syntax::{AnyVueDirective, HtmlAttributeList, VueDirective};
 use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::use_vue_valid_v_if::UseVueValidVIfOptions;
 
@@ -106,10 +106,7 @@ impl Rule for UseVueValidVIf {
                 }
 
                 // Check for conflicts with v-else or v-else-if on the same element
-                if let Some(element) = find_containing_element(vue_directive)
-                    && let Some(conflict_range) =
-                        find_conflicting_else_directives(&element, vue_directive)
-                {
+                if let Some(conflict_range) = find_conflicting_else_directives(vue_directive) {
                     return Some(ViolationKind::ConflictsWithElse(conflict_range));
                 }
 
@@ -168,38 +165,17 @@ impl Rule for UseVueValidVIf {
     }
 }
 
-/// Find containing HTML element for a Vue directive
-fn find_containing_element(directive: &VueDirective) -> Option<HtmlElement> {
-    directive
-        .syntax()
-        .ancestors()
-        .skip(1)
-        .find_map(HtmlElement::cast)
-}
-
 /// Find conflicting v-else or v-else-if directives on the same element
-fn find_conflicting_else_directives(
-    element: &HtmlElement,
-    v_if_directive: &VueDirective,
-) -> Option<TextRange> {
-    let opening_element = element.opening_element().ok()?;
-
-    for attribute in opening_element.attributes() {
-        if let Some(AnyVueDirective::VueDirective(directive)) = attribute.as_any_vue_directive() {
-            // Skip the v-if directive we're currently checking
-            if directive.syntax() == v_if_directive.syntax() {
-                continue;
-            }
-
-            // Check for v-else or v-else-if
-            if let Ok(name_token) = directive.name_token() {
-                let name = name_token.text();
-                if name == "v-else" || name == "v-else-if" {
-                    return Some(directive.range());
-                }
-            }
-        }
-    }
-
-    None
+fn find_conflicting_else_directives(v_if: &VueDirective) -> Option<TextRange> {
+    v_if.syntax()
+        .ancestors()
+        .find_map(HtmlAttributeList::cast)?
+        .into_iter()
+        .find_map(|attr| {
+            let other = attr.as_any_vue_directive()?.as_vue_directive()?;
+            let name = other.name_token().ok()?;
+            (other.syntax() != v_if.syntax()
+                && matches!(name.text_trimmed(), "v-else" | "v-else-if"))
+            .then(|| other.range())
+        })
 }

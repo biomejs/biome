@@ -24,6 +24,9 @@ const VAULT = {
   token: "AAAAAAAAAAAAAAAAAAAAAMLheAAAAAAA0%2BuSeid%2BULvsea4JtiGRiSDSJSI%3DEUifiRBkKG5E2XzMDjRfl76ZC9Ub0wnz4XsNiRVBChTYbJcE3F"
 };
 
+// Alternating case patterns - SHOULD trigger (suspicious, unlike CamelCase)
+const suspiciousString = "aBcDeFgHiJkLmNoPq";
+
 // TODO: Get these to work, they seem common and important
 // const herokuApiKey = "abcd1234-5678-90ef-ghij-klmnopqrstuv";
 // const BASIC_AUTH_HEADER = "Authorization: Basic QWxhZGRpbjpPcGVuU2VzYW1l";
@@ -408,6 +411,28 @@ invalid.js:18:10 lint/security/noSecrets ━━━━━━━━━━━━━
        │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     19 │ };
     20 │ 
+  
+  i Type of secret detected: Detected high entropy string
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
+  
+
+```
+
+```
+invalid.js:22:26 lint/security/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential secret found.
+  
+    21 │ // Alternating case patterns - SHOULD trigger (suspicious, unlike CamelCase)
+  > 22 │ const suspiciousString = "aBcDeFgHiJkLmNoPq";
+       │                          ^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ // TODO: Get these to work, they seem common and important
   
   i Type of secret detected: Detected high entropy string
   

@@ -30,4 +30,20 @@
   <div v-else></div>
   <span v-if="cond2"></span>
   <span v-else></span>
+
+  <!-- Multiline conditional elements -->
+  <div
+    v-if="condition"
+    data-attr1
+    data-attr2
+    data-attr3
+    data-attr4
+    data-attr5
+    data-attr6
+  />
+  <div v-else></div>
+
+  <!-- Nested conditionals with self-closing tag -->
+  <div v-if="cond1"></div>
+  <div v-else><span v-if="cond2" /></div>
 </template>

@@ -20,7 +20,10 @@ pub(crate) fn parse_astro_fence(p: &mut HtmlParser) -> ParsedSyntax {
         let c = m.complete(p, ASTRO_FRONTMATTER_ELEMENT);
         return ParsedSyntax::Present(c);
     }
-    parse_astro_embedded(p).ok();
+    if let Absent = parse_astro_embedded(p) {
+        let content = p.start();
+        content.complete(p, ASTRO_EMBEDDED_CONTENT);
+    }
     p.expect(T![---]);
 
     let c = m.complete(p, ASTRO_FRONTMATTER_ELEMENT);

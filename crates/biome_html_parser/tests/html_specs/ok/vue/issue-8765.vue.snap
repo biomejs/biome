@@ -1,0 +1,165 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<div @keydown.:="handler" ></div>
+<div @keydown.;="handler" ></div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueVOnShorthandDirective {
+                        at_token: AT@5..6 "@" [] [],
+                        arg: VueStaticArgument {
+                            name_token: HTML_LITERAL@6..13 "keydown" [] [],
+                        },
+                        modifiers: VueModifierList [
+                            VueModifier {
+                                dot_token: DOT@13..14 "." [] [],
+                                modifier_token: HTML_LITERAL@14..15 ":" [] [],
+                            },
+                        ],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@15..16 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@16..26 "\"handler\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@26..27 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@27..28 "<" [] [],
+                slash_token: SLASH@28..29 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@29..32 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@32..33 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@33..35 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@35..39 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueVOnShorthandDirective {
+                        at_token: AT@39..40 "@" [] [],
+                        arg: VueStaticArgument {
+                            name_token: HTML_LITERAL@40..47 "keydown" [] [],
+                        },
+                        modifiers: VueModifierList [
+                            VueModifier {
+                                dot_token: DOT@47..48 "." [] [],
+                                modifier_token: HTML_LITERAL@48..49 ";" [] [],
+                            },
+                        ],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@49..50 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@50..60 "\"handler\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@60..61 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@61..62 "<" [] [],
+                slash_token: SLASH@62..63 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@63..66 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@66..67 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@67..68 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..68
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..67
+    0: HTML_ELEMENT@0..33
+      0: HTML_OPENING_ELEMENT@0..27
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..26
+          0: VUE_V_ON_SHORTHAND_DIRECTIVE@5..26
+            0: AT@5..6 "@" [] []
+            1: VUE_STATIC_ARGUMENT@6..13
+              0: HTML_LITERAL@6..13 "keydown" [] []
+            2: VUE_MODIFIER_LIST@13..15
+              0: VUE_MODIFIER@13..15
+                0: DOT@13..14 "." [] []
+                1: HTML_LITERAL@14..15 ":" [] []
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@15..26
+              0: EQ@15..16 "=" [] []
+              1: HTML_STRING@16..26
+                0: HTML_STRING_LITERAL@16..26 "\"handler\"" [] [Whitespace(" ")]
+        3: R_ANGLE@26..27 ">" [] []
+      1: HTML_ELEMENT_LIST@27..27
+      2: HTML_CLOSING_ELEMENT@27..33
+        0: L_ANGLE@27..28 "<" [] []
+        1: SLASH@28..29 "/" [] []
+        2: HTML_TAG_NAME@29..32
+          0: HTML_LITERAL@29..32 "div" [] []
+        3: R_ANGLE@32..33 ">" [] []
+    1: HTML_ELEMENT@33..67
+      0: HTML_OPENING_ELEMENT@33..61
+        0: L_ANGLE@33..35 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@35..39
+          0: HTML_LITERAL@35..39 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@39..60
+          0: VUE_V_ON_SHORTHAND_DIRECTIVE@39..60
+            0: AT@39..40 "@" [] []
+            1: VUE_STATIC_ARGUMENT@40..47
+              0: HTML_LITERAL@40..47 "keydown" [] []
+            2: VUE_MODIFIER_LIST@47..49
+              0: VUE_MODIFIER@47..49
+                0: DOT@47..48 "." [] []
+                1: HTML_LITERAL@48..49 ";" [] []
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@49..60
+              0: EQ@49..50 "=" [] []
+              1: HTML_STRING@50..60
+                0: HTML_STRING_LITERAL@50..60 "\"handler\"" [] [Whitespace(" ")]
+        3: R_ANGLE@60..61 ">" [] []
+      1: HTML_ELEMENT_LIST@61..61
+      2: HTML_CLOSING_ELEMENT@61..67
+        0: L_ANGLE@61..62 "<" [] []
+        1: SLASH@62..63 "/" [] []
+        2: HTML_TAG_NAME@63..66
+          0: HTML_LITERAL@63..66 "div" [] []
+        3: R_ANGLE@66..67 ">" [] []
+  4: EOF@67..68 "" [Newline("\n")] []
+
+```

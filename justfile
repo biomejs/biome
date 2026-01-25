@@ -232,7 +232,11 @@ test-doc:
 
 # Run CommonMark conformance tests for the markdown parser
 test-markdown-conformance:
-	cargo test -p biome_markdown_parser --test commonmark_spec -- --nocapture
+	cargo run -p xtask_coverage -- --suites=markdown/commonmark
+
+# Update the CommonMark spec.json to a specific version
+update-commonmark-spec version:
+	./scripts/update-commonmark-spec.sh {{version}}
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-lintrule name:
