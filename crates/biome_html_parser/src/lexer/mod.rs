@@ -5,16 +5,16 @@ use crate::token_source::{
     TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::{
-    AS_KW, ATTACH_KW, AWAIT_KW, CATCH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, EACH_KW,
-    ELSE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, IDENT, IF_KW, KEY_KW,
-    NEWLINE, RENDER_KW, SNIPPET_KW, THEN_KW, TOMBSTONE, UNICODE_BOM, WHITESPACE,
+    ANIMATE_KW, AS_KW, ATTACH_KW, AWAIT_KW, BIND_KW, CATCH_KW, CLASS_KW, COMMENT, CONST_KW,
+    DEBUG_KW, DOCTYPE_KW, EACH_KW, ELSE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL,
+    HTML_STRING_LITERAL, IDENT, IF_KW, IN_KW, KEY_KW, NEWLINE, OUT_KW, RENDER_KW, SNIPPET_KW,
+    STYLE_KW, THEN_KW, TOMBSTONE, TRANSITION_KW, UNICODE_BOM, USE_KW, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::SyntaxKind;
-use biome_unicode_table::Dispatch::{BSL, QOT, UNI};
-use biome_unicode_table::lookup_byte;
+use biome_unicode_table::{Dispatch::*, lookup_byte};
 use std::ops::{Add, AddAssign};
 
 pub(crate) struct HtmlLexer<'src> {
@@ -61,29 +61,31 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::InsideTag] context.
     fn consume_token_inside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
-        match current {
-            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            b'<' => self.consume_l_angle(),
-            b'>' => self.consume_byte(T![>]),
-            b'/' => self.consume_byte(T![/]),
-            b'=' => self.consume_byte(T![=]),
-            b'!' => self.consume_byte(T![!]),
-            b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
-            b'{' => {
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            LSS => self.consume_l_angle(),
+            MOR => self.consume_byte(T![>]),
+            SLH => self.consume_byte(T![/]),
+            EQL => self.consume_byte(T![=]),
+            EXL => self.consume_byte(T![!]),
+            BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
+            BEO => {
                 if self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
                 }
             }
-            b'}' => {
+            BEC => {
                 if self.at_closing_double_text_expression() {
                     self.consume_r_double_text_expression()
                 } else {
                     self.consume_byte(T!['}'])
                 }
             }
-            b'\'' | b'"' => self.consume_string_literal(current),
+            QOT => self.consume_string_literal(current),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
@@ -92,7 +94,7 @@ impl<'src> HtmlLexer<'src> {
             _ if self.current_kind != T![<] && is_attribute_name_byte(current) => {
                 self.consume_identifier(current, IdentifierContext::None)
             }
-            _ if is_at_start_identifier(current) => self
+            IDT => self
                 .consume_language_identifier(current)
                 .unwrap_or_else(|| self.consume_unexpected_character()),
             _ => {
@@ -109,21 +111,23 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::InsideTagVue] context.
     fn consume_token_inside_tag_vue(&mut self, current: u8) -> HtmlSyntaxKind {
-        match current {
-            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            b'<' => self.consume_l_angle(),
-            b'>' => self.consume_byte(T![>]),
-            b'/' => self.consume_byte(T![/]),
-            b'=' => self.consume_byte(T![=]),
-            b'!' => self.consume_byte(T![!]),
-            b'{' => {
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            LSS => self.consume_l_angle(),
+            MOR => self.consume_byte(T![>]),
+            SLH => self.consume_byte(T![/]),
+            EQL => self.consume_byte(T![=]),
+            EXL => self.consume_byte(T![!]),
+            BEO => {
                 if self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
                 }
             }
-            b'}' => {
+            BEC => {
                 if self.at_closing_double_text_expression() {
                     self.consume_r_double_text_expression()
                 } else {
@@ -132,14 +136,14 @@ impl<'src> HtmlLexer<'src> {
             }
 
             // these are used in Vue directives
-            b':' => self.consume_byte(T![:]),
-            b'@' => self.consume_byte(T![@]),
-            b'.' => self.consume_byte(T![.]),
-            b'[' => self.consume_byte(T!['[']),
-            b']' => self.consume_byte(T![']']),
-            b'#' => self.consume_byte(T![#]),
+            COL => self.consume_byte(T![:]),
+            AT_ => self.consume_byte(T![@]),
+            PRD => self.consume_byte(T![.]),
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            HAS => self.consume_byte(T![#]),
 
-            b'\'' | b'"' => self.consume_string_literal(current),
+            QOT => self.consume_string_literal(current),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
@@ -157,30 +161,32 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::Regular] context.
     fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
-        match current {
-            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            b'!' if self.current() == T![<] => self.consume_byte(T![!]),
-            b'/' if self.current() == T![<] => self.consume_byte(T![/]),
-            b',' if self.current() == T![<] => self.consume_byte(T![,]),
-            b'-' if self.at_frontmatter_edge() => self.consume_frontmatter_edge(),
-            b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
-            b'[' => self.consume_byte(T!['[']),
-            b']' => self.consume_byte(T![']']),
-            b'{' => {
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            EXL if self.current() == T![<] => self.consume_byte(T![!]),
+            SLH if self.current() == T![<] => self.consume_byte(T![/]),
+            COM if self.current() == T![<] => self.consume_byte(T![,]),
+            MIN if self.at_frontmatter_edge() => self.consume_frontmatter_edge(),
+            BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            BEO => {
                 if self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
                 }
             }
-            b'}' => {
+            BEC => {
                 if self.at_closing_double_text_expression() {
                     self.consume_r_double_text_expression()
                 } else {
                     self.consume_byte(T!['}'])
                 }
             }
-            b'<' => {
+            LSS => {
                 // if this truly is the start of a tag, it *must* be immediately followed by a tag name. Whitespace is not allowed.
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
                 if self
@@ -199,7 +205,7 @@ impl<'src> HtmlLexer<'src> {
                     self.consume_byte(HTML_LITERAL)
                 }
             }
-            _ if is_at_start_identifier(current) => self
+            IDT => self
                 .consume_language_identifier(current)
                 .unwrap_or_else(|| self.consume_html_text(current)),
             _ => {
@@ -216,25 +222,29 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::AttributeValue] context.
     fn consume_token_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
-        match current {
-            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            b'<' => self.consume_byte(T![<]),
-            b'>' => self.consume_byte(T![>]),
-            b'{' => self.consume_byte(T!['{']),
-            b'}' => self.consume_byte(T!['}']),
-            b'\'' | b'"' => self.consume_string_literal(current),
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            LSS => self.consume_byte(T![<]),
+            MOR => self.consume_byte(T![>]),
+            BEO => self.consume_byte(T!['{']),
+            BEC => self.consume_byte(T!['}']),
+            QOT => self.consume_string_literal(current),
             _ => self.consume_unquoted_string_literal(),
         }
     }
 
     /// Consume a token in the [HtmlLexContext::Doctype] context.
     fn consume_token_doctype(&mut self, current: u8) -> HtmlSyntaxKind {
-        match current {
-            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            b'<' => self.consume_byte(T![<]),
-            b'>' => self.consume_byte(T![>]),
-            b'!' => self.consume_byte(T![!]),
-            b'\'' | b'"' => self.consume_string_literal(current),
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            LSS => self.consume_byte(T![<]),
+            MOR => self.consume_byte(T![>]),
+            EXL => self.consume_byte(T![!]),
+            QOT => self.consume_string_literal(current),
             _ if is_tag_name_byte(current) || is_attribute_name_byte(current) => {
                 self.consume_identifier(current, IdentifierContext::Doctype)
             }
@@ -291,19 +301,19 @@ impl<'src> HtmlLexer<'src> {
     /// Consumes tokens within a double text expression ('{{...}}') until the closing
     /// delimiter is reached. Returns HTML_LITERAL for the expression content.
     fn consume_double_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
-        match current {
-            b'}' if self.at_closing_double_text_expression() => {
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            BEC if self.at_closing_double_text_expression() => {
                 self.consume_r_double_text_expression()
             }
-            b'<' => self.consume_byte(T![<]),
+            LSS => self.consume_byte(T![<]),
             _ => {
                 while let Some(current) = self.current_byte() {
-                    match current {
-                        b'}' if self.at_closing_double_text_expression() => break,
-                        _ => {
-                            self.advance(1);
-                        }
+                    if current == b'}' && self.at_closing_double_text_expression() {
+                        break;
                     }
+                    self.advance(1);
                 }
                 HTML_LITERAL
             }
@@ -431,9 +441,11 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::CdataSection] context.
     fn consume_inside_cdata(&mut self, current: u8) -> HtmlSyntaxKind {
-        match current {
-            b'<' if self.at_start_cdata() => self.consume_cdata_start(),
-            b']' if self.at_end_cdata() => self.consume_cdata_end(),
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            LSS if self.at_start_cdata() => self.consume_cdata_start(),
+            BTC if self.at_end_cdata() => self.consume_cdata_end(),
             _ => {
                 while let Some(char) = self.current_byte() {
                     if self.at_end_cdata() {
@@ -453,11 +465,13 @@ impl<'src> HtmlLexer<'src> {
         current: u8,
         context: HtmlLexContext,
     ) -> HtmlSyntaxKind {
-        match current {
-            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            b'<' if self.at_start_cdata() => self.consume_cdata_start(),
-            b'<' => self.consume_byte(T![<]),
-            b'-' => {
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            LSS if self.at_start_cdata() => self.consume_cdata_start(),
+            LSS => self.consume_byte(T![<]),
+            MIN => {
                 debug_assert!(self.at_frontmatter_edge());
                 self.advance(3);
                 T![---]
@@ -469,22 +483,39 @@ impl<'src> HtmlLexer<'src> {
     }
 
     fn consume_svelte(&mut self, current: u8) -> HtmlSyntaxKind {
-        match current {
-            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            b'}' => self.consume_byte(T!['}']),
-            b'.' if self.is_at_three_dots() => self.consume_dot3(),
-            b',' => self.consume_byte(T![,]),
-            b'(' => self.consume_byte(T!['(']),
-            b')' => self.consume_byte(T![')']),
-            b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
-            b'{' => self.consume_byte(T!['{']),
-            b'[' => self.consume_byte(T!['[']),
-            b']' => self.consume_byte(T![']']),
-            _ if is_at_start_identifier(current) => self
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            BEC => self.consume_byte(T!['}']),
+            PRD if self.is_at_three_dots() => self.consume_dot3(),
+            COM => self.consume_byte(T![,]),
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
+            BEO => self.consume_byte(T!['{']),
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            COL => self.consume_byte(T![:]),
+            EQL => self.consume_byte(T![=]),
+            PIP => self.consume_byte(T![|]),
+            IDT => self
                 .consume_language_identifier(current)
                 .unwrap_or_else(|| self.consume_svelte_identifier(current)),
             _ => self.consume_single_text_expression(),
         }
+    }
+
+    fn consume_svelte_literal(&mut self) -> HtmlSyntaxKind {
+        while let Some(current) = self.current_byte() {
+            let dispatched = lookup_byte(current);
+            if dispatched == WHS || dispatched == EQL || dispatched == MOR {
+                break;
+            }
+            self.advance(1);
+        }
+
+        HTML_LITERAL
     }
 
     /// Consumes a Svelte identifier (alphanumeric + underscore only)
@@ -568,6 +599,15 @@ impl<'src> HtmlLexer<'src> {
             b"then" => THEN_KW,
             b"catch" => CATCH_KW,
             b"snippet" => SNIPPET_KW,
+            b"bind" => BIND_KW,
+            b"transition" => TRANSITION_KW,
+            b"animate" => ANIMATE_KW,
+            b"in" => IN_KW,
+            b"out" => OUT_KW,
+            b"use" => USE_KW,
+            b"style" => STYLE_KW,
+            b"class" => CLASS_KW,
+
             _ => {
                 self.position = starting_position;
                 return None;
@@ -979,15 +1019,17 @@ impl<'src> HtmlLexer<'src> {
         let mut closing_expression = None;
         let mut was_escaped = false;
 
-        match current {
-            b'{' => {
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            BEO => {
                 if self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
                 }
             }
-            b'}' => {
+            BEC => {
                 if self.at_closing_double_text_expression() {
                     self.consume_r_double_text_expression()
                 } else {
@@ -996,20 +1038,22 @@ impl<'src> HtmlLexer<'src> {
             }
             _ => {
                 while let Some(current) = self.current_byte() {
-                    match current {
-                        b'{' => {
+                    let dispatched = lookup_byte(current);
+
+                    match dispatched {
+                        BEO => {
                             if was_escaped {
                                 self.advance(1);
                             } else {
                                 break;
                             }
                         }
-                        b'\\' => {
+                        BSL => {
                             was_escaped = true;
                             whitespace_started = None;
                             self.advance(1);
                         }
-                        b'}' => {
+                        BEC => {
                             if was_escaped {
                                 self.advance(1);
                             } else {
@@ -1023,10 +1067,10 @@ impl<'src> HtmlLexer<'src> {
                             }
                         }
 
-                        b'<' => {
+                        LSS => {
                             break;
                         }
-                        b'\n' | b'\r' => {
+                        WHS if current == b'\n' || current == b'\r' => {
                             if whitespace_started.is_none() {
                                 whitespace_started = Some(self.checkpoint());
                             }
@@ -1037,7 +1081,7 @@ impl<'src> HtmlLexer<'src> {
                             }
                             self.advance(1);
                         }
-                        b' ' | b'\t' => {
+                        WHS => {
                             if was_escaped {
                                 was_escaped = false;
                             }
@@ -1114,6 +1158,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                         self.consume_astro_frontmatter(current, context)
                     }
                     HtmlLexContext::Svelte => self.consume_svelte(current),
+                    HtmlLexContext::SvelteBindingLiteral => self.consume_svelte_literal(),
                 },
                 None => EOF,
             }
@@ -1190,6 +1235,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
             Some(current) => match context {
                 HtmlReLexContext::Svelte => self.consume_svelte(current),
                 HtmlReLexContext::HtmlText => self.consume_html_text(current),
+                HtmlReLexContext::InsideTag => self.consume_token_inside_tag(current),
             },
             None => EOF,
         };

@@ -1,0 +1,79 @@
+name: Benchmarks HTML
+on:
+  workflow_dispatch:
+  merge_group:
+  pull_request:
+    types: [ opened, synchronize ]
+    branches:
+      - main
+      - next
+    paths:
+      - 'Cargo.lock'
+      - 'crates/biome_html_analyze/**/*.rs'
+      - 'crates/biome_html_formatter/**/*.rs'
+      - 'crates/biome_html_parser/**/*.rs'
+      - 'crates/biome_html_*/**/*.rs'
+      - 'crates/biome_formatter/**/*.rs'
+      - 'crates/biome_rowan/**/*.rs'
+      - 'crates/biome_parser/**/*.rs'
+  push:
+    branches:
+      - main
+      - next
+    paths:
+      - 'Cargo.lock'
+      - 'crates/biome_html_analyze/**/*.rs'
+      - 'crates/biome_html_formatter/**/*.rs'
+      - 'crates/biome_html_parser/**/*.rs'
+      - 'crates/biome_html_*/**/*.rs'
+      - 'crates/biome_formatter/**/*.rs'
+      - 'crates/biome_rowan/**/*.rs'
+      - 'crates/biome_parser/**/*.rs'
+
+env:
+  RUST_LOG: info
+
+jobs:
+  bench:
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_html_parser
+          - biome_html_formatter
+          - biome_html_analyze
+
+    steps:
+
+      - name: Checkout PR Branch
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        with:
+          channel: stable
+          cache-target: release
+          bins: cargo-codspeed
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile
+        timeout-minutes: 20
+        run: cargo codspeed build -p ${{ matrix.package }}
+        env:
+          CARGO_BUILD_JOBS: 3  # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@972e3437949c89e1357ebd1a2dbc852fcbc57245 # v4.5.1
+        timeout-minutes: 50
+        with:
+          mode: simulation
+          run: cargo codspeed run
+          token: ${{ secrets.CODSPEED_TOKEN }}

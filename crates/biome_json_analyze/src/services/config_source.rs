@@ -1,55 +1,34 @@
 use biome_analyze::{
-    AddVisitor, FromServices, Phase, Phases, QueryKey, Queryable, RuleKey, RuleMetadata,
-    ServiceBag, ServicesDiagnostic, SyntaxVisitor,
+    AddVisitor, ExtendedConfigurationProvider, FromServices, Phase, Phases, QueryKey, Queryable,
+    RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
-#[cfg(feature = "configuration")]
-use biome_configuration::{ConfigurationSource, ExtendedConfigurationIterator};
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_rowan::AstNode;
-#[cfg(feature = "configuration")]
 use std::sync::Arc;
 
-#[cfg(feature = "configuration")]
 #[derive(Debug, Default)]
-pub struct ConfigurationSourceService(Option<std::sync::Arc<ConfigurationSource>>);
+pub struct ConfigurationSourceService(Option<Arc<dyn ExtendedConfigurationProvider>>);
 
-#[cfg(not(feature = "configuration"))]
-#[derive(Debug, Default)]
-pub struct ConfigurationSourceService;
-
-#[cfg(feature = "configuration")]
 impl ConfigurationSourceService {
-    pub(crate) fn extends(&self) -> Option<ExtendedConfigurationIterator<'_>> {
+    pub(crate) fn any_extended_starts_with_catch_all(&self) -> bool {
         self.0
             .as_ref()
-            .map(|source| source.extended_configurations())
+            .is_some_and(|provider| provider.any_extended_starts_with_catch_all())
     }
 }
 
-#[cfg(feature = "configuration")]
 impl FromServices for ConfigurationSourceService {
     fn from_services(
         rule_key: &RuleKey,
         _rule_metadata: &RuleMetadata,
         services: &ServiceBag,
     ) -> Result<Self, ServicesDiagnostic> {
-        let source: &Option<Arc<ConfigurationSource>> =
+        let source: &Option<Arc<dyn ExtendedConfigurationProvider>> =
             services.get_service().ok_or_else(|| {
-                ServicesDiagnostic::new(rule_key.rule_name(), &["ConfigurationSource"])
+                ServicesDiagnostic::new(rule_key.rule_name(), &["ExtendedConfigurationProvider"])
             })?;
 
         Ok(Self(source.clone()))
-    }
-}
-
-#[cfg(not(feature = "configuration"))]
-impl FromServices for ConfigurationSourceService {
-    fn from_services(
-        _rule_key: &RuleKey,
-        _rule_metadata: &RuleMetadata,
-        _services: &ServiceBag,
-    ) -> Result<Self, ServicesDiagnostic> {
-        Ok(Self)
     }
 }
 
@@ -59,7 +38,7 @@ impl Phase for ConfigurationSourceService {
     }
 }
 
-/// Query type usable by lint rules **that uses the package manifest** and matches on specific [AstNode] types.
+/// Query type usable by lint rules **that uses the configuration source** and matches on specific [AstNode] types.
 #[derive(Clone)]
 pub struct ConfigSource<N>(pub N);
 

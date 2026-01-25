@@ -162,6 +162,8 @@ pub(crate) fn parse_apply_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
 struct ApplyClassList;
 
+static TW_APPLY_CLASS_LIST_END: TokenSet<CssSyntaxKind> = token_set![T![;], T!['}']];
+
 impl ParseNodeList for ApplyClassList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
@@ -172,7 +174,7 @@ impl ParseNodeList for ApplyClassList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![;])
+        p.at_ts(TW_APPLY_CLASS_LIST_END)
     }
 
     fn recover(
@@ -182,7 +184,7 @@ impl ParseNodeList for ApplyClassList {
     ) -> biome_parser::parse_recovery::RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_CUSTOM_IDENTIFIER, token_set![T![;], EOF])
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_CUSTOM_IDENTIFIER, TW_APPLY_CLASS_LIST_END)
                 .enable_recovery_on_line_break(),
             expected_identifier,
         )

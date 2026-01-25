@@ -384,24 +384,31 @@ fn assert_lint(
                 let options = test.create_analyzer_options::<JsonLanguage>(config)?;
                 let json_services = JsonAnalyzeServices {
                     file_source,
-                    configuration_source: None,
+                    configuration_provider: None,
                 };
-                biome_json_analyze::analyze(&root, filter, &options, json_services, |signal| {
-                    if let Some(mut diag) = signal.diagnostic() {
-                        for action in signal.actions() {
-                            if !action.is_suppression() {
-                                diag = diag.add_code_suggestion(action.into());
+                biome_json_analyze::analyze(
+                    &root,
+                    filter,
+                    &options,
+                    json_services,
+                    &[],
+                    |signal| {
+                        if let Some(mut diag) = signal.diagnostic() {
+                            for action in signal.actions() {
+                                if !action.is_suppression() {
+                                    diag = diag.add_code_suggestion(action.into());
+                                }
                             }
+
+                            let error = diag
+                                .with_file_path(test.file_path())
+                                .with_file_source_code(code);
+                            diagnostics.write_diagnostic(error);
                         }
 
-                        let error = diag
-                            .with_file_path(test.file_path())
-                            .with_file_source_code(code);
-                        diagnostics.write_diagnostic(error);
-                    }
-
-                    ControlFlow::<()>::Continue(())
-                });
+                        ControlFlow::<()>::Continue(())
+                    },
+                );
             }
         }
         DocumentFileSource::Css(file_source) => {
@@ -574,7 +581,9 @@ fn make_json_object_with_single_member<V: Into<AnyJsonValue>>(
         make::token(biome_json_syntax::JsonSyntaxKind::L_CURLY),
         make::json_member_list(
             [make::json_member(
-                make::json_member_name(make::json_string_literal(name)),
+                biome_json_syntax::AnyJsonMemberName::JsonMemberName(make::json_member_name(
+                    make::json_string_literal(name),
+                )),
                 make::token(biome_json_syntax::JsonSyntaxKind::COLON),
                 value.into(),
             )],
@@ -592,7 +601,7 @@ fn get_first_member<V: Into<AnyJsonValue>>(parent: V, expected_name: &str) -> Op
         .into_iter()
         .next()?
         .ok()?;
-    let member_name = member.name().ok()?.inner_string_text().ok()?.to_string();
+    let member_name = member.name().ok()?.inner_string_text()?.ok()?.to_string();
 
     if member_name.as_str() == expected_name {
         member.value().ok()

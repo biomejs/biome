@@ -51,6 +51,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -85,4 +86,5 @@ something()[1]()[3]()
 some.member.with.
 	// biome-ignore format: Verify that formatting calls into right.format()
 	rather.hard.to.test.because.name.doesnt.format.being.ignored;
+
 ```

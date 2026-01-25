@@ -21,8 +21,10 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Attribute Position: Auto
+Trailing newline: true
 -----
 
 ```grit
 file(body=contains `console.$method` => `println`)
+
 ```

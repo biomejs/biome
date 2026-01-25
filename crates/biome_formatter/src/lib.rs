@@ -789,6 +789,53 @@ impl FromStr for BracketSameLine {
     }
 }
 
+#[derive(Clone, Copy, Debug, Eq, Hash, Deserializable, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct TrailingNewline(bool);
+
+impl TrailingNewline {
+    /// Return the boolean value for this [TrailingNewline]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl Default for TrailingNewline {
+    fn default() -> Self {
+        Self(true)
+    }
+}
+
+impl From<bool> for TrailingNewline {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+impl std::fmt::Display for TrailingNewline {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::write!(f, "{}", self.value())
+    }
+}
+
+impl FromStr for TrailingNewline {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match bool::from_str(s) {
+            Ok(value) => Ok(Self(value)),
+            Err(_) => Err(
+                "Value not supported for TrailingNewline. Supported values are 'true' and 'false'.",
+            ),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
@@ -863,6 +910,9 @@ pub trait FormatOptions {
     /// The type of line ending.
     fn line_ending(&self) -> LineEnding;
 
+    /// Whether to add a trailing newline at the end of the file.
+    fn trailing_newline(&self) -> TrailingNewline;
+
     /// Derives the print options from the these format options
     fn as_print_options(&self) -> PrinterOptions;
 }
@@ -911,6 +961,7 @@ pub struct SimpleFormatOptions {
     pub indent_width: IndentWidth,
     pub line_width: LineWidth,
     pub line_ending: LineEnding,
+    pub trailing_newline: TrailingNewline,
 }
 
 impl FormatOptions for SimpleFormatOptions {
@@ -928,6 +979,10 @@ impl FormatOptions for SimpleFormatOptions {
 
     fn line_ending(&self) -> LineEnding {
         self.line_ending
+    }
+
+    fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
     }
 
     fn as_print_options(&self) -> PrinterOptions {
@@ -990,6 +1045,14 @@ impl<Context> Formatted<Context> {
         });
     }
 
+    /// Propagates the expand flags through the document.
+    ///
+    /// This must be called after [Self::format_embedded] to ensure that groups inside
+    /// embedded content properly propagate their expansion flags.
+    pub fn propagate_expand(&mut self) {
+        self.document.propagate_expand();
+    }
+
     /// Returns the formatted document.
     pub fn document(&self) -> &Document {
         &self.document
@@ -1019,6 +1082,13 @@ where
             None => printed,
         };
 
+        // Strip trailing newlines if the option is set to false
+        let printed = if !self.context.options().trailing_newline().value() {
+            printed.strip_trailing_newlines()
+        } else {
+            printed
+        };
+
         Ok(printed)
     }
 
@@ -1037,6 +1107,13 @@ where
         let printed = match self.context.source_map() {
             Some(source_map) => source_map.map_printed(printed),
             None => printed,
+        };
+
+        // Strip trailing newlines if the option is set to false
+        let printed = if !self.context.options().trailing_newline().value() {
+            printed.strip_trailing_newlines()
+        } else {
+            printed
         };
 
         Ok(printed)
@@ -1133,6 +1210,16 @@ impl Printed {
     /// Takes the ranges of nodes that have been formatted as verbatim, replacing them with an empty list.
     pub fn take_verbatim_ranges(&mut self) -> Vec<TextRange> {
         std::mem::take(&mut self.verbatim_ranges)
+    }
+
+    /// Strips trailing newline characters from the formatted code.
+    /// This handles all line ending types (LF, CRLF, CR).
+    pub fn strip_trailing_newlines(mut self) -> Self {
+        // Strip all trailing line ending characters
+        while self.code.ends_with('\n') || self.code.ends_with('\r') {
+            self.code.pop();
+        }
+        self
     }
 }
 
@@ -2268,5 +2355,40 @@ mod tests {
                 line_width: LineWidth(80)
             }
         );
+    }
+
+    #[test]
+    fn test_strip_trailing_newlines() {
+        use super::Printed;
+
+        // Test stripping LF
+        let printed = Printed::new("test\n".to_string(), None, vec![], vec![]);
+        let stripped = printed.strip_trailing_newlines();
+        assert_eq!(stripped.as_code(), "test");
+
+        // Test stripping CRLF
+        let printed = Printed::new("test\r\n".to_string(), None, vec![], vec![]);
+        let stripped = printed.strip_trailing_newlines();
+        assert_eq!(stripped.as_code(), "test");
+
+        // Test stripping CR
+        let printed = Printed::new("test\r".to_string(), None, vec![], vec![]);
+        let stripped = printed.strip_trailing_newlines();
+        assert_eq!(stripped.as_code(), "test");
+
+        // Test stripping multiple newlines
+        let printed = Printed::new("test\n\n\n".to_string(), None, vec![], vec![]);
+        let stripped = printed.strip_trailing_newlines();
+        assert_eq!(stripped.as_code(), "test");
+
+        // Test not stripping newlines in the middle
+        let printed = Printed::new("test\ncode".to_string(), None, vec![], vec![]);
+        let stripped = printed.strip_trailing_newlines();
+        assert_eq!(stripped.as_code(), "test\ncode");
+
+        // Test empty string
+        let printed = Printed::new(String::new(), None, vec![], vec![]);
+        let stripped = printed.strip_trailing_newlines();
+        assert_eq!(stripped.as_code(), "");
     }
 }

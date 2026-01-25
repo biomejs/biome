@@ -45,7 +45,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoReturnAssign {
-        version: "next",
+        version: "2.3.11",
         name: "noReturnAssign",
         language: "js",
         sources: &[RuleSource::Eslint("no-return-assign").same()],

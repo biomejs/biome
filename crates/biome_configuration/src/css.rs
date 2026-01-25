@@ -1,6 +1,8 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{
+    IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -98,6 +100,20 @@ pub struct CssFormatterConfiguration {
     #[bpaf(long("css-formatter-quote-style"), argument("double|single"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_style: Option<QuoteStyle>,
+
+    /// Whether to add a trailing newline at the end of the file.
+    ///
+    /// Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+    /// - <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+    /// - <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+    /// - <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+    ///
+    /// Disable the option at your own risk.
+    ///
+    /// Defaults to true.
+    #[bpaf(long("css-formatter-trailing-newline"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl CssFormatterConfiguration {

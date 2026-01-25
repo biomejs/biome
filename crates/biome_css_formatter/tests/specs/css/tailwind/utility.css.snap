@@ -38,6 +38,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
@@ -66,6 +67,7 @@ Quote style: Double Quotes
 @utility tab-* {
 	tab-size: --value(--tab-size-*);
 }
+
 ```
 
 ## Output 1
@@ -76,6 +78,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
@@ -104,4 +107,5 @@ Quote style: Double Quotes
 @utility tab-* {
 	tab-size: --value(--tab-size-*);
 }
+
 ```

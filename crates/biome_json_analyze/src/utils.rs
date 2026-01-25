@@ -9,7 +9,7 @@ pub(crate) fn matches_parent_object(node: &JsonMember, name: &str) -> bool {
         .skip(1)
         .find_map(JsonMember::cast)
         .and_then(|member| member.name().ok())
-        .and_then(|member| member.inner_string_text().ok())
+        .and_then(|member| member.inner_string_text()?.ok())
         .is_some_and(|text| text.text() == name)
 }
 

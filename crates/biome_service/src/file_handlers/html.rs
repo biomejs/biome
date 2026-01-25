@@ -27,7 +27,7 @@ use biome_formatter::format_element::{Interned, LineMode};
 use biome_formatter::prelude::{Document, Tag};
 use biome_formatter::{
     AttributePosition, BracketSameLine, FormatElement, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, Printed,
+    LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_html_analyze::analyze;
@@ -83,6 +83,7 @@ pub struct HtmlFormatterSettings {
     pub whitespace_sensitivity: Option<WhitespaceSensitivity>,
     pub indent_script_and_style: Option<IndentScriptAndStyle>,
     pub self_close_void_elements: Option<SelfCloseVoidElements>,
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl From<HtmlFormatterConfiguration> for HtmlFormatterSettings {
@@ -98,6 +99,7 @@ impl From<HtmlFormatterConfiguration> for HtmlFormatterSettings {
             whitespace_sensitivity: config.whitespace_sensitivity,
             indent_script_and_style: config.indent_script_and_style,
             self_close_void_elements: config.self_close_void_elements,
+            trailing_newline: config.trailing_newline,
         }
     }
 }
@@ -178,6 +180,7 @@ impl ServiceLanguage for HtmlLanguage {
         let whitespace_sensitivity = language.whitespace_sensitivity.unwrap_or_default();
         let indent_script_and_style = language.indent_script_and_style.unwrap_or_default();
         let self_close_void_elements = language.self_close_void_elements.unwrap_or_default();
+        let trailing_newline = language.trailing_newline.unwrap_or_default();
 
         let mut options =
             HtmlFormatOptions::new(file_source.to_html_file_source().unwrap_or_default())
@@ -189,7 +192,8 @@ impl ServiceLanguage for HtmlLanguage {
                 .with_bracket_same_line(bracket_same_line)
                 .with_whitespace_sensitivity(whitespace_sensitivity)
                 .with_indent_script_and_style(indent_script_and_style)
-                .with_self_close_void_elements(self_close_void_elements);
+                .with_self_close_void_elements(self_close_void_elements)
+                .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_html_format_options(path, &mut options);
 
@@ -431,13 +435,21 @@ fn parse_embedded_nodes(
         }
 
         if file_source.is_vue()
-            && let Some(_text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
+            && let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
         {
-            // TODO: uncomment this once we have better parsing of Vue syntax where we have expressions VS names
-            // let result = parse_vue_text_expression(text_expression, cache, biome_path, settings);
-            // if let Some((content, file_source)) = result {
-            //     nodes.push((content.into(), file_source));
-            // }
+            let result = parse_vue_text_expression(text_expression, cache, biome_path, settings);
+            if let Some((content, file_source)) = result {
+                nodes.push((content.into(), file_source));
+            }
+        }
+
+        if file_source.is_astro()
+            && let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
+        {
+            let result = parse_astro_text_expression(text_expression, cache, biome_path, settings);
+            if let Some((content, file_source)) = result {
+                nodes.push((content.into(), file_source));
+            }
         }
 
         if let Some(element) = HtmlElement::cast_ref(&element) {
@@ -714,8 +726,41 @@ pub(crate) fn parse_svelte_text_expression(
     Some((snippet, document_file_source))
 }
 
+/// Parses Astro single text expressions `{ expression }`
+pub(crate) fn parse_astro_text_expression(
+    element: HtmlSingleTextExpression,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    let expression = element.expression().ok()?;
+    let content = expression.html_literal_token().ok()?;
+    // Astro is kinda weird in its JSX-like expressions. They are JS, but they contain HTML, not JSX.
+    // That's because Astro doesn't parse what's inside the expressions, actually. In fact, their arrow function callbacks
+    // don't have curly brackets.
+    //
+    // As for now, we use the TSX parser, hoping it won't bite us back in the future.
+    let file_source =
+        JsFileSource::tsx().with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
+    let document_file_source = DocumentFileSource::Js(file_source);
+    let options = settings.parse_options::<JsLanguage>(biome_path, &document_file_source);
+    let parse = parse_js_with_offset_and_cache(
+        content.text(),
+        content.text_range().start(),
+        file_source,
+        options,
+        cache,
+    );
+    let snippet = EmbeddedSnippet::new(
+        parse.into(),
+        expression.range(),
+        content.text_range(),
+        content.text_range().start(),
+    );
+    Some((snippet, document_file_source))
+}
+
 /// Parses Vue double text expressions `{{ expression }}`
-#[expect(unused)]
 pub(crate) fn parse_vue_text_expression(
     element: HtmlDoubleTextExpression,
     cache: &mut NodeCache,
@@ -854,6 +899,10 @@ fn format_embedded(
             _ => None,
         }
     });
+
+    // Propagate expand flags again after inserting embedded content,
+    // so that groups inside the embedded documents properly expand.
+    formatted.propagate_expand();
 
     match formatted.print() {
         Ok(printed) => Ok(printed),

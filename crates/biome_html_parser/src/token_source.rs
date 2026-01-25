@@ -40,6 +40,9 @@ pub(crate) enum HtmlLexContext {
     /// Outside of this context, the lexer doesn't yield any particular keywords.
     Svelte,
 
+    /// The binding properties in Svelte are special and require a special lexing. They accept everything until `=` is found.
+    SvelteBindingLiteral,
+
     /// Lex tokens inside text expressions. In the following examples, `foo` is the text expression:
     /// - `{{ foo }}`
     /// - `attr={ foo }`
@@ -139,6 +142,8 @@ pub(crate) enum HtmlReLexContext {
     Svelte,
     /// Relex tokens using `HtmlLexer::consume_html_text`
     HtmlText,
+    /// Relex tokens as if the parser was inside a tag.
+    InsideTag,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;

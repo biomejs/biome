@@ -7,6 +7,8 @@ alias r := ready
 alias l := lint
 alias qt := test-quick
 
+set windows-powershell := true
+
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
@@ -153,14 +155,14 @@ new-js-assistrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=js --category=assist --name={{rulename}}
   just gen-analyzer
 
-# Creates a new json assist rule with the given name. Name has to be camel case.
-new-json-assistrule rulename:
-  cargo run -p xtask_codegen -- new-lintrule --kind=json --category=assist --name={{rulename}}
-  just gen-analyzer
-
 # Creates a new json lint rule with the given name. Name has to be camel case.
 new-json-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=json --category=lint --name={{rulename}}
+  just gen-analyzer
+
+# Creates a new json assist rule with the given name. Name has to be camel case.
+new-json-assistrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=json --category=assist --name={{rulename}}
   just gen-analyzer
 
 # Creates a new css lint rule with the given name. Name has to be camel case.
@@ -168,14 +170,29 @@ new-css-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=css --category=lint --name={{rulename}}
   just gen-analyzer
 
+# Creates a new css assist rule with the given name. Name has to be camel case.
+new-css-assistrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=css --category=assist --name={{rulename}}
+  just gen-analyzer
+
 # Creates a new graphql lint rule with the given name. Name has to be camel case.
 new-graphql-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=graphql --category=lint --name={{rulename}}
   just gen-analyzer
 
+# Creates a new graphql assist rule with the given name. Name has to be camel case.
+new-graphql-assistrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=graphql --category=assist --name={{rulename}}
+  just gen-analyzer
+
 # Creates a new html lint rule with the given name. Name has to be camel case.
 new-html-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=html --category=lint --name={{rulename}}
+  just gen-analyzer
+
+# Creates a new html assist rule with the given name. Name has to be camel case.
+new-html-assistrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=html --category=assist --name={{rulename}}
   just gen-analyzer
 
 # Creates a new html lint rule with the given name, but targets vue. Name has to be camel case.
@@ -203,15 +220,23 @@ _touch file:
 
 # Run tests of all crates
 test:
-	cargo test run --no-fail-fast
+	cargo test --no-fail-fast
 
 # Run tests for the crate passed as argument e.g. just test-create biome_cli
 test-crate name:
-	cargo test run -p {{name}} --no-fail-fast
+	cargo test -p {{name}} --no-fail-fast
 
 # Run doc tests
 test-doc:
 	cargo test --doc
+
+# Run CommonMark conformance tests for the markdown parser
+test-markdown-conformance:
+	cargo run -p xtask_coverage -- --suites=markdown/commonmark
+
+# Update the CommonMark spec.json to a specific version
+update-commonmark-spec version:
+	./scripts/update-commonmark-spec.sh {{version}}
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-lintrule name:

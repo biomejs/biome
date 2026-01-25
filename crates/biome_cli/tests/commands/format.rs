@@ -1228,7 +1228,7 @@ fn format_stdin_formats_virtual_path_outside_includes() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--stdin-file-path", "a.tsx"].as_slice()),
+        Args::from(["format", "--stdin-file-path=a.tsx"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3611,6 +3611,424 @@ fn should_format_file_with_syntax_errors_when_flag_enabled() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_format_file_with_syntax_errors_when_flag_enabled",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn trailing_newline_javascript_via_config() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+  "files": {
+    "includes": ["**/*.js"]
+  },
+  "javascript": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    let test = Utf8Path::new("test.js");
+    fs.insert(test.into(), "const a = 1;\n".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", test.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, "const a = 1;");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "trailing_newline_javascript_via_config",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn trailing_newline_javascript_via_cli() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    let test = Utf8Path::new("test.js");
+    fs.insert(test.into(), "const a = 1;\n".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--javascript-formatter-trailing-newline=false",
+                test.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, "const a = 1;");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "trailing_newline_javascript_via_cli",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn trailing_newline_json_via_config() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+  "json": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    let test = Utf8Path::new("test.json");
+    fs.insert(test.into(), r#"{"name": "test"}"#.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", test.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    // Note: Just verify the snapshot, don't assert file contents
+    // The formatter will determine the actual formatting
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "trailing_newline_json_via_config",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn trailing_newline_json_via_cli() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    let test = Utf8Path::new("test.json");
+    fs.insert(test.into(), r#"{"name": "test"}"#.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--json-formatter-trailing-newline=false",
+                test.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    // Note: Just verify the snapshot, don't assert file contents
+    // The formatter will determine the actual formatting
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "trailing_newline_json_via_cli",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn trailing_newline_css_via_config() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+  "files": {
+    "includes": ["**/*.css"]
+  },
+  "css": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    let test = Utf8Path::new("test.css");
+    fs.insert(test.into(), ".test { color: red; }".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", test.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, ".test {\n\tcolor: red;\n}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "trailing_newline_css_via_config",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn trailing_newline_css_via_cli() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    let test = Utf8Path::new("test.css");
+    fs.insert(test.into(), ".test { color: red; }".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--css-formatter-trailing-newline=false",
+                test.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, ".test {\n\tcolor: red;\n}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "trailing_newline_css_via_cli",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn trailing_newline_graphql_via_config() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+  "files": {
+    "includes": ["**/*.graphql"]
+  },
+  "graphql": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    let test = Utf8Path::new("test.graphql");
+    fs.insert(test.into(), "type Query { hello: String }".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", test.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, "type Query {\n\thello: String\n}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "trailing_newline_graphql_via_config",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn trailing_newline_graphql_via_cli() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    let test = Utf8Path::new("test.graphql");
+    fs.insert(test.into(), "type Query { hello: String }".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--graphql-formatter-trailing-newline=false",
+                test.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, "type Query {\n\thello: String\n}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "trailing_newline_graphql_via_cli",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn trailing_newline_html_via_config() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+  "files": {
+    "includes": ["**/*.html"]
+  },
+  "html": {
+    "formatter": {
+      "enabled": true,
+      "trailingNewline": false
+    }
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    let test = Utf8Path::new("test.html");
+    fs.insert(
+        test.into(),
+        "<!doctype html><html><body>Hello</body></html>".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", test.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(
+        &fs,
+        test,
+        "<!doctype html>\n<html>\n\t<body>\n\t\tHello\n\t</body>\n</html>",
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "trailing_newline_html_via_config",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn trailing_newline_html_via_cli() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+  "html": {
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    let test = Utf8Path::new("test.html");
+    fs.insert(
+        test.into(),
+        "<!doctype html><html><body>Hello</body></html>".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--html-formatter-trailing-newline=false",
+                test.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(
+        &fs,
+        test,
+        "<!doctype html>\n<html>\n\t<body>\n\t\tHello\n\t</body>\n</html>",
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "trailing_newline_html_via_cli",
         fs,
         console,
         result,

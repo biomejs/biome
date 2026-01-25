@@ -8,7 +8,8 @@ use crate::syntax::HtmlSyntaxFeatures::{DoubleTextExpressions, SingleTextExpress
 use crate::syntax::astro::parse_astro_fence;
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
-    is_at_svelte_keyword, parse_attach_attribute, parse_svelte_at_block, parse_svelte_hash_block,
+    is_at_svelte_directive_start, is_at_svelte_keyword, parse_attach_attribute,
+    parse_svelte_at_block, parse_svelte_directive, parse_svelte_hash_block,
 };
 use crate::syntax::vue::{
     parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_on_shorthand_directive,
@@ -138,6 +139,14 @@ fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
     }
 }
 
+fn is_possible_component(p: &HtmlParser, tag_name: &str) -> bool {
+    tag_name
+        .chars()
+        .next()
+        .is_some_and(|c| c.is_ascii_uppercase())
+        && !p.options().is_html()
+}
+
 fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![<]) {
         return Absent;
@@ -148,7 +157,8 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     let opening_tag_name = p.cur_text().to_string();
     let should_be_self_closing = VOID_ELEMENTS
         .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
+        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
+        && !is_possible_component(p, opening_tag_name.as_str());
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
@@ -229,7 +239,8 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     p.bump_with_context(T![/], HtmlLexContext::InsideTag);
     let should_be_self_closing = VOID_ELEMENTS
         .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()));
+        .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()))
+        && !is_possible_component(p, p.cur_text());
     if should_be_self_closing {
         p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
     }
@@ -393,16 +404,21 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         T!['{'] => SingleTextExpressions.parse_exclusive_syntax(
             p,
             |p| parse_single_text_expression(p, HtmlLexContext::InsideTag),
-            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte_prop(p, m.range(p)),
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte(p, m.range(p)),
         ),
         T!["{@"] => SingleTextExpressions.parse_exclusive_syntax(
             p,
             |p| parse_attach_attribute(p),
-            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte_prop(p, m.range(p)),
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte(p, m.range(p)),
         ),
         _ if p.cur_text().starts_with("v-") => {
             HtmlSyntaxFeatures::Vue
                 .parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
+        }
+        _ if is_at_svelte_directive_start(p) => {
+            SingleTextExpressions.parse_exclusive_syntax(p, parse_svelte_directive, |p, m| {
+                disabled_svelte(p, m.range(p))
+            })
         }
         _ => {
             let m = p.start();

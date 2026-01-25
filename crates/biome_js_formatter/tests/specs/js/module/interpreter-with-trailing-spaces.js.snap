@@ -33,9 +33,11 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
 #!/usr/bin/env node
 console.log(1);
+
 ```

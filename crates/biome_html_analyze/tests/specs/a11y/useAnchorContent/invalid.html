@@ -1,0 +1,56 @@
+<!-- should generate diagnostics -->
+
+<!-- Empty anchor -->
+<a></a>
+
+<!-- Self-closing anchor (void-like usage) -->
+<a />
+
+<!-- Case insensitive - uppercase anchor -->
+<A></A>
+
+<!-- Anchor with only whitespace -->
+<a>    </a>
+
+<!-- Anchor with aria-hidden attribute -->
+<a aria-hidden="true">content</a>
+
+<!-- Anchor with aria-hidden (no value = truthy) -->
+<a aria-hidden>content</a>
+
+<!-- All children hidden with aria-hidden -->
+<a><span aria-hidden="true">content</span></a>
+
+<!-- Nested hidden content -->
+<a><div aria-hidden="true"><span>nested content</span></div></a>
+
+<!-- Empty aria-label should still be invalid -->
+<a aria-label=""></a>
+
+<!-- Whitespace-only aria-label should still be invalid -->
+<a aria-label="   "></a>
+
+<!-- Empty title should still be invalid -->
+<a title=""></a>
+
+<!-- Whitespace-only title should still be invalid -->
+<a title="   "></a>
+
+<!-- Image without alt attribute -->
+<a><img /></a>
+
+<!-- Image with empty alt attribute -->
+<a><img alt="" /></a>
+
+<!-- Image with whitespace-only alt attribute -->
+<a><img alt="   " /></a>
+
+<!-- Void elements that never provide accessible content -->
+<a><br /></a>
+
+<a><hr /></a>
+
+<a><wbr /></a>
+
+<!-- Hidden input is not accessible -->
+<a><input type="hidden" /></a>

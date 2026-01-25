@@ -850,6 +850,46 @@ pub struct HtmlTextExpressionFields {
     pub html_literal_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteAnimateDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteAnimateDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteAnimateDirectiveFields {
+        SvelteAnimateDirectiveFields {
+            animate_token: self.animate_token(),
+            value: self.value(),
+        }
+    }
+    pub fn animate_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<SvelteDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteAnimateDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteAnimateDirectiveFields {
+    pub animate_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<SvelteDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteAttachAttribute {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1245,6 +1285,86 @@ pub struct SvelteAwaitThenClauseFields {
     pub name: SyntaxResult<HtmlTextExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteBindDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteBindDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteBindDirectiveFields {
+        SvelteBindDirectiveFields {
+            bind_token: self.bind_token(),
+            value: self.value(),
+        }
+    }
+    pub fn bind_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<SvelteDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteBindDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteBindDirectiveFields {
+    pub bind_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<SvelteDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteClassDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteClassDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteClassDirectiveFields {
+        SvelteClassDirectiveFields {
+            class_token: self.class_token(),
+            value: self.value(),
+        }
+    }
+    pub fn class_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<SvelteDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteClassDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteClassDirectiveFields {
+    pub class_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<SvelteDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteConstBlock {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1388,6 +1508,96 @@ pub struct SvelteDebugBlockFields {
     pub debug_token: SyntaxResult<SyntaxToken>,
     pub bindings: SvelteBindingList,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteDirectiveModifier {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteDirectiveModifier {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteDirectiveModifierFields {
+        SvelteDirectiveModifierFields {
+            bitwise_or_token: self.bitwise_or_token(),
+            name: self.name(),
+        }
+    }
+    pub fn bitwise_or_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<SvelteName> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteDirectiveModifier {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteDirectiveModifierFields {
+    pub bitwise_or_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<SvelteName>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteDirectiveValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteDirectiveValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteDirectiveValueFields {
+        SvelteDirectiveValueFields {
+            colon_token: self.colon_token(),
+            property: self.property(),
+            modifiers: self.modifiers(),
+            initializer: self.initializer(),
+        }
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn property(&self) -> SyntaxResult<AnySvelteBindingProperty> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn modifiers(&self) -> SvelteDirectiveModifierList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+        support::node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for SvelteDirectiveValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteDirectiveValueFields {
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub property: SyntaxResult<AnySvelteBindingProperty>,
+    pub modifiers: SvelteDirectiveModifierList,
+    pub initializer: Option<HtmlAttributeInitializerClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteEachAsKeyedItem {
@@ -2020,6 +2230,46 @@ pub struct SvelteIfOpeningBlockFields {
     pub children: HtmlElementList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteInDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteInDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteInDirectiveFields {
+        SvelteInDirectiveFields {
+            in_token: self.in_token(),
+            value: self.value(),
+        }
+    }
+    pub fn in_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<SvelteDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteInDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteInDirectiveFields {
+    pub in_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<SvelteDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteKeyBlock {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2160,6 +2410,41 @@ pub struct SvelteKeyOpeningBlockFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteLiteral {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteLiteral {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteLiteralFields {
+        SvelteLiteralFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for SvelteLiteral {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteLiteralFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteName {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2193,6 +2478,46 @@ impl Serialize for SvelteName {
 #[derive(Serialize)]
 pub struct SvelteNameFields {
     pub ident_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteOutDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteOutDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteOutDirectiveFields {
+        SvelteOutDirectiveFields {
+            out_token: self.out_token(),
+            value: self.value(),
+        }
+    }
+    pub fn out_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<SvelteDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteOutDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteOutDirectiveFields {
+    pub out_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<SvelteDirectiveValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteRenderBlock {
@@ -2468,6 +2793,126 @@ pub struct SvelteSquareDestructuredNameFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub names: SvelteBindingAssignmentBindingList,
     pub r_brack_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteStyleDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteStyleDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteStyleDirectiveFields {
+        SvelteStyleDirectiveFields {
+            style_token: self.style_token(),
+            value: self.value(),
+        }
+    }
+    pub fn style_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<SvelteDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteStyleDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteStyleDirectiveFields {
+    pub style_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<SvelteDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteTransitionDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteTransitionDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteTransitionDirectiveFields {
+        SvelteTransitionDirectiveFields {
+            transition_token: self.transition_token(),
+            value: self.value(),
+        }
+    }
+    pub fn transition_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<SvelteDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteTransitionDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteTransitionDirectiveFields {
+    pub transition_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<SvelteDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteUseDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteUseDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteUseDirectiveFields {
+        SvelteUseDirectiveFields {
+            use_token: self.use_token(),
+            value: self.value(),
+        }
+    }
+    pub fn use_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<SvelteDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteUseDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteUseDirectiveFields {
+    pub use_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<SvelteDirectiveValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct VueDirective {
@@ -2845,6 +3290,7 @@ impl AnyAstroFrontmatterElement {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlAttribute {
+    AnySvelteDirective(AnySvelteDirective),
     AnyVueDirective(AnyVueDirective),
     HtmlAttribute(HtmlAttribute),
     HtmlBogusAttribute(HtmlBogusAttribute),
@@ -2853,6 +3299,12 @@ pub enum AnyHtmlAttribute {
     SvelteAttachAttribute(SvelteAttachAttribute),
 }
 impl AnyHtmlAttribute {
+    pub fn as_any_svelte_directive(&self) -> Option<&AnySvelteDirective> {
+        match &self {
+            Self::AnySvelteDirective(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_any_vue_directive(&self) -> Option<&AnyVueDirective> {
         match &self {
             Self::AnyVueDirective(item) => Some(item),
@@ -3054,6 +3506,25 @@ impl AnySvelteBindingAssignmentBinding {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnySvelteBindingProperty {
+    SvelteLiteral(SvelteLiteral),
+    SvelteName(SvelteName),
+}
+impl AnySvelteBindingProperty {
+    pub fn as_svelte_literal(&self) -> Option<&SvelteLiteral> {
+        match &self {
+            Self::SvelteLiteral(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_name(&self) -> Option<&SvelteName> {
+        match &self {
+            Self::SvelteName(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnySvelteBlock {
     SvelteAwaitBlock(SvelteAwaitBlock),
     SvelteBogusBlock(SvelteBogusBlock),
@@ -3162,6 +3633,67 @@ impl AnySvelteDestructuredName {
     pub fn as_svelte_square_destructured_name(&self) -> Option<&SvelteSquareDestructuredName> {
         match &self {
             Self::SvelteSquareDestructuredName(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnySvelteDirective {
+    SvelteAnimateDirective(SvelteAnimateDirective),
+    SvelteBindDirective(SvelteBindDirective),
+    SvelteClassDirective(SvelteClassDirective),
+    SvelteInDirective(SvelteInDirective),
+    SvelteOutDirective(SvelteOutDirective),
+    SvelteStyleDirective(SvelteStyleDirective),
+    SvelteTransitionDirective(SvelteTransitionDirective),
+    SvelteUseDirective(SvelteUseDirective),
+}
+impl AnySvelteDirective {
+    pub fn as_svelte_animate_directive(&self) -> Option<&SvelteAnimateDirective> {
+        match &self {
+            Self::SvelteAnimateDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_bind_directive(&self) -> Option<&SvelteBindDirective> {
+        match &self {
+            Self::SvelteBindDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_class_directive(&self) -> Option<&SvelteClassDirective> {
+        match &self {
+            Self::SvelteClassDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_in_directive(&self) -> Option<&SvelteInDirective> {
+        match &self {
+            Self::SvelteInDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_out_directive(&self) -> Option<&SvelteOutDirective> {
+        match &self {
+            Self::SvelteOutDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_style_directive(&self) -> Option<&SvelteStyleDirective> {
+        match &self {
+            Self::SvelteStyleDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_transition_directive(&self) -> Option<&SvelteTransitionDirective> {
+        match &self {
+            Self::SvelteTransitionDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_use_directive(&self) -> Option<&SvelteUseDirective> {
+        match &self {
+            Self::SvelteUseDirective(item) => Some(item),
             _ => None,
         }
     }
@@ -4295,6 +4827,57 @@ impl From<HtmlTextExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for SvelteAnimateDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_ANIMATE_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_ANIMATE_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteAnimateDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteAnimateDirective")
+                .field(
+                    "animate_token",
+                    &support::DebugSyntaxResult(self.animate_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteAnimateDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteAnimateDirective> for SyntaxNode {
+    fn from(n: SvelteAnimateDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteAnimateDirective> for SyntaxElement {
+    fn from(n: SvelteAnimateDirective) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for SvelteAttachAttribute {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4751,6 +5334,105 @@ impl From<SvelteAwaitThenClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for SvelteBindDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_BIND_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_BIND_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteBindDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteBindDirective")
+                .field("bind_token", &support::DebugSyntaxResult(self.bind_token()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteBindDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteBindDirective> for SyntaxNode {
+    fn from(n: SvelteBindDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteBindDirective> for SyntaxElement {
+    fn from(n: SvelteBindDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteClassDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_CLASS_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_CLASS_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteClassDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteClassDirective")
+                .field(
+                    "class_token",
+                    &support::DebugSyntaxResult(self.class_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteClassDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteClassDirective> for SyntaxNode {
+    fn from(n: SvelteClassDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteClassDirective> for SyntaxElement {
+    fn from(n: SvelteClassDirective) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for SvelteConstBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4921,6 +5603,113 @@ impl From<SvelteDebugBlock> for SyntaxNode {
 }
 impl From<SvelteDebugBlock> for SyntaxElement {
     fn from(n: SvelteDebugBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteDirectiveModifier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_DIRECTIVE_MODIFIER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_DIRECTIVE_MODIFIER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteDirectiveModifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteDirectiveModifier")
+                .field(
+                    "bitwise_or_token",
+                    &support::DebugSyntaxResult(self.bitwise_or_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteDirectiveModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteDirectiveModifier> for SyntaxNode {
+    fn from(n: SvelteDirectiveModifier) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteDirectiveModifier> for SyntaxElement {
+    fn from(n: SvelteDirectiveModifier) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteDirectiveValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_DIRECTIVE_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_DIRECTIVE_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteDirectiveValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteDirectiveValue")
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("property", &support::DebugSyntaxResult(self.property()))
+                .field("modifiers", &self.modifiers())
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("SvelteDirectiveValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteDirectiveValue> for SyntaxNode {
+    fn from(n: SvelteDirectiveValue) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteDirectiveValue> for SyntaxElement {
+    fn from(n: SvelteDirectiveValue) -> Self {
         n.syntax.into()
     }
 }
@@ -5639,6 +6428,54 @@ impl From<SvelteIfOpeningBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for SvelteInDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_IN_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_IN_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteInDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteInDirective")
+                .field("in_token", &support::DebugSyntaxResult(self.in_token()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteInDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteInDirective> for SyntaxNode {
+    fn from(n: SvelteInDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteInDirective> for SyntaxElement {
+    fn from(n: SvelteInDirective) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for SvelteKeyBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5805,6 +6642,56 @@ impl From<SvelteKeyOpeningBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for SvelteLiteral {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_LITERAL as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_LITERAL
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteLiteral")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("SvelteLiteral").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteLiteral> for SyntaxNode {
+    fn from(n: SvelteLiteral) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteLiteral> for SyntaxElement {
+    fn from(n: SvelteLiteral) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for SvelteName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5852,6 +6739,54 @@ impl From<SvelteName> for SyntaxNode {
 }
 impl From<SvelteName> for SyntaxElement {
     fn from(n: SvelteName) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteOutDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_OUT_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_OUT_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteOutDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteOutDirective")
+                .field("out_token", &support::DebugSyntaxResult(self.out_token()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteOutDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteOutDirective> for SyntaxNode {
+    fn from(n: SvelteOutDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteOutDirective> for SyntaxElement {
+    fn from(n: SvelteOutDirective) -> Self {
         n.syntax.into()
     }
 }
@@ -6189,6 +7124,156 @@ impl From<SvelteSquareDestructuredName> for SyntaxNode {
 }
 impl From<SvelteSquareDestructuredName> for SyntaxElement {
     fn from(n: SvelteSquareDestructuredName) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteStyleDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_STYLE_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_STYLE_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteStyleDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteStyleDirective")
+                .field(
+                    "style_token",
+                    &support::DebugSyntaxResult(self.style_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteStyleDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteStyleDirective> for SyntaxNode {
+    fn from(n: SvelteStyleDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteStyleDirective> for SyntaxElement {
+    fn from(n: SvelteStyleDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteTransitionDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_TRANSITION_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_TRANSITION_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteTransitionDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteTransitionDirective")
+                .field(
+                    "transition_token",
+                    &support::DebugSyntaxResult(self.transition_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteTransitionDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteTransitionDirective> for SyntaxNode {
+    fn from(n: SvelteTransitionDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteTransitionDirective> for SyntaxElement {
+    fn from(n: SvelteTransitionDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteUseDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_USE_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_USE_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteUseDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteUseDirective")
+                .field("use_token", &support::DebugSyntaxResult(self.use_token()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteUseDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteUseDirective> for SyntaxNode {
+    fn from(n: SvelteUseDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteUseDirective> for SyntaxElement {
+    fn from(n: SvelteUseDirective) -> Self {
         n.syntax.into()
     }
 }
@@ -6698,7 +7783,8 @@ impl From<SvelteAttachAttribute> for AnyHtmlAttribute {
 }
 impl AstNode for AnyHtmlAttribute {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyVueDirective::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnySvelteDirective::KIND_SET
+        .union(AnyVueDirective::KIND_SET)
         .union(HtmlAttribute::KIND_SET)
         .union(HtmlBogusAttribute::KIND_SET)
         .union(HtmlDoubleTextExpression::KIND_SET)
@@ -6711,6 +7797,7 @@ impl AstNode for AnyHtmlAttribute {
             | HTML_DOUBLE_TEXT_EXPRESSION
             | HTML_SINGLE_TEXT_EXPRESSION
             | SVELTE_ATTACH_ATTRIBUTE => true,
+            k if AnySvelteDirective::can_cast(k) => true,
             k if AnyVueDirective::can_cast(k) => true,
             _ => false,
         }
@@ -6729,6 +7816,12 @@ impl AstNode for AnyHtmlAttribute {
                 Self::SvelteAttachAttribute(SvelteAttachAttribute { syntax })
             }
             _ => {
+                let syntax = match AnySvelteDirective::try_cast(syntax) {
+                    Ok(any_svelte_directive) => {
+                        return Some(Self::AnySvelteDirective(any_svelte_directive));
+                    }
+                    Err(syntax) => syntax,
+                };
                 if let Some(any_vue_directive) = AnyVueDirective::cast(syntax) {
                     return Some(Self::AnyVueDirective(any_vue_directive));
                 }
@@ -6744,6 +7837,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlDoubleTextExpression(it) => it.syntax(),
             Self::HtmlSingleTextExpression(it) => it.syntax(),
             Self::SvelteAttachAttribute(it) => it.syntax(),
+            Self::AnySvelteDirective(it) => it.syntax(),
             Self::AnyVueDirective(it) => it.syntax(),
         }
     }
@@ -6754,6 +7848,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlDoubleTextExpression(it) => it.into_syntax(),
             Self::HtmlSingleTextExpression(it) => it.into_syntax(),
             Self::SvelteAttachAttribute(it) => it.into_syntax(),
+            Self::AnySvelteDirective(it) => it.into_syntax(),
             Self::AnyVueDirective(it) => it.into_syntax(),
         }
     }
@@ -6761,6 +7856,7 @@ impl AstNode for AnyHtmlAttribute {
 impl std::fmt::Debug for AnyHtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AnySvelteDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::AnyVueDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusAttribute(it) => std::fmt::Debug::fmt(it, f),
@@ -6773,6 +7869,7 @@ impl std::fmt::Debug for AnyHtmlAttribute {
 impl From<AnyHtmlAttribute> for SyntaxNode {
     fn from(n: AnyHtmlAttribute) -> Self {
         match n {
+            AnyHtmlAttribute::AnySvelteDirective(it) => it.into_syntax(),
             AnyHtmlAttribute::AnyVueDirective(it) => it.into_syntax(),
             AnyHtmlAttribute::HtmlAttribute(it) => it.into_syntax(),
             AnyHtmlAttribute::HtmlBogusAttribute(it) => it.into_syntax(),
@@ -7253,6 +8350,65 @@ impl From<AnySvelteBindingAssignmentBinding> for SyntaxElement {
         node.into()
     }
 }
+impl From<SvelteLiteral> for AnySvelteBindingProperty {
+    fn from(node: SvelteLiteral) -> Self {
+        Self::SvelteLiteral(node)
+    }
+}
+impl From<SvelteName> for AnySvelteBindingProperty {
+    fn from(node: SvelteName) -> Self {
+        Self::SvelteName(node)
+    }
+}
+impl AstNode for AnySvelteBindingProperty {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SvelteLiteral::KIND_SET.union(SvelteName::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, SVELTE_LITERAL | SVELTE_NAME)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SVELTE_LITERAL => Self::SvelteLiteral(SvelteLiteral { syntax }),
+            SVELTE_NAME => Self::SvelteName(SvelteName { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::SvelteLiteral(it) => it.syntax(),
+            Self::SvelteName(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::SvelteLiteral(it) => it.into_syntax(),
+            Self::SvelteName(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnySvelteBindingProperty {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::SvelteLiteral(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteName(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnySvelteBindingProperty> for SyntaxNode {
+    fn from(n: AnySvelteBindingProperty) -> Self {
+        match n {
+            AnySvelteBindingProperty::SvelteLiteral(it) => it.into_syntax(),
+            AnySvelteBindingProperty::SvelteName(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnySvelteBindingProperty> for SyntaxElement {
+    fn from(n: AnySvelteBindingProperty) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<SvelteAwaitBlock> for AnySvelteBlock {
     fn from(node: SvelteAwaitBlock) -> Self {
         Self::SvelteAwaitBlock(node)
@@ -7538,6 +8694,146 @@ impl From<AnySvelteDestructuredName> for SyntaxNode {
 }
 impl From<AnySvelteDestructuredName> for SyntaxElement {
     fn from(n: AnySvelteDestructuredName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<SvelteAnimateDirective> for AnySvelteDirective {
+    fn from(node: SvelteAnimateDirective) -> Self {
+        Self::SvelteAnimateDirective(node)
+    }
+}
+impl From<SvelteBindDirective> for AnySvelteDirective {
+    fn from(node: SvelteBindDirective) -> Self {
+        Self::SvelteBindDirective(node)
+    }
+}
+impl From<SvelteClassDirective> for AnySvelteDirective {
+    fn from(node: SvelteClassDirective) -> Self {
+        Self::SvelteClassDirective(node)
+    }
+}
+impl From<SvelteInDirective> for AnySvelteDirective {
+    fn from(node: SvelteInDirective) -> Self {
+        Self::SvelteInDirective(node)
+    }
+}
+impl From<SvelteOutDirective> for AnySvelteDirective {
+    fn from(node: SvelteOutDirective) -> Self {
+        Self::SvelteOutDirective(node)
+    }
+}
+impl From<SvelteStyleDirective> for AnySvelteDirective {
+    fn from(node: SvelteStyleDirective) -> Self {
+        Self::SvelteStyleDirective(node)
+    }
+}
+impl From<SvelteTransitionDirective> for AnySvelteDirective {
+    fn from(node: SvelteTransitionDirective) -> Self {
+        Self::SvelteTransitionDirective(node)
+    }
+}
+impl From<SvelteUseDirective> for AnySvelteDirective {
+    fn from(node: SvelteUseDirective) -> Self {
+        Self::SvelteUseDirective(node)
+    }
+}
+impl AstNode for AnySvelteDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SvelteAnimateDirective::KIND_SET
+        .union(SvelteBindDirective::KIND_SET)
+        .union(SvelteClassDirective::KIND_SET)
+        .union(SvelteInDirective::KIND_SET)
+        .union(SvelteOutDirective::KIND_SET)
+        .union(SvelteStyleDirective::KIND_SET)
+        .union(SvelteTransitionDirective::KIND_SET)
+        .union(SvelteUseDirective::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            SVELTE_ANIMATE_DIRECTIVE
+                | SVELTE_BIND_DIRECTIVE
+                | SVELTE_CLASS_DIRECTIVE
+                | SVELTE_IN_DIRECTIVE
+                | SVELTE_OUT_DIRECTIVE
+                | SVELTE_STYLE_DIRECTIVE
+                | SVELTE_TRANSITION_DIRECTIVE
+                | SVELTE_USE_DIRECTIVE
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SVELTE_ANIMATE_DIRECTIVE => {
+                Self::SvelteAnimateDirective(SvelteAnimateDirective { syntax })
+            }
+            SVELTE_BIND_DIRECTIVE => Self::SvelteBindDirective(SvelteBindDirective { syntax }),
+            SVELTE_CLASS_DIRECTIVE => Self::SvelteClassDirective(SvelteClassDirective { syntax }),
+            SVELTE_IN_DIRECTIVE => Self::SvelteInDirective(SvelteInDirective { syntax }),
+            SVELTE_OUT_DIRECTIVE => Self::SvelteOutDirective(SvelteOutDirective { syntax }),
+            SVELTE_STYLE_DIRECTIVE => Self::SvelteStyleDirective(SvelteStyleDirective { syntax }),
+            SVELTE_TRANSITION_DIRECTIVE => {
+                Self::SvelteTransitionDirective(SvelteTransitionDirective { syntax })
+            }
+            SVELTE_USE_DIRECTIVE => Self::SvelteUseDirective(SvelteUseDirective { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::SvelteAnimateDirective(it) => it.syntax(),
+            Self::SvelteBindDirective(it) => it.syntax(),
+            Self::SvelteClassDirective(it) => it.syntax(),
+            Self::SvelteInDirective(it) => it.syntax(),
+            Self::SvelteOutDirective(it) => it.syntax(),
+            Self::SvelteStyleDirective(it) => it.syntax(),
+            Self::SvelteTransitionDirective(it) => it.syntax(),
+            Self::SvelteUseDirective(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::SvelteAnimateDirective(it) => it.into_syntax(),
+            Self::SvelteBindDirective(it) => it.into_syntax(),
+            Self::SvelteClassDirective(it) => it.into_syntax(),
+            Self::SvelteInDirective(it) => it.into_syntax(),
+            Self::SvelteOutDirective(it) => it.into_syntax(),
+            Self::SvelteStyleDirective(it) => it.into_syntax(),
+            Self::SvelteTransitionDirective(it) => it.into_syntax(),
+            Self::SvelteUseDirective(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnySvelteDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::SvelteAnimateDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteBindDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteClassDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteInDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteOutDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteStyleDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteTransitionDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteUseDirective(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnySvelteDirective> for SyntaxNode {
+    fn from(n: AnySvelteDirective) -> Self {
+        match n {
+            AnySvelteDirective::SvelteAnimateDirective(it) => it.into_syntax(),
+            AnySvelteDirective::SvelteBindDirective(it) => it.into_syntax(),
+            AnySvelteDirective::SvelteClassDirective(it) => it.into_syntax(),
+            AnySvelteDirective::SvelteInDirective(it) => it.into_syntax(),
+            AnySvelteDirective::SvelteOutDirective(it) => it.into_syntax(),
+            AnySvelteDirective::SvelteStyleDirective(it) => it.into_syntax(),
+            AnySvelteDirective::SvelteTransitionDirective(it) => it.into_syntax(),
+            AnySvelteDirective::SvelteUseDirective(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnySvelteDirective> for SyntaxElement {
+    fn from(n: AnySvelteDirective) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -7841,6 +9137,11 @@ impl std::fmt::Display for AnySvelteBindingAssignmentBinding {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnySvelteBindingProperty {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnySvelteBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -7852,6 +9153,11 @@ impl std::fmt::Display for AnySvelteBlockItem {
     }
 }
 impl std::fmt::Display for AnySvelteDestructuredName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnySvelteDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -7966,6 +9272,11 @@ impl std::fmt::Display for HtmlTextExpression {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for SvelteAnimateDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for SvelteAttachAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -8006,6 +9317,16 @@ impl std::fmt::Display for SvelteAwaitThenClause {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for SvelteBindDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteClassDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for SvelteConstBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -8017,6 +9338,16 @@ impl std::fmt::Display for SvelteCurlyDestructuredName {
     }
 }
 impl std::fmt::Display for SvelteDebugBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteDirectiveModifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteDirectiveValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -8086,6 +9417,11 @@ impl std::fmt::Display for SvelteIfOpeningBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for SvelteInDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for SvelteKeyBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -8101,7 +9437,17 @@ impl std::fmt::Display for SvelteKeyOpeningBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for SvelteLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for SvelteName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteOutDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -8132,6 +9478,21 @@ impl std::fmt::Display for SvelteSnippetOpeningBlock {
     }
 }
 impl std::fmt::Display for SvelteSquareDestructuredName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteStyleDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteTransitionDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteUseDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -9031,6 +10392,88 @@ impl IntoIterator for SvelteBindingList {
 impl IntoIterator for &SvelteBindingList {
     type Item = SyntaxResult<SvelteName>;
     type IntoIter = AstSeparatedListNodesIterator<Language, SvelteName>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct SvelteDirectiveModifierList {
+    syntax_list: SyntaxList,
+}
+impl SvelteDirectiveModifierList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for SvelteDirectiveModifierList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_DIRECTIVE_MODIFIER_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_DIRECTIVE_MODIFIER_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for SvelteDirectiveModifierList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for SvelteDirectiveModifierList {
+    type Language = Language;
+    type Node = SvelteDirectiveModifier;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for SvelteDirectiveModifierList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("SvelteDirectiveModifierList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &SvelteDirectiveModifierList {
+    type Item = SvelteDirectiveModifier;
+    type IntoIter = AstNodeListIterator<Language, SvelteDirectiveModifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for SvelteDirectiveModifierList {
+    type Item = SvelteDirectiveModifier;
+    type IntoIter = AstNodeListIterator<Language, SvelteDirectiveModifier>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

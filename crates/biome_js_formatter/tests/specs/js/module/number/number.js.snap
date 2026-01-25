@@ -33,9 +33,11 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
 1.23e4;
 1000e3; // FIXME handle number with scientific notation #1294
+
 ```

@@ -40,12 +40,12 @@ pub use analyzer::{
     LinterConfiguration, RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration,
     RuleWithFixOptions, RuleWithOptions, Rules, linter_configuration,
 };
+use biome_analyze::ExtendedConfigurationProvider;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{KeyValuePair, markup};
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValidator, DeserializableValue,
-    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Deserialized, Text,
-    TextRange,
+    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Text, TextRange,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
@@ -673,16 +673,6 @@ impl biome_deserialize::Deserializable for FilesConfiguration {
     }
 }
 
-#[derive(Debug)]
-pub struct ConfigurationPayload {
-    /// The result of the deserialization
-    pub deserialized: Deserialized<Configuration>,
-    /// The path of where the `biome.json` or `biome.jsonc` file was found. This contains the file name.
-    pub configuration_file_path: Utf8PathBuf,
-    /// The base path where the external configuration in a package should be resolved from
-    pub external_resolution_base_path: Utf8PathBuf,
-}
-
 #[derive(Debug, Default, PartialEq, Clone, Eq, Hash)]
 pub enum ConfigurationPathHint {
     /// The default mode, not having a configuration file is not an error.
@@ -811,6 +801,17 @@ impl ConfigurationSource {
         self.source.as_ref().and_then(|source| {
             let (_, path) = source.clone();
             path.map(|p| p.as_path().to_path_buf())
+        })
+    }
+}
+
+impl ExtendedConfigurationProvider for ConfigurationSource {
+    fn any_extended_starts_with_catch_all(&self) -> bool {
+        self.extended_configurations().any(|c| {
+            c.files
+                .as_ref()
+                .and_then(|files| files.includes.as_deref())
+                .is_some_and(|globs| globs.first().is_some_and(|glob| glob.as_str() == "**"))
         })
     }
 }

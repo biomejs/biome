@@ -45,6 +45,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -61,6 +62,7 @@ declare function test(): string;
 export declare function abcd(): string;
 
 declare let a;
+
 ```
 
 ## Output 1
@@ -81,6 +83,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -97,4 +100,5 @@ declare function test(): string
 export declare function abcd(): string
 
 declare let a
+
 ```

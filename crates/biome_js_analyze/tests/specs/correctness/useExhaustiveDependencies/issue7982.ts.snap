@@ -1,0 +1,132 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: issue7982.ts
+---
+# Input
+```ts
+import { useState, useCallback } from "react";
+
+function App() {
+    const [count, setCount] = useState(0);
+
+    // All three of these should generate a diagnostic.
+
+    const correctError = useCallback(() => {
+        return count * 2;
+    }, []);
+
+    // Reported as a bug for not generating a diagnostic.
+    const falseNegative = useCallback(
+        (() => {
+            return count * 2;
+        }) as Function,
+        [],
+    );
+
+    const recommendedWorkaround = useCallback(() => {
+        return count * 2;
+    }, []) as Function;
+}
+
+```
+
+# Diagnostics
+```
+issue7982.ts:8:26 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on count.
+  
+     6 │     // All three of these should generate a diagnostic.
+     7 │ 
+   > 8 │     const correctError = useCallback(() => {
+       │                          ^^^^^^^^^^^
+     9 │         return count * 2;
+    10 │     }, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+     8 │     const correctError = useCallback(() => {
+   > 9 │         return count * 2;
+       │                ^^^^^
+    10 │     }, []);
+    11 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    10 │ ····},·[count]);
+       │         +++++   
+
+```
+
+```
+issue7982.ts:13:27 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on count.
+  
+    12 │     // Reported as a bug for not generating a diagnostic.
+  > 13 │     const falseNegative = useCallback(
+       │                           ^^^^^^^^^^^
+    14 │         (() => {
+    15 │             return count * 2;
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    13 │     const falseNegative = useCallback(
+    14 │         (() => {
+  > 15 │             return count * 2;
+       │                    ^^^^^
+    16 │         }) as Function,
+    17 │         [],
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    17 │ ········[count],
+       │          +++++  
+
+```
+
+```
+issue7982.ts:20:35 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on count.
+  
+    18 │     );
+    19 │ 
+  > 20 │     const recommendedWorkaround = useCallback(() => {
+       │                                   ^^^^^^^^^^^
+    21 │         return count * 2;
+    22 │     }, []) as Function;
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    20 │     const recommendedWorkaround = useCallback(() => {
+  > 21 │         return count * 2;
+       │                ^^^^^
+    22 │     }, []) as Function;
+    23 │ }
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    22 │ ····},·[count])·as·Function;
+       │         +++++               
+
+```

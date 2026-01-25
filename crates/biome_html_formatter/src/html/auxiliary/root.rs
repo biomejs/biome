@@ -27,7 +27,11 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
 
         html.format().fmt(f)?;
 
-        write!(f, [hard_line_break(), format_removed(&eof_token?)])?;
+        if f.options().trailing_newline().value() {
+            write!(f, [hard_line_break()])?;
+        }
+
+        write!(f, [format_removed(&eof_token?)])?;
 
         Ok(())
     }

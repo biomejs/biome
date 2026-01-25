@@ -4,7 +4,6 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, Scope, SemanticModel, SemanticScopeExtensions};
 use biome_js_syntax::*;
@@ -104,6 +103,12 @@ impl Rule for UseConst {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let declaration = ctx.query();
         let model = ctx.model();
+
+        // `let` declarations inside snippets are allowed
+        let file_source = ctx.source_type::<JsFileSource>();
+        if file_source.is_embedded_source() && declaration.is_let() {
+            return None;
+        }
 
         // Not a let declaration or inside a for-loop init
         if !declaration.is_let() || declaration.parent::<JsForStatement>().is_some() {

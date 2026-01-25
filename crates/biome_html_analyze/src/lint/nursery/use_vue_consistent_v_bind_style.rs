@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueConsistentVBindStyle {
-        version: "next",
+        version: "2.3.11",
         name: "useVueConsistentVBindStyle",
         language: "html",
         recommended: true,
