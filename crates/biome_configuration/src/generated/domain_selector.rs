@@ -77,6 +77,7 @@ static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("correctness", "noSolidDestructuredProps"),
         RuleFilter::Rule("nursery", "noDuplicatedSpreadProps"),
+        RuleFilter::Rule("nursery", "noSolidEarlyReturn"),
         RuleFilter::Rule("performance", "useSolidForComponent"),
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
     ]

@@ -5432,6 +5432,7 @@ export interface RuleWithNoShadowOptions {
 	options?: NoShadowOptions;
 }
 export interface RuleWithNoSolidEarlyReturnOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoSolidEarlyReturnOptions;
 }
