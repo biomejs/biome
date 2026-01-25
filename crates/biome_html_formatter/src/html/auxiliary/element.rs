@@ -135,7 +135,7 @@ impl FormatHtmlElement {
 
         let tag_name = tag_name
             .trim_trivia()
-            .map(|t| t.value_token())
+            .map(|t| t.name_value_token())
             .transpose()?;
 
         let should_be_verbatim = HTML_VERBATIM_TAGS.iter().any(|tag| {

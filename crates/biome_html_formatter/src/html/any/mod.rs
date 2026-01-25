@@ -4,4 +4,5 @@ pub(crate) mod attribute;
 pub(crate) mod attribute_initializer;
 pub(crate) mod content;
 pub(crate) mod element;
+pub(crate) mod tag_name;
 pub(crate) mod text_expression;

@@ -62,7 +62,7 @@ impl Rule for UseValidLang {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let element_text = node.name().ok()?.value_token().ok()?;
+        let element_text = node.name().ok()?.name_value_token().ok()?;
         let source_type = ctx.source_type::<HtmlFileSource>();
         let matches_tag = if source_type.is_html() {
             element_text.text_trimmed().eq_ignore_ascii_case("html")

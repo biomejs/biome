@@ -3,7 +3,7 @@ use crate::{
     utils::{formatters::FormatTokenAsLowercase, metadata::is_canonical_html_attribute},
 };
 use biome_formatter::{FormatRuleWithOptions, write};
-use biome_html_syntax::{HtmlAttributeName, HtmlAttributeNameFields, HtmlTagName};
+use biome_html_syntax::{AnyHtmlTagName, HtmlAttributeName, HtmlAttributeNameFields};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlAttributeName {
@@ -11,7 +11,7 @@ pub(crate) struct FormatHtmlAttributeName {
     pub is_canonical_html_element: bool,
 
     /// The name of the tag this attribute belongs to.
-    pub tag_name: Option<HtmlTagName>,
+    pub tag_name: Option<AnyHtmlTagName>,
 
     /// Whether it should be formatted in compact mode. In compact mode, all tokens and children
     /// are removed
@@ -23,7 +23,7 @@ pub(crate) struct FormatHtmlAttributeNameOptions {
     pub is_canonical_html_element: bool,
 
     /// The name of the tag this attribute belongs to.
-    pub tag_name: Option<HtmlTagName>,
+    pub tag_name: Option<AnyHtmlTagName>,
 
     /// Whether it should be formatted in compact mode. In compact mode, all tokens and children
     /// are removed

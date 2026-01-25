@@ -10,7 +10,7 @@ impl FormatNodeRule<HtmlTagName> for FormatHtmlTagName {
     fn fmt_fields(&self, node: &HtmlTagName, f: &mut HtmlFormatter) -> FormatResult<()> {
         let HtmlTagNameFields { value_token } = node.as_fields();
 
-        if should_lowercase_html_tag(f, node) {
+        if should_lowercase_html_tag(f, &node.clone().into()) {
             write!(f, [FormatTokenAsLowercase::from(value_token?)])
         } else {
             write![f, [value_token.format()]]
