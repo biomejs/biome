@@ -1,5 +1,6 @@
-use crate::{AnyJsonValue, JsonMember, JsonMemberName, JsonSyntaxToken, inner_string_text};
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, TokenText};
+use crate::{
+    AnyJsonMemberName, AnyJsonValue, JsonMember, JsonMemberName, JsonSyntaxToken, inner_string_text,
+};
 use biome_rowan::{AstSeparatedList, SyntaxResult, TokenText};
 
 impl JsonMemberName {

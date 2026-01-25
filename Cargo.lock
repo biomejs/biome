@@ -1137,8 +1137,6 @@ dependencies = [
  "mimalloc",
  "regex",
  "rustc-hash 2.1.1",
- "serde",
- "serde_json",
  "tests_macros",
  "tikv-jemallocator",
 ]
