@@ -4,6 +4,7 @@ Profile-*.json
 .vscode/*
 .idea
 .vs
+.serena
 .zed/*
 # Release artifacts
 **/target
