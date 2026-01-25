@@ -1,0 +1,125 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@utility px-* {
+	padding-inline: --value(--padding-inline-*);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
+                name: TwFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@9..11 "px" [] [],
+                    },
+                    minus_token: MINUS@11..12 "-" [] [],
+                    star_token: STAR@12..14 "*" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@14..15 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@15..31 "padding-inline" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@31..33 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@33..40 "--value" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@40..41 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            TwValueThemeReference {
+                                                                reference: CssDashedIdentifier {
+                                                                    value_token: IDENT@41..57 "--padding-inline" [] [],
+                                                                },
+                                                                minus_token: MINUS@57..58 "-" [] [],
+                                                                star_token: STAR@58..59 "*" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@59..60 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@60..61 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@61..63 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@63..64 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..64
+  0: (empty)
+  1: CSS_RULE_LIST@0..63
+    0: CSS_AT_RULE@0..63
+      0: AT@0..1 "@" [] []
+      1: TW_UTILITY_AT_RULE@1..63
+        0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
+        1: TW_FUNCTIONAL_UTILITY_NAME@9..14
+          0: CSS_IDENTIFIER@9..11
+            0: IDENT@9..11 "px" [] []
+          1: MINUS@11..12 "-" [] []
+          2: STAR@12..14 "*" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@14..63
+          0: L_CURLY@14..15 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@15..61
+            0: CSS_DECLARATION_WITH_SEMICOLON@15..61
+              0: CSS_DECLARATION@15..60
+                0: CSS_GENERIC_PROPERTY@15..60
+                  0: CSS_IDENTIFIER@15..31
+                    0: IDENT@15..31 "padding-inline" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@31..33 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@33..60
+                    0: CSS_FUNCTION@33..60
+                      0: CSS_IDENTIFIER@33..40
+                        0: IDENT@33..40 "--value" [] []
+                      1: L_PAREN@40..41 "(" [] []
+                      2: CSS_PARAMETER_LIST@41..59
+                        0: CSS_PARAMETER@41..59
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@41..59
+                            0: CSS_COMPONENT_VALUE_LIST@41..59
+                              0: TW_VALUE_THEME_REFERENCE@41..59
+                                0: CSS_DASHED_IDENTIFIER@41..57
+                                  0: IDENT@41..57 "--padding-inline" [] []
+                                1: MINUS@57..58 "-" [] []
+                                2: STAR@58..59 "*" [] []
+                      3: R_PAREN@59..60 ")" [] []
+                1: (empty)
+              1: SEMICOLON@60..61 ";" [] []
+          2: R_CURLY@61..63 "}" [Newline("\n")] []
+  2: EOF@63..64 "" [Newline("\n")] []
+
+```

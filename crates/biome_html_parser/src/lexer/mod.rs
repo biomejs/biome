@@ -155,6 +155,42 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consume a token in the [HtmlLexContext::VueDirectiveArgument] context.
+    fn consume_token_vue_directive_argument(&mut self) -> HtmlSyntaxKind {
+        let start = self.text_position();
+        let mut brackets_stack = 0;
+        let mut quotes_seen = QuotesSeen::new();
+
+        while let Some(byte) = self.current_byte() {
+            quotes_seen.check_byte(byte);
+            let char = biome_unicode_table::lookup_byte(byte);
+            use biome_unicode_table::Dispatch::*;
+
+            if quotes_seen.is_empty() {
+                match char {
+                    BTO => {
+                        brackets_stack += 1;
+                    }
+                    BTC => {
+                        if brackets_stack == 0 {
+                            break;
+                        }
+                        brackets_stack -= 1;
+                    }
+                    _ => {}
+                }
+            }
+
+            self.advance_byte_or_char(byte);
+        }
+
+        if self.text_position() != start {
+            HTML_LITERAL
+        } else {
+            ERROR_TOKEN
+        }
+    }
+
     /// Consume a token in the [HtmlLexContext::Regular] context.
     fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
@@ -1078,6 +1114,9 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::Regular => self.consume_token(current),
                     HtmlLexContext::InsideTag => self.consume_token_inside_tag(current),
                     HtmlLexContext::InsideTagVue => self.consume_token_inside_tag_vue(current),
+                    HtmlLexContext::VueDirectiveArgument => {
+                        self.consume_token_vue_directive_argument()
+                    }
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {

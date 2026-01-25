@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 432
 expression: redactor(content)
 ---
 ## `index.css`
@@ -106,8 +107,10 @@ reporter/violations ━━━━━━━━━━━━━━━━━━━━
   
   Rule Name                                        Diagnostics
   
-  lint/correctness/noUnknownFunction               14 (2 errors, 12 warnings)
-  lint/suspicious/noImplicitAnyLet                 16 (12 errors, 4 warnings)
+  lint/correctness/noUnusedVariables               12 (12 warnings)
+  lint/correctness/noUnknownFunction               2 (2 errors)
+  lint/suspicious/noImplicitAnyLet                 12 (12 errors)
+  lint/correctness/noUnusedImports                 4 (4 warnings)
   lint/suspicious/noDoubleEquals                   8 (8 errors)
   assist/source/organizeImports                    2 (2 errors)
   lint/suspicious/noRedeclare                      12 (12 errors)

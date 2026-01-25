@@ -798,6 +798,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "insta",
+ "phf",
  "schemars",
  "serde",
  "tests_macros",
@@ -4037,6 +4038,7 @@ checksum = "c1562dc717473dbaa4c1f85a36410e03c047b2e7df7f45ee938fbef64ae7fadf"
 dependencies = [
  "phf_macros",
  "phf_shared",
+ "serde",
 ]
 
 [[package]]

@@ -133,28 +133,28 @@ invalid.vue:17:18 lint/nursery/useVueValidVOn ━━━━━━━━━━━�
   
   i Allowed modifiers:
   
-  - stop
-  - prevent
-  - capture
-  - self
-  - ctrl
-  - shift
-  - alt
-  - meta
+  - delete
   - native
-  - once
+  - capture
+  - down
+  - self
+  - meta
   - left
-  - right
-  - middle
-  - passive
-  - esc
-  - tab
+  - stop
   - enter
   - space
   - up
-  - down
-  - delete
+  - once
+  - middle
+  - ctrl
+  - alt
+  - tab
   - exact
+  - passive
+  - prevent
+  - esc
+  - right
+  - shift
   
 
 ```
@@ -176,28 +176,28 @@ invalid.vue:20:15 lint/nursery/useVueValidVOn ━━━━━━━━━━━�
   
   i Allowed modifiers:
   
-  - stop
-  - prevent
-  - capture
-  - self
-  - ctrl
-  - shift
-  - alt
-  - meta
+  - delete
   - native
-  - once
+  - capture
+  - down
+  - self
+  - meta
   - left
-  - right
-  - middle
-  - passive
-  - esc
-  - tab
+  - stop
   - enter
   - space
   - up
-  - down
-  - delete
+  - once
+  - middle
+  - ctrl
+  - alt
+  - tab
   - exact
+  - passive
+  - prevent
+  - esc
+  - right
+  - shift
   
 
 ```
@@ -219,28 +219,28 @@ invalid.vue:23:17 lint/nursery/useVueValidVOn ━━━━━━━━━━━�
   
   i Allowed modifiers:
   
-  - stop
-  - prevent
-  - capture
-  - self
-  - ctrl
-  - shift
-  - alt
-  - meta
+  - delete
   - native
-  - once
+  - capture
+  - down
+  - self
+  - meta
   - left
-  - right
-  - middle
-  - passive
-  - esc
-  - tab
+  - stop
   - enter
   - space
   - up
-  - down
-  - delete
+  - once
+  - middle
+  - ctrl
+  - alt
+  - tab
   - exact
+  - passive
+  - prevent
+  - esc
+  - right
+  - shift
   
 
 ```
@@ -262,28 +262,28 @@ invalid.vue:26:18 lint/nursery/useVueValidVOn ━━━━━━━━━━━�
   
   i Allowed modifiers:
   
-  - stop
-  - prevent
-  - capture
-  - self
-  - ctrl
-  - shift
-  - alt
-  - meta
+  - delete
   - native
-  - once
+  - capture
+  - down
+  - self
+  - meta
   - left
-  - right
-  - middle
-  - passive
-  - esc
-  - tab
+  - stop
   - enter
   - space
   - up
-  - down
-  - delete
+  - once
+  - middle
+  - ctrl
+  - alt
+  - tab
   - exact
+  - passive
+  - prevent
+  - esc
+  - right
+  - shift
   
 
 ```
@@ -305,28 +305,28 @@ invalid.vue:29:18 lint/nursery/useVueValidVOn ━━━━━━━━━━━�
   
   i Allowed modifiers:
   
-  - stop
-  - prevent
-  - capture
-  - self
-  - ctrl
-  - shift
-  - alt
-  - meta
+  - delete
   - native
-  - once
+  - capture
+  - down
+  - self
+  - meta
   - left
-  - right
-  - middle
-  - passive
-  - esc
-  - tab
+  - stop
   - enter
   - space
   - up
-  - down
-  - delete
+  - once
+  - middle
+  - ctrl
+  - alt
+  - tab
   - exact
+  - passive
+  - prevent
+  - esc
+  - right
+  - shift
   
 
 ```
@@ -348,28 +348,28 @@ invalid.vue:32:22 lint/nursery/useVueValidVOn ━━━━━━━━━━━�
   
   i Allowed modifiers:
   
-  - stop
-  - prevent
-  - capture
-  - self
-  - ctrl
-  - shift
-  - alt
-  - meta
+  - delete
   - native
-  - once
+  - capture
+  - down
+  - self
+  - meta
   - left
-  - right
-  - middle
-  - passive
-  - esc
-  - tab
+  - stop
   - enter
   - space
   - up
-  - down
-  - delete
+  - once
+  - middle
+  - ctrl
+  - alt
+  - tab
   - exact
+  - passive
+  - prevent
+  - esc
+  - right
+  - shift
   
 
 ```

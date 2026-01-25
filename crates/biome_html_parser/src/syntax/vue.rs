@@ -161,7 +161,7 @@ fn parse_vue_dynamic_argument(p: &mut HtmlParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump_with_context(T!['['], HtmlLexContext::InsideTagVue);
+    p.bump_with_context(T!['['], HtmlLexContext::VueDirectiveArgument);
     p.expect_with_context(HTML_LITERAL, HtmlLexContext::InsideTagVue);
     p.expect_with_context(T![']'], HtmlLexContext::InsideTagVue);
 

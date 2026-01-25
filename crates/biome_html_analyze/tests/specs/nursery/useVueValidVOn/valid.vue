@@ -35,6 +35,11 @@
   <div @keydown.down="handler"></div>
   <div @keydown.left="handler"></div>
   <div @keydown.right="handler"></div>
+  <div @keydown.arrow-down="handler"></div>
+  <div @keydown.a="handler"></div>
+  <div @keydown.b="handler"></div>
+  <div @keydown.a.b.c="handler"></div>
+  <div @keydown.27="foo"></div>
 
   <!-- Combined modifiers -->
   <div @click.stop.prevent="foo"></div>
