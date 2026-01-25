@@ -8,18 +8,14 @@ expression: redactor(content)
 { "linter": { "enabled": true } }
 ```
 
-## `package.json`
+## `.eslintrc`
 
-```json
+```eslintrc
 {
-        "name": "foo",
-        "version": "0.0.0",
-        "eslintConfig": {
-            "rules": {
-                "eqeqeq": "warn"
-            }
+        "rules": {
+            "eol-last": "error",
+            "indent": ["error", 2],
         },
-        "eslintIgnore": ["/dist", "test", "!test/x/**"]
     }
 ```
 
@@ -30,18 +26,9 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
 
   i Configuration file can be updated.
   
-    1    │ - {·"linter":·{·"enabled":·true·}·}
-       1 │ + {
-       2 │ + → "linter":·{
-       3 │ + → → "enabled":·true,
-       4 │ + → → "rules":·{
-       5 │ + → → → "recommended":·false,
-       6 │ + → → → "suspicious":·{·"noDoubleEquals":·"warn"·}
-       7 │ + → → },
-       8 │ + → → "includes":·["**",·"dist",·"**/test",·"!test/x/**"]
-       9 │ + → }
-      10 │ + }
-      11 │ + 
+    1   │ - {·"linter":·{·"enabled":·true·}·}
+      1 │ + {·"linter":·{·"enabled":·true,·"rules":·{·"recommended":·false·}·}·}
+      2 │ + 
   
 
 ```
@@ -49,11 +36,22 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
 ```block
 migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i 1 ESLint rules found
-    - 1 can be migrated to Biome's rules (run with --write to migrate)
-    - 100% (1) of your ESLint rules are fully covered by Biome
-      - 100% (1) via direct migration to Biome rules
+  i 2 ESLint rules found
+    - 2 are obsolete because of Biome's formatter
+    - 0 can be migrated to Biome's rules (run with --write to migrate)
+    - 100% (2) of your ESLint rules are fully covered by Biome
+      - 0% (0) via direct migration to Biome rules
   
+  
+  i Unsupported rules (0 incompatible with formatter, 1 made obsolete by the formatter, 1 covered by a formatter option, 0 not yet implemented, 0 unknown source):
+  
+  i These rules enforce behavior completely covered by the formatter (so you don't lose the functionality):
+  
+  - eol-last
+  
+  i These rules are covered by formatter options, but they require manual migration:
+  
+  - indent - Covered by Biome's indentWidth formatter option.
   
 
 ```
