@@ -396,7 +396,25 @@
 			"type": "boolean"
 		},
 		"BracketSpacing": { "type": "boolean" },
-		"CheckInputType": { "type": "string", "enum": ["off", "loose", "strict"] },
+		"CheckInputType": {
+			"oneOf": [
+				{
+					"description": "Don't check the input type",
+					"type": "string",
+					"const": "off"
+				},
+				{
+					"description": "Check the input type (case-insensitive)",
+					"type": "string",
+					"const": "loose"
+				},
+				{
+					"description": "Check the input type (case-sensitive)",
+					"type": "string",
+					"const": "strict"
+				}
+			]
+		},
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
