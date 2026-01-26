@@ -102,6 +102,8 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_CUSTOM_IDENTIFIER
                 | CSS_BOGUS_UNICODE_RANGE_VALUE
                 | CSS_BOGUS_SUPPORTS_CONDITION
+                | CSS_BOGUS_FUNCTION_PARAMETER
+                | CSS_BOGUS_TYPE
         )
     }
 

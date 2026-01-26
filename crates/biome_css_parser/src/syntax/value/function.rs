@@ -224,7 +224,7 @@ pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
     let param = if is_at_parenthesized(p) {
         parse_parenthesized_expression(p)
     } else if is_at_comma_separated_value(p) {
-        parse_coma_separated_value(p)
+        parse_comma_separated_value(p)
     } else {
         parse_list_of_component_values_expression(p)
     };
@@ -316,7 +316,7 @@ fn is_at_comma_separated_value(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-fn parse_coma_separated_value(p: &mut CssParser) -> ParsedSyntax {
+fn parse_comma_separated_value(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_comma_separated_value(p) {
         return Absent;
     }
