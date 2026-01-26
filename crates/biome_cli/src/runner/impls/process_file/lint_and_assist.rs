@@ -94,7 +94,6 @@ impl ProcessFile for LintAssistProcessFile {
             }
             if output != input {
                 changed = true;
-                dbg!(&output);
                 workspace_file.update_file(output)?;
                 input = workspace_file.input()?;
             }
