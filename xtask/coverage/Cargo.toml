@@ -16,7 +16,7 @@ biome_parser       = { workspace = true }
 biome_rowan        = { workspace = true }
 biome_string_case  = { workspace = true }
 camino             = { workspace = true }
-colored            = "3.0.0"
+colored            = "3.1.1"
 indicatif          = { version = "0.18.3", features = ["improved_unicode"] }
 pico-args          = { version = "0.5.0", features = ["eq-separator"] }
 regex              = { workspace = true }
