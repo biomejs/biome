@@ -18,8 +18,8 @@
     "react": "^19.2.3"
   },
   "devDependencies": {
-    "@types/node": "22.19.5",
-    "@types/react": "19.2.8",
+    "@types/node": "22.19.7",
+    "@types/react": "19.2.9",
     "typescript": "5.9.3"
   },
   "license": "MIT OR Apache-2.0"
