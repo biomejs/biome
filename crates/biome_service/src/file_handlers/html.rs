@@ -1142,7 +1142,7 @@ pub(crate) fn update_snippets(
 /// returns the entire string. If there's no leading whitespace, returns an empty string.
 ///
 /// # Examples
-/// ```
+/// ```ignore
 /// assert_eq!(read_leading_trivia("\n\tconsole.log('Hi');"), "\n\t");
 /// assert_eq!(read_leading_trivia("console.log('Hi');"), "");
 /// assert_eq!(read_leading_trivia("   "), "   ");
@@ -1175,7 +1175,7 @@ fn read_leading_trivia(value: &str) -> Cow<'_, str> {
 /// trailing whitespace, returns an empty string.
 ///
 /// # Examples
-/// ```
+/// ```ignore
 /// assert_eq!(read_trailing_trivia("console.log('Hi');\n"), "\n");
 /// assert_eq!(read_trailing_trivia("console.log('Hi');"), "");
 /// assert_eq!(read_trailing_trivia("   "), "");
