@@ -6,8 +6,7 @@
         "useInputName": {
           "level": "error",
           "options": {
-            "checkInputType": true,
-            "caseSensitiveInputType": true
+            "checkInputType": "strict"
           }
         }
       }

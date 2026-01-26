@@ -6937,13 +6937,9 @@ export type UseFindOptions = {};
 export type UseInlineScriptIdOptions = {};
 export interface UseInputNameOptions {
 	/**
-	 * Treat input type names as case-sensitive
-	 */
-	caseSensitiveInputType?: boolean;
-	/**
 	 * Check that the input type name follows the convention <mutationName>Input
 	 */
-	checkInputType?: boolean;
+	checkInputType?: CheckInputType;
 }
 export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
@@ -7396,6 +7392,7 @@ export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
  * The GraphQL description style to enforce.
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
+export type CheckInputType = "off" | "loose" | "strict";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
 export type VueDirectiveStyle2 = "shorthand" | "longhand";

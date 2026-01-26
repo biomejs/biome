@@ -6,7 +6,7 @@
         "useInputName": {
           "level": "error",
           "options": {
-            "checkInputType": false
+            "checkInputType": "off"
           }
         }
       }

@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
 #[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
@@ -6,24 +8,33 @@ use serde::{Deserialize, Serialize};
 pub struct UseInputNameOptions {
     /// Check that the input type name follows the convention <mutationName>Input
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
-    pub check_input_type: Option<bool>,
-
-    /// Treat input type names as case-sensitive
-    #[serde(skip_serializing_if = "Option::<_>::is_none")]
-    pub case_sensitive_input_type: Option<bool>,
+    pub check_input_type: Option<CheckInputType>,
 }
 
-impl UseInputNameOptions {
-    pub const DEFAULT_CHECK_INPUT_TYPE: bool = false;
-    pub const DEFAULT_CASE_SENSITIVE_INPUT_TYPE: bool = true;
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum CheckInputType {
+    /// Don't check the input type
+    #[default]
+    Off,
+    /// Check the input type (case-insensitive)
+    Loose,
+    /// Check the input type (case-sensitive)
+    Strict,
+}
 
-    pub fn check_input_type(&self) -> bool {
-        self.check_input_type
-            .unwrap_or(Self::DEFAULT_CHECK_INPUT_TYPE)
-    }
+impl FromStr for CheckInputType {
+    type Err = &'static str;
 
-    pub fn case_sensitive_input_type(&self) -> bool {
-        self.case_sensitive_input_type
-            .unwrap_or(Self::DEFAULT_CASE_SENSITIVE_INPUT_TYPE)
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "off" => Ok(Self::Off),
+            "loose" => Ok(Self::Loose),
+            "strict" => Ok(Self::Strict),
+            _ => Err("Value not supported, expected 'off', 'loose' or 'strict'"),
+        }
     }
 }

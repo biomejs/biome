@@ -396,6 +396,7 @@
 			"type": "boolean"
 		},
 		"BracketSpacing": { "type": "boolean" },
+		"CheckInputType": { "type": "string", "enum": ["off", "loose", "strict"] },
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -12860,13 +12861,9 @@
 		"UseInputNameOptions": {
 			"type": "object",
 			"properties": {
-				"caseSensitiveInputType": {
-					"description": "Treat input type names as case-sensitive",
-					"type": ["boolean", "null"]
-				},
 				"checkInputType": {
 					"description": "Check that the input type name follows the convention <mutationName>Input",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/$defs/CheckInputType" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

@@ -8,7 +8,7 @@ use biome_graphql_syntax::{
     GraphqlSyntaxToken,
 };
 use biome_rowan::{AstNode, TextRange};
-use biome_rule_options::use_input_name::UseInputNameOptions;
+use biome_rule_options::use_input_name::{CheckInputType, UseInputNameOptions};
 
 declare_lint_rule! {
     /// Require mutation argument to be always called "input"
@@ -37,15 +37,16 @@ declare_lint_rule! {
     ///
     /// ### `checkInputType`
     ///
-    /// When the option `checkInputType` is enabled, the input type requires to be called `<mutation name>Input`.
+    /// With the option `checkInputType` on, the input type name requires to be called `<mutation name>Input`.
+    /// This can either be "loose" (case-insensitive) or "strict" (case-sensitive).
     /// Using the name of the mutation in the input type name will make it easier to find the mutation that the input type belongs to.
     ///
-    /// Default `false`
+    /// Default `"off"`
     ///
     /// ```json,options
     /// {
     ///   "options": {
-    ///     "checkInputType": true
+    ///     "checkInputType": "loose"
     ///   }
     /// }
     /// ```
@@ -56,24 +57,42 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ### `caseSensitiveInputType`
-    ///
-    /// Treat input type names as case-sensitive.
-    ///
-    /// Default `true`
-    ///
-    /// ```json,options
-    /// {
-    ///   "options": {
-    ///     "checkInputType": true,
-    ///     "caseSensitiveInputType": false
-    ///   }
+    /// ```graphql,use_options
+    /// type Mutation {
+    ///   SetMessage(input: setMessageInput): String
     /// }
     /// ```
     ///
     /// ```graphql,use_options
     /// type Mutation {
+    ///   SetMessage(input: SetMessageInput): String
+    /// }
+    /// ```
+    ///
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "checkInputType": "strict"
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```graphql,expect_diagnostic,use_options
+    /// type Mutation {
+    ///   SetMessage(input: InputMessage): String
+    /// }
+    /// ```
+    ///
+    /// ```graphql,expect_diagnostic,use_options
+    /// type Mutation {
     ///   SetMessage(input: setMessageInput): String
+    /// }
+    /// ```
+    ///
+    /// ```graphql,use_options
+    /// type Mutation {
+    ///   SetMessage(input: SetMessageInput): String
     /// }
     /// ```
     ///
@@ -131,10 +150,10 @@ impl Rule for UseInputName {
                 ));
             }
 
-            let check_input_type = ctx.options().check_input_type();
-            if check_input_type {
-                let is_case_sensitive_input_type = ctx.options().case_sensitive_input_type();
-
+            let check_input_type = ctx.options().check_input_type;
+            if let Some(check_input_type) = check_input_type
+                && check_input_type != CheckInputType::Off
+            {
                 let any_type = argument.ty().ok()?;
 
                 let ty = find_input_type(any_type)?;
@@ -144,8 +163,8 @@ impl Rule for UseInputName {
                 let def_value_token = def_name.value_token().ok()?;
 
                 let valid_str = format!("{}Input", def_value_token.text_trimmed());
-                if (is_case_sensitive_input_type && ty_string != valid_str)
-                    || (!is_case_sensitive_input_type
+                if (check_input_type == CheckInputType::Strict && ty_string != valid_str)
+                    || (check_input_type == CheckInputType::Loose
                         && !ty_string.eq_ignore_ascii_case(&valid_str))
                 {
                     return Some(UseInputNameState::InvalidTypeName(
