@@ -919,6 +919,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusIfTest::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_IF_TEST_BOOLEAN_EXPR => {
+                    let $pattern =
+                        unsafe { $crate::CssBogusIfTestBooleanExpr::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_KEYFRAMES_ITEM => {
                     let $pattern = unsafe { $crate::CssBogusKeyframesItem::new_unchecked(node) };
                     $body
