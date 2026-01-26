@@ -21,7 +21,7 @@ type Mutation { SetMessage(input: CreateAMessageInput): String }
 ```
 invalid.graphql:4:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Input "record" should be named "input".
+  i Unexpected input name, expected the input name "record" to be named "input".
   
     3 │ # Input name not "input"
   > 4 │ type Mutation { SetMessage(record: String): String }
@@ -39,7 +39,7 @@ invalid.graphql:4:28 lint/nursery/useInputName ━━━━━━━━━━━
 ```
 invalid.graphql:7:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Input type "String" name should be "SetMessageInput".
+  i Unexpected input type name, expected the input type name "String" to be named "SetMessageInput".
   
     6 │ # Input type not ending with Input
   > 7 │ type Mutation { SetMessage(input: String): String }
@@ -57,7 +57,7 @@ invalid.graphql:7:28 lint/nursery/useInputName ━━━━━━━━━━━
 ```
 invalid.graphql:10:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Input type "CreateAMessageInput" name should be "SetMessageInput".
+  i Unexpected input type name, expected the input type name "CreateAMessageInput" to be named "SetMessageInput".
   
      9 │ # Input type not matching mutation name
   > 10 │ type Mutation { SetMessage(input: CreateAMessageInput): String }

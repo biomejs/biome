@@ -4,20 +4,16 @@ use biome_analyze::{
 use biome_console::{MarkupBuf, markup};
 use biome_graphql_syntax::{
     AnyGraphqlPrimitiveType, AnyGraphqlType, GraphqlFieldDefinition, GraphqlFieldDefinitionList,
-    GraphqlFieldsDefinition, GraphqlLanguage, GraphqlObjectTypeDefinition,
-    GraphqlObjectTypeExtension,
+    GraphqlFieldsDefinition, GraphqlObjectTypeDefinition, GraphqlObjectTypeExtension,
+    GraphqlSyntaxToken,
 };
-use biome_rowan::{AstNode, SyntaxToken, TextRange};
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_input_name::UseInputNameOptions;
-use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Require mutation argument to be always called "input"
     ///
     /// Using the same name for all input parameters will make your schemas easier to consume and more predictable.
-    ///
-    /// Optionally, when the option `checkInputType` has been enabled, the input type requires to be called `<mutation name>Input`.
-    /// Using the name of the mutation in the input type name will make it easier to find the mutation that the input type belongs to.
     ///
     /// ## Examples
     ///
@@ -41,7 +37,8 @@ declare_lint_rule! {
     ///
     /// ### `checkInputType`
     ///
-    /// Check that the input type name follows the convention <mutationName>Input.
+    /// When the option `checkInputType` is enabled, the input type requires to be called `<mutation name>Input`.
+    /// Using the name of the mutation in the input type name will make it easier to find the mutation that the input type belongs to.
     ///
     /// Default `false`
     ///
@@ -69,12 +66,12 @@ declare_lint_rule! {
     /// {
     ///   "options": {
     ///     "checkInputType": true,
-    ///     "caseSensitiveInputType": true
+    ///     "caseSensitiveInputType": false
     ///   }
     /// }
     /// ```
     ///
-    /// ```graphql,expect_diagnostic,use_options
+    /// ```graphql,use_options
     /// type Mutation {
     ///   SetMessage(input: setMessageInput): String
     /// }
@@ -85,7 +82,7 @@ declare_lint_rule! {
         name: "useInputName",
         language: "graphql",
         recommended: false,
-        sources: &[RuleSource::EslintGraphql("input-name").inspired()],
+        sources: &[RuleSource::EslintGraphql("input-name").same()],
     }
 }
 
@@ -108,10 +105,10 @@ impl Rule for UseInputName {
             .and_then(GraphqlFieldsDefinition::cast)?;
 
         let is_mutation = fields_def.syntax().parent().is_some_and(|parent| {
-            if let Some(type_def) = GraphqlObjectTypeDefinition::cast(parent.clone()) {
+            if let Some(type_def) = GraphqlObjectTypeDefinition::cast_ref(&parent) {
                 return type_def.is_mutation();
             }
-            if let Some(type_ext) = GraphqlObjectTypeExtension::cast(parent.clone()) {
+            if let Some(type_ext) = GraphqlObjectTypeExtension::cast_ref(&parent) {
                 return type_ext.is_mutation();
             }
 
@@ -136,7 +133,7 @@ impl Rule for UseInputName {
 
             let check_input_type = ctx.options().check_input_type();
             if check_input_type {
-                let case_sensitive_input_type = ctx.options().case_sensitive_input_type();
+                let is_case_sensitive_input_type = ctx.options().case_sensitive_input_type();
 
                 let any_type = argument.ty().ok()?;
 
@@ -146,14 +143,15 @@ impl Rule for UseInputName {
                 let def_name = node.name().ok()?;
                 let def_value_token = def_name.value_token().ok()?;
 
-                let valid_string = def_value_token.text_trimmed().to_string() + "Input";
-                if (case_sensitive_input_type && ty_string != valid_string)
-                    || ty_string.to_lowercase_cow() != valid_string.to_lowercase_cow()
+                let valid_str = format!("{}Input", def_value_token.text_trimmed());
+                if (is_case_sensitive_input_type && ty_string != valid_str)
+                    || (!is_case_sensitive_input_type
+                        && !ty_string.eq_ignore_ascii_case(&valid_str))
                 {
                     return Some(UseInputNameState::InvalidTypeName(
                         argument.range(),
                         ty_string.to_string(),
-                        valid_string,
+                        valid_str,
                     ));
                 }
             }
@@ -190,11 +188,11 @@ impl UseInputNameState {
     fn message(&self) -> MarkupBuf {
         match self {
             Self::InvalidName(_, current) => (markup! {
-                "Input \""{ current }"\" should be named \"input\"."
+                "Unexpected input name, expected the input name \""{ current }"\" to be named \"input\"."
             })
             .to_owned(),
             Self::InvalidTypeName(_, current, valid) => (markup! {
-                "Input type \""{ current }"\" name should be \""{ valid }"\"."
+                "Unexpected input type name, expected the input type name \""{ current }"\" to be named \""{ valid }"\"."
             })
             .to_owned(),
         }
@@ -214,27 +212,24 @@ impl UseInputNameState {
     }
 }
 
-fn find_input_type(any_type: AnyGraphqlType) -> Option<SyntaxToken<GraphqlLanguage>> {
-    match any_type {
-        AnyGraphqlType::AnyGraphqlPrimitiveType(primitive_type) => {
-            find_input_type_primitive_type(primitive_type)
-        }
-        AnyGraphqlType::GraphqlNonNullType(non_null_type) => {
-            let base = non_null_type.base().ok()?;
-            find_input_type_primitive_type(base)
-        }
-        _ => None,
-    }
-}
+fn find_input_type(any_type: AnyGraphqlType) -> Option<GraphqlSyntaxToken> {
+    let mut current_type = any_type;
 
-fn find_input_type_primitive_type(
-    primitive_type: AnyGraphqlPrimitiveType,
-) -> Option<SyntaxToken<GraphqlLanguage>> {
-    match primitive_type {
-        AnyGraphqlPrimitiveType::GraphqlNameReference(name_ref) => name_ref.value_token().ok(),
-        AnyGraphqlPrimitiveType::GraphqlListType(list_type) => {
-            let any_type = list_type.element().ok()?;
-            find_input_type(any_type)
+    loop {
+        match current_type {
+            AnyGraphqlType::AnyGraphqlPrimitiveType(primitive_type) => match primitive_type {
+                AnyGraphqlPrimitiveType::GraphqlNameReference(name_ref) => {
+                    return name_ref.value_token().ok();
+                }
+                AnyGraphqlPrimitiveType::GraphqlListType(list_type) => {
+                    current_type = list_type.element().ok()?;
+                }
+            },
+            AnyGraphqlType::GraphqlNonNullType(non_null_type) => {
+                let base = non_null_type.base().ok()?;
+                current_type = AnyGraphqlType::AnyGraphqlPrimitiveType(base);
+            }
+            _ => return None,
         }
     }
 }

@@ -21,7 +21,7 @@ type Mutation { SetMessage(record: [SetMessageInput]): String }
 ```
 invalid.graphql:2:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Input "record" should be named "input".
+  i Unexpected input name, expected the input name "record" to be named "input".
   
     1 │ # should generate diagnostics
   > 2 │ type Mutation { SetMessage(record: String): String }
@@ -39,7 +39,7 @@ invalid.graphql:2:28 lint/nursery/useInputName ━━━━━━━━━━━
 ```
 invalid.graphql:4:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Input "record" should be named "input".
+  i Unexpected input name, expected the input name "record" to be named "input".
   
     2 │ type Mutation { SetMessage(record: String): String }
     3 │ 
@@ -58,7 +58,7 @@ invalid.graphql:4:28 lint/nursery/useInputName ━━━━━━━━━━━
 ```
 invalid.graphql:6:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Input "record" should be named "input".
+  i Unexpected input name, expected the input name "record" to be named "input".
   
     4 │ type Mutation { SetMessage(record: SetMessageInput): String }
     5 │ 
@@ -77,7 +77,7 @@ invalid.graphql:6:28 lint/nursery/useInputName ━━━━━━━━━━━
 ```
 invalid.graphql:8:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Input "record" should be named "input".
+  i Unexpected input name, expected the input name "record" to be named "input".
   
      6 │ type Mutation { SetMessage(record: setMessageInput): String }
      7 │ 
@@ -96,7 +96,7 @@ invalid.graphql:8:28 lint/nursery/useInputName ━━━━━━━━━━━
 ```
 invalid.graphql:10:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Input "record" should be named "input".
+  i Unexpected input name, expected the input name "record" to be named "input".
   
      8 │ type Mutation { SetMessage(record: SetMessageInput!): String }
      9 │ 
