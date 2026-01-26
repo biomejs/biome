@@ -103,7 +103,9 @@ pub(crate) fn parse_if_function(p: &mut CssParser) -> ParsedSyntax {
 
     // Signal that we encountered an if() function. This flag is used by
     // declaration_or_rule_list_block to handle speculative parsing conflicts.
-    p.state_mut().encountered_if_function = true;
+    if p.state().speculative_parsing {
+        p.state_mut().encountered_if_function = true;
+    }
 
     let m = p.start();
 
@@ -345,7 +347,7 @@ fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> Co
         // parse_any_if_test_boolean_expr_group failed to parse,
         // but the parser is already at a recovered position.
         let m = p.start();
-        let rhs = m.complete(p, CSS_BOGUS);
+        let rhs = m.complete(p, CSS_BOGUS_IF_TEST_BOOLEAN_EXPR);
         parse_if_test_boolean_and_expr(p, rhs);
     }
 
@@ -387,7 +389,7 @@ fn parse_if_test_boolean_or_expr(p: &mut CssParser, lhs: CompletedMarker) -> Com
         // parse_any_if_test_boolean_expr_group failed to parse,
         // but the parser is already at a recovered position.
         let m = p.start();
-        let rhs = m.complete(p, CSS_BOGUS);
+        let rhs = m.complete(p, CSS_BOGUS_IF_TEST_BOOLEAN_EXPR);
         parse_if_test_boolean_or_expr(p, rhs);
     }
 
