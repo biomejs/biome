@@ -54,7 +54,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentEnumValueType {
-        version: "next",
+        version: "2.3.13",
         name: "useConsistentEnumValueType",
         language: "ts",
         recommended: false,
