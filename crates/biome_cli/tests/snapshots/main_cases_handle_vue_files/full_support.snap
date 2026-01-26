@@ -63,22 +63,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.vue:8:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.vue:10:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a lang attribute when using the html element.
   
-     6 │ </script>
-     7 │ 
-   > 8 │ <html>
+     8 │ </script>
+     9 │ 
+  > 10 │ <html>
        │ ^^^^^^
-   > 9 │ 	<head>
-  > 10 │ 		<title>Svelte</title>
-  > 11 │ 	</head>
-  > 12 │ 	<body></body>
-  > 13 │ </html>
+  > 11 │ 	<head>
+  > 12 │ 		<title>Svelte</title>
+  > 13 │ 	</head>
+  > 14 │ 	<body></body>
+  > 15 │ </html>
        │ ^^^^^^^
-    14 │ 
-    15 │ <style>#id {
+    16 │ 
+    17 │ <style>
   
   i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
@@ -86,15 +86,16 @@ file.vue:8:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━
 ```
 
 ```block
-file.vue:16:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.vue:19:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
   
-    15 │ <style>#id {
-  > 16 │ 	font-family: comic-sans;
+    17 │ <style>
+    18 │ #id {
+  > 19 │ 	font-family: comic-sans;
        │ 	             ^^^^^^^^^^
-    17 │ }
-    18 │ .class {
+    20 │ }
+    21 │ .class {
   
   i Consider adding a generic font family as a fallback.
   

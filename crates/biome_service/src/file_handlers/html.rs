@@ -1112,7 +1112,14 @@ pub(crate) fn update_snippets(
         };
 
         if let Some(value_token) = element.value_token() {
-            let new_token = ident(snippet.new_code.as_str());
+            let leading_trivia = read_leading_trivia(value_token.text_trimmed());
+            let trailing_trivia = read_trailing_trivia(value_token.text_trimmed());
+            let new_token = ident(&format!(
+                "{}{}{}",
+                leading_trivia,
+                snippet.new_code.as_str(),
+                trailing_trivia
+            ));
             mutation.replace_token(value_token, new_token);
         }
     }
@@ -1120,4 +1127,70 @@ pub(crate) fn update_snippets(
     let root = mutation.commit();
 
     Ok(root.as_send().unwrap())
+}
+
+/// Extracts all leading whitespace (spaces, tabs, newlines, carriage returns) from a string.
+///
+/// This function iterates through the string bytes to find where the actual content starts.
+/// For HTML embedded content tokens, whitespace is part of the token text itself, not stored as trivia.
+///
+/// # Arguments
+/// * `value` - The string to extract leading trivia from
+///
+/// # Returns
+/// A `Cow<'_, str>` containing the leading whitespace. If the entire string is whitespace,
+/// returns the entire string. If there's no leading whitespace, returns an empty string.
+///
+/// # Examples
+/// ```
+/// assert_eq!(read_leading_trivia("\n\tconsole.log('Hi');"), "\n\t");
+/// assert_eq!(read_leading_trivia("console.log('Hi');"), "");
+/// assert_eq!(read_leading_trivia("   "), "   ");
+/// ```
+fn read_leading_trivia(value: &str) -> Cow<'_, str> {
+    let bytes = value.as_bytes();
+    let count = bytes
+        .iter()
+        .take_while(|&&b| matches!(b, b' ' | b'\t' | b'\n' | b'\r'))
+        .count();
+
+    if count > 0 {
+        Cow::Borrowed(&value[..count])
+    } else {
+        Cow::Borrowed("")
+    }
+}
+
+/// Extracts all trailing whitespace (spaces, tabs, newlines, carriage returns) from a string.
+///
+/// This function iterates backward through the string bytes to find where the actual content ends.
+/// For HTML embedded content tokens, whitespace is part of the token text itself, not stored as trivia.
+///
+/// # Arguments
+/// * `value` - The string to extract trailing trivia from
+///
+/// # Returns
+/// A `Cow<'_, str>` containing the trailing whitespace. If the entire string is whitespace,
+/// returns an empty string (because leading trivia would have consumed it all). If there's no
+/// trailing whitespace, returns an empty string.
+///
+/// # Examples
+/// ```
+/// assert_eq!(read_trailing_trivia("console.log('Hi');\n"), "\n");
+/// assert_eq!(read_trailing_trivia("console.log('Hi');"), "");
+/// assert_eq!(read_trailing_trivia("   "), "");
+/// ```
+fn read_trailing_trivia(value: &str) -> Cow<'_, str> {
+    let bytes = value.as_bytes();
+    let count = bytes
+        .iter()
+        .rev()
+        .take_while(|&&b| matches!(b, b' ' | b'\t' | b'\n' | b'\r'))
+        .count();
+
+    if count > 0 {
+        Cow::Borrowed(&value[value.len() - count..])
+    } else {
+        Cow::Borrowed("")
+    }
 }
