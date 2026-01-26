@@ -150,7 +150,7 @@ termcolor                    = "1.4.1"
 terminal_size                = "0.4.3"
 tests_macros                 = { path = "./crates/tests_macros" }
 tikv-jemallocator            = "0.6.1"
-tokio                        = "1.48.0"
+tokio                        = "1.49.0"
 tower                        = "0.5.3"
 tower-lsp-server             = "0.23.0"
 tracing                      = { version = "0.1.44", default-features = false, features = ["attributes", "std"] }
