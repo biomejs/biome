@@ -5,6 +5,7 @@ use crate::file_handlers::FormatEmbedNode;
 use crate::settings::ServiceLanguage;
 use crate::workspace::DocumentFileSource;
 use crate::workspace::document::services::embedded_bindings::EmbeddedExportedBindings;
+use crate::workspace::document::services::embedded_value_references::EmbeddedValueReferences;
 use biome_css_syntax::{AnyCssRoot, CssLanguage};
 use biome_diagnostics::Error;
 use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
@@ -271,6 +272,9 @@ pub struct DocumentServices {
     /// Service to track bindings exported by the document
     exported_bindings: Option<EmbeddedExportedBindings>,
 
+    /// Service to track value references from non-source snippets
+    value_references: Option<EmbeddedValueReferences>,
+
     /// The document doesn't have any services
     language: LanguageServices,
 }
@@ -279,12 +283,17 @@ impl DocumentServices {
     pub fn none() -> Self {
         Self {
             exported_bindings: None,
+            value_references: None,
             language: LanguageServices::None,
         }
     }
 
     pub(crate) fn set_embedded_bindings(&mut self, bindings: EmbeddedExportedBindings) {
         self.exported_bindings = Some(bindings);
+    }
+
+    pub(crate) fn set_embedded_value_references(&mut self, value_refs: EmbeddedValueReferences) {
+        self.value_references = Some(value_refs);
     }
 
     pub fn as_css_services(&self) -> Option<&CssDocumentServices> {
@@ -297,6 +306,10 @@ impl DocumentServices {
 
     pub fn embedded_bindings(&self) -> Option<EmbeddedExportedBindings> {
         self.exported_bindings.clone()
+    }
+
+    pub fn embedded_value_references(&self) -> Option<EmbeddedValueReferences> {
+        self.value_references.clone()
     }
 }
 
@@ -311,6 +324,7 @@ impl From<CssDocumentServices> for DocumentServices {
     fn from(services: CssDocumentServices) -> Self {
         Self {
             exported_bindings: None,
+            value_references: None,
             language: LanguageServices::Css(services),
         }
     }

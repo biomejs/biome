@@ -13,6 +13,7 @@ use crate::settings::{ModuleGraphResolutionKind, SettingsHandle, SettingsWithEdi
 use crate::workspace::document::services::embedded_bindings::{
     EmbeddedBuilder, EmbeddedExportedBindings,
 };
+use crate::workspace::document::services::embedded_value_references::EmbeddedValueReferences;
 use crate::workspace::document::*;
 use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices};
 use crate::workspace::{
@@ -479,6 +480,26 @@ impl WorkspaceServer {
         };
         exported_bindings.finish(builder);
         services.set_embedded_bindings(exported_bindings);
+
+        // Track value references from non-source snippets (templates)
+        let mut value_references = EmbeddedValueReferences::default();
+        for snippet in &embedded_snippets {
+            if let Some(js_snippet) = snippet.as_js_embedded_snippet() {
+                let Some(file_source) = self.get_source(snippet.file_source_index()) else {
+                    continue;
+                };
+                let Some(js_file_source) = file_source.to_js_file_source() else {
+                    continue;
+                };
+                // Only process non-source snippets (templates)
+                if !js_file_source.is_embedded_source() {
+                    let mut builder = value_references.builder();
+                    builder.visit_non_source_snippet(&js_snippet.parse.tree());
+                    value_references.finish(builder);
+                }
+            }
+        }
+        services.set_embedded_value_references(value_references);
 
         let is_indexed = if
         // Dependency files can be skipped altoghether
@@ -1558,6 +1579,26 @@ impl Workspace for WorkspaceServer {
 
         exported_bindings.finish(builder);
         services.set_embedded_bindings(exported_bindings);
+
+        // Track value references from non-source snippets (templates)
+        let mut value_references = EmbeddedValueReferences::default();
+        for snippet in &embedded_snippets {
+            if let Some(js_snippet) = snippet.as_js_embedded_snippet() {
+                let Some(file_source) = self.get_source(snippet.file_source_index()) else {
+                    continue;
+                };
+                let Some(js_file_source) = file_source.to_js_file_source() else {
+                    continue;
+                };
+                // Only process non-source snippets (templates)
+                if !js_file_source.is_embedded_source() {
+                    let mut builder = value_references.builder();
+                    builder.visit_non_source_snippet(&js_snippet.parse.tree());
+                    value_references.finish(builder);
+                }
+            }
+        }
+        services.set_embedded_value_references(value_references);
 
         let document = Document {
             content,
