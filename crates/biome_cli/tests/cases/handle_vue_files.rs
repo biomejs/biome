@@ -1139,3 +1139,36 @@ import Component from "./Component.vue"
         result,
     ));
 }
+
+const VUE_ENUM_IN_TEMPLATE: &str = r#"<script setup lang="ts">
+import { Component, FooEnum } from './types';
+</script>
+<template>
+  <Component />
+  <div>{{ FooEnum.Foo }}</div>
+</template>"#;
+
+#[test]
+fn use_import_type_not_triggered_for_enum_in_template() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(file.into(), VUE_ENUM_IN_TEMPLATE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_import_type_not_triggered_for_enum_in_template",
+        fs,
+        console,
+        result,
+    ));
+}

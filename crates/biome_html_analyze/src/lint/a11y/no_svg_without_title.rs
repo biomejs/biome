@@ -6,6 +6,8 @@ use biome_rowan::AstNode;
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
 use biome_string_case::StrLikeExtension;
 
+use crate::a11y::is_aria_hidden_true;
+
 const NAME_REQUIRED_ROLES: &[&str] = &["img", "image", "graphics-document", "graphics-symbol"];
 
 declare_lint_rule! {
@@ -135,13 +137,8 @@ impl Rule for NoSvgWithoutTitle {
             return None;
         }
 
-        if let Some(aria_hidden_attr) = node.find_attribute_by_name("aria-hidden")
-            && let Some(attr_static_val) = aria_hidden_attr.initializer()
-        {
-            let attr_text = attr_static_val.value().ok()?.string_value()?;
-            if attr_text == "true" {
-                return None;
-            }
+        if is_aria_hidden_true(node) {
+            return None;
         }
 
         // Checks if a `svg` element has a valid `title` element in a childlist

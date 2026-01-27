@@ -1,6 +1,7 @@
 use crate::{
     JsRuleAction,
     react::{ReactLibrary, is_global_react_import, is_jsx_factory_import},
+    services::embedded_value_references::EmbeddedValueReferences,
     services::semantic::Semantic,
 };
 use biome_analyze::{
@@ -186,6 +187,9 @@ impl Rule for UseImportType {
             return None;
         }
         let model = ctx.model();
+        let references = ctx
+            .get_service::<EmbeddedValueReferences>()
+            .expect("embedded value references service");
         let style = ctx.options().style.unwrap_or_default();
         match import_clause {
             AnyJsImportClause::JsImportBareClause(_) => None,
@@ -195,11 +199,11 @@ impl Rule for UseImportType {
                 let is_default_used_as_type = if is_jsx_factory_binding(ctx, default_binding) {
                     false
                 } else {
-                    is_only_used_as_type(model, default_binding)
+                    is_only_used_as_type(model, default_binding, references)
                 };
                 match clause.specifier().ok()? {
                     AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named_specifiers) => {
-                        match named_import_type_fix(model, &named_specifiers, false) {
+                        match named_import_type_fix(model, &named_specifiers, false, references) {
                             Some(NamedImportTypeFix::UseImportType(specifiers)) => {
                                 if is_default_used_as_type {
                                     Some(ImportTypeFix::UseImportType)
@@ -254,7 +258,7 @@ impl Rule for UseImportType {
 
                         match (
                             is_default_used_as_type,
-                            is_only_used_as_type(model, namespace_binding),
+                            is_only_used_as_type(model, namespace_binding, references),
                         ) {
                             (true, true) => Some(ImportTypeFix::UseImportType),
                             (true, false) => {
@@ -278,7 +282,8 @@ impl Rule for UseImportType {
                     return None;
                 }
 
-                is_only_used_as_type(model, default_binding).then_some(ImportTypeFix::UseImportType)
+                is_only_used_as_type(model, default_binding, references)
+                    .then_some(ImportTypeFix::UseImportType)
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
                 let type_token = clause.type_token();
@@ -303,6 +308,7 @@ impl Rule for UseImportType {
                     model,
                     &clause.named_specifiers().ok()?,
                     type_token.is_some(),
+                    references,
                 )? {
                     NamedImportTypeFix::UseImportType(specifiers) => {
                         if style == Style::InlineType {
@@ -344,7 +350,7 @@ impl Rule for UseImportType {
                     return None;
                 }
 
-                is_only_used_as_type(model, namespace_binding)
+                is_only_used_as_type(model, namespace_binding, references)
                     .then_some(ImportTypeFix::UseImportType)
             }
         }
@@ -814,7 +820,19 @@ pub enum ImportTypeFix {
 
 /// Returns `true` if all references of `binding` are only used as a type.
 /// If there is no reference, then returns `false`.
-fn is_only_used_as_type(model: &SemanticModel, binding: &JsIdentifierBinding) -> bool {
+fn is_only_used_as_type(
+    model: &SemanticModel,
+    binding: &JsIdentifierBinding,
+    references: &EmbeddedValueReferences,
+) -> bool {
+    // First check if the binding is used as a value in embedded non-source snippets (templates)
+    if let Ok(name_token) = binding.name_token()
+        && references.is_used_as_value(name_token.text())
+    {
+        return false;
+    }
+
+    // Then check semantic model for type-only usage
     let mut result = false;
     for reference in binding.all_references(model) {
         if let Some(reference) = AnyJsIdentifierUsage::cast_ref(reference.syntax()) {
@@ -839,6 +857,7 @@ fn named_import_type_fix(
     model: &SemanticModel,
     named_specifiers: &JsNamedImportSpecifiers,
     has_type_token: bool,
+    value_refs: &EmbeddedValueReferences,
 ) -> Option<NamedImportTypeFix> {
     let specifiers = named_specifiers.specifiers();
     if specifiers.is_empty() {
@@ -872,6 +891,7 @@ fn named_import_type_fix(
                         Some(is_only_used_as_type(
                             model,
                             local_name.as_js_identifier_binding()?,
+                            value_refs,
                         ))
                     })
                     .unwrap_or(false)

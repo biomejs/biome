@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.astro`
+
+```astro
+---
+import { Component, FooEnum } from './types';
+---
+<main>
+  <Component />
+  {FooEnum.Foo}
+</main>
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

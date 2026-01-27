@@ -9,6 +9,12 @@ use biome_html_syntax::{
 use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::HtmlRuleAction;
+use crate::a11y::{
+    get_truthy_aria_hidden_attribute, has_accessible_name, html_element_has_truthy_aria_hidden,
+    html_self_closing_element_has_accessible_name,
+    html_self_closing_element_has_non_empty_attribute,
+    html_self_closing_element_has_truthy_aria_hidden,
+};
 
 declare_lint_rule! {
     /// Enforce that anchors have content and that the content is accessible to screen readers.
@@ -111,7 +117,7 @@ impl Rule for UseAnchorContent {
         }
 
         // Check if the anchor itself has aria-hidden attribute
-        if let Some(aria_hidden_attr) = get_truthy_aria_hidden(node) {
+        if let Some(aria_hidden_attr) = get_truthy_aria_hidden_attribute(node) {
             return Some(UseAnchorContentState {
                 aria_hidden_attribute: Some(aria_hidden_attr),
             });
@@ -182,127 +188,33 @@ impl Rule for UseAnchorContent {
     }
 }
 
-/// Returns the aria-hidden attribute if it has a truthy value.
-fn get_truthy_aria_hidden(node: &AnyHtmlElement) -> Option<HtmlAttribute> {
-    let attribute = node.find_attribute_by_name("aria-hidden")?;
-    let is_truthy = attribute
-        .initializer()
-        .and_then(|init| init.value().ok())
-        .and_then(|value| value.string_value())
-        .is_none_or(|value| !value.eq_ignore_ascii_case("false"));
-
-    if is_truthy { Some(attribute) } else { None }
-}
-
-/// Checks if the element has an accessible name via aria-label or title attribute.
-fn has_accessible_name(node: &AnyHtmlElement) -> bool {
-    // Check aria-label attribute
-    if let Some(attr) = node.find_attribute_by_name("aria-label")
-        && attr
-            .initializer()
-            .and_then(|init| init.value().ok())
-            .and_then(|value| value.string_value())
-            .is_some_and(|s| !s.trim().is_empty())
-    {
-        return true;
-    }
-
-    // Check title attribute
-    if let Some(attr) = node.find_attribute_by_name("title")
-        && attr
-            .initializer()
-            .and_then(|init| init.value().ok())
-            .and_then(|value| value.string_value())
-            .is_some_and(|s| !s.trim().is_empty())
-    {
-        return true;
-    }
-
-    false
-}
-
-/// Checks if the given `HtmlElementList` has accessible content.
-/// Accessible content is either:
-/// - Non-empty text content
-/// - Child elements that don't have `aria-hidden="true"`
+/// Checks if `HtmlElementList` contains accessible content (non-empty text or visible elements).
 fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
     html_child_list.into_iter().any(|child| match &child {
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
         AnyHtmlElement::HtmlElement(element) => {
-            // Check if this child element has aria-hidden
-            let has_aria_hidden =
-                element
-                    .find_attribute_by_name("aria-hidden")
-                    .is_some_and(|attribute| {
-                        attribute
-                            .initializer()
-                            .and_then(|init| init.value().ok())
-                            .and_then(|value| value.string_value())
-                            .is_none_or(|value| !value.eq_ignore_ascii_case("false"))
-                    });
-
-            if has_aria_hidden {
-                // This element is hidden, check if there's other accessible content at this level
+            if html_element_has_truthy_aria_hidden(element) {
                 false
             } else {
-                // Element is not hidden, check if it has accessible content recursively
                 has_accessible_content(&element.children())
             }
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
-            // Check if element is hidden with aria-hidden
-            let has_aria_hidden =
-                element
-                    .find_attribute_by_name("aria-hidden")
-                    .is_some_and(|attribute| {
-                        attribute
-                            .initializer()
-                            .and_then(|init| init.value().ok())
-                            .and_then(|value| value.string_value())
-                            .is_none_or(|value| !value.eq_ignore_ascii_case("false"))
-                    });
-            if has_aria_hidden {
+            if html_self_closing_element_has_truthy_aria_hidden(element) {
                 return false;
             }
 
-            // Check for explicit accessible name via aria-label or title
-            let has_aria_label = element
-                .find_attribute_by_name("aria-label")
-                .is_some_and(|attr| {
-                    attr.initializer()
-                        .and_then(|init| init.value().ok())
-                        .and_then(|value| value.string_value())
-                        .is_some_and(|s| !s.trim().is_empty())
-                });
-            if has_aria_label {
+            if html_self_closing_element_has_accessible_name(element) {
                 return true;
             }
 
-            let has_title = element.find_attribute_by_name("title").is_some_and(|attr| {
-                attr.initializer()
-                    .and_then(|init| init.value().ok())
-                    .and_then(|value| value.string_value())
-                    .is_some_and(|s| !s.trim().is_empty())
-            });
-            if has_title {
-                return true;
-            }
-
-            // Check tag-specific accessible content
             let tag_name = element.name().ok().and_then(|n| n.value_token().ok());
             let tag_text = tag_name.as_ref().map(|t| t.text_trimmed());
 
             match tag_text {
-                // <img> requires non-empty alt attribute
                 Some(name) if name.eq_ignore_ascii_case("img") => {
-                    element.find_attribute_by_name("alt").is_some_and(|attr| {
-                        attr.initializer()
-                            .and_then(|init| init.value().ok())
-                            .and_then(|value| value.string_value())
-                            .is_some_and(|s| !s.trim().is_empty())
-                    })
+                    html_self_closing_element_has_non_empty_attribute(element, "alt")
                 }
-                // Void elements without meaningful content are not accessible
                 Some(name)
                     if name.eq_ignore_ascii_case("br")
                         || name.eq_ignore_ascii_case("hr")
@@ -314,7 +226,6 @@ fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
                 {
                     false
                 }
-                // <input type="hidden"> is not accessible, other inputs may be
                 Some(name) if name.eq_ignore_ascii_case("input") => {
                     let is_hidden = element.find_attribute_by_name("type").is_some_and(|attr| {
                         attr.initializer()
@@ -324,11 +235,9 @@ fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
                     });
                     !is_hidden
                 }
-                // Other self-closing elements without explicit accessible name are not accessible
                 _ => false,
             }
         }
-        // Bogus elements and CDATA sections - treat as potentially accessible to avoid false positives
         AnyHtmlElement::HtmlBogusElement(_) | AnyHtmlElement::HtmlCdataSection(_) => true,
     })
 }

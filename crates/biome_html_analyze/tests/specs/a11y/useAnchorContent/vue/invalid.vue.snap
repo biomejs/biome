@@ -104,33 +104,6 @@ invalid.vue:5:3 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.vue:6:3 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide screen reader accessible content when using a elements.
-  
-    4 │   <a>    </a>
-    5 │   <a aria-hidden="true">content</a>
-  > 6 │   <a aria-hidden>content</a>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │   <a><span aria-hidden="true">content</span></a>
-    8 │   <a><div aria-hidden="true"><span>nested content</span></div></a>
-  
-  i All links on a page should have content that is accessible to screen readers.
-  
-  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
-  
-  i Follow these links for more information,
-     WCAG 2.4.4
-     WCAG 4.1.2
-  
-  i Unsafe fix: Remove the aria-hidden attribute to allow the anchor element and its content visible to assistive technologies.
-  
-    6 │ ··<a·aria-hidden>content</a>
-      │      -----------            
-
-```
-
-```
 invalid.vue:7:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.

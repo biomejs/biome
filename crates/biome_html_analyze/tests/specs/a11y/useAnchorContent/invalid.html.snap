@@ -179,32 +179,6 @@ invalid.html:16:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.html:19:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide screen reader accessible content when using a elements.
-  
-    18 │ <!-- Anchor with aria-hidden (no value = truthy) -->
-  > 19 │ <a aria-hidden>content</a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    20 │ 
-    21 │ <!-- All children hidden with aria-hidden -->
-  
-  i All links on a page should have content that is accessible to screen readers.
-  
-  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
-  
-  i Follow these links for more information,
-     WCAG 2.4.4
-     WCAG 4.1.2
-  
-  i Unsafe fix: Remove the aria-hidden attribute to allow the anchor element and its content visible to assistive technologies.
-  
-    19 │ <a·aria-hidden>content</a>
-       │    -----------            
-
-```
-
-```
 invalid.html:22:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.

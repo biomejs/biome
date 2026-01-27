@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.vue`
+
+```vue
+<script setup lang="ts">
+import { Component, FooEnum } from './types';
+</script>
+<template>
+  <Component />
+  <div>{{ FooEnum.Foo }}</div>
+</template>
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

@@ -7,6 +7,10 @@ use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_alt_text::UseAltTextOptions;
 
+use crate::a11y::{
+    attribute_value_equals_ignore_case, has_non_empty_attribute, is_aria_hidden_true,
+};
+
 declare_lint_rule! {
     /// Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
     ///
@@ -118,9 +122,9 @@ impl Rule for UseAltText {
         let is_html_file = file_source.is_html();
 
         let has_alt = has_valid_alt_text(element);
-        let has_aria_label = has_valid_label(element, "aria-label");
-        let has_aria_labelledby = has_valid_label(element, "aria-labelledby");
-        let aria_hidden = is_aria_hidden(element);
+        let has_aria_label = has_non_empty_attribute(element, "aria-label");
+        let has_aria_labelledby = has_non_empty_attribute(element, "aria-labelledby");
+        let aria_hidden = is_aria_hidden_true(element);
 
         let name_matches = |name: &str| -> bool {
             if is_html_file {
@@ -131,7 +135,7 @@ impl Rule for UseAltText {
         };
 
         if name_matches("object") {
-            let has_title = has_valid_label(element, "title");
+            let has_title = has_non_empty_attribute(element, "title");
 
             if !has_title && !has_aria_label && !has_aria_labelledby && !aria_hidden {
                 // For object elements, check if it has accessible child content
@@ -191,13 +195,7 @@ impl Rule for UseAltText {
 fn has_type_image_attribute(element: &AnyHtmlElement) -> bool {
     element
         .find_attribute_by_name("type")
-        .is_some_and(|attribute| {
-            attribute
-                .initializer()
-                .and_then(|init| init.value().ok())
-                .and_then(|value| value.string_value())
-                .is_some_and(|value| value.eq_ignore_ascii_case("image"))
-        })
+        .is_some_and(|attr| attribute_value_equals_ignore_case(&attr, "image"))
 }
 
 /// Check if the element has a valid alt attribute
@@ -206,37 +204,4 @@ fn has_valid_alt_text(element: &AnyHtmlElement) -> bool {
     // If there's no initializer, it's treated as an empty string (valid)
     // If there's an initializer with a value, any value is valid
     element.find_attribute_by_name("alt").is_some()
-}
-
-/// Check if the element has a valid label attribute (aria-label, aria-labelledby, or title)
-fn has_valid_label(element: &AnyHtmlElement, name_to_lookup: &str) -> bool {
-    element
-        .find_attribute_by_name(name_to_lookup)
-        .is_some_and(|attribute| {
-            // If no initializer, the attribute is present but empty - not valid for labels
-            let Some(initializer) = attribute.initializer() else {
-                return false;
-            };
-
-            // Check if the value is not empty
-            initializer
-                .value()
-                .ok()
-                .and_then(|value| value.string_value())
-                .is_some_and(|value| !value.trim().is_empty())
-        })
-}
-
-/// Check if the element has aria-hidden="true"
-fn is_aria_hidden(element: &AnyHtmlElement) -> bool {
-    element
-        .find_attribute_by_name("aria-hidden")
-        .is_some_and(|attribute| {
-            // Only aria-hidden="true" means hidden (must have initializer with value "true")
-            attribute
-                .initializer()
-                .and_then(|init| init.value().ok())
-                .and_then(|value| value.string_value())
-                .is_some_and(|value| value == "true")
-        })
 }

@@ -4,6 +4,7 @@
 pub use crate::registry::visit_registry;
 pub use crate::services::control_flow::ControlFlowGraph;
 use crate::services::embedded_bindings::EmbeddedBindings;
+use crate::services::embedded_value_references::EmbeddedValueReferences;
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
@@ -51,6 +52,7 @@ pub struct JsAnalyzerServices {
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
     embedded_bindings: Vec<FxHashMap<TextRange, TokenText>>,
+    embedded_value_references: Vec<FxHashMap<TextRange, TokenText>>,
 }
 
 impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
@@ -66,6 +68,7 @@ impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             project_layout,
             source_type,
             embedded_bindings: Default::default(),
+            embedded_value_references: Default::default(),
         }
     }
 }
@@ -73,6 +76,10 @@ impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
 impl JsAnalyzerServices {
     pub fn set_embedded_bindings(&mut self, bindings: Vec<FxHashMap<TextRange, TokenText>>) {
         self.embedded_bindings = bindings;
+    }
+
+    pub fn set_embedded_value_references(&mut self, refs: Vec<FxHashMap<TextRange, TokenText>>) {
+        self.embedded_value_references = refs;
     }
 }
 
@@ -130,6 +137,7 @@ where
         project_layout,
         source_type,
         embedded_bindings,
+        embedded_value_references,
     } = services;
 
     let (registry, mut services, diagnostics, visitors) = registry.build();
@@ -186,6 +194,7 @@ where
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
     services.insert_service(EmbeddedBindings(embedded_bindings));
+    services.insert_service(EmbeddedValueReferences(embedded_value_references));
 
     (
         analyzer.run(AnalyzerContext {
