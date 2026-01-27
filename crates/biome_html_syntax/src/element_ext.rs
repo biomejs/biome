@@ -13,34 +13,17 @@ const VOID_ELEMENTS: &[&str] = &[
 ];
 
 /// Helper to get the text value from any tag name variant
-fn get_tag_name_text(name: &AnyHtmlTagName) -> SyntaxResult<TokenText> {
+fn get_tag_name_text(name: &AnyHtmlTagName) -> Option<TokenText> {
     match name {
         AnyHtmlTagName::HtmlTagName(tag) => {
-            let token = tag.value_token()?;
-            Ok(token.token_text_trimmed())
+            let token = tag.value_token().ok()?;
+            Some(token.token_text_trimmed())
         }
         AnyHtmlTagName::HtmlComponentName(component) => {
-            let token = component.value_token()?;
-            Ok(token.token_text_trimmed())
+            let token = component.value_token().ok()?;
+            Some(token.token_text_trimmed())
         }
-        AnyHtmlTagName::HtmlMemberName(member) => {
-            // For member names like Component.Member, we need to get the object part
-            // (the base component name) since that's what we want to track
-            match member.object()? {
-                crate::AnyHtmlComponentObjectName::HtmlTagName(tag) => {
-                    let token = tag.value_token()?;
-                    Ok(token.token_text_trimmed())
-                }
-                crate::AnyHtmlComponentObjectName::HtmlComponentName(component) => {
-                    let token = component.value_token()?;
-                    Ok(token.token_text_trimmed())
-                }
-                crate::AnyHtmlComponentObjectName::HtmlMemberName(nested_member) => {
-                    // Recursively get the base name from nested members
-                    get_tag_name_text(&AnyHtmlTagName::HtmlMemberName(nested_member))
-                }
-            }
-        }
+        AnyHtmlTagName::HtmlMemberName(_) => None,
     }
 }
 
@@ -232,7 +215,7 @@ impl HtmlElement {
             return false;
         };
 
-        let Ok(name_text) = get_tag_name_text(&name) else {
+        let Some(name_text) = name.token_text_trimmed() else {
             return false;
         };
 
@@ -244,7 +227,7 @@ impl HtmlElement {
             return false;
         };
 
-        let Ok(name_text) = get_tag_name_text(&name) else {
+        let Some(name_text) = name.token_text_trimmed() else {
             return false;
         };
 
@@ -319,7 +302,7 @@ impl AnyHtmlTagName {
     /// Returns the trimmed token text of the tag name.
     /// For member names like Component.Member, returns the full member expression text.
     pub fn token_text_trimmed(&self) -> Option<TokenText> {
-        get_tag_name_text(self).ok()
+        get_tag_name_text(self)
     }
 }
 
