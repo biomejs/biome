@@ -230,12 +230,20 @@ fn is_comment_in_previous_sibling_content(
     comment: &SourceComment<HtmlLanguage>,
 ) -> bool {
     let Some(prev_sibling) = node.prev_sibling() else {
+        eprintln!("DEBUG: no prev_sibling for node {:?}", node.kind());
         return false;
     };
 
     // Check if previous sibling is a text content node (HtmlContent or HtmlEmbeddedContent)
     let is_text_content = HtmlContent::can_cast(prev_sibling.kind())
         || HtmlEmbeddedContent::can_cast(prev_sibling.kind());
+
+    eprintln!(
+        "DEBUG: node={:?}, prev_sibling={:?}, is_text_content={}",
+        node.kind(),
+        prev_sibling.kind(),
+        is_text_content
+    );
 
     if !is_text_content {
         return false;
@@ -245,7 +253,13 @@ fn is_comment_in_previous_sibling_content(
     let comment_range = comment.piece().text_range();
     let sibling_range = prev_sibling.text_range_with_trivia();
 
-    sibling_range.contains_range(comment_range)
+    let result = sibling_range.contains_range(comment_range);
+    eprintln!(
+        "DEBUG: comment_range={:?}, sibling_range={:?}, result={}",
+        comment_range, sibling_range, result
+    );
+
+    result
 }
 
 /// Formats a slice of leading comments (used for verbatim node formatting).
@@ -271,11 +285,11 @@ fn format_leading_comments_impl(
     for comment in leading_comments.iter() {
         // Skip comments that are within the text content of the previous sibling.
         // These comments are already formatted as HtmlChild::Comment in children.rs.
-        if let Some(node) = node {
-            if is_comment_in_previous_sibling_content(node, comment) {
-                comment.mark_formatted();
-                continue;
-            }
+        if let Some(node) = node
+            && is_comment_in_previous_sibling_content(node, comment)
+        {
+            comment.mark_formatted();
+            continue;
         }
 
         let format_comment = FormatRefWithRule::new(
