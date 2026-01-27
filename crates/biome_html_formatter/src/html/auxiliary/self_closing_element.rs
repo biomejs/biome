@@ -64,7 +64,9 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                     }
                 }
                 // We remove the slash only from void elements
-                else if node.is_void_element()? && self_close_void_elements.is_never() {
+                else if node.is_void_element().unwrap_or_default()
+                    && self_close_void_elements.is_never()
+                {
                     if let Some(slash_token) = &slash_token {
                         write!(f, [format_removed(slash_token)])?;
                     }

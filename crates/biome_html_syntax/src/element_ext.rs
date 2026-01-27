@@ -31,10 +31,10 @@ impl HtmlSelfClosingElement {
     /// Whether the current self-closing element is a void element.
     ///
     /// <https://html.spec.whatwg.org/#void-elements>
-    pub fn is_void_element(&self) -> SyntaxResult<bool> {
-        let name = self.name()?;
+    pub fn is_void_element(&self) -> Option<bool> {
+        let name = self.name().ok()?;
         let name_text = get_tag_name_text(&name)?;
-        Ok(VOID_ELEMENTS.binary_search(&&*name_text).is_ok())
+        Some(VOID_ELEMENTS.binary_search(&&*name_text).is_ok())
     }
 }
 
@@ -116,7 +116,7 @@ impl HtmlSelfClosingElement {
     /// Returns the tag name of the element (trimmed), if it has one.
     pub fn tag_name(&self) -> Option<TokenText> {
         let name = self.name().ok()?;
-        get_tag_name_text(&name).ok()
+        get_tag_name_text(&name)
     }
 
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
@@ -140,7 +140,7 @@ impl HtmlOpeningElement {
     /// Returns the tag name of the element (trimmed), if it has one.
     pub fn tag_name(&self) -> Option<TokenText> {
         let name = self.name().ok()?;
-        get_tag_name_text(&name).ok()
+        get_tag_name_text(&name)
     }
 
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
