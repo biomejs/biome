@@ -3,6 +3,10 @@ import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
 	features: FeatureName;
 	inlineConfig?: Configuration;
+	/**
+	 * Features that shouldn't be enabled
+	 */
+	notRequestedFeatures?: FeatureName;
 	path: BiomePath;
 	projectKey: ProjectKey;
 	skipIgnoreCheck?: boolean;
@@ -7700,7 +7704,8 @@ export type SupportKind =
 	| "ignored"
 	| "protected"
 	| "featureNotEnabled"
-	| "fileNotSupported";
+	| "fileNotSupported"
+	| "notRequested";
 export interface UpdateSettingsParams {
 	configuration: Configuration;
 	extendedConfigurations?: [BiomePath, Configuration][];
