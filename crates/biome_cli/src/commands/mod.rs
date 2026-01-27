@@ -204,6 +204,10 @@ pub enum BiomeCommand {
         #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
         skip: Vec<AnalyzerSelector>,
 
+        /// Enables the watch mode to re-run the check automatically when any file in the workspace has changed.
+        #[bpaf(long("watch"), switch)]
+        watch: bool,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
@@ -302,18 +306,26 @@ pub enum BiomeCommand {
         /// ```
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
+
         /// When set to true, only the files that have been staged (the ones prepared to be committed)
         /// will be linted.
         #[bpaf(long("staged"), switch)]
         staged: bool,
+
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.
         #[bpaf(long("changed"), switch)]
         changed: bool,
+
         /// Use this to specify the base branch to compare against when you're using the --changed
         /// flag and the `defaultBranch` is not set in your biome.json
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
+
+        /// Enables the watch mode to re-run the check automatically when any file in the workspace has changed.
+        #[bpaf(long("watch"), switch)]
+        watch: bool,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
@@ -394,6 +406,10 @@ pub enum BiomeCommand {
         /// flag, and the `defaultBranch` is not set in your biome.json
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
+
+        /// Enables the watch mode to re-run the check automatically when any file in the workspace has changed.
+        #[bpaf(long("watch"), switch)]
+        watch: bool,
 
         /// Single file, single path or list of paths.
         #[bpaf(positional("PATH"), many)]

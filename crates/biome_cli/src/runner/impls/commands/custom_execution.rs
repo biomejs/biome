@@ -84,6 +84,7 @@ where
     type CrawlerOutput = ();
     type Collector = ();
     type Crawler = ();
+    type Watcher = ();
     type Finalizer = ();
     type Handler = ();
     type ProcessFile = ();
@@ -93,6 +94,10 @@ where
     }
 
     fn requires_crawling(&self) -> bool {
+        false
+    }
+
+    fn is_watch_mode(&self) -> bool {
         false
     }
 

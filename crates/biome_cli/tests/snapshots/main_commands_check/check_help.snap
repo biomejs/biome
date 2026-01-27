@@ -9,7 +9,7 @@ Runs formatter, linter and import sorting to the requested files.
 
 Usage: check [--write] [--unsafe] [--assist-enabled=<true|false>] [--enforce-assist=<true|false>] [
 --format-with-errors=<true|false>] [--staged] [--changed] [--since=REF] [--only=
-<GROUP|RULE|DOMAIN|ACTION>]... [--skip=<GROUP|RULE|DOMAIN|ACTION>]... [PATH]...
+<GROUP|RULE|DOMAIN|ACTION>]... [--skip=<GROUP|RULE|DOMAIN|ACTION>]... [--watch] [PATH]...
 
 Options that changes how the JSON parser behaves
         --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
@@ -373,6 +373,8 @@ Available options:
                               Example:
                               ```shell biome check --skip=correctness/noUnusedVariables
                               --skip=suspicious --skip=project ```
+        --watch               Enables the watch mode to re-run the check automatically when any file
+                              in the workspace has changed.
     -h, --help                Prints help information
 
 ```

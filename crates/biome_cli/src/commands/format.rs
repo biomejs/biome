@@ -42,6 +42,7 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) since: Option<String>,
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
+    pub(crate) watch: bool,
 }
 
 struct FormatExecution {
@@ -117,6 +118,10 @@ impl TraversalCommand for FormatCommandPayload {
 
     fn command_name(&self) -> &'static str {
         "format"
+    }
+
+    fn is_watch_mode(&self) -> bool {
+        self.watch
     }
 
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
@@ -222,5 +227,27 @@ impl TraversalCommand for FormatCommandPayload {
         )?
         .unwrap_or(self.paths.clone());
         Ok(paths)
+    }
+
+    fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
+        if self.is_watch_mode() {
+            if self.fix {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--fix",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+
+            if self.write {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--write",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+        }
+
+        Ok(())
     }
 }

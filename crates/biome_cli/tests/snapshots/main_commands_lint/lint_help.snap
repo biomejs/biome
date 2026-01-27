@@ -8,7 +8,7 @@ expression: redactor(content)
 Run various checks on a set of files.
 
 Usage: lint [--write] [--unsafe] [--suppress] [--reason=STRING] [--only=<GROUP|RULE|DOMAIN|ACTION>
-]... [--skip=<GROUP|RULE|DOMAIN|ACTION>]... [--staged] [--changed] [--since=REF] [PATH]...
+]... [--skip=<GROUP|RULE|DOMAIN|ACTION>]... [--staged] [--changed] [--since=REF] [--watch] [PATH]...
 
 Options that changes how the JSON parser behaves
         --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
@@ -132,6 +132,8 @@ Available options:
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag and the `defaultBranch` is not set in your
                               biome.json
+        --watch               Enables the watch mode to re-run the check automatically when any file
+                              in the workspace has changed.
     -h, --help                Prints help information
 
 ```

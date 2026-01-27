@@ -44,6 +44,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) css_parser: Option<CssParserConfiguration>,
     pub(crate) only: Vec<AnalyzerSelector>,
     pub(crate) skip: Vec<AnalyzerSelector>,
+    pub(crate) watch: bool,
 }
 
 struct CheckExecution {
@@ -161,6 +162,10 @@ impl TraversalCommand for CheckCommandPayload {
         "check"
     }
 
+    fn is_watch_mode(&self) -> bool {
+        self.watch
+    }
+
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
         None
     }
@@ -275,5 +280,27 @@ impl TraversalCommand for CheckCommandPayload {
         .unwrap_or(self.paths.clone());
 
         Ok(paths)
+    }
+
+    fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
+        if self.is_watch_mode() {
+            if self.fix {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--fix",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+
+            if self.write {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--write",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+        }
+
+        Ok(())
     }
 }
