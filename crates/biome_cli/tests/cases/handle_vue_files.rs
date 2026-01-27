@@ -1181,14 +1181,6 @@ import { Component, FooEnum } from './types';
     ));
 }
 
-const VUE_ENUM_IN_TEMPLATE: &str = r#"<script setup lang="ts">
-import { Component, FooEnum } from './types';
-</script>
-<template>
-  <Component />
-  <div>{{ FooEnum.Foo }}</div>
-</template>"#;
-
 #[test]
 fn use_import_type_not_triggered_for_enum_in_template_v2() {
     let fs = MemoryFileSystem::default();
@@ -1227,6 +1219,7 @@ let {
         &mut console,
         Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
     );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

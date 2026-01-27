@@ -77,7 +77,7 @@ pub(crate) fn is_hidden_from_screen_reader(element: &AnyHtmlTagElement) -> bool 
         return true;
     }
 
-    match element.name_value_token().ok() {
+    match element.name_value_token() {
         Some(name) if name.text_trimmed() == "input" => element
             .find_attribute_by_name("type")
             .is_some_and(|attr| attribute_value_equals_ignore_case(&attr, "hidden")),

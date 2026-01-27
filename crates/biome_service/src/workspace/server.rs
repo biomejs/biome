@@ -502,18 +502,14 @@ impl WorkspaceServer {
         }
 
         // Also track component element names from HTML templates (Vue/Svelte)
-        if let Some(html_file_source) = source.to_html_file_source() {
-            if html_file_source.is_vue()
-                || html_file_source.is_svelte()
-                || html_file_source.is_astro()
-            {
-                if let Some(Ok(any_parse)) = &syntax {
-                    let html_root: HtmlRoot = any_parse.tree();
-                    let mut builder = value_references.builder();
-                    builder.visit_html_root(&html_root);
-                    value_references.finish(builder);
-                }
-            }
+        if let Some(html_file_source) = source.to_html_file_source()
+            && html_file_source.supports_components()
+            && let Some(Ok(any_parse)) = &syntax
+        {
+            let html_root: HtmlRoot = any_parse.tree();
+            let mut builder = value_references.builder();
+            builder.visit_html_root(&html_root);
+            value_references.finish(builder);
         }
 
         services.set_embedded_value_references(value_references);
@@ -1617,19 +1613,15 @@ impl Workspace for WorkspaceServer {
         }
 
         // Also track component element names from HTML templates (Vue/Svelte)
-        if let Some(html_file_source) = document_source.to_html_file_source() {
-            if html_file_source.is_vue()
-                || html_file_source.is_svelte()
-                || html_file_source.is_astro()
-            {
-                let html_root: HtmlRoot = parsed.any_parse.tree();
-                let mut builder = value_references.builder();
-                builder.visit_html_root(&html_root);
-                value_references.finish(builder);
-            }
+        if let Some(html_file_source) = document_source.to_html_file_source()
+            && html_file_source.supports_components()
+        {
+            let html_root: HtmlRoot = parsed.any_parse.tree();
+            let mut builder = value_references.builder();
+            builder.visit_html_root(&html_root);
+            value_references.finish(builder);
         }
 
-        dbg!(&value_references);
         services.set_embedded_value_references(value_references);
 
         let document = Document {

@@ -342,29 +342,12 @@ impl AnyHtmlTagElement {
         }
     }
 
-    pub fn name_value_token(&self) -> SyntaxResult<HtmlSyntaxToken> {
-        let name = self.name()?;
+    pub fn name_value_token(&self) -> Option<HtmlSyntaxToken> {
+        let name = self.name().ok()?;
         match name {
-            AnyHtmlTagName::HtmlTagName(tag) => tag.value_token(),
-            AnyHtmlTagName::HtmlComponentName(component) => component.value_token(),
-            AnyHtmlTagName::HtmlMemberName(member) => {
-                // For member names, return the first token (the base component name)
-                match member.object()? {
-                    crate::AnyHtmlComponentObjectName::HtmlTagName(tag) => tag.value_token(),
-                    crate::AnyHtmlComponentObjectName::HtmlComponentName(component) => {
-                        component.value_token()
-                    }
-                    crate::AnyHtmlComponentObjectName::HtmlMemberName(_) => {
-                        // For deeply nested members, we'd need to recurse
-                        // For now, use syntax to get the first token
-                        use biome_rowan::AstNode;
-                        member
-                            .syntax()
-                            .first_token()
-                            .ok_or_else(|| biome_rowan::SyntaxError::MissingRequiredChild)
-                    }
-                }
-            }
+            AnyHtmlTagName::HtmlTagName(tag) => tag.value_token().ok(),
+            AnyHtmlTagName::HtmlComponentName(_) => None,
+            AnyHtmlTagName::HtmlMemberName(_) => None,
         }
     }
 

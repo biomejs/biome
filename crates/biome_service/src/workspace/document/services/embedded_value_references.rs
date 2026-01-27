@@ -179,17 +179,7 @@ mod tests {
         for refs in service.references.iter() {
             if refs.values().any(|token| {
                 let text = token.text();
-                // Exact match
-                if text == reference {
-                    return true;
-                }
-                // Match dotted names like "AvatarPrimitive.Fallback" against "AvatarPrimitive"
-                if let Some(base) = text.split('.').next() {
-                    if base == reference {
-                        return true;
-                    }
-                }
-                false
+                text == reference
             }) {
                 return true;
             }
