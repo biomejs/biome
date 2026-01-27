@@ -139,6 +139,7 @@ dependencies = [
  "camino",
  "enumflags2",
  "indexmap",
+ "insta",
  "rustc-hash 2.1.1",
  "schemars",
  "serde",

@@ -13,6 +13,7 @@ pub mod context;
 mod diagnostics;
 mod matcher;
 pub mod options;
+pub mod profiling;
 mod query;
 mod registry;
 mod rule;
