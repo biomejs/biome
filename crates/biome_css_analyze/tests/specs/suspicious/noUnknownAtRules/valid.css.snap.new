@@ -1,3 +1,10 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 102
+expression: valid.css
+---
+# Input
+```css
 /* should not generate diagnostics */
 @starting-style {
     opacity: 0;
@@ -126,3 +133,7 @@ url-prefix(http: //www.w3.org/Style/), domain(mozilla.org), regexp('https:.*')
 @function --test-fn() {
   result: 1;
 }
+
+```
+
+_Note: The parser emitted 11 diagnostics which are not shown here._
