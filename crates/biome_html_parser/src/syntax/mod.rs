@@ -4,7 +4,7 @@ mod svelte;
 mod vue;
 
 use crate::parser::HtmlParser;
-use crate::syntax::HtmlSyntaxFeatures::{DoubleTextExpressions, SingleTextExpressions};
+use crate::syntax::HtmlSyntaxFeatures::{Astro, DoubleTextExpressions, SingleTextExpressions, Vue};
 use crate::syntax::astro::parse_astro_fence;
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
@@ -149,18 +149,13 @@ fn is_possible_component(p: &HtmlParser, tag_name: &str) -> bool {
         && !p.options().is_html()
 }
 
-/// Returns true if the current file supports component syntax (Vue/Svelte/Astro)
-fn supports_components(p: &HtmlParser) -> bool {
-    !p.options().is_html()
-}
-
 /// Returns the lexer context to use when parsing component names and member expressions.
 /// This allows `.` to be lexed as a token for member expressions like Component.Member
 /// We reuse InsideTagVue context because it supports `.` lexing, but this is ONLY used
 /// for parsing component names, not for parsing attributes.
 #[inline(always)]
 fn component_name_context(p: &HtmlParser) -> HtmlLexContext {
-    if supports_components(p) {
+    if Vue.is_supported(p) || Astro.is_supported(p) || SingleTextExpressions.is_supported(p) {
         // Use InsideTagVue for all component-supporting files when parsing component names
         // This allows `.` to be lexed properly for member expressions
         // Note: This is safe because we only use this context for tag names, not attributes
