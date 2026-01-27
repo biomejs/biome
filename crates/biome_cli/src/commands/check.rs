@@ -77,7 +77,7 @@ impl Execution for CheckExecution {
     }
 
     fn not_requested_features(&self) -> FeatureName {
-        FeaturesBuilder::new().without_search().build()
+        FeaturesBuilder::new().with_search().build()
     }
 
     fn can_handle(&self, features: FeaturesSupported) -> bool {

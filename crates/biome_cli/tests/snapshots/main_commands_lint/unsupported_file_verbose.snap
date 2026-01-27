@@ -29,6 +29,18 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+check.txt files/missingHandler  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome could not determine the language for the file extension txt
+  
+  Verbose advice
+  
+    i If you want to turn off this diagnostic, consider using --files-ignore-unknown from the CLI, or files.ignoreUnknown from the configuration file.
+    
+
+```
+
+```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Files processed:
@@ -51,4 +63,5 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 Scanned project folder in <TIME>.
 Checked 0 files in <TIME>. No fixes applied.
+Found 1 warning.
 ```

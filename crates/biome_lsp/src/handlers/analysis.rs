@@ -80,7 +80,10 @@ pub(crate) fn code_actions(
         features,
         inline_config: session.inline_config(),
         skip_ignore_check: false,
-        not_requested_features: FeaturesBuilder::new().with_search().build(),
+        not_requested_features: FeaturesBuilder::new()
+            .with_search()
+            .with_formatter()
+            .build(),
     })?;
 
     if !file_features.supports_lint() && !file_features.supports_assist() {

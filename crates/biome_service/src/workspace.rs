@@ -350,7 +350,8 @@ impl FeaturesSupported {
     pub fn is_ignored(&self) -> bool {
         self.0
             .iter()
-            .all(|support_kind| support_kind.is_ignored() || support_kind.is_not_requested())
+            .filter(|support_kind| !support_kind.is_not_requested())
+            .all(|support_kind| support_kind.is_ignored())
     }
 
     /// The file is protected only if all the features marked it as protected
@@ -364,6 +365,7 @@ impl FeaturesSupported {
     pub fn is_not_supported(&self) -> bool {
         self.0
             .iter()
+            .filter(|support_kind| !support_kind.is_not_requested())
             .all(|support_kind| support_kind.is_not_supported())
     }
 
@@ -371,6 +373,7 @@ impl FeaturesSupported {
     pub fn is_not_enabled(&self) -> bool {
         self.0
             .iter()
+            .filter(|support_kind| !support_kind.is_not_requested())
             .all(|support_kind| support_kind.is_not_enabled())
     }
 
