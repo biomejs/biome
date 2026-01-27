@@ -348,6 +348,7 @@ pub mod use_import_extensions;
 pub mod use_import_type;
 pub mod use_index_of;
 pub mod use_inline_script_id;
+pub mod use_input_name;
 pub mod use_is_array;
 pub mod use_is_nan;
 pub mod use_iterable_callback_return;

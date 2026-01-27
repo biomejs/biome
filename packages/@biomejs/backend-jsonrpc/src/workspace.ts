@@ -2193,6 +2193,11 @@ See https://biomejs.dev/linter/rules/use-inline-script-id
 	 */
 	useInlineScriptId?: UseInlineScriptIdConfiguration;
 	/**
+	* Require mutation argument to be always called "input".
+See https://biomejs.dev/linter/rules/use-input-name 
+	 */
+	useInputName?: UseInputNameConfiguration;
+	/**
 	* Disallow anonymous operations when more than one operation specified in document.
 See https://biomejs.dev/linter/rules/use-lone-anonymous-operation 
 	 */
@@ -3954,6 +3959,9 @@ export type UseFindConfiguration =
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
+export type UseInputNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseInputNameOptions;
 export type UseLoneAnonymousOperationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneAnonymousOperationOptions;
@@ -5540,6 +5548,10 @@ export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
 	options?: UseInlineScriptIdOptions;
 }
+export interface RuleWithUseInputNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseInputNameOptions;
+}
 export interface RuleWithUseLoneAnonymousOperationOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneAnonymousOperationOptions;
@@ -6923,6 +6935,12 @@ export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseInlineScriptIdOptions = {};
+export interface UseInputNameOptions {
+	/**
+	 * Check that the input type name follows the convention <mutationName>Input
+	 */
+	checkInputType?: CheckInputType;
+}
 export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
 export interface UseMaxParamsOptions {
@@ -7374,6 +7392,7 @@ export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
  * The GraphQL description style to enforce.
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
+export type CheckInputType = "off" | "loose" | "strict";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
 export type VueDirectiveStyle2 = "shorthand" | "longhand";
@@ -7796,6 +7815,7 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useInputName"
 	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneExecutableDefinition"
