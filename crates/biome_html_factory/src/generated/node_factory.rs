@@ -101,7 +101,7 @@ pub fn html_cdata_section(
 pub fn html_closing_element(
     l_angle_token: SyntaxToken,
     slash_token: SyntaxToken,
-    name: HtmlTagName,
+    name: AnyHtmlTagName,
     r_angle_token: SyntaxToken,
 ) -> HtmlClosingElement {
     HtmlClosingElement::unwrap_cast(SyntaxNode::new_detached(
@@ -112,6 +112,12 @@ pub fn html_closing_element(
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(r_angle_token)),
         ],
+    ))
+}
+pub fn html_component_name(value_token: SyntaxToken) -> HtmlComponentName {
+    HtmlComponentName::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_COMPONENT_NAME,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn html_content(value_token: SyntaxToken) -> HtmlContent {
@@ -216,9 +222,23 @@ pub fn html_embedded_content(value_token: SyntaxToken) -> HtmlEmbeddedContent {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn html_member_name(
+    object: AnyHtmlComponentObjectName,
+    dot_token: SyntaxToken,
+    member: HtmlTagName,
+) -> HtmlMemberName {
+    HtmlMemberName::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_MEMBER_NAME,
+        [
+            Some(SyntaxElement::Node(object.into_syntax())),
+            Some(SyntaxElement::Token(dot_token)),
+            Some(SyntaxElement::Node(member.into_syntax())),
+        ],
+    ))
+}
 pub fn html_opening_element(
     l_angle_token: SyntaxToken,
-    name: HtmlTagName,
+    name: AnyHtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
 ) -> HtmlOpeningElement {
@@ -278,7 +298,7 @@ impl HtmlRootBuilder {
 }
 pub fn html_self_closing_element(
     l_angle_token: SyntaxToken,
-    name: HtmlTagName,
+    name: AnyHtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
 ) -> HtmlSelfClosingElementBuilder {
@@ -292,7 +312,7 @@ pub fn html_self_closing_element(
 }
 pub struct HtmlSelfClosingElementBuilder {
     l_angle_token: SyntaxToken,
-    name: HtmlTagName,
+    name: AnyHtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
     slash_token: Option<SyntaxToken>,

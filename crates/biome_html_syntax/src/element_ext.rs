@@ -1,7 +1,8 @@
 use crate::{
-    AnyHtmlContent, AnyHtmlElement, AnyHtmlTextExpression, AnySvelteBlock, AstroEmbeddedContent,
-    HtmlAttribute, HtmlAttributeList, HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement,
-    HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName, ScriptType, inner_string_text,
+    AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, AnyHtmlTextExpression, AnySvelteBlock,
+    AstroEmbeddedContent, HtmlAttribute, HtmlAttributeList, HtmlElement, HtmlEmbeddedContent,
+    HtmlOpeningElement, HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName, ScriptType,
+    inner_string_text,
 };
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
 
@@ -11,15 +12,46 @@ const VOID_ELEMENTS: &[&str] = &[
     "wbr",
 ];
 
+/// Helper to get the text value from any tag name variant
+fn get_tag_name_text(name: &AnyHtmlTagName) -> SyntaxResult<TokenText> {
+    match name {
+        AnyHtmlTagName::HtmlTagName(tag) => {
+            let token = tag.value_token()?;
+            Ok(token.token_text_trimmed())
+        }
+        AnyHtmlTagName::HtmlComponentName(component) => {
+            let token = component.value_token()?;
+            Ok(token.token_text_trimmed())
+        }
+        AnyHtmlTagName::HtmlMemberName(member) => {
+            // For member names like Component.Member, we need to get the object part
+            // (the base component name) since that's what we want to track
+            match member.object()? {
+                crate::AnyHtmlComponentObjectName::HtmlTagName(tag) => {
+                    let token = tag.value_token()?;
+                    Ok(token.token_text_trimmed())
+                }
+                crate::AnyHtmlComponentObjectName::HtmlComponentName(component) => {
+                    let token = component.value_token()?;
+                    Ok(token.token_text_trimmed())
+                }
+                crate::AnyHtmlComponentObjectName::HtmlMemberName(nested_member) => {
+                    // Recursively get the base name from nested members
+                    get_tag_name_text(&AnyHtmlTagName::HtmlMemberName(nested_member))
+                }
+            }
+        }
+    }
+}
+
 impl HtmlSelfClosingElement {
     /// Whether the current self-closing element is a void element.
     ///
     /// <https://html.spec.whatwg.org/#void-elements>
     pub fn is_void_element(&self) -> SyntaxResult<bool> {
         let name = self.name()?;
-        Ok(VOID_ELEMENTS
-            .binary_search(&name.value_token()?.text_trimmed())
-            .is_ok())
+        let name_text = get_tag_name_text(&name)?;
+        Ok(VOID_ELEMENTS.binary_search(&&*name_text).is_ok())
     }
 }
 
@@ -101,8 +133,7 @@ impl HtmlSelfClosingElement {
     /// Returns the tag name of the element (trimmed), if it has one.
     pub fn tag_name(&self) -> Option<TokenText> {
         let name = self.name().ok()?;
-        let name_token = name.value_token().ok()?;
-        Some(name_token.token_text_trimmed())
+        get_tag_name_text(&name).ok()
     }
 
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
@@ -126,8 +157,7 @@ impl HtmlOpeningElement {
     /// Returns the tag name of the element (trimmed), if it has one.
     pub fn tag_name(&self) -> Option<TokenText> {
         let name = self.name().ok()?;
-        let name_token = name.value_token().ok()?;
-        Some(name_token.token_text_trimmed())
+        get_tag_name_text(&name).ok()
     }
 
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
@@ -198,27 +228,27 @@ impl HtmlElement {
     }
 
     pub fn is_style_tag(&self) -> bool {
-        let Ok(name_token) = self
-            .opening_element()
-            .and_then(|el| el.name())
-            .and_then(|name| name.value_token())
-        else {
+        let Ok(name) = self.opening_element().and_then(|el| el.name()) else {
             return false;
         };
 
-        name_token.text_trimmed().eq_ignore_ascii_case("style")
+        let Ok(name_text) = get_tag_name_text(&name) else {
+            return false;
+        };
+
+        name_text.eq_ignore_ascii_case("style")
     }
 
     pub fn is_script_tag(&self) -> bool {
-        let Ok(name_token) = self
-            .opening_element()
-            .and_then(|el| el.name())
-            .and_then(|name| name.value_token())
-        else {
+        let Ok(name) = self.opening_element().and_then(|el| el.name()) else {
             return false;
         };
 
-        name_token.text_trimmed().eq_ignore_ascii_case("script")
+        let Ok(name_text) = get_tag_name_text(&name) else {
+            return false;
+        };
+
+        name_text.eq_ignore_ascii_case("script")
     }
 
     fn has_attribute(&self, name: &str, value: &str) -> bool {
@@ -266,7 +296,7 @@ impl HtmlElement {
         self.is_style_tag() && self.has_attribute("lang", "scss")
     }
 
-    pub fn name(&self) -> SyntaxResult<HtmlTagName> {
+    pub fn name(&self) -> SyntaxResult<AnyHtmlTagName> {
         self.opening_element()?.name()
     }
 }
@@ -285,12 +315,20 @@ impl HtmlTagName {
     }
 }
 
+impl AnyHtmlTagName {
+    /// Returns the trimmed token text of the tag name.
+    /// For member names like Component.Member, returns the full member expression text.
+    pub fn token_text_trimmed(&self) -> Option<TokenText> {
+        get_tag_name_text(self).ok()
+    }
+}
+
 declare_node_union! {
     pub AnyHtmlTagElement = HtmlOpeningElement | HtmlSelfClosingElement
 }
 
 impl AnyHtmlTagElement {
-    pub fn name(&self) -> SyntaxResult<HtmlTagName> {
+    pub fn name(&self) -> SyntaxResult<AnyHtmlTagName> {
         match self {
             Self::HtmlOpeningElement(element) => element.name(),
             Self::HtmlSelfClosingElement(element) => element.name(),
@@ -305,7 +343,29 @@ impl AnyHtmlTagElement {
     }
 
     pub fn name_value_token(&self) -> SyntaxResult<HtmlSyntaxToken> {
-        self.name()?.value_token()
+        let name = self.name()?;
+        match name {
+            AnyHtmlTagName::HtmlTagName(tag) => tag.value_token(),
+            AnyHtmlTagName::HtmlComponentName(component) => component.value_token(),
+            AnyHtmlTagName::HtmlMemberName(member) => {
+                // For member names, return the first token (the base component name)
+                match member.object()? {
+                    crate::AnyHtmlComponentObjectName::HtmlTagName(tag) => tag.value_token(),
+                    crate::AnyHtmlComponentObjectName::HtmlComponentName(component) => {
+                        component.value_token()
+                    }
+                    crate::AnyHtmlComponentObjectName::HtmlMemberName(_) => {
+                        // For deeply nested members, we'd need to recurse
+                        // For now, use syntax to get the first token
+                        use biome_rowan::AstNode;
+                        member
+                            .syntax()
+                            .first_token()
+                            .ok_or_else(|| biome_rowan::SyntaxError::MissingRequiredChild)
+                    }
+                }
+            }
+        }
     }
 
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {

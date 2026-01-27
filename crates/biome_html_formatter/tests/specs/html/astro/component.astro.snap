@@ -39,7 +39,7 @@ Trailing newline: true
 import Base from "$layouts/Base.astro";
 ---
 
-<Base title="500"></Base>
+<Base title="500"> </Base>
 
 ```
 

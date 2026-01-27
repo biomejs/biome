@@ -47,6 +47,7 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
+use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
@@ -499,6 +500,22 @@ impl WorkspaceServer {
                 }
             }
         }
+
+        // Also track component element names from HTML templates (Vue/Svelte)
+        if let Some(html_file_source) = source.to_html_file_source() {
+            if html_file_source.is_vue()
+                || html_file_source.is_svelte()
+                || html_file_source.is_astro()
+            {
+                if let Some(Ok(any_parse)) = &syntax {
+                    let html_root: HtmlRoot = any_parse.tree();
+                    let mut builder = value_references.builder();
+                    builder.visit_html_root(&html_root);
+                    value_references.finish(builder);
+                }
+            }
+        }
+
         services.set_embedded_value_references(value_references);
 
         let is_indexed = if
@@ -1598,6 +1615,21 @@ impl Workspace for WorkspaceServer {
                 }
             }
         }
+
+        // Also track component element names from HTML templates (Vue/Svelte)
+        if let Some(html_file_source) = document_source.to_html_file_source() {
+            if html_file_source.is_vue()
+                || html_file_source.is_svelte()
+                || html_file_source.is_astro()
+            {
+                let html_root: HtmlRoot = parsed.any_parse.tree();
+                let mut builder = value_references.builder();
+                builder.visit_html_root(&html_root);
+                value_references.finish(builder);
+            }
+        }
+
+        dbg!(&value_references);
         services.set_embedded_value_references(value_references);
 
         let document = Document {
@@ -1719,7 +1751,7 @@ impl Workspace for WorkspaceServer {
                 plugins: plugins.clone(),
                 diagnostic_offset: None,
                 document_services: &services,
-                embedded_exported_bindings: services.embedded_bindings(),
+                snippet_services: None,
             });
 
             let LintResults {
@@ -1752,8 +1784,8 @@ impl Workspace for WorkspaceServer {
                     pull_code_actions,
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
-                    document_services: snippet_services,
-                    embedded_exported_bindings: services.embedded_bindings(),
+                    document_services: &services,
+                    snippet_services: Some(snippet_services),
                 });
 
                 diagnostics.extend(results.diagnostics);

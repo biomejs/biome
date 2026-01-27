@@ -31,6 +31,6 @@ Trailing newline: true
 -----
 
 ```svelte
-<Base title="500"></Base>
+<Base title="500"> </Base>
 
 ```

@@ -827,7 +827,7 @@ fn is_only_used_as_type(
 ) -> bool {
     // First check if the binding is used as a value in embedded non-source snippets (templates)
     if let Ok(name_token) = binding.name_token()
-        && references.is_used_as_value(name_token.text())
+        && references.is_used_as_value(name_token.text_trimmed())
     {
         return false;
     }

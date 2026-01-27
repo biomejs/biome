@@ -100,7 +100,7 @@ impl HtmlClosingElement {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: HtmlTagName) -> Self {
+    pub fn with_name(self, element: AnyHtmlTagName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -110,6 +110,14 @@ impl HtmlClosingElement {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
+impl HtmlComponentName {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }
@@ -219,6 +227,26 @@ impl HtmlEmbeddedContent {
         )
     }
 }
+impl HtmlMemberName {
+    pub fn with_object(self, element: AnyHtmlComponentObjectName) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_dot_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_member(self, element: HtmlTagName) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl HtmlOpeningElement {
     pub fn with_l_angle_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -226,7 +254,7 @@ impl HtmlOpeningElement {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: HtmlTagName) -> Self {
+    pub fn with_name(self, element: AnyHtmlTagName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -284,7 +312,7 @@ impl HtmlSelfClosingElement {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: HtmlTagName) -> Self {
+    pub fn with_name(self, element: AnyHtmlTagName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),

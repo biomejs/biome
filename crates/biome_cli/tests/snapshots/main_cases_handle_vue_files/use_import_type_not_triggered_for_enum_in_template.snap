@@ -2,6 +2,17 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
 ## `file.vue`
 
 ```vue

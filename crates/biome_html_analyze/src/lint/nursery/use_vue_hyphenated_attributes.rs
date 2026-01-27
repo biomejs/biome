@@ -4,7 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_html_syntax::{
-    AnyHtmlAttribute, HtmlAttributeList, HtmlOpeningElement, HtmlSelfClosingElement, HtmlTagName,
+    AnyHtmlAttribute, AnyHtmlTagName, HtmlAttributeList, HtmlOpeningElement, HtmlSelfClosingElement,
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TokenText, declare_node_union};
 use biome_rule_options::use_vue_hyphenated_attributes::UseVueHyphenatedAttributesOptions;
@@ -113,8 +113,9 @@ impl Rule for UseVueHyphenatedAttributes {
         let node = ctx.query();
 
         if let Some(ignore_tags) = ctx.options().ignore_tags.as_ref()
-            && let Ok(tag_name) = node.name().and_then(|name| name.value_token())
-            && ignore_tags.contains(tag_name.text_trimmed())
+            && let Ok(tag_name) = node.name()
+            && let Some(tag_name_text) = tag_name.token_text_trimmed()
+            && ignore_tags.contains(tag_name_text.as_ref())
         {
             return Box::new([]);
         }
@@ -227,7 +228,7 @@ impl Rule for UseVueHyphenatedAttributes {
 }
 
 impl AnyTagWithAttributes {
-    fn name(&self) -> SyntaxResult<HtmlTagName> {
+    fn name(&self) -> SyntaxResult<AnyHtmlTagName> {
         match self {
             Self::HtmlOpeningElement(node) => node.name(),
             Self::HtmlSelfClosingElement(node) => node.name(),

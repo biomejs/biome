@@ -18,7 +18,10 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
         let bracket_same_line = f.options().bracket_same_line().value();
         let self_close_void_elements = f.options().self_close_void_elements();
         let name = name?;
-        let is_canonical_html_element = should_lowercase_html_tag(f, &name);
+        let is_canonical_html_element = name
+            .as_html_tag_name()
+            .map(|name| should_lowercase_html_tag(f, &name))
+            .unwrap_or_default();
 
         write!(f, [l_angle_token.format(), name.format()])?;
 

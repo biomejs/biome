@@ -20,16 +20,26 @@ fn quick_test() {
     // quick brown fox
     // "#;
     let src = r#"
-{#snippet ff.call()}
-    {page.value}
-    {second.value}
-    <div>
-        <span></span>
-    </div>
-{/snippet}
+<script type="text/x-template" id="header-view-template">
+      <div class="draggable-header-view"
+        @mousedown="startDrag" @touchstart="startDrag"
+        @mousemove="onDrag" @touchmove="onDrag"
+        @mouseup="stopDrag" @touchend="stopDrag" @mouseleave="stopDrag">
+        <svg class="bg" width="320" height="560">
+          <path :d="headerPath" fill="3F51B5"></path>
+        </svg>
+        <div class="header">
+          <slot name="header"></slot>
+        </div>
+        <div class="content" :style="contentPosition">
+          <slot name="content"></slot>
+        </div>
+      </div>
+    </script>
 "#;
-    let source_type = HtmlFileSource::astro();
+    let source_type = HtmlFileSource::html();
     let tree = parse_html(src, HtmlParseOptions::from(&source_type));
+    dbg!(&tree);
     let options = HtmlFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)
         .with_line_width(LineWidth::try_from(80).unwrap())

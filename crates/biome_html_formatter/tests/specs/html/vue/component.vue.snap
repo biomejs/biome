@@ -31,6 +31,6 @@ Trailing newline: true
 -----
 
 ```vue
-<Base title="500"></Base>
+<Base title="500"> </Base>
 
 ```

@@ -1140,21 +1140,29 @@ import Component from "./Component.vue"
     ));
 }
 
-const VUE_ENUM_IN_TEMPLATE: &str = r#"<script setup lang="ts">
-import { Component, FooEnum } from './types';
-</script>
-<template>
-  <Component />
-  <div>{{ FooEnum.Foo }}</div>
-</template>"#;
-
 #[test]
 fn use_import_type_not_triggered_for_enum_in_template() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
     let file = Utf8Path::new("file.vue");
-    fs.insert(file.into(), VUE_ENUM_IN_TEMPLATE.as_bytes());
+    fs.insert(
+        file.into(),
+        r#"<script setup lang="ts">
+import { Component, FooEnum } from './types';
+</script>
+<template>
+  <Component />
+  <div>{{ FooEnum.Foo }}</div>
+</template>"#
+            .as_bytes(),
+    );
 
     let (fs, result) = run_cli(
         fs,
@@ -1167,6 +1175,62 @@ fn use_import_type_not_triggered_for_enum_in_template() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "use_import_type_not_triggered_for_enum_in_template",
+        fs,
+        console,
+        result,
+    ));
+}
+
+const VUE_ENUM_IN_TEMPLATE: &str = r#"<script setup lang="ts">
+import { Component, FooEnum } from './types';
+</script>
+<template>
+  <Component />
+  <div>{{ FooEnum.Foo }}</div>
+</template>"#;
+
+#[test]
+fn use_import_type_not_triggered_for_enum_in_template_v2() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+import { Avatar as AvatarPrimitive } from "bits-ui"; // <-- false positive
+import { cn } from "$lib/utils.js";
+
+let {
+	ref = $bindable(null),
+	class: className,
+}: AvatarPrimitive.FallbackProps = $props();
+</script>
+
+<!-- used as value here -->
+<AvatarPrimitive.Fallback
+	bind:ref
+	class="something nice"
+/>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_import_type_not_triggered_for_enum_in_template_v2",
         fs,
         console,
         result,
