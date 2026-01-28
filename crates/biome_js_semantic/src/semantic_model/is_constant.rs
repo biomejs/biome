@@ -14,8 +14,7 @@ pub fn is_constant(expr: &AnyJsExpression) -> bool {
         if matches!(node.kind(), JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION)
             && !node
                 .children_with_tokens()
-                .skip(1)
-                .next()
+                .nth(2)
                 .is_some_and(|child| matches!(child.kind(), JsSyntaxKind::EQ))
         {
             return false;
