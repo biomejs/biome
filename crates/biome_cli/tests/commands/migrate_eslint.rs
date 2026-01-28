@@ -712,3 +712,34 @@ fn migrate_merge_with_overrides() {
         result,
     ));
 }
+
+#[test]
+fn migrate_rules_covered_by_formatter() {
+    let biomejson = r#"{ "linter": { "enabled": true } }"#;
+    let eslintrc = r#"{
+        "rules": {
+            "eol-last": "error",
+            "indent": ["error", 2],
+        },
+    }"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Utf8Path::new(".eslintrc").into(), eslintrc.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "eslint"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_rules_covered_by_formatter",
+        fs,
+        console,
+        result,
+    ));
+}

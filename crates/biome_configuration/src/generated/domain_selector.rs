@@ -28,6 +28,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noDeprecatedImports"),
         RuleFilter::Rule("nursery", "noImportCycles"),
         RuleFilter::Rule("nursery", "noUnresolvedImports"),
+        RuleFilter::Rule("nursery", "useConsistentEnumValueType"),
     ]
 });
 static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {

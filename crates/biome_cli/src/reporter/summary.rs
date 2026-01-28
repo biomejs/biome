@@ -479,7 +479,7 @@ impl PartialOrd<Self> for RuleName {
 
 impl Ord for RuleName {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.0.len().cmp(&other.0.len())
+        (self.0.len(), self.0).cmp(&(other.0.len(), other.0))
     }
 }
 impl Display for RuleName {
