@@ -2,48 +2,9 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `index.ts`
+## `file.xml`
 
-```ts
-import { z} from "z"
-import { z, b , a} from "lodash"
-
-a ==b
-
-debugger
-
-let f;
-		let f;
-```
-
-## `main.ts`
-
-```ts
-import { z} from "z"
-import { z, b , a} from "lodash"
-
-a ==b
-
-debugger
-
-let f;
-		let f;
-```
-
-# Termination Message
-
-```block
-check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Some errors were emitted while running checks.
-  
-
-
-```
-
-# Emitted Messages
-
-```block
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites name="Biome" tests="19" failures="19" errors="16" time="<TIME>">
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
@@ -142,5 +103,44 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
         </testcase>
     </testsuite>
 </testsuites>
+
+```
+
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
 
 ```
