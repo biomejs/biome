@@ -752,15 +752,13 @@ fn allow_setext_heading(p: &MarkdownParser) -> bool {
 /// Compute the real leading indent of the current line from source text.
 /// This is needed because leading whitespace may have been consumed as trivia
 /// in list item context, making `line_start_leading_indent()` return 0.
+/// Token-based lookahead cannot recover the original column once trivia is skipped.
 fn real_line_indent_from_source(p: &MarkdownParser) -> usize {
     let source = p.source().source_text();
     let pos: usize = p.cur_range().start().into();
 
     // Find the start of the current line
-    let line_start = source[..pos]
-        .rfind('\n')
-        .map(|i| i + 1)
-        .unwrap_or(0);
+    let line_start = source[..pos].rfind('\n').map_or(0, |i| i + 1);
 
     // Count leading whitespace columns on this line
     let mut column = 0;
@@ -862,6 +860,9 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
             if quote_depth > 0 {
                 let is_quote_blank_line = p.lookahead(|p| {
                     p.bump(NEWLINE);
+                    if is_quote_only_blank_line_from_source(p, quote_depth) {
+                        return true;
+                    }
                     if !has_quote_prefix(p, quote_depth) {
                         return false;
                     }
@@ -932,10 +933,11 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
             // After crossing a line, check for setext underlines.
             // For non-list paragraphs, we need to look past up to 3 spaces of indent
             // to detect setext underlines (CommonMark §4.3).
-            if has_content && p.state().list_item_required_indent == 0 {
-                let is_setext = p.lookahead(|p| {
-                    at_setext_underline_after_newline(p).is_some()
-                });
+            // IMPORTANT: Only break if allow_setext_heading() is true - this ensures
+            // setext underlines outside a blockquote (without >) don't incorrectly
+            // terminate the paragraph (CommonMark example 093).
+            if has_content && p.state().list_item_required_indent == 0 && allow_setext_heading(p) {
+                let is_setext = p.lookahead(|p| at_setext_underline_after_newline(p).is_some());
                 if is_setext {
                     // Skip the indent so parse_paragraph sees the underline
                     p.skip_line_indent(INDENT_CODE_BLOCK_SPACES);
@@ -1074,18 +1076,16 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
         if parsed.is_absent() {
             break;
         }
-        let after_hard_break =
-            matches!(&parsed, Present(cm) if cm.kind(p) == MD_HARD_LINE);
+        let after_hard_break = matches!(&parsed, Present(cm) if cm.kind(p) == MD_HARD_LINE);
 
         // Per CommonMark §6.7: after a hard line break, leading spaces on the
         // next line are ignored. Skip whitespace-only textual tokens as trivia.
-        if after_hard_break && p.at(MD_TEXTUAL_LITERAL) {
-            if p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
-                while p.at(MD_TEXTUAL_LITERAL)
-                    && p.cur_text().chars().all(|c| c == ' ' || c == '\t')
-                {
-                    p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
-                }
+        if after_hard_break
+            && p.at(MD_TEXTUAL_LITERAL)
+            && p.cur_text().chars().all(|c| c == ' ' || c == '\t')
+        {
+            while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+                p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
             }
         }
 
@@ -1095,6 +1095,67 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
 
     m.complete(p, MD_INLINE_ITEM_LIST);
     p.set_emphasis_context(prev_emphasis_context);
+}
+
+fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> bool {
+    if depth == 0 {
+        return false;
+    }
+
+    let source = p.source().source_text();
+    let start: usize = p.cur_range().start().into();
+    if start >= source.len() {
+        return true;
+    }
+
+    // Scan up to 3 spaces/tabs before the first '>'
+    let mut idx = start;
+    let mut indent = 0usize;
+    while idx < source.len() {
+        match source.as_bytes()[idx] {
+            b' ' => {
+                indent += 1;
+                idx += 1;
+            }
+            b'\t' => {
+                indent += 4 - (indent % 4);
+                idx += 1;
+            }
+            _ => break,
+        }
+        if indent > 3 {
+            return false;
+        }
+    }
+
+    // Consume quote markers and optional single space after each
+    for _ in 0..depth {
+        if idx >= source.len() || source.as_bytes()[idx] != b'>' {
+            return false;
+        }
+        idx += 1;
+        if idx < source.len() {
+            let c = source.as_bytes()[idx];
+            if c == b' ' || c == b'\t' {
+                idx += 1;
+            }
+        }
+    }
+
+    // Skip trailing whitespace
+    while idx < source.len() {
+        match source.as_bytes()[idx] {
+            b' ' | b'\t' => idx += 1,
+            _ => break,
+        }
+    }
+
+    // Blank if line ends here or at newline
+    if idx >= source.len() {
+        return true;
+    }
+
+    matches!(source.as_bytes()[idx], b'\n' | b'\r')
 }
 
 /// Build an emphasis context for the current inline list and install it on the parser.

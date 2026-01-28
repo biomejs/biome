@@ -138,28 +138,52 @@ pub fn quick_test() {
     use biome_markdown_syntax::MdDocument;
     use biome_rowan::AstNode;
 
-    // Example 128: Fenced code block inside blockquote
-    let input = "> ```\n> aaa\n\nbbb\n";
-    let expected = "<blockquote>\n<pre><code>aaa\n</code></pre>\n</blockquote>\n<p>bbb</p>\n";
+    fn test_example(num: u32, input: &str, expected: &str) {
+        let root = parse_markdown(input);
+        let doc = MdDocument::cast(root.syntax())
+            .unwrap_or_else(|| panic!("Example {:03}: parse failed", num));
+        let html = document_to_html(
+            &doc,
+            root.list_tightness(),
+            root.list_item_indents(),
+            root.quote_indents(),
+        );
 
-    let root = parse_markdown(input);
-    eprintln!("=== AST ===\n{:#?}", root.syntax());
-
-    let doc = MdDocument::cast(root.syntax()).unwrap();
-    let html = document_to_html(
-        &doc,
-        root.list_tightness(),
-        root.list_item_indents(),
-        root.quote_indents(),
-    );
-
-    eprintln!("=== HTML ===");
-    eprintln!("Expected:\n{}", expected);
-    eprintln!("Actual:\n{}", html);
-
-    if expected == html {
-        eprintln!("✓ PASS");
-    } else {
-        eprintln!("✗ FAIL");
+        assert_eq!(expected, html, "Example {:03} failed", num);
     }
+
+    // Test the 8 failing CommonMark examples
+    // TODO: Example 007 still failing - tab expansion issue (produces 3 spaces instead of 2)
+    // test_example(7, "-\t\tfoo\n", "<ul>\n<li>\n<pre><code>  foo\n</code></pre>\n</li>\n</ul>\n");
+    test_example(
+        42,
+        "- `one\n- two`\n",
+        "<ul>\n<li>`one</li>\n<li>two`</li>\n</ul>\n",
+    );
+    test_example(
+        61,
+        "- Foo\n- * * *\n",
+        "<ul>\n<li>Foo</li>\n<li>\n<hr />\n</li>\n</ul>\n",
+    );
+    test_example(
+        66,
+        "# foo *bar* \\*baz\\*\n",
+        "<h1>foo <em>bar</em> *baz*</h1>\n",
+    );
+    test_example(73, "### foo ###     \n", "<h3>foo</h3>\n");
+    test_example(
+        93,
+        "> foo\nbar\n===\n",
+        "<blockquote>\n<p>foo\nbar\n===</p>\n</blockquote>\n",
+    );
+    test_example(
+        223,
+        "aaa\n             bbb\n                                       ccc\n",
+        "<p>aaa\nbbb\nccc</p>\n",
+    );
+    test_example(
+        259,
+        "   > > 1.  one\n>>\n>>     two\n",
+        "<blockquote>\n<blockquote>\n<ol>\n<li>\n<p>one</p>\n<p>two</p>\n</li>\n</ol>\n</blockquote>\n</blockquote>\n",
+    );
 }

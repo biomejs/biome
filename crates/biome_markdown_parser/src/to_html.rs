@@ -121,8 +121,18 @@ fn expand_tabs(text: &str) -> String {
 /// 2. Strips the first `strip_cols` columns of indentation
 /// 3. Preserves literal tabs in the remaining content
 fn strip_indent_preserve_tabs(text: &str, strip_cols: usize) -> String {
+    strip_indent_preserve_tabs_with_offset(text, strip_cols, 0)
+}
+
+fn strip_indent_preserve_tabs_with_offset(
+    text: &str,
+    strip_cols: usize,
+    first_line_column: usize,
+) -> String {
+    let mut first_line = true;
     map_lines(text, |line, result| {
-        let mut col = 0;
+        let mut col = if first_line { first_line_column } else { 0 };
+        first_line = false;
         let mut char_idx = 0;
 
         // Find where to start copying (after stripping strip_cols columns)
@@ -461,19 +471,22 @@ fn render_paragraph(
     }
 }
 
+/// Strip leading whitespace from paragraph continuation lines.
+///
+/// Per CommonMark §4.8, paragraph continuation lines can have any amount of
+/// initial whitespace, and that whitespace is stripped in the output.
+/// The first line keeps its content unchanged; subsequent lines have all
+/// leading spaces and tabs stripped.
 fn strip_paragraph_indent(content: &str) -> String {
+    let mut first_line = true;
     map_lines(content, |line, out| {
-        let mut stripped = 0usize;
-        let mut at_line_start = true;
-        for ch in line.chars() {
-            if at_line_start {
-                if ch == ' ' && stripped < 4 {
-                    stripped += 1;
-                    continue;
-                }
-                at_line_start = false;
-            }
-            out.push(ch);
+        if first_line {
+            // First line: keep as-is
+            first_line = false;
+            out.push_str(line);
+        } else {
+            // Continuation lines: strip ALL leading whitespace
+            out.push_str(line.trim_start());
         }
     })
 }
@@ -660,6 +673,49 @@ fn render_indented_code_block(
     out.push_str("</code></pre>\n");
 }
 
+fn render_indented_code_block_in_list(
+    code: &MdIndentCodeBlock,
+    out: &mut String,
+    list_indent: usize,
+    quote_indent: usize,
+    first_line_column: usize,
+) {
+    out.push_str("<pre><code>");
+
+    let mut content = collect_raw_inline_text(&code.content());
+    if content.starts_with('\n') {
+        content = content[1..].to_string();
+    }
+
+    let content = strip_indent_preserve_tabs_with_offset(
+        &content,
+        4 + list_indent + quote_indent,
+        first_line_column,
+    );
+    out.push_str(&escape_html(&content));
+
+    out.push_str("</code></pre>\n");
+}
+
+fn render_block_in_list(
+    block: &AnyMdBlock,
+    ctx: &HtmlRenderContext,
+    out: &mut String,
+    in_tight_list: bool,
+    list_indent: usize,
+    quote_indent: usize,
+    first_line_column: usize,
+) {
+    if let AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(AnyCodeBlock::MdIndentCodeBlock(
+        code,
+    ))) = block
+    {
+        render_indented_code_block_in_list(code, out, list_indent, quote_indent, first_line_column);
+    } else {
+        render_block(block, ctx, out, in_tight_list, list_indent, quote_indent);
+    }
+}
+
 /// Render an HTML block.
 fn render_html_block(
     html: &MdHtmlBlock,
@@ -785,19 +841,20 @@ fn render_list_item(
     // A blank line within an item requires two consecutive newline blocks
     // (one ending the previous line, one for the blank line itself).
     // A single MD_NEWLINE between blocks is just a structural separator.
-    let item_has_blank_line = blocks.windows(2).any(|pair| {
-        is_newline_block(&pair[0]) && is_newline_block(&pair[1])
-    });
+    let item_has_blank_line = blocks
+        .windows(2)
+        .any(|pair| is_newline_block(&pair[0]) && is_newline_block(&pair[1]));
     let is_tight = is_tight && !item_has_blank_line;
 
-    let (indent, first_line_code_indent) = match list_indent {
+    let (indent, first_line_code_indent, first_line_column) = match list_indent {
         Some(entry) => {
             let base = list_item_required_indent(entry);
             let first_line_code =
-                (entry.spaces_after_marker > INDENT_CODE_BLOCK_SPACES).then_some(1);
-            (base, first_line_code)
+                (entry.spaces_after_marker > INDENT_CODE_BLOCK_SPACES).then_some(base);
+            let column = entry.marker_indent + entry.marker_width;
+            (base, first_line_code, column)
         }
-        None => (0, None),
+        None => (0, None, 0),
     };
 
     if is_empty_content(&blocks) {
@@ -818,7 +875,26 @@ fn render_list_item(
                     ) => code_indent,
                     _ => indent,
                 };
-                render_block(block, ctx, out, true, block_indent, quote_indent);
+                let column_for_block = if first_line_code_indent.is_some()
+                    && matches!(
+                        block,
+                        AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
+                            AnyCodeBlock::MdIndentCodeBlock(_)
+                        ))
+                    ) {
+                    first_line_column
+                } else {
+                    0
+                };
+                render_block_in_list(
+                    block,
+                    ctx,
+                    out,
+                    true,
+                    block_indent,
+                    quote_indent,
+                    column_for_block,
+                );
             }
             // Remove trailing newline for tight lists
             if out.ends_with('\n') {
@@ -836,10 +912,29 @@ fn render_list_item(
                     ) => code_indent,
                     _ => indent,
                 };
-                render_block(first, ctx, out, true, block_indent, quote_indent);
+                let column_for_block = if first_line_code_indent.is_some()
+                    && matches!(
+                        first,
+                        AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
+                            AnyCodeBlock::MdIndentCodeBlock(_)
+                        ))
+                    ) {
+                    first_line_column
+                } else {
+                    0
+                };
+                render_block_in_list(
+                    first,
+                    ctx,
+                    out,
+                    true,
+                    block_indent,
+                    quote_indent,
+                    column_for_block,
+                );
             }
             for block in blocks.iter().skip(1) {
-                render_block(block, ctx, out, true, indent, quote_indent);
+                render_block_in_list(block, ctx, out, true, indent, quote_indent, 0);
             }
         } else {
             out.push('\n');
@@ -857,11 +952,35 @@ fn render_list_item(
                 } else {
                     indent
                 };
-                render_block(block, ctx, out, true, block_indent, quote_indent);
+                let column_for_block = if idx == 0
+                    && first_line_code_indent.is_some()
+                    && matches!(
+                        block,
+                        AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
+                            AnyCodeBlock::MdIndentCodeBlock(_)
+                        ))
+                    ) {
+                    first_line_column
+                } else {
+                    0
+                };
+                render_block_in_list(
+                    block,
+                    ctx,
+                    out,
+                    true,
+                    block_indent,
+                    quote_indent,
+                    column_for_block,
+                );
             }
             // Remove trailing newline when the last content block is a paragraph
             // (tight list paragraphs should not have trailing newlines)
-            if blocks.iter().rev().find(|b| !is_newline_block(b)).is_some_and(is_paragraph_block)
+            if blocks
+                .iter()
+                .rev()
+                .find(|b| !is_newline_block(b))
+                .is_some_and(is_paragraph_block)
                 && out.ends_with('\n')
             {
                 out.pop();
@@ -884,7 +1003,27 @@ fn render_list_item(
             } else {
                 indent
             };
-            render_block(block, ctx, out, false, block_indent, quote_indent);
+            let column_for_block = if idx == 0
+                && first_line_code_indent.is_some()
+                && matches!(
+                    block,
+                    AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
+                        AnyCodeBlock::MdIndentCodeBlock(_)
+                    ))
+                ) {
+                first_line_column
+            } else {
+                0
+            };
+            render_block_in_list(
+                block,
+                ctx,
+                out,
+                false,
+                block_indent,
+                quote_indent,
+                column_for_block,
+            );
         }
     }
 
@@ -982,7 +1121,8 @@ fn render_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &mut String
 /// Render textual content.
 fn render_textual(text: &MdTextual, out: &mut String) {
     if let Ok(token) = text.value_token() {
-        let raw = token.text();
+        // Use text_trimmed() to exclude skipped trivia (e.g., indentation stripped during parsing)
+        let raw = token.text_trimmed();
         // Process backslash escapes and escape HTML
         let processed = process_escapes(raw);
         out.push_str(&escape_html(&processed));

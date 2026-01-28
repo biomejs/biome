@@ -240,7 +240,6 @@ impl<'source> MarkdownParser<'source> {
         self.source.bump_link_definition();
     }
 
-
     pub fn checkpoint(&self) -> MarkdownParserCheckpoint {
         MarkdownParserCheckpoint {
             context: self.context.checkpoint(),

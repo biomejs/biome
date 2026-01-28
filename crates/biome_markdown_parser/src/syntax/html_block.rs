@@ -56,8 +56,13 @@ enum Type1Tag {
     Textarea,
 }
 
+/// Determine HTML block type using raw source to match line-based CommonMark rules.
+/// Token lookahead is insufficient here because lexer contexts can split or merge
+/// tokens across `<...>` boundaries, and we need the exact line text.
 fn html_block_kind(p: &MarkdownParser) -> Option<HtmlBlockKind> {
     let remaining = p.source_after_current();
+    // Skip whitespace trivia that may precede the '<' token
+    let remaining = remaining.trim_start_matches([' ', '\t']);
     if !remaining.starts_with('<') {
         return None;
     }
@@ -147,51 +152,21 @@ fn first_line(text: &str) -> &str {
     text.split_once(['\n', '\r']).map_or(text, |(line, _)| line)
 }
 
+/// Check if a line contains only a valid HTML open or close tag (for type 7 HTML blocks).
+/// Uses the same validation as inline HTML (CommonMark §6.8) to ensure proper tag structure.
 fn line_has_only_tag(line: &str) -> bool {
     let bytes = line.as_bytes();
     if !bytes.starts_with(b"<") {
         return false;
     }
 
-    let Some(end) = tag_end_index(bytes) else {
+    // Use inline HTML validator which properly checks tag name, attributes, etc.
+    let Some(html_len) = super::inline::is_inline_html(line) else {
         return false;
     };
 
-    line[end + 1..].chars().all(|c| c == ' ' || c == '\t')
-}
-
-fn tag_end_index(bytes: &[u8]) -> Option<usize> {
-    let mut i = 1;
-    let mut in_single = false;
-    let mut in_double = false;
-
-    while i < bytes.len() {
-        let b = bytes[i];
-        if in_single {
-            if b == b'\'' {
-                in_single = false;
-            }
-            i += 1;
-            continue;
-        }
-        if in_double {
-            if b == b'"' {
-                in_double = false;
-            }
-            i += 1;
-            continue;
-        }
-
-        match b {
-            b'\'' => in_single = true,
-            b'"' => in_double = true,
-            b'>' => return Some(i),
-            _ => {}
-        }
-        i += 1;
-    }
-
-    None
+    // After the tag, only whitespace is allowed
+    line[html_len..].chars().all(|c| c == ' ' || c == '\t')
 }
 
 /// Block-level tags that can interrupt paragraphs.
@@ -317,25 +292,33 @@ pub(crate) fn parse_html_block(p: &mut MarkdownParser) -> ParsedSyntax {
 
 fn parse_until_blank_line(p: &mut MarkdownParser) {
     while !p.at(EOF) {
-        if p.at(NEWLINE) && p.at_blank_line() {
+        if p.at(NEWLINE) {
+            if p.at_blank_line() {
+                let text_m = p.start();
+                p.bump_remap(MD_TEXTUAL_LITERAL);
+                text_m.complete(p, MD_TEXTUAL);
+                break;
+            }
+            // Consume the newline first, then check if the next line exits the container
             let text_m = p.start();
             p.bump_remap(MD_TEXTUAL_LITERAL);
             text_m.complete(p, MD_TEXTUAL);
-            break;
+
+            if at_container_boundary(p) {
+                break;
+            }
+            skip_container_prefixes(p);
+            continue;
         }
 
+        // For non-newline tokens, check container boundary (handles virtual line start)
         if at_container_boundary(p) {
             break;
         }
 
         let text_m = p.start();
-        let is_newline = p.at(NEWLINE);
         p.bump_remap(MD_TEXTUAL_LITERAL);
         text_m.complete(p, MD_TEXTUAL);
-
-        if is_newline {
-            skip_container_prefixes(p);
-        }
     }
 }
 
@@ -343,10 +326,6 @@ fn parse_until_terminator(p: &mut MarkdownParser, terminator: &str, case_insensi
     let mut line = String::new();
 
     while !p.at(EOF) {
-        if at_container_boundary(p) {
-            break;
-        }
-
         let text = p.cur_text();
         let is_newline = p.at(NEWLINE);
         line.push_str(text);
@@ -360,6 +339,10 @@ fn parse_until_terminator(p: &mut MarkdownParser, terminator: &str, case_insensi
                 break;
             }
             line.clear();
+            // Check container boundary after consuming newline
+            if at_container_boundary(p) {
+                break;
+            }
             skip_container_prefixes(p);
         }
     }
@@ -380,7 +363,7 @@ fn line_contains(line: &str, needle: &str, case_insensitive: bool) -> bool {
         if hay[i..i + needle.len()]
             .iter()
             .zip(needle.iter())
-            .all(|(a, b)| a.to_ascii_lowercase() == b.to_ascii_lowercase())
+            .all(|(a, b)| a.eq_ignore_ascii_case(b))
         {
             return true;
         }
@@ -406,7 +389,14 @@ fn skip_container_prefixes(p: &mut MarkdownParser) {
 fn at_container_boundary(p: &mut MarkdownParser) -> bool {
     let quote_depth = p.state().block_quote_depth;
     if quote_depth > 0 && p.at_line_start() && !has_quote_prefix(p, quote_depth) {
-        return true;
+        // Skip if at virtual line start — the quote prefix was already consumed
+        // by the container parser that set this virtual start position.
+        if p.state()
+            .virtual_line_start
+            .is_none_or(|vls| vls != p.cur_range().start())
+        {
+            return true;
+        }
     }
 
     let required_indent = p.state().list_item_required_indent;

@@ -621,15 +621,6 @@ pub(crate) fn parse_hard_line(p: &mut MarkdownParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let ends_block = p.lookahead(|p| {
-        p.bump(MD_HARD_LINE_LITERAL);
-        p.at(NEWLINE) || p.at(EOF)
-    });
-
-    if ends_block {
-        return super::parse_textual(p);
-    }
-
     let m = p.start();
     p.bump(MD_HARD_LINE_LITERAL);
     Present(m.complete(p, MD_HARD_LINE))
@@ -642,7 +633,6 @@ pub(crate) fn parse_hard_line(p: &mut MarkdownParser) -> ParsedSyntax {
 /// as literal text, not an unclosed code span.
 ///
 /// Returns false if no match found (opener should become literal text).
-
 fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -> bool {
     use crate::lexer::MarkdownLexContext;
 
@@ -673,6 +663,11 @@ fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -
                 if crate::syntax::at_setext_underline_after_newline(p).is_some() {
                     return false;
                 }
+                // Per CommonMark, block interrupts (including list markers) can
+                // terminate paragraphs. A code span cannot cross a block boundary.
+                if crate::syntax::at_block_interrupt(p) || at_list_marker_after_newline(p) {
+                    return false;
+                }
                 continue;
             }
 
@@ -695,6 +690,78 @@ fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -
             p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
         }
     })
+}
+
+/// Check if we're at a list marker after a newline.
+/// This is used to detect when a code span would cross a list item boundary.
+fn at_list_marker_after_newline(p: &mut MarkdownParser) -> bool {
+    // Skip up to 3 spaces of indent (list markers can be indented 0-3 spaces)
+    let mut columns = 0usize;
+    while columns < 4
+        && p.at(MD_TEXTUAL_LITERAL)
+        && p.cur_text().chars().all(|c| c == ' ' || c == '\t')
+    {
+        for c in p.cur_text().chars() {
+            match c {
+                ' ' => columns += 1,
+                '\t' => columns += 4 - (columns % 4),
+                _ => {}
+            }
+        }
+        if columns >= 4 {
+            return false; // Indented code block, not a list marker
+        }
+        p.bump(MD_TEXTUAL_LITERAL);
+    }
+
+    // Check for bullet list markers: -, *, +
+    if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
+        let marker_text = p.cur_text();
+        if marker_text.len() == 1 {
+            p.bump_any();
+            // Must be followed by space, tab, or EOL
+            if p.at(NEWLINE) || p.at(T![EOF]) {
+                return true;
+            }
+            if p.at(MD_TEXTUAL_LITERAL) {
+                let text = p.cur_text();
+                return text.starts_with(' ') || text.starts_with('\t');
+            }
+        }
+        return false;
+    }
+
+    // Check for ordered list marker: digits followed by . or )
+    if p.at(MD_ORDERED_LIST_MARKER) {
+        p.bump(MD_ORDERED_LIST_MARKER);
+        // Must be followed by space, tab, or EOL
+        if p.at(NEWLINE) || p.at(T![EOF]) {
+            return true;
+        }
+        if p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            return text.starts_with(' ') || text.starts_with('\t');
+        }
+        return false;
+    }
+
+    // Check for textual bullet markers (lexed as MD_TEXTUAL_LITERAL in some contexts)
+    if p.at(MD_TEXTUAL_LITERAL) {
+        let text = p.cur_text();
+        if text == "-" || text == "*" || text == "+" {
+            p.bump(MD_TEXTUAL_LITERAL);
+            // Must be followed by space, tab, or EOL
+            if p.at(NEWLINE) || p.at(T![EOF]) {
+                return true;
+            }
+            if p.at(MD_TEXTUAL_LITERAL) {
+                let next = p.cur_text();
+                return next.starts_with(' ') || next.starts_with('\t');
+            }
+        }
+    }
+
+    false
 }
 
 /// Parse inline code span (`` `code` `` or ``` `` `code` `` ```).
@@ -1382,6 +1449,7 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
         // Complete the destination and link immediately without looking for closing paren.
         if destination_result == DestinationScanResult::DepthExceeded {
             destination.complete(p, MD_INLINE_ITEM_LIST);
+            p.force_relex_regular();
             return Present(m.complete(p, kind.inline_kind()));
         }
 

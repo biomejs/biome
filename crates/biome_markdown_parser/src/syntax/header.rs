@@ -25,6 +25,7 @@
 //! ```
 
 use crate::parser::MarkdownParser;
+use crate::syntax::inline::EmphasisContext;
 use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::{
     Parser,
@@ -144,6 +145,9 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
         return;
     }
 
+    // Set up emphasis context for header content (single line only)
+    let prev_context = set_header_emphasis_context(p);
+
     // Parse content as a paragraph containing inline items
     let m = p.start();
     let inline_m = p.start();
@@ -179,6 +183,83 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
 
     inline_m.complete(p, MD_INLINE_ITEM_LIST);
     m.complete(p, MD_PARAGRAPH);
+
+    // Restore previous emphasis context
+    p.set_emphasis_context(prev_context);
+}
+
+/// Compute the byte length of header content (up to end of line or trailing hashes).
+fn header_content_source_len(p: &mut MarkdownParser) -> usize {
+    p.lookahead(|p| {
+        let mut len = 0usize;
+
+        loop {
+            if p.at(T![EOF]) || p.at(NEWLINE) {
+                break;
+            }
+
+            // Check for trailing hashes (whitespace + # + end of line)
+            if p.at(MD_TEXTUAL_LITERAL) {
+                let text = p.cur_text();
+                if text.chars().all(|c| c == ' ' || c == '\t') {
+                    // Might be whitespace before trailing hashes
+                    let ws_len = text.len();
+                    p.bump(MD_TEXTUAL_LITERAL);
+
+                    // Check if followed by hash + end of line
+                    if p.at(T![#]) {
+                        let hash_len = p.cur_text().len();
+                        p.bump(T![#]);
+
+                        // Skip any whitespace after hashes
+                        while p.at(MD_TEXTUAL_LITERAL)
+                            && p.cur_text().chars().all(|c| c == ' ' || c == '\t')
+                        {
+                            p.bump(MD_TEXTUAL_LITERAL);
+                        }
+
+                        if p.at(T![EOF]) || p.at(NEWLINE) {
+                            // This is trailing hashes - don't include in content
+                            break;
+                        }
+                        // Not trailing hashes - include in content
+                        len += ws_len + hash_len;
+                    } else {
+                        len += ws_len;
+                    }
+                    continue;
+                }
+            }
+
+            // Check for MD_HARD_LINE_LITERAL (trailing spaces/backslash)
+            if p.at(MD_HARD_LINE_LITERAL) {
+                // Don't include hard line in emphasis context
+                break;
+            }
+
+            len += p.cur_text().len();
+            p.bump_any();
+        }
+
+        len
+    })
+}
+
+/// Build an emphasis context for header content and install it on the parser.
+/// Returns the previous context so it can be restored.
+fn set_header_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext> {
+    let source_len = header_content_source_len(p);
+    let source = p.source_after_current();
+    let inline_source = if source_len <= source.len() {
+        &source[..source_len]
+    } else {
+        source
+    };
+    let base_offset = u32::from(p.cur_range().start()) as usize;
+    let context = EmphasisContext::new(inline_source, base_offset, |label| {
+        p.has_link_reference_definition(label)
+    });
+    p.set_emphasis_context(Some(context))
 }
 
 /// Check if the current position has a trailing hash sequence.
@@ -198,11 +279,16 @@ fn is_trailing_hash_sequence(p: &mut MarkdownParser) -> bool {
     // Consume the single HASH token (contains all consecutive hashes)
     p.bump(T![#]);
 
-    // Skip any trailing whitespace after hashes
-    while p.at(MD_TEXTUAL_LITERAL) {
+    // Skip any trailing whitespace after hashes (may include newline in same token)
+    // Also check MD_HARD_LINE_LITERAL (5+ trailing spaces before newline)
+    while p.at(MD_TEXTUAL_LITERAL) || p.at(MD_HARD_LINE_LITERAL) {
         let text = p.cur_text();
-        if text.chars().all(|c| c == ' ' || c == '\t') {
-            p.bump(MD_TEXTUAL_LITERAL);
+        // Accept whitespace tokens that may include newline
+        if text
+            .chars()
+            .all(|c| c == ' ' || c == '\t' || c == '\n' || c == '\r')
+        {
+            p.bump_any();
         } else {
             break;
         }
@@ -255,10 +341,27 @@ pub(crate) fn parse_trailing_hashes(p: &mut MarkdownParser) {
         }
 
         // Consume the trailing hash token and wrap in MdHash node
-        if p.at(T![#]) && !p.at_inline_end() {
+        if p.at(T![#]) {
             let hash_m = p.start();
             p.bump(T![#]);
             hash_m.complete(p, MD_HASH);
+
+            // Skip any trailing whitespace AFTER the closing hashes
+            // Per CommonMark §4.2, trailing whitespace after closing hashes is ignored
+            // The lexer may combine trailing whitespace with the newline into a single token
+            // Check both MD_TEXTUAL_LITERAL and MD_HARD_LINE_LITERAL (5+ spaces before newline)
+            while p.at(MD_TEXTUAL_LITERAL) || p.at(MD_HARD_LINE_LITERAL) {
+                let text = p.cur_text();
+                // Check if this is whitespace-only (spaces/tabs) or whitespace+newline
+                let is_trailing_ws = text
+                    .chars()
+                    .all(|c| c == ' ' || c == '\t' || c == '\n' || c == '\r');
+                if is_trailing_ws {
+                    p.parse_as_skipped_trivia_tokens(|p| p.bump_any());
+                } else {
+                    break;
+                }
+            }
         }
     }
 

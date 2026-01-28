@@ -315,20 +315,24 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@527..541 "Invalid start " [] [],
                 },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@541..542 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@542..543 "!" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@543..544 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@544..545 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@545..546 ">" [] [],
+                MdInlineHtml {
+                    value: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@541..542 "<" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@542..543 "!" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@543..544 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@544..545 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@545..546 ">" [] [],
+                        },
+                    ],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@546..562 " should be text." [] [],
@@ -339,38 +343,42 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@563..575 "Double dash " [] [],
                 },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@575..576 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@576..577 "!" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@577..578 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@578..579 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@579..584 " foo " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@584..585 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@585..586 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@586..591 " bar " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@591..592 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@592..593 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@593..594 ">" [] [],
+                MdInlineHtml {
+                    value: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@575..576 "<" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@576..577 "!" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@577..578 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@578..579 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@579..584 " foo " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@584..585 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@585..586 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@586..591 " bar " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@591..592 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@592..593 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@593..594 ">" [] [],
+                        },
+                    ],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@594..616 " should be text maybe." [] [],
@@ -381,23 +389,27 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@617..635 "Starts with arrow " [] [],
                 },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@635..636 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@636..637 "!" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@637..638 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@638..639 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@639..640 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@640..641 ">" [] [],
+                MdInlineHtml {
+                    value: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@635..636 "<" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@636..637 "!" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@637..638 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@638..639 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@639..640 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@640..641 ">" [] [],
+                        },
+                    ],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@641..657 " should be text." [] [],
@@ -602,65 +614,71 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@527..658
         0: MD_TEXTUAL@527..541
           0: MD_TEXTUAL_LITERAL@527..541 "Invalid start " [] []
-        1: MD_TEXTUAL@541..542
-          0: MD_TEXTUAL_LITERAL@541..542 "<" [] []
-        2: MD_TEXTUAL@542..543
-          0: MD_TEXTUAL_LITERAL@542..543 "!" [] []
-        3: MD_TEXTUAL@543..544
-          0: MD_TEXTUAL_LITERAL@543..544 "-" [] []
-        4: MD_TEXTUAL@544..545
-          0: MD_TEXTUAL_LITERAL@544..545 "-" [] []
-        5: MD_TEXTUAL@545..546
-          0: MD_TEXTUAL_LITERAL@545..546 ">" [] []
-        6: MD_TEXTUAL@546..562
+        1: MD_INLINE_HTML@541..546
+          0: MD_INLINE_ITEM_LIST@541..546
+            0: MD_TEXTUAL@541..542
+              0: MD_TEXTUAL_LITERAL@541..542 "<" [] []
+            1: MD_TEXTUAL@542..543
+              0: MD_TEXTUAL_LITERAL@542..543 "!" [] []
+            2: MD_TEXTUAL@543..544
+              0: MD_TEXTUAL_LITERAL@543..544 "-" [] []
+            3: MD_TEXTUAL@544..545
+              0: MD_TEXTUAL_LITERAL@544..545 "-" [] []
+            4: MD_TEXTUAL@545..546
+              0: MD_TEXTUAL_LITERAL@545..546 ">" [] []
+        2: MD_TEXTUAL@546..562
           0: MD_TEXTUAL_LITERAL@546..562 " should be text." [] []
-        7: MD_TEXTUAL@562..563
+        3: MD_TEXTUAL@562..563
           0: MD_TEXTUAL_LITERAL@562..563 "\n" [] []
-        8: MD_TEXTUAL@563..575
+        4: MD_TEXTUAL@563..575
           0: MD_TEXTUAL_LITERAL@563..575 "Double dash " [] []
-        9: MD_TEXTUAL@575..576
-          0: MD_TEXTUAL_LITERAL@575..576 "<" [] []
-        10: MD_TEXTUAL@576..577
-          0: MD_TEXTUAL_LITERAL@576..577 "!" [] []
-        11: MD_TEXTUAL@577..578
-          0: MD_TEXTUAL_LITERAL@577..578 "-" [] []
-        12: MD_TEXTUAL@578..579
-          0: MD_TEXTUAL_LITERAL@578..579 "-" [] []
-        13: MD_TEXTUAL@579..584
-          0: MD_TEXTUAL_LITERAL@579..584 " foo " [] []
-        14: MD_TEXTUAL@584..585
-          0: MD_TEXTUAL_LITERAL@584..585 "-" [] []
-        15: MD_TEXTUAL@585..586
-          0: MD_TEXTUAL_LITERAL@585..586 "-" [] []
-        16: MD_TEXTUAL@586..591
-          0: MD_TEXTUAL_LITERAL@586..591 " bar " [] []
-        17: MD_TEXTUAL@591..592
-          0: MD_TEXTUAL_LITERAL@591..592 "-" [] []
-        18: MD_TEXTUAL@592..593
-          0: MD_TEXTUAL_LITERAL@592..593 "-" [] []
-        19: MD_TEXTUAL@593..594
-          0: MD_TEXTUAL_LITERAL@593..594 ">" [] []
-        20: MD_TEXTUAL@594..616
+        5: MD_INLINE_HTML@575..594
+          0: MD_INLINE_ITEM_LIST@575..594
+            0: MD_TEXTUAL@575..576
+              0: MD_TEXTUAL_LITERAL@575..576 "<" [] []
+            1: MD_TEXTUAL@576..577
+              0: MD_TEXTUAL_LITERAL@576..577 "!" [] []
+            2: MD_TEXTUAL@577..578
+              0: MD_TEXTUAL_LITERAL@577..578 "-" [] []
+            3: MD_TEXTUAL@578..579
+              0: MD_TEXTUAL_LITERAL@578..579 "-" [] []
+            4: MD_TEXTUAL@579..584
+              0: MD_TEXTUAL_LITERAL@579..584 " foo " [] []
+            5: MD_TEXTUAL@584..585
+              0: MD_TEXTUAL_LITERAL@584..585 "-" [] []
+            6: MD_TEXTUAL@585..586
+              0: MD_TEXTUAL_LITERAL@585..586 "-" [] []
+            7: MD_TEXTUAL@586..591
+              0: MD_TEXTUAL_LITERAL@586..591 " bar " [] []
+            8: MD_TEXTUAL@591..592
+              0: MD_TEXTUAL_LITERAL@591..592 "-" [] []
+            9: MD_TEXTUAL@592..593
+              0: MD_TEXTUAL_LITERAL@592..593 "-" [] []
+            10: MD_TEXTUAL@593..594
+              0: MD_TEXTUAL_LITERAL@593..594 ">" [] []
+        6: MD_TEXTUAL@594..616
           0: MD_TEXTUAL_LITERAL@594..616 " should be text maybe." [] []
-        21: MD_TEXTUAL@616..617
+        7: MD_TEXTUAL@616..617
           0: MD_TEXTUAL_LITERAL@616..617 "\n" [] []
-        22: MD_TEXTUAL@617..635
+        8: MD_TEXTUAL@617..635
           0: MD_TEXTUAL_LITERAL@617..635 "Starts with arrow " [] []
-        23: MD_TEXTUAL@635..636
-          0: MD_TEXTUAL_LITERAL@635..636 "<" [] []
-        24: MD_TEXTUAL@636..637
-          0: MD_TEXTUAL_LITERAL@636..637 "!" [] []
-        25: MD_TEXTUAL@637..638
-          0: MD_TEXTUAL_LITERAL@637..638 "-" [] []
-        26: MD_TEXTUAL@638..639
-          0: MD_TEXTUAL_LITERAL@638..639 "-" [] []
-        27: MD_TEXTUAL@639..640
-          0: MD_TEXTUAL_LITERAL@639..640 "-" [] []
-        28: MD_TEXTUAL@640..641
-          0: MD_TEXTUAL_LITERAL@640..641 ">" [] []
-        29: MD_TEXTUAL@641..657
+        9: MD_INLINE_HTML@635..641
+          0: MD_INLINE_ITEM_LIST@635..641
+            0: MD_TEXTUAL@635..636
+              0: MD_TEXTUAL_LITERAL@635..636 "<" [] []
+            1: MD_TEXTUAL@636..637
+              0: MD_TEXTUAL_LITERAL@636..637 "!" [] []
+            2: MD_TEXTUAL@637..638
+              0: MD_TEXTUAL_LITERAL@637..638 "-" [] []
+            3: MD_TEXTUAL@638..639
+              0: MD_TEXTUAL_LITERAL@638..639 "-" [] []
+            4: MD_TEXTUAL@639..640
+              0: MD_TEXTUAL_LITERAL@639..640 "-" [] []
+            5: MD_TEXTUAL@640..641
+              0: MD_TEXTUAL_LITERAL@640..641 ">" [] []
+        10: MD_TEXTUAL@641..657
           0: MD_TEXTUAL_LITERAL@641..657 " should be text." [] []
-        30: MD_TEXTUAL@657..658
+        11: MD_TEXTUAL@657..658
           0: MD_TEXTUAL_LITERAL@657..658 "\n" [] []
       1: (empty)
   2: EOF@658..658 "" [] []

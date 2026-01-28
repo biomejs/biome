@@ -72,19 +72,25 @@ const INDENT_CODE_BLOCK_SPACES: usize = 4;
 /// `line_start_leading_indent()`. For virtual line start cases (nested list
 /// detection), we compute the actual column position from the source text
 /// to ensure correct indented code block detection in nested lists.
+///
+/// Raw source scan is required because leading whitespace may be consumed
+/// as trivia during list parsing, so token-based lookahead loses the true
+/// column needed for CommonMark's indent rules.
 fn compute_marker_indent(p: &MarkdownParser) -> usize {
     if p.state().virtual_line_start == Some(p.cur_range().start()) {
+        // Inside block quotes, treat the virtual line start as column 0.
+        if p.state().block_quote_depth > 0 {
+            return p.line_start_leading_indent();
+        }
+
         // Virtual line start: compute actual column from source text.
         // The leading whitespace was skipped as trivia, but we need the
-        // real column for indented code block detection.
+        // real column for indented code block detection in nested lists.
         let source = p.source().source_text();
         let pos: usize = p.cur_range().start().into();
 
         // Find the start of the current line
-        let line_start = source[..pos]
-            .rfind('\n')
-            .map(|i| i + 1)
-            .unwrap_or(0);
+        let line_start = source[..pos].rfind('\n').map_or(0, |i| i + 1);
 
         // Count columns from line start to current position
         let mut column = 0;
@@ -147,6 +153,44 @@ fn skip_list_marker_indent(p: &mut MarkdownParser) {
 
 fn is_whitespace_only(text: &str) -> bool {
     !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
+}
+
+/// Check if the remaining content forms a thematic break pattern.
+///
+/// Per CommonMark §4.1, a thematic break is 3 or more matching characters
+/// (`*`, `-`, or `_`) on a line by itself, optionally with spaces between them.
+///
+/// This function checks the source text directly since the lexer may not
+/// produce MD_THEMATIC_BREAK_LITERAL in all contexts (e.g., after list markers).
+/// Token lookahead is insufficient here because the marker may be lexed as
+/// textual content within list item contexts.
+fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
+    // Get the remaining text on the current line
+    let source = p.source_after_current();
+
+    // Find the end of the line
+    let line_end = source.find('\n').unwrap_or(source.len());
+    let line = &source[..line_end];
+
+    // Determine which character to check for
+    let first_char = line.trim_start().chars().next();
+    let break_char = match first_char {
+        Some('*' | '-' | '_') => first_char.unwrap(),
+        _ => return false,
+    };
+
+    // Count the break characters (must be at least 3)
+    let mut count = 0usize;
+    for c in line.chars() {
+        if c == break_char {
+            count += 1;
+        } else if c != ' ' && c != '\t' {
+            // Non-whitespace, non-break character - not a thematic break
+            return false;
+        }
+    }
+
+    count >= 3
 }
 
 fn at_bullet_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
@@ -221,7 +265,6 @@ fn skip_blank_lines_between_items(
     is_tight: &mut bool,
     last_item_ends_with_blank: &mut bool,
 ) {
-
     // Skip blank lines between list items.
     // Per CommonMark §5.3, blank lines between items make the list loose
     // but don't end the list.
@@ -248,7 +291,6 @@ fn update_list_tightness(
     is_tight: &mut bool,
     last_item_ends_with_blank: &mut bool,
 ) {
-
     // Blank line between items makes the list loose
     if *last_item_ends_with_blank {
         *is_tight = false;
@@ -409,7 +451,7 @@ impl ParseNodeList for BulletList {
             return result;
         }
 
-        let result = is_at_list_end_common(
+        is_at_list_end_common(
             p,
             self.marker_kind,
             at_bullet_list_item,
@@ -457,9 +499,7 @@ impl ParseNodeList for BulletList {
                     Some(!has_item)
                 }
             },
-        );
-
-        result
+        )
     }
 
     fn recover(
@@ -1212,6 +1252,36 @@ fn parse_list_item_block_content(
             && (p.at_line_start() || p.has_preceding_line_break())
             && has_quote_prefix(p, quote_depth);
 
+        // Special case: blank line with only quote prefixes (e.g., ">>").
+        // Treat it as a blank line inside the list item so it becomes loose.
+        if !first_line && quote_depth > 0 && p.at(NEWLINE) {
+            let is_quote_blank_line = p.lookahead(|p| {
+                p.bump(NEWLINE);
+                if !has_quote_prefix(p, quote_depth) {
+                    return false;
+                }
+                consume_quote_prefix_without_virtual(p, quote_depth);
+                while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                    p.bump(MD_TEXTUAL_LITERAL);
+                }
+                p.at(NEWLINE) || p.at(T![EOF])
+            });
+
+            if is_quote_blank_line {
+                let m = p.start();
+                p.bump(NEWLINE);
+                m.complete(p, MD_NEWLINE);
+                if has_quote_prefix(p, quote_depth) {
+                    consume_quote_prefix(p, quote_depth);
+                }
+                consume_blank_line(p);
+                has_blank_line = true;
+                last_was_blank = true;
+                first_line = false;
+                continue;
+            }
+        }
+
         if !first_line && p.at(NEWLINE) && !p.at_blank_line() && !newline_has_quote_prefix {
             let action = classify_blank_line(p, required_indent, marker_indent);
             // Check if the NEWLINE we're at is itself on a blank line
@@ -1252,6 +1322,27 @@ fn parse_list_item_block_content(
             && (p.at_line_start() || p.has_preceding_line_break())
             && (has_quote_prefix(p, quote_depth)
                 || quote_only_line_indent_at_current(p, quote_depth).is_some());
+
+        if line_has_quote_prefix {
+            let is_quote_only_line = p.lookahead(|p| {
+                consume_quote_prefix_without_virtual(p, quote_depth);
+                while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                    p.bump(MD_TEXTUAL_LITERAL);
+                }
+                p.at(NEWLINE) || p.at(T![EOF])
+            });
+
+            if is_quote_only_line {
+                consume_quote_prefix(p, quote_depth);
+                consume_blank_line(p);
+                if !first_line {
+                    has_blank_line = true;
+                }
+                last_was_blank = true;
+                first_line = false;
+                continue;
+            }
+        }
 
         let blank_line_after_prefix = if line_has_quote_prefix {
             p.lookahead(|p| {
@@ -1448,7 +1539,7 @@ fn parse_list_item_block_content(
                 }
                 let text = p.cur_text();
                 let hash_count = text.len();
-                if hash_count < 1 || hash_count > 6 {
+                if !(1..=6).contains(&hash_count) {
                     return None;
                 }
                 p.bump(p.cur());
@@ -1509,8 +1600,7 @@ fn parse_list_item_block_content(
                     p.bump(MD_TEXTUAL_LITERAL);
                 }
                 // Check for > as either T![>] or MD_TEXTUAL_LITERAL ">"
-                p.at(T![>])
-                    || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">")
+                p.at(T![>]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">")
             });
 
             if blockquote_start {
@@ -1564,6 +1654,32 @@ fn parse_list_item_block_content(
                 }
                 p.state_mut().virtual_line_start = prev_virtual;
                 p.state_mut().list_item_required_indent = prev_required;
+            }
+
+            // Check for thematic break BEFORE nested list markers.
+            // Per CommonMark §4.1, `* * *` or `- - -` on a line by itself is a thematic
+            // break, not nested list markers. This handles example 061.
+            let is_thematic_break = p.lookahead(|p| {
+                while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                    p.bump(MD_TEXTUAL_LITERAL);
+                }
+                // Check for lexer-produced thematic break token
+                if p.at(MD_THEMATIC_BREAK_LITERAL) {
+                    return true;
+                }
+                // Check for token-based thematic break pattern
+                // The lexer may not produce MD_THEMATIC_BREAK_LITERAL after a list marker
+                // because after_newline is false. Check manually.
+                is_thematic_break_pattern(p)
+            });
+
+            if is_thematic_break {
+                // Parse the thematic break as a block within the list item.
+                let _ = super::thematic_break_block::parse_thematic_break_block(p);
+                last_block_was_paragraph = false;
+                last_was_blank = false;
+                first_line = false;
+                continue;
             }
 
             let nested_marker = p.lookahead(|p| {
@@ -2078,18 +2194,14 @@ fn has_bullet_item_after_blank_lines_at_indent(
     p: &mut MarkdownParser,
     expected_indent: usize,
 ) -> bool {
-    has_list_item_after_blank_lines_at_indent(
-        p,
-        expected_indent,
-        |p| {
-            if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
-                p.bump(p.cur());
-                marker_followed_by_whitespace_or_eol(p)
-            } else {
-                false
-            }
-        },
-    )
+    has_list_item_after_blank_lines_at_indent(p, expected_indent, |p| {
+        if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
+            p.bump(p.cur());
+            marker_followed_by_whitespace_or_eol(p)
+        } else {
+            false
+        }
+    })
 }
 
 fn has_list_item_after_blank_lines_at_indent<F>(

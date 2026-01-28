@@ -32,6 +32,8 @@ pub(crate) fn normalize_reference_label(text: &str) -> String {
         push_normalized_char(&mut out, c, &mut saw_whitespace);
     }
 
+    // CommonMark uses Unicode case folding; uppercasing keeps ß/ẞ matching "SS"
+    // (e.g. example 540) and aligns with cmark's behavior for reference labels.
     out.as_str().to_lowercase_cow().to_uppercase()
 }
 
