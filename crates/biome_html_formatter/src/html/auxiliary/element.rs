@@ -4,9 +4,10 @@ use crate::verbatim::{format_html_leading_comments, format_html_leading_comments
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
 use biome_html_syntax::{
-    HtmlElement, HtmlElementFields, HtmlElementList, HtmlRoot, HtmlSelfClosingElement,
-    HtmlSyntaxToken,
+    AnyHtmlTagName, HtmlElement, HtmlElementFields, HtmlElementList, HtmlRoot,
+    HtmlSelfClosingElement, HtmlSyntaxToken,
 };
+use biome_rowan::TokenText;
 use biome_string_case::StrLikeExtension;
 
 use super::{
@@ -18,6 +19,15 @@ use super::{
 /// We ignore the `script` and `style` tags as well, since embedded language parsing/formatting is not yet implemented.
 ///
 const HTML_VERBATIM_TAGS: &[&str] = &["script", "style", "pre"];
+
+/// Helper to get token text from any tag name variant
+fn get_tag_name_text(name: &AnyHtmlTagName) -> Option<TokenText> {
+    match name {
+        AnyHtmlTagName::HtmlTagName(tag) => tag.value_token().ok().map(|t| t.token_text_trimmed()),
+        AnyHtmlTagName::HtmlComponentName(_) => None,
+        AnyHtmlTagName::HtmlMemberName(_) => None,
+    }
+}
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElement {
@@ -129,20 +139,17 @@ impl FormatHtmlElement {
             .nth(2)
             .is_some_and(|ancestor| HtmlRoot::can_cast(ancestor.kind()));
         // If `<template>` is at the root level, force multiline formatting of its children.
-        let is_template_element = tag_name
-            .token_text_trimmed()
+        let is_template_element = get_tag_name_text(&tag_name)
             .is_some_and(|tt| tt.to_ascii_lowercase_cow() == "template");
 
-        let tag_name = tag_name
-            .trim_trivia()
-            .map(|t| t.value_token())
-            .transpose()?;
-
-        let should_be_verbatim = HTML_VERBATIM_TAGS.iter().any(|tag| {
-            tag_name
-                .as_ref()
-                .is_some_and(|tag_name| tag_name.text().eq_ignore_ascii_case(tag))
-        });
+        let should_be_verbatim = match tag_name {
+            AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_) => false,
+            AnyHtmlTagName::HtmlTagName(tag_name) => HTML_VERBATIM_TAGS.iter().any(|tag| {
+                tag_name.value_token().as_ref().is_ok_and(|tag_name_token| {
+                    tag_name_token.text_trimmed().eq_ignore_ascii_case(tag)
+                })
+            }),
+        };
 
         let should_format_embedded_nodes = if f.context().should_delegate_fmt_embedded_nodes() {
             // Only delegate for supported <script> or <style> content

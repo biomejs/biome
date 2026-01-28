@@ -208,10 +208,9 @@ fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
                 return true;
             }
 
-            let tag_name = element.name().ok().and_then(|n| n.value_token().ok());
-            let tag_text = tag_name.as_ref().map(|t| t.text_trimmed());
+            let tag_text = element.name().ok().and_then(|n| n.token_text_trimmed());
 
-            match tag_text {
+            match tag_text.as_ref().map(|t| t.as_ref()) {
                 Some(name) if name.eq_ignore_ascii_case("img") => {
                     html_self_closing_element_has_non_empty_attribute(element, "alt")
                 }

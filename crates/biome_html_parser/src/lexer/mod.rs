@@ -110,6 +110,7 @@ impl<'src> HtmlLexer<'src> {
     }
 
     /// Consume a token in the [HtmlLexContext::InsideTagVue] context.
+    /// This context is used for Vue files with Vue-specific directives.
     fn consume_token_inside_tag_vue(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
@@ -676,6 +677,9 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consumes an HTML tag name token starting with the given byte.
     /// Tag names can contain alphanumeric characters, hyphens, colons and dots.
+    /// Consumes an HTML tag name token starting with the given byte.
+    /// Tag names can contain alphanumeric characters, hyphens, and colons.
+    /// In component contexts (Vue/Svelte/Astro), dots are excluded and lexed separately.
     fn consume_tag_name(&mut self, first: u8) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
 
@@ -1258,10 +1262,10 @@ fn is_tag_name_byte(byte: u8) -> bool {
     // However, custom tag names must start with a lowercase letter, but they can be followed by pretty much anything else.
     // https://html.spec.whatwg.org/#valid-custom-element-name
 
-    // The extra characters allowed here `-`, `:`, and `.` are not usually allowed in the HTML tag name.
+    // The extra characters allowed here `-` and `:` are not usually allowed in the HTML tag name.
     // However, Prettier considers them to be valid characters in tag names, so we allow them to remain compatible.
 
-    byte.is_ascii_alphanumeric() || byte == b'-' || byte == b':' || byte == b'.'
+    byte.is_ascii_alphanumeric() || byte == b'-' || byte == b':'
 }
 
 fn is_attribute_name_byte(byte: u8) -> bool {

@@ -109,7 +109,7 @@ HtmlTextExpression = 'html_literal'
 // <a />
 HtmlSelfClosingElement =
 	'<'
-	name: HtmlTagName
+	name: AnyHtmlTagName
 	attributes: HtmlAttributeList
 	'/'?
 	'>'
@@ -124,7 +124,7 @@ HtmlElement =
 // ^^        ^
 HtmlOpeningElement =
 	'<'
-	name: HtmlTagName
+	name: AnyHtmlTagName
 	attributes: HtmlAttributeList
 	'>'
 
@@ -132,8 +132,28 @@ HtmlOpeningElement =
 HtmlClosingElement =
 	'<'
 	'/'
-	name: HtmlTagName
+	name: AnyHtmlTagName
 	'>'
+
+AnyHtmlTagName =
+	HtmlTagName
+	| HtmlComponentName
+	| HtmlMemberName
+
+// <Component />
+// Used in Vue/Svelte/Astro files for PascalCase component names
+HtmlComponentName = value: 'html_literal'
+
+AnyHtmlComponentObjectName =
+	HtmlTagName
+	| HtmlComponentName
+	| HtmlMemberName
+
+// <Component.test>
+HtmlMemberName =
+	object: AnyHtmlComponentObjectName
+	'.'
+	member: HtmlTagName
 
 // <![CDATA[example]]>
 // Reference: https://html.spec.whatwg.org/multipage/syntax.html#cdata-sections

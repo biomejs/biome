@@ -287,7 +287,7 @@ impl HtmlClosingElement {
     pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn name(&self) -> SyntaxResult<HtmlTagName> {
+    pub fn name(&self) -> SyntaxResult<AnyHtmlTagName> {
         support::required_node(&self.syntax, 2usize)
     }
     pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -306,8 +306,43 @@ impl Serialize for HtmlClosingElement {
 pub struct HtmlClosingElementFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub slash_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<HtmlTagName>,
+    pub name: SyntaxResult<AnyHtmlTagName>,
     pub r_angle_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlComponentName {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlComponentName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlComponentNameFields {
+        HtmlComponentNameFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for HtmlComponentName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlComponentNameFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlContent {
@@ -540,6 +575,51 @@ pub struct HtmlEmbeddedContentFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlMemberName {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlMemberName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlMemberNameFields {
+        HtmlMemberNameFields {
+            object: self.object(),
+            dot_token: self.dot_token(),
+            member: self.member(),
+        }
+    }
+    pub fn object(&self) -> SyntaxResult<AnyHtmlComponentObjectName> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn dot_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn member(&self) -> SyntaxResult<HtmlTagName> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for HtmlMemberName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlMemberNameFields {
+    pub object: SyntaxResult<AnyHtmlComponentObjectName>,
+    pub dot_token: SyntaxResult<SyntaxToken>,
+    pub member: SyntaxResult<HtmlTagName>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlOpeningElement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -564,7 +644,7 @@ impl HtmlOpeningElement {
     pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<HtmlTagName> {
+    pub fn name(&self) -> SyntaxResult<AnyHtmlTagName> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn attributes(&self) -> HtmlAttributeList {
@@ -585,7 +665,7 @@ impl Serialize for HtmlOpeningElement {
 #[derive(Serialize)]
 pub struct HtmlOpeningElementFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<HtmlTagName>,
+    pub name: SyntaxResult<AnyHtmlTagName>,
     pub attributes: HtmlAttributeList,
     pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
@@ -670,7 +750,7 @@ impl HtmlSelfClosingElement {
     pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<HtmlTagName> {
+    pub fn name(&self) -> SyntaxResult<AnyHtmlTagName> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn attributes(&self) -> HtmlAttributeList {
@@ -694,7 +774,7 @@ impl Serialize for HtmlSelfClosingElement {
 #[derive(Serialize)]
 pub struct HtmlSelfClosingElementFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<HtmlTagName>,
+    pub name: SyntaxResult<AnyHtmlTagName>,
     pub attributes: HtmlAttributeList,
     pub slash_token: Option<SyntaxToken>,
     pub r_angle_token: SyntaxResult<SyntaxToken>,
@@ -3362,6 +3442,32 @@ impl AnyHtmlAttributeInitializer {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyHtmlComponentObjectName {
+    HtmlComponentName(HtmlComponentName),
+    HtmlMemberName(HtmlMemberName),
+    HtmlTagName(HtmlTagName),
+}
+impl AnyHtmlComponentObjectName {
+    pub fn as_html_component_name(&self) -> Option<&HtmlComponentName> {
+        match &self {
+            Self::HtmlComponentName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_member_name(&self) -> Option<&HtmlMemberName> {
+        match &self {
+            Self::HtmlMemberName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_tag_name(&self) -> Option<&HtmlTagName> {
+        match &self {
+            Self::HtmlTagName(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlContent {
     AnyHtmlTextExpression(AnyHtmlTextExpression),
     HtmlContent(HtmlContent),
@@ -3423,6 +3529,32 @@ impl AnyHtmlElement {
     pub fn as_html_self_closing_element(&self) -> Option<&HtmlSelfClosingElement> {
         match &self {
             Self::HtmlSelfClosingElement(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyHtmlTagName {
+    HtmlComponentName(HtmlComponentName),
+    HtmlMemberName(HtmlMemberName),
+    HtmlTagName(HtmlTagName),
+}
+impl AnyHtmlTagName {
+    pub fn as_html_component_name(&self) -> Option<&HtmlComponentName> {
+        match &self {
+            Self::HtmlComponentName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_member_name(&self) -> Option<&HtmlMemberName> {
+        match &self {
+            Self::HtmlMemberName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_tag_name(&self) -> Option<&HtmlTagName> {
+        match &self {
+            Self::HtmlTagName(item) => Some(item),
             _ => None,
         }
     }
@@ -4161,6 +4293,56 @@ impl From<HtmlClosingElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for HtmlComponentName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_COMPONENT_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_COMPONENT_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlComponentName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlComponentName")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlComponentName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlComponentName> for SyntaxNode {
+    fn from(n: HtmlComponentName) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlComponentName> for SyntaxElement {
+    fn from(n: HtmlComponentName) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for HtmlContent {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4443,6 +4625,55 @@ impl From<HtmlEmbeddedContent> for SyntaxNode {
 }
 impl From<HtmlEmbeddedContent> for SyntaxElement {
     fn from(n: HtmlEmbeddedContent) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for HtmlMemberName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_MEMBER_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_MEMBER_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlMemberName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlMemberName")
+                .field("object", &support::DebugSyntaxResult(self.object()))
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .field("member", &support::DebugSyntaxResult(self.member()))
+                .finish()
+        } else {
+            f.debug_struct("HtmlMemberName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlMemberName> for SyntaxNode {
+    fn from(n: HtmlMemberName) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlMemberName> for SyntaxElement {
+    fn from(n: HtmlMemberName) -> Self {
         n.syntax.into()
     }
 }
@@ -7947,6 +8178,77 @@ impl From<AnyHtmlAttributeInitializer> for SyntaxElement {
         node.into()
     }
 }
+impl From<HtmlComponentName> for AnyHtmlComponentObjectName {
+    fn from(node: HtmlComponentName) -> Self {
+        Self::HtmlComponentName(node)
+    }
+}
+impl From<HtmlMemberName> for AnyHtmlComponentObjectName {
+    fn from(node: HtmlMemberName) -> Self {
+        Self::HtmlMemberName(node)
+    }
+}
+impl From<HtmlTagName> for AnyHtmlComponentObjectName {
+    fn from(node: HtmlTagName) -> Self {
+        Self::HtmlTagName(node)
+    }
+}
+impl AstNode for AnyHtmlComponentObjectName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = HtmlComponentName::KIND_SET
+        .union(HtmlMemberName::KIND_SET)
+        .union(HtmlTagName::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, HTML_COMPONENT_NAME | HTML_MEMBER_NAME | HTML_TAG_NAME)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            HTML_COMPONENT_NAME => Self::HtmlComponentName(HtmlComponentName { syntax }),
+            HTML_MEMBER_NAME => Self::HtmlMemberName(HtmlMemberName { syntax }),
+            HTML_TAG_NAME => Self::HtmlTagName(HtmlTagName { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::HtmlComponentName(it) => it.syntax(),
+            Self::HtmlMemberName(it) => it.syntax(),
+            Self::HtmlTagName(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::HtmlComponentName(it) => it.into_syntax(),
+            Self::HtmlMemberName(it) => it.into_syntax(),
+            Self::HtmlTagName(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyHtmlComponentObjectName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::HtmlComponentName(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlMemberName(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlTagName(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyHtmlComponentObjectName> for SyntaxNode {
+    fn from(n: AnyHtmlComponentObjectName) -> Self {
+        match n {
+            AnyHtmlComponentObjectName::HtmlComponentName(it) => it.into_syntax(),
+            AnyHtmlComponentObjectName::HtmlMemberName(it) => it.into_syntax(),
+            AnyHtmlComponentObjectName::HtmlTagName(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyHtmlComponentObjectName> for SyntaxElement {
+    fn from(n: AnyHtmlComponentObjectName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<HtmlContent> for AnyHtmlContent {
     fn from(node: HtmlContent) -> Self {
         Self::HtmlContent(node)
@@ -8117,6 +8419,77 @@ impl From<AnyHtmlElement> for SyntaxNode {
 }
 impl From<AnyHtmlElement> for SyntaxElement {
     fn from(n: AnyHtmlElement) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<HtmlComponentName> for AnyHtmlTagName {
+    fn from(node: HtmlComponentName) -> Self {
+        Self::HtmlComponentName(node)
+    }
+}
+impl From<HtmlMemberName> for AnyHtmlTagName {
+    fn from(node: HtmlMemberName) -> Self {
+        Self::HtmlMemberName(node)
+    }
+}
+impl From<HtmlTagName> for AnyHtmlTagName {
+    fn from(node: HtmlTagName) -> Self {
+        Self::HtmlTagName(node)
+    }
+}
+impl AstNode for AnyHtmlTagName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = HtmlComponentName::KIND_SET
+        .union(HtmlMemberName::KIND_SET)
+        .union(HtmlTagName::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, HTML_COMPONENT_NAME | HTML_MEMBER_NAME | HTML_TAG_NAME)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            HTML_COMPONENT_NAME => Self::HtmlComponentName(HtmlComponentName { syntax }),
+            HTML_MEMBER_NAME => Self::HtmlMemberName(HtmlMemberName { syntax }),
+            HTML_TAG_NAME => Self::HtmlTagName(HtmlTagName { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::HtmlComponentName(it) => it.syntax(),
+            Self::HtmlMemberName(it) => it.syntax(),
+            Self::HtmlTagName(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::HtmlComponentName(it) => it.into_syntax(),
+            Self::HtmlMemberName(it) => it.into_syntax(),
+            Self::HtmlTagName(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyHtmlTagName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::HtmlComponentName(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlMemberName(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlTagName(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyHtmlTagName> for SyntaxNode {
+    fn from(n: AnyHtmlTagName) -> Self {
+        match n {
+            AnyHtmlTagName::HtmlComponentName(it) => it.into_syntax(),
+            AnyHtmlTagName::HtmlMemberName(it) => it.into_syntax(),
+            AnyHtmlTagName::HtmlTagName(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyHtmlTagName> for SyntaxElement {
+    fn from(n: AnyHtmlTagName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -9112,12 +9485,22 @@ impl std::fmt::Display for AnyHtmlAttributeInitializer {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyHtmlComponentObjectName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyHtmlContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for AnyHtmlElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyHtmlTagName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -9212,6 +9595,11 @@ impl std::fmt::Display for HtmlClosingElement {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for HtmlComponentName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for HtmlContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -9233,6 +9621,11 @@ impl std::fmt::Display for HtmlElement {
     }
 }
 impl std::fmt::Display for HtmlEmbeddedContent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -77,6 +77,8 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_ATTRIBUTE_INITIALIZER_CLAUSE",
         "HTML_STRING",
         "HTML_TAG_NAME",
+        "HTML_COMPONENT_NAME",
+        "HTML_MEMBER_NAME",
         "HTML_ATTRIBUTE_NAME",
         "HTML_ELEMENT_LIST",
         "HTML_ATTRIBUTE_LIST",

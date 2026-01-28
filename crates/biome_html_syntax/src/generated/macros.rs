@@ -45,6 +45,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlClosingElement::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_COMPONENT_NAME => {
+                    let $pattern = unsafe { $crate::HtmlComponentName::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_CONTENT => {
                     let $pattern = unsafe { $crate::HtmlContent::new_unchecked(node) };
                     $body
@@ -63,6 +67,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::HTML_EMBEDDED_CONTENT => {
                     let $pattern = unsafe { $crate::HtmlEmbeddedContent::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_MEMBER_NAME => {
+                    let $pattern = unsafe { $crate::HtmlMemberName::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_OPENING_ELEMENT => {

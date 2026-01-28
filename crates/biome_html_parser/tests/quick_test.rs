@@ -11,7 +11,7 @@ pub fn quick_test() {
 <Base title="500"></Base>
 "#;
 
-    let source_type = HtmlFileSource::astro();
+    let source_type = HtmlFileSource::svelte();
     let options = HtmlParseOptions::from(&source_type);
     let root = parse_html(code, options);
     let syntax = root.syntax();

@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::HtmlOpeningElement;
+use biome_html_syntax::{HtmlFileSource, HtmlOpeningElement};
 use biome_rowan::AstNode;
 use biome_rule_options::no_sync_scripts::NoSyncScriptsOptions;
 
@@ -44,10 +44,15 @@ impl Rule for NoSyncScripts {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let binding = ctx.query();
+        let file_source = ctx.source_type::<HtmlFileSource>();
 
         let name = binding.name().ok()?;
-        let value_token = name.value_token().ok()?;
-        if value_token.text_trimmed() != "script" {
+        let name_text = name.token_text_trimmed()?;
+
+        if file_source.is_html() && !name_text.eq_ignore_ascii_case("script") {
+            return None;
+        }
+        if !file_source.is_html() && name_text != "script" {
             return None;
         }
 

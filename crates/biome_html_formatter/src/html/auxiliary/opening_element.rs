@@ -59,7 +59,9 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         let name = name?;
         let css_display = get_css_display_from_tag(&name);
         let is_whitespace_sensitive = css_display.is_internally_whitespace_sensitive(f);
-        let is_canonical_html_element = should_lowercase_html_tag(f, &name);
+        let is_canonical_html_element = name
+            .as_html_tag_name()
+            .is_some_and(|name| should_lowercase_html_tag(f, name));
 
         let bracket_same_line = f.options().bracket_same_line().value();
 
