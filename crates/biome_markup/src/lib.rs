@@ -28,6 +28,136 @@ impl ToTokens for StackEntry {
     }
 }
 
+/// Creates a markup structure for formatted console output.
+///
+/// The `markup!` macro provides an XML-like syntax for creating styled and structured
+/// console output. It generates a `biome_console::Markup` instance containing markup
+/// nodes that define the styling and content hierarchy.
+///
+/// # Syntax
+///
+/// The macro accepts a mix of elements, text literals, and interpolated expressions:
+///
+/// - **Elements**: `<ElementName>` ... `</ElementName>`
+/// - **Self-closing elements**: `<ElementName />`
+/// - **Attributes**: `<ElementName attr="value">` or `<ElementName attr={expression}>`
+/// - **Text content**: String literals between elements
+/// - **Dynamic content**: `{expression}` for interpolating Rust expressions
+///
+/// ## Elements
+///
+/// Elements correspond to `biome_console::MarkupElement` variants and are used to
+/// apply styling or structure to content. Common elements include:
+///
+/// - `<Emphasis>` - Emphasized/bold text
+/// - `<Dim>` - Dimmed/faint text
+/// - `<Italic>` - Italic text
+/// - `<Underline>` - Underlined text
+/// - `<Error>` - Error styling (typically red)
+/// - `<Warn>` - Warning styling (typically yellow)
+/// - `<Info>` - Info styling (typically blue)
+/// - `<Success>` - Success styling (typically green)
+/// - `<Debug>` - Debug styling (typically blue/cyan)
+/// - `<Trace>` - Trace styling (typically magenta)
+/// - `<Inverse>` - Inverse video styling
+/// - `<Hyperlink>` - Hyperlink with href attribute
+///
+/// Elements can be nested to combine styles.
+///
+/// ## Attributes
+///
+/// Some elements accept attributes to customize their behavior:
+///
+/// - Literal values: `attr="value"`
+/// - Expressions: `attr={rust_expression}`
+///
+/// Attribute values are converted using `.into()`, so they must implement the
+/// appropriate trait for the expected type.
+///
+/// ## Content
+///
+/// Content can be:
+///
+/// - **String literals**: Directly embedded as text nodes
+/// - **Interpolated expressions**: Wrapped in `{}` and must implement `Display`
+///
+/// # Examples
+///
+/// ## Basic styling
+///
+/// ```
+/// # use biome_markup::markup;
+/// let msg = markup! {
+///     <Emphasis>"Hello, world!"</Emphasis>
+/// };
+/// ```
+///
+/// ## Nested elements
+///
+/// ```
+/// # use biome_markup::markup;
+/// let msg = markup! {
+///     <Error><Emphasis>"Critical error"</Emphasis></Error>
+/// };
+/// ```
+///
+/// ## Mixed content
+///
+/// ```
+/// # use biome_markup::markup;
+/// let msg = markup! {
+///     "Found " <Emphasis>"3"</Emphasis> " errors"
+/// };
+/// ```
+///
+/// ## Dynamic content with interpolation
+///
+/// ```
+/// # use biome_markup::markup;
+/// let count = 5;
+/// let msg = markup! {
+///     "Found " <Emphasis>{count}</Emphasis> " errors"
+/// };
+/// ```
+///
+/// ## Elements with attributes
+///
+/// ```
+/// # use biome_markup::markup;
+/// let path = "src/main.rs";
+/// let msg = markup! {
+///     <Hyperlink href={path}>"Click here"</Hyperlink>
+/// };
+/// ```
+///
+/// ## Complex example with multiple elements and interpolation
+///
+/// ```
+/// # use biome_markup::markup;
+/// let filename = "config.json";
+/// let line = 42;
+/// let error_msg = "Invalid syntax";
+///
+/// let msg = markup! {
+///     <Error>"Error"</Error> " in " <Emphasis>{filename}</Emphasis> " at line " {line} ": " <Dim>{error_msg}</Dim>
+/// };
+/// ```
+///
+/// # Errors
+///
+/// The macro will produce compile-time errors for:
+///
+/// - Mismatched opening and closing tags
+/// - Unclosed elements
+/// - Unexpected closing elements
+/// - Invalid syntax (missing `=` in attributes, invalid punctuation, etc.)
+///
+/// # Notes
+///
+/// - All elements must be properly closed unless self-closing
+/// - Element names correspond to `MarkupElement` enum variants
+/// - The macro expands to a `biome_console::Markup` instance
+/// - Interpolated expressions are cast to `&dyn Display`
 #[proc_macro]
 #[proc_macro_error]
 pub fn markup(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

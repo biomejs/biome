@@ -1305,6 +1305,7 @@ dependencies = [
 name = "biome_markup"
 version = "0.5.7"
 dependencies = [
+ "biome_console",
  "proc-macro-error2",
  "proc-macro2",
  "quote",
