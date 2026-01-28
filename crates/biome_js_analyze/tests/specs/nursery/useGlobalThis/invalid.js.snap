@@ -1,0 +1,1252 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+global;
+self;
+window;
+
+window.foo;
+window.foo();
+
+window > 10;
+10 > window;
+window ?? 10;
+10 ?? window;
+window.foo = 123;
+window = 123;
+obj.a = window;
+
+function* gen() { yield window };
+async function gen() { await window };
+
+window ? foo : bar;
+foo ? window : bar;
+foo ? bar : window;
+
+function foo() { return window }
+new window();
+
+const obj = { foo: window.foo, bar: window.bar, window: window }
+
+function sequenceTest() { let x, y; x = (y = 10, y + 5, window); console.log(x, y); }
+
+window`Hello ${42} World`
+`Hello ${window.foo} World`
+var str = `Hello ${window.foo} World`
+
+delete window.foo
+
+++window
+++window.foo
+
+for (var attr in window) { }
+for (window.foo = 0; i < 10; window.foo++) { }
+for (const item of window.foo) { }
+for (const item of window) { }
+
+switch (window) {}
+switch (true) { case window: break; }
+switch (true) { case window.foo: break; }
+while (window) { }
+do {} while (window) {}
+if (window) {}
+
+throw window
+
+var foo = window
+
+function foo (name = window) { }
+
+self.innerWidth;
+
+self.innerHeight;
+
+window.crypto;
+window.addEventListener("play", () => {})
+window.onplay = function () {}
+function greet({ name = window.foo }) {}
+({ foo: window.foo } = {})
+[window.foo] = []
+foo[window]
+foo[window.foo]
+
+typeof window !== "undefined";
+typeof self !== "undefined";
+typeof global !== "undefined";
+typeof window.something === "function";
+typeof self.something === "function";
+typeof global.something === "function";
+
+global.global_did_not_declare_in_language_options;
+window.window_did_not_declare_in_language_options;
+self.self_did_not_declare_in_language_options;
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ global;
+      │ ^^^^^^
+    3 │ self;
+    4 │ window;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    1 │ /* should generate diagnostics */
+    2 │ global;
+  > 3 │ self;
+      │ ^^^^
+    4 │ window;
+    5 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    2 │ global;
+    3 │ self;
+  > 4 │ window;
+      │ ^^^^^^
+    5 │ 
+    6 │ window.foo;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    4 │ window;
+    5 │ 
+  > 6 │ window.foo;
+      │ ^^^^^^
+    7 │ window.foo();
+    8 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    6 │ window.foo;
+  > 7 │ window.foo();
+      │ ^^^^^^
+    8 │ 
+    9 │ window > 10;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+     7 │ window.foo();
+     8 │ 
+   > 9 │ window > 10;
+       │ ^^^^^^
+    10 │ 10 > window;
+    11 │ window ?? 10;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:6 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+     9 │ window > 10;
+  > 10 │ 10 > window;
+       │      ^^^^^^
+    11 │ window ?? 10;
+    12 │ 10 ?? window;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+     9 │ window > 10;
+    10 │ 10 > window;
+  > 11 │ window ?? 10;
+       │ ^^^^^^
+    12 │ 10 ?? window;
+    13 │ window.foo = 123;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:7 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    10 │ 10 > window;
+    11 │ window ?? 10;
+  > 12 │ 10 ?? window;
+       │       ^^^^^^
+    13 │ window.foo = 123;
+    14 │ window = 123;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    11 │ window ?? 10;
+    12 │ 10 ?? window;
+  > 13 │ window.foo = 123;
+       │ ^^^^^^
+    14 │ window = 123;
+    15 │ obj.a = window;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    12 │ 10 ?? window;
+    13 │ window.foo = 123;
+  > 14 │ window = 123;
+       │ ^^^^^^
+    15 │ obj.a = window;
+    16 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:9 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    13 │ window.foo = 123;
+    14 │ window = 123;
+  > 15 │ obj.a = window;
+       │         ^^^^^^
+    16 │ 
+    17 │ function* gen() { yield window };
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:25 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    15 │ obj.a = window;
+    16 │ 
+  > 17 │ function* gen() { yield window };
+       │                         ^^^^^^
+    18 │ async function gen() { await window };
+    19 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:30 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    17 │ function* gen() { yield window };
+  > 18 │ async function gen() { await window };
+       │                              ^^^^^^
+    19 │ 
+    20 │ window ? foo : bar;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    18 │ async function gen() { await window };
+    19 │ 
+  > 20 │ window ? foo : bar;
+       │ ^^^^^^
+    21 │ foo ? window : bar;
+    22 │ foo ? bar : window;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:7 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    20 │ window ? foo : bar;
+  > 21 │ foo ? window : bar;
+       │       ^^^^^^
+    22 │ foo ? bar : window;
+    23 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:13 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    20 │ window ? foo : bar;
+    21 │ foo ? window : bar;
+  > 22 │ foo ? bar : window;
+       │             ^^^^^^
+    23 │ 
+    24 │ function foo() { return window }
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:25 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    22 │ foo ? bar : window;
+    23 │ 
+  > 24 │ function foo() { return window }
+       │                         ^^^^^^
+    25 │ new window();
+    26 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:5 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    24 │ function foo() { return window }
+  > 25 │ new window();
+       │     ^^^^^^
+    26 │ 
+    27 │ const obj = { foo: window.foo, bar: window.bar, window: window }
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:20 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    25 │ new window();
+    26 │ 
+  > 27 │ const obj = { foo: window.foo, bar: window.bar, window: window }
+       │                    ^^^^^^
+    28 │ 
+    29 │ function sequenceTest() { let x, y; x = (y = 10, y + 5, window); console.log(x, y); }
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:37 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    25 │ new window();
+    26 │ 
+  > 27 │ const obj = { foo: window.foo, bar: window.bar, window: window }
+       │                                     ^^^^^^
+    28 │ 
+    29 │ function sequenceTest() { let x, y; x = (y = 10, y + 5, window); console.log(x, y); }
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:57 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    25 │ new window();
+    26 │ 
+  > 27 │ const obj = { foo: window.foo, bar: window.bar, window: window }
+       │                                                         ^^^^^^
+    28 │ 
+    29 │ function sequenceTest() { let x, y; x = (y = 10, y + 5, window); console.log(x, y); }
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:57 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    27 │ const obj = { foo: window.foo, bar: window.bar, window: window }
+    28 │ 
+  > 29 │ function sequenceTest() { let x, y; x = (y = 10, y + 5, window); console.log(x, y); }
+       │                                                         ^^^^^^
+    30 │ 
+    31 │ window`Hello ${42} World`
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    29 │ function sequenceTest() { let x, y; x = (y = 10, y + 5, window); console.log(x, y); }
+    30 │ 
+  > 31 │ window`Hello ${42} World`
+       │ ^^^^^^
+    32 │ `Hello ${window.foo} World`
+    33 │ var str = `Hello ${window.foo} World`
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:10 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    31 │ window`Hello ${42} World`
+  > 32 │ `Hello ${window.foo} World`
+       │          ^^^^^^
+    33 │ var str = `Hello ${window.foo} World`
+    34 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:20 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    31 │ window`Hello ${42} World`
+    32 │ `Hello ${window.foo} World`
+  > 33 │ var str = `Hello ${window.foo} World`
+       │                    ^^^^^^
+    34 │ 
+    35 │ delete window.foo
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:8 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    33 │ var str = `Hello ${window.foo} World`
+    34 │ 
+  > 35 │ delete window.foo
+       │        ^^^^^^
+    36 │ 
+    37 │ ++window
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:3 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    35 │ delete window.foo
+    36 │ 
+  > 37 │ ++window
+       │   ^^^^^^
+    38 │ ++window.foo
+    39 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:3 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    37 │ ++window
+  > 38 │ ++window.foo
+       │   ^^^^^^
+    39 │ 
+    40 │ for (var attr in window) { }
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:18 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    38 │ ++window.foo
+    39 │ 
+  > 40 │ for (var attr in window) { }
+       │                  ^^^^^^
+    41 │ for (window.foo = 0; i < 10; window.foo++) { }
+    42 │ for (const item of window.foo) { }
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:6 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    40 │ for (var attr in window) { }
+  > 41 │ for (window.foo = 0; i < 10; window.foo++) { }
+       │      ^^^^^^
+    42 │ for (const item of window.foo) { }
+    43 │ for (const item of window) { }
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:30 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    40 │ for (var attr in window) { }
+  > 41 │ for (window.foo = 0; i < 10; window.foo++) { }
+       │                              ^^^^^^
+    42 │ for (const item of window.foo) { }
+    43 │ for (const item of window) { }
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:20 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    40 │ for (var attr in window) { }
+    41 │ for (window.foo = 0; i < 10; window.foo++) { }
+  > 42 │ for (const item of window.foo) { }
+       │                    ^^^^^^
+    43 │ for (const item of window) { }
+    44 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:20 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    41 │ for (window.foo = 0; i < 10; window.foo++) { }
+    42 │ for (const item of window.foo) { }
+  > 43 │ for (const item of window) { }
+       │                    ^^^^^^
+    44 │ 
+    45 │ switch (window) {}
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:9 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    43 │ for (const item of window) { }
+    44 │ 
+  > 45 │ switch (window) {}
+       │         ^^^^^^
+    46 │ switch (true) { case window: break; }
+    47 │ switch (true) { case window.foo: break; }
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:22 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    45 │ switch (window) {}
+  > 46 │ switch (true) { case window: break; }
+       │                      ^^^^^^
+    47 │ switch (true) { case window.foo: break; }
+    48 │ while (window) { }
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:22 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    45 │ switch (window) {}
+    46 │ switch (true) { case window: break; }
+  > 47 │ switch (true) { case window.foo: break; }
+       │                      ^^^^^^
+    48 │ while (window) { }
+    49 │ do {} while (window) {}
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:48:8 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    46 │ switch (true) { case window: break; }
+    47 │ switch (true) { case window.foo: break; }
+  > 48 │ while (window) { }
+       │        ^^^^^^
+    49 │ do {} while (window) {}
+    50 │ if (window) {}
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:14 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    47 │ switch (true) { case window.foo: break; }
+    48 │ while (window) { }
+  > 49 │ do {} while (window) {}
+       │              ^^^^^^
+    50 │ if (window) {}
+    51 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:5 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    48 │ while (window) { }
+    49 │ do {} while (window) {}
+  > 50 │ if (window) {}
+       │     ^^^^^^
+    51 │ 
+    52 │ throw window
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:7 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    50 │ if (window) {}
+    51 │ 
+  > 52 │ throw window
+       │       ^^^^^^
+    53 │ 
+    54 │ var foo = window
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:54:11 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    52 │ throw window
+    53 │ 
+  > 54 │ var foo = window
+       │           ^^^^^^
+    55 │ 
+    56 │ function foo (name = window) { }
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:22 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    54 │ var foo = window
+    55 │ 
+  > 56 │ function foo (name = window) { }
+       │                      ^^^^^^
+    57 │ 
+    58 │ self.innerWidth;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:58:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    56 │ function foo (name = window) { }
+    57 │ 
+  > 58 │ self.innerWidth;
+       │ ^^^^
+    59 │ 
+    60 │ self.innerHeight;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:60:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    58 │ self.innerWidth;
+    59 │ 
+  > 60 │ self.innerHeight;
+       │ ^^^^
+    61 │ 
+    62 │ window.crypto;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    60 │ self.innerHeight;
+    61 │ 
+  > 62 │ window.crypto;
+       │ ^^^^^^
+    63 │ window.addEventListener("play", () => {})
+    64 │ window.onplay = function () {}
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:63:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    62 │ window.crypto;
+  > 63 │ window.addEventListener("play", () => {})
+       │ ^^^^^^
+    64 │ window.onplay = function () {}
+    65 │ function greet({ name = window.foo }) {}
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:64:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    62 │ window.crypto;
+    63 │ window.addEventListener("play", () => {})
+  > 64 │ window.onplay = function () {}
+       │ ^^^^^^
+    65 │ function greet({ name = window.foo }) {}
+    66 │ ({ foo: window.foo } = {})
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:65:25 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    63 │ window.addEventListener("play", () => {})
+    64 │ window.onplay = function () {}
+  > 65 │ function greet({ name = window.foo }) {}
+       │                         ^^^^^^
+    66 │ ({ foo: window.foo } = {})
+    67 │ [window.foo] = []
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:66:9 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    64 │ window.onplay = function () {}
+    65 │ function greet({ name = window.foo }) {}
+  > 66 │ ({ foo: window.foo } = {})
+       │         ^^^^^^
+    67 │ [window.foo] = []
+    68 │ foo[window]
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:67:2 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    65 │ function greet({ name = window.foo }) {}
+    66 │ ({ foo: window.foo } = {})
+  > 67 │ [window.foo] = []
+       │  ^^^^^^
+    68 │ foo[window]
+    69 │ foo[window.foo]
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:68:5 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    66 │ ({ foo: window.foo } = {})
+    67 │ [window.foo] = []
+  > 68 │ foo[window]
+       │     ^^^^^^
+    69 │ foo[window.foo]
+    70 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:69:5 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    67 │ [window.foo] = []
+    68 │ foo[window]
+  > 69 │ foo[window.foo]
+       │     ^^^^^^
+    70 │ 
+    71 │ typeof window !== "undefined";
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:71:8 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    69 │ foo[window.foo]
+    70 │ 
+  > 71 │ typeof window !== "undefined";
+       │        ^^^^^^
+    72 │ typeof self !== "undefined";
+    73 │ typeof global !== "undefined";
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:72:8 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    71 │ typeof window !== "undefined";
+  > 72 │ typeof self !== "undefined";
+       │        ^^^^
+    73 │ typeof global !== "undefined";
+    74 │ typeof window.something === "function";
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:73:8 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    71 │ typeof window !== "undefined";
+    72 │ typeof self !== "undefined";
+  > 73 │ typeof global !== "undefined";
+       │        ^^^^^^
+    74 │ typeof window.something === "function";
+    75 │ typeof self.something === "function";
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:74:8 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    72 │ typeof self !== "undefined";
+    73 │ typeof global !== "undefined";
+  > 74 │ typeof window.something === "function";
+       │        ^^^^^^
+    75 │ typeof self.something === "function";
+    76 │ typeof global.something === "function";
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:75:8 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    73 │ typeof global !== "undefined";
+    74 │ typeof window.something === "function";
+  > 75 │ typeof self.something === "function";
+       │        ^^^^
+    76 │ typeof global.something === "function";
+    77 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:76:8 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    74 │ typeof window.something === "function";
+    75 │ typeof self.something === "function";
+  > 76 │ typeof global.something === "function";
+       │        ^^^^^^
+    77 │ 
+    78 │ global.global_did_not_declare_in_language_options;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:78:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    76 │ typeof global.something === "function";
+    77 │ 
+  > 78 │ global.global_did_not_declare_in_language_options;
+       │ ^^^^^^
+    79 │ window.window_did_not_declare_in_language_options;
+    80 │ self.self_did_not_declare_in_language_options;
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:79:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    78 │ global.global_did_not_declare_in_language_options;
+  > 79 │ window.window_did_not_declare_in_language_options;
+       │ ^^^^^^
+    80 │ self.self_did_not_declare_in_language_options;
+    81 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:80:1 lint/nursery/useGlobalThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer globalThis over window, self and global
+  
+    78 │ global.global_did_not_declare_in_language_options;
+    79 │ window.window_did_not_declare_in_language_options;
+  > 80 │ self.self_did_not_declare_in_language_options;
+       │ ^^^^
+    81 │ 
+  
+  i The globalThis is the standard way to access the global object across environments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -2208,6 +2208,11 @@ See https://biomejs.dev/linter/rules/use-find
 	 */
 	useFind?: UseFindConfiguration;
 	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/use-global-this 
+	 */
+	useGlobalThis?: UseGlobalThisConfiguration;
+	/**
 	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
 See https://biomejs.dev/linter/rules/use-inline-script-id 
 	 */
@@ -3988,6 +3993,9 @@ export type UseExplicitTypeConfiguration =
 export type UseFindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFindOptions;
+export type UseGlobalThisConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseGlobalThisOptions;
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
@@ -5593,6 +5601,10 @@ export interface RuleWithUseFindOptions {
 	level: RulePlainConfiguration;
 	options?: UseFindOptions;
 }
+export interface RuleWithUseGlobalThisOptions {
+	level: RulePlainConfiguration;
+	options?: UseGlobalThisOptions;
+}
 export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
 	options?: UseInlineScriptIdOptions;
@@ -7002,6 +7014,7 @@ export interface UseErrorCauseOptions {
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
+export type UseGlobalThisOptions = {};
 export type UseInlineScriptIdOptions = {};
 export interface UseInputNameOptions {
 	/**
@@ -7887,9 +7900,10 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
+	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useInputName"
 	| "lint/nursery/useInlineScriptId"
+	| "lint/nursery/useInputName"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"

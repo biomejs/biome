@@ -337,6 +337,7 @@ pub mod use_for_of;
 pub mod use_fragment_syntax;
 pub mod use_generic_font_names;
 pub mod use_getter_return;
+pub mod use_global_this;
 pub mod use_google_font_display;
 pub mod use_google_font_preconnect;
 pub mod use_graphql_named_operations;

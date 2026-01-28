@@ -5916,6 +5916,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGlobalThis": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-global-this",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseGlobalThisConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useInlineScriptId": {
 					"description": "Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.\nSee https://biomejs.dev/linter/rules/use-inline-script-id",
 					"anyOf": [
@@ -9791,6 +9798,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseGlobalThisOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseGlobalThisOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseGoogleFontDisplayOptions": {
 			"type": "object",
 			"properties": {
@@ -12845,6 +12861,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseGlobalThisConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseGlobalThisOptions" }
+			]
+		},
+		"UseGlobalThisOptions": { "type": "object", "additionalProperties": false },
 		"UseGoogleFontDisplayConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
