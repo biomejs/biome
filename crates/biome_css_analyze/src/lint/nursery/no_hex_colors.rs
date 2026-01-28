@@ -47,7 +47,7 @@ declare_lint_rule! {
     /// - [MDN Web Docs on CSS color values](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/color_value)
     ///
     pub NoHexColors {
-        version: "next",
+        version: "2.3.14",
         name: "noHexColors",
         language: "css",
         sources: &[RuleSource::Stylelint("color-no-hex").same()],
