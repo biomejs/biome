@@ -11,6 +11,9 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = true
 
+[package.metadata.cargo-udeps.ignore]
+development = ["biome_console"]
+
 [lib]
 proc-macro = true
 
@@ -24,6 +27,3 @@ biome_console = { path = "../biome_console" }
 
 [lints]
 workspace = true
-
-[package.metadata.cargo-udeps.ignore]
-development = ["biome_console"]
