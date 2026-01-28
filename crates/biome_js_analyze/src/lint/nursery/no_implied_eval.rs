@@ -142,38 +142,16 @@ impl Rule for NoImpliedEval {
 /// - window.setTimeout (static member)
 /// - `window["setTimeout"]` (computed member)
 /// - globalThis.setTimeout (static member)
-/// - (0, setTimeout) (sequence expression)
 ///
 /// Uses the `global_identifier` utility which handles window/globalThis chains automatically
 fn is_eval_like_function(
     callee: &AnyJsExpression,
     model: &biome_js_semantic::SemanticModel,
 ) -> Option<bool> {
-    let unwrapped = unwrap_callee(callee);
+    let unwrapped = callee.clone().omit_parentheses();
     let (reference, name) = global_identifier(&unwrapped)?;
 
     Some(model.binding(&reference).is_none() && EVAL_LIKE_FUNCTIONS.contains(&name.text()))
-}
-
-/// Unwraps parentheses and sequence expressions to get the actual callee
-fn unwrap_callee(expr: &AnyJsExpression) -> AnyJsExpression {
-    match expr {
-        AnyJsExpression::JsSequenceExpression(sequence) => {
-            if let Ok(right) = sequence.right() {
-                return unwrap_callee(&right);
-            }
-            expr.clone()
-        }
-
-        AnyJsExpression::JsParenthesizedExpression(paren) => {
-            if let Ok(inner) = paren.expression() {
-                return unwrap_callee(&inner);
-            }
-            expr.clone()
-        }
-
-        _ => expr.clone(),
-    }
 }
 
 /// Checks if the argument is a string (literal, template, or concatenation)

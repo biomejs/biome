@@ -26,15 +26,8 @@ setTimeout(`alert('Hi!');`, 100);
 setTimeout("alert" + "('Hi!');", 100);
 setInterval("foo" + "bar", 10);
 
-// Sequence expression
-(0, setTimeout)("alert('Hi!');", 100);
-(0, window.setTimeout)("alert('Hi!');", 100);
-
 // Computed member on global object
 global["setTimeout"]("alert('Hi!');", 100);
-
-// Nested sequence expression
-(0, (0, setTimeout))("alert('Hi!');", 100);
 
 // Optional chaining on member access
 window?.setTimeout("alert('Hi!');", 100);
@@ -44,13 +37,6 @@ globalThis?.setTimeout("alert('Hi!');", 100);
 // Optional chaining on computed member
 window?.["setTimeout"]("alert('Hi!');", 100);
 globalThis?.["setInterval"]("alert('Hi!');", 100);
-
-// Optional call on sequence expression
-(0, setTimeout)?.("alert('Hi!');", 100);
-(0, window.setTimeout)?.("alert('Hi!');", 100);
-
-// Parenthesized optional call
-((0, setTimeout))?.("alert('Hi!');", 100);
 
 // Parenthesized string arguments
 setTimeout(("alert('Hi!');"), 100);
