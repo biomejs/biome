@@ -1879,6 +1879,11 @@ See https://biomejs.dev/linter/rules/no-deprecated-imports
 	 */
 	noDeprecatedImports?: NoDeprecatedImportsConfiguration;
 	/**
+	* Disallow deprecated media types.
+See https://biomejs.dev/linter/rules/no-deprecated-media-type 
+	 */
+	noDeprecatedMediaType?: NoDeprecatedMediaTypeConfiguration;
+	/**
 	* Disallow equal signs explicitly at the beginning of regular expressions.
 See https://biomejs.dev/linter/rules/no-div-regex 
 	 */
@@ -3778,6 +3783,9 @@ export type NoContinueConfiguration =
 export type NoDeprecatedImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDeprecatedImportsOptions;
+export type NoDeprecatedMediaTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDeprecatedMediaTypeOptions;
 export type NoDivRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDivRegexOptions;
@@ -5297,6 +5305,10 @@ export interface RuleWithNoDeprecatedImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDeprecatedImportsOptions;
 }
+export interface RuleWithNoDeprecatedMediaTypeOptions {
+	level: RulePlainConfiguration;
+	options?: NoDeprecatedMediaTypeOptions;
+}
 export interface RuleWithNoDivRegexOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6791,6 +6803,12 @@ export interface NoAmbiguousAnchorTextOptions {
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
+export interface NoDeprecatedMediaTypeOptions {
+	/**
+	 * Media types to allow (case-insensitive).
+	 */
+	allow?: string[];
+}
 export type NoDivRegexOptions = {};
 export type NoDuplicateArgumentNamesOptions = {};
 export type NoDuplicateAttributesOptions = {};
@@ -7759,6 +7777,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDeprecatedMediaType"
 	| "lint/nursery/noDivRegex"
 	| "lint/nursery/noDuplicateArgumentNames"
 	| "lint/nursery/noDuplicateAttributes"

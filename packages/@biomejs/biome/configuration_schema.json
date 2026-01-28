@@ -2912,6 +2912,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDeprecatedMediaTypeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDeprecatedMediaTypeOptions" }
+			]
+		},
+		"NoDeprecatedMediaTypeOptions": {
+			"type": "object",
+			"properties": {
+				"allow": {
+					"description": "Media types to allow (case-insensitive).",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoDescendingSpecificityConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5416,6 +5433,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDeprecatedMediaType": {
+					"description": "Disallow deprecated media types.\nSee https://biomejs.dev/linter/rules/no-deprecated-media-type",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDeprecatedMediaTypeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDivRegex": {
 					"description": "Disallow equal signs explicitly at the beginning of regular expressions.\nSee https://biomejs.dev/linter/rules/no-div-regex",
 					"anyOf": [
@@ -6996,6 +7020,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDeprecatedImportsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDeprecatedMediaTypeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDeprecatedMediaTypeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
