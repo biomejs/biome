@@ -10,11 +10,12 @@ use biome_js_factory::make;
 use biome_js_semantic::{CanBeImportedExported, ClosureExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, AnyJsObjectBindingPatternMember,
-    JsArrayBindingPattern, JsArrayBindingPatternElement, JsArrayBindingPatternElementList,
-    JsArrayExpression, JsComputedMemberExpression, JsObjectBindingPattern,
-    JsObjectBindingPatternPropertyList, JsReferenceIdentifier, JsVariableDeclarator, T,
-    TsTypeofType, is_transparent_expression_wrapper,
+    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression,
+    AnyJsMemberExpression, AnyJsObjectBindingPatternMember, JsArrayBindingPattern,
+    JsArrayBindingPatternElement, JsArrayBindingPatternElementList, JsArrayExpression,
+    JsComputedMemberExpression, JsObjectBindingPattern, JsObjectBindingPatternPropertyList,
+    JsReferenceIdentifier, JsVariableDeclarator, T, TsTypeofType,
+    is_transparent_expression_wrapper,
 };
 use biome_js_syntax::{
     JsCallExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TextRange,
@@ -849,8 +850,20 @@ fn is_stable_expression(
                 && let Some(binding) = model.binding(&name)
             {
                 let binding = &binding.tree();
-                if let Some(declaration_node) =
-                    &binding.declaration().map(|decl| decl.syntax().clone())
+                let declaration = binding.declaration();
+                let declaration_node = if let Some(
+                    AnyJsBindingDeclaration::JsArrowFunctionExpression(arrow_function),
+                ) = &declaration
+                    && let Ok(AnyJsArrowFunctionParameters::AnyJsBinding(
+                        AnyJsBinding::JsIdentifierBinding(identifier),
+                    )) = arrow_function.parameters()
+                    && identifier.syntax().eq(binding.syntax())
+                {
+                    Some(identifier.syntax().clone())
+                } else {
+                    declaration.map(|decl| decl.syntax().clone())
+                };
+                if let Some(declaration_node) = &declaration_node
                     && identifier
                         .syntax()
                         .ancestors()
