@@ -1133,6 +1133,50 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "e18e/prefer-array-at" => {
+            let group = rules.style.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_at_index
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "e18e/prefer-date-now" => {
+            let group = rules.complexity.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_date_now
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "e18e/prefer-exponentiation-operator" => {
+            let group = rules.style.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_exponentiation_operator
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "e18e/prefer-object-has-own" => {
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_prototype_builtins
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "e18e/prefer-spread-syntax" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            let group = rules.style.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_object_spread
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "eqeqeq" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
