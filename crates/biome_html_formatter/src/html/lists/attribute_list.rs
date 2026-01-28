@@ -77,6 +77,9 @@ impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
                                     AnyHtmlAttribute::AnySvelteDirective(attr) => {
                                         attr.format().fmt(f)
                                     }
+                                    AnyHtmlAttribute::HtmlSpreadAttribute(attr) => {
+                                        attr.format().fmt(f)
+                                    }
                                 })
                             }))
                             .finish()?;

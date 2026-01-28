@@ -682,6 +682,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlSingleTextExpressi
         )
     }
 }
+impl FormatRule<biome_html_syntax::HtmlSpreadAttribute>
+    for crate::html::auxiliary::spread_attribute::FormatHtmlSpreadAttribute
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlSpreadAttribute,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlSpreadAttribute>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlSpreadAttribute {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlSpreadAttribute,
+        crate::html::auxiliary::spread_attribute::FormatHtmlSpreadAttribute,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::spread_attribute::FormatHtmlSpreadAttribute::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlSpreadAttribute {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlSpreadAttribute,
+        crate::html::auxiliary::spread_attribute::FormatHtmlSpreadAttribute,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::spread_attribute::FormatHtmlSpreadAttribute::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::HtmlString>
     for crate::html::auxiliary::string::FormatHtmlString
 {

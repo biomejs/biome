@@ -349,6 +349,22 @@ pub fn html_single_text_expression(
         ],
     ))
 }
+pub fn html_spread_attribute(
+    l_curly_token: SyntaxToken,
+    dotdotdot_token: SyntaxToken,
+    argument: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+) -> HtmlSpreadAttribute {
+    HtmlSpreadAttribute::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_SPREAD_ATTRIBUTE,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Token(dotdotdot_token)),
+            Some(SyntaxElement::Node(argument.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn html_string(value_token: SyntaxToken) -> HtmlString {
     HtmlString::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_STRING,

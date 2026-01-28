@@ -825,6 +825,56 @@ pub struct HtmlSingleTextExpressionFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlSpreadAttribute {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlSpreadAttribute {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlSpreadAttributeFields {
+        HtmlSpreadAttributeFields {
+            l_curly_token: self.l_curly_token(),
+            dotdotdot_token: self.dotdotdot_token(),
+            argument: self.argument(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn dotdotdot_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn argument(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for HtmlSpreadAttribute {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlSpreadAttributeFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub dotdotdot_token: SyntaxResult<SyntaxToken>,
+    pub argument: SyntaxResult<HtmlTextExpression>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlString {
     pub(crate) syntax: SyntaxNode,
 }
@@ -3376,6 +3426,7 @@ pub enum AnyHtmlAttribute {
     HtmlBogusAttribute(HtmlBogusAttribute),
     HtmlDoubleTextExpression(HtmlDoubleTextExpression),
     HtmlSingleTextExpression(HtmlSingleTextExpression),
+    HtmlSpreadAttribute(HtmlSpreadAttribute),
     SvelteAttachAttribute(SvelteAttachAttribute),
 }
 impl AnyHtmlAttribute {
@@ -3412,6 +3463,12 @@ impl AnyHtmlAttribute {
     pub fn as_html_single_text_expression(&self) -> Option<&HtmlSingleTextExpression> {
         match &self {
             Self::HtmlSingleTextExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_spread_attribute(&self) -> Option<&HtmlSpreadAttribute> {
+        match &self {
+            Self::HtmlSpreadAttribute(item) => Some(item),
             _ => None,
         }
     }
@@ -4905,6 +4962,65 @@ impl From<HtmlSingleTextExpression> for SyntaxNode {
 }
 impl From<HtmlSingleTextExpression> for SyntaxElement {
     fn from(n: HtmlSingleTextExpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for HtmlSpreadAttribute {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_SPREAD_ATTRIBUTE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_SPREAD_ATTRIBUTE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlSpreadAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlSpreadAttribute")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("argument", &support::DebugSyntaxResult(self.argument()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlSpreadAttribute").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlSpreadAttribute> for SyntaxNode {
+    fn from(n: HtmlSpreadAttribute) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlSpreadAttribute> for SyntaxElement {
+    fn from(n: HtmlSpreadAttribute) -> Self {
         n.syntax.into()
     }
 }
@@ -8007,6 +8123,11 @@ impl From<HtmlSingleTextExpression> for AnyHtmlAttribute {
         Self::HtmlSingleTextExpression(node)
     }
 }
+impl From<HtmlSpreadAttribute> for AnyHtmlAttribute {
+    fn from(node: HtmlSpreadAttribute) -> Self {
+        Self::HtmlSpreadAttribute(node)
+    }
+}
 impl From<SvelteAttachAttribute> for AnyHtmlAttribute {
     fn from(node: SvelteAttachAttribute) -> Self {
         Self::SvelteAttachAttribute(node)
@@ -8020,6 +8141,7 @@ impl AstNode for AnyHtmlAttribute {
         .union(HtmlBogusAttribute::KIND_SET)
         .union(HtmlDoubleTextExpression::KIND_SET)
         .union(HtmlSingleTextExpression::KIND_SET)
+        .union(HtmlSpreadAttribute::KIND_SET)
         .union(SvelteAttachAttribute::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
@@ -8027,6 +8149,7 @@ impl AstNode for AnyHtmlAttribute {
             | HTML_BOGUS_ATTRIBUTE
             | HTML_DOUBLE_TEXT_EXPRESSION
             | HTML_SINGLE_TEXT_EXPRESSION
+            | HTML_SPREAD_ATTRIBUTE
             | SVELTE_ATTACH_ATTRIBUTE => true,
             k if AnySvelteDirective::can_cast(k) => true,
             k if AnyVueDirective::can_cast(k) => true,
@@ -8043,6 +8166,7 @@ impl AstNode for AnyHtmlAttribute {
             HTML_SINGLE_TEXT_EXPRESSION => {
                 Self::HtmlSingleTextExpression(HtmlSingleTextExpression { syntax })
             }
+            HTML_SPREAD_ATTRIBUTE => Self::HtmlSpreadAttribute(HtmlSpreadAttribute { syntax }),
             SVELTE_ATTACH_ATTRIBUTE => {
                 Self::SvelteAttachAttribute(SvelteAttachAttribute { syntax })
             }
@@ -8067,6 +8191,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlBogusAttribute(it) => it.syntax(),
             Self::HtmlDoubleTextExpression(it) => it.syntax(),
             Self::HtmlSingleTextExpression(it) => it.syntax(),
+            Self::HtmlSpreadAttribute(it) => it.syntax(),
             Self::SvelteAttachAttribute(it) => it.syntax(),
             Self::AnySvelteDirective(it) => it.syntax(),
             Self::AnyVueDirective(it) => it.syntax(),
@@ -8078,6 +8203,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlBogusAttribute(it) => it.into_syntax(),
             Self::HtmlDoubleTextExpression(it) => it.into_syntax(),
             Self::HtmlSingleTextExpression(it) => it.into_syntax(),
+            Self::HtmlSpreadAttribute(it) => it.into_syntax(),
             Self::SvelteAttachAttribute(it) => it.into_syntax(),
             Self::AnySvelteDirective(it) => it.into_syntax(),
             Self::AnyVueDirective(it) => it.into_syntax(),
@@ -8093,6 +8219,7 @@ impl std::fmt::Debug for AnyHtmlAttribute {
             Self::HtmlBogusAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlDoubleTextExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlSpreadAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteAttachAttribute(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -8106,6 +8233,7 @@ impl From<AnyHtmlAttribute> for SyntaxNode {
             AnyHtmlAttribute::HtmlBogusAttribute(it) => it.into_syntax(),
             AnyHtmlAttribute::HtmlDoubleTextExpression(it) => it.into_syntax(),
             AnyHtmlAttribute::HtmlSingleTextExpression(it) => it.into_syntax(),
+            AnyHtmlAttribute::HtmlSpreadAttribute(it) => it.into_syntax(),
             AnyHtmlAttribute::SvelteAttachAttribute(it) => it.into_syntax(),
         }
     }
@@ -9646,6 +9774,11 @@ impl std::fmt::Display for HtmlSelfClosingElement {
     }
 }
 impl std::fmt::Display for HtmlSingleTextExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlSpreadAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

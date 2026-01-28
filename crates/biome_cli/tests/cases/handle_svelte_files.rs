@@ -561,6 +561,7 @@ fn embedded_bindings_are_tracked_correctly() {
 import { Component } from "./component.svelte";
 let hello = "Hello World";
 let array = [];
+let props = [];
 </script>
 
 <html>
@@ -569,6 +570,7 @@ let array = [];
     {#each array as item}
     {/each}
     <Component />
+    <input {...props} />
 </html>
 "#
         .as_bytes(),

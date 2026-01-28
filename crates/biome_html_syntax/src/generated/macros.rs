@@ -89,6 +89,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlSingleTextExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_SPREAD_ATTRIBUTE => {
+                    let $pattern = unsafe { $crate::HtmlSpreadAttribute::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_STRING => {
                     let $pattern = unsafe { $crate::HtmlString::new_unchecked(node) };
                     $body

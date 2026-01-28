@@ -611,6 +611,46 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(HTML_SINGLE_TEXT_EXPRESSION, children)
             }
+            HTML_SPREAD_ATTRIBUTE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['{']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [...]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlTextExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        HTML_SPREAD_ATTRIBUTE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(HTML_SPREAD_ATTRIBUTE, children)
+            }
             HTML_STRING => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();

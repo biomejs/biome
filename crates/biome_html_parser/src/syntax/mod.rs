@@ -5,11 +5,12 @@ mod vue;
 
 use crate::parser::HtmlParser;
 use crate::syntax::HtmlSyntaxFeatures::{Astro, DoubleTextExpressions, SingleTextExpressions, Vue};
-use crate::syntax::astro::parse_astro_fence;
+use crate::syntax::astro::{parse_astro_fence, parse_astro_spread_or_expression};
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
     is_at_svelte_directive_start, is_at_svelte_keyword, parse_attach_attribute,
     parse_svelte_at_block, parse_svelte_directive, parse_svelte_hash_block,
+    parse_svelte_spread_or_expression,
 };
 use crate::syntax::vue::{
     parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_on_shorthand_directive,
@@ -461,9 +462,12 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             parse_vue_v_slot_shorthand_directive,
             |p, m| disabled_vue(p, m.range(p)),
         ),
+        T!['{'] if SingleTextExpressions.is_supported(p) => parse_svelte_spread_or_expression(p),
+        T!['{'] if Astro.is_supported(p) => parse_astro_spread_or_expression(p),
+        // Keep previous behaviour so that invalid documents are still parsed.
         T!['{'] => SingleTextExpressions.parse_exclusive_syntax(
             p,
-            |p| parse_single_text_expression(p, HtmlLexContext::InsideTag),
+            |p| parse_svelte_spread_or_expression(p),
             |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte(p, m.range(p)),
         ),
         T!["{@"] => SingleTextExpressions.parse_exclusive_syntax(
@@ -472,8 +476,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte(p, m.range(p)),
         ),
         _ if p.cur_text().starts_with("v-") => {
-            HtmlSyntaxFeatures::Vue
-                .parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
+            Vue.parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
         }
         _ if is_at_svelte_directive_start(p) => {
             SingleTextExpressions.parse_exclusive_syntax(p, parse_svelte_directive, |p, m| {
@@ -486,10 +489,8 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 
             if p.at(T![=]) {
                 parse_attribute_initializer(p).ok();
-                Present(m.complete(p, HTML_ATTRIBUTE))
-            } else {
-                Present(m.complete(p, HTML_ATTRIBUTE))
             }
+            Present(m.complete(p, HTML_ATTRIBUTE))
         }
     }
 }
@@ -669,7 +670,7 @@ pub(crate) fn parse_single_text_expression(
     p: &mut HtmlParser,
     context: HtmlLexContext,
 ) -> ParsedSyntax {
-    if !HtmlSyntaxFeatures::SingleTextExpressions.is_supported(p) {
+    if !SingleTextExpressions.is_supported(p) {
         return Absent;
     }
 
