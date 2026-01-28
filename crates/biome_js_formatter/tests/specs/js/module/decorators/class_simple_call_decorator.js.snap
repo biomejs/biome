@@ -79,6 +79,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -161,4 +162,5 @@ export
 @decorator3.method(value)
 @decorator4.method(value)
 class Foo {}
+
 ```

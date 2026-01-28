@@ -37,6 +37,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -47,4 +48,5 @@ true;
 false;
 null;
 /[/]\/\u0aBc/gim;
+
 ```

@@ -52,6 +52,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -71,4 +72,5 @@ const e: string =
 	// 1
 	// 2
 	{ object: 5 };
+
 ```

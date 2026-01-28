@@ -64,6 +64,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -93,4 +94,5 @@ class Test {
 	prop10: any = // 1 // 2
 		{ object: 3 };
 }
+
 ```

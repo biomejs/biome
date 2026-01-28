@@ -1,0 +1,7 @@
+/* should not generate diagnostics */
+
+/* These should be valid because they're in the ignore list */
+a:custom-pseudo-class { }
+a:MyCustomPseudoClass { }
+a:mycustompseudoclass { }
+a:another-custom-pseudo-class { }

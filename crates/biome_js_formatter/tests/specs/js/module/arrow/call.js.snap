@@ -75,6 +75,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -131,6 +132,7 @@ romise.then((result) =>
 		? "ok"
 		: "fail",
 );
+
 ```
 
 ## Output 1
@@ -151,6 +153,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -207,4 +210,5 @@ romise.then(result =>
 		? "ok"
 		: "fail",
 );
+
 ```

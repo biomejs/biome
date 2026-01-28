@@ -28,15 +28,20 @@ impl FormatNodeRule<JsScript> for FormatJsScript {
             ]
         ]?;
 
-        write![
+        write!(
             f,
             [
                 statements.format(),
                 format_trailing_comments(node.syntax()),
-                format_removed(&eof_token?),
-                hard_line_break()
+                format_removed(&eof_token?)
             ]
-        ]
+        )?;
+
+        if f.options().trailing_newline().value() {
+            write!(f, [hard_line_break()])
+        } else {
+            Ok(())
+        }
     }
 
     fn fmt_leading_comments(&self, _: &JsScript, _: &mut JsFormatter) -> FormatResult<()> {

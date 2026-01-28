@@ -2,36 +2,16 @@
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
 	features: FeatureName;
+	inlineConfig?: Configuration;
+	/**
+	 * Features that shouldn't be enabled
+	 */
+	notRequestedFeatures?: FeatureName;
 	path: BiomePath;
 	projectKey: ProjectKey;
 	skipIgnoreCheck?: boolean;
 }
 export type FeatureName = FeatureKind[];
-export type BiomePath = string;
-export type ProjectKey = number;
-export type FeatureKind =
-	| "format"
-	| "lint"
-	| "search"
-	| "assist"
-	| "debug"
-	| "htmlFullSupport";
-export interface FileFeaturesResult {
-	featuresSupported: FeaturesSupported;
-}
-export type FeaturesSupported = { [K in FeatureKind]?: SupportKind };
-export type SupportKind =
-	| "supported"
-	| "ignored"
-	| "protected"
-	| "featureNotEnabled"
-	| "fileNotSupported";
-export interface UpdateSettingsParams {
-	configuration: Configuration;
-	extendedConfigurations?: [BiomePath, Configuration][];
-	projectKey: ProjectKey;
-	workspaceDirectory?: BiomePath;
-}
 /**
  * The configuration that is contained inside the file `biome.json`
  */
@@ -102,6 +82,15 @@ project. By default, this is `true`.
 	 */
 	vcs?: VcsConfiguration;
 }
+export type BiomePath = string;
+export type ProjectKey = number;
+export type FeatureKind =
+	| "format"
+	| "lint"
+	| "search"
+	| "assist"
+	| "debug"
+	| "htmlFullSupport";
 export type Schema = string;
 export interface AssistConfiguration {
 	/**
@@ -224,6 +213,19 @@ match these patterns.
 	 */
 	lineWidth?: LineWidth;
 	/**
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
+	 */
+	trailingNewline?: TrailingNewline;
+	/**
 	* Use any `.editorconfig` files to configure the formatter. Configuration
 in `biome.json` will override `.editorconfig` configuration.
 
@@ -292,6 +294,10 @@ export interface JsConfiguration {
 	 * Assist options
 	 */
 	assist?: JsAssistConfiguration;
+	/**
+	 * Enables support for embedding snippets.
+	 */
+	experimentalEmbeddedSnippetsEnabled?: Bool;
 	/**
 	 * Formatting options
 	 */
@@ -437,6 +443,19 @@ export interface CssFormatterConfiguration {
 	 * The type of quotes used in CSS code. Defaults to double.
 	 */
 	quoteStyle?: QuoteStyle;
+	/**
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
+	 */
+	trailingNewline?: TrailingNewline;
 }
 /**
  * Options that changes how the CSS linter behaves
@@ -456,7 +475,8 @@ export interface CssParserConfiguration {
 	 */
 	allowWrongLineComments?: Bool;
 	/**
-	 * Enables parsing of CSS Modules specific features.
+	* Enables parsing of CSS Modules specific features. Enable this feature only
+when your files don't end in `.module.css`. 
 	 */
 	cssModules?: Bool;
 	/**
@@ -481,6 +501,7 @@ export type LineEnding = "lf" | "crlf" | "cr" | "auto";
 The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
+export type TrailingNewline = boolean;
 /**
  * Options that changes how the GraphQL linter behaves
  */
@@ -522,6 +543,19 @@ export interface GraphqlFormatterConfiguration {
 	 * The type of quotes used in GraphQL code. Defaults to double.
 	 */
 	quoteStyle?: QuoteStyle;
+	/**
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
+	 */
+	trailingNewline?: TrailingNewline;
 }
 /**
  * Options that change how the GraphQL linter behaves.
@@ -559,6 +593,19 @@ export interface GritFormatterConfiguration {
 	 * What's the max width of a line applied to Grit files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
+	 */
+	trailingNewline?: TrailingNewline;
 }
 export interface GritLinterConfiguration {
 	/**
@@ -615,6 +662,19 @@ export interface HtmlFormatterConfiguration {
 	 * Whether void elements should be self-closed. Defaults to never.
 	 */
 	selfCloseVoidElements?: SelfCloseVoidElements;
+	/**
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
+	 */
+	trailingNewline?: TrailingNewline;
 	/**
 	 * Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "css".
 	 */
@@ -720,6 +780,19 @@ When formatting `package.json`, Biome will use `always` unless configured otherw
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
 	 */
 	trailingCommas?: JsTrailingCommas;
+	/**
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
+	 */
+	trailingNewline?: TrailingNewline;
 }
 /**
  * Indicates the type of runtime or transformation used for interpreting JSX.
@@ -803,6 +876,19 @@ When formatting `package.json`, Biome will use `always` unless configured otherw
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
 	 */
 	trailingCommas?: JsonTrailingCommas;
+	/**
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
+	 */
+	trailingNewline?: TrailingNewline;
 }
 /**
  * Linter options specific to the JSON linter
@@ -913,6 +999,11 @@ See https://biomejs.dev/assist/actions/use-sorted-attributes
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;
 	/**
+	* Sort interface members by key.
+See https://biomejs.dev/assist/actions/use-sorted-interface-members 
+	 */
+	useSortedInterfaceMembers?: UseSortedInterfaceMembersConfiguration;
+	/**
 	* Sort the keys of a JSON object in natural order.
 See https://biomejs.dev/assist/actions/use-sorted-keys 
 	 */
@@ -984,7 +1075,8 @@ export type RuleDomain =
 	| "vue"
 	| "project"
 	| "tailwind"
-	| "turborepo";
+	| "turborepo"
+	| "types";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
 export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
@@ -1058,6 +1150,19 @@ has syntax errors
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+
+Disable the option at your own risk.
+
+Defaults to true. 
+	 */
+	trailingNewline?: TrailingNewline;
 }
 export type OverrideGlobs = Glob[];
 export interface OverrideLinterConfiguration {
@@ -1080,6 +1185,9 @@ export type OrganizeImportsConfiguration =
 export type UseSortedAttributesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedAttributesOptions;
+export type UseSortedInterfaceMembersConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedInterfaceMembersOptions;
 export type UseSortedKeysConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedKeysOptions;
@@ -1092,7 +1200,7 @@ export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
  */
 export interface A11y {
 	/**
-	* Enforce that the accessKey attribute is not used on any HTML element.
+	* Enforce that the accesskey attribute is not used on any HTML element.
 See https://biomejs.dev/linter/rules/no-access-key 
 	 */
 	noAccessKey?: NoAccessKeyConfiguration;
@@ -1107,7 +1215,7 @@ See https://biomejs.dev/linter/rules/no-aria-unsupported-elements
 	 */
 	noAriaUnsupportedElements?: NoAriaUnsupportedElementsConfiguration;
 	/**
-	* Enforce that autoFocus prop is not used on elements.
+	* Enforce that the autofocus attribute is not used on elements.
 See https://biomejs.dev/linter/rules/no-autofocus 
 	 */
 	noAutofocus?: NoAutofocusConfiguration;
@@ -1147,7 +1255,7 @@ See https://biomejs.dev/linter/rules/no-noninteractive-tabindex
 	 */
 	noNoninteractiveTabindex?: NoNoninteractiveTabindexConfiguration;
 	/**
-	* Prevent the usage of positive integers on tabIndex property.
+	* Prevent the usage of positive integers on tabindex attribute.
 See https://biomejs.dev/linter/rules/no-positive-tabindex 
 	 */
 	noPositiveTabindex?: NoPositiveTabindexConfiguration;
@@ -1201,7 +1309,7 @@ See https://biomejs.dev/linter/rules/use-aria-props-supported-by-role
 	 */
 	useAriaPropsSupportedByRole?: UseAriaPropsSupportedByRoleConfiguration;
 	/**
-	* Enforces the usage of the attribute type for the element button.
+	* Enforces the usage and validity of the attribute type for the element button.
 See https://biomejs.dev/linter/rules/use-button-type 
 	 */
 	useButtonType?: UseButtonTypeConfiguration;
@@ -2581,7 +2689,7 @@ See https://biomejs.dev/linter/rules/no-useless-else
 	 */
 	noUselessElse?: NoUselessElseConfiguration;
 	/**
-	* Disallow use of @value rule in css modules.
+	* Disallow use of @value rule in CSS modules.
 See https://biomejs.dev/linter/rules/no-value-at-rule 
 	 */
 	noValueAtRule?: NoValueAtRuleConfiguration;
@@ -3323,6 +3431,10 @@ export interface RuleAssistWithOrganizeImportsOptions {
 export interface RuleAssistWithUseSortedAttributesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedAttributesOptions;
+}
+export interface RuleAssistWithUseSortedInterfaceMembersOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedInterfaceMembersOptions;
 }
 export interface RuleAssistWithUseSortedKeysOptions {
 	level: RuleAssistPlainConfiguration;
@@ -4630,7 +4742,14 @@ export interface OrganizeImportsOptions {
 export interface UseSortedAttributesOptions {
 	sortOrder?: SortOrder;
 }
+export type UseSortedInterfaceMembersOptions = {};
 export interface UseSortedKeysOptions {
+	/**
+	* When enabled, groups object keys by their value's nesting depth before sorting.
+Simple values (primitives, single-line arrays, single-line objects) are sorted first,
+followed by nested values (multi-line objects, multi-line arrays). 
+	 */
+	groupByNesting?: boolean;
 	sortOrder?: SortOrder;
 }
 export type UseSortedPropertiesOptions = {};
@@ -6733,11 +6852,31 @@ export interface NoUndeclaredVariablesOptions {
 	 */
 	checkTypes?: boolean;
 }
-export type NoUnknownFunctionOptions = {};
+export interface NoUnknownFunctionOptions {
+	/**
+	 * A list of unknown function names to ignore (case-insensitive).
+	 */
+	ignore?: string[];
+}
 export type NoUnknownMediaFeatureNameOptions = {};
-export type NoUnknownPropertyOptions = {};
-export type NoUnknownPseudoClassOptions = {};
-export type NoUnknownPseudoElementOptions = {};
+export interface NoUnknownPropertyOptions {
+	/**
+	 * A list of unknown property names to ignore (case-insensitive).
+	 */
+	ignore?: string[];
+}
+export interface NoUnknownPseudoClassOptions {
+	/**
+	 * A list of unknown pseudo-class names to ignore (case-insensitive).
+	 */
+	ignore?: string[];
+}
+export interface NoUnknownPseudoElementOptions {
+	/**
+	 * A list of unknown pseudo-element names to ignore (case-insensitive).
+	 */
+	ignore?: string[];
+}
 export type NoUnknownTypeSelectorOptions = {};
 export type NoUnknownUnitOptions = {};
 export type NoUnmatchableAnbSelectorOptions = {};
@@ -6780,6 +6919,11 @@ export type UseGraphqlNamedOperationsOptions = {};
 export type UseHookAtTopLevelOptions = {};
 export type UseImageSizeOptions = null;
 export interface UseImportExtensionsOptions {
+	/**
+	* A map of file extensions to their suggested replacements.
+For example, `{"ts": "js"}` would suggest `.js` extensions for TypeScript imports. 
+	 */
+	extensionMappings?: Record<string, string>;
 	/**
 	* If `true`, the suggested extension is always `.js` regardless of what
 extension the source file has in your project. 
@@ -7266,7 +7410,16 @@ export type UseTemplateOptions = {};
 export type UseThrowNewErrorOptions = {};
 export type UseThrowOnlyErrorOptions = {};
 export type UseTrimStartEndOptions = {};
-export type UseUnifiedTypeSignaturesOptions = {};
+export interface UseUnifiedTypeSignaturesOptions {
+	/**
+	 * Whether to ignore overloads with different JSDoc comments.
+	 */
+	ignoreDifferentJsDoc?: boolean;
+	/**
+	 * Whether to ignore overloads with differently named parameters.
+	 */
+	ignoreDifferentlyNamedParameters?: boolean;
+}
 export type NoAlertOptions = {};
 export type NoApproximativeNumericConstantOptions = {};
 export type NoArrayIndexKeyOptions = {};
@@ -7390,7 +7543,13 @@ export type UseGetterReturnOptions = {};
 export type UseGoogleFontDisplayOptions = {};
 export type UseGuardForInOptions = {};
 export type UseIsArrayOptions = {};
-export type UseIterableCallbackReturnOptions = {};
+export interface UseIterableCallbackReturnOptions {
+	/**
+	* When `true`, the rule reports `forEach` callbacks that return a value (default behaviour).
+When `false` or unset, such callbacks are ignored. 
+	 */
+	checkForEach?: boolean;
+}
 export type UseNamespaceKeywordOptions = {};
 export type UseNumberToFixedDigitsArgumentOptions = {};
 export type UseStaticResponseMethodsOptions = {};
@@ -7613,6 +7772,25 @@ export type RestrictedModifier =
 	| "protected"
 	| "readonly"
 	| "static";
+export interface FileFeaturesResult {
+	featuresSupported: FeaturesSupported;
+}
+export type FeaturesSupported = { [K in FeatureKind]?: SupportKind };
+export type SupportKind =
+	| "supported"
+	| "ignored"
+	| "protected"
+	| "featureNotEnabled"
+	| "fileNotSupported"
+	| "notRequested";
+export interface UpdateSettingsParams {
+	configuration: Configuration;
+	extendedConfigurations?: [BiomePath, Configuration][];
+	moduleGraphResolutionKind?: ModuleGraphResolutionKind;
+	projectKey: ProjectKey;
+	workspaceDirectory?: BiomePath;
+}
+export type ModuleGraphResolutionKind = "none" | "modules" | "modulesAndTypes";
 export interface UpdateSettingsResult {
 	diagnostics: Diagnostic[];
 }
@@ -7755,7 +7933,6 @@ export type Category =
 	| "lint/correctness/noUnknownMediaFeatureName"
 	| "lint/correctness/noUnknownProperty"
 	| "lint/correctness/noUnknownPseudoClass"
-	| "lint/correctness/noUnknownPseudoClassSelector"
 	| "lint/correctness/noUnknownPseudoElement"
 	| "lint/correctness/noUnknownTypeSelector"
 	| "lint/correctness/noUnknownUnit"
@@ -7875,6 +8052,11 @@ export type Category =
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
+	| "lint/nursery/useUniqueArgumentNames"
+	| "lint/nursery/useUniqueFieldDefinitionNames"
+	| "lint/nursery/useUniqueGraphqlOperationName"
+	| "lint/nursery/useUniqueInputFieldNames"
+	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentVBindStyle"
 	| "lint/nursery/useVueConsistentVOnStyle"
@@ -8082,6 +8264,7 @@ export type Category =
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
+	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedAttributes"
@@ -8275,7 +8458,8 @@ Target paths must be absolute.
 				targetPaths: BiomePath[];
 			};
 	  }
-	| "project";
+	| "project"
+	| "typeAware";
 export interface ScanProjectResult {
 	/**
 	 * A list of child configuration files found inside the project
@@ -8297,6 +8481,7 @@ export interface Duration {
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
+	inlineConfig?: Configuration;
 	path: BiomePath;
 	/**
 	* Set to `true` to persist the node cache used during parsing, in order to
@@ -8337,6 +8522,11 @@ export interface JsonFileSource {
 	variant: JsonFileVariant;
 }
 export interface CssFileSource {
+	/**
+	* Used to mark if the CSS is embedded inside some particular files. This affects the parsing.
+For example, if inside a styled`` literal, a top-level declaration is allowed. 
+	 */
+	embeddingKind: EmbeddingKind2;
 	variant: CssVariant;
 }
 export interface GraphqlFileSource {
@@ -8349,7 +8539,6 @@ export interface GritFileSource {
 	variant: GritVariant;
 }
 export type EmbeddingKind =
-	| "Svelte"
 	| "None"
 	| {
 			Astro: {
@@ -8362,9 +8551,21 @@ export type EmbeddingKind =
 	| {
 			Vue: {
 				/**
+				 * Where the bindings are defined
+				 */
+				is_source: boolean;
+				/**
 				 * Whether the script is inside script tag with setup attribute
 				 */
 				setup: boolean;
+			};
+	  }
+	| {
+			Svelte: {
+				/**
+				 * Where the bindings are defined
+				 */
+				is_source: boolean;
 			};
 	  };
 export type Language =
@@ -8387,6 +8588,7 @@ export type LanguageVersion = "eS2022" | "eSNext";
  * It represents the extension of the file
  */
 export type JsonFileVariant = "standard" | "jsonc";
+export type EmbeddingKind2 = "None" | "Styled" | { Html: EmbeddingHtmlKind };
 /**
 	* The style of CSS contained in the file.
 
@@ -8406,12 +8608,14 @@ export type HtmlVariant =
 	| "Vue"
 	| "Svelte";
 export type GritVariant = "Standard";
+export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
 export type HtmlTextExpressions = "None" | "Single" | "Double";
 export interface OpenFileResult {
 	diagnostics: Diagnostic[];
 }
 export interface ChangeFileParams {
 	content: string;
+	inlineConfig?: Configuration;
 	path: BiomePath;
 	projectKey: ProjectKey;
 	version: number;
@@ -8445,6 +8649,7 @@ When this field is empty, Biome checks only `files.includes`.
 export type IgnoreKind = "path" | "ancestors";
 export interface UpdateModuleGraphParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 	/**
 	 * The kind of update to apply to the module graph
 	 */
@@ -8546,6 +8751,7 @@ export interface PullDiagnosticsParams {
 	 * Rules to apply on top of the configuration
 	 */
 	enabledRules?: AnalyzerSelector[];
+	inlineConfig?: Configuration;
 	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -8566,6 +8772,7 @@ export interface PullDiagnosticsResult {
 export interface PullActionsParams {
 	categories?: RuleCategories;
 	enabledRules?: AnalyzerSelector[];
+	inlineConfig?: Configuration;
 	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -8635,6 +8842,7 @@ export type Applicability = "always" | "maybeIncorrect";
 export interface PullDiagnosticsAndActionsParams {
 	categories?: RuleCategories;
 	enabledRules?: AnalyzerSelector[];
+	inlineConfig?: Configuration;
 	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -8644,6 +8852,7 @@ export interface PullDiagnosticsAndActionsResult {
 	diagnostics: [Diagnostic, CodeAction[]][];
 }
 export interface FormatFileParams {
+	inlineConfig?: Configuration;
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
@@ -8667,11 +8876,13 @@ export interface SourceMarker {
 	source: TextSize;
 }
 export interface FormatRangeParams {
+	inlineConfig?: Configuration;
 	path: BiomePath;
 	projectKey: ProjectKey;
 	range: TextRange;
 }
 export interface FormatOnTypeParams {
+	inlineConfig?: Configuration;
 	offset: TextSize;
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -8682,6 +8893,7 @@ export interface FixFileParams {
 	 */
 	enabledRules?: AnalyzerSelector[];
 	fixFileMode: FixFileMode;
+	inlineConfig?: Configuration;
 	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -8745,7 +8957,7 @@ export interface ParsePatternParams {
 	defaultLanguage: GritTargetLanguage;
 	pattern: string;
 }
-export type GritTargetLanguage = "CSS" | "JavaScript";
+export type GritTargetLanguage = "CSS" | "JavaScript" | "JSON";
 export interface ParsePatternResult {
 	patternId: PatternId;
 }

@@ -27,7 +27,7 @@ pub fn json_boolean_value(value_token_token: SyntaxToken) -> JsonBooleanValue {
     ))
 }
 pub fn json_member(
-    name: JsonMemberName,
+    name: AnyJsonMemberName,
     colon_token: SyntaxToken,
     value: AnyJsonValue,
 ) -> JsonMember {
@@ -43,6 +43,12 @@ pub fn json_member(
 pub fn json_member_name(value_token: SyntaxToken) -> JsonMemberName {
     JsonMemberName::unwrap_cast(SyntaxNode::new_detached(
         JsonSyntaxKind::JSON_MEMBER_NAME,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn json_metavariable(value_token: SyntaxToken) -> JsonMetavariable {
+    JsonMetavariable::unwrap_cast(SyntaxNode::new_detached(
+        JsonSyntaxKind::JSON_METAVARIABLE,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -154,6 +160,16 @@ where
     I::IntoIter: ExactSizeIterator,
 {
     JsonBogus::unwrap_cast(SyntaxNode::new_detached(JsonSyntaxKind::JSON_BOGUS, slots))
+}
+pub fn json_bogus_name<I>(slots: I) -> JsonBogusName
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    JsonBogusName::unwrap_cast(SyntaxNode::new_detached(
+        JsonSyntaxKind::JSON_BOGUS_NAME,
+        slots,
+    ))
 }
 pub fn json_bogus_value<I>(slots: I) -> JsonBogusValue
 where

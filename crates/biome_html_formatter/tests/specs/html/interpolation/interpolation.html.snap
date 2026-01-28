@@ -28,12 +28,14 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```html
 <div>
 	{{ $interpolation }}
 </div>
+
 ```
 
 ## Output 1
@@ -48,10 +50,12 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```html
 <div>
 	{{ $interpolation }}
 </div>
+
 ```

@@ -1,0 +1,1 @@
+https://raw.githubusercontent.com/dyc3/opentogethertube/e6b44c716289a8babb2f70624e452542e45c2a1b/client/index.html

@@ -38,6 +38,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -48,4 +49,5 @@ let b = {
 	set foo(a) {}
 	set bar(a, ) {}
 }
+
 ```

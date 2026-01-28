@@ -63,8 +63,7 @@ impl Rule for NoScriptUrl {
 
         // Only check <a> elements for HTML (unlike JSX where components/custom elements exist)
         let name = element.name().ok()?;
-        let token = name.value_token().ok()?;
-        let tag = token.text_trimmed();
+        let tag = name.token_text_trimmed()?;
         if !tag.eq_ignore_ascii_case("a") {
             return None;
         }

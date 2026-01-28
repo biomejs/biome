@@ -89,6 +89,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -151,6 +152,7 @@ export * as something_bad_will_happen from "something_bad_might_not_happen" with
 
 // you should remove the escape
 ("content \'\' ");
+
 ```
 
 # Lines exceeding max width of 80 characters
@@ -176,6 +178,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -238,6 +241,7 @@ export * as something_bad_will_happen from "something_bad_might_not_happen" with
 
 // you should remove the escape
 ("content \'\' ");
+
 ```
 
 # Lines exceeding max width of 80 characters

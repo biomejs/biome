@@ -36,6 +36,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```svelte
@@ -50,4 +51,5 @@ Self close void elements: never
 	<!-- Error state -->
 	<p>Error: {error.message}</p>
 {/await}
+
 ```

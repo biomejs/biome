@@ -1,0 +1,31 @@
+//! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
+
+pub(crate) mod alias_node;
+pub(crate) mod anchor_property;
+pub(crate) mod block_content;
+pub(crate) mod block_keep_indicator;
+pub(crate) mod block_map_explicit_entry;
+pub(crate) mod block_map_implicit_entry;
+pub(crate) mod block_mapping;
+pub(crate) mod block_sequence;
+pub(crate) mod block_sequence_entry;
+pub(crate) mod block_strip_indicator;
+pub(crate) mod directive;
+pub(crate) mod document;
+pub(crate) mod double_quoted_scalar;
+pub(crate) mod flow_in_block_node;
+pub(crate) mod flow_json_node;
+pub(crate) mod flow_map_explicit_entry;
+pub(crate) mod flow_map_implicit_entry;
+pub(crate) mod flow_mapping;
+pub(crate) mod flow_sequence;
+pub(crate) mod flow_yaml_node;
+pub(crate) mod folded_scalar;
+pub(crate) mod indentation_indicator;
+pub(crate) mod literal_scalar;
+pub(crate) mod plain_scalar;
+pub(crate) mod properties_anchor_first;
+pub(crate) mod properties_tag_first;
+pub(crate) mod root;
+pub(crate) mod single_quoted_scalar;
+pub(crate) mod tag_property;

@@ -24,8 +24,10 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```json
 { "number": 123, "string": "some-string" }
+
 ```

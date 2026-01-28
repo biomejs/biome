@@ -1,0 +1,15 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid_with_ignore.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+/* These should be valid because they're in the ignore list */
+a { transform: custom-function(1px); }
+a { transform: MyCustomFunction(1px); }
+a { transform: mycustomfunction(1px); }
+a { transform: another-custom-function(1px); }
+
+```

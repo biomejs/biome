@@ -8,6 +8,7 @@ pub(crate) mod feature;
 mod font_face;
 mod font_feature_values;
 mod font_palette_values;
+mod function;
 mod import;
 mod keyframes;
 mod layer;
@@ -44,6 +45,7 @@ use crate::syntax::at_rule::font_feature_values::parse_font_feature_values_at_ru
 use crate::syntax::at_rule::font_palette_values::{
     parse_font_palette_values_at_rule, parse_font_palette_values_at_rule_declarator,
 };
+use crate::syntax::at_rule::function::{parse_function_at_rule, parse_function_at_rule_declarator};
 use crate::syntax::at_rule::import::parse_import_at_rule;
 use crate::syntax::at_rule::keyframes::parse_keyframes_at_rule;
 use crate::syntax::at_rule::layer::parse_layer_at_rule;
@@ -117,6 +119,7 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![font_face] => parse_font_face_at_rule(p),
         T![font_feature_values] => parse_font_feature_values_at_rule(p),
         T![font_palette_values] => parse_font_palette_values_at_rule(p),
+        T![function] => parse_function_at_rule(p),
         T![media] => parse_media_at_rule(p),
         T![keyframes] => parse_keyframes_at_rule(p),
         T![page] => parse_page_at_rule(p),
@@ -221,6 +224,7 @@ pub(crate) fn parse_any_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
         T![position_try] => parse_position_try_at_rule_declarator(p),
         T![property] => parse_property_at_rule_declarator(p),
         T![view_transition] => parse_view_transition_at_rule_declarator(p),
+        T![function] => parse_function_at_rule_declarator(p),
 
         // Unknown: create a bogus child so the wrapper can complete
         _ => {

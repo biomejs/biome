@@ -15,7 +15,7 @@ use crate::{
     JsExport, JsModuleInfo, JsOwnExport, ModuleDiagnostic, SerializedJsModuleInfo,
     js_module_info::JsModuleVisitor,
 };
-use biome_css_syntax::CssRoot;
+use biome_css_syntax::AnyCssRoot;
 use biome_fs::BiomePath;
 use biome_js_syntax::AnyJsRoot;
 use biome_js_type_info::ImportSymbol;
@@ -82,6 +82,7 @@ impl ModuleGraph {
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
         added_or_updated_paths: &[(&BiomePath, AnyJsRoot)],
+        enable_type_inference: bool,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         // Make sure all directories are registered for the added/updated paths.
         let path_info = self.path_info.pin();
@@ -109,7 +110,8 @@ impl ModuleGraph {
         let modules = self.data.pin();
         for (path, root) in added_or_updated_paths {
             let directory = path.parent().unwrap_or(path);
-            let visitor = JsModuleVisitor::new(root.clone(), directory, &fs_proxy);
+            let visitor =
+                JsModuleVisitor::new(root.clone(), directory, &fs_proxy, enable_type_inference);
 
             let module_info = visitor.collect_info();
             for import_path in module_info.all_import_paths() {
@@ -132,7 +134,7 @@ impl ModuleGraph {
         &self,
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
-        added_or_updated_paths: &[(&BiomePath, CssRoot)],
+        added_or_updated_paths: &[(&BiomePath, AnyCssRoot)],
         _semantic_model: Option<&biome_css_semantic::model::SemanticModel>,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         // Make sure all directories are registered for the added/updated paths.

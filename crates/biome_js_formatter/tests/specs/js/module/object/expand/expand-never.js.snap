@@ -48,6 +48,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -69,6 +70,7 @@ const d = {
 };
 
 const e = { name1: "value1", name2: "value2" };
+
 ```
 
 ## Output 1
@@ -89,6 +91,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Never
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -101,4 +104,5 @@ const c = { name1: "value1", name2: "value2" };
 const d = { name1: "value1", name2: "value2" };
 
 const e = { name1: "value1", name2: "value2" };
+
 ```

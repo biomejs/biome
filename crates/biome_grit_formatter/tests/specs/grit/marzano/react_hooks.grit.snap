@@ -676,6 +676,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Attribute Position: Auto
+Trailing newline: true
 -----
 
 ```grit
@@ -1268,6 +1269,7 @@ private pattern fix_react_default_export() {
 		}
 	}
 }
+
 ```
 
 # Lines exceeding max width of 80 characters

@@ -845,8 +845,12 @@ mod tests {
     fn mappings() {
         let (transformed, source_map) = source_map_test("(((a * b) * c)) / 3");
 
-        let formatted =
-            format_node(JsFormatOptions::new(JsFileSource::default()), &transformed).unwrap();
+        let formatted = format_node(
+            JsFormatOptions::new(JsFileSource::default()),
+            &transformed,
+            false,
+        )
+        .unwrap();
         let printed = formatted
             .print_with_indent(0, SourceMapGeneration::Enabled)
             .unwrap();

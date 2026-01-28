@@ -21,6 +21,8 @@ biome_grit_parser    = { workspace = true }
 biome_grit_syntax    = { workspace = true }
 biome_js_parser      = { workspace = true }
 biome_js_syntax      = { workspace = true }
+biome_json_parser    = { workspace = true }
+biome_json_syntax    = { workspace = true }
 biome_parser         = { workspace = true }
 biome_rowan          = { workspace = true }
 biome_string_case    = { workspace = true }

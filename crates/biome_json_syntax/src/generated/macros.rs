@@ -32,6 +32,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsonMemberName::new_unchecked(node) };
                     $body
                 }
+                $crate::JsonSyntaxKind::JSON_METAVARIABLE => {
+                    let $pattern = unsafe { $crate::JsonMetavariable::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsonSyntaxKind::JSON_NULL_VALUE => {
                     let $pattern = unsafe { $crate::JsonNullValue::new_unchecked(node) };
                     $body
@@ -54,6 +58,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::JsonSyntaxKind::JSON_BOGUS => {
                     let $pattern = unsafe { $crate::JsonBogus::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsonSyntaxKind::JSON_BOGUS_NAME => {
+                    let $pattern = unsafe { $crate::JsonBogusName::new_unchecked(node) };
                     $body
                 }
                 $crate::JsonSyntaxKind::JSON_BOGUS_VALUE => {

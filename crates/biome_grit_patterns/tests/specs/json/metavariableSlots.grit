@@ -1,0 +1,4 @@
+language json
+
+// Test slot binding with TreeSitter-compatible names
+pair(key = $name, value = $val)

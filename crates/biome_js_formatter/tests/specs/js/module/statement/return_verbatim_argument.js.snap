@@ -56,6 +56,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -84,6 +85,7 @@ function supported3() {
 		thatBreaksOverMultipleLines
 	);
 }
+
 ```
 
 # Lines exceeding max width of 80 characters

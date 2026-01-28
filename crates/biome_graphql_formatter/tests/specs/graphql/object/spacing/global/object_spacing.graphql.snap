@@ -27,12 +27,14 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
 {
 	field_value(object_value: { key: "value" })
 }
+
 ```
 
 ## Output 1
@@ -44,10 +46,12 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
 {
 	field_value(object_value: { key: "value" })
 }
+
 ```

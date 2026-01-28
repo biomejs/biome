@@ -33,9 +33,11 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
 // https://github.com/biomejs/biome/issues/1039
 s(/🚀🚀/).s().s();
+
 ```

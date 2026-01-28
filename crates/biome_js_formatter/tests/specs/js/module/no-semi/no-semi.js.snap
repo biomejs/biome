@@ -111,6 +111,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -205,6 +206,7 @@ while (false) (function () {})();
 
 aReallyLongLine012345678901234567890123456789012345678901234567890123456789 *
 	(b + c);
+
 ```
 
 ## Output 1
@@ -225,6 +227,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -319,4 +322,5 @@ while (false) (function () {})()
 
 aReallyLongLine012345678901234567890123456789012345678901234567890123456789 *
 	(b + c)
+
 ```

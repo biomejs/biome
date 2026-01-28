@@ -123,6 +123,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -231,4 +232,5 @@ class Foo {
 	/*middle*/ @dec /*after*/
 	set setter(val) {}
 }
+
 ```

@@ -34,6 +34,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -43,6 +44,7 @@ let [
 	aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbb,
 	cccccccccccccccccccc = dddddddddddddddddddd,
 ] = e;
+
 ```
 
 ## Output 1
@@ -63,6 +65,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -72,4 +75,5 @@ let [
 	aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbb,
 	cccccccccccccccccccc = dddddddddddddddddddd,
 ] = e;
+
 ```

@@ -16,6 +16,7 @@ Profile-*.json
 **/build
 .pnpm-debug.log
 .vercel
+.claude/settings.local.json
 
 # https://github.com/nnethercote/dhat-rs output file
 dhat-heap.json

@@ -1,0 +1,80 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<html />
+<html></html>
+<html lang></html>
+<html lang=""></html>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a lang attribute when using the html element.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <html />
+      │ ^^^^^^^^
+    3 │ <html></html>
+    4 │ <html lang></html>
+  
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
+  
+
+```
+
+```
+invalid.html:3:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a lang attribute when using the html element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <html />
+  > 3 │ <html></html>
+      │ ^^^^^^^^^^^^^
+    4 │ <html lang></html>
+    5 │ <html lang=""></html>
+  
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
+  
+
+```
+
+```
+invalid.html:4:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a lang attribute when using the html element.
+  
+    2 │ <html />
+    3 │ <html></html>
+  > 4 │ <html lang></html>
+      │ ^^^^^^^^^^^^^^^^^^
+    5 │ <html lang=""></html>
+    6 │ 
+  
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
+  
+
+```
+
+```
+invalid.html:5:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a lang attribute when using the html element.
+  
+    3 │ <html></html>
+    4 │ <html lang></html>
+  > 5 │ <html lang=""></html>
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
+  
+
+```

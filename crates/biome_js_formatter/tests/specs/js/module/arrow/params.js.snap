@@ -357,6 +357,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -667,6 +668,7 @@ export default (element) =>
 		delete props["class"];
 		if (!element.hasAttribute("ssr")) return;
 	};
+
 ```
 
 ## Output 1
@@ -687,6 +689,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -997,4 +1000,5 @@ export default element =>
 		delete props["class"];
 		if (!element.hasAttribute("ssr")) return;
 	};
+
 ```

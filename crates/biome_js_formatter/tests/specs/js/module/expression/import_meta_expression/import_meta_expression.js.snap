@@ -34,6 +34,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -42,6 +43,7 @@ import.meta.field =
 	obj.aReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherReallyLongVariable;
 import.meta.aReallyLongVariableName.andAnotherReallyLongVariableName
 	.andAnotherReallyLongVariableName.andAnotherReallyLongVariable;
+
 ```
 
 # Lines exceeding max width of 80 characters
@@ -67,6 +69,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -75,6 +78,7 @@ import.meta.field =
     obj.aReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherReallyLongVariable;
 import.meta.aReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherReallyLongVariableName
     .andAnotherReallyLongVariable;
+
 ```
 
 # Lines exceeding max width of 120 characters

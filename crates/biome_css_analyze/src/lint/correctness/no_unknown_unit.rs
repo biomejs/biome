@@ -3,10 +3,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssDimension, CssFunction, CssGenericProperty, CssQueryFeaturePlain, CssSyntaxKind,
+    AnyCssAttrUnit, AnyCssDimension, CssFunction, CssGenericProperty, CssQueryFeaturePlain,
+    CssSyntaxKind,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{SyntaxNodeCast, TextRange};
+use biome_rowan::{SyntaxNodeCast, TextRange, declare_node_union};
 use biome_rule_options::no_unknown_unit::NoUnknownUnitOptions;
 use biome_string_case::StrLikeExtension;
 
@@ -71,13 +72,17 @@ declare_lint_rule! {
     }
 }
 
+declare_node_union! {
+    pub AnyCssUnit  = AnyCssDimension | AnyCssAttrUnit
+}
+
 pub struct NoUnknownUnitState {
     unit: String,
     span: TextRange,
 }
 
 impl Rule for NoUnknownUnit {
-    type Query = Ast<AnyCssDimension>;
+    type Query = Ast<AnyCssUnit>;
     type State = NoUnknownUnitState;
     type Signals = Option<Self::State>;
     type Options = NoUnknownUnitOptions;
@@ -86,87 +91,108 @@ impl Rule for NoUnknownUnit {
         let node = ctx.query();
 
         match node {
-            AnyCssDimension::CssUnknownDimension(dimension) => {
-                let unit_token = dimension.unit_token().ok()?;
-                let unit = unit_token.text_trimmed().to_string();
+            AnyCssUnit::AnyCssDimension(dimension) => {
+                match dimension {
+                    AnyCssDimension::CssUnknownDimension(dimension) => {
+                        let unit_token = dimension.unit_token().ok()?;
+                        let unit = unit_token.text_trimmed().to_string();
 
-                Some(NoUnknownUnitState {
-                    unit,
-                    span: unit_token.text_trimmed_range(),
-                })
-            }
-            AnyCssDimension::CssRegularDimension(dimension) => {
-                let unit_token = dimension.unit_token().ok()?;
-                let unit = unit_token.text_trimmed().to_string();
-
-                // The `x` unit is parsed as `CssRegularDimension`, but it is used for describing resolutions.
-                // This check is to disallow the use of the `x` unit outside this specific context.
-                if unit == "x" {
-                    let mut allow_x = false;
-
-                    for ancestor in dimension.unit_token().ok()?.ancestors() {
-                        match ancestor.kind() {
-                            CssSyntaxKind::CSS_FUNCTION => {
-                                let function_name_token = ancestor
-                                    .cast::<CssFunction>()?
-                                    .name()
-                                    .ok()?
-                                    .value_token()
-                                    .ok()?;
-                                let function_name =
-                                    function_name_token.text_trimmed().to_ascii_lowercase_cow();
-
-                                if function_name.ends_with("image-set") {
-                                    allow_x = true;
-                                    break;
-                                }
-                            }
-                            CssSyntaxKind::CSS_GENERIC_PROPERTY => {
-                                let property_name_token = ancestor
-                                    .cast::<CssGenericProperty>()?
-                                    .name()
-                                    .ok()?
-                                    .as_css_identifier()?
-                                    .value_token()
-                                    .ok()?;
-                                let property_name =
-                                    property_name_token.text_trimmed().to_ascii_lowercase_cow();
-
-                                if property_name == "image-resolution" {
-                                    allow_x = true;
-                                    break;
-                                }
-                            }
-                            CssSyntaxKind::CSS_QUERY_FEATURE_PLAIN => {
-                                let feature_name_token = ancestor
-                                    .cast::<CssQueryFeaturePlain>()?
-                                    .name()
-                                    .ok()?
-                                    .value_token()
-                                    .ok()?;
-                                let feature_name =
-                                    feature_name_token.text_trimmed().to_ascii_lowercase_cow();
-
-                                if RESOLUTION_MEDIA_FEATURE_NAMES.contains(&feature_name.as_ref()) {
-                                    allow_x = true;
-                                    break;
-                                }
-                            }
-                            _ => {}
-                        }
-                    }
-
-                    if !allow_x {
-                        return Some(NoUnknownUnitState {
+                        Some(NoUnknownUnitState {
                             unit,
                             span: unit_token.text_trimmed_range(),
-                        });
+                        })
                     }
-                }
+                    AnyCssDimension::CssRegularDimension(dimension) => {
+                        let unit_token = dimension.unit_token().ok()?;
+                        let unit = unit_token.text_trimmed().to_string();
 
-                None
+                        // The `x` unit is parsed as `CssRegularDimension`, but it is used for describing resolutions.
+                        // This check is to disallow the use of the `x` unit outside this specific context.
+                        if unit == "x" {
+                            let mut allow_x = false;
+
+                            for ancestor in dimension.unit_token().ok()?.ancestors() {
+                                match ancestor.kind() {
+                                    CssSyntaxKind::CSS_FUNCTION => {
+                                        let function_name_token = ancestor
+                                            .cast::<CssFunction>()?
+                                            .name()
+                                            .ok()?
+                                            .value_token()
+                                            .ok()?;
+                                        let function_name = function_name_token
+                                            .text_trimmed()
+                                            .to_ascii_lowercase_cow();
+
+                                        if function_name.ends_with("image-set") {
+                                            allow_x = true;
+                                            break;
+                                        }
+                                    }
+                                    CssSyntaxKind::CSS_GENERIC_PROPERTY => {
+                                        let property_name_token = ancestor
+                                            .cast::<CssGenericProperty>()?
+                                            .name()
+                                            .ok()?
+                                            .as_css_identifier()?
+                                            .value_token()
+                                            .ok()?;
+                                        let property_name = property_name_token
+                                            .text_trimmed()
+                                            .to_ascii_lowercase_cow();
+
+                                        if property_name == "image-resolution" {
+                                            allow_x = true;
+                                            break;
+                                        }
+                                    }
+                                    CssSyntaxKind::CSS_QUERY_FEATURE_PLAIN => {
+                                        let feature_name_token = ancestor
+                                            .cast::<CssQueryFeaturePlain>()?
+                                            .name()
+                                            .ok()?
+                                            .value_token()
+                                            .ok()?;
+                                        let feature_name = feature_name_token
+                                            .text_trimmed()
+                                            .to_ascii_lowercase_cow();
+
+                                        if RESOLUTION_MEDIA_FEATURE_NAMES
+                                            .contains(&feature_name.as_ref())
+                                        {
+                                            allow_x = true;
+                                            break;
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            }
+
+                            if !allow_x {
+                                return Some(NoUnknownUnitState {
+                                    unit,
+                                    span: unit_token.text_trimmed_range(),
+                                });
+                            }
+                        }
+
+                        None
+                    }
+                    _ => None,
+                }
             }
-            _ => None,
+            AnyCssUnit::AnyCssAttrUnit(unit) => match unit {
+                AnyCssAttrUnit::CssUnknownAttrUnit(unit) => {
+                    let unit_token = unit.unit_token().ok()?;
+                    let unit = unit_token.text_trimmed().to_string();
+
+                    Some(NoUnknownUnitState {
+                        unit,
+                        span: unit_token.text_trimmed_range(),
+                    })
+                }
+                _ => None,
+            },
         }
     }
 

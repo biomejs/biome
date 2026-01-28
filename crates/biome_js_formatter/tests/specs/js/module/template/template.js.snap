@@ -102,6 +102,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -189,6 +190,7 @@ const issus_3766 = `Lectures: ${doneCount}/${totalCount} | Mins: ${(
 ).toFixed(2)}/${(totalSecs / 60).toFixed(2)}| Hours: ${(
 	doneSecs / 3600
 ).toFixed(2)}/${(totalSecs / 3600).toFixed(2)}`;
+
 ```
 
 # Lines exceeding max width of 80 characters

@@ -26,17 +26,9 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useImportExtensions"),
         RuleFilter::Rule("correctness", "useJsonImportAttributes"),
         RuleFilter::Rule("nursery", "noDeprecatedImports"),
-        RuleFilter::Rule("nursery", "noFloatingPromises"),
         RuleFilter::Rule("nursery", "noImportCycles"),
-        RuleFilter::Rule("nursery", "noMisusedPromises"),
-        RuleFilter::Rule("nursery", "noUnnecessaryConditions"),
         RuleFilter::Rule("nursery", "noUnresolvedImports"),
-        RuleFilter::Rule("nursery", "useArraySortCompare"),
-        RuleFilter::Rule("nursery", "useAwaitThenable"),
         RuleFilter::Rule("nursery", "useConsistentEnumValueType"),
-        RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
-        RuleFilter::Rule("nursery", "useFind"),
-        RuleFilter::Rule("nursery", "useRegexpExec"),
     ]
 });
 static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
@@ -91,6 +83,18 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 });
 static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
     LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noUndeclaredEnvVars")]);
+static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "noFloatingPromises"),
+        RuleFilter::Rule("nursery", "noMisusedPromises"),
+        RuleFilter::Rule("nursery", "noUnnecessaryConditions"),
+        RuleFilter::Rule("nursery", "useArraySortCompare"),
+        RuleFilter::Rule("nursery", "useAwaitThenable"),
+        RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
+        RuleFilter::Rule("nursery", "useFind"),
+        RuleFilter::Rule("nursery", "useRegexpExec"),
+    ]
+});
 static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noVueArrowFuncInWatch"),
@@ -115,6 +119,7 @@ impl DomainSelector {
             "solid" => SOLID_FILTERS.clone(),
             "test" => TEST_FILTERS.clone(),
             "turborepo" => TURBOREPO_FILTERS.clone(),
+            "types" => TYPES_FILTERS.clone(),
             "vue" => VUE_FILTERS.clone(),
             _ => unreachable!("DomainFilter::as_rule_filters: domain {} not found", self.0),
         }
@@ -135,6 +140,7 @@ impl DomainSelector {
             "turborepo" => TURBOREPO_FILTERS
                 .iter()
                 .any(|filter| filter.match_rule::<R>()),
+            "types" => TYPES_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "vue" => VUE_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             _ => false,
         }

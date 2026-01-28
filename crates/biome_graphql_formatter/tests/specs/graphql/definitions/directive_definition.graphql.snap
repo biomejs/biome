@@ -57,6 +57,7 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
@@ -70,4 +71,5 @@ directive @example on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
 directive @delegateField(name: String!) repeatable on OBJECT | INTERFACE
 
 directive @directive(directive: directive) on FIELD
+
 ```

@@ -4,11 +4,12 @@ pub(crate) mod gitlab;
 pub(crate) mod json;
 pub(crate) mod junit;
 pub(crate) mod rdjson;
+pub(crate) mod sarif;
 pub(crate) mod summary;
 pub(crate) mod terminal;
 
 use crate::cli_options::MaxDiagnostics;
-use crate::execute::Execution;
+use crate::runner::execution::Execution;
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{Diagnostic, Error, Severity};
 use biome_fs::BiomePath;
@@ -46,17 +47,17 @@ pub struct TraversalSummary {
 }
 
 /// When using this trait, the type that implements this trait is the one that holds the read-only information to pass around
-pub trait Reporter: Sized {
+pub(crate) trait Reporter: Sized {
     /// Writes the summary using the underling visitor
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()>;
 }
 
 /// When using this trait, the type that implements this trait is the one that will **write** the data, ideally inside a buffer
-pub trait ReporterVisitor {
+pub(crate) trait ReporterVisitor {
     /// Writes the summary in the underling writer
     fn report_summary(
         &mut self,
-        _execution: &Execution,
+        _execution: &dyn Execution,
         _summary: TraversalSummary,
         _verbose: bool,
     ) -> io::Result<()>;
@@ -73,7 +74,7 @@ pub trait ReporterVisitor {
     /// Writes a diagnostics
     fn report_diagnostics(
         &mut self,
-        _execution: &Execution,
+        _execution: &dyn Execution,
         _payload: DiagnosticsPayload,
         _verbose: bool,
         _working_directory: Option<&Utf8Path>,

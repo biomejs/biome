@@ -1,5 +1,3 @@
-use crate::LoggingLevel;
-use crate::logging::LoggingKind;
 use biome_configuration::ConfigurationPathHint;
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
@@ -8,7 +6,7 @@ use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 /// Global options applied to all commands
-#[derive(Debug, Clone, Bpaf)]
+#[derive(Debug, Default, Clone, Bpaf)]
 pub struct CliOptions {
     /// Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
     #[bpaf(long("colors"), argument("off|force"))]
@@ -56,37 +54,10 @@ pub struct CliOptions {
     /// Allows to change how diagnostics and summary are reported.
     #[bpaf(
         long("reporter"),
-        argument("json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson"),
+        argument("json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif"),
         fallback(CliReporter::default())
     )]
     pub reporter: CliReporter,
-
-    /// Optional path to redirect log messages to.
-    ///
-    /// If omitted, logs are printed to stdout.
-    #[bpaf(long("log-file"))]
-    pub log_file: Option<String>,
-
-    /// The level of logging. In order, from the most verbose to the least
-    /// verbose: debug, info, warn, error.
-    ///
-    /// The value `none` won't show any logging.
-    #[bpaf(
-        long("log-level"),
-        argument("none|debug|info|warn|error"),
-        fallback(LoggingLevel::default()),
-        display_fallback
-    )]
-    pub log_level: LoggingLevel,
-
-    /// How the log should look like.
-    #[bpaf(
-        long("log-kind"),
-        argument("pretty|compact|json"),
-        fallback(LoggingKind::default()),
-        display_fallback
-    )]
-    pub log_kind: LoggingKind,
 
     /// The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
     #[bpaf(
@@ -169,6 +140,8 @@ pub enum CliReporter {
     Checkstyle,
     /// Reports diagnostics using the [Reviewdog JSON format](https://deepwiki.com/reviewdog/reviewdog/3.2-reviewdog-diagnostic-format)
     RdJson,
+    /// Reports diagnostics using the SARIF format
+    Sarif,
 }
 
 impl CliReporter {
@@ -190,6 +163,7 @@ impl FromStr for CliReporter {
             "gitlab" => Ok(Self::GitLab),
             "checkstyle" => Ok(Self::Checkstyle),
             "rdjson" => Ok(Self::RdJson),
+            "sarif" => Ok(Self::Sarif),
             _ => Err(format!(
                 "value {s:?} is not valid for the --reporter argument"
             )),
@@ -209,6 +183,7 @@ impl Display for CliReporter {
             Self::GitLab => f.write_str("gitlab"),
             Self::Checkstyle => f.write_str("checkstyle"),
             Self::RdJson => f.write_str("rdjson"),
+            Self::Sarif => f.write_str("sarif"),
         }
     }
 }

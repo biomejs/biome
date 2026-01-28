@@ -24,12 +24,14 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
 .foo {
 	@apply text-blue-500 hover:text-blue-600 accent-red accent-blue accent-green text-sm text-md hover:underline md:grid;
 }
+
 ```
 
 # Lines exceeding max width of 80 characters
@@ -45,12 +47,14 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
 .foo {
 	@apply text-blue-500 hover:text-blue-600 accent-red accent-blue accent-green text-sm text-md hover:underline md:grid;
 }
+
 ```
 
 # Lines exceeding max width of 80 characters
