@@ -1,0 +1,99 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "domains": {
+      "react": "none"
+    }
+  }
+}
+```
+
+## `package.json`
+
+```json
+{
+    "dependencies": {
+        "react": "^18.0.0"
+    }
+}
+
+```
+
+## `test.jsx`
+
+```jsx
+
+import { useEffect, useState } from "react";
+
+function Component2() {
+    const [local, setLocal] = useState(0);
+    useEffect(() => {
+      console.log(local);
+    }, []);
+}
+    
+```
+
+# Emitted Messages
+
+```block
+test.jsx:4:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function Component2 is unused.
+  
+    2 │ import { useEffect, useState } from "react";
+    3 │ 
+  > 4 │ function Component2() {
+      │          ^^^^^^^^^^
+    5 │     const [local, setLocal] = useState(0);
+    6 │     useEffect(() => {
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend Component2 with an underscore.
+  
+     2  2 │   import { useEffect, useState } from "react";
+     3  3 │   
+     4    │ - function·Component2()·{
+        4 │ + function·_Component2()·{
+     5  5 │       const [local, setLocal] = useState(0);
+     6  6 │       useEffect(() => {
+  
+
+```
+
+```block
+test.jsx:5:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable setLocal is unused.
+  
+    4 │ function Component2() {
+  > 5 │     const [local, setLocal] = useState(0);
+      │                   ^^^^^^^^
+    6 │     useEffect(() => {
+    7 │       console.log(local);
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend setLocal with an underscore.
+  
+     3  3 │   
+     4  4 │   function Component2() {
+     5    │ - ····const·[local,·setLocal]·=·useState(0);
+        5 │ + ····const·[local,·_setLocal]·=·useState(0);
+     6  6 │       useEffect(() => {
+     7  7 │         console.log(local);
+  
+
+```
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+Found 2 warnings.
+```
