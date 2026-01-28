@@ -1,0 +1,12 @@
+{
+  "root": false,
+  "extends": "//",
+  "files": {
+    // This should be relative to the location of this config file, so we should not touch root/donotformat.ts
+    "includes": ["*.ts"]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2
+  }
+}
