@@ -2261,6 +2261,11 @@ See https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions
 	 */
 	useConsistentGraphqlDescriptions?: UseConsistentGraphqlDescriptionsConfiguration;
 	/**
+	* Enforce consistent use of either method signatures or function properties within interfaces and type aliases.
+See https://biomejs.dev/linter/rules/use-consistent-method-signatures 
+	 */
+	useConsistentMethodSignatures?: UseConsistentMethodSignaturesConfiguration;
+	/**
 	* Require the @deprecated directive to specify a deletion date.
 See https://biomejs.dev/linter/rules/use-deprecated-date 
 	 */
@@ -4037,6 +4042,9 @@ export type UseConsistentArrowReturnConfiguration =
 export type UseConsistentGraphqlDescriptionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentGraphqlDescriptionsOptions;
+export type UseConsistentMethodSignaturesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentMethodSignaturesOptions;
 export type UseDeprecatedDateConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDeprecatedDateOptions;
@@ -5618,6 +5626,10 @@ export interface RuleWithUseConsistentGraphqlDescriptionsOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentGraphqlDescriptionsOptions;
 }
+export interface RuleWithUseConsistentMethodSignaturesOptions {
+	level: RulePlainConfiguration;
+	options?: UseConsistentMethodSignaturesOptions;
+}
 export interface RuleWithUseDeprecatedDateOptions {
 	level: RulePlainConfiguration;
 	options?: UseDeprecatedDateOptions;
@@ -7037,6 +7049,17 @@ export interface UseConsistentGraphqlDescriptionsOptions {
 	 */
 	style?: UseConsistentGraphqlDescriptionsStyle;
 }
+/**
+ * Options type for `useConsistentMethodSignatures`.
+ */
+export interface UseConsistentMethodSignaturesOptions {
+	/**
+	* The style of method signatures whose usage will be enforced.
+
+Default: "property" 
+	 */
+	style?: MethodSignatureStyle;
+}
 export interface UseDeprecatedDateOptions {
 	argumentName?: string;
 }
@@ -7520,6 +7543,7 @@ export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
  * The GraphQL description style to enforce.
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
+export type MethodSignatureStyle = "property" | "method";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
 export type VueDirectiveStyle2 = "shorthand" | "longhand";
@@ -7950,6 +7974,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
+	| "lint/nursery/useConsistentMethodSignatures"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useDestructuring"

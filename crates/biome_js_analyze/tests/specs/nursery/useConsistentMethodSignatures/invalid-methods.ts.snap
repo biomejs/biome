@@ -1,0 +1,121 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-methods.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+interface PropIface {
+  propFunc: (arg: string) => number;
+}
+
+type GenericProp<T, U> = {
+  p: (arg: T) => U;
+};
+
+type PropUnion =
+  | {
+      foo: (bar: number) => number;
+    }
+  | 4;
+
+type bad = {
+  qux: (quux: number) => "quuux";
+} & { foo: string };
+
+interface OverloadedProps {
+  moo: (() => void) & ((x: number) => number) & ((x: string) => boolean);
+}
+
+```
+
+# Diagnostics
+```
+invalid-methods.ts:4:3 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using method-style over property-style method signatures.
+  
+    3 │ interface PropIface {
+  > 4 │   propFunc: (arg: string) => number;
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i Consistently using a single style of method signatures helps improve readability and consistency.
+  
+  i If this isn't what you want, consider changing the style option in the rule's settings.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-methods.ts:8:3 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using method-style over property-style method signatures.
+  
+     7 │ type GenericProp<T, U> = {
+   > 8 │   p: (arg: T) => U;
+       │   ^^^^^^^^^^^^^^^^^
+     9 │ };
+    10 │ 
+  
+  i Consistently using a single style of method signatures helps improve readability and consistency.
+  
+  i If this isn't what you want, consider changing the style option in the rule's settings.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-methods.ts:13:7 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using method-style over property-style method signatures.
+  
+    11 │ type PropUnion =
+    12 │   | {
+  > 13 │       foo: (bar: number) => number;
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │     }
+    15 │   | 4;
+  
+  i Consistently using a single style of method signatures helps improve readability and consistency.
+  
+  i If this isn't what you want, consider changing the style option in the rule's settings.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-methods.ts:18:3 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using method-style over property-style method signatures.
+  
+    17 │ type bad = {
+  > 18 │   qux: (quux: number) => "quuux";
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ } & { foo: string };
+    20 │ 
+  
+  i Consistently using a single style of method signatures helps improve readability and consistency.
+  
+  i If this isn't what you want, consider changing the style option in the rule's settings.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
