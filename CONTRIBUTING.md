@@ -328,10 +328,6 @@ Where `biome_new_crate` is going to be the name of the new crate. The `--lib` op
 
 To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal page](https://github.com/biomejs/biome/blob/main/crates/biome_analyze/CONTRIBUTING.md)
 
-**Note**: For the `biome_js_analyze` crate, the `lint/nursery` group uses automatic code generation via proc macros. Simply add your rule file to `crates/biome_js_analyze/src/lint/nursery/` and run `cargo check` - the build system will automatically discover and register your rule. No need to run `just gen-analyzer` for this group.
-
-For other groups and crates, you still need to run `just gen-analyzer` after adding or removing rules.
-
 ### Parser
 
 To know the technical details of how our parser works and how to write test, please check our [internal page](https://github.com/biomejs/biome/blob/main/crates/biome_parser/CONTRIBUTING.md)

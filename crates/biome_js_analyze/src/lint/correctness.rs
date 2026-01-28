@@ -2,60 +2,10 @@
 
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use biome_analyze::declare_lint_group;
-pub mod no_children_prop;
-pub mod no_const_assign;
-pub mod no_constant_condition;
-pub mod no_constant_math_min_max_clamp;
-pub mod no_constructor_return;
-pub mod no_empty_character_class_in_regex;
-pub mod no_empty_pattern;
-pub mod no_global_dirname_filename;
-pub mod no_global_object_calls;
-pub mod no_inner_declarations;
-pub mod no_invalid_builtin_instantiation;
-pub mod no_invalid_constructor_super;
-pub mod no_invalid_use_before_declaration;
-pub mod no_nested_component_definitions;
-pub mod no_nodejs_modules;
-pub mod no_nonoctal_decimal_escape;
-pub mod no_precision_loss;
-pub mod no_private_imports;
-pub mod no_process_global;
-pub mod no_qwik_use_visible_task;
-pub mod no_react_prop_assignments;
-pub mod no_render_return_value;
-pub mod no_restricted_elements;
-pub mod no_self_assign;
-pub mod no_setter_return;
-pub mod no_solid_destructured_props;
-pub mod no_string_case_mismatch;
-pub mod no_switch_declarations;
-pub mod no_undeclared_dependencies;
-pub mod no_undeclared_variables;
-pub mod no_unreachable;
-pub mod no_unreachable_super;
-pub mod no_unsafe_finally;
-pub mod no_unsafe_optional_chaining;
-pub mod no_unused_function_parameters;
-pub mod no_unused_imports;
-pub mod no_unused_labels;
-pub mod no_unused_private_class_members;
-pub mod no_unused_variables;
-pub mod no_void_elements_with_children;
-pub mod no_void_type_return;
-pub mod use_exhaustive_dependencies;
-pub mod use_hook_at_top_level;
-pub mod use_image_size;
-pub mod use_import_extensions;
-pub mod use_is_nan;
-pub mod use_json_import_attributes;
-pub mod use_jsx_key_in_iterable;
-pub mod use_parse_int_radix;
-pub mod use_qwik_classlist;
-pub mod use_single_js_doc_asterisk;
-pub mod use_unique_element_ids;
-pub mod use_valid_for_direction;
-pub mod use_valid_typeof;
-pub mod use_yield;
-declare_lint_group! { pub Correctness { name : "correctness" , rules : [self :: no_children_prop :: NoChildrenProp , self :: no_const_assign :: NoConstAssign , self :: no_constant_condition :: NoConstantCondition , self :: no_constant_math_min_max_clamp :: NoConstantMathMinMaxClamp , self :: no_constructor_return :: NoConstructorReturn , self :: no_empty_character_class_in_regex :: NoEmptyCharacterClassInRegex , self :: no_empty_pattern :: NoEmptyPattern , self :: no_global_dirname_filename :: NoGlobalDirnameFilename , self :: no_global_object_calls :: NoGlobalObjectCalls , self :: no_inner_declarations :: NoInnerDeclarations , self :: no_invalid_builtin_instantiation :: NoInvalidBuiltinInstantiation , self :: no_invalid_constructor_super :: NoInvalidConstructorSuper , self :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclaration , self :: no_nested_component_definitions :: NoNestedComponentDefinitions , self :: no_nodejs_modules :: NoNodejsModules , self :: no_nonoctal_decimal_escape :: NoNonoctalDecimalEscape , self :: no_precision_loss :: NoPrecisionLoss , self :: no_private_imports :: NoPrivateImports , self :: no_process_global :: NoProcessGlobal , self :: no_qwik_use_visible_task :: NoQwikUseVisibleTask , self :: no_react_prop_assignments :: NoReactPropAssignments , self :: no_render_return_value :: NoRenderReturnValue , self :: no_restricted_elements :: NoRestrictedElements , self :: no_self_assign :: NoSelfAssign , self :: no_setter_return :: NoSetterReturn , self :: no_solid_destructured_props :: NoSolidDestructuredProps , self :: no_string_case_mismatch :: NoStringCaseMismatch , self :: no_switch_declarations :: NoSwitchDeclarations , self :: no_undeclared_dependencies :: NoUndeclaredDependencies , self :: no_undeclared_variables :: NoUndeclaredVariables , self :: no_unreachable :: NoUnreachable , self :: no_unreachable_super :: NoUnreachableSuper , self :: no_unsafe_finally :: NoUnsafeFinally , self :: no_unsafe_optional_chaining :: NoUnsafeOptionalChaining , self :: no_unused_function_parameters :: NoUnusedFunctionParameters , self :: no_unused_imports :: NoUnusedImports , self :: no_unused_labels :: NoUnusedLabels , self :: no_unused_private_class_members :: NoUnusedPrivateClassMembers , self :: no_unused_variables :: NoUnusedVariables , self :: no_void_elements_with_children :: NoVoidElementsWithChildren , self :: no_void_type_return :: NoVoidTypeReturn , self :: use_exhaustive_dependencies :: UseExhaustiveDependencies , self :: use_hook_at_top_level :: UseHookAtTopLevel , self :: use_image_size :: UseImageSize , self :: use_import_extensions :: UseImportExtensions , self :: use_is_nan :: UseIsNan , self :: use_json_import_attributes :: UseJsonImportAttributes , self :: use_jsx_key_in_iterable :: UseJsxKeyInIterable , self :: use_parse_int_radix :: UseParseIntRadix , self :: use_qwik_classlist :: UseQwikClasslist , self :: use_single_js_doc_asterisk :: UseSingleJsDocAsterisk , self :: use_unique_element_ids :: UseUniqueElementIds , self :: use_valid_for_direction :: UseValidForDirection , self :: use_valid_typeof :: UseValidTypeof , self :: use_yield :: UseYield ,] } }
+#![doc = r" Group description generated by proc macro at compile time."]
+#![doc = r""]
+#![doc = r" To add a new rule, create a `.rs` file in the group subdirectory"]
+#![doc = r" and run `cargo check`. The build system will automatically discover"]
+#![doc = r" and register your rule."]
+use biome_analyze_macros::declare_group_from_fs;
+declare_group_from_fs! { category : "lint" , group : "correctness" }

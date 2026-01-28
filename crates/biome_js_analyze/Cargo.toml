@@ -19,9 +19,6 @@ name    = "js_analyzer"
 harness = false
 name    = "use_sorted_classes_parser"
 
-[build-dependencies]
-filetime = { workspace = true }
-
 [dependencies]
 biome_analyze            = { workspace = true }
 biome_analyze_macros     = { path = "../biome_analyze_macros" }
@@ -68,6 +65,9 @@ biome_test_utils    = { path = "../biome_test_utils" }
 criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }
+
+[build-dependencies]
+filetime = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }

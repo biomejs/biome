@@ -324,6 +324,7 @@ name = "biome_css_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_console",
  "biome_css_factory",
  "biome_css_parser",
@@ -341,6 +342,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "codspeed-criterion-compat",
+ "filetime",
  "insta",
  "mimalloc",
  "regex",
@@ -600,6 +602,7 @@ name = "biome_graphql_analyze"
 version = "0.0.1"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -613,6 +616,7 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "filetime",
  "insta",
  "jiff",
  "rustc-hash 2.1.1",
@@ -797,6 +801,7 @@ name = "biome_html_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -810,6 +815,7 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "filetime",
  "insta",
  "phf",
  "schemars",
@@ -1124,6 +1130,7 @@ name = "biome_json_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_configuration",
  "biome_console",
  "biome_diagnostics",
@@ -1137,6 +1144,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "codspeed-criterion-compat",
+ "filetime",
  "insta",
  "mimalloc",
  "rustc-hash 2.1.1",

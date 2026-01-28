@@ -1,4 +1,4 @@
-//! Build script for biome_js_analyze.
+//! Build script for biome_css_analyze.
 //!
 //! This build script watches for changes to rule files in group directories
 //! and "touches" the corresponding group files to trigger recompilation.
@@ -17,16 +17,11 @@ fn main() -> io::Result<()> {
     watch_group("lint", "complexity")?;
     watch_group("lint", "correctness")?;
     watch_group("lint", "nursery")?;
-    watch_group("lint", "performance")?;
-    watch_group("lint", "security")?;
     watch_group("lint", "style")?;
     watch_group("lint", "suspicious")?;
 
     // Assist groups
     watch_group("assist", "source")?;
-
-    // Syntax groups
-    watch_group("syntax", "correctness")?;
 
     Ok(())
 }
