@@ -12,7 +12,6 @@ pub(crate) mod double_text_expression;
 pub(crate) mod element;
 pub(crate) mod embedded_content;
 pub(crate) mod member_name;
-pub(crate) mod name;
 pub(crate) mod opening_element;
 pub(crate) mod root;
 pub(crate) mod self_closing_element;

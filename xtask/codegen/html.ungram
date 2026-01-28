@@ -209,8 +209,6 @@ AnyHtmlAttributeInitializer =
 	| HtmlSingleTextExpression
 
 
-HtmlName = 'ident'
-
 // ==================================
 // Svelte
 // ==================================
@@ -600,7 +598,7 @@ SvelteDirectiveModifier =
 HtmlSpreadAttribute =
 	'{'
 	'...'
-	argument: HtmlName
+	argument: HtmlTextExpression
 	'}'
 
 

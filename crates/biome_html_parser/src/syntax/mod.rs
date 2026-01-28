@@ -736,28 +736,6 @@ fn parse_single_text_expression_content(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_TEXT_EXPRESSION))
 }
 
-/// Parses a generic HTML name.
-///
-/// # Arguments
-/// - `next_context`: context to apply after bumping the name
-/// - `should_bail`: condition to bail early
-pub(crate) fn parse_name<F>(
-    p: &mut HtmlParser,
-    next_context: HtmlLexContext,
-    should_bail_if: F,
-) -> ParsedSyntax
-where
-    F: FnOnce(&HtmlParser) -> bool,
-{
-    if !p.at(IDENT) && !should_bail_if(p) {
-        return Absent;
-    }
-    let m = p.start();
-    p.bump_remap_with_context(IDENT, next_context);
-
-    Present(m.complete(p, HTML_NAME))
-}
-
 impl TextExpression {
     fn parse_element(&mut self, p: &mut HtmlParser) -> ParsedSyntax {
         if p.at(EOF) || p.at(T![<]) {

@@ -5,7 +5,7 @@ use crate::syntax::parse_error::{
     expected_svelte_property, expected_text_expression, expected_valid_directive,
 };
 use crate::syntax::{
-    parse_attribute_initializer, parse_html_element, parse_name, parse_single_text_expression,
+    TextExpression, parse_attribute_initializer, parse_html_element, parse_single_text_expression,
     parse_single_text_expression_content,
 };
 use crate::token_source::{HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt};
@@ -374,11 +374,12 @@ pub(crate) fn parse_svelte_spread_or_expression(p: &mut HtmlParser) -> ParsedSyn
     p.bump_with_context(T!['{'], HtmlLexContext::Svelte);
 
     if p.at(T![...]) {
-        p.bump_with_context(T![...], HtmlLexContext::Svelte);
-        parse_name(p, HtmlLexContext::Svelte, is_at_svelte_keyword)
-            .or_add_diagnostic(p, |p, range| {
-                p.err_builder("Expected a name after '...'", range)
-            });
+        p.bump_with_context(T![...], HtmlLexContext::single_expression());
+
+        TextExpression::new_single()
+            .parse_element(p)
+            .or_add_diagnostic(p, expected_expression);
+
         p.expect_with_context(T!['}'], HtmlLexContext::InsideTag);
         Present(m.complete(p, HTML_SPREAD_ATTRIBUTE))
     } else {

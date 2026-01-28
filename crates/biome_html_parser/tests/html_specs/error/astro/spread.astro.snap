@@ -28,16 +28,10 @@ HtmlRoot {
                 HtmlSpreadAttribute {
                     l_curly_token: L_CURLY@7..8 "{" [] [],
                     dotdotdot_token: DOT3@8..11 "..." [] [],
-                    argument: HtmlName {
-                        ident_token: IDENT@11..17 "props" [] [Whitespace(" ")],
+                    argument: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@11..43 "props >\n<Component {...props />\n" [] [],
                     },
                     r_curly_token: missing (required),
-                },
-                HtmlAttribute {
-                    name: HtmlAttributeName {
-                        value_token: HTML_LITERAL@17..43 ">\n<Component {...props />\n" [] [],
-                    },
-                    initializer: missing (optional),
                 },
             ],
             slash_token: missing (optional),
@@ -61,16 +55,12 @@ HtmlRoot {
       1: HTML_TAG_NAME@1..7
         0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@7..43
-        0: HTML_SPREAD_ATTRIBUTE@7..17
+        0: HTML_SPREAD_ATTRIBUTE@7..43
           0: L_CURLY@7..8 "{" [] []
           1: DOT3@8..11 "..." [] []
-          2: HTML_NAME@11..17
-            0: IDENT@11..17 "props" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@11..43
+            0: HTML_LITERAL@11..43 "props >\n<Component {...props />\n" [] []
           3: (empty)
-        1: HTML_ATTRIBUTE@17..43
-          0: HTML_ATTRIBUTE_NAME@17..43
-            0: HTML_LITERAL@17..43 ">\n<Component {...props />\n" [] []
-          1: (empty)
       3: (empty)
       4: (empty)
   4: EOF@43..43 "" [] []
@@ -80,25 +70,9 @@ HtmlRoot {
 ## Diagnostics
 
 ```
-spread.astro:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `}` but instead found `>
-    <Component {...props />
-    `
-  
-  > 1 │ <input {...props >
-      │                  ^
-  > 2 │ <Component {...props />
-  > 3 │ 
-      │ 
-  
-  i Remove >
-    <Component {...props />
-  
-  
 spread.astro:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `>` but instead the file ends
+  × expected `}` but instead the file ends
   
     1 │ <input {...props >
     2 │ <Component {...props />

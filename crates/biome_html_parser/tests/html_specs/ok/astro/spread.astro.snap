@@ -28,8 +28,8 @@ HtmlRoot {
                 HtmlSpreadAttribute {
                     l_curly_token: L_CURLY@7..8 "{" [] [],
                     dotdotdot_token: DOT3@8..11 "..." [] [],
-                    argument: HtmlName {
-                        ident_token: IDENT@11..16 "props" [] [],
+                    argument: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@11..16 "props" [] [],
                     },
                     r_curly_token: R_CURLY@16..18 "}" [] [Whitespace(" ")],
                 },
@@ -46,8 +46,8 @@ HtmlRoot {
                 HtmlSpreadAttribute {
                     l_curly_token: L_CURLY@31..32 "{" [] [],
                     dotdotdot_token: DOT3@32..35 "..." [] [],
-                    argument: HtmlName {
-                        ident_token: IDENT@35..40 "props" [] [],
+                    argument: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@35..40 "props" [] [],
                     },
                     r_curly_token: R_CURLY@40..42 "}" [] [Whitespace(" ")],
                 },
@@ -76,8 +76,8 @@ HtmlRoot {
         0: HTML_SPREAD_ATTRIBUTE@7..18
           0: L_CURLY@7..8 "{" [] []
           1: DOT3@8..11 "..." [] []
-          2: HTML_NAME@11..16
-            0: IDENT@11..16 "props" [] []
+          2: HTML_TEXT_EXPRESSION@11..16
+            0: HTML_LITERAL@11..16 "props" [] []
           3: R_CURLY@16..18 "}" [] [Whitespace(" ")]
       3: (empty)
       4: R_ANGLE@18..19 ">" [] []
@@ -89,8 +89,8 @@ HtmlRoot {
         0: HTML_SPREAD_ATTRIBUTE@31..42
           0: L_CURLY@31..32 "{" [] []
           1: DOT3@32..35 "..." [] []
-          2: HTML_NAME@35..40
-            0: IDENT@35..40 "props" [] []
+          2: HTML_TEXT_EXPRESSION@35..40
+            0: HTML_LITERAL@35..40 "props" [] []
           3: R_CURLY@40..42 "}" [] [Whitespace(" ")]
       3: SLASH@42..43 "/" [] []
       4: R_ANGLE@43..44 ">" [] []

@@ -620,41 +620,6 @@ pub struct HtmlMemberNameFields {
     pub member: SyntaxResult<HtmlTagName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct HtmlName {
-    pub(crate) syntax: SyntaxNode,
-}
-impl HtmlName {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> HtmlNameFields {
-        HtmlNameFields {
-            ident_token: self.ident_token(),
-        }
-    }
-    pub fn ident_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-impl Serialize for HtmlName {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct HtmlNameFields {
-    pub ident_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlOpeningElement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -887,7 +852,7 @@ impl HtmlSpreadAttribute {
     pub fn dotdotdot_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn argument(&self) -> SyntaxResult<HtmlName> {
+    pub fn argument(&self) -> SyntaxResult<HtmlTextExpression> {
         support::required_node(&self.syntax, 2usize)
     }
     pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -906,7 +871,7 @@ impl Serialize for HtmlSpreadAttribute {
 pub struct HtmlSpreadAttributeFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
-    pub argument: SyntaxResult<HtmlName>,
+    pub argument: SyntaxResult<HtmlTextExpression>,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4766,56 +4731,6 @@ impl From<HtmlMemberName> for SyntaxNode {
 }
 impl From<HtmlMemberName> for SyntaxElement {
     fn from(n: HtmlMemberName) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for HtmlName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_NAME as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == HTML_NAME
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for HtmlName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlName")
-                .field(
-                    "ident_token",
-                    &support::DebugSyntaxResult(self.ident_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<HtmlName> for SyntaxNode {
-    fn from(n: HtmlName) -> Self {
-        n.syntax
-    }
-}
-impl From<HtmlName> for SyntaxElement {
-    fn from(n: HtmlName) -> Self {
         n.syntax.into()
     }
 }
@@ -9839,11 +9754,6 @@ impl std::fmt::Display for HtmlEmbeddedContent {
     }
 }
 impl std::fmt::Display for HtmlMemberName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for HtmlName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

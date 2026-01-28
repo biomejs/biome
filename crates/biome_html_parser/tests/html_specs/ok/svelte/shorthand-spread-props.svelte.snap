@@ -28,8 +28,8 @@ HtmlRoot {
                     HtmlSpreadAttribute {
                         l_curly_token: L_CURLY@8..9 "{" [] [],
                         dotdotdot_token: DOT3@9..12 "..." [] [],
-                        argument: HtmlName {
-                            ident_token: IDENT@12..17 "props" [] [],
+                        argument: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@12..17 "props" [] [],
                         },
                         r_curly_token: R_CURLY@17..18 "}" [] [],
                     },
@@ -72,8 +72,8 @@ HtmlRoot {
           0: HTML_SPREAD_ATTRIBUTE@8..18
             0: L_CURLY@8..9 "{" [] []
             1: DOT3@9..12 "..." [] []
-            2: HTML_NAME@12..17
-              0: IDENT@12..17 "props" [] []
+            2: HTML_TEXT_EXPRESSION@12..17
+              0: HTML_LITERAL@12..17 "props" [] []
             3: R_CURLY@17..18 "}" [] []
         3: R_ANGLE@18..19 ">" [] []
       1: HTML_ELEMENT_LIST@19..27

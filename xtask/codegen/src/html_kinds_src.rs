@@ -90,7 +90,6 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_SINGLE_TEXT_EXPRESSION",
         "HTML_TEXT_EXPRESSION",
         "HTML_SPREAD_ATTRIBUTE",
-        "HTML_NAME",
         // Astro nodes
         "ASTRO_FRONTMATTER_ELEMENT",
         "ASTRO_EMBEDDED_CONTENT",

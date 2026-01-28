@@ -1,7 +1,7 @@
 use crate::parser::HtmlParser;
 use crate::syntax::HtmlSyntaxFeatures::Astro;
-use crate::syntax::parse_error::expected_closed_fence;
-use crate::syntax::{parse_name, parse_single_text_expression};
+use crate::syntax::parse_error::{expected_closed_fence, expected_expression};
+use crate::syntax::{TextExpression, parse_single_text_expression};
 use crate::token_source::HtmlLexContext;
 use biome_html_syntax::HtmlSyntaxKind::{
     ASTRO_EMBEDDED_CONTENT, ASTRO_FRONTMATTER_ELEMENT, FENCE, HTML_LITERAL, HTML_SPREAD_ATTRIBUTE,
@@ -61,11 +61,13 @@ pub(crate) fn parse_astro_spread_or_expression(p: &mut HtmlParser) -> ParsedSynt
     p.bump_with_context(T!['{'], HtmlLexContext::Svelte);
 
     if p.at(T![...]) {
-        p.bump_with_context(T![...], HtmlLexContext::Svelte);
-        parse_name(p, HtmlLexContext::Svelte, |_| true).or_add_diagnostic(p, |p, range| {
-            p.err_builder("Expected a name after '...'", range)
-        });
+        p.bump_with_context(T![...], HtmlLexContext::single_expression());
+        TextExpression::new_single()
+            .parse_element(p)
+            .or_add_diagnostic(p, expected_expression);
+
         p.expect_with_context(T!['}'], HtmlLexContext::InsideTag);
+
         Present(m.complete(p, HTML_SPREAD_ATTRIBUTE))
     } else {
         p.rewind(checkpoint);

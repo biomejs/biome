@@ -236,12 +236,6 @@ pub fn html_member_name(
         ],
     ))
 }
-pub fn html_name(ident_token: SyntaxToken) -> HtmlName {
-    HtmlName::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_NAME,
-        [Some(SyntaxElement::Token(ident_token))],
-    ))
-}
 pub fn html_opening_element(
     l_angle_token: SyntaxToken,
     name: AnyHtmlTagName,
@@ -358,7 +352,7 @@ pub fn html_single_text_expression(
 pub fn html_spread_attribute(
     l_curly_token: SyntaxToken,
     dotdotdot_token: SyntaxToken,
-    argument: HtmlName,
+    argument: HtmlTextExpression,
     r_curly_token: SyntaxToken,
 ) -> HtmlSpreadAttribute {
     HtmlSpreadAttribute::unwrap_cast(SyntaxNode::new_detached(
