@@ -1,5 +1,6 @@
 use biome_html_syntax::{
     AnyHtmlComponentObjectName, AnyHtmlTagName, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
+    HtmlSpreadAttribute,
 };
 use biome_js_syntax::{
     AnyJsIdentifierUsage, AnyJsRoot, JsReferenceIdentifier, JsStaticMemberExpression,
@@ -68,7 +69,22 @@ impl EmbeddedValueReferencesBuilder {
             if let Some(element) = HtmlSelfClosingElement::cast_ref(&node) {
                 self.visit_html_self_closing_element(&element);
             }
+
+            if let Some(spread_attribute) = HtmlSpreadAttribute::cast_ref(&node) {
+                self.visit_spread_attribute(&spread_attribute);
+            }
         }
+    }
+
+    fn visit_spread_attribute(&mut self, attribute: &HtmlSpreadAttribute) -> Option<()> {
+        let argument = attribute.argument().ok()?;
+
+        let name = argument.ident_token().ok()?;
+
+        self.references
+            .insert(name.text_trimmed_range(), name.token_text_trimmed());
+
+        Some(())
     }
 
     fn visit_html_element(&mut self, element: &HtmlElement) -> Option<()> {

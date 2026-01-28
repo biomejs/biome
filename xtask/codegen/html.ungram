@@ -185,6 +185,7 @@ AnyHtmlAttribute =
 	| HtmlDoubleTextExpression
 	| HtmlSingleTextExpression
 	| SvelteAttachAttribute
+	| HtmlSpreadAttribute
 	| AnySvelteDirective
 	| AnyVueDirective
 	| HtmlBogusAttribute
@@ -208,6 +209,7 @@ AnyHtmlAttributeInitializer =
 	| HtmlSingleTextExpression
 
 
+HtmlName = 'ident'
 
 // ==================================
 // Svelte
@@ -593,7 +595,13 @@ SvelteDirectiveModifier =
 	'|'
 	name: SvelteName
 
-
+// <input {...props} >
+//        ^^^^^^^^^^
+HtmlSpreadAttribute =
+	'{'
+	'...'
+	argument: HtmlName
+	'}'
 
 
 // Keep it different just for svelte

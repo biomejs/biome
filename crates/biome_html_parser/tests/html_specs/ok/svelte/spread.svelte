@@ -1,0 +1,2 @@
+<input {...foo} />
+<Component {...foo} />
