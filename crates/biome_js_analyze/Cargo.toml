@@ -19,8 +19,12 @@ name    = "js_analyzer"
 harness = false
 name    = "use_sorted_classes_parser"
 
+[build-dependencies]
+filetime = { workspace = true }
+
 [dependencies]
 biome_analyze            = { workspace = true }
+biome_analyze_macros     = { path = "../biome_analyze_macros" }
 biome_aria               = { workspace = true }
 biome_aria_metadata      = { workspace = true }
 biome_console            = { workspace = true }

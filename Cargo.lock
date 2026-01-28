@@ -145,6 +145,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_analyze_macros"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "biome_string_case",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+ "xtask_glue",
+]
+
+[[package]]
 name = "biome_aria"
 version = "0.5.7"
 dependencies = [
@@ -882,6 +895,7 @@ name = "biome_js_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_aria",
  "biome_aria_metadata",
  "biome_console",
@@ -913,6 +927,7 @@ dependencies = [
  "camino",
  "codspeed-criterion-compat",
  "enumflags2",
+ "filetime",
  "globset",
  "insta",
  "mimalloc",
@@ -2759,6 +2774,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
+name = "filetime"
+version = "0.2.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f98844151eee8917efc50bd9e8318cb963ae8b297431495d3f758616ea5c57db"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "libredox",
+]
+
+[[package]]
 name = "fixedbitset"
 version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3655,6 +3681,7 @@ checksum = "c0ff37bd590ca25063e35af745c343cb7a0271906fb7b37e4813e8f79f00268d"
 dependencies = [
  "bitflags 2.9.3",
  "libc",
+ "redox_syscall",
 ]
 
 [[package]]
