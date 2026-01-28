@@ -265,6 +265,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "composes",
         "position-try",
         "view-transition",
+        "function",
+        "returns",
         //
         "font-face",
         // Don't add to the end of this list, add new keywords above the "HERE"
@@ -392,6 +394,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         // Values
         "CSS_PARENTHESIZED_EXPRESSION",
         "CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION",
+        "CSS_COMMA_SEPARATED_VALUE",
         "CSS_BINARY_EXPRESSION",
         "CSS_URL_VALUE_RAW",
         "CSS_URL_FUNCTION",
@@ -442,6 +445,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_FONT_PALETTE_VALUES_AT_RULE_DECLARATOR",
         "CSS_POSITION_TRY_AT_RULE_DECLARATOR",
         "CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR",
+        "CSS_FUNCTION_AT_RULE_DECLARATOR",
         "CSS_MEDIA_AT_RULE_DECLARATOR",
         "CSS_CONTAINER_AT_RULE_DECLARATOR",
         "CSS_SUPPORTS_AT_RULE_DECLARATOR",
@@ -452,6 +456,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_COUNTER_STYLE_AT_RULE",
         "CSS_PROPERTY_AT_RULE",
         "CSS_CONTAINER_AT_RULE",
+        "CSS_FUNCTION_AT_RULE",
         "CSS_CONTAINER_NOT_QUERY",
         "CSS_CONTAINER_AND_QUERY",
         "CSS_CONTAINER_OR_QUERY",
@@ -553,6 +558,10 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_VALUE_AT_RULE_GENERIC_PROPERTY",
         "CSS_VALUE_AT_RULE_GENERIC_VALUE",
         "CSS_VIEW_TRANSITION_AT_RULE",
+        "CSS_FUNCTION_PARAMETER",
+        "CSS_FUNCTION_PARAMETER_DEFAULT_VALUE",
+        "CSS_FUNCTION_PARAMETER_LIST",
+        "CSS_RETURNS_STATEMENT",
         // Tailwind CSS 4.0 nodes
         "TW_THEME_AT_RULE",
         "TW_UTILITY_AT_RULE",
@@ -606,6 +615,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_SYNTAX",
         "CSS_BOGUS_SYNTAX_SINGLE_COMPONENT",
         "CSS_BOGUS_ATTR_NAME",
+        "CSS_BOGUS_FUNCTION_PARAMETER",
+        "CSS_BOGUS_TYPE",
         // Grit metavariable
         "CSS_METAVARIABLE",
     ],

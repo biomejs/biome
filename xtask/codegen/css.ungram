@@ -66,6 +66,8 @@ CssBogusIfTest = SyntaxElement*
 CssBogusSyntax = SyntaxElement*
 CssBogusSyntaxSingleComponent = SyntaxElement*
 CssBogusAttrName = SyntaxElement*
+CssBogusFunctionParameter = SyntaxElement*
+CssBogusType = SyntaxElement*
 
 AnyCssRoot =
 	CssRoot
@@ -663,6 +665,7 @@ AnyCssAtRule =
 	| CssValueAtRule
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
+	| CssFunctionAtRule
 	// Tailwind CSS 4.0 at rules
 	| TwThemeAtRule
 	| TwSourceAtRule
@@ -698,6 +701,7 @@ AnyCssAtRuleDeclarator =
 	| CssSupportsAtRuleDeclarator
 	| CssScopeAtRuleDeclarator
 	| CssStartingStyleAtRuleDeclarator
+	| CssFunctionAtRuleDeclarator
 
 // Conditional block declarator nodes
 CssMediaAtRuleDeclarator =
@@ -746,6 +750,14 @@ CssPositionTryAtRuleDeclarator =
 
 CssViewTransitionAtRuleDeclarator =
 	'view-transition'
+
+CssFunctionAtRuleDeclarator =
+	'function'
+	name: CssDashedIdentifier
+	'('
+	parameters: CssFunctionParameterList
+	')'
+	returns: CssReturnsStatement?
 
 // @charset "UTF-8";
 // ^^^^^^^^^^^^^^^^^
@@ -1750,6 +1762,55 @@ CssViewTransitionAtRule =
 	declarator: CssViewTransitionAtRuleDeclarator
 	block: AnyCssDeclarationBlock
 
+// https://drafts.csswg.org/css-mixins-1/#function-rule
+// @function <function-token> <function-parameter>#? ) [ returns <css-type> ]? { <declaration-list> }
+//
+// @function --transparent(--color, --alpha) { }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssFunctionAtRule =
+	declarator: CssFunctionAtRuleDeclarator
+	block: CssDeclarationOrAtRuleBlock
+
+// <function-parameter>#?
+//
+/// @function --transparent(--color, --alpha) { }
+//                          ^^^^^^^^^^^^^^^^
+CssFunctionParameterList = AnyCssFunctionParameter (',' AnyCssFunctionParameter)*
+
+AnyCssFunctionParameter =
+	CssFunctionParameter
+	| CssBogusFunctionParameter
+
+// <css-type>
+//
+// @function --transparent(--color <color>, --alpha <number>) { }
+//                                 ^^^^^^^          ^^^^^^^^
+AnyCssType =
+	CssTypeFunction
+	| AnyCssSyntaxComponent
+	| CssBogusType
+
+// @function --transparent(--color <color>: red, --alpha <number>: 0.5) { }
+//                         ^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^
+CssFunctionParameter =
+	name: CssDashedIdentifier
+	type:  AnyCssType?
+	default_value: CssFunctionParameterDefaultValue?
+
+// @function --transparent(--color <color>: red, --alpha <number>: 0.5) { }
+//                                        ^^^^^                  ^^^^^
+CssFunctionParameterDefaultValue =
+	':'
+	value: AnyCssValue
+
+// returns <css-type>
+//
+// @function --transparent(--color <color>: red, --alpha <number>: 0.5) returns <color> { }
+//                                                                      ^^^^^^^^^^^^^^^
+CssReturnsStatement =
+	'returns'
+	type: AnyCssType
+
 ///////////////
 // AUXILIARY
 ///////////////
@@ -1978,8 +2039,14 @@ AnyCssExpression =
 	CssBinaryExpression
 	| CssParenthesizedExpression
 	| CssListOfComponentValuesExpression
+	| CssCommaSeparatedValue
 
 CssListOfComponentValuesExpression = CssComponentValueList
+
+CssCommaSeparatedValue =
+	'{'
+	items: CssGenericComponentValueList
+	'}'
 
 CssBinaryExpression =
 	left: AnyCssExpression
@@ -1987,7 +2054,6 @@ CssBinaryExpression =
 		'+' | '-' | '*' | '/'
 	)
 	right: AnyCssExpression
-
 
 CssParenthesizedExpression =
 	'(' expression: AnyCssExpression? ')'

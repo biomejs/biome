@@ -3,7 +3,8 @@ use super::parse_error::expected_expression;
 use super::url::{is_at_url_function, parse_url_function};
 use crate::parser::CssParser;
 use crate::syntax::css_modules::v_bind_not_allowed;
-use crate::syntax::parse_error::expected_declaration_item;
+use crate::syntax::parse_error::{expected_component_value, expected_declaration_item};
+use crate::syntax::property::parse_generic_component_value;
 use crate::syntax::value::attr::{is_at_attr_function, parse_attr_function};
 use crate::syntax::value::r#if::parse_if_function;
 use crate::syntax::{
@@ -13,7 +14,7 @@ use crate::syntax::{
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
@@ -206,7 +207,7 @@ pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
 /// to decide if parsing should proceed for a general CSS expression.
 #[inline]
 pub(crate) fn is_at_any_expression(p: &mut CssParser) -> bool {
-    is_at_parenthesized(p) || is_at_any_value(p)
+    is_at_parenthesized(p) || is_at_any_value(p) || is_at_comma_separated_value(p)
 }
 
 /// Parses any CSS expression from the current position in the CSS parser.
@@ -222,6 +223,8 @@ pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
 
     let param = if is_at_parenthesized(p) {
         parse_parenthesized_expression(p)
+    } else if is_at_comma_separated_value(p) {
+        parse_comma_separated_value(p)
     } else {
         parse_list_of_component_values_expression(p)
     };
@@ -305,4 +308,53 @@ pub(crate) fn parse_tailwind_value_theme_reference(p: &mut CssParser) -> ParsedS
     p.expect(T![*]);
 
     Present(m.complete(p, TW_VALUE_THEME_REFERENCE))
+}
+
+#[inline]
+fn is_at_comma_separated_value(p: &mut CssParser) -> bool {
+    p.at(T!['{'])
+}
+
+#[inline]
+fn parse_comma_separated_value(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_comma_separated_value(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(T!['{']);
+    CommaSeparatedValueValueList.parse_list(p);
+    p.expect(T!['}']);
+
+    Present(m.complete(p, CSS_COMMA_SEPARATED_VALUE))
+}
+
+struct CommaSeparatedValueValueList;
+
+impl ParseNodeList for CommaSeparatedValueValueList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_GENERIC_COMPONENT_VALUE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_generic_component_value(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T!['}'])
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, token_set![T!['}']])
+                .enable_recovery_on_line_break(),
+            expected_component_value,
+        )
+    }
 }

@@ -77,6 +77,10 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssColorProfileAtRuleDeclarator::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_COMMA_SEPARATED_VALUE => {
+                    let $pattern = unsafe { $crate::CssCommaSeparatedValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_COMPLEX_SELECTOR => {
                     let $pattern = unsafe { $crate::CssComplexSelector::new_unchecked(node) };
                     $body
@@ -253,6 +257,24 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_FUNCTION => {
                     let $pattern = unsafe { $crate::CssFunction::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FUNCTION_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssFunctionAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FUNCTION_AT_RULE_DECLARATOR => {
+                    let $pattern =
+                        unsafe { $crate::CssFunctionAtRuleDeclarator::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FUNCTION_PARAMETER => {
+                    let $pattern = unsafe { $crate::CssFunctionParameter::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FUNCTION_PARAMETER_DEFAULT_VALUE => {
+                    let $pattern =
+                        unsafe { $crate::CssFunctionParameterDefaultValue::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_GENERIC_DELIMITER => {
@@ -678,6 +700,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssRelativeSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_RETURNS_STATEMENT => {
+                    let $pattern = unsafe { $crate::CssReturnsStatement::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_ROOT => {
                     let $pattern = unsafe { $crate::CssRoot::new_unchecked(node) };
                     $body
@@ -976,6 +1002,11 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssBogusFontFeatureValuesItem::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_FUNCTION_PARAMETER => {
+                    let $pattern =
+                        unsafe { $crate::CssBogusFunctionParameter::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_IF_BRANCH => {
                     let $pattern = unsafe { $crate::CssBogusIfBranch::new_unchecked(node) };
                     $body
@@ -1055,6 +1086,10 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssBogusSyntaxSingleComponent::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_TYPE => {
+                    let $pattern = unsafe { $crate::CssBogusType::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_UNICODE_RANGE_VALUE => {
                     let $pattern =
                         unsafe { $crate::CssBogusUnicodeRangeValue::new_unchecked(node) };
@@ -1130,6 +1165,10 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_FONT_FEATURE_VALUES_ITEM_LIST => {
                     let $pattern =
                         unsafe { $crate::CssFontFeatureValuesItemList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FUNCTION_PARAMETER_LIST => {
+                    let $pattern = unsafe { $crate::CssFunctionParameterList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST => {

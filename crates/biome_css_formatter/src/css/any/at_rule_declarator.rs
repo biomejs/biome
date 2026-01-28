@@ -15,6 +15,7 @@ impl FormatRule<AnyCssAtRuleDeclarator> for FormatAnyCssAtRuleDeclarator {
             AnyCssAtRuleDeclarator::CssFontPaletteValuesAtRuleDeclarator(node) => {
                 node.format().fmt(f)
             }
+            AnyCssAtRuleDeclarator::CssFunctionAtRuleDeclarator(node) => node.format().fmt(f),
             AnyCssAtRuleDeclarator::CssMediaAtRuleDeclarator(node) => node.format().fmt(f),
             AnyCssAtRuleDeclarator::CssPositionTryAtRuleDeclarator(node) => node.format().fmt(f),
             AnyCssAtRuleDeclarator::CssPropertyAtRuleDeclarator(node) => node.format().fmt(f),
