@@ -1,0 +1,5 @@
+/* should generate diagnostics */
+a { color: #000; }
+a { color: #fff1aa; }
+a { color: #123456aa; }
+a { color: #0000000000000000; }

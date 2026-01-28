@@ -1,5 +1,30 @@
 # @biomejs/biome
 
+## 2.3.13
+
+### Patch Changes
+
+- [#8815](https://github.com/biomejs/biome/pull/8815) [`f924f23`](https://github.com/biomejs/biome/commit/f924f234607ae62db1511158b36124ec0d5ce074) Thanks [@dyc3](https://github.com/dyc3)! - Improved [`useVueValidVOn`](https://biomejs.dev/linter/rules/use-vue-valid-v-on/) to be more closely aligned with the source rule. It will now properly allow modifiers for all possible keyboard events. It should have better performance when there are no violations of the rule as well.
+
+  Now treated valid:
+
+  ```vue
+  <div @keydown.arrow-down="handler"></div>
+  <div @keydown.a="handler"></div>
+  <div @keydown.b="handler"></div>
+  <div @keydown.27="foo"></div>
+  ```
+
+- [#8856](https://github.com/biomejs/biome/pull/8856) [`85f81f9`](https://github.com/biomejs/biome/commit/85f81f98923770469d09c5d003cfb76c0f3c971f) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8710](https://github.com/biomejs/biome/issues/8710): Biome now parses Vue dynamic slot shorthand arguments that use template literals in `[]`.
+
+- [#8850](https://github.com/biomejs/biome/pull/8850) [`2a190e0`](https://github.com/biomejs/biome/commit/2a190e0719ac447236afae0df8c915033c08e059) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8708](https://github.com/biomejs/biome/issues/8708): Tailwind `@utility` directives now parse functional utility names like `px-*` when Tailwind directives are enabled.
+
+- [#8863](https://github.com/biomejs/biome/pull/8863) [`79386e0`](https://github.com/biomejs/biome/commit/79386e08050d498c2cea6cdcaba4b0fa31245209) Thanks [@dyc3](https://github.com/dyc3)! - Fixed an issue with `biome migrate eslint` where it couldn't detect rules for CSS, GraphQL, and HTML.
+
+- [#8771](https://github.com/biomejs/biome/pull/8771) [`6f56b6e`](https://github.com/biomejs/biome/commit/6f56b6eeb961ca63fad601fc35b3b28df08cc247) Thanks [@lghuahua](https://github.com/lghuahua)! - Fix the `--reporter=summary` output incorrectly merging and displaying wrong issue counts for different rules. Fixes [#8730](https://github.com/biomejs/biome/issues/8730)
+
+- [#8714](https://github.com/biomejs/biome/pull/8714) [`ac3a71f`](https://github.com/biomejs/biome/commit/ac3a71f8f856d267159e24ccc75e1913776d92f5) Thanks [@Netail](https://github.com/Netail)! - Added new nursery rule [`use-consistent-enum-value-type`](https://biomejs.dev/linter/rules/use-consistent-enum-value-type). This rule disallows enums from having both number and string members.
+
 ## 2.3.12
 
 ### Patch Changes

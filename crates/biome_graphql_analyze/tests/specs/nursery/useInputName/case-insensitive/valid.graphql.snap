@@ -1,0 +1,17 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+type Mutation { SetMessage(input: SetMessageInput): String }
+
+type Mutation { SetMessage(input: SetMessageInput!): String }
+
+type Mutation { SetMessage(input: [SetMessageInput]): String }
+
+# Case insensitive
+type Mutation { SetMessage(input: setMessageInput): String }
+
+```

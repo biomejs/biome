@@ -1,0 +1,86 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+@media tv {}
+@media handheld and (min-width: 480px) {}
+@media speech {}
+
+```
+
+# Diagnostics
+```
+invalid.css:2:8 lint/nursery/noDeprecatedMediaType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected deprecated media type: tv
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ @media tv {}
+      │        ^^
+    3 │ @media handheld and (min-width: 480px) {}
+    4 │ @media speech {}
+  
+  i Deprecated media types are recognized but match nothing; prefer using media features or recommended media types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Recommended media types include:
+  
+  - all
+  - print
+  - screen
+  
+
+```
+
+```
+invalid.css:3:8 lint/nursery/noDeprecatedMediaType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected deprecated media type: handheld
+  
+    1 │ /* should generate diagnostics */
+    2 │ @media tv {}
+  > 3 │ @media handheld and (min-width: 480px) {}
+      │        ^^^^^^^^
+    4 │ @media speech {}
+    5 │ 
+  
+  i Deprecated media types are recognized but match nothing; prefer using media features or recommended media types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Recommended media types include:
+  
+  - all
+  - print
+  - screen
+  
+
+```
+
+```
+invalid.css:4:8 lint/nursery/noDeprecatedMediaType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected deprecated media type: speech
+  
+    2 │ @media tv {}
+    3 │ @media handheld and (min-width: 480px) {}
+  > 4 │ @media speech {}
+      │        ^^^^^^
+    5 │ 
+  
+  i Deprecated media types are recognized but match nothing; prefer using media features or recommended media types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Recommended media types include:
+  
+  - all
+  - print
+  - screen
+  
+
+```
