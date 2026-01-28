@@ -1,0 +1,7 @@
+/* should not generate diagnostics */
+p {
+	color: red;
+}
+a { color: black; }
+a { color: rgb(0, 0, 0); }
+a { color: rgba(0, 0, 0, 1); }
