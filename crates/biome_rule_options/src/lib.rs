@@ -201,6 +201,7 @@ pub mod no_shorthand_property_overrides;
 pub mod no_shouty_constants;
 pub mod no_skipped_tests;
 pub mod no_solid_destructured_props;
+pub mod no_solid_early_return;
 pub mod no_sparse_array;
 pub mod no_static_element_interactions;
 pub mod no_static_only_class;

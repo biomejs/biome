@@ -205,6 +205,7 @@ define_categories! {
     "lint/nursery/noRootType": "https://biomejs.dev/linter/rules/no-root-type",
     "lint/nursery/noScriptUrl": "https://biomejs.dev/linter/rules/no-script-url",
     "lint/nursery/noShadow": "https://biomejs.dev/linter/rules/no-shadow",
+    "lint/nursery/noSolidEarlyReturn": "https://biomejs.dev/linter/rules/no-solid-early-return",
     "lint/nursery/noSyncScripts": "https://biomejs.dev/linter/rules/no-sync-scripts",
     "lint/nursery/noTernary": "https://biomejs.dev/linter/rules/no-ternary",
     "lint/nursery/noUndeclaredEnvVars": "https://biomejs.dev/linter/rules/no-undeclared-env-vars",

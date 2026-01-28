@@ -4582,6 +4582,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSolidEarlyReturnConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSolidEarlyReturnOptions" }
+			]
+		},
+		"NoSolidEarlyReturnOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSparseArrayConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5682,6 +5692,13 @@
 					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.\nSee https://biomejs.dev/linter/rules/no-shadow",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoShadowConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSolidEarlyReturn": {
+					"description": "Disallow early returns in Solid components.\nSee https://biomejs.dev/linter/rules/no-solid-early-return",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSolidEarlyReturnConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8466,6 +8483,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSolidDestructuredPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSolidEarlyReturnOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSolidEarlyReturnOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
