@@ -1,5 +1,27 @@
 # @biomejs/biome
 
+## 2.3.14
+
+### Patch Changes
+
+- [#8602](https://github.com/biomejs/biome/pull/8602) [`9a18daa`](https://github.com/biomejs/biome/commit/9a18daada12f5ef841d4fcd1efd7826a3aa26684) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`noVueArrowFuncInWatch`](https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch/). This rule forbids using arrow functions in watchers in Vue components, because arrow functions do not give access to the component instance (via `this`), while regular functions do.
+
+- [#8861](https://github.com/biomejs/biome/pull/8861) [`3531687`](https://github.com/biomejs/biome/commit/35316874d588ec7f202a97e9f7049578793a2b26) Thanks [@dyc3](https://github.com/dyc3)! - Added the `noDeprecatedMediaType` CSS rule to flag deprecated media types like `tv` and `handheld`.
+
+- [#8860](https://github.com/biomejs/biome/pull/8860) [`95f1eea`](https://github.com/biomejs/biome/commit/95f1eea852d0e2ab248c8d8dcf7fb89da9d583d4) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noHexColors`](https://biomejs.dev/linter/rules/no-hex-colors/), which flags the use of hexadecimal color codes in CSS and suggests using named colors or RGB/RGBA/HSL/HSLA formats instead.
+
+- [#8864](https://github.com/biomejs/biome/pull/8864) [`5e97119`](https://github.com/biomejs/biome/commit/5e97119467f77d2d551fc5dac0d46c318691440a) Thanks [@dyc3](https://github.com/dyc3)! - Improved the summary provided by `biome migrate eslint` to be clearer on why rules were not migrated. Biome now specifies a reason when a rule is not migrated, such as being incompatible with the formatter or not implemented yet. This helps users make more informed decisions when migrating their ESLint configurations to Biome.
+
+- [#8619](https://github.com/biomejs/biome/pull/8619) [`d78e01d`](https://github.com/biomejs/biome/commit/d78e01dbb60c06208e7abb697ae4e700aa3dd3bd) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`useInputName`](https://biomejs.dev/linter/rules/use-input-name/). Require mutation arguments to be called “input”, and the input type to be called Mutation name + “Input”.
+
+  **Invalid:**
+
+  ```graphql
+  type Mutation {
+    SetMessage(message: String): String
+  }
+  ```
+
 ## 2.3.13
 
 ### Patch Changes

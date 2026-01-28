@@ -60,7 +60,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDeprecatedMediaType {
-        version: "next",
+        version: "2.3.14",
         name: "noDeprecatedMediaType",
         language: "css",
         recommended: false,
