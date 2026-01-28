@@ -38,6 +38,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         .expect("Expected test to have a file name")
         .to_str()
         .expect("File name to be valid UTF8");
+    let extension = test_case_path
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or_default();
 
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
@@ -91,7 +95,12 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         }
     }
 
-    let mut source_type = CssFileSource::css();
+    let mut source_type = if extension == "scss" {
+        CssFileSource::scss()
+    } else {
+        CssFileSource::css()
+    };
+
     if file_name.ends_with(".styled.css") {
         source_type = source_type.with_embedding_kind(EmbeddingKind::Styled);
     }

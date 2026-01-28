@@ -1,0 +1,25 @@
+/* Outer comment
+   /* Inner nested comment */
+   Still in outer comment
+*/
+.simple { color: red; }
+
+/* Level 1
+   /* Level 2
+      /* Level 3 */
+   */
+*/
+.deep { background: blue; }
+
+/* Start /* nested /* deeply */ nested */ end */
+$var: value;
+
+/* Outer
+   /* Inner with newline
+   */
+   Back to outer
+*/
+.test { margin: 0; }
+
+
+

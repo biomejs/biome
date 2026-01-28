@@ -10,9 +10,14 @@ use biome_service::{
     workspace::DocumentFileSource,
 };
 
-#[derive(Default)]
 pub struct CssTestFormatLanguage {
     source_type: CssFileSource,
+}
+
+impl CssTestFormatLanguage {
+    pub fn new(source_type: CssFileSource) -> Self {
+        Self { source_type }
+    }
 }
 
 impl TestFormatLanguage for CssTestFormatLanguage {

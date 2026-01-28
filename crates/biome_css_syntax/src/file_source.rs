@@ -40,6 +40,7 @@ pub enum EmbeddingHtmlKind {
 )]
 #[serde(rename_all = "camelCase")]
 pub struct CssFileSource {
+    language: CssFileLanguage,
     variant: CssVariant,
 
     /// Used to mark if the CSS is embedded inside some particular files. This affects the parsing.
@@ -47,7 +48,29 @@ pub struct CssFileSource {
     embedding_kind: EmbeddingKind,
 }
 
-/// The style of CSS contained in the file.
+/// The language of the stylesheet.
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+#[serde(rename_all = "camelCase")]
+pub enum CssFileLanguage {
+    #[default]
+    Css,
+    Scss,
+}
+
+impl CssFileLanguage {
+    pub const fn is_css(&self) -> bool {
+        matches!(self, Self::Css)
+    }
+
+    pub const fn is_scss(&self) -> bool {
+        matches!(self, Self::Scss)
+    }
+}
+
+/// Extra CSS features enabled for the file.
 ///
 /// Currently, Biome aims to be compatible with
 /// the latest Recommendation level standards.
@@ -70,6 +93,15 @@ pub enum CssVariant {
 impl CssFileSource {
     pub fn css() -> Self {
         Self {
+            language: CssFileLanguage::Css,
+            variant: CssVariant::Standard,
+            embedding_kind: EmbeddingKind::None,
+        }
+    }
+
+    pub fn scss() -> Self {
+        Self {
+            language: CssFileLanguage::Scss,
             variant: CssVariant::Standard,
             embedding_kind: EmbeddingKind::None,
         }
@@ -77,6 +109,7 @@ impl CssFileSource {
 
     pub fn tailwind_css() -> Self {
         Self {
+            language: CssFileLanguage::Css,
             variant: CssVariant::TailwindCss,
             embedding_kind: EmbeddingKind::None,
         }
@@ -84,6 +117,7 @@ impl CssFileSource {
 
     pub fn new_css_modules() -> Self {
         Self {
+            language: CssFileLanguage::Css,
             variant: CssVariant::CssModules,
             embedding_kind: EmbeddingKind::None,
         }
@@ -106,6 +140,14 @@ impl CssFileSource {
     pub fn with_tailwind_directives(mut self) -> Self {
         self.variant = CssVariant::TailwindCss;
         self
+    }
+
+    pub fn is_css(&self) -> bool {
+        self.language.is_css()
+    }
+
+    pub fn is_scss(&self) -> bool {
+        self.language.is_scss()
     }
 
     pub fn is_css_modules(&self) -> bool {
@@ -147,6 +189,7 @@ impl CssFileSource {
         // We assume the file extension is normalized to lowercase
         match extension {
             "css" => Ok(Self::css()),
+            "scss" => Ok(Self::scss()),
             "module.css" => Ok(Self::new_css_modules()),
             _ => Err(FileSourceError::UnknownExtension),
         }
@@ -161,6 +204,7 @@ impl CssFileSource {
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "css" => Ok(Self::css()),
+            "scss" => Ok(Self::scss()),
             "tailwindcss" => Ok(Self::tailwind_css()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
