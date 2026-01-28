@@ -106,6 +106,8 @@ pub enum RuleSource {
     Eslint(&'static str),
     /// Rules from [Eslint Plugin Barrel Files](https://github.com/thepassle/eslint-plugin-barrel-files)
     EslintBarrelFiles(&'static str),
+    /// Rules from [Eslint Plugin Better Tailwindcss](https://github.com/schoero/eslint-plugin-better-tailwindcss)
+    EslintBetterTailwindcss(&'static str),
     /// Rules from [GraphQL-ESLint](https://github.com/graphql-hive/graphql-eslint)
     EslintGraphql(&'static str),
     /// Rules from [Eslint Plugin Import](https://github.com/import-js/eslint-plugin-import)
@@ -187,6 +189,7 @@ impl std::fmt::Display for RuleSource {
             Self::DenoLint(_) => write!(f, "Deno Lint"),
             Self::Eslint(_) => write!(f, "ESLint"),
             Self::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
+            Self::EslintBetterTailwindcss(_) => write!(f, "eslint-plugin-better-tailwindcss"),
             Self::EslintGraphql(_) => write!(f, "GraphQL-ESLint"),
             Self::EslintImport(_) => write!(f, "eslint-plugin-import"),
             Self::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
@@ -273,6 +276,7 @@ impl RuleSource {
             | Self::DenoLint(rule_name)
             | Self::Eslint(rule_name)
             | Self::EslintBarrelFiles(rule_name)
+            | Self::EslintBetterTailwindcss(rule_name)
             | Self::EslintGraphql(rule_name)
             | Self::EslintImport(rule_name)
             | Self::EslintImportAccess(rule_name)
@@ -317,6 +321,9 @@ impl RuleSource {
             | Self::GraphqlSchemaLinter(rule_name)
             | Self::Stylelint(rule_name) => (*rule_name).to_string(),
             Self::EslintBarrelFiles(rule_name) => format!("barrel-files/{rule_name}"),
+            Self::EslintBetterTailwindcss(rule_name) => {
+                format!("better-tailwindcss/{rule_name}")
+            }
             Self::EslintGraphql(rule_name) => format!("@graphql-eslint/{rule_name}"),
             Self::EslintImport(rule_name) => format!("import/{rule_name}"),
             Self::EslintImportAccess(rule_name) => format!("import-access/{rule_name}"),
@@ -361,6 +368,7 @@ impl RuleSource {
             Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintBetterTailwindcss(rule_name) => format!("https://github.com/schoero/eslint-plugin-better-tailwindcss/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
             Self::EslintImport(rule_name) => format!("https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintImportAccess(_) => "https://github.com/uhyo/eslint-plugin-import-access".to_string(),

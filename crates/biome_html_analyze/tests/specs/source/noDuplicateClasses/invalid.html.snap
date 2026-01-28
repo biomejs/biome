@@ -1,0 +1,292 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- Invalid: exact duplicates -->
+<div class="flex flex"></div>
+<div class="p-4 text-red-500 p-4 bg-white"></div>
+
+<!-- Invalid: multiple duplicates -->
+<div class="flex p-4 flex m-2 p-4"></div>
+
+<!-- Invalid: duplicates with complex classes -->
+<div class="hover:focus:m-2 foo hover:focus:m-2"></div>
+
+<!-- Invalid: duplicates in the middle -->
+<div class="text-lg text-center text-lg font-bold"></div>
+
+<!-- Invalid: single-quoted strings (should preserve quotes) -->
+<div class='mt-4 mt-4'></div>
+
+<!-- Invalid: duplicates with newlines (preserves original whitespace) -->
+<div class="foo
+bar
+foo"></div>
+
+<!-- Invalid: duplicates with tabs -->
+<div class="flex	p-4	flex"></div>
+
+<!-- Invalid: multiple spaces (should preserve spacing) -->
+<div class="flex  p-4  flex"></div>
+
+<!-- Invalid: leading/trailing whitespace (should preserve) -->
+<div class=" flex flex "></div>
+
+<!-- Invalid: triple duplicate -->
+<div class="flex flex flex"></div>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    1 │ <!-- Invalid: exact duplicates -->
+  > 2 │ <div class="flex flex"></div>
+      │      ^^^^^^^^^^^^^^^^^
+    3 │ <div class="p-4 text-red-500 p-4 bg-white"></div>
+    4 │ 
+  
+  i The class flex appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    2 │ <div·class="flex·flex"></div>
+      │                 -----        
+
+```
+
+```
+invalid.html:3:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    1 │ <!-- Invalid: exact duplicates -->
+    2 │ <div class="flex flex"></div>
+  > 3 │ <div class="p-4 text-red-500 p-4 bg-white"></div>
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ <!-- Invalid: multiple duplicates -->
+  
+  i The class p-4 appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    3 │ <div·class="p-4·text-red-500·p-4·bg-white"></div>
+      │                              ----                
+
+```
+
+```
+invalid.html:6:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains duplicate classes.
+  
+    5 │ <!-- Invalid: multiple duplicates -->
+  > 6 │ <div class="flex p-4 flex m-2 p-4"></div>
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ <!-- Invalid: duplicates with complex classes -->
+  
+  i The classes flex, p-4 appear multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    6 │ <div·class="flex·p-4·flex·m-2·p-4"></div>
+      │                      -----   ----        
+
+```
+
+```
+invalid.html:9:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+     8 │ <!-- Invalid: duplicates with complex classes -->
+   > 9 │ <div class="hover:focus:m-2 foo hover:focus:m-2"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ <!-- Invalid: duplicates in the middle -->
+  
+  i The class hover:focus:m-2 appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    9 │ <div·class="hover:focus:m-2·foo·hover:focus:m-2"></div>
+      │                                ----------------        
+
+```
+
+```
+invalid.html:12:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    11 │ <!-- Invalid: duplicates in the middle -->
+  > 12 │ <div class="text-lg text-center text-lg font-bold"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ <!-- Invalid: single-quoted strings (should preserve quotes) -->
+  
+  i The class text-lg appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    12 │ <div·class="text-lg·text-center·text-lg·font-bold"></div>
+       │                                 --------                 
+
+```
+
+```
+invalid.html:15:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    14 │ <!-- Invalid: single-quoted strings (should preserve quotes) -->
+  > 15 │ <div class='mt-4 mt-4'></div>
+       │      ^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ <!-- Invalid: duplicates with newlines (preserves original whitespace) -->
+  
+  i The class mt-4 appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    15 │ <div·class='mt-4·mt-4'></div>
+       │                 -----        
+
+```
+
+```
+invalid.html:18:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    17 │ <!-- Invalid: duplicates with newlines (preserves original whitespace) -->
+  > 18 │ <div class="foo
+       │      ^^^^^^^^^^
+  > 19 │ bar
+  > 20 │ foo"></div>
+       │ ^^^^
+    21 │ 
+    22 │ <!-- Invalid: duplicates with tabs -->
+  
+  i The class foo appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    17 17 │   <!-- Invalid: duplicates with newlines (preserves original whitespace) -->
+    18 18 │   <div class="foo
+    19    │ - bar
+    20    │ - foo"></div>
+       19 │ + bar"></div>
+    21 20 │   
+    22 21 │   <!-- Invalid: duplicates with tabs -->
+  
+
+```
+
+```
+invalid.html:23:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    22 │ <!-- Invalid: duplicates with tabs -->
+  > 23 │ <div class="flex	p-4	flex"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ <!-- Invalid: multiple spaces (should preserve spacing) -->
+  
+  i The class flex appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    23 │ <div·class="flex→ p-4→ flex"></div>
+       │                      ------        
+
+```
+
+```
+invalid.html:26:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    25 │ <!-- Invalid: multiple spaces (should preserve spacing) -->
+  > 26 │ <div class="flex  p-4  flex"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ <!-- Invalid: leading/trailing whitespace (should preserve) -->
+  
+  i The class flex appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    26 │ <div·class="flex··p-4··flex"></div>
+       │                      ------        
+
+```
+
+```
+invalid.html:29:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    28 │ <!-- Invalid: leading/trailing whitespace (should preserve) -->
+  > 29 │ <div class=" flex flex "></div>
+       │      ^^^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ <!-- Invalid: triple duplicate -->
+  
+  i The class flex appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    29 │ <div·class="·flex·flex·"></div>
+       │                   -----        
+
+```
+
+```
+invalid.html:32:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    31 │ <!-- Invalid: triple duplicate -->
+  > 32 │ <div class="flex flex flex"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^^
+    33 │ 
+  
+  i The class flex appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    32 │ <div·class="flex·flex·flex"></div>
+       │                 ----------        
+
+```
