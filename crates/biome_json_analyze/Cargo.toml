@@ -29,6 +29,7 @@ biome_string_case  = { workspace = true }
 biome_suppression  = { workspace = true }
 camino             = { workspace = true }
 rustc-hash         = { workspace = true }
+regex              = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { workspace = true }
