@@ -7,7 +7,7 @@ a {
 }
 
 .invalid-use-of-return {
-	return: 1;
+	result: 1;
 }
 
 @function --test-fn() {

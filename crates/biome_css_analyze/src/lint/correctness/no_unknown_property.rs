@@ -117,6 +117,9 @@ impl Rule for NoUnknownProperty {
             return None;
         }
 
+        let property_name = node.name().ok()?.to_trimmed_text();
+        let property_name_lower = property_name.to_ascii_lowercase_cow();
+
         let in_function_at_rule = node.syntax().ancestors().skip(1).any(|ancestor| {
             if CssFunctionAtRule::can_cast(ancestor.kind()) {
                 return true;
@@ -125,10 +128,7 @@ impl Rule for NoUnknownProperty {
             false
         });
 
-        let property_name = node.name().ok()?.to_trimmed_text();
-        let property_name_lower = property_name.to_ascii_lowercase_cow();
-
-        if in_function_at_rule && property_name_lower == "return" {
+        if in_function_at_rule && property_name_lower == "result" {
             return None;
         }
 
