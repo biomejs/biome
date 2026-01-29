@@ -3693,6 +3693,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoImpliedEvalConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoImpliedEvalOptions" }
+			]
+		},
+		"NoImpliedEvalOptions": { "type": "object", "additionalProperties": false },
 		"NoImportAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5580,6 +5587,13 @@
 					"description": "Disallow hex colors.\nSee https://biomejs.dev/linter/rules/no-hex-colors",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoHexColorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImpliedEval": {
+					"description": "Disallow the use of eval()-like methods.\nSee https://biomejs.dev/linter/rules/no-implied-eval",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoImpliedEvalConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7721,6 +7735,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoImplicitCoercionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoImpliedEvalOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoImpliedEvalOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

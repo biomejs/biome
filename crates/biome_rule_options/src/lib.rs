@@ -120,6 +120,7 @@ pub mod no_img_element;
 pub mod no_implicit_any_let;
 pub mod no_implicit_boolean;
 pub mod no_implicit_coercions;
+pub mod no_implied_eval;
 pub mod no_import_assign;
 pub mod no_import_cycles;
 pub mod no_important_in_keyframe;
