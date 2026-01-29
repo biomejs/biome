@@ -32,6 +32,7 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
+Delimiter spacing: false
 Trailing newline: true
 -----
 
@@ -58,6 +59,7 @@ Line width: 80
 Trailing commas: None
 Expand: Never
 Bracket spacing: true
+Delimiter spacing: false
 Trailing newline: true
 -----
 
