@@ -132,3 +132,19 @@ function Component10() {
         </HoC>
     );
 }
+
+// index appears before item in template string (issue #8812)
+function Component11() {
+    const arr = [1,2,3];
+    return arr.map((item, index) => {
+        return <div key={`${index}-${item}`}>{item}</div>;
+    })
+}
+
+// index appears before item in binary expression
+function Component12() {
+    const arr = [1,2,3];
+    return arr.map((item, index) => {
+        return <div key={index + "-" + item}>{item}</div>;
+    })
+}

@@ -52,6 +52,12 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
+    /// ```jsx,expect_diagnostic
+    /// something.forEach((item, index) => {
+    ///     <Component key={`${index}-${item}`} >foo</Component>
+    /// });
+    /// ```
+    ///
     /// ### Valid
     /// ```jsx
     /// something.forEach((item) => {
@@ -140,87 +146,124 @@ impl Rule for NoArrayIndexKey {
         let model = ctx.model();
         let reference = node.as_js_expression()?;
 
-        let mut capture_array_index = None;
+        // Collect all candidate identifiers from the key expression
+        let mut candidate_identifiers: Vec<JsReferenceIdentifier> = Vec::new();
 
         match reference {
             AnyJsExpression::JsIdentifierExpression(identifier_expression) => {
-                capture_array_index = Some(identifier_expression.name().ok()?);
+                if let Ok(name) = identifier_expression.name() {
+                    candidate_identifiers.push(name);
+                }
             }
             AnyJsExpression::JsTemplateExpression(template_expression) => {
                 let template_elements = template_expression.elements();
                 for element in template_elements {
-                    if let AnyJsTemplateElement::JsTemplateElement(template_element) = element {
-                        let cap_index_value = template_element
+                    if let AnyJsTemplateElement::JsTemplateElement(template_element) = element
+                        && let Some(identifier) = template_element
                             .expression()
-                            .ok()?
-                            .as_js_identifier_expression()?
-                            .name()
-                            .ok();
-                        capture_array_index = cap_index_value;
-                    }
+                            .ok()
+                            .and_then(|expr| expr.as_js_identifier_expression().cloned())
+                            .and_then(|expr| expr.name().ok())
+                        {
+                            candidate_identifiers.push(identifier);
+                        }
                 }
             }
             AnyJsExpression::JsBinaryExpression(binary_expression) => {
-                let _ = cap_array_index_value(&binary_expression, &mut capture_array_index);
+                collect_identifiers_from_binary(&binary_expression, &mut candidate_identifiers);
             }
             _ => {}
         };
 
-        let reference = capture_array_index?;
-
-        // Given the reference identifier retrieved from the key property,
-        // find the declaration and ensure it resolves to the parameter of a function,
-        // and navigate up to the closest call expression
-        let parameter = model
-            .binding(&reference)
-            .and_then(|declaration| declaration.syntax().parent())
-            .and_then(JsFormalParameter::cast)?;
-        let function = parameter
-            .parent::<JsParameterList>()
-            .and_then(|list| list.parent::<JsParameters>())
-            .and_then(|parameters| parameters.parent::<AnyJsFunction>())?;
-        let call_expression = function
-            .parent::<JsCallArgumentList>()
-            .and_then(|arguments| arguments.parent::<JsCallArguments>())
-            .and_then(|arguments| arguments.parent::<JsCallExpression>())?;
-
-        // Check if the caller is an array method and the parameter is the array index of that method
-        let is_array_method_index = is_array_method_index(&parameter, &call_expression)?;
-
-        if !is_array_method_index {
-            return None;
-        }
-
-        if node.is_property_object_member() {
-            let object_expression = node
-                .parent::<JsObjectMemberList>()
-                .and_then(|list| list.parent::<JsObjectExpression>())?;
-
-            // Check if the object expression is passed to a `React.cloneElement` call
-            let call_expression = object_expression
+        // Check each candidate to see if it's an array index parameter
+        for reference in candidate_identifiers {
+            // Given the reference identifier retrieved from the key property,
+            // find the declaration and ensure it resolves to the parameter of a function,
+            // and navigate up to the closest call expression
+            let Some(parameter) = model
+                .binding(&reference)
+                .and_then(|declaration| declaration.syntax().parent())
+                .and_then(JsFormalParameter::cast)
+            else {
+                continue;
+            };
+            let Some(function) = parameter
+                .parent::<JsParameterList>()
+                .and_then(|list| list.parent::<JsParameters>())
+                .and_then(|parameters| parameters.parent::<AnyJsFunction>())
+            else {
+                continue;
+            };
+            let Some(call_expression) = function
                 .parent::<JsCallArgumentList>()
-                .and_then(|list| list.parent::<JsCallArguments>())
-                .and_then(|arguments| arguments.parent::<JsCallExpression>())?;
-            let callee = call_expression.callee().ok()?.omit_parentheses();
+                .and_then(|arguments| arguments.parent::<JsCallArguments>())
+                .and_then(|arguments| arguments.parent::<JsCallExpression>())
+            else {
+                continue;
+            };
 
-            if is_react_call_api(&callee, model, ReactLibrary::React, "cloneElement") {
-                let binding = parameter.binding().ok()?;
-                let binding_origin = binding.as_any_js_binding()?.as_js_identifier_binding()?;
-                Some(NoArrayIndexKeyState {
+            // Check if the caller is an array method and the parameter is the array index of that method
+            let Some(is_array_method_index_result) =
+                is_array_method_index(&parameter, &call_expression)
+            else {
+                continue;
+            };
+
+            if !is_array_method_index_result {
+                continue;
+            }
+
+            if node.is_property_object_member() {
+                let Some(object_expression) = node
+                    .parent::<JsObjectMemberList>()
+                    .and_then(|list| list.parent::<JsObjectExpression>())
+                else {
+                    continue;
+                };
+
+                // Check if the object expression is passed to a `React.cloneElement` call
+                let Some(clone_call_expression) = object_expression
+                    .parent::<JsCallArgumentList>()
+                    .and_then(|list| list.parent::<JsCallArguments>())
+                    .and_then(|arguments| arguments.parent::<JsCallExpression>())
+                else {
+                    continue;
+                };
+                let Some(callee) = clone_call_expression.callee().ok() else {
+                    continue;
+                };
+                let callee = callee.omit_parentheses();
+
+                if is_react_call_api(&callee, model, ReactLibrary::React, "cloneElement") {
+                    let Some(binding) = parameter.binding().ok() else {
+                        continue;
+                    };
+                    let Some(binding_origin) =
+                        binding.as_any_js_binding()?.as_js_identifier_binding()
+                    else {
+                        continue;
+                    };
+                    return Some(NoArrayIndexKeyState {
+                        binding_origin: binding_origin.range(),
+                        incorrect_prop: reference.range(),
+                    });
+                }
+            } else {
+                let Some(binding) = parameter.binding().ok() else {
+                    continue;
+                };
+                let Some(binding_origin) = binding.as_any_js_binding()?.as_js_identifier_binding()
+                else {
+                    continue;
+                };
+                return Some(NoArrayIndexKeyState {
                     binding_origin: binding_origin.range(),
                     incorrect_prop: reference.range(),
-                })
-            } else {
-                None
+                });
             }
-        } else {
-            let binding = parameter.binding().ok()?;
-            let binding_origin = binding.as_any_js_binding()?.as_js_identifier_binding()?;
-            Some(NoArrayIndexKeyState {
-                binding_origin: binding_origin.range(),
-                incorrect_prop: reference.range(),
-            })
         }
+
+        None
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -280,29 +323,33 @@ fn is_array_method_index(
     }
 }
 
-fn cap_array_index_value(
+fn collect_identifiers_from_binary(
     binary_expression: &JsBinaryExpression,
-    capture_array_index: &mut Option<JsReferenceIdentifier>,
-) -> Option<()> {
-    let left = binary_expression.left().ok()?;
-    let right = binary_expression.right().ok()?;
+    identifiers: &mut Vec<JsReferenceIdentifier>,
+) {
+    let Ok(left) = binary_expression.left() else {
+        return;
+    };
+    let Ok(right) = binary_expression.right() else {
+        return;
+    };
 
     // recursive call if left or right again are binary_expressions
     if let Some(left_binary) = left.as_js_binary_expression() {
-        cap_array_index_value(left_binary, capture_array_index);
-    };
+        collect_identifiers_from_binary(left_binary, identifiers);
+    }
 
     if let Some(right_binary) = right.as_js_binary_expression() {
-        cap_array_index_value(right_binary, capture_array_index);
-    };
+        collect_identifiers_from_binary(right_binary, identifiers);
+    }
 
-    if let Some(left_expression) = left.as_js_identifier_expression() {
-        *capture_array_index = left_expression.name().ok();
-    };
+    if let Some(left_expression) = left.as_js_identifier_expression()
+        && let Ok(name) = left_expression.name() {
+            identifiers.push(name);
+        }
 
-    if let Some(right_expression) = right.as_js_identifier_expression() {
-        *capture_array_index = right_expression.name().ok();
-    };
-
-    Some(())
+    if let Some(right_expression) = right.as_js_identifier_expression()
+        && let Ok(name) = right_expression.name() {
+            identifiers.push(name);
+        }
 }
