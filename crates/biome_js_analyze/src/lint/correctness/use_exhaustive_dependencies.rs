@@ -575,14 +575,12 @@ fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> 
         if matches!(
             parent.kind(),
             JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION
-        ) {
-            if let Some(wrapper) = parent.parent()
-                && let Some(call_expression) = JsCallExpression::cast(wrapper)
-                && let Ok(callee) = call_expression.callee()
-                && callee.syntax().eq(&parent)
-            {
-                return result;
-            }
+        ) && let Some(wrapper) = parent.parent()
+            && let Some(call_expression) = JsCallExpression::cast(wrapper)
+            && let Ok(callee) = call_expression.callee()
+            && callee.syntax().eq(&parent)
+        {
+            return result;
         }
 
         if matches!(
