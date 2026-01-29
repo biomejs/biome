@@ -176,6 +176,13 @@ export interface FormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters.
+Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`,
+and JSX curly braces `{}`.
+Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
 	* Whether to expand arrays and objects on multiple lines.
@@ -420,6 +427,10 @@ export interface CssAssistConfiguration {
  */
 export interface CssFormatterConfiguration {
 	/**
+	 * Whether to insert spaces inside delimiters. Affects parentheses `()` and square brackets `[]`. Defaults to false.
+	 */
+	delimiterSpacing?: DelimiterSpacing;
+	/**
 	 * Control the formatter for CSS (and its super languages) files.
 	 */
 	enabled?: Bool;
@@ -491,6 +502,10 @@ export type AttributePosition = "auto" | "multiline";
  */
 export type BracketSameLine = boolean;
 export type BracketSpacing = boolean;
+/**
+ * Whether to insert spaces inside delimiters. Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly braces `{}`.
+ */
+export type DelimiterSpacing = boolean;
 export type Expand = "auto" | "always" | "never";
 export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
@@ -728,6 +743,10 @@ export interface JsFormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
+	 * Whether to insert spaces inside delimiters. Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly braces `{}`. Defaults to false.
+	 */
+	delimiterSpacing?: DelimiterSpacing;
+	/**
 	 * Control the formatter for JavaScript (and its super languages) files.
 	 */
 	enabled?: Bool;
@@ -843,6 +862,10 @@ export interface JsonFormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	 * Whether to insert spaces inside square brackets `[]`. Defaults to false.
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	/**
 	 * Control the formatter for JSON (and its super languages) files.
 	 */
@@ -1115,6 +1138,13 @@ export interface OverrideFormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters.
+Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`,
+and JSX curly braces `{}`.
+Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
 	* Whether to expand arrays and objects on multiple lines.
