@@ -12,6 +12,7 @@ categories.workspace = true
 
 [dependencies]
 biome_analyze            = { workspace = true }
+biome_analyze_macros     = { workspace = true }
 biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
@@ -32,6 +33,9 @@ biome_test_utils  = { path = "../biome_test_utils" }
 camino            = { workspace = true }
 insta             = { workspace = true, features = ["glob"] }
 tests_macros      = { path = "../tests_macros" }
+
+[build-dependencies]
+filetime = { workspace = true }
 
 [features]
 schema = ["schemars"]
