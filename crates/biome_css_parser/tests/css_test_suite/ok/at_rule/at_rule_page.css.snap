@@ -73,6 +73,14 @@ expression: snapshot
 @page unset {}
 @page revert {}
 @page revert-layer {}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 2.5cm 3cm 1cm 3cm;
+  }
+}
+
 ```
 
 
@@ -1216,17 +1224,104 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@1106..1109 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@1109..1115 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaTypeQuery {
+                            modifier: missing (optional),
+                            ty: CssMediaType {
+                                value: CssIdentifier {
+                                    value_token: IDENT@1115..1121 "print" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@1121..1122 "{" [] [],
+                    rules: CssRuleList [
+                        CssAtRule {
+                            at_token: AT@1122..1126 "@" [Newline("\n"), Whitespace("  ")] [],
+                            rule: CssPageAtRule {
+                                page_token: PAGE_KW@1126..1131 "page" [] [Whitespace(" ")],
+                                selectors: CssPageSelectorList [],
+                                block: CssPageAtRuleBlock {
+                                    l_curly_token: L_CURLY@1131..1132 "{" [] [],
+                                    items: CssPageAtRuleItemList [
+                                        CssDeclarationWithSemicolon {
+                                            declaration: CssDeclaration {
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@1132..1141 "size" [Newline("\n"), Whitespace("    ")] [],
+                                                    },
+                                                    colon_token: COLON@1141..1143 ":" [] [Whitespace(" ")],
+                                                    value: CssGenericComponentValueList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@1143..1146 "A4" [] [Whitespace(" ")],
+                                                        },
+                                                        CssIdentifier {
+                                                            value_token: IDENT@1146..1154 "portrait" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                important: missing (optional),
+                                            },
+                                            semicolon_token: SEMICOLON@1154..1155 ";" [] [],
+                                        },
+                                        CssDeclarationWithSemicolon {
+                                            declaration: CssDeclaration {
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@1155..1166 "margin" [Newline("\n"), Whitespace("    ")] [],
+                                                    },
+                                                    colon_token: COLON@1166..1168 ":" [] [Whitespace(" ")],
+                                                    value: CssGenericComponentValueList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@1168..1171 "2.5" [] [],
+                                                            unit_token: IDENT@1171..1174 "cm" [] [Whitespace(" ")],
+                                                        },
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@1174..1175 "3" [] [],
+                                                            unit_token: IDENT@1175..1178 "cm" [] [Whitespace(" ")],
+                                                        },
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@1178..1179 "1" [] [],
+                                                            unit_token: IDENT@1179..1182 "cm" [] [Whitespace(" ")],
+                                                        },
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@1182..1183 "3" [] [],
+                                                            unit_token: IDENT@1183..1185 "cm" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                important: missing (optional),
+                                            },
+                                            semicolon_token: SEMICOLON@1185..1186 ";" [] [],
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@1186..1190 "}" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@1190..1192 "}" [Newline("\n")] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@1106..1106 "" [] [],
+    eof_token: EOF@1192..1193 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..1106
+0: CSS_ROOT@0..1193
   0: (empty)
-  1: CSS_RULE_LIST@0..1106
+  1: CSS_RULE_LIST@0..1192
     0: CSS_AT_RULE@0..8
       0: AT@0..1 "@" [] []
       1: CSS_PAGE_AT_RULE@1..8
@@ -1991,6 +2086,64 @@ CssRoot {
           0: L_CURLY@1104..1105 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@1105..1105
           2: R_CURLY@1105..1106 "}" [] []
-  2: EOF@1106..1106 "" [] []
+    37: CSS_AT_RULE@1106..1192
+      0: AT@1106..1109 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@1109..1192
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@1109..1121
+          0: MEDIA_KW@1109..1115 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@1115..1121
+            0: CSS_MEDIA_TYPE_QUERY@1115..1121
+              0: (empty)
+              1: CSS_MEDIA_TYPE@1115..1121
+                0: CSS_IDENTIFIER@1115..1121
+                  0: IDENT@1115..1121 "print" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@1121..1192
+          0: L_CURLY@1121..1122 "{" [] []
+          1: CSS_RULE_LIST@1122..1190
+            0: CSS_AT_RULE@1122..1190
+              0: AT@1122..1126 "@" [Newline("\n"), Whitespace("  ")] []
+              1: CSS_PAGE_AT_RULE@1126..1190
+                0: PAGE_KW@1126..1131 "page" [] [Whitespace(" ")]
+                1: CSS_PAGE_SELECTOR_LIST@1131..1131
+                2: CSS_PAGE_AT_RULE_BLOCK@1131..1190
+                  0: L_CURLY@1131..1132 "{" [] []
+                  1: CSS_PAGE_AT_RULE_ITEM_LIST@1132..1186
+                    0: CSS_DECLARATION_WITH_SEMICOLON@1132..1155
+                      0: CSS_DECLARATION@1132..1154
+                        0: CSS_GENERIC_PROPERTY@1132..1154
+                          0: CSS_IDENTIFIER@1132..1141
+                            0: IDENT@1132..1141 "size" [Newline("\n"), Whitespace("    ")] []
+                          1: COLON@1141..1143 ":" [] [Whitespace(" ")]
+                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@1143..1154
+                            0: CSS_IDENTIFIER@1143..1146
+                              0: IDENT@1143..1146 "A4" [] [Whitespace(" ")]
+                            1: CSS_IDENTIFIER@1146..1154
+                              0: IDENT@1146..1154 "portrait" [] []
+                        1: (empty)
+                      1: SEMICOLON@1154..1155 ";" [] []
+                    1: CSS_DECLARATION_WITH_SEMICOLON@1155..1186
+                      0: CSS_DECLARATION@1155..1185
+                        0: CSS_GENERIC_PROPERTY@1155..1185
+                          0: CSS_IDENTIFIER@1155..1166
+                            0: IDENT@1155..1166 "margin" [Newline("\n"), Whitespace("    ")] []
+                          1: COLON@1166..1168 ":" [] [Whitespace(" ")]
+                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@1168..1185
+                            0: CSS_REGULAR_DIMENSION@1168..1174
+                              0: CSS_NUMBER_LITERAL@1168..1171 "2.5" [] []
+                              1: IDENT@1171..1174 "cm" [] [Whitespace(" ")]
+                            1: CSS_REGULAR_DIMENSION@1174..1178
+                              0: CSS_NUMBER_LITERAL@1174..1175 "3" [] []
+                              1: IDENT@1175..1178 "cm" [] [Whitespace(" ")]
+                            2: CSS_REGULAR_DIMENSION@1178..1182
+                              0: CSS_NUMBER_LITERAL@1178..1179 "1" [] []
+                              1: IDENT@1179..1182 "cm" [] [Whitespace(" ")]
+                            3: CSS_REGULAR_DIMENSION@1182..1185
+                              0: CSS_NUMBER_LITERAL@1182..1183 "3" [] []
+                              1: IDENT@1183..1185 "cm" [] []
+                        1: (empty)
+                      1: SEMICOLON@1185..1186 ";" [] []
+                  2: R_CURLY@1186..1190 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@1190..1192 "}" [Newline("\n")] []
+  2: EOF@1192..1193 "" [Newline("\n")] []
 
 ```
