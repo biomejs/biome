@@ -17,14 +17,30 @@ impl FormatNodeRule<CssDocumentCustomMatcher> for FormatCssDocumentCustomMatcher
             r_paren_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                name.format(),
-                l_paren_token.format(),
-                value.format(),
-                r_paren_token.format()
-            ]
-        )
+        let should_insert_space = f.options().delimiter_spacing().value();
+
+        if should_insert_space {
+            write!(
+                f,
+                [
+                    name.format(),
+                    l_paren_token.format(),
+                    space(),
+                    value.format(),
+                    space(),
+                    r_paren_token.format()
+                ]
+            )
+        } else {
+            write!(
+                f,
+                [
+                    name.format(),
+                    l_paren_token.format(),
+                    value.format(),
+                    r_paren_token.format()
+                ]
+            )
+        }
     }
 }
