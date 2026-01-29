@@ -651,6 +651,10 @@ fn is_stable_binding(
         return true;
     }
 
+    let Some(decl) = binding.declaration() else {
+        return false;
+    };
+
     // Any declarations outside the component function are considered stable
     if binding
         .range()
@@ -659,10 +663,6 @@ fn is_stable_binding(
     {
         return true;
     }
-
-    let Some(decl) = binding.declaration() else {
-        return false;
-    };
 
     match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
         // These declarations are always stable
@@ -849,14 +849,28 @@ fn is_stable_expression(
                 && let Some(binding) = model.binding(&name)
             {
                 let binding = &binding.tree();
-                if let Some(declaration_node) =
-                    &binding.declaration().map(|decl| decl.syntax().clone())
-                    && identifier
+                // Check for self-reference (e.g., using a variable in its own initializer)
+                // but NOT for arrow function parameters, since they are meant to be used
+                // inside the function body.
+                if let Some(decl) = binding.declaration() {
+                    let declaration_node = decl.syntax().clone();
+                    let is_ancestor = identifier
                         .syntax()
                         .ancestors()
-                        .any(|ancestor| declaration_node == &ancestor)
-                {
-                    return true;
+                        .any(|ancestor| declaration_node == ancestor);
+                    // Only treat as self-reference if the declaration is NOT an arrow function
+                    // or formal parameter. For arrow function parameters like `props =>`,
+                    // the identifier `props` used in the body should NOT be considered stable.
+                    if is_ancestor
+                        && !matches!(
+                            decl,
+                            AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+                                | AnyJsBindingDeclaration::JsFormalParameter(_)
+                                | AnyJsBindingDeclaration::JsRestParameter(_)
+                        )
+                    {
+                        return true;
+                    }
                 }
 
                 is_stable_binding(
@@ -868,6 +882,9 @@ fn is_stable_expression(
                     depth + 1,
                 )
             } else {
+                // If we can't find the binding (e.g., an undefined global or external reference),
+                // assume it's stable. Unknown references are typically globals or externals that
+                // don't change between renders.
                 true
             }
         }
