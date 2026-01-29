@@ -1,7 +1,7 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+    DelimiterSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -100,6 +100,11 @@ pub struct CssFormatterConfiguration {
     #[bpaf(long("css-formatter-quote-style"), argument("double|single"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_style: Option<QuoteStyle>,
+
+    /// Whether to insert spaces inside delimiters. Affects parentheses `()` and square brackets `[]`. Defaults to false.
+    #[bpaf(long("css-formatter-delimiter-spacing"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delimiter_spacing: Option<DelimiterSpacing>,
 
     /// Whether to add a trailing newline at the end of the file.
     ///
