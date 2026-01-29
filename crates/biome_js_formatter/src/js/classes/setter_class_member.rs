@@ -20,21 +20,44 @@ impl FormatNodeRule<JsSetterClassMember> for FormatJsSetterClassMember {
             body,
         } = node.as_fields();
 
-        write![
-            f,
-            [
-                modifiers.format(),
-                space(),
-                set_token.format(),
-                space(),
-                name.format(),
-                l_paren_token.format(),
-                parameter.format(),
-                comma_token.format(),
-                r_paren_token.format(),
-                space(),
-                body.format(),
+        let should_insert_space = f.options().delimiter_spacing().value();
+
+        if should_insert_space {
+            write![
+                f,
+                [
+                    modifiers.format(),
+                    space(),
+                    set_token.format(),
+                    space(),
+                    name.format(),
+                    l_paren_token.format(),
+                    space(),
+                    parameter.format(),
+                    comma_token.format(),
+                    space(),
+                    r_paren_token.format(),
+                    space(),
+                    body.format(),
+                ]
             ]
-        ]
+        } else {
+            write![
+                f,
+                [
+                    modifiers.format(),
+                    space(),
+                    set_token.format(),
+                    space(),
+                    name.format(),
+                    l_paren_token.format(),
+                    parameter.format(),
+                    comma_token.format(),
+                    r_paren_token.format(),
+                    space(),
+                    body.format(),
+                ]
+            ]
+        }
     }
 }

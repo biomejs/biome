@@ -102,6 +102,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                     }
                     AnyJsExpression(JsSequenceExpression(sequence)) => {
                         let has_comment = f.context().comments().has_comments(sequence.syntax());
+                        let should_insert_space = f.options().delimiter_spacing().value();
                         if has_comment {
                             return write!(
                                 f,
@@ -123,7 +124,10 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                                 group(&format_args![
                                     space(),
                                     token("("),
-                                    soft_block_indent(&format_body),
+                                    soft_block_indent_with_maybe_space(
+                                        &format_body,
+                                        should_insert_space
+                                    ),
                                     token(")")
                                 ])
                             ])]
@@ -147,6 +151,8 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                         // if it's inside a JSXExpression (e.g. an attribute) we should align the expression's closing } with the line with the opening {.
                         || matches!(node.syntax().parent().kind(), Some(JsSyntaxKind::JSX_EXPRESSION_CHILD | JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE)))
                         && !f.context().comments().has_comments(node.syntax());
+                    let should_insert_space_for_parens =
+                        should_add_parens && f.options().delimiter_spacing().value();
                     if body_is_condition_type {
                         write!(
                             f,
@@ -157,9 +163,15 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                                         if should_add_parens {
                                             write!(f, [if_group_fits_on_line(&token("("))])?;
                                         }
+                                        if should_insert_space_for_parens {
+                                            write!(f, [if_group_fits_on_line(&space())])?;
+                                        }
 
                                         write!(f, [format_body])?;
 
+                                        if should_insert_space_for_parens {
+                                            write!(f, [if_group_fits_on_line(&space())])?;
+                                        }
                                         if should_add_parens {
                                             write!(f, [if_group_fits_on_line(&token(")"))])?;
                                         }
@@ -182,9 +194,15 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                                         if should_add_parens {
                                             write!(f, [if_group_fits_on_line(&token("("))])?;
                                         }
+                                        if should_insert_space_for_parens {
+                                            write!(f, [if_group_fits_on_line(&space())])?;
+                                        }
 
                                         write!(f, [format_body])?;
 
+                                        if should_insert_space_for_parens {
+                                            write!(f, [if_group_fits_on_line(&space())])?;
+                                        }
                                         if should_add_parens {
                                             write!(f, [if_group_fits_on_line(&token(")"))])?;
                                         }
@@ -251,9 +269,13 @@ fn format_signature(
                     let should_hug =
                         is_test_call_argument(arrow.syntax())? || is_first_or_last_call_argument;
                     let parentheses_not_needed = can_avoid_parentheses(arrow, f);
+                    let should_insert_space = f.options().delimiter_spacing().value();
 
                     if !parentheses_not_needed {
                         write!(f, [token("(")])?;
+                        if should_insert_space {
+                            write!(f, [space()])?;
+                        }
                     }
 
                     if should_hug || parentheses_not_needed {
@@ -261,14 +283,17 @@ fn format_signature(
                     } else {
                         write!(
                             f,
-                            [&soft_block_indent(&format_args![
-                                binding.format(),
-                                FormatTrailingCommas::All
-                            ])]
+                            [&soft_block_indent_with_maybe_space(
+                                &format_args![binding.format(), FormatTrailingCommas::All],
+                                should_insert_space
+                            )]
                         )?
                     }
 
                     if !parentheses_not_needed {
+                        if should_insert_space {
+                            write!(f, [space()])?;
+                        }
                         write!(f, [token(")")])?;
                     }
                 }
@@ -641,11 +666,12 @@ impl Format<JsFormatContext> for ArrowChain {
           if f.context().comments().has_comments(sequence.syntax())
         );
 
-        let format_tail_body_inner = format_with(|f| {
+        let format_tail_body_inner = format_with(|f: &mut JsFormatter| {
             let format_tail_body = FormatMaybeCachedFunctionBody {
                 body: &tail_body,
                 mode: self.options.body_cache_mode,
             };
+            let should_insert_space = f.options().delimiter_spacing().value();
 
             // Ensure that the parens of sequence expressions end up on their own line if the
             // body breaks
@@ -668,7 +694,10 @@ impl Format<JsFormatContext> for ArrowChain {
                         f,
                         [group(&format_args![
                             token("("),
-                            soft_block_indent(&format_tail_body),
+                            soft_block_indent_with_maybe_space(
+                                &format_tail_body,
+                                should_insert_space
+                            ),
                             token(")")
                         ])]
                     )?;
