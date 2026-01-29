@@ -13,6 +13,7 @@ publish              = true
 
 [dependencies]
 biome_rowan = { workspace = true, optional = true }
+utf8proc    = { workspace = true }
 
 [features]
 biome_rowan = ["dep:biome_rowan"]
