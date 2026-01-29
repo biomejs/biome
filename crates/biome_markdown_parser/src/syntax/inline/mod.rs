@@ -53,7 +53,20 @@ mod links;
 pub(crate) use emphasis::EmphasisContext;
 pub(crate) use html::is_inline_html;
 
-fn parse_inline_item_list_until_no_links(p: &mut MarkdownParser, stop: MarkdownSyntaxKind) -> bool {
+enum InlineLinksPolicy {
+    NoLinks,
+    FullLinks,
+}
+
+struct InlineListUntilResult {
+    has_nested_link: bool,
+}
+
+fn parse_inline_item_list_until_impl(
+    p: &mut MarkdownParser,
+    stop: MarkdownSyntaxKind,
+    policy: InlineLinksPolicy,
+) -> InlineListUntilResult {
     let m = p.start();
     let prev_context = emphasis::set_inline_emphasis_context_until(p, stop);
     let mut bracket_depth = 0usize;
@@ -110,87 +123,28 @@ fn parse_inline_item_list_until_no_links(p: &mut MarkdownParser, stop: MarkdownS
         }
 
         if p.at(L_BRACK) {
-            if !has_nested_link && nested_link_starts_here(p) {
-                has_nested_link = true;
+            match policy {
+                InlineLinksPolicy::NoLinks => {
+                    if !has_nested_link && nested_link_starts_here(p) {
+                        has_nested_link = true;
+                    }
+                    bracket_depth += 1;
+                    let _ = super::parse_textual(p);
+                    continue;
+                }
+                InlineLinksPolicy::FullLinks => {
+                    let result = links::parse_link_or_reference(p);
+                    if result.is_present() {
+                        continue;
+                    }
+                    bracket_depth += 1;
+                    let _ = super::parse_textual(p);
+                    continue;
+                }
             }
-            bracket_depth += 1;
-            let _ = super::parse_textual(p);
-            continue;
         }
 
-        if parse_any_inline_no_links(p).is_absent() {
-            break;
-        }
-    }
-
-    m.complete(p, MD_INLINE_ITEM_LIST);
-    p.set_emphasis_context(prev_context);
-    has_nested_link
-}
-
-/// Parse inline items until `stop` token, allowing full inline parsing including links.
-/// Used for image alt text where nested links/images should be fully parsed
-/// so their text content can be extracted for the alt attribute.
-fn parse_inline_item_list_until(p: &mut MarkdownParser, stop: MarkdownSyntaxKind) {
-    let m = p.start();
-    let prev_context = emphasis::set_inline_emphasis_context_until(p, stop);
-    let mut bracket_depth = 0usize;
-
-    loop {
-        if p.at(NEWLINE) {
-            if p.at_blank_line() {
-                break;
-            }
-            let _ = super::parse_textual(p);
-            continue;
-        }
-
-        if p.at(T![EOF]) {
-            break;
-        }
-
-        // Code spans can contain `]`
-        if p.at(BACKTICK) {
-            if code_span::parse_inline_code(p).is_present() {
-                continue;
-            }
-            let _ = super::parse_textual(p);
-            continue;
-        }
-
-        // Autolinks and inline HTML can contain `]`
-        if p.at(L_ANGLE) {
-            if html::parse_autolink(p).is_present() {
-                continue;
-            }
-            if html::parse_inline_html(p).is_present() {
-                continue;
-            }
-            let _ = super::parse_textual(p);
-            continue;
-        }
-
-        if p.at(stop) {
-            if bracket_depth == 0 {
-                break;
-            }
-            bracket_depth = bracket_depth.saturating_sub(1);
-            let _ = super::parse_textual(p);
-            continue;
-        }
-
-        // For image alt: allow full inline parsing including links and images
-        if p.at(L_BRACK) {
-            let result = links::parse_link_or_reference(p);
-            if result.is_present() {
-                continue;
-            }
-            bracket_depth += 1;
-            let _ = super::parse_textual(p);
-            continue;
-        }
-
-        if p.at(BANG) && p.nth_at(1, L_BRACK) {
+        if matches!(policy, InlineLinksPolicy::FullLinks) && p.at(BANG) && p.nth_at(1, L_BRACK) {
             let result = links::parse_image_or_reference(p);
             if result.is_present() {
                 continue;
@@ -199,13 +153,29 @@ fn parse_inline_item_list_until(p: &mut MarkdownParser, stop: MarkdownSyntaxKind
             continue;
         }
 
-        if parse_any_inline(p).is_absent() {
+        let parsed = match policy {
+            InlineLinksPolicy::NoLinks => parse_any_inline_no_links(p),
+            InlineLinksPolicy::FullLinks => parse_any_inline(p),
+        };
+        if parsed.is_absent() {
             break;
         }
     }
 
     m.complete(p, MD_INLINE_ITEM_LIST);
     p.set_emphasis_context(prev_context);
+    InlineListUntilResult { has_nested_link }
+}
+
+fn parse_inline_item_list_until_no_links(p: &mut MarkdownParser, stop: MarkdownSyntaxKind) -> bool {
+    parse_inline_item_list_until_impl(p, stop, InlineLinksPolicy::NoLinks).has_nested_link
+}
+
+/// Parse inline items until `stop` token, allowing full inline parsing including links.
+/// Used for image alt text where nested links/images should be fully parsed
+/// so their text content can be extracted for the alt attribute.
+fn parse_inline_item_list_until(p: &mut MarkdownParser, stop: MarkdownSyntaxKind) {
+    let _ = parse_inline_item_list_until_impl(p, stop, InlineLinksPolicy::FullLinks);
 }
 
 fn nested_link_starts_here(p: &mut MarkdownParser) -> bool {
