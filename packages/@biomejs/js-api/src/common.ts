@@ -1,8 +1,10 @@
 import type {
 	BiomePath,
 	FixFileMode,
+	GritTargetLanguage,
 	Module,
 	OpenProjectResult,
+	PatternId,
 	ProjectKey,
 	Workspace,
 } from "./wasm";
@@ -306,6 +308,62 @@ export class BiomeCommon<Configuration, Diagnostic> {
 				printer.free();
 				throw err;
 			}
+		});
+	}
+
+	/**
+	 * Parse a GritQL pattern for searching code.
+	 *
+	 * @param pattern The GritQL pattern to parse
+	 * @param defaultLanguage The default language to use for the pattern
+	 * @returns A pattern ID that can be used for searching
+	 */
+	parsePattern(
+		pattern: string,
+		defaultLanguage: GritTargetLanguage,
+	): PatternId {
+		return tryCatchWrapper(() => {
+			const result = this.workspace.parsePattern({
+				pattern,
+				defaultLanguage,
+			});
+			return result.patternId;
+		});
+	}
+
+	/**
+	 * Search for matches of a parsed GritQL pattern in a file.
+	 *
+	 * @param projectKey The identifier of the project
+	 * @param filePath The path to the file to search
+	 * @param content The content of the file
+	 * @param pattern The pattern ID returned from parsePattern
+	 * @returns List of text ranges where matches were found
+	 */
+	searchPattern(
+		projectKey: ProjectKey,
+		filePath: string,
+		content: string,
+		pattern: PatternId,
+	): [number, number][] {
+		return this.withFile(projectKey, filePath, content, (path) => {
+			const result = this.workspace.searchPattern({
+				projectKey,
+				path,
+				pattern,
+			});
+			return result.matches;
+		});
+	}
+
+	/**
+	 * Drop a parsed pattern when it's no longer needed.
+	 *
+	 * @param pattern The pattern ID to drop
+	 */
+	dropPattern(pattern: PatternId): void {
+		tryCatchWrapper(() => {
+			this.workspace.dropPattern({ pattern });
 		});
 	}
 }
