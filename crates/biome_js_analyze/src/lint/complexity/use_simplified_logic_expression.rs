@@ -194,7 +194,31 @@ fn simplify_or_expression(
     literal: JsBooleanLiteralExpression,
     expression: AnyJsExpression,
 ) -> Option<AnyJsExpression> {
+    // Check if the literal is `false` - in that case, simplifying `expr || false` to `expr`
+    // would change semantics if `expr` contains optional chaining.
+    // For example: `account?.test || false` returns `false` when account is undefined,
+    // but `account?.test` returns `undefined`. See issue #8577.
+    let is_false_literal = matches!(literal.value_token().ok()?.kind(), T![false]);
+    if is_false_literal && contains_optional_chain(&expression) {
+        return None;
+    }
     keep_expression_if_literal(literal, expression, false)
+}
+
+/// Checks if an expression contains optional chaining (`?.`).
+/// This includes static member access (`a?.b`), computed member access (`a?.[b]`),
+/// and optional call expressions (`a?.()`).
+fn contains_optional_chain(expr: &AnyJsExpression) -> bool {
+    match expr {
+        AnyJsExpression::JsStaticMemberExpression(member) => member.is_optional_chain(),
+        AnyJsExpression::JsComputedMemberExpression(member) => member.is_optional_chain(),
+        AnyJsExpression::JsCallExpression(call) => call.is_optional_chain(),
+        AnyJsExpression::JsParenthesizedExpression(paren) => paren
+            .expression()
+            .ok()
+            .is_some_and(|inner| contains_optional_chain(&inner)),
+        _ => false,
+    }
 }
 
 fn keep_expression_if_literal(
