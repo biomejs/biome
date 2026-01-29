@@ -28,3 +28,5 @@ a { font: 1em "Noto Serif", var(--serif); }
 a { font: 14px/1.5 Arial, var(--fallback); }
 a { font-family: revert }
 a { font-family: revert-layer }
+@supports (font: -apple-system-body) {}
+@supports (font-family: -apple-system) {}

@@ -27,6 +27,7 @@ declare_lint_rule! {
     /// - Property with a keyword value such as `inherit`, `initial`.
     /// - The last value being a CSS variable.
     /// - `font-family` property in an `@font-face` rule.
+    /// - `font` or `font-family` property in an `@supports` rule (feature detection).
     ///
     /// ## Examples
     ///
@@ -62,6 +63,10 @@ declare_lint_rule! {
     /// @font-face { font-family: Gentium; }
     /// ```
     ///
+    /// ```css
+    /// @supports (font: -apple-system-body) {}
+    /// ```
+    ///
     pub UseGenericFontNames {
         version: "1.8.0",
         name: "useGenericFontNames",
@@ -85,6 +90,12 @@ impl Rule for UseGenericFontNames {
 
         // Ignore `@font-face`. See more detail: https://drafts.csswg.org/css-fonts/#font-face-rule
         if is_in_font_face_at_rule(node) {
+            return None;
+        }
+
+        // Ignore `@supports`. The font property inside @supports is used for feature detection,
+        // not as an actual font-family declaration.
+        if is_in_supports_at_rule(node) {
             return None;
         }
 
@@ -156,6 +167,15 @@ fn is_in_font_face_at_rule(node: &CssGenericProperty) -> bool {
         .and_then(|n| n.cast::<CssAtRule>())
         .and_then(|n| n.rule().ok())
         .is_some_and(|n| matches!(n, AnyCssAtRule::CssFontFaceAtRule(_)))
+}
+
+fn is_in_supports_at_rule(node: &CssGenericProperty) -> bool {
+    node.syntax()
+        .ancestors()
+        .find(|n| n.kind() == CssSyntaxKind::CSS_AT_RULE)
+        .and_then(|n| n.cast::<CssAtRule>())
+        .and_then(|n| n.rule().ok())
+        .is_some_and(|n| matches!(n, AnyCssAtRule::CssSupportsAtRule(_)))
 }
 
 fn is_shorthand_font_property_with_keyword(properties: &CssGenericComponentValueList) -> bool {
