@@ -6,8 +6,9 @@ use crate::syntax::at_rule::parse_error::{
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{ParseBlockBody, parse_declaration_or_at_rule_list_block};
 use crate::syntax::{
-    is_at_any_declaration_with_semicolon, is_at_identifier, parse_any_declaration_with_semicolon,
-    parse_custom_identifier_with_keywords, parse_regular_identifier,
+    is_at_any_declaration_with_semicolon, is_at_identifier, is_at_qualified_rule,
+    parse_any_declaration_with_semicolon, parse_custom_identifier_with_keywords,
+    parse_qualified_rule, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -166,7 +167,10 @@ impl ParseBlockBody for PageBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_PAGE_AT_RULE_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
-        at_margin_rule(p) || is_at_at_rule(p) || is_at_any_declaration_with_semicolon(p)
+        at_margin_rule(p)
+            || is_at_at_rule(p)
+            || is_at_any_declaration_with_semicolon(p)
+            || is_at_qualified_rule(p)
     }
 
     fn parse_list(&mut self, p: &mut CssParser) {
@@ -175,7 +179,8 @@ impl ParseBlockBody for PageBlock {
 }
 
 const CSS_PAGE_AT_RULE_ITEM_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
-    token_set!(T![@], T![ident]);
+    token_set!(T![@], T![ident], T!['}']);
+
 struct PageAtRuleItemList;
 impl ParseNodeList for PageAtRuleItemList {
     type Kind = CssSyntaxKind;
@@ -189,6 +194,19 @@ impl ParseNodeList for PageAtRuleItemList {
             parse_at_rule(p)
         } else if is_at_any_declaration_with_semicolon(p) {
             parse_any_declaration_with_semicolon(p)
+        } else if is_at_qualified_rule(p) {
+            // Qualified rules are not allowed in @page at-rules, but we parse
+            // them fully and coerce to a bogus node for better error recovery.
+            // Without this, the curly braces in the qualified rule's block would
+            // confuse recovery and break parsing of subsequent declarations.
+            if let Present(mut syntax) = parse_qualified_rule(p) {
+                let range = syntax.range(p);
+                p.error(expected_any_page_at_rule_item(p, range));
+                syntax.change_kind(p, CSS_BOGUS);
+                return Present(syntax);
+            }
+
+            Absent
         } else {
             Absent
         }
