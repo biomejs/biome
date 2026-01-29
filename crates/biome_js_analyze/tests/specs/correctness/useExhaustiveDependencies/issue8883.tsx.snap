@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: issue8883.tsx
+---
+# Input
+```tsx
+import { useEffect } from 'react';
+
+// Test: Arrow function with parameter without parentheses, using props directly
+const TestDirect = props => {
+  useEffect(() => console.log(props.msg), [props.msg]);
+};
+
+// Test: Arrow function with parameter without parentheses, destructuring in body
+const TestDestructure = props => {
+  const { msg } = props;
+  useEffect(() => console.log(msg), [msg]);
+};
+
+```
