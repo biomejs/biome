@@ -45,7 +45,7 @@ use biome_rowan::{AstNode, AstNodeList, Direction, TextRange};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use std::collections::HashMap;
 
-use crate::link_reference::normalize_reference_label;
+use crate::syntax::reference::normalize_reference_label;
 use crate::parser::ListTightness;
 
 // ============================================================================

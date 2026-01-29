@@ -30,6 +30,7 @@ pub mod link_block;
 pub mod list;
 pub mod parse_error;
 pub mod quote;
+pub mod reference;
 pub mod thematic_break_block;
 
 use biome_markdown_syntax::kind::MarkdownSyntaxKind;
@@ -508,7 +509,7 @@ fn newline_is_blank_line(p: &MarkdownParser) -> bool {
     prev == b'\n' || prev == b'\r'
 }
 
-/// Consume exactly `indent` columns of leading whitespace at line start.
+/// Check if the current line is blank (lookahead only).
 fn consume_indent_prefix(p: &mut MarkdownParser, indent: usize) {
     if indent == 0 {
         return;
@@ -645,7 +646,7 @@ pub(crate) fn is_dash_only_thematic_break_text(text: &str) -> bool {
 /// The byte count includes only the whitespace tokens consumed during the indent skip,
 /// NOT the underline token itself. Callers that track byte budgets must subtract this.
 ///
-/// This is the single source of truth for setext detection in inline contexts.
+/// This is the shared helper for setext detection in inline contexts.
 /// Used by `has_matching_code_span_closer`, `parse_inline_html`, and `parse_inline_item_list`.
 ///
 /// Context safety: this function does NOT call `allow_setext_heading` because the token

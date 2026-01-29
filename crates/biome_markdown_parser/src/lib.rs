@@ -8,7 +8,6 @@ use parser::MarkdownParser;
 use syntax::parse_document;
 
 mod lexer;
-mod link_reference;
 mod parser;
 mod syntax;
 mod token_source;
@@ -39,7 +38,7 @@ pub fn parse_markdown_with_cache(
     options: MarkdownParseOptions,
 ) -> MarkdownParse {
     let link_definitions =
-        link_reference::collect_link_reference_definitions(source, options.clone());
+        syntax::reference::collect_link_reference_definitions(source, options.clone());
     let mut parser = MarkdownParser::new(source, options);
     parser.set_link_reference_definitions(link_definitions);
 

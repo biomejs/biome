@@ -152,7 +152,7 @@ pub fn quick_test() {
         assert_eq!(expected, html, "Example {:03} failed", num);
     }
 
-    // Test the 8 failing CommonMark examples
+    // Test the remaining failing CommonMark examples
     // TODO: Example 007 still failing - tab expansion issue (produces 3 spaces instead of 2)
     // test_example(7, "-\t\tfoo\n", "<ul>\n<li>\n<pre><code>  foo\n</code></pre>\n</li>\n</ul>\n");
     test_example(

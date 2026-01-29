@@ -222,7 +222,7 @@ impl<'source> MarkdownParser<'source> {
     /// a DOUBLE_STAR or DOUBLE_UNDERSCORE token. After re-lexing, the token will
     /// be either STAR or UNDERSCORE (single char).
     ///
-    /// # Safety
+    /// Note
     /// Only call on the current token, NOT inside lookahead closures.
     /// This invalidates any buffered lookahead, so ensure no lookahead is active.
     pub(crate) fn force_relex_emphasis_inline(&mut self) -> MarkdownSyntaxKind {

@@ -112,7 +112,7 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
     }
 
     // Label must also be non-empty after normalization (e.g., `[\n ]` normalizes to empty)
-    let normalized = crate::link_reference::normalize_reference_label(&label_text);
+    let normalized = crate::syntax::reference::normalize_reference_label(&label_text);
     if normalized.is_empty() {
         return false;
     }

@@ -8,7 +8,8 @@ use biome_rowan::{AstNode, Direction};
 use crate::MarkdownLosslessTreeSink;
 use crate::MarkdownParseOptions;
 use crate::parser::MarkdownParser;
-use crate::syntax::parse_document;
+
+use super::parse_document;
 
 /// Normalize a reference label per CommonMark spec.
 ///

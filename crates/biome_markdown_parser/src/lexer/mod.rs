@@ -707,8 +707,8 @@ impl<'src> MarkdownLexer<'src> {
     ///
     /// For `-` at line start:
     /// - 1-2 dashes followed by newline: setext underline (H2)
-    /// - 3+ dashes followed by newline: thematic break (not setext, since the parser
-    ///   will convert thematic breaks to setext headers when preceded by paragraph)
+    /// - 3+ dashes followed by newline: thematic break (not setext; the parser may
+    ///   convert dash-only thematic breaks to setext when preceded by a paragraph)
     fn consume_thematic_break_or_emphasis(
         &mut self,
         dispatched: Dispatch,
@@ -735,7 +735,7 @@ impl<'src> MarkdownLexer<'src> {
 
         // For `-` at line start with 1-2 dashes, emit setext underline.
         // 3+ dashes could be thematic break, so let that logic handle it.
-        // The parser will convert thematic breaks to setext when preceded by paragraph.
+        // The parser may convert dash-only thematic breaks to setext when preceded by paragraph.
         if start_char == b'-' && self.after_newline {
             let mut dash_count = 0;
             // Consume only `-` characters (no spaces between)
