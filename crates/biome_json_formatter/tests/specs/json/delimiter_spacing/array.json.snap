@@ -1,0 +1,67 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: json/delimiter_spacing/array.json
+---
+# Input
+
+```json
+{
+	"array": [1, 2, 3],
+	"boundaryFits": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+	"boundaryBreaks": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand: Auto
+Bracket spacing: true
+Delimiter spacing: false
+Trailing newline: true
+-----
+
+```json
+{
+	"array": [1, 2, 3],
+	"boundaryFits": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+	"boundaryBreaks": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+}
+
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand: Auto
+Bracket spacing: true
+Delimiter spacing: true
+Trailing newline: true
+-----
+
+```json
+{
+	"array": [ 1, 2, 3 ],
+	"boundaryFits": [ "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ],
+	"boundaryBreaks": [
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	]
+}
+
+```

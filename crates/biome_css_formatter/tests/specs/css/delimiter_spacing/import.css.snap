@@ -1,0 +1,125 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/delimiter_spacing/import.css
+---
+# Input
+
+```css
+/* Layer function */
+@import url("theme.css") layer(default);
+@import url("base.css") layer(base);
+@import url("utilities.css") layer(utilities);
+
+/* Supports condition */
+@import url("fallback.css") supports(display: flex);
+@import url("grid-layout.css") supports(display: grid);
+
+/* Combined layer and supports */
+@import url("modern.css") layer(modern) supports(display: grid);
+@import url("advanced.css") layer(features) supports((display: flex) and (gap: 10px));
+
+/* Media conditions */
+@import url("print.css") print;
+@import url("screen.css") screen and (min-width: 768px);
+
+/* Full combination */
+@import url("responsive.css") layer(responsive) supports(display: grid) screen and (min-width: 1024px);
+
+/* Quoted URLs in import */
+@import url("https://fonts.example.com/font.css") layer(fonts);
+
+/* Multiple supports conditions */
+@import url("complex.css") supports((display: grid) or (display: flex));
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Delimiter spacing: false
+Trailing newline: true
+-----
+
+```css
+/* Layer function */
+@import url("theme.css") layer(default);
+@import url("base.css") layer(base);
+@import url("utilities.css") layer(utilities);
+
+/* Supports condition */
+@import url("fallback.css") supports(display: flex);
+@import url("grid-layout.css") supports(display: grid);
+
+/* Combined layer and supports */
+@import url("modern.css") layer(modern) supports(display: grid);
+@import url("advanced.css") layer(features)
+	supports((display: flex) and (gap: 10px));
+
+/* Media conditions */
+@import url("print.css") print;
+@import url("screen.css") screen and (min-width: 768px);
+
+/* Full combination */
+@import url("responsive.css") layer(responsive) supports(display: grid)
+	screen and (min-width: 1024px);
+
+/* Quoted URLs in import */
+@import url("https://fonts.example.com/font.css") layer(fonts);
+
+/* Multiple supports conditions */
+@import url("complex.css") supports((display: grid) or (display: flex));
+
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Delimiter spacing: true
+Trailing newline: true
+-----
+
+```css
+/* Layer function */
+@import url( "theme.css" ) layer( default );
+@import url( "base.css" ) layer( base );
+@import url( "utilities.css" ) layer( utilities );
+
+/* Supports condition */
+@import url( "fallback.css" ) supports( display: flex );
+@import url( "grid-layout.css" ) supports( display: grid );
+
+/* Combined layer and supports */
+@import url( "modern.css" ) layer( modern ) supports( display: grid );
+@import url( "advanced.css" ) layer( features )
+	supports( ( display: flex ) and ( gap: 10px ) );
+
+/* Media conditions */
+@import url( "print.css" ) print;
+@import url( "screen.css" ) screen and ( min-width: 768px );
+
+/* Full combination */
+@import url( "responsive.css" ) layer( responsive ) supports( display: grid )
+	screen and ( min-width: 1024px );
+
+/* Quoted URLs in import */
+@import url( "https://fonts.example.com/font.css" ) layer( fonts );
+
+/* Multiple supports conditions */
+@import url( "complex.css" ) supports( ( display: grid ) or ( display: flex ) );
+
+```

@@ -1,0 +1,164 @@
+// =====================
+// Single line (special case patterns)
+// =====================
+
+// CommonJS require
+require("a");
+
+// AMD define
+define(["a"], function (a) {});
+
+// Test calls
+it("test", function () {});
+describe("suite", function () {});
+test("test", function () {});
+
+// React hooks with deps array
+useMemo(() => {}, []);
+
+// Multiline template only
+foo(`
+  multiline
+`);
+
+// =====================
+// Multi-line (curried calls)
+// =====================
+
+// Curried function - basic
+foo(a, b)(c);
+
+// Curried function - second call single arg
+foo(a)(b);
+
+// Curried function - with string argument
+foo(a, b, c)('test');
+
+// Curried function - triple call
+foo(a, b)(c, d)(e);
+
+// Curried function - triple call single args
+foo(a)(b)(c);
+
+// Method call - curried
+obj.foo(a, b)(c);
+
+// Boundary - 78 chars without spaces, 80 with spaces (fits)
+foo(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, b)(c);
+
+// Boundary - 79 chars without spaces, 81 with spaces (breaks)
+foo(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, b)(c);
+
+// =====================
+// Grouped arguments (ExpandSecondArgument)
+// =====================
+
+// Test 1: Grouped last argument - short object
+foo(a, {b: 1});
+
+// Test 2: Grouped last argument - short array
+foo(a, [b, c]);
+
+// Test 3: Grouped last argument - longer object
+foo(a, {b: 1, c: 2, d: 3});
+
+// Test 4: Method call with grouped last argument
+a.foo(b, {c: 1});
+
+// Test 5: Constructor with grouped last argument
+new Foo(a, {b: 1});
+
+// Test 6: Multiple args before grouped object
+foo(a, b, {c: 1});
+
+// Test 7: Boundary - 76 chars without spaces, 80 with spaces (fits)
+foo(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, {b: 1});
+
+// Test 8: Boundary - 77 chars without spaces, 81 with spaces (breaks)
+foo(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, {b: 1});
+
+// =====================
+// Grouped layout (multi-line variants)
+// =====================
+
+// Test 1: Grouped last argument with multi-line object
+foo(a, {
+	b: 1,
+	c: 2,
+});
+
+// Test 2: Grouped last argument with function
+foo(a, function () {
+	return b;
+});
+
+// Test 3: Grouped last argument with arrow function
+foo(a, () => {
+	return b;
+});
+
+// Test 4: Grouped first argument with function
+foo(function () {
+	return a;
+}, b);
+
+// Test 5: Grouped first argument with arrow function
+foo(() => {
+	return a;
+}, b);
+
+// Test 6: Grouped last argument with nested array
+foo(a, [
+	[b, c],
+	[d, e],
+]);
+
+// Test 7: Method call with grouped layout
+obj.foo(a, {
+	b: 1,
+	c: 2,
+});
+
+// Test 8: Boundary - 79 chars without spaces, 80 with spaces (first line fits)
+foo(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, {
+	b: 1,
+});
+
+// Test 9: Boundary - 80 chars without spaces, 81 with spaces (first line breaks)
+foo(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, {
+	b: 1,
+});
+
+// Test 10: Single arrow function argument - fits on one line
+a.map(( b ) => fn( b ));
+
+// Test 11: Single arrow arg - boundary 78+2=80 chars (fits)
+a.map(( bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb ) => fn( b ));
+
+// Test 12: Single arrow arg - boundary 79+2=81 chars (breaks)
+a.map(( bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb ) => fn( b ));
+
+// =====================
+// All broken out (default layout)
+// =====================
+
+// Test 1: Simple call with few arguments (fits on one line)
+foo(a, b, c);
+
+// Test 2: Method call (fits on one line)
+a.foo(b, c, d);
+
+// Test 3: Constructor call (fits on one line)
+new Foo(a, b, c);
+
+// Test 4: Nested call (fits on one line)
+foo(bar(a, b), c);
+
+// Test 5: Chained call (fits on one line)
+foo(a, b).bar(c, d);
+
+// Test 6: Boundary - 78 chars, + 2 spaces = 80 chars (fits on one line)
+foo(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, b);
+
+// Test 7: Boundary - 79 chars, + 2 spaces = 81 chars (breaks to multi-line)
+foo(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, b);
