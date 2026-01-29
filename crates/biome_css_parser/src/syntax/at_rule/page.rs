@@ -196,7 +196,7 @@ impl ParseNodeList for PageAtRuleItemList {
             parse_any_declaration_with_semicolon(p)
         } else if is_at_qualified_rule(p) {
             // Qualified rules are not allowed in @page at-rules, but we parse
-            // them fully and coerce to a bogus node for better error recovery.
+            // them fully and re-map to a bogus node for better error recovery.
             // Without this, the curly braces in the qualified rule's block would
             // confuse recovery and break parsing of subsequent declarations.
             if let Present(mut syntax) = parse_qualified_rule(p) {
