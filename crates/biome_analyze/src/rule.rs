@@ -278,6 +278,7 @@ impl<'a> RuleSource<'a> {
             Self::Stylelint(_) => 34,
             Self::EslintTurbo(_) => 35,
             Self::HtmlEslint(_) => 36,
+            Self::EslintE18e(_) => 37,
         }
     }
 
@@ -377,6 +378,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintVueJs(_) => "vue",
             Self::EslintTurbo(_) => "turbo",
             Self::HtmlEslint(_) => "@html-eslint",
+            Self::EslintE18e(_) => "e18e",
         }
     }
 
