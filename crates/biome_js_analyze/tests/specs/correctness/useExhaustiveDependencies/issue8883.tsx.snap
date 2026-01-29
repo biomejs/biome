@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: issue8883.tsx
+---
+# Input
+```tsx
+import React, { useEffect } from 'react'
+
+type ExampleProps = {
+    msg: string;
+};
+
+const DestructuredInParams: React.FC<ExampleProps> = ({ msg }) => {
+    useEffect(() => console.log(msg), [msg]); // correct behavior
+};
+
+const DestructuredInBody1: React.FC<ExampleProps> = props => {
+    const { msg } = props;
+    useEffect(() => console.log(msg), [msg]); // should NOT trigger useExhaustiveDependencies
+};
+
+const DestructuredInBody2: React.FC<ExampleProps> = props => {
+    const { msg } = props;
+    useEffect(() => console.log(msg), []); // should trigger useExhaustiveDependencies
+};
+
+```
+
+# Diagnostics
+```
+issue8883.tsx:18:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on msg.
+  
+    16 │ const DestructuredInBody2: React.FC<ExampleProps> = props => {
+    17 │     const { msg } = props;
+  > 18 │     useEffect(() => console.log(msg), []); // should trigger useExhaustiveDependencies
+       │     ^^^^^^^^^
+    19 │ };
+    20 │ 
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    16 │ const DestructuredInBody2: React.FC<ExampleProps> = props => {
+    17 │     const { msg } = props;
+  > 18 │     useEffect(() => console.log(msg), []); // should trigger useExhaustiveDependencies
+       │                                 ^^^
+    19 │ };
+    20 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    18 │ ····useEffect(()·=>·console.log(msg),·[msg]);·//·should·trigger·useExhaustiveDependencies
+       │                                        +++                                               
+
+```

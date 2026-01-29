@@ -7,14 +7,15 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_semantic::{CanBeImportedExported, ClosureExtensions, SemanticModel};
+use biome_js_semantic::{CanBeImportedExported, ClosureExtensions, SemanticModel, is_constant};
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, AnyJsObjectBindingPatternMember,
-    JsArrayBindingPattern, JsArrayBindingPatternElement, JsArrayBindingPatternElementList,
-    JsArrayExpression, JsComputedMemberExpression, JsObjectBindingPattern,
-    JsObjectBindingPatternPropertyList, JsReferenceIdentifier, JsVariableDeclarator, T,
-    TsTypeofType, is_transparent_expression_wrapper,
+    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression,
+    AnyJsMemberExpression, AnyJsObjectBindingPatternMember, JsArrayBindingPattern,
+    JsArrayBindingPatternElement, JsArrayBindingPatternElementList, JsArrayExpression,
+    JsComputedMemberExpression, JsObjectBindingPattern, JsObjectBindingPatternPropertyList,
+    JsReferenceIdentifier, JsVariableDeclarator, T, TsTypeofType,
+    is_transparent_expression_wrapper,
 };
 use biome_js_syntax::{
     JsCallExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TextRange,
@@ -540,8 +541,8 @@ fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> 
             parent.kind(),
             JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER
         ) {
-            if let Some(sequence_expression) = AnyExpressionCandidate::cast_ref(&prev_node) {
-                result.push(sequence_expression.clone());
+            if let Some(expression) = AnyExpressionCandidate::cast_ref(&prev_node) {
+                result.push(expression.clone());
             }
             return result;
         }
@@ -557,7 +558,27 @@ fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> 
 
         if let Some(computed_member_expression) = JsComputedMemberExpression::cast_ref(&parent)
             && let Ok(object) = computed_member_expression.object()
-            && !prev_node.eq(object.syntax())
+        {
+            if !prev_node.eq(object.syntax()) {
+                return result;
+            }
+            // collect only constant member access expressions
+            if let Ok(member) = computed_member_expression.member()
+                && !is_constant(&member)
+            {
+                return result;
+            }
+        }
+
+        // Follow eslint React plugin behavior:
+        // When calling a method of an object, only the object should be included in the dependency list.
+        if matches!(
+            parent.kind(),
+            JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION
+        ) && let Some(wrapper) = parent.parent()
+            && let Some(call_expression) = JsCallExpression::cast(wrapper)
+            && let Ok(callee) = call_expression.callee()
+            && callee.syntax().eq(&parent)
         {
             return result;
         }
@@ -849,8 +870,20 @@ fn is_stable_expression(
                 && let Some(binding) = model.binding(&name)
             {
                 let binding = &binding.tree();
-                if let Some(declaration_node) =
-                    &binding.declaration().map(|decl| decl.syntax().clone())
+                let declaration = binding.declaration();
+                let declaration_node = if let Some(
+                    AnyJsBindingDeclaration::JsArrowFunctionExpression(arrow_function),
+                ) = &declaration
+                    && let Ok(AnyJsArrowFunctionParameters::AnyJsBinding(
+                        AnyJsBinding::JsIdentifierBinding(identifier),
+                    )) = arrow_function.parameters()
+                    && identifier.syntax().eq(binding.syntax())
+                {
+                    Some(identifier.syntax().clone())
+                } else {
+                    declaration.map(|decl| decl.syntax().clone())
+                };
+                if let Some(declaration_node) = &declaration_node
                     && identifier
                         .syntax()
                         .ancestors()
