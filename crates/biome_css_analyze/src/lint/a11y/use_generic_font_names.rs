@@ -88,8 +88,9 @@ impl Rule for UseGenericFontNames {
             return None;
         }
 
-        // Ignore `@supports` queries. See issue: https://github.com/biomejs/biome/issues/8845
-        if is_in_supports_at_rule(node) {
+        // Ignore `@supports` feature declarations (the condition part).
+        // See issue: https://github.com/biomejs/biome/issues/8845
+        if is_in_supports_feature_declaration(node) {
             return None;
         }
 
@@ -163,13 +164,14 @@ fn is_in_font_face_at_rule(node: &CssGenericProperty) -> bool {
         .is_some_and(|n| matches!(n, AnyCssAtRule::CssFontFaceAtRule(_)))
 }
 
-fn is_in_supports_at_rule(node: &CssGenericProperty) -> bool {
+/// Check if the node is inside a `@supports` feature declaration (the condition part),
+/// not inside the declaration block of `@supports`.
+/// e.g. `@supports (font: -apple-system-body)` - the `font: -apple-system-body` is inside
+/// the condition and should be ignored, but styles inside `@supports { ... }` block should not.
+fn is_in_supports_feature_declaration(node: &CssGenericProperty) -> bool {
     node.syntax()
         .ancestors()
-        .filter(|n| n.kind() == CssSyntaxKind::CSS_AT_RULE)
-        .filter_map(|n| n.cast::<CssAtRule>())
-        .filter_map(|n| n.rule().ok())
-        .any(|n| matches!(n, AnyCssAtRule::CssSupportsAtRule(_)))
+        .any(|n| n.kind() == CssSyntaxKind::CSS_SUPPORTS_FEATURE_DECLARATION)
 }
 
 fn is_shorthand_font_property_with_keyword(properties: &CssGenericComponentValueList) -> bool {
