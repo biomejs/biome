@@ -28,3 +28,11 @@ a { font: 1em "Noto Serif", var(--serif); }
 a { font: 14px/1.5 Arial, var(--fallback); }
 a { font-family: revert }
 a { font-family: revert-layer }
+
+/* @supports queries should not trigger the rule */
+@supports (font: -apple-system-body) {
+  a { font-family: Arial; }
+}
+@supports (display: grid) {
+  b { font-family: 'Arial', "Lucida Grande", Arial; }
+}
