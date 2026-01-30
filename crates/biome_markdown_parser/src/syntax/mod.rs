@@ -48,6 +48,7 @@ use fenced_code_block::{
 };
 use header::{at_header, parse_header};
 use html_block::{at_html_block, at_html_block_interrupt, parse_html_block};
+use inline::EmphasisContext;
 use link_block::{at_link_block, parse_link_block};
 use list::{
     at_bullet_list_item, at_order_list_item, marker_followed_by_whitespace_or_eol,
@@ -58,7 +59,6 @@ use quote::{
     parse_quote,
 };
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
-use inline::EmphasisContext;
 
 use crate::MarkdownParser;
 
@@ -1186,9 +1186,7 @@ fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> boo
 
 /// Build an emphasis context for the current inline list and install it on the parser.
 /// Returns the previous context so it can be restored.
-fn set_inline_emphasis_context(
-    p: &mut MarkdownParser,
-) -> Option<EmphasisContext> {
+fn set_inline_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext> {
     let source_len = inline_list_source_len(p);
     let source = p.source_after_current();
     let inline_source = if source_len <= source.len() {

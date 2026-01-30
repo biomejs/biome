@@ -197,8 +197,7 @@ impl<'source> MarkdownParser<'source> {
     /// Re-lex the current token using LinkDefinition context.
     /// This makes whitespace produce separate tokens for destination/title parsing.
     pub(crate) fn re_lex_link_definition(&mut self) {
-        self.source
-            .re_lex(MarkdownReLexContext::LinkDefinition);
+        self.source.re_lex(MarkdownReLexContext::LinkDefinition);
     }
 
     /// Force re-lex the current token in Regular context.
@@ -228,8 +227,7 @@ impl<'source> MarkdownParser<'source> {
     /// Only call on the current token, NOT inside lookahead closures.
     /// This invalidates any buffered lookahead, so ensure no lookahead is active.
     pub(crate) fn force_relex_emphasis_inline(&mut self) -> MarkdownSyntaxKind {
-        self.source
-            .re_lex(MarkdownReLexContext::EmphasisInline)
+        self.source.re_lex(MarkdownReLexContext::EmphasisInline)
     }
 
     pub(crate) fn set_force_ordered_list_marker(&mut self, value: bool) {

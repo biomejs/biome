@@ -51,8 +51,8 @@ use crate::syntax::quote::{
     parse_quote_block_list,
 };
 use crate::syntax::{
-    at_block_interrupt, at_indent_code_block, is_paragraph_like, INDENT_CODE_BLOCK_SPACES,
-    TAB_STOP_SPACES,
+    INDENT_CODE_BLOCK_SPACES, TAB_STOP_SPACES, at_block_interrupt, at_indent_code_block,
+    is_paragraph_like,
 };
 
 /// Tokens that start a new block (used for recovery)

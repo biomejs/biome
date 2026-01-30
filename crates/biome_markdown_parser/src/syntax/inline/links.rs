@@ -7,13 +7,13 @@ use biome_rowan::TextRange;
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
+use crate::syntax::inline::{parse_inline_item_list_until, parse_inline_item_list_until_no_links};
 use crate::syntax::parse_error::{unclosed_image, unclosed_link};
 use crate::syntax::reference::normalize_reference_label;
 use crate::syntax::{
+    LinkDestinationKind, MAX_LINK_DESTINATION_PAREN_DEPTH, ParenDepthResult,
     ends_with_unescaped_close, try_update_paren_depth, validate_link_destination_text,
-    LinkDestinationKind, ParenDepthResult, MAX_LINK_DESTINATION_PAREN_DEPTH,
 };
-use crate::syntax::inline::{parse_inline_item_list_until, parse_inline_item_list_until_no_links};
 
 /// Parse link starting with `[` - dispatches to inline link or reference link.
 ///
@@ -127,11 +127,7 @@ impl LinkParseKind {
 
     fn report_unclosed_destination(self, p: &mut MarkdownParser, opening_range: TextRange) {
         match self {
-            Self::Link => p.error(unclosed_link(
-                p,
-                opening_range,
-                "expected `)` to close URL",
-            )),
+            Self::Link => p.error(unclosed_link(p, opening_range, "expected `)` to close URL")),
             Self::Image => p.error(unclosed_image(
                 p,
                 opening_range,
@@ -632,11 +628,7 @@ fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSca
             break;
         }
         let text = p.cur_text();
-        if !validate_link_destination_text(
-            text,
-            LinkDestinationKind::Raw,
-            &mut pending_escape,
-        ) {
+        if !validate_link_destination_text(text, LinkDestinationKind::Raw, &mut pending_escape) {
             return DestinationScanResult::Invalid;
         }
         match try_update_paren_depth(text, paren_depth, MAX_PAREN_DEPTH) {
@@ -774,11 +766,7 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
         }
 
         let text = p.cur_text();
-        if !validate_link_destination_text(
-            text,
-            LinkDestinationKind::Raw,
-            &mut pending_escape,
-        ) {
+        if !validate_link_destination_text(text, LinkDestinationKind::Raw, &mut pending_escape) {
             return DestinationScanResult::Invalid;
         }
         match try_update_paren_depth(text, paren_depth, MAX_PAREN_DEPTH) {

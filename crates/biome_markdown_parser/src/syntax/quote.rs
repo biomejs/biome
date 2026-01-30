@@ -31,17 +31,17 @@
 //! - A blank line
 //! - A line that starts another block-level construct (header, code, list, etc.)
 
-use biome_markdown_syntax::kind::MarkdownSyntaxKind::{self, *};
 use biome_markdown_syntax::T;
+use biome_markdown_syntax::kind::MarkdownSyntaxKind::{self, *};
+use biome_parser::Parser;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::prelude::ParsedSyntax::{self, *};
-use biome_parser::Parser;
 
 use crate::MarkdownParser;
-use crate::syntax::{INDENT_CODE_BLOCK_SPACES, TAB_STOP_SPACES, is_paragraph_like};
 use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::quote_nesting_too_deep;
+use crate::syntax::{INDENT_CODE_BLOCK_SPACES, TAB_STOP_SPACES, is_paragraph_like};
 
 /// Check if we're at the start of a block quote (`>`).
 pub(crate) fn at_quote(p: &mut MarkdownParser) -> bool {

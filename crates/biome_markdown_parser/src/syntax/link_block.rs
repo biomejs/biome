@@ -28,8 +28,8 @@ use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
 use crate::syntax::reference::normalize_reference_label;
 use crate::syntax::{
+    LinkDestinationKind, MAX_LINK_DESTINATION_PAREN_DEPTH, ParenDepthResult,
     ends_with_unescaped_close, try_update_paren_depth, validate_link_destination_text,
-    LinkDestinationKind, ParenDepthResult, MAX_LINK_DESTINATION_PAREN_DEPTH,
 };
 
 /// Maximum label length per CommonMark spec (999 characters).
@@ -309,11 +309,8 @@ fn skip_destination_tokens(p: &mut MarkdownParser) -> DestinationResult {
                 break;
             }
 
-            if !validate_link_destination_text(
-                text,
-                LinkDestinationKind::Raw,
-                &mut pending_escape,
-            ) {
+            if !validate_link_destination_text(text, LinkDestinationKind::Raw, &mut pending_escape)
+            {
                 return DestinationResult::Invalid;
             }
 
