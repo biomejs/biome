@@ -1,4 +1,3 @@
-mod any_class_string_like;
 mod class_info;
 pub mod class_lexer;
 mod presets;
@@ -7,10 +6,11 @@ mod sort_config;
 mod tailwind_preset;
 
 use self::{
-    any_class_string_like::AnyClassStringLike, presets::UseSortedClassesPreset,
-    sort::get_sort_class_name_range, sort::sort_class_name, sort_config::SortConfig,
+    presets::UseSortedClassesPreset, sort::get_sort_class_name_range, sort::sort_class_name,
+    sort_config::SortConfig,
 };
 use crate::JsRuleAction;
+use crate::shared::any_class_string_like::AnyClassStringLike;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make::{

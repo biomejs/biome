@@ -3,8 +3,9 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use biome_analyze::declare_assist_group;
+pub mod no_duplicate_classes;
 pub mod organize_imports;
 pub mod use_sorted_attributes;
 pub mod use_sorted_interface_members;
 pub mod use_sorted_keys;
-declare_assist_group! { pub Source { name : "source" , rules : [self :: organize_imports :: OrganizeImports , self :: use_sorted_attributes :: UseSortedAttributes , self :: use_sorted_interface_members :: UseSortedInterfaceMembers , self :: use_sorted_keys :: UseSortedKeys ,] } }
+declare_assist_group! { pub Source { name : "source" , rules : [self :: no_duplicate_classes :: NoDuplicateClasses , self :: organize_imports :: OrganizeImports , self :: use_sorted_attributes :: UseSortedAttributes , self :: use_sorted_interface_members :: UseSortedInterfaceMembers , self :: use_sorted_keys :: UseSortedKeys ,] } }
