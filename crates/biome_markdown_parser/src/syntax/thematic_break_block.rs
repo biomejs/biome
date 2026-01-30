@@ -21,6 +21,9 @@ use biome_parser::{
     prelude::ParsedSyntax::{self, *},
 };
 
+/// CommonMark requires 3 or more matching characters for thematic breaks.
+const THEMATIC_BREAK_MIN_CHARS: usize = 3;
+
 pub(crate) fn at_thematic_break_block(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
         if p.at_line_start() || p.at_start_of_input() {
@@ -51,6 +54,32 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
     // Check for lexer-produced thematic break token
     if p.at(MD_THEMATIC_BREAK_LITERAL) {
         return true;
+    }
+
+    // If the entire line segment is a single textual literal, validate it directly.
+    if p.at(MD_TEXTUAL_LITERAL)
+        && p.cur_text()
+            .chars()
+            .all(|c| c == ' ' || c == '\t' || c == '*' || c == '-' || c == '_')
+    {
+        let mut break_char = None;
+        let mut break_count = 0usize;
+
+        for c in p.cur_text().chars() {
+            if c == ' ' || c == '\t' {
+                continue;
+            }
+            if let Some(existing) = break_char {
+                if existing != c {
+                    return false;
+                }
+            } else {
+                break_char = Some(c);
+            }
+            break_count += 1;
+        }
+
+        return break_count >= THEMATIC_BREAK_MIN_CHARS;
     }
 
     // Get the break character from the first non-whitespace token
@@ -105,7 +134,7 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
     }
 
     // Valid thematic break if 3+ characters followed by end of line
-    count >= 3 && (p.at(NEWLINE) || p.at(T![EOF]))
+    count >= THEMATIC_BREAK_MIN_CHARS && (p.at(NEWLINE) || p.at(T![EOF]))
 }
 
 pub(crate) fn parse_thematic_break_block(p: &mut MarkdownParser) -> ParsedSyntax {
