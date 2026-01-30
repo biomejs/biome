@@ -32,7 +32,7 @@ use biome_parser::{
     prelude::ParsedSyntax::{self, *},
 };
 
-use super::parse_any_inline;
+use crate::syntax::parse_any_inline;
 
 /// Maximum number of `#` characters allowed in an ATX heading (CommonMark §4.2).
 const MAX_HEADER_HASHES: usize = 6;

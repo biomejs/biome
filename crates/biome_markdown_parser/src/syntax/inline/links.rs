@@ -8,7 +8,7 @@ use biome_rowan::TextRange;
 use crate::MarkdownParser;
 use crate::syntax::reference::normalize_reference_label;
 
-use super::{parse_inline_item_list_until, parse_inline_item_list_until_no_links};
+use crate::syntax::inline::{parse_inline_item_list_until, parse_inline_item_list_until_no_links};
 
 /// Parse link starting with `[` - dispatches to inline link or reference link.
 ///

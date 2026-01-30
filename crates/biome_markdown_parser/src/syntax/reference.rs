@@ -9,7 +9,7 @@ use crate::MarkdownLosslessTreeSink;
 use crate::MarkdownParseOptions;
 use crate::parser::MarkdownParser;
 
-use super::parse_document;
+use crate::syntax::parse_document;
 
 /// Normalize a reference label per CommonMark spec.
 ///

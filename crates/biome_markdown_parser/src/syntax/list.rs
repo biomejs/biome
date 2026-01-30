@@ -40,17 +40,17 @@ use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_parser::prelude::{CompletedMarker, Marker, ParseDiagnostic, TokenSet};
 use biome_parser::{Parser, token_set};
 
-use super::quote::{
+use biome_rowan::TextRange;
+
+use crate::MarkdownParser;
+use crate::syntax::fenced_code_block::parse_fenced_code_block;
+use crate::syntax::parse_any_block_with_indent_code_policy;
+use crate::syntax::parse_error::list_nesting_too_deep;
+use crate::syntax::quote::{
     consume_quote_prefix, consume_quote_prefix_without_virtual, has_quote_prefix,
     parse_quote_block_list,
 };
-use biome_rowan::TextRange;
-
-use super::fenced_code_block::parse_fenced_code_block;
-use super::parse_error::list_nesting_too_deep;
-use super::{at_block_interrupt, at_indent_code_block, is_paragraph_like};
-use crate::MarkdownParser;
-use crate::syntax::parse_any_block_with_indent_code_policy;
+use crate::syntax::{at_block_interrupt, at_indent_code_block, is_paragraph_like};
 
 /// Tokens that start a new block (used for recovery)
 const BLOCK_RECOVERY_SET: TokenSet<MarkdownSyntaxKind> = token_set![

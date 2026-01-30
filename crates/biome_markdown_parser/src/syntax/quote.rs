@@ -38,9 +38,9 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 
-use super::is_paragraph_like;
-use super::parse_error::quote_nesting_too_deep;
 use crate::MarkdownParser;
+use crate::syntax::is_paragraph_like;
+use crate::syntax::parse_error::quote_nesting_too_deep;
 
 /// Check if we're at the start of a block quote (`>`).
 pub(crate) fn at_quote(p: &mut MarkdownParser) -> bool {

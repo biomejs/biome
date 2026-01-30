@@ -32,7 +32,7 @@ use biome_parser::{
     },
 };
 
-use super::parse_error::unterminated_fenced_code;
+use crate::syntax::parse_error::unterminated_fenced_code;
 
 /// Minimum number of fence characters required per CommonMark §4.5.
 const MIN_FENCE_LENGTH: usize = 3;
