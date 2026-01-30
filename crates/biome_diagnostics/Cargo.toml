@@ -48,7 +48,7 @@ unicode-width                = { workspace = true }
 [dev-dependencies]
 insta      = { workspace = true }
 serde_json = { workspace = true }
-trybuild   = "=1.0.114"
+trybuild   = "=1.0.115"
 
 [features]
 bpaf   = ["dep:bpaf"]
