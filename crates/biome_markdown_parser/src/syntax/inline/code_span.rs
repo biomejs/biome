@@ -3,8 +3,8 @@ use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 
-use crate::lexer::MarkdownLexContext;
 use crate::MarkdownParser;
+use crate::lexer::MarkdownLexContext;
 
 /// Parse a hard line break.
 ///
@@ -60,7 +60,7 @@ fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -
                 }
                 // Per CommonMark, block interrupts (including list markers) can
                 // terminate paragraphs. A code span cannot cross a block boundary.
-                if crate::syntax::at_block_interrupt(p) || at_list_marker_after_newline(p) {
+                if crate::syntax::at_block_interrupt(p) || is_at_list_marker_after_newline(p) {
                     return false;
                 }
                 continue;
@@ -89,10 +89,13 @@ fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -
 
 /// Check if we're at a list marker after a newline.
 /// This is used to detect when a code span would cross a list item boundary.
-fn at_list_marker_after_newline(p: &mut MarkdownParser) -> bool {
+fn is_at_list_marker_after_newline(p: &mut MarkdownParser) -> bool {
+    // List markers can be indented up to 3 spaces; 4+ means indented code block.
+    const LIST_MARKER_MAX_INDENT: usize = 4;
+
     // Skip up to 3 spaces of indent (list markers can be indented 0-3 spaces)
     let mut columns = 0usize;
-    while columns < 4
+    while columns < LIST_MARKER_MAX_INDENT
         && p.at(MD_TEXTUAL_LITERAL)
         && p.cur_text().chars().all(|c| c == ' ' || c == '\t')
     {
@@ -103,7 +106,7 @@ fn at_list_marker_after_newline(p: &mut MarkdownParser) -> bool {
                 _ => {}
             }
         }
-        if columns >= 4 {
+        if columns >= LIST_MARKER_MAX_INDENT {
             return false; // Indented code block, not a list marker
         }
         p.bump(MD_TEXTUAL_LITERAL);
@@ -112,16 +115,10 @@ fn at_list_marker_after_newline(p: &mut MarkdownParser) -> bool {
     // Check for bullet list markers: -, *, +
     if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
         let marker_text = p.cur_text();
+        // Only a single -, *, or + is a list marker; longer runs are not.
         if marker_text.len() == 1 {
             p.bump_any();
-            // Must be followed by space, tab, or EOL
-            if p.at(NEWLINE) || p.at(T![EOF]) {
-                return true;
-            }
-            if p.at(MD_TEXTUAL_LITERAL) {
-                let text = p.cur_text();
-                return text.starts_with(' ') || text.starts_with('\t');
-            }
+            return is_list_marker_followed_by_space_or_eol(p);
         }
         return false;
     }
@@ -129,15 +126,7 @@ fn at_list_marker_after_newline(p: &mut MarkdownParser) -> bool {
     // Check for ordered list marker: digits followed by . or )
     if p.at(MD_ORDERED_LIST_MARKER) {
         p.bump(MD_ORDERED_LIST_MARKER);
-        // Must be followed by space, tab, or EOL
-        if p.at(NEWLINE) || p.at(T![EOF]) {
-            return true;
-        }
-        if p.at(MD_TEXTUAL_LITERAL) {
-            let text = p.cur_text();
-            return text.starts_with(' ') || text.starts_with('\t');
-        }
-        return false;
+        return is_list_marker_followed_by_space_or_eol(p);
     }
 
     // Check for textual bullet markers (lexed as MD_TEXTUAL_LITERAL in some contexts)
@@ -145,17 +134,22 @@ fn at_list_marker_after_newline(p: &mut MarkdownParser) -> bool {
         let text = p.cur_text();
         if text == "-" || text == "*" || text == "+" {
             p.bump(MD_TEXTUAL_LITERAL);
-            // Must be followed by space, tab, or EOL
-            if p.at(NEWLINE) || p.at(T![EOF]) {
-                return true;
-            }
-            if p.at(MD_TEXTUAL_LITERAL) {
-                let next = p.cur_text();
-                return next.starts_with(' ') || next.starts_with('\t');
-            }
+            return is_list_marker_followed_by_space_or_eol(p);
         }
     }
 
+    false
+}
+
+/// A list marker must be followed by space, tab, or end of line/input.
+fn is_list_marker_followed_by_space_or_eol(p: &MarkdownParser) -> bool {
+    if p.at(NEWLINE) || p.at(T![EOF]) {
+        return true;
+    }
+    if p.at(MD_TEXTUAL_LITERAL) {
+        let text = p.cur_text();
+        return text.starts_with(' ') || text.starts_with('\t');
+    }
     false
 }
 

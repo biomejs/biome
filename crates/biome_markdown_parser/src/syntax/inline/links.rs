@@ -5,8 +5,8 @@ use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_rowan::TextRange;
 
-use crate::lexer::MarkdownLexContext;
 use crate::MarkdownParser;
+use crate::lexer::MarkdownLexContext;
 use crate::syntax::reference::normalize_reference_label;
 
 use crate::syntax::inline::{parse_inline_item_list_until, parse_inline_item_list_until_no_links};

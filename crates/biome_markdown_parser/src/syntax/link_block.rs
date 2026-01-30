@@ -24,8 +24,8 @@ use biome_markdown_syntax::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 
-use crate::lexer::MarkdownLexContext;
 use crate::MarkdownParser;
+use crate::lexer::MarkdownLexContext;
 
 /// Maximum label length per CommonMark spec (999 characters).
 const MAX_LABEL_LENGTH: usize = 999;
