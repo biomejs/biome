@@ -31,15 +31,16 @@
 //! - A blank line
 //! - A line that starts another block-level construct (header, code, list, etc.)
 
-use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::{self, *};
-use biome_parser::Parser;
+use biome_markdown_syntax::T;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::prelude::ParsedSyntax::{self, *};
+use biome_parser::Parser;
 
 use crate::MarkdownParser;
-use crate::syntax::is_paragraph_like;
+use crate::syntax::{INDENT_CODE_BLOCK_SPACES, TAB_STOP_SPACES, is_paragraph_like};
+use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::quote_nesting_too_deep;
 
 /// Check if we're at the start of a block quote (`>`).
@@ -198,7 +199,7 @@ impl ParseNodeList for QuoteBlockList {
         // Treat content after '>' as column 0 for block parsing (fence detection).
         let prev_virtual = p.state().virtual_line_start;
         p.state_mut().virtual_line_start = Some(p.cur_range().start());
-        let parsed = super::parse_any_block_with_indent_code_policy(p, true);
+        let parsed = parse_any_block_with_indent_code_policy(p, true);
         p.state_mut().virtual_line_start = prev_virtual;
         if let Present(ref marker) = parsed {
             self.last_block_was_paragraph = is_paragraph_like(marker.kind(p));
@@ -250,7 +251,7 @@ pub(crate) fn line_has_quote_prefix_at_current(p: &MarkdownParser, depth: usize)
                 idx += 1;
             }
             b'\t' => {
-                indent += 4;
+                indent += TAB_STOP_SPACES;
                 idx += 1;
             }
             _ => break,
@@ -291,12 +292,12 @@ fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
     for c in p.source_after_current().chars() {
         match c {
             ' ' => column += 1,
-            '\t' => column += 4 - (column % 4),
+            '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
             _ => break,
         }
     }
 
-    column >= 4
+    column >= INDENT_CODE_BLOCK_SPACES
 }
 
 fn parse_quote_indented_code_block(p: &mut MarkdownParser, depth: usize) -> ParsedSyntax {

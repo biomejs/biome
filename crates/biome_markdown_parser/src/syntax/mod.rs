@@ -67,6 +67,8 @@ pub(crate) const MAX_LINK_DESTINATION_PAREN_DEPTH: i32 = 32;
 
 /// CommonMark requires 4 or more spaces for indented code blocks.
 const INDENT_CODE_BLOCK_SPACES: usize = 4;
+/// Tabs advance to the next 4-space tab stop in CommonMark parsing.
+const TAB_STOP_SPACES: usize = 4;
 
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();

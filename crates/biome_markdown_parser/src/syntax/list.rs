@@ -50,7 +50,10 @@ use crate::syntax::quote::{
     consume_quote_prefix, consume_quote_prefix_without_virtual, has_quote_prefix,
     parse_quote_block_list,
 };
-use crate::syntax::{at_block_interrupt, at_indent_code_block, is_paragraph_like};
+use crate::syntax::{
+    at_block_interrupt, at_indent_code_block, is_paragraph_like, INDENT_CODE_BLOCK_SPACES,
+    TAB_STOP_SPACES,
+};
 
 /// Tokens that start a new block (used for recovery)
 const BLOCK_RECOVERY_SET: TokenSet<MarkdownSyntaxKind> = token_set![
@@ -63,9 +66,6 @@ const BLOCK_RECOVERY_SET: TokenSet<MarkdownSyntaxKind> = token_set![
     TRIPLE_TILDE,
     MD_ORDERED_LIST_MARKER
 ];
-/// CommonMark requires 4 or more spaces for indented code blocks.
-const INDENT_CODE_BLOCK_SPACES: usize = 4;
-
 /// Compute the marker indent for list parsing.
 ///
 /// For normal cases, this returns the leading whitespace count from
@@ -96,7 +96,7 @@ fn compute_marker_indent(p: &MarkdownParser) -> usize {
         let mut column = 0;
         for c in source[line_start..pos].chars() {
             match c {
-                '\t' => column += 4 - (column % 4),
+                '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
                 _ => column += 1,
             }
         }
@@ -468,7 +468,7 @@ impl ParseNodeList for BulletList {
                             indent += 1;
                             p.bump(MD_TEXTUAL_LITERAL);
                         } else if text == "\t" {
-                            indent += 4 - (indent % 4);
+                            indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES);
                             p.bump(MD_TEXTUAL_LITERAL);
                         } else {
                             break;
@@ -999,7 +999,7 @@ fn count_spaces_after_marker(s: &str, start_column: usize) -> usize {
     for c in s.chars() {
         match c {
             ' ' => column += 1,
-            '\t' => column += 4 - (column % 4),
+            '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
             _ => break,
         }
     }
@@ -1059,7 +1059,7 @@ fn count_spaces_after_dash_in_token(text: &str, start_column: usize) -> usize {
 
         match c {
             ' ' => column += 1,
-            '\t' => column += 4 - (column % 4),
+            '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
             _ => break,
         }
     }
@@ -1072,7 +1072,7 @@ fn line_indent_from_current(p: &MarkdownParser) -> usize {
     for c in p.source_after_current().chars() {
         match c {
             ' ' => column += 1,
-            '\t' => column += 4 - (column % 4),
+            '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
             _ => break,
         }
     }
@@ -1104,7 +1104,7 @@ fn quote_only_line_indent_at_current(p: &MarkdownParser, depth: usize) -> Option
                     i += 1;
                 }
                 b'\t' => {
-                    let advance = 4 - (column % 4);
+                    let advance = TAB_STOP_SPACES - (column % TAB_STOP_SPACES);
                     column += advance;
                     i += 1;
                 }
@@ -1130,7 +1130,7 @@ fn quote_only_line_indent_at_current(p: &MarkdownParser, depth: usize) -> Option
                 i += 1;
             }
             b'\t' => {
-                indent += 4 - (indent % 4);
+                indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES);
                 i += 1;
             }
             _ => return None,
@@ -1171,7 +1171,7 @@ fn next_quote_content_indent(p: &MarkdownParser, depth: usize) -> Option<usize> 
                         i += 1;
                     }
                     b'\t' => {
-                        let advance = 4 - (column % 4);
+                        let advance = TAB_STOP_SPACES - (column % TAB_STOP_SPACES);
                         column += advance;
                         i += 1;
                     }
@@ -1197,7 +1197,7 @@ fn next_quote_content_indent(p: &MarkdownParser, depth: usize) -> Option<usize> 
                     i += 1;
                 }
                 b'\t' => {
-                    indent += 4 - (indent % 4);
+                    indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES);
                     i += 1;
                 }
                 _ => return Some(indent),
@@ -2237,7 +2237,7 @@ where
                 indent += 1;
                 p.bump(MD_TEXTUAL_LITERAL);
             } else if text == "\t" {
-                indent += 4 - (indent % 4);
+                indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES);
                 p.bump(MD_TEXTUAL_LITERAL);
             } else {
                 break;
@@ -2302,7 +2302,7 @@ where
                 indent += 1;
                 p.bump(MD_TEXTUAL_LITERAL);
             } else if text == "\t" {
-                indent += 4 - (indent % 4);
+                indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES);
                 p.bump(MD_TEXTUAL_LITERAL);
             } else {
                 break;
