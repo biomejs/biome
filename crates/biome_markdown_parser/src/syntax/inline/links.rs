@@ -5,6 +5,7 @@ use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_rowan::TextRange;
 
+use crate::lexer::MarkdownLexContext;
 use crate::MarkdownParser;
 use crate::syntax::reference::normalize_reference_label;
 
@@ -491,8 +492,6 @@ fn collect_link_text(p: &mut MarkdownParser) -> Option<String> {
 }
 
 fn bump_textual_link_def(p: &mut MarkdownParser) {
-    use crate::lexer::MarkdownLexContext;
-
     let item = p.start();
     p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::LinkDefinition);
     item.complete(p, MD_TEXTUAL);

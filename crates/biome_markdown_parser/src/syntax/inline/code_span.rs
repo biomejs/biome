@@ -3,6 +3,7 @@ use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 
+use crate::lexer::MarkdownLexContext;
 use crate::MarkdownParser;
 
 /// Parse a hard line break.
@@ -30,8 +31,6 @@ pub(crate) fn parse_hard_line(p: &mut MarkdownParser) -> ParsedSyntax {
 ///
 /// Returns false if no match found (opener should become literal text).
 fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -> bool {
-    use crate::lexer::MarkdownLexContext;
-
     p.lookahead(|p| {
         // Skip the opening backticks (handle both BACKTICK and TRIPLE_BACKTICK)
         if p.at(T!["```"]) {
@@ -170,8 +169,6 @@ fn at_list_marker_after_newline(p: &mut MarkdownParser) -> bool {
 /// - Backslash escapes are NOT processed inside code spans (\` is literal `\``)
 /// - If no matching closer exists, the opener is treated as literal text
 pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
-    use crate::lexer::MarkdownLexContext;
-
     // Handle both BACKTICK and TRIPLE_BACKTICK (T!["```"] ) as code span openers.
     // TRIPLE_BACKTICK can appear when backticks are at line start but info string
     // contains backticks, making it not a fenced code block (CommonMark examples 138, 145).

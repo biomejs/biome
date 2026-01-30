@@ -24,6 +24,7 @@ use biome_markdown_syntax::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 
+use crate::lexer::MarkdownLexContext;
 use crate::MarkdownParser;
 
 /// Maximum label length per CommonMark spec (999 characters).
@@ -542,8 +543,6 @@ fn parse_link_destination(p: &mut MarkdownParser) {
 /// Consume the current token as MdTextual using LinkDefinition context.
 /// This ensures whitespace produces separate tokens for destination/title parsing.
 fn bump_textual_link_def(p: &mut MarkdownParser) {
-    use crate::lexer::MarkdownLexContext;
-
     let item = p.start();
     p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::LinkDefinition);
     item.complete(p, MD_TEXTUAL);
