@@ -4,6 +4,8 @@ use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 
 use crate::MarkdownParser;
+use crate::lexer::MarkdownLexContext;
+use crate::syntax::inline_span_crosses_setext;
 
 /// Check if text starting with `<` is valid inline HTML per CommonMark §6.8.
 /// Returns the length of the HTML element if valid, None otherwise.
@@ -283,7 +285,7 @@ pub(crate) fn parse_inline_html(p: &mut MarkdownParser) -> ParsedSyntax {
 
     // Per CommonMark §4.3, setext heading underlines take priority over inline HTML.
     // If this HTML tag spans across a line that is a setext underline, treat `<` as literal.
-    if crate::syntax::inline_span_crosses_setext(p, html_len) {
+    if inline_span_crosses_setext(p, html_len) {
         return Absent;
     }
 
@@ -468,10 +470,7 @@ pub(crate) fn parse_autolink(p: &mut MarkdownParser) -> ParsedSyntax {
     let content_m = p.start();
     while !p.at(R_ANGLE) && !p.at(T![EOF]) && !p.at_inline_end() {
         let text_m = p.start();
-        p.bump_remap_with_context(
-            MD_TEXTUAL_LITERAL,
-            crate::lexer::MarkdownLexContext::CodeSpan,
-        );
+        p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
         text_m.complete(p, MD_TEXTUAL);
     }
     content_m.complete(p, MD_INLINE_ITEM_LIST);

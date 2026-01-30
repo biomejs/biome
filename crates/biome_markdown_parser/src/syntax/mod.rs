@@ -58,6 +58,7 @@ use quote::{
     parse_quote,
 };
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
+use inline::EmphasisContext;
 
 use crate::MarkdownParser;
 
@@ -1185,7 +1186,7 @@ fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> boo
 /// Returns the previous context so it can be restored.
 fn set_inline_emphasis_context(
     p: &mut MarkdownParser,
-) -> Option<crate::syntax::inline::EmphasisContext> {
+) -> Option<EmphasisContext> {
     let source_len = inline_list_source_len(p);
     let source = p.source_after_current();
     let inline_source = if source_len <= source.len() {
@@ -1195,10 +1196,9 @@ fn set_inline_emphasis_context(
     };
     let base_offset = u32::from(p.cur_range().start()) as usize;
     // Create a reference checker closure that uses the parser's link reference definitions
-    let context =
-        crate::syntax::inline::EmphasisContext::new(inline_source, base_offset, |label| {
-            p.has_link_reference_definition(label)
-        });
+    let context = EmphasisContext::new(inline_source, base_offset, |label| {
+        p.has_link_reference_definition(label)
+    });
     p.set_emphasis_context(Some(context))
 }
 

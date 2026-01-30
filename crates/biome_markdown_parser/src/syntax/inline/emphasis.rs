@@ -6,6 +6,7 @@ use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_unicode_table::is_unicode_punctuation;
 
 use crate::MarkdownParser;
+use crate::syntax::parse_error::unclosed_emphasis;
 use crate::syntax::reference::normalize_reference_label;
 
 // ============================================================================
@@ -643,11 +644,7 @@ fn parse_emphasis_from_context(p: &mut MarkdownParser, expect_strong: bool) -> P
     }
 
     if consumed_closer < use_count {
-        p.error(crate::syntax::parse_error::unclosed_emphasis(
-            p,
-            opening_range,
-            opener_text,
-        ));
+        p.error(unclosed_emphasis(p, opening_range, opener_text));
     }
 
     if expect_strong {

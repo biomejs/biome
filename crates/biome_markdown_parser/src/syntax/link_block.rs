@@ -26,6 +26,11 @@ use biome_parser::prelude::ParsedSyntax::{self, *};
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
+use crate::syntax::reference::normalize_reference_label;
+use crate::syntax::{
+    ends_with_unescaped_close, try_update_paren_depth, validate_link_destination_text,
+    LinkDestinationKind, ParenDepthResult, MAX_LINK_DESTINATION_PAREN_DEPTH,
+};
 
 /// Maximum label length per CommonMark spec (999 characters).
 const MAX_LABEL_LENGTH: usize = 999;
@@ -113,7 +118,7 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
     }
 
     // Label must also be non-empty after normalization (e.g., `[\n ]` normalizes to empty)
-    let normalized = crate::syntax::reference::normalize_reference_label(&label_text);
+    let normalized = normalize_reference_label(&label_text);
     if normalized.is_empty() {
         return false;
     }
@@ -252,9 +257,9 @@ fn skip_destination_tokens(p: &mut MarkdownParser) -> DestinationResult {
             }
             if p.at(R_ANGLE) {
                 if pending_escape {
-                    if !crate::syntax::validate_link_destination_text(
+                    if !validate_link_destination_text(
                         p.cur_text(),
-                        crate::syntax::LinkDestinationKind::Enclosed,
+                        LinkDestinationKind::Enclosed,
                         &mut pending_escape,
                     ) {
                         return DestinationResult::Invalid;
@@ -272,9 +277,9 @@ fn skip_destination_tokens(p: &mut MarkdownParser) -> DestinationResult {
                     };
                 }
             }
-            if !crate::syntax::validate_link_destination_text(
+            if !validate_link_destination_text(
                 p.cur_text(),
-                crate::syntax::LinkDestinationKind::Enclosed,
+                LinkDestinationKind::Enclosed,
                 &mut pending_escape,
             ) {
                 return DestinationResult::Invalid;
@@ -304,27 +309,22 @@ fn skip_destination_tokens(p: &mut MarkdownParser) -> DestinationResult {
                 break;
             }
 
-            if !crate::syntax::validate_link_destination_text(
+            if !validate_link_destination_text(
                 text,
-                crate::syntax::LinkDestinationKind::Raw,
+                LinkDestinationKind::Raw,
                 &mut pending_escape,
             ) {
                 return DestinationResult::Invalid;
             }
 
-            match crate::syntax::try_update_paren_depth(
-                text,
-                paren_depth,
-                crate::syntax::MAX_LINK_DESTINATION_PAREN_DEPTH,
-            ) {
-                crate::syntax::ParenDepthResult::Ok(next_depth) => {
+            match try_update_paren_depth(text, paren_depth, MAX_LINK_DESTINATION_PAREN_DEPTH) {
+                ParenDepthResult::Ok(next_depth) => {
                     has_content = true;
                     saw_separator = false;
                     paren_depth = next_depth;
                     p.bump_link_definition();
                 }
-                crate::syntax::ParenDepthResult::DepthExceeded
-                | crate::syntax::ParenDepthResult::UnmatchedClose => {
+                ParenDepthResult::DepthExceeded | ParenDepthResult::UnmatchedClose => {
                     // For link reference definitions, both cases end the destination
                     break;
                 }
@@ -354,7 +354,7 @@ fn skip_title_tokens(p: &mut MarkdownParser) -> bool {
 
     // Check if first token is complete (e.g., `"title"`)
     let first_text = p.cur_text();
-    if first_text.len() >= 2 && crate::syntax::ends_with_unescaped_close(first_text, close_char) {
+    if first_text.len() >= 2 && ends_with_unescaped_close(first_text, close_char) {
         p.bump_link_definition();
         skip_whitespace_tokens(p);
         return p.at(EOF) || p.at(NEWLINE);
@@ -369,7 +369,7 @@ fn skip_title_tokens(p: &mut MarkdownParser) -> bool {
         }
 
         // Check for closing delimiter
-        let is_close = crate::syntax::ends_with_unescaped_close(p.cur_text(), close_char);
+        let is_close = ends_with_unescaped_close(p.cur_text(), close_char);
 
         if is_close {
             p.bump_link_definition();
@@ -519,17 +519,12 @@ fn parse_link_destination(p: &mut MarkdownParser) {
             }
 
             let text = p.cur_text();
-            match crate::syntax::try_update_paren_depth(
-                text,
-                paren_depth,
-                crate::syntax::MAX_LINK_DESTINATION_PAREN_DEPTH,
-            ) {
-                crate::syntax::ParenDepthResult::Ok(next_depth) => {
+            match try_update_paren_depth(text, paren_depth, MAX_LINK_DESTINATION_PAREN_DEPTH) {
+                ParenDepthResult::Ok(next_depth) => {
                     paren_depth = next_depth;
                     bump_textual_link_def(p);
                 }
-                crate::syntax::ParenDepthResult::DepthExceeded
-                | crate::syntax::ParenDepthResult::UnmatchedClose => {
+                ParenDepthResult::DepthExceeded | ParenDepthResult::UnmatchedClose => {
                     break;
                 }
             }
@@ -690,7 +685,7 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
         let is_close = if close_char == ')' {
             p.at(R_PAREN)
         } else {
-            crate::syntax::ends_with_unescaped_close(p.cur_text(), close_char)
+            ends_with_unescaped_close(p.cur_text(), close_char)
         };
         if is_close {
             // Use Regular context for title content

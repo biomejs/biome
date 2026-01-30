@@ -39,20 +39,31 @@ fn is_html_like_content(p: &MarkdownParser) -> bool {
 
 #[derive(Clone, Copy)]
 enum HtmlBlockKind {
+    /// CommonMark HTML block type 1: raw `<script>`, `<pre>`, `<style>`, `<textarea>`.
     Type1(Type1Tag),
+    /// CommonMark HTML block type 2: HTML comment (`<!-- ... -->`).
     Type2,
+    /// CommonMark HTML block type 3: processing instruction (`<? ... ?>`).
     Type3,
+    /// CommonMark HTML block type 4: declaration (`<![A-Z] ... >`).
     Type4,
+    /// CommonMark HTML block type 5: CDATA section (`<![CDATA[ ... ]]>`).
     Type5,
+    /// CommonMark HTML block type 6: block-level tag (e.g. `<div>`).
     Type6,
+    /// CommonMark HTML block type 7: any other tag on its own line.
     Type7,
 }
 
 #[derive(Clone, Copy)]
 enum Type1Tag {
+    /// `<script>` raw HTML block.
     Script,
+    /// `<pre>` raw HTML block.
     Pre,
+    /// `<style>` raw HTML block.
     Style,
+    /// `<textarea>` raw HTML block.
     Textarea,
 }
 

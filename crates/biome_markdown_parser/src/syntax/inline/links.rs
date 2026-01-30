@@ -7,8 +7,12 @@ use biome_rowan::TextRange;
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
+use crate::syntax::parse_error::{unclosed_image, unclosed_link};
 use crate::syntax::reference::normalize_reference_label;
-
+use crate::syntax::{
+    ends_with_unescaped_close, try_update_paren_depth, validate_link_destination_text,
+    LinkDestinationKind, ParenDepthResult, MAX_LINK_DESTINATION_PAREN_DEPTH,
+};
 use crate::syntax::inline::{parse_inline_item_list_until, parse_inline_item_list_until_no_links};
 
 /// Parse link starting with `[` - dispatches to inline link or reference link.
@@ -123,12 +127,12 @@ impl LinkParseKind {
 
     fn report_unclosed_destination(self, p: &mut MarkdownParser, opening_range: TextRange) {
         match self {
-            Self::Link => p.error(crate::syntax::parse_error::unclosed_link(
+            Self::Link => p.error(unclosed_link(
                 p,
                 opening_range,
                 "expected `)` to close URL",
             )),
-            Self::Image => p.error(crate::syntax::parse_error::unclosed_image(
+            Self::Image => p.error(unclosed_image(
                 p,
                 opening_range,
                 "expected `)` to close image URL",
@@ -194,7 +198,7 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
         // Inline link/image: [text](url) or ![alt](url)
         // Bump past ( and lex the following tokens in LinkDefinition context
         // so whitespace separates destination and title.
-        p.expect_with_context(L_PAREN, crate::lexer::MarkdownLexContext::LinkDefinition);
+        p.expect_with_context(L_PAREN, MarkdownLexContext::LinkDefinition);
 
         let destination = p.start();
         let destination_result = parse_inline_link_destination_tokens(p);
@@ -583,7 +587,7 @@ enum DestinationScanResult {
 }
 
 fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationScanResult {
-    const MAX_PAREN_DEPTH: i32 = crate::syntax::MAX_LINK_DESTINATION_PAREN_DEPTH;
+    const MAX_PAREN_DEPTH: i32 = MAX_LINK_DESTINATION_PAREN_DEPTH;
     // Skip leading whitespace to match parse_inline_link_destination_tokens behavior
     while is_title_separator_token(p) {
         skip_link_def_separator_tokens(p);
@@ -597,9 +601,9 @@ fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSca
             }
             if p.at(R_ANGLE) {
                 if pending_escape {
-                    if !crate::syntax::validate_link_destination_text(
+                    if !validate_link_destination_text(
                         p.cur_text(),
-                        crate::syntax::LinkDestinationKind::Enclosed,
+                        LinkDestinationKind::Enclosed,
                         &mut pending_escape,
                     ) {
                         return DestinationScanResult::Invalid;
@@ -610,9 +614,9 @@ fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSca
                 p.bump_link_definition();
                 return DestinationScanResult::Valid;
             }
-            if !crate::syntax::validate_link_destination_text(
+            if !validate_link_destination_text(
                 p.cur_text(),
-                crate::syntax::LinkDestinationKind::Enclosed,
+                LinkDestinationKind::Enclosed,
                 &mut pending_escape,
             ) {
                 return DestinationScanResult::Invalid;
@@ -628,24 +632,24 @@ fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSca
             break;
         }
         let text = p.cur_text();
-        if !crate::syntax::validate_link_destination_text(
+        if !validate_link_destination_text(
             text,
-            crate::syntax::LinkDestinationKind::Raw,
+            LinkDestinationKind::Raw,
             &mut pending_escape,
         ) {
             return DestinationScanResult::Invalid;
         }
-        match crate::syntax::try_update_paren_depth(text, paren_depth, MAX_PAREN_DEPTH) {
-            crate::syntax::ParenDepthResult::Ok(next_depth) => {
+        match try_update_paren_depth(text, paren_depth, MAX_PAREN_DEPTH) {
+            ParenDepthResult::Ok(next_depth) => {
                 paren_depth = next_depth;
                 p.bump_link_definition();
             }
-            crate::syntax::ParenDepthResult::DepthExceeded => {
+            ParenDepthResult::DepthExceeded => {
                 // Paren depth exceeded - destination is truncated at this point.
                 // Per CommonMark/cmark, the link is still valid but closed here.
                 return DestinationScanResult::DepthExceeded;
             }
-            crate::syntax::ParenDepthResult::UnmatchedClose => {
+            ParenDepthResult::UnmatchedClose => {
                 // Unmatched closing paren - destination ends here normally.
                 // The `)` belongs to the enclosing construct (inline link closer).
                 break;
@@ -671,7 +675,7 @@ fn scan_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
     };
 
     let text = p.cur_text();
-    let is_complete = text.len() >= 2 && crate::syntax::ends_with_unescaped_close(text, close_char);
+    let is_complete = text.len() >= 2 && ends_with_unescaped_close(text, close_char);
 
     p.bump_link_definition();
     if is_complete {
@@ -691,7 +695,7 @@ fn scan_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
         }
 
         let text = p.cur_text();
-        if crate::syntax::ends_with_unescaped_close(text, close_char) {
+        if ends_with_unescaped_close(text, close_char) {
             p.bump_link_definition();
             return;
         }
@@ -724,7 +728,7 @@ fn bump_link_def_separator(p: &mut MarkdownParser) {
 
 fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationScanResult {
     p.re_lex_link_definition();
-    const MAX_PAREN_DEPTH: i32 = crate::syntax::MAX_LINK_DESTINATION_PAREN_DEPTH;
+    const MAX_PAREN_DEPTH: i32 = MAX_LINK_DESTINATION_PAREN_DEPTH;
 
     if p.at(L_ANGLE) {
         bump_textual_link_def(p);
@@ -735,9 +739,9 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
             }
             if p.at(R_ANGLE) {
                 if pending_escape {
-                    if !crate::syntax::validate_link_destination_text(
+                    if !validate_link_destination_text(
                         p.cur_text(),
-                        crate::syntax::LinkDestinationKind::Enclosed,
+                        LinkDestinationKind::Enclosed,
                         &mut pending_escape,
                     ) {
                         return DestinationScanResult::Invalid;
@@ -748,9 +752,9 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
                 bump_textual_link_def(p);
                 return DestinationScanResult::Valid;
             }
-            if !crate::syntax::validate_link_destination_text(
+            if !validate_link_destination_text(
                 p.cur_text(),
-                crate::syntax::LinkDestinationKind::Enclosed,
+                LinkDestinationKind::Enclosed,
                 &mut pending_escape,
             ) {
                 return DestinationScanResult::Invalid;
@@ -770,23 +774,23 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
         }
 
         let text = p.cur_text();
-        if !crate::syntax::validate_link_destination_text(
+        if !validate_link_destination_text(
             text,
-            crate::syntax::LinkDestinationKind::Raw,
+            LinkDestinationKind::Raw,
             &mut pending_escape,
         ) {
             return DestinationScanResult::Invalid;
         }
-        match crate::syntax::try_update_paren_depth(text, paren_depth, MAX_PAREN_DEPTH) {
-            crate::syntax::ParenDepthResult::Ok(next_depth) => {
+        match try_update_paren_depth(text, paren_depth, MAX_PAREN_DEPTH) {
+            ParenDepthResult::Ok(next_depth) => {
                 paren_depth = next_depth;
                 bump_textual_link_def(p);
             }
-            crate::syntax::ParenDepthResult::DepthExceeded => {
+            ParenDepthResult::DepthExceeded => {
                 // Paren depth exceeded - destination is truncated at this point.
                 return DestinationScanResult::DepthExceeded;
             }
-            crate::syntax::ParenDepthResult::UnmatchedClose => {
+            ParenDepthResult::UnmatchedClose => {
                 // Unmatched closing paren - destination ends here normally.
                 // The `)` belongs to the enclosing construct (inline link closer).
                 break;
@@ -825,7 +829,7 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
     };
 
     let text = p.cur_text();
-    let is_complete = text.len() >= 2 && crate::syntax::ends_with_unescaped_close(text, close_char);
+    let is_complete = text.len() >= 2 && ends_with_unescaped_close(text, close_char);
 
     bump_textual_link_def(p);
     if is_complete {
@@ -845,7 +849,7 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
         }
 
         let text = p.cur_text();
-        if crate::syntax::ends_with_unescaped_close(text, close_char) {
+        if ends_with_unescaped_close(text, close_char) {
             bump_textual_link_def(p);
             return;
         }

@@ -55,7 +55,7 @@ use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEv
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use std::collections::HashMap;
 
-use crate::parser::ListTightness;
+use crate::parser::{ListItemIndent, ListTightness, QuoteIndent};
 use crate::syntax::reference::normalize_reference_label;
 
 // ============================================================================
@@ -259,9 +259,9 @@ pub struct HtmlRenderContext {
     /// List tightness by text range
     list_tightness: HashMap<TextRange, bool>,
     /// List item indentation details by text range
-    list_item_indents: HashMap<TextRange, crate::parser::ListItemIndent>,
+    list_item_indents: HashMap<TextRange, ListItemIndent>,
     /// Quote marker indents by text range
-    quote_indents: HashMap<TextRange, crate::parser::QuoteIndent>,
+    quote_indents: HashMap<TextRange, QuoteIndent>,
 }
 
 impl HtmlRenderContext {
@@ -269,8 +269,8 @@ impl HtmlRenderContext {
     pub fn new(
         document: &MdDocument,
         list_tightness: &[ListTightness],
-        list_item_indents: &[crate::parser::ListItemIndent],
-        quote_indents: &[crate::parser::QuoteIndent],
+        list_item_indents: &[ListItemIndent],
+        quote_indents: &[QuoteIndent],
     ) -> Self {
         let link_definitions = collect_link_definitions(document);
         let list_tightness_map = list_tightness
@@ -305,7 +305,7 @@ impl HtmlRenderContext {
         self.list_tightness.get(&range).copied().unwrap_or(false)
     }
 
-    pub fn list_item_indent(&self, range: TextRange) -> Option<&crate::parser::ListItemIndent> {
+    pub fn list_item_indent(&self, range: TextRange) -> Option<&ListItemIndent> {
         self.list_item_indents.get(&range)
     }
 
@@ -318,8 +318,8 @@ impl HtmlRenderContext {
 pub fn document_to_html(
     document: &MdDocument,
     list_tightness: &[ListTightness],
-    list_item_indents: &[crate::parser::ListItemIndent],
-    quote_indents: &[crate::parser::QuoteIndent],
+    list_item_indents: &[ListItemIndent],
+    quote_indents: &[QuoteIndent],
 ) -> String {
     let ctx = HtmlRenderContext::new(document, list_tightness, list_item_indents, quote_indents);
     HtmlRenderer::new(&ctx).render(document.syntax())
@@ -1706,7 +1706,7 @@ fn is_empty_content(blocks: &[AnyMdBlock]) -> bool {
 
 const INDENT_CODE_BLOCK_SPACES: usize = 4;
 
-fn list_item_required_indent(entry: &crate::parser::ListItemIndent) -> usize {
+fn list_item_required_indent(entry: &ListItemIndent) -> usize {
     if entry.spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
         entry.marker_indent + entry.marker_width + 1
     } else {

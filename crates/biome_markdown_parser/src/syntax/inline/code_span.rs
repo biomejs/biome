@@ -5,6 +5,7 @@ use biome_parser::prelude::ParsedSyntax::{self, *};
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
+use crate::syntax::{at_block_interrupt, at_setext_underline_after_newline};
 
 /// Parse a hard line break.
 ///
@@ -55,12 +56,12 @@ fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -
             // underline, the code span is invalid — the underline forms a heading.
             if p.at(NEWLINE) {
                 p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
-                if crate::syntax::at_setext_underline_after_newline(p).is_some() {
+                if at_setext_underline_after_newline(p).is_some() {
                     return false;
                 }
                 // Per CommonMark, block interrupts (including list markers) can
                 // terminate paragraphs. A code span cannot cross a block boundary.
-                if crate::syntax::at_block_interrupt(p) || is_at_list_marker_after_newline(p) {
+                if at_block_interrupt(p) || is_at_list_marker_after_newline(p) {
                     return false;
                 }
                 continue;
