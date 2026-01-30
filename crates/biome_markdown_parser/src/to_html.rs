@@ -33,15 +33,25 @@
 //! This implementation prioritizes correctness over performance. Each rendering
 //! pass may allocate multiple intermediate strings. For production rendering,
 //! consider a single-buffer approach using `fmt::Write` or direct string building.
+//!
+//! ## Traversal
+//!
+//! The renderer uses `biome_rowan`'s `.preorder()` visitor to walk the CST and
+//! emit HTML for enter/leave events instead of manual recursive descent. Nodes
+//! that need post-processing (like paragraphs, headers, list items, and
+//! reference links) are buffered until `Leave` so their final HTML wrapper can
+//! be decided with full context.
 
 use biome_markdown_syntax::{
-    AnyCodeBlock, AnyContainerBlock, AnyLeafBlock, AnyMdBlock, AnyMdInline, MdAutolink, MdBullet,
-    MdBulletListItem, MdDocument, MdEntityReference, MdFencedCodeBlock, MdHeader, MdHtmlBlock,
-    MdIndentCodeBlock, MdInlineCode, MdInlineHtml, MdInlineImage, MdInlineLink,
-    MdLinkReferenceDefinition, MdLinkTitle, MdOrderedListItem, MdParagraph, MdQuote,
-    MdReferenceImage, MdReferenceLink, MdSetextHeader, MdTextual,
+    AnyCodeBlock, AnyLeafBlock, AnyMdBlock, AnyMdInline, MarkdownLanguage, MdAutolink, MdBlockList,
+    MdBullet, MdBulletListItem, MdDocument, MdEntityReference, MdFencedCodeBlock, MdHardLine,
+    MdHeader, MdHtmlBlock, MdIndentCodeBlock, MdInlineCode, MdInlineEmphasis, MdInlineHtml,
+    MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink, MdLinkBlock, MdLinkDestination,
+    MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle, MdOrderedListItem, MdParagraph, MdQuote,
+    MdReferenceImage, MdReferenceLink, MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak,
+    MdTextual, MdThematicBreakBlock,
 };
-use biome_rowan::{AstNode, AstNodeList, Direction, TextRange};
+use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use std::collections::HashMap;
 
@@ -312,13 +322,7 @@ pub fn document_to_html(
     quote_indents: &[crate::parser::QuoteIndent],
 ) -> String {
     let ctx = HtmlRenderContext::new(document, list_tightness, list_item_indents, quote_indents);
-    let mut html = String::new();
-
-    for block in document.value() {
-        render_block(&block, &ctx, &mut html, false, 0, 0);
-    }
-
-    html
+    HtmlRenderer::new(&ctx).render(document.syntax())
 }
 
 // ============================================================================
@@ -360,115 +364,702 @@ fn collect_link_definitions(document: &MdDocument) -> HashMap<String, (String, O
 }
 
 // ============================================================================
-// Block Rendering
+// Visitor Rendering
 // ============================================================================
 
-/// Render a block element to HTML.
-fn render_block(
-    block: &AnyMdBlock,
-    ctx: &HtmlRenderContext,
-    out: &mut String,
-    in_tight_list: bool,
-    list_indent: usize,
+struct HtmlRenderer<'a> {
+    ctx: &'a HtmlRenderContext,
+    buffers: Vec<Buffer>,
+    list_stack: Vec<ListState>,
+    list_item_stack: Vec<ListItemState>,
+    quote_indent_stack: Vec<usize>,
     quote_indent: usize,
-) {
-    match block {
-        AnyMdBlock::AnyLeafBlock(leaf) => {
-            render_leaf_block(leaf, ctx, out, in_tight_list, list_indent, quote_indent);
+    depth: usize,
+    opaque_depth: Option<usize>,
+    skip_children_depth: Option<usize>,
+    suppressed_inline_nodes: Vec<Vec<SyntaxNode<MarkdownLanguage>>>,
+}
+
+struct Buffer {
+    kind: BufferKind,
+    content: String,
+}
+
+enum BufferKind {
+    Root,
+    Paragraph(ParagraphState),
+    Header(HeaderState),
+    SetextHeader(HeaderState),
+    ReferenceLink(ReferenceLinkState),
+    ListItem,
+}
+
+struct ParagraphState {
+    in_tight_list: bool,
+    quote_indent: usize,
+    suppress_wrapping: bool,
+}
+
+struct HeaderState {
+    level: usize,
+}
+
+struct ReferenceLinkState {
+    label_display: Option<String>,
+    url: Option<String>,
+    title: Option<String>,
+}
+
+struct ListState {
+    is_tight: bool,
+}
+
+struct ListItemState {
+    is_tight: bool,
+    leading_newline: bool,
+    trim_trailing_newline: bool,
+    is_empty: bool,
+    block_indents: HashMap<TextRange, BlockIndent>,
+}
+
+#[derive(Clone, Copy, Default)]
+struct BlockIndent {
+    indent: usize,
+    first_line_column: usize,
+}
+
+impl<'a> HtmlRenderer<'a> {
+    fn new(ctx: &'a HtmlRenderContext) -> Self {
+        Self {
+            ctx,
+            buffers: vec![Buffer {
+                kind: BufferKind::Root,
+                content: String::new(),
+            }],
+            list_stack: Vec::new(),
+            list_item_stack: Vec::new(),
+            quote_indent_stack: Vec::new(),
+            quote_indent: 0,
+            depth: 0,
+            opaque_depth: None,
+            skip_children_depth: None,
+            suppressed_inline_nodes: Vec::new(),
         }
-        AnyMdBlock::AnyContainerBlock(container) => {
-            render_container_block(container, ctx, out, list_indent, quote_indent);
+    }
+
+    fn render(mut self, root: &SyntaxNode<MarkdownLanguage>) -> String {
+        for event in root.preorder() {
+            match event {
+                WalkEvent::Enter(node) => {
+                    if self.opaque_depth.is_some() {
+                        self.depth += 1;
+                        continue;
+                    }
+                    if let Some(skip) = self.skip_children_depth
+                        && self.depth > skip
+                    {
+                        self.depth += 1;
+                        continue;
+                    }
+
+                    self.enter(node);
+                    self.depth += 1;
+                }
+                WalkEvent::Leave(node) => {
+                    self.depth = self.depth.saturating_sub(1);
+                    if let Some(opaque_depth) = self.opaque_depth {
+                        if self.depth == opaque_depth {
+                            self.opaque_depth = None;
+                        }
+                        continue;
+                    }
+
+                    if let Some(skip) = self.skip_children_depth {
+                        if self.depth > skip {
+                            continue;
+                        }
+                        if self.depth == skip {
+                            self.leave(node);
+                            self.skip_children_depth = None;
+                            continue;
+                        }
+                    }
+
+                    self.leave(node);
+                }
+            }
         }
+
+        self.buffers
+            .pop()
+            .map(|buffer| buffer.content)
+            .unwrap_or_default()
+    }
+
+    fn enter(&mut self, node: SyntaxNode<MarkdownLanguage>) {
+        if MdInlineItemList::cast(node.clone()).is_some()
+            && self
+                .suppressed_inline_nodes
+                .iter()
+                .flatten()
+                .any(|suppressed| *suppressed == node)
+        {
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
+        if MdParagraph::cast(node.clone()).is_some() {
+            let suppress_wrapping = node.parent().and_then(MdHeader::cast).is_some()
+                || node.parent().and_then(MdSetextHeader::cast).is_some();
+            let is_direct_list_item = node
+                .parent()
+                .and_then(MdBlockList::cast)
+                .and_then(|list| list.syntax().parent())
+                .and_then(MdBullet::cast)
+                .is_some();
+            let in_tight_list = is_direct_list_item
+                && self
+                    .list_item_stack
+                    .last()
+                    .is_some_and(|state| state.is_tight);
+            let state = ParagraphState {
+                in_tight_list,
+                quote_indent: self.quote_indent,
+                suppress_wrapping,
+            };
+            self.push_buffer(BufferKind::Paragraph(state));
+            return;
+        }
+
+        if let Some(header) = MdHeader::cast(node.clone()) {
+            let level = header_level(&header);
+            self.push_buffer(BufferKind::Header(HeaderState { level }));
+            return;
+        }
+
+        if let Some(header) = MdSetextHeader::cast(node.clone()) {
+            let level = setext_header_level(&header);
+            self.push_buffer(BufferKind::SetextHeader(HeaderState { level }));
+            return;
+        }
+
+        if let Some(quote) = MdQuote::cast(node.clone()) {
+            self.push_str("<blockquote>\n");
+            let marker_indent = self.ctx.quote_indent(quote.syntax().text_trimmed_range());
+            self.quote_indent += marker_indent;
+            self.quote_indent_stack.push(marker_indent);
+            return;
+        }
+
+        if let Some(list) = MdBulletListItem::cast(node.clone()) {
+            let is_tight = self.ctx.is_list_tight(list.syntax().text_trimmed_range());
+            self.list_stack.push(ListState { is_tight });
+            self.push_str("<ul>\n");
+            return;
+        }
+
+        if let Some(list) = MdOrderedListItem::cast(node.clone()) {
+            let is_tight = self.ctx.is_list_tight(list.syntax().text_trimmed_range());
+            self.list_stack.push(ListState { is_tight });
+
+            let start = list
+                .md_bullet_list()
+                .first()
+                .and_then(|bullet| bullet.bullet().ok())
+                .map_or(1, |marker| {
+                    let text = marker.text();
+                    text.trim_start()
+                        .chars()
+                        .take_while(|c| c.is_ascii_digit())
+                        .collect::<String>()
+                        .parse::<u32>()
+                        .unwrap_or(1)
+                });
+
+            if start == 1 {
+                self.push_str("<ol>\n");
+            } else {
+                self.push_str("<ol start=\"");
+                self.push_str(&start.to_string());
+                self.push_str("\">\n");
+            }
+            return;
+        }
+
+        if let Some(bullet) = MdBullet::cast(node.clone()) {
+            let list_is_tight = self.list_stack.last().is_some_and(|state| state.is_tight);
+            let blocks: Vec<_> = bullet.content().iter().collect();
+            let item_has_blank_line = blocks
+                .windows(2)
+                .any(|pair| is_newline_block(&pair[0]) && is_newline_block(&pair[1]));
+            let is_tight = list_is_tight && !item_has_blank_line;
+            let is_empty = is_empty_content(&blocks);
+
+            let first_is_paragraph = blocks.first().is_some_and(is_paragraph_block);
+            let last_is_paragraph = blocks
+                .iter()
+                .rev()
+                .find(|b| !is_newline_block(b))
+                .is_some_and(is_paragraph_block);
+
+            let leading_newline = !is_tight || !first_is_paragraph;
+            let trim_trailing_newline = is_tight && last_is_paragraph;
+
+            let list_indent = self
+                .ctx
+                .list_item_indent(bullet.syntax().text_trimmed_range());
+            let (indent, first_line_code_indent, first_line_column) = match list_indent {
+                Some(entry) => {
+                    let base = list_item_required_indent(entry);
+                    let first_line_code =
+                        (entry.spaces_after_marker > INDENT_CODE_BLOCK_SPACES).then_some(base);
+                    let column = entry.marker_indent + entry.marker_width;
+                    (base, first_line_code, column)
+                }
+                None => (0, None, 0),
+            };
+
+            let mut block_indents = HashMap::new();
+            for (idx, block) in blocks.iter().enumerate() {
+                let block_indent = if idx == 0 {
+                    match (first_line_code_indent, block) {
+                        (
+                            Some(code_indent),
+                            AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
+                                AnyCodeBlock::MdIndentCodeBlock(_),
+                            )),
+                        ) => code_indent,
+                        _ => indent,
+                    }
+                } else {
+                    indent
+                };
+
+                let column_for_block = if idx == 0
+                    && first_line_code_indent.is_some()
+                    && matches!(
+                        block,
+                        AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
+                            AnyCodeBlock::MdIndentCodeBlock(_)
+                        ))
+                    ) {
+                    first_line_column
+                } else {
+                    0
+                };
+
+                block_indents.insert(
+                    block.syntax().text_trimmed_range(),
+                    BlockIndent {
+                        indent: block_indent,
+                        first_line_column: column_for_block,
+                    },
+                );
+            }
+
+            self.list_item_stack.push(ListItemState {
+                is_tight,
+                leading_newline,
+                trim_trailing_newline,
+                is_empty,
+                block_indents,
+            });
+            self.push_buffer(BufferKind::ListItem);
+            if is_empty {
+                self.skip_children_depth = Some(self.depth);
+            }
+            return;
+        }
+
+        if let Some(code) = MdFencedCodeBlock::cast(node.clone()) {
+            let block_indent = self.block_indent(code.syntax().text_trimmed_range());
+            let quote_indent = self.quote_indent;
+            render_fenced_code_block(&code, self.out_mut(), block_indent.indent, quote_indent);
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
+        if let Some(code) = MdIndentCodeBlock::cast(node.clone()) {
+            let block_indent = self.block_indent(code.syntax().text_trimmed_range());
+            let quote_indent = self.quote_indent;
+            if block_indent.first_line_column > 0 {
+                render_indented_code_block_in_list(
+                    &code,
+                    self.out_mut(),
+                    block_indent.indent,
+                    quote_indent,
+                    block_indent.first_line_column,
+                );
+            } else {
+                render_indented_code_block(
+                    &code,
+                    self.out_mut(),
+                    block_indent.indent,
+                    quote_indent,
+                );
+            }
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
+        if let Some(html) = MdHtmlBlock::cast(node.clone()) {
+            let is_inline = node
+                .parent()
+                .and_then(biome_markdown_syntax::MdInlineItemList::cast)
+                .is_some();
+            if is_inline {
+                let content = collect_raw_inline_text(&html.content());
+                self.push_str(&content);
+            } else {
+                let block_indent = self.block_indent(html.syntax().text_trimmed_range());
+                let quote_indent = self.quote_indent;
+                render_html_block(&html, self.out_mut(), block_indent.indent, quote_indent);
+            }
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
+        if MdThematicBreakBlock::cast(node.clone()).is_some() {
+            self.push_str("<hr />\n");
+            return;
+        }
+
+        if MdLinkReferenceDefinition::cast(node.clone()).is_some()
+            || MdLinkBlock::cast(node.clone()).is_some()
+        {
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
+        if MdLinkDestination::cast(node.clone()).is_some()
+            || MdLinkLabel::cast(node.clone()).is_some()
+            || MdLinkTitle::cast(node.clone()).is_some()
+            || MdReferenceLinkLabel::cast(node.clone()).is_some()
+        {
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
+        if MdInlineEmphasis::cast(node.clone()).is_some() {
+            self.push_str("<strong>");
+            return;
+        }
+
+        if MdInlineItalic::cast(node.clone()).is_some() {
+            self.push_str("<em>");
+            return;
+        }
+
+        if let Some(code) = MdInlineCode::cast(node.clone()) {
+            render_inline_code(&code, self.out_mut());
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
+        if let Some(link) = MdInlineLink::cast(node.clone()) {
+            let dest = collect_inline_text(&link.destination());
+            let dest = process_link_destination(&dest);
+            self.suppressed_inline_nodes
+                .push(vec![link.destination().syntax().clone()]);
+
+            self.push_str("<a href=\"");
+            self.push_str(&escape_html_attribute(&dest));
+            self.push_str("\"");
+
+            if let Some(title) = link.title() {
+                render_link_title(&title, self.out_mut());
+            }
+
+            self.push_str(">");
+            return;
+        }
+
+        if let Some(img) = MdInlineImage::cast(node.clone()) {
+            let alt = extract_alt_text(&img.alt(), self.ctx);
+            let dest = collect_inline_text(&img.destination());
+            let dest = process_link_destination(&dest);
+
+            self.push_str("<img src=\"");
+            self.push_str(&escape_html_attribute(&dest));
+            self.push_str("\" alt=\"");
+            self.push_str(&escape_html_attribute(&alt));
+            self.push_str("\"");
+
+            if let Some(title) = img.title() {
+                render_link_title(&title, self.out_mut());
+            }
+
+            self.push_str(" />");
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
+        if let Some(link) = MdReferenceLink::cast(node.clone()) {
+            let text_raw = collect_inline_text(&link.text());
+            let (label, label_display) =
+                resolve_reference_label(link.label(), text_raw, |label_node| {
+                    collect_inline_text(&label_node.label())
+                });
+            let (url, title) = self
+                .ctx
+                .get_link_definition(&label)
+                .map_or((None, None), |(url, title)| {
+                    (Some(url.clone()), title.clone())
+                });
+            self.push_buffer(BufferKind::ReferenceLink(ReferenceLinkState {
+                label_display,
+                url,
+                title,
+            }));
+            return;
+        }
+
+        if let Some(img) = MdReferenceImage::cast(node.clone()) {
+            let alt = extract_alt_text(&img.alt(), self.ctx);
+            let alt_raw = collect_inline_text(&img.alt());
+            let (label, label_display) =
+                resolve_reference_label(img.label(), alt_raw, |label_node| {
+                    collect_inline_text(&label_node.label())
+                });
+
+            if let Some((url, title)) = self.ctx.get_link_definition(&label) {
+                self.push_str("<img src=\"");
+                self.push_str(&escape_html_attribute(url));
+                self.push_str("\" alt=\"");
+                self.push_str(&escape_html_attribute(&alt));
+                self.push_str("\"");
+
+                if let Some(t) = title {
+                    self.push_str(" title=\"");
+                    self.push_str(&escape_html_attribute(t));
+                    self.push_str("\"");
+                }
+
+                self.push_str(" />");
+            } else {
+                self.push_str("![");
+                self.push_str(&alt);
+                self.push_str("]");
+                if let Some(label) = label_display {
+                    self.push_str("[");
+                    self.push_str(&escape_html(&label));
+                    self.push_str("]");
+                }
+            }
+
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
+        if let Some(autolink) = MdAutolink::cast(node.clone()) {
+            render_autolink(&autolink, self.out_mut());
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
+        if let Some(html) = MdInlineHtml::cast(node.clone()) {
+            render_inline_html(&html, self.out_mut());
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
+        if let Some(hard) = MdHardLine::cast(node.clone()) {
+            if is_last_inline_item(&node) {
+                if let Ok(token) = hard.value_token()
+                    && token.text().starts_with('\\')
+                {
+                    self.push_str("\\");
+                }
+            } else {
+                self.push_str("<br />\n");
+            }
+            return;
+        }
+
+        if MdSoftBreak::cast(node.clone()).is_some() {
+            self.push_str("\n");
+            return;
+        }
+
+        if let Some(text) = MdTextual::cast(node.clone()) {
+            render_textual(&text, self.out_mut());
+            return;
+        }
+
+        if let Some(entity) = MdEntityReference::cast(node) {
+            render_entity_reference(&entity, self.out_mut());
+        }
+    }
+
+    fn leave(&mut self, node: SyntaxNode<MarkdownLanguage>) {
+        if MdParagraph::cast(node.clone()).is_some() {
+            let buffer = self.pop_buffer();
+            if let BufferKind::Paragraph(state) = buffer.kind {
+                if state.suppress_wrapping {
+                    self.push_str(&buffer.content);
+                    return;
+                }
+                let mut content = buffer.content;
+                if state.quote_indent > 0 {
+                    content = strip_quote_prefixes(&content, state.quote_indent);
+                }
+                let content = strip_paragraph_indent(
+                    content.trim_matches(|c| c == ' ' || c == '\n' || c == '\r'),
+                );
+
+                if state.in_tight_list {
+                    self.push_str(&content);
+                    self.push_str("\n");
+                } else {
+                    self.push_str("<p>");
+                    self.push_str(&content);
+                    self.push_str("</p>\n");
+                }
+            }
+            return;
+        }
+
+        if MdHeader::cast(node.clone()).is_some() || MdSetextHeader::cast(node.clone()).is_some() {
+            let buffer = self.pop_buffer();
+            if let BufferKind::Header(state) | BufferKind::SetextHeader(state) = buffer.kind {
+                self.push_str("<h");
+                self.push_str(&state.level.to_string());
+                self.push_str(">");
+                self.push_str(buffer.content.trim());
+                self.push_str("</h");
+                self.push_str(&state.level.to_string());
+                self.push_str(">\n");
+            }
+            return;
+        }
+
+        if MdQuote::cast(node.clone()).is_some() {
+            self.push_str("</blockquote>\n");
+            if let Some(indent) = self.quote_indent_stack.pop() {
+                self.quote_indent = self.quote_indent.saturating_sub(indent);
+            }
+            return;
+        }
+
+        if MdBulletListItem::cast(node.clone()).is_some() {
+            self.push_str("</ul>\n");
+            self.list_stack.pop();
+            return;
+        }
+
+        if MdOrderedListItem::cast(node.clone()).is_some() {
+            self.push_str("</ol>\n");
+            self.list_stack.pop();
+            return;
+        }
+
+        if MdBullet::cast(node.clone()).is_some() {
+            let buffer = self.pop_buffer();
+            let state = self.list_item_stack.pop();
+            if let (BufferKind::ListItem, Some(state)) = (buffer.kind, state) {
+                if state.is_empty {
+                    self.push_str("<li></li>\n");
+                    return;
+                }
+
+                self.push_str("<li>");
+                if state.leading_newline {
+                    self.push_str("\n");
+                }
+
+                let mut content = buffer.content;
+                if state.trim_trailing_newline && content.ends_with('\n') {
+                    content.pop();
+                }
+                self.push_str(&content);
+                self.push_str("</li>\n");
+            }
+            return;
+        }
+
+        if MdInlineEmphasis::cast(node.clone()).is_some() {
+            self.push_str("</strong>");
+            return;
+        }
+
+        if MdInlineItalic::cast(node.clone()).is_some() {
+            self.push_str("</em>");
+            return;
+        }
+
+        if MdInlineLink::cast(node.clone()).is_some() {
+            self.suppressed_inline_nodes.pop();
+            self.push_str("</a>");
+            return;
+        }
+
+        if MdReferenceLink::cast(node).is_some() {
+            let buffer = self.pop_buffer();
+            if let BufferKind::ReferenceLink(state) = buffer.kind {
+                if let Some(url) = state.url {
+                    self.push_str("<a href=\"");
+                    self.push_str(&escape_html_attribute(&url));
+                    self.push_str("\"");
+                    if let Some(title) = state.title {
+                        self.push_str(" title=\"");
+                        self.push_str(&escape_html_attribute(&title));
+                        self.push_str("\"");
+                    }
+                    self.push_str(">");
+                    self.push_str(&buffer.content);
+                    self.push_str("</a>");
+                } else {
+                    self.push_str("[");
+                    self.push_str(&buffer.content);
+                    self.push_str("]");
+                    if let Some(label) = state.label_display {
+                        self.push_str("[");
+                        self.push_str(&escape_html(&label));
+                        self.push_str("]");
+                    }
+                }
+            }
+        }
+    }
+
+    fn push_buffer(&mut self, kind: BufferKind) {
+        self.buffers.push(Buffer {
+            kind,
+            content: String::new(),
+        });
+    }
+
+    fn pop_buffer(&mut self) -> Buffer {
+        self.buffers.pop().unwrap_or(Buffer {
+            kind: BufferKind::Root,
+            content: String::new(),
+        })
+    }
+
+    fn out_mut(&mut self) -> &mut String {
+        &mut self.buffers.last_mut().expect("missing buffer").content
+    }
+
+    fn push_str(&mut self, value: &str) {
+        self.out_mut().push_str(value);
+    }
+
+    fn block_indent(&self, range: TextRange) -> BlockIndent {
+        self.list_item_stack
+            .last()
+            .and_then(|state| state.block_indents.get(&range).copied())
+            .unwrap_or_default()
     }
 }
 
-/// Render a leaf block to HTML.
-fn render_leaf_block(
-    block: &AnyLeafBlock,
-    ctx: &HtmlRenderContext,
-    out: &mut String,
-    in_tight_list: bool,
-    list_indent: usize,
-    quote_indent: usize,
-) {
-    match block {
-        AnyLeafBlock::MdParagraph(para) => {
-            render_paragraph(para, ctx, out, in_tight_list, quote_indent);
-        }
-        AnyLeafBlock::MdHeader(header) => {
-            render_atx_header(header, ctx, out);
-        }
-        AnyLeafBlock::MdSetextHeader(header) => {
-            render_setext_header(header, ctx, out);
-        }
-        AnyLeafBlock::AnyCodeBlock(code) => {
-            render_code_block(code, out, list_indent, quote_indent);
-        }
-        AnyLeafBlock::MdThematicBreakBlock(_) => {
-            out.push_str("<hr />\n");
-        }
-        AnyLeafBlock::MdHtmlBlock(html) => {
-            render_html_block(html, out, list_indent, quote_indent);
-        }
-        AnyLeafBlock::MdLinkReferenceDefinition(_) => {
-            // Link reference definitions don't produce output
-        }
-        AnyLeafBlock::MdLinkBlock(_) => {
-            // MdLinkBlock is an internal structure, skip it
-        }
-        AnyLeafBlock::MdNewline(_) => {
-            // Blank lines don't produce output
-        }
-    }
-}
-
-/// Render a container block to HTML.
-fn render_container_block(
-    block: &AnyContainerBlock,
-    ctx: &HtmlRenderContext,
-    out: &mut String,
-    list_indent: usize,
-    quote_indent: usize,
-) {
-    match block {
-        AnyContainerBlock::MdQuote(quote) => {
-            render_blockquote(quote, ctx, out, list_indent, quote_indent);
-        }
-        AnyContainerBlock::MdBulletListItem(list) => {
-            render_bullet_list(list, ctx, out, quote_indent);
-        }
-        AnyContainerBlock::MdOrderedListItem(list) => {
-            render_ordered_list(list, ctx, out, quote_indent);
-        }
-    }
-}
-
-/// Render a paragraph.
-fn render_paragraph(
-    para: &MdParagraph,
-    ctx: &HtmlRenderContext,
-    out: &mut String,
-    in_tight_list: bool,
-    quote_indent: usize,
-) {
-    let mut content = render_inline_list(&para.list(), ctx);
-    if quote_indent > 0 {
-        content = strip_quote_prefixes(&content, quote_indent);
-    }
-    // Trim both ends - leading whitespace can appear from parser including
-    // the space after list markers in the paragraph content
-    let content =
-        strip_paragraph_indent(content.trim_matches(|c| c == ' ' || c == '\n' || c == '\r'));
-
-    if in_tight_list {
-        // In tight lists, paragraphs are rendered without <p> tags
-        out.push_str(&content);
-        out.push('\n');
-    } else {
-        out.push_str("<p>");
-        out.push_str(&content);
-        out.push_str("</p>\n");
-    }
+fn is_last_inline_item(node: &SyntaxNode<MarkdownLanguage>) -> bool {
+    let Some(parent) = node.parent() else {
+        return false;
+    };
+    let Some(list) = biome_markdown_syntax::MdInlineItemList::cast(parent) else {
+        return false;
+    };
+    list.iter().last().is_some_and(|item| item.syntax() == node)
 }
 
 /// Strip leading whitespace from paragraph continuation lines.
@@ -492,36 +1083,23 @@ fn strip_paragraph_indent(content: &str) -> String {
 }
 
 /// Render an ATX header (# style).
-fn render_atx_header(header: &MdHeader, ctx: &HtmlRenderContext, out: &mut String) {
+fn header_level(header: &MdHeader) -> usize {
     // Count total hash characters in the before list.
     // The lexer emits all consecutive `#` chars as a single HASH token,
     // so we sum the text lengths of all hash tokens.
     // Use text_trimmed() to exclude any leading trivia (skipped indentation spaces).
-    let level = header
+    header
         .before()
         .iter()
         .filter_map(|h| h.hash_token().ok())
         .map(|tok| tok.text_trimmed().len())
         .sum::<usize>()
-        .clamp(1, 6);
-
-    out.push_str("<h");
-    out.push_str(&level.to_string());
-    out.push('>');
-
-    if let Some(content) = header.content() {
-        let text = render_inline_list(&content.list(), ctx);
-        out.push_str(text.trim());
-    }
-
-    out.push_str("</h");
-    out.push_str(&level.to_string());
-    out.push_str(">\n");
+        .clamp(1, 6)
 }
 
 /// Render a setext header (underline style).
-fn render_setext_header(header: &MdSetextHeader, ctx: &HtmlRenderContext, out: &mut String) {
-    let level = if let Ok(underline) = header.underline_token() {
+fn setext_header_level(header: &MdSetextHeader) -> usize {
+    if let Ok(underline) = header.underline_token() {
         let text = underline.text();
         if text.trim_start().starts_with('=') {
             1
@@ -530,40 +1108,12 @@ fn render_setext_header(header: &MdSetextHeader, ctx: &HtmlRenderContext, out: &
         }
     } else {
         1
-    };
-
-    out.push_str("<h");
-    out.push_str(&level.to_string());
-    out.push('>');
-
-    let text = render_inline_list(&header.content(), ctx);
-    out.push_str(text.trim());
-
-    out.push_str("</h");
-    out.push_str(&level.to_string());
-    out.push_str(">\n");
+    }
 }
 
 // ============================================================================
 // Code Block Rendering
 // ============================================================================
-
-/// Render a code block (fenced or indented).
-fn render_code_block(
-    code: &AnyCodeBlock,
-    out: &mut String,
-    list_indent: usize,
-    quote_indent: usize,
-) {
-    match code {
-        AnyCodeBlock::MdFencedCodeBlock(fenced) => {
-            render_fenced_code_block(fenced, out, list_indent, quote_indent);
-        }
-        AnyCodeBlock::MdIndentCodeBlock(indented) => {
-            render_indented_code_block(indented, out, list_indent, quote_indent);
-        }
-    }
-}
 
 /// Render a fenced code block.
 ///
@@ -697,25 +1247,6 @@ fn render_indented_code_block_in_list(
     out.push_str("</code></pre>\n");
 }
 
-fn render_block_in_list(
-    block: &AnyMdBlock,
-    ctx: &HtmlRenderContext,
-    out: &mut String,
-    in_tight_list: bool,
-    list_indent: usize,
-    quote_indent: usize,
-    first_line_column: usize,
-) {
-    if let AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(AnyCodeBlock::MdIndentCodeBlock(
-        code,
-    ))) = block
-    {
-        render_indented_code_block_in_list(code, out, list_indent, quote_indent, first_line_column);
-    } else {
-        render_block(block, ctx, out, in_tight_list, list_indent, quote_indent);
-    }
-}
-
 /// Render an HTML block.
 fn render_html_block(
     html: &MdHtmlBlock,
@@ -733,388 +1264,6 @@ fn render_html_block(
     out.push_str(&content);
     if !content.ends_with('\n') {
         out.push('\n');
-    }
-}
-
-// ============================================================================
-// Container Block Rendering
-// ============================================================================
-
-/// Render a blockquote.
-fn render_blockquote(
-    quote: &MdQuote,
-    ctx: &HtmlRenderContext,
-    out: &mut String,
-    list_indent: usize,
-    quote_indent: usize,
-) {
-    out.push_str("<blockquote>\n");
-
-    let content = quote.content();
-    let marker_indent = ctx.quote_indent(quote.syntax().text_trimmed_range());
-    for block in content.iter() {
-        render_block(
-            &block,
-            ctx,
-            out,
-            false,
-            list_indent,
-            quote_indent + marker_indent,
-        );
-    }
-
-    out.push_str("</blockquote>\n");
-}
-
-/// Render a bullet (unordered) list.
-fn render_bullet_list(
-    list: &MdBulletListItem,
-    ctx: &HtmlRenderContext,
-    out: &mut String,
-    quote_indent: usize,
-) {
-    let range = list.syntax().text_trimmed_range();
-    let is_tight = ctx.is_list_tight(range);
-
-    out.push_str("<ul>\n");
-
-    for bullet in list.md_bullet_list() {
-        render_list_item(&bullet, ctx, out, is_tight, quote_indent);
-    }
-
-    out.push_str("</ul>\n");
-}
-
-/// Render an ordered list.
-fn render_ordered_list(
-    list: &MdOrderedListItem,
-    ctx: &HtmlRenderContext,
-    out: &mut String,
-    quote_indent: usize,
-) {
-    let range = list.syntax().text_trimmed_range();
-    let is_tight = ctx.is_list_tight(range);
-
-    // Get starting number from first item
-    let start = list
-        .md_bullet_list()
-        .first()
-        .and_then(|bullet| bullet.bullet().ok())
-        .map_or(1, |marker| {
-            let text = marker.text();
-            // Extract number from "1." or "1)" format
-            text.trim_start()
-                .chars()
-                .take_while(|c| c.is_ascii_digit())
-                .collect::<String>()
-                .parse::<u32>()
-                .unwrap_or(1)
-        });
-
-    if start == 1 {
-        out.push_str("<ol>\n");
-    } else {
-        out.push_str("<ol start=\"");
-        out.push_str(&start.to_string());
-        out.push_str("\">\n");
-    }
-
-    for bullet in list.md_bullet_list() {
-        render_list_item(&bullet, ctx, out, is_tight, quote_indent);
-    }
-
-    out.push_str("</ol>\n");
-}
-
-/// Render a list item.
-fn render_list_item(
-    bullet: &MdBullet,
-    ctx: &HtmlRenderContext,
-    out: &mut String,
-    is_tight: bool,
-    quote_indent: usize,
-) {
-    out.push_str("<li>");
-
-    let list_indent = ctx.list_item_indent(bullet.syntax().text_trimmed_range());
-    let blocks: Vec<_> = bullet.content().iter().collect();
-    // A blank line within an item requires two consecutive newline blocks
-    // (one ending the previous line, one for the blank line itself).
-    // A single MD_NEWLINE between blocks is just a structural separator.
-    let item_has_blank_line = blocks
-        .windows(2)
-        .any(|pair| is_newline_block(&pair[0]) && is_newline_block(&pair[1]));
-    let is_tight = is_tight && !item_has_blank_line;
-
-    let (indent, first_line_code_indent, first_line_column) = match list_indent {
-        Some(entry) => {
-            let base = list_item_required_indent(entry);
-            let first_line_code =
-                (entry.spaces_after_marker > INDENT_CODE_BLOCK_SPACES).then_some(base);
-            let column = entry.marker_indent + entry.marker_width;
-            (base, first_line_code, column)
-        }
-        None => (0, None, 0),
-    };
-
-    if is_empty_content(&blocks) {
-        out.push_str("</li>\n");
-        return;
-    }
-
-    if is_tight {
-        if blocks.len() == 1 && is_paragraph_block(&blocks[0]) {
-            // Tight list with single paragraph: no newline after <li>
-            if let Some(block) = blocks.first() {
-                let block_indent = match (first_line_code_indent, block) {
-                    (
-                        Some(code_indent),
-                        AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
-                            AnyCodeBlock::MdIndentCodeBlock(_),
-                        )),
-                    ) => code_indent,
-                    _ => indent,
-                };
-                let column_for_block = if first_line_code_indent.is_some()
-                    && matches!(
-                        block,
-                        AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
-                            AnyCodeBlock::MdIndentCodeBlock(_)
-                        ))
-                    ) {
-                    first_line_column
-                } else {
-                    0
-                };
-                render_block_in_list(
-                    block,
-                    ctx,
-                    out,
-                    true,
-                    block_indent,
-                    quote_indent,
-                    column_for_block,
-                );
-            }
-            // Remove trailing newline for tight lists
-            if out.ends_with('\n') {
-                out.pop();
-            }
-        } else if blocks.first().is_some_and(is_paragraph_block) {
-            // Tight list with multiple blocks: render paragraph inline with <li>
-            if let Some(first) = blocks.first() {
-                let block_indent = match (first_line_code_indent, first) {
-                    (
-                        Some(code_indent),
-                        AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
-                            AnyCodeBlock::MdIndentCodeBlock(_),
-                        )),
-                    ) => code_indent,
-                    _ => indent,
-                };
-                let column_for_block = if first_line_code_indent.is_some()
-                    && matches!(
-                        first,
-                        AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
-                            AnyCodeBlock::MdIndentCodeBlock(_)
-                        ))
-                    ) {
-                    first_line_column
-                } else {
-                    0
-                };
-                render_block_in_list(
-                    first,
-                    ctx,
-                    out,
-                    true,
-                    block_indent,
-                    quote_indent,
-                    column_for_block,
-                );
-            }
-            for block in blocks.iter().skip(1) {
-                render_block_in_list(block, ctx, out, true, indent, quote_indent, 0);
-            }
-        } else {
-            out.push('\n');
-            for (idx, block) in blocks.iter().enumerate() {
-                let block_indent = if idx == 0 {
-                    match (first_line_code_indent, block) {
-                        (
-                            Some(code_indent),
-                            AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
-                                AnyCodeBlock::MdIndentCodeBlock(_),
-                            )),
-                        ) => code_indent,
-                        _ => indent,
-                    }
-                } else {
-                    indent
-                };
-                let column_for_block = if idx == 0
-                    && first_line_code_indent.is_some()
-                    && matches!(
-                        block,
-                        AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
-                            AnyCodeBlock::MdIndentCodeBlock(_)
-                        ))
-                    ) {
-                    first_line_column
-                } else {
-                    0
-                };
-                render_block_in_list(
-                    block,
-                    ctx,
-                    out,
-                    true,
-                    block_indent,
-                    quote_indent,
-                    column_for_block,
-                );
-            }
-            // Remove trailing newline when the last content block is a paragraph
-            // (tight list paragraphs should not have trailing newlines)
-            if blocks
-                .iter()
-                .rev()
-                .find(|b| !is_newline_block(b))
-                .is_some_and(is_paragraph_block)
-                && out.ends_with('\n')
-            {
-                out.pop();
-            }
-        }
-    } else {
-        // Loose list or multiple blocks
-        out.push('\n');
-        for (idx, block) in blocks.iter().enumerate() {
-            let block_indent = if idx == 0 {
-                match (first_line_code_indent, block) {
-                    (
-                        Some(code_indent),
-                        AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
-                            AnyCodeBlock::MdIndentCodeBlock(_),
-                        )),
-                    ) => code_indent,
-                    _ => indent,
-                }
-            } else {
-                indent
-            };
-            let column_for_block = if idx == 0
-                && first_line_code_indent.is_some()
-                && matches!(
-                    block,
-                    AnyMdBlock::AnyLeafBlock(AnyLeafBlock::AnyCodeBlock(
-                        AnyCodeBlock::MdIndentCodeBlock(_)
-                    ))
-                ) {
-                first_line_column
-            } else {
-                0
-            };
-            render_block_in_list(
-                block,
-                ctx,
-                out,
-                false,
-                block_indent,
-                quote_indent,
-                column_for_block,
-            );
-        }
-    }
-
-    out.push_str("</li>\n");
-}
-
-// ============================================================================
-// Inline Rendering
-// ============================================================================
-
-/// Render an inline item list to HTML string.
-fn render_inline_list(
-    list: &biome_markdown_syntax::MdInlineItemList,
-    ctx: &HtmlRenderContext,
-) -> String {
-    let mut result = String::new();
-    let items: Vec<_> = list.iter().collect();
-    let len = items.len();
-
-    for (i, item) in items.iter().enumerate() {
-        let is_last = i == len - 1;
-
-        // Special handling for hard line breaks at end of block
-        if is_last && let AnyMdInline::MdHardLine(hard) = item {
-            // Per CommonMark: hard line break at end of block is ignored
-            // But if it was a backslash, output the backslash
-            if let Ok(token) = hard.value_token()
-                && token.text().starts_with('\\')
-            {
-                result.push('\\');
-            }
-            // Otherwise (trailing spaces), output nothing
-            continue;
-        }
-
-        render_inline(item, ctx, &mut result);
-    }
-    result
-}
-
-/// Render an inline element.
-fn render_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &mut String) {
-    match inline {
-        AnyMdInline::MdTextual(text) => {
-            render_textual(text, out);
-        }
-        AnyMdInline::MdInlineEmphasis(em) => {
-            out.push_str("<strong>");
-            out.push_str(&render_inline_list(&em.content(), ctx));
-            out.push_str("</strong>");
-        }
-        AnyMdInline::MdInlineItalic(italic) => {
-            out.push_str("<em>");
-            out.push_str(&render_inline_list(&italic.content(), ctx));
-            out.push_str("</em>");
-        }
-        AnyMdInline::MdInlineCode(code) => {
-            render_inline_code(code, out);
-        }
-        AnyMdInline::MdInlineLink(link) => {
-            render_inline_link(link, ctx, out);
-        }
-        AnyMdInline::MdInlineImage(img) => {
-            render_inline_image(img, ctx, out);
-        }
-        AnyMdInline::MdReferenceLink(link) => {
-            render_reference_link(link, ctx, out);
-        }
-        AnyMdInline::MdReferenceImage(img) => {
-            render_reference_image(img, ctx, out);
-        }
-        AnyMdInline::MdAutolink(autolink) => {
-            render_autolink(autolink, out);
-        }
-        AnyMdInline::MdInlineHtml(html) => {
-            render_inline_html(html, out);
-        }
-        AnyMdInline::MdHtmlBlock(html) => {
-            // Inline HTML block (rare case)
-            let content = collect_raw_inline_text(&html.content());
-            out.push_str(&content);
-        }
-        AnyMdInline::MdHardLine(_) => {
-            out.push_str("<br />\n");
-        }
-        AnyMdInline::MdSoftBreak(_) => {
-            out.push('\n');
-        }
-        AnyMdInline::MdEntityReference(entity) => {
-            render_entity_reference(entity, out);
-        }
     }
 }
 
@@ -1152,125 +1301,6 @@ fn render_inline_code(code: &MdInlineCode, out: &mut String) {
     out.push_str("</code>");
 }
 
-/// Render an inline link.
-fn render_inline_link(link: &MdInlineLink, ctx: &HtmlRenderContext, out: &mut String) {
-    let text = render_inline_list(&link.text(), ctx);
-    let dest = collect_inline_text(&link.destination());
-    let dest = process_link_destination(&dest);
-
-    out.push_str("<a href=\"");
-    out.push_str(&escape_html_attribute(&dest));
-    out.push('"');
-
-    if let Some(title) = link.title() {
-        render_link_title(&title, out);
-    }
-
-    out.push('>');
-    out.push_str(&text);
-    out.push_str("</a>");
-}
-
-/// Render an inline image.
-fn render_inline_image(img: &MdInlineImage, ctx: &HtmlRenderContext, out: &mut String) {
-    let alt = extract_alt_text(&img.alt(), ctx);
-
-    let dest = collect_inline_text(&img.destination());
-    let dest = process_link_destination(&dest);
-
-    out.push_str("<img src=\"");
-    out.push_str(&escape_html_attribute(&dest));
-    out.push_str("\" alt=\"");
-    out.push_str(&escape_html_attribute(&alt));
-    out.push('"');
-
-    if let Some(title) = img.title() {
-        render_link_title(&title, out);
-    }
-
-    out.push_str(" />");
-}
-
-/// Render a reference link.
-fn render_reference_link(link: &MdReferenceLink, ctx: &HtmlRenderContext, out: &mut String) {
-    let text = render_inline_list(&link.text(), ctx);
-    let text_raw = collect_inline_text(&link.text());
-
-    render_reference_common(
-        link.label(),
-        text_raw.clone(),
-        |label_node| collect_inline_text(&label_node.label()),
-        ctx,
-        out,
-        |url, title, out| {
-            out.push_str("<a href=\"");
-            out.push_str(&escape_html_attribute(url));
-            out.push('"');
-
-            if let Some(t) = title {
-                out.push_str(" title=\"");
-                out.push_str(&escape_html_attribute(t));
-                out.push('"');
-            }
-
-            out.push('>');
-            out.push_str(&text);
-            out.push_str("</a>");
-        },
-        |label_display, out| {
-            // No definition found - output as literal text
-            out.push('[');
-            out.push_str(&text);
-            out.push(']');
-            if let Some(label) = label_display {
-                out.push('[');
-                out.push_str(&escape_html(&label));
-                out.push(']');
-            }
-        },
-    );
-}
-
-/// Render a reference image.
-fn render_reference_image(img: &MdReferenceImage, ctx: &HtmlRenderContext, out: &mut String) {
-    let alt = extract_alt_text(&img.alt(), ctx);
-    let alt_raw = collect_inline_text(&img.alt());
-
-    render_reference_common(
-        img.label(),
-        alt_raw.clone(),
-        |label_node| collect_inline_text(&label_node.label()),
-        ctx,
-        out,
-        |url, title, out| {
-            out.push_str("<img src=\"");
-            out.push_str(&escape_html_attribute(url));
-            out.push_str("\" alt=\"");
-            out.push_str(&escape_html_attribute(&alt));
-            out.push('"');
-
-            if let Some(t) = title {
-                out.push_str(" title=\"");
-                out.push_str(&escape_html_attribute(t));
-                out.push('"');
-            }
-
-            out.push_str(" />");
-        },
-        |label_display, out| {
-            // No definition found - output as literal text
-            out.push_str("![");
-            out.push_str(&alt);
-            out.push(']');
-            if let Some(label) = label_display {
-                out.push('[');
-                out.push_str(&escape_html(&label));
-                out.push(']');
-            }
-        },
-    );
-}
-
 fn resolve_reference_label<L, F>(
     label_node: Option<L>,
     fallback: String,
@@ -1288,29 +1318,6 @@ where
         }
     } else {
         (fallback, None)
-    }
-}
-
-fn render_reference_common<L, FLabel, FFound, FMissing>(
-    label_node: Option<L>,
-    fallback: String,
-    label_text: FLabel,
-    ctx: &HtmlRenderContext,
-    out: &mut String,
-    on_found: FFound,
-    on_missing: FMissing,
-) where
-    FLabel: FnOnce(&L) -> String,
-    FFound: FnOnce(&str, Option<&str>, &mut String),
-    FMissing: FnOnce(Option<String>, &mut String),
-{
-    // Get label (if explicit) or use the fallback
-    let (label, label_display) = resolve_reference_label(label_node, fallback, label_text);
-
-    if let Some((url, title)) = ctx.get_link_definition(&label) {
-        on_found(url, title.as_deref(), out);
-    } else {
-        on_missing(label_display, out);
     }
 }
 
