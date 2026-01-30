@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.svelte`
+
+```svelte
+<CollapsiblePrimitive.Content>
+	{#snippet child({ props, open })}
+		{#if open}
+			<div {...props} transition:slide={{ duration }}>
+				{@render children?.()}
+			</div>
+		{/if}
+	{/snippet}
+</CollapsiblePrimitive.Content>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

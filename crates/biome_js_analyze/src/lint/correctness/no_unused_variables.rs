@@ -1,5 +1,6 @@
 use crate::JsRuleAction;
 use crate::services::embedded_bindings::EmbeddedBindings;
+use crate::services::embedded_value_references::EmbeddedValueReferences;
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
@@ -296,6 +297,10 @@ impl Rule for NoUnusedVariables {
         let embedded_bindings = ctx
             .get_service::<EmbeddedBindings>()
             .expect("embedded bindings service");
+        let embedded_references = ctx
+            .get_service::<EmbeddedValueReferences>()
+            .expect("embedded references service");
+
         let file_source = ctx.source_type::<JsFileSource>();
 
         let is_declaration_file = file_source.language().is_definition_file();
@@ -316,10 +321,22 @@ impl Rule for NoUnusedVariables {
         }
 
         // Ignore name prefixed with `_`
-        let is_underscore_prefixed = binding.name_token().ok()?.text_trimmed().starts_with('_');
+        let binding_name = binding.name_token().ok()?;
+        let is_underscore_prefixed = binding_name.text_trimmed().starts_with('_');
         let is_defined_in_embedded_binding =
-            embedded_bindings.contains_binding(binding.name_token().ok()?.text_trimmed());
-        if !is_underscore_prefixed && is_unused(model, binding) && !is_defined_in_embedded_binding {
+            embedded_bindings.contains_binding(binding_name.text_trimmed());
+        let is_used_as_reference =
+            embedded_references.is_used_as_value(binding_name.text_trimmed());
+
+        if is_defined_in_embedded_binding {
+            return None;
+        }
+
+        if is_used_as_reference {
+            return None;
+        }
+
+        if !is_underscore_prefixed && is_unused(model, binding) {
             suggested_fix_if_unused(binding, ctx.options())
         } else {
             None
