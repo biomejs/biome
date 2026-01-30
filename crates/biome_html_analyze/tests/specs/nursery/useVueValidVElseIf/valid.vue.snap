@@ -54,5 +54,21 @@ expression: valid.vue
   <div v-if="user.age >= 18 && user.hasPermission"></div>
   <div v-else-if="user.age >= 13 && user.parentalConsent"></div>
   <div v-else></div>
+
+  <!-- Multiline conditional elements -->
+  <div
+    v-if="cond1"
+    data-attr1
+    data-attr2
+    data-attr3
+    data-attr4
+    data-attr5
+    data-attr6
+  />
+  <div v-else-if="cond2"></div>
+
+  <!-- Nested conditionals with self-closing tag -->
+  <div v-if="cond1"></div>
+  <div v-else-if="cond2"><span v-if="cond3" /></div>
 </template>
 ```

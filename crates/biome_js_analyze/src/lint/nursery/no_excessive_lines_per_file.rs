@@ -110,7 +110,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoExcessiveLinesPerFile {
-        version: "next",
+        version: "2.3.12",
         name: "noExcessiveLinesPerFile",
         language: "js",
         recommended: false,

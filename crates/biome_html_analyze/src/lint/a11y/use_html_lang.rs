@@ -7,6 +7,8 @@ use biome_html_syntax::AnyHtmlElement;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_html_lang::UseHtmlLangOptions;
 
+use crate::a11y::has_non_empty_attribute;
+
 declare_lint_rule! {
     /// Enforce that `html` element has `lang` attribute.
     ///
@@ -55,12 +57,7 @@ impl Rule for UseHtmlLang {
             return None;
         }
 
-        if let Some(lang_attribute) = element.find_attribute_by_name("lang")
-            && let Some(initializer) = lang_attribute.initializer()
-            && let Ok(value) = initializer.value()
-            && let Some(value) = value.string_value()
-            && !value.trim_ascii().is_empty()
-        {
+        if has_non_empty_attribute(element, "lang") {
             return None;
         }
 

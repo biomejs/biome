@@ -33,6 +33,17 @@ impl HtmlAttributeList {
     }
 }
 
+impl HtmlAttribute {
+    /// Extracts the value from an attribute's initializer.
+    ///
+    /// Returns `None` if the attribute has no initializer or the value cannot be extracted.
+    pub fn value(&self) -> Option<Text> {
+        self.initializer()
+            .and_then(|init| init.value().ok())
+            .and_then(|value| value.string_value())
+    }
+}
+
 impl HtmlAttributeName {
     /// Returns the token text of the attribute name.
     pub fn token_text(&self) -> Option<TokenText> {

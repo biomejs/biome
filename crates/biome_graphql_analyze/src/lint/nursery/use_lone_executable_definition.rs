@@ -63,7 +63,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseLoneExecutableDefinition {
-        version: "next",
+        version: "2.3.12",
         name: "useLoneExecutableDefinition",
         language: "graphql",
         recommended: false,

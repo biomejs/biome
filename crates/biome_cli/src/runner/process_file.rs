@@ -140,9 +140,10 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
             .file_features(SupportsFeatureParams {
                 project_key: ctx.project_key(),
                 path: biome_path.clone(),
-                features: ctx.execution().features(),
+                features: ctx.execution().wanted_features(),
                 inline_config: None,
                 skip_ignore_check: false,
+                not_requested_features: ctx.execution().not_requested_features(),
             })
             .with_file_path_and_code_and_tags(
                 biome_path.to_string(),
@@ -169,7 +170,9 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
                         UnhandledDiagnostic.with_file_path(biome_path.to_string()),
                     ));
                 }
-                SupportKind::FeatureNotEnabled | SupportKind::Ignored => {
+                SupportKind::FeatureNotEnabled
+                | SupportKind::Ignored
+                | SupportKind::NotRequested => {
                     return Ok(FileStatus::Ignored);
                 }
                 SupportKind::Protected => {

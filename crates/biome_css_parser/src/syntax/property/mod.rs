@@ -239,7 +239,7 @@ impl ParseNodeList for GenericComponentValueList {
 }
 
 #[inline]
-fn is_at_generic_component_value(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_generic_component_value(p: &mut CssParser) -> bool {
     is_at_any_value(p) || is_at_generic_delimiter(p)
 }
 

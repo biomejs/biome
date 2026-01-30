@@ -1,74 +1,74 @@
 /* should not generate diagnostics */
 /* General properties */
 a {
-  color: green;
+	color: green;
 }
 
 a {
-  fill: black;
+	fill: black;
 }
 
 /* Firefox-specific property */
 a {
-  -moz-align-self: center;
+	-moz-align-self: center;
 }
 
 /* WebKit (Safari, Chrome, etc.) specific property */
 a {
-  -webkit-align-self: center;
+	-webkit-align-self: center;
 }
 
 /* Standard property */
 a {
-  align-self: center;
+	align-self: center;
 }
 
 /* Additional examples of browser-specific properties */
 /* Internet Explorer specific property */
 a {
-  -ms-flex-align: center;
+	-ms-flex-align: center;
 }
 
 /* Opera specific property */
 a {
-  -o-link: #FF0000;
+	-o-link: #FF0000;
 }
 
 /* Microsoft Edge specific property */
 a {
-  -ms-scroll-limit: 5px 5px 0px 0px;
+	-ms-scroll-limit: 5px 5px 0px 0px;
 }
 
 /* Chrome/Safari specific property */
 a {
-  -webkit-mask-image: url(mask.png);
+	-webkit-mask-image: url(mask.png);
 }
 
 /* Custom property */
 a {
-  --custom-color: #1234560;
+	--custom-color: #123456;
 }
 
 a {
-  --custom-margin: 100px;
+	--custom-margin: 100px;
 }
 
 a {
-  --custom-property: 10px;
+	--custom-property: 10px;
 }
 
 /* Composition */
 .classA {
-  color: green;
-  background: red;
+	color: green;
+	background: red;
 }
 
 .classB {
-  composes: classA;
-  color: yellow;
+	composes: classA;
+	color: yellow;
 }
 
 /* View Transition navigation property (should not be flagged) */
 view-transition {
-  navigation: auto;
+	navigation: auto;
 }

@@ -13,8 +13,8 @@ use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, PrintDiagnostic, Sever
 use biome_service::WorkspaceError;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    ChangeFileParams, CloseFileParams, FeaturesBuilder, FeaturesSupported, FileContent,
-    FileFeaturesResult, FixFileParams, FormatFileParams, OpenFileParams, SupportsFeatureParams,
+    ChangeFileParams, CloseFileParams, FeaturesSupported, FileContent, FileFeaturesResult,
+    FixFileParams, FormatFileParams, OpenFileParams, SupportsFeatureParams,
 };
 use std::borrow::Cow;
 use tracing::info;
@@ -54,7 +54,7 @@ impl ProcessFile for LintAssistProcessFile {
                 .guard()
                 .fix_file(
                     fix_mode,
-                    false,
+                    features_supported.supports_format(),
                     categories,
                     only.clone(),
                     skip.clone(),
@@ -195,13 +195,10 @@ impl ProcessFile for LintAssistProcessFile {
         } = workspace.file_features(SupportsFeatureParams {
             project_key,
             path: biome_path.clone(),
-            features: FeaturesBuilder::new()
-                .with_linter()
-                .with_assist()
-                .with_formatter()
-                .build(),
+            features: payload.execution.wanted_features(),
             inline_config: None,
             skip_ignore_check,
+            not_requested_features: payload.execution.not_requested_features(),
         })?;
 
         if file_features.is_ignored() {
@@ -242,7 +239,7 @@ impl ProcessFile for LintAssistProcessFile {
                 project_key,
                 fix_file_mode,
                 path: biome_path.clone(),
-                should_format: false,
+                should_format: file_features.supports_format(),
                 only: only.clone(),
                 skip: skip.clone(),
                 suppression_reason: None,

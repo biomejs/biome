@@ -160,8 +160,8 @@ fn is_dialog_or_popover(tag_element: &AnyHtmlTagElement) -> bool {
     let is_dialog = tag_element
         .name()
         .ok()
-        .and_then(|n| n.value_token().ok())
-        .is_some_and(|token| token.text_trimmed().eq_ignore_ascii_case("dialog"));
+        .and_then(|n| n.token_text_trimmed())
+        .is_some_and(|text| text.eq_ignore_ascii_case("dialog"));
 
     is_dialog || tag_element.find_attribute_by_name("popover").is_some()
 }

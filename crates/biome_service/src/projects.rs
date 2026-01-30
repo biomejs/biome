@@ -19,11 +19,12 @@ pub struct GetFileFeaturesParams<'a> {
     pub fs: &'a dyn FileSystem,
     pub project_key: ProjectKey,
     pub path: &'a Utf8Path,
-    pub features: FeatureName,
+    pub requested_features: FeatureName,
     pub language: DocumentFileSource,
     pub capabilities: &'a Capabilities,
     pub handle: &'a SettingsWithEditor<'a>,
     pub skip_ignore_check: bool,
+    pub not_requested_features: FeatureName,
 }
 
 /// The information tracked for each project.
@@ -216,11 +217,12 @@ impl Projects {
             fs,
             project_key,
             path,
-            features,
+            requested_features,
             language,
             capabilities,
             handle,
             skip_ignore_check,
+            not_requested_features: denied_features,
         }: GetFileFeaturesParams<'_>,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let data = self.0.pin();
@@ -228,9 +230,11 @@ impl Projects {
             .get(&project_key)
             .ok_or_else(WorkspaceError::no_project)?;
         let settings = handle.as_ref();
-        let mut file_features = FeaturesSupported::default();
-        file_features = file_features.with_capabilities(capabilities);
-        file_features = file_features.with_settings_and_language(handle, path, capabilities);
+        let mut file_features = FeaturesSupported::default()
+            .with_capabilities(capabilities)
+            .with_not_requested_features(denied_features)
+            .with_settings_and_language(handle, path, capabilities);
+
         if settings.ignore_unknown_enabled() && language == DocumentFileSource::Unknown {
             file_features.ignore_not_supported();
         } else if path.file_name().is_some_and(|file_name| {
@@ -247,8 +251,8 @@ impl Projects {
 
                 // If there are specific features enabled, but all of them ignore the
                 // path, then we treat the path as ignored too.
-                let is_ignored_by_features = !features.is_empty()
-                    && features.iter().all(|feature| {
+                let is_ignored_by_features = !requested_features.is_empty()
+                    && requested_features.iter().all(|feature| {
                         project_data
                             .root_settings
                             .is_path_ignored_for_feature(path, feature)
@@ -260,7 +264,7 @@ impl Projects {
             if is_ignored {
                 file_features.set_ignored_for_all_features();
             } else {
-                for feature in features.iter() {
+                for feature in requested_features.iter() {
                     if project_data
                         .root_settings
                         .is_path_ignored_for_feature(path, feature)

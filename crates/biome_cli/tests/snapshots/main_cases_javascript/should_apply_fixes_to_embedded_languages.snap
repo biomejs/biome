@@ -60,14 +60,16 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.js:2:48 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.js:8:1 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unknown property is not allowed.
   
-    1 │ const _Foo = gql`query People{ people(id: $personId) { name } }`;
-  > 2 │ const _Baz = styled.div`background-color: red; align: center; padding: 0;`;
-      │                                                ^^^^^
-    3 │ 
+     6 │ `;
+     7 │ const _Baz = styled.div`background-color: red;
+   > 8 │ align: center;
+       │ ^^^^^
+     9 │ padding: 0;
+    10 │ `;
   
   i See CSS Specifications and browser specific properties for more details.
   

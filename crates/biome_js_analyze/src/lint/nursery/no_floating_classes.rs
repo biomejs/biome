@@ -38,7 +38,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoFloatingClasses {
-        version: "next",
+        version: "2.3.12",
         name: "noFloatingClasses",
         language: "js",
         recommended: false,

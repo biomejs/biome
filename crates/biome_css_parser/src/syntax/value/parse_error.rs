@@ -42,3 +42,10 @@ pub(crate) fn expected_any_syntax(p: &CssParser, range: TextRange) -> ParseDiagn
 pub(crate) fn expected_syntax_type_name(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("syntax type name", range, p)
 }
+
+pub(crate) fn expected_if_test_boolean_not_expr(
+    p: &CssParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    expected_any(&["not boolean expression", "if test"], range, p)
+}

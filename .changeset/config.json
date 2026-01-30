@@ -26,6 +26,7 @@
     "@biomejs/aria-data",
     "@biomejs/benchmark",
     "@biomejs/plugin-api",
-    "tailwindcss-config-analyzer"
+    "tailwindcss-config-analyzer",
+    "@biomejs/prettier-compare"
   ]
 }

@@ -7,6 +7,8 @@ use biome_html_syntax::AnyHtmlElement;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_iframe_title::UseIframeTitleOptions;
 
+use crate::a11y::has_non_empty_attribute;
+
 declare_lint_rule! {
     /// Enforces the usage of the attribute `title` for the element `iframe`.
     ///
@@ -63,12 +65,7 @@ impl Rule for UseIframeTitle {
             return None;
         }
 
-        if let Some(title_attribute) = element.find_attribute_by_name("title")
-            && let Some(initializer) = title_attribute.initializer()
-            && let Ok(value) = initializer.value()
-            && let Some(value) = value.string_value()
-            && !value.trim_ascii().is_empty()
-        {
+        if has_non_empty_attribute(element, "title") {
             return None;
         }
 

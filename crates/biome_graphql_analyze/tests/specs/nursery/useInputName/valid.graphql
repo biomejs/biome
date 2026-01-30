@@ -1,0 +1,14 @@
+# should not generate diagnostics
+type Mutation { SetMessage(input: String): String }
+
+type Mutation { SetMessage(input: SetMessageInput): String }
+
+type Mutation { SetMessage(input: setMessageInput): String }
+
+type Mutation { SetMessage(input: CreateAMessageInput): String }
+
+type Mutation { SetMessage(input: SetMessageInput!): String }
+
+type Mutation { SetMessage(input: [SetMessageInput]): String }
+
+extend type Mutation { SetMessage(input: String): String }

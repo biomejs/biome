@@ -1,6 +1,6 @@
 use std::{borrow::Cow, collections::HashMap, sync::LazyLock};
 
-use biome_html_syntax::{AnyHtmlElement, HtmlAttributeName, HtmlTagName};
+use biome_html_syntax::{AnyHtmlElement, AnyHtmlTagName, HtmlAttributeName, HtmlTagName};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
 use crate::{
@@ -847,16 +847,27 @@ pub(crate) fn is_canonical_html_attribute_name(tag_name: &str, attribute_name: &
 ///
 /// See [`HTML_ATTRIBUTES_BY_TAG`], [`HTML_GLOBAL_ATTRIBUTES`].
 pub(crate) fn is_canonical_html_attribute(
-    tag_name: &HtmlTagName,
+    tag_name: &AnyHtmlTagName,
     attribute_name: &HtmlAttributeName,
 ) -> bool {
-    let Ok(tag_name) = tag_name.value_token() else {
-        return false;
-    };
-    let Ok(attribute_name) = attribute_name.value_token() else {
-        return false;
-    };
-    is_canonical_html_attribute_name(tag_name.text_trimmed(), attribute_name.text_trimmed())
+    // Only check for canonical attributes on regular HTML tags, not components
+    match tag_name {
+        AnyHtmlTagName::HtmlTagName(tag) => {
+            let Ok(tag_token) = tag.value_token() else {
+                return false;
+            };
+            let tag_name_text = tag_token.text_trimmed();
+
+            let Ok(attribute_token) = attribute_name.value_token() else {
+                return false;
+            };
+            let attribute_name_text = attribute_token.text_trimmed();
+
+            is_canonical_html_attribute_name(tag_name_text, attribute_name_text)
+        }
+        // Component names and member names are not canonical HTML
+        AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_) => false,
+    }
 }
 
 /// Gets the CSS display value for an HTML element.

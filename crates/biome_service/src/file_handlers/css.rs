@@ -566,10 +566,10 @@ fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
     let css_services = CssAnalyzerServices {
-        semantic_model: params
-            .document_services
-            .as_css_services()
-            .and_then(|services| services.semantic_model.as_ref()),
+        semantic_model: params.snippet_services.and_then(|s| {
+            s.as_css_services()
+                .and_then(|services| services.semantic_model.as_ref())
+        }),
         file_source,
     };
     let (_, analyze_diagnostics) = analyze(

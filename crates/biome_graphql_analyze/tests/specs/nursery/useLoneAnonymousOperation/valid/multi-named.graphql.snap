@@ -1,0 +1,15 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: multi-named.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+query Foo {
+	field
+}
+query Bar {
+	field
+}
+
+```

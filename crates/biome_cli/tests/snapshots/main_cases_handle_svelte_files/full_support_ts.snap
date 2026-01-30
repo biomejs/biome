@@ -62,16 +62,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.svelte:14:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:15:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a lang attribute when using the html element.
   
-    12 │ </script>
-    13 │ 
-  > 14 │ <html><head><title>Svelte</title></head><body></body></html>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    15 │ 
-    16 │ <style>
+    13 │ </script>
+    14 │ 
+  > 15 │ <html>
+       │ ^^^^^^
+  > 16 │ 	<head>
+  > 17 │ 		<title>Svelte</title>
+  > 18 │ 	</head>
+  > 19 │ 	<body></body>
+  > 20 │ </html>
+       │ ^^^^^^^
+    21 │ 
+    22 │ <style>
   
   i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
@@ -79,15 +85,16 @@ file.svelte:14:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
 ```
 
 ```block
-file.svelte:17:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:24:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
   
-    16 │ <style>
-  > 17 │ #id { font-family: comic-sans } .class { background: red}
-       │                    ^^^^^^^^^^
-    18 │ </style>
-    19 │ 
+    22 │ <style>
+    23 │ #id {
+  > 24 │ 	font-family: comic-sans;
+       │ 	             ^^^^^^^^^^
+    25 │ }
+    26 │ .class {
   
   i Consider adding a generic font family as a fallback.
   

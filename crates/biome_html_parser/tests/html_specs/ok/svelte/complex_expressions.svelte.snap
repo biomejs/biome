@@ -44,8 +44,14 @@ HtmlRoot {
             children: HtmlElementList [
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@50..53 "<" [Newline("\n"), Whitespace("\t")] [],
-                    name: HtmlTagName {
-                        value_token: HTML_LITERAL@53..67 "InputOTP.Slot" [] [Whitespace(" ")],
+                    name: HtmlMemberName {
+                        object: HtmlComponentName {
+                            value_token: HTML_LITERAL@53..61 "InputOTP" [] [],
+                        },
+                        dot_token: DOT@61..62 "." [] [],
+                        member: HtmlTagName {
+                            value_token: HTML_LITERAL@62..67 "Slot" [] [Whitespace(" ")],
+                        },
                     },
                     attributes: HtmlAttributeList [
                         HtmlSingleTextExpression {
@@ -98,8 +104,14 @@ HtmlRoot {
             children: HtmlElementList [
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@126..129 "<" [Newline("\n"), Whitespace("\t")] [],
-                    name: HtmlTagName {
-                        value_token: HTML_LITERAL@129..143 "InputOTP.Slot" [] [Whitespace(" ")],
+                    name: HtmlMemberName {
+                        object: HtmlComponentName {
+                            value_token: HTML_LITERAL@129..137 "InputOTP" [] [],
+                        },
+                        dot_token: DOT@137..138 "." [] [],
+                        member: HtmlTagName {
+                            value_token: HTML_LITERAL@138..143 "Slot" [] [Whitespace(" ")],
+                        },
                     },
                     attributes: HtmlAttributeList [
                         HtmlSingleTextExpression {
@@ -149,8 +161,12 @@ HtmlRoot {
       1: HTML_ELEMENT_LIST@50..76
         0: HTML_SELF_CLOSING_ELEMENT@50..76
           0: L_ANGLE@50..53 "<" [Newline("\n"), Whitespace("\t")] []
-          1: HTML_TAG_NAME@53..67
-            0: HTML_LITERAL@53..67 "InputOTP.Slot" [] [Whitespace(" ")]
+          1: HTML_MEMBER_NAME@53..67
+            0: HTML_COMPONENT_NAME@53..61
+              0: HTML_LITERAL@53..61 "InputOTP" [] []
+            1: DOT@61..62 "." [] []
+            2: HTML_TAG_NAME@62..67
+              0: HTML_LITERAL@62..67 "Slot" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@67..74
             0: HTML_SINGLE_TEXT_EXPRESSION@67..74
               0: L_CURLY@67..68 "{" [] []
@@ -187,8 +203,12 @@ HtmlRoot {
       1: HTML_ELEMENT_LIST@126..152
         0: HTML_SELF_CLOSING_ELEMENT@126..152
           0: L_ANGLE@126..129 "<" [Newline("\n"), Whitespace("\t")] []
-          1: HTML_TAG_NAME@129..143
-            0: HTML_LITERAL@129..143 "InputOTP.Slot" [] [Whitespace(" ")]
+          1: HTML_MEMBER_NAME@129..143
+            0: HTML_COMPONENT_NAME@129..137
+              0: HTML_LITERAL@129..137 "InputOTP" [] []
+            1: DOT@137..138 "." [] []
+            2: HTML_TAG_NAME@138..143
+              0: HTML_LITERAL@138..143 "Slot" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@143..150
             0: HTML_SINGLE_TEXT_EXPRESSION@143..150
               0: L_CURLY@143..144 "{" [] []

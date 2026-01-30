@@ -67,7 +67,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseInlineScriptId {
-        version: "next",
+        version: "2.3.12",
         name: "useInlineScriptId",
         language: "jsx",
         sources: &[RuleSource::EslintNext("inline-script-id").same()],

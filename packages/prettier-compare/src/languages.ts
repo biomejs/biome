@@ -100,6 +100,11 @@ export const LANGUAGES: Record<string, LanguageConfig> = {
 		prettierParser: "svelte",
 		displayName: "Svelte",
 	},
+	astro: {
+		biomeFilePath: "file.astro",
+		prettierParser: "astro",
+		displayName: "Astro",
+	},
 };
 
 /**

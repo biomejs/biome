@@ -11,9 +11,7 @@ pub use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::vue::VueFileHandler;
 use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
-use crate::workspace::document::services::embedded_bindings::{
-    EmbeddedBuilder, EmbeddedExportedBindings,
-};
+use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
     AnyEmbeddedSnippet, CodeAction, DocumentServices, FixAction, FixFileMode, FixFileResult,
     GetSyntaxTreeResult, PullActionsResult, PullDiagnosticsAndActionsResult, RenameResult,
@@ -563,7 +561,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) pull_code_actions: bool,
     pub(crate) diagnostic_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
-    pub(crate) embedded_exported_bindings: Option<EmbeddedExportedBindings>,
+    pub(crate) snippet_services: Option<&'a DocumentServices>,
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {

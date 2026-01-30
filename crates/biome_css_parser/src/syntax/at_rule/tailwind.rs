@@ -41,12 +41,18 @@ pub(crate) fn parse_utility_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![utility]);
 
     // Parse utility name - can be simple or functional
-    if !is_at_identifier(p) {
+    if !is_at_utility_identifier(p) {
         p.error(expected_identifier(p, p.cur_range()));
         return Present(m.complete(p, CSS_BOGUS_AT_RULE));
     }
 
-    parse_utility_name(p).ok();
+    parse_utility_name(p)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_CUSTOM_IDENTIFIER, token_set![T!['{']]),
+            expected_identifier,
+        )
+        .ok();
 
     parse_declaration_or_rule_list_block(p);
 
@@ -55,19 +61,39 @@ pub(crate) fn parse_utility_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
 fn parse_utility_name(p: &mut CssParser) -> ParsedSyntax {
     // Check if this is a functional utility (ends with -*)
-    if p.at(T![ident]) && p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
+    if is_at_functional_utility_name(p) {
         // Functional utility: tab-*
         let m = p.start();
 
-        parse_regular_identifier(p).ok();
+        parse_utility_identifier(p).ok();
         p.expect(T![-]);
         p.expect(T![*]);
 
         Present(m.complete(p, TW_FUNCTIONAL_UTILITY_NAME))
     } else {
         // Simple utility: center-flex
-        parse_regular_identifier(p)
+        parse_utility_identifier(p)
     }
+}
+
+fn parse_utility_identifier(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_identifier(p) {
+        parse_identifier(p, CssLexContext::Regular)
+    } else if p.cur().is_known_dimension_unit() {
+        let m = p.start();
+        p.bump_remap(T![ident]);
+        Present(m.complete(p, CSS_IDENTIFIER))
+    } else {
+        Absent
+    }
+}
+
+fn is_at_utility_identifier(p: &mut CssParser) -> bool {
+    is_at_identifier(p) || p.cur().is_known_dimension_unit()
+}
+
+fn is_at_functional_utility_name(p: &mut CssParser) -> bool {
+    is_at_utility_identifier(p) && p.nth_at(1, T![-]) && p.nth_at(2, T![*])
 }
 
 // @variant dark { background: black; }

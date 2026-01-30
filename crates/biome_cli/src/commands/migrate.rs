@@ -29,7 +29,11 @@ pub(crate) struct MigrateExecution {
 }
 
 impl Execution for MigrateExecution {
-    fn features(&self) -> FeatureName {
+    fn wanted_features(&self) -> FeatureName {
+        FeaturesBuilder::new().build()
+    }
+
+    fn not_requested_features(&self) -> FeatureName {
         FeaturesBuilder::new().build()
     }
 

@@ -13,6 +13,7 @@ use crate::settings::{ModuleGraphResolutionKind, SettingsHandle, SettingsWithEdi
 use crate::workspace::document::services::embedded_bindings::{
     EmbeddedBuilder, EmbeddedExportedBindings,
 };
+use crate::workspace::document::services::embedded_value_references::EmbeddedValueReferences;
 use crate::workspace::document::*;
 use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices};
 use crate::workspace::{
@@ -46,6 +47,7 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
+use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
@@ -479,6 +481,38 @@ impl WorkspaceServer {
         };
         exported_bindings.finish(builder);
         services.set_embedded_bindings(exported_bindings);
+
+        // Track value references from non-source snippets (templates)
+        let mut value_references = EmbeddedValueReferences::default();
+        for snippet in &embedded_snippets {
+            if let Some(js_snippet) = snippet.as_js_embedded_snippet() {
+                let Some(file_source) = self.get_source(snippet.file_source_index()) else {
+                    continue;
+                };
+                let Some(js_file_source) = file_source.to_js_file_source() else {
+                    continue;
+                };
+                // Only process non-source snippets (templates)
+                if !js_file_source.is_embedded_source() {
+                    let mut builder = value_references.builder();
+                    builder.visit_non_source_snippet(&js_snippet.parse.tree());
+                    value_references.finish(builder);
+                }
+            }
+        }
+
+        // Also track component element names from HTML templates (Vue/Svelte)
+        if let Some(html_file_source) = source.to_html_file_source()
+            && html_file_source.supports_components()
+            && let Some(Ok(any_parse)) = &syntax
+        {
+            let html_root: HtmlRoot = any_parse.tree();
+            let mut builder = value_references.builder();
+            builder.visit_html_root(&html_root);
+            value_references.finish(builder);
+        }
+
+        services.set_embedded_value_references(value_references);
 
         let is_indexed = if
         // Dependency files can be skipped altoghether
@@ -1289,11 +1323,12 @@ impl Workspace for WorkspaceServer {
             fs: self.fs.as_ref(),
             project_key: params.project_key,
             path: &params.path,
-            features: params.features,
+            requested_features: params.features,
             language,
             capabilities: &capabilities,
             handle: &settings,
             skip_ignore_check: params.skip_ignore_check,
+            not_requested_features: params.not_requested_features,
         })
     }
 
@@ -1559,6 +1594,37 @@ impl Workspace for WorkspaceServer {
         exported_bindings.finish(builder);
         services.set_embedded_bindings(exported_bindings);
 
+        // Track value references from non-source snippets (templates)
+        let mut value_references = EmbeddedValueReferences::default();
+        for snippet in &embedded_snippets {
+            if let Some(js_snippet) = snippet.as_js_embedded_snippet() {
+                let Some(file_source) = self.get_source(snippet.file_source_index()) else {
+                    continue;
+                };
+                let Some(js_file_source) = file_source.to_js_file_source() else {
+                    continue;
+                };
+                // Only process non-source snippets (templates)
+                if !js_file_source.is_embedded_source() {
+                    let mut builder = value_references.builder();
+                    builder.visit_non_source_snippet(&js_snippet.parse.tree());
+                    value_references.finish(builder);
+                }
+            }
+        }
+
+        // Also track component element names from HTML templates (Vue/Svelte)
+        if let Some(html_file_source) = document_source.to_html_file_source()
+            && html_file_source.supports_components()
+        {
+            let html_root: HtmlRoot = parsed.any_parse.tree();
+            let mut builder = value_references.builder();
+            builder.visit_html_root(&html_root);
+            value_references.finish(builder);
+        }
+
+        services.set_embedded_value_references(value_references);
+
         let document = Document {
             content,
             version: Some(version),
@@ -1678,7 +1744,7 @@ impl Workspace for WorkspaceServer {
                 plugins: plugins.clone(),
                 diagnostic_offset: None,
                 document_services: &services,
-                embedded_exported_bindings: services.embedded_bindings(),
+                snippet_services: None,
             });
 
             let LintResults {
@@ -1711,8 +1777,8 @@ impl Workspace for WorkspaceServer {
                     pull_code_actions,
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
-                    document_services: snippet_services,
-                    embedded_exported_bindings: services.embedded_bindings(),
+                    document_services: &services,
+                    snippet_services: Some(snippet_services),
                 });
 
                 diagnostics.extend(results.diagnostics);

@@ -1,0 +1,16 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 111
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+p {
+	color: red;
+}
+a { color: black; }
+a { color: rgb(0, 0, 0); }
+a { color: rgba(0, 0, 0, 1); }
+
+```

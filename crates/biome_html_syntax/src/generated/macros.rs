@@ -45,6 +45,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlClosingElement::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_COMPONENT_NAME => {
+                    let $pattern = unsafe { $crate::HtmlComponentName::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_CONTENT => {
                     let $pattern = unsafe { $crate::HtmlContent::new_unchecked(node) };
                     $body
@@ -65,6 +69,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlEmbeddedContent::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_MEMBER_NAME => {
+                    let $pattern = unsafe { $crate::HtmlMemberName::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_OPENING_ELEMENT => {
                     let $pattern = unsafe { $crate::HtmlOpeningElement::new_unchecked(node) };
                     $body
@@ -79,6 +87,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::HTML_SINGLE_TEXT_EXPRESSION => {
                     let $pattern = unsafe { $crate::HtmlSingleTextExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_SPREAD_ATTRIBUTE => {
+                    let $pattern = unsafe { $crate::HtmlSpreadAttribute::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_STRING => {

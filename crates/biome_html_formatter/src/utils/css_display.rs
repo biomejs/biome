@@ -10,7 +10,7 @@
 
 use crate::HtmlFormatter;
 use crate::utils::metadata::{MATHML_ALL_TAGS, SVG_ALL_TAGS};
-use biome_html_syntax::HtmlTagName;
+use biome_html_syntax::AnyHtmlTagName;
 use biome_string_case::StrLikeExtension;
 
 /// CSS display values that are relevant for HTML formatting decisions.
@@ -243,12 +243,18 @@ pub fn get_css_display(tag_name: &str) -> CssDisplay {
     }
 }
 
-/// Gets the CSS display value from an HtmlTagName syntax node.
-pub fn get_css_display_from_tag(tag_name: &HtmlTagName) -> CssDisplay {
-    let Ok(token) = tag_name.value_token() else {
-        return CssDisplay::Inline;
-    };
-    get_css_display(token.text_trimmed())
+/// Gets the CSS display value from an [AnyHtmlTagName] syntax node.
+pub fn get_css_display_from_tag(tag_name: &AnyHtmlTagName) -> CssDisplay {
+    match tag_name {
+        AnyHtmlTagName::HtmlComponentName(_) => CssDisplay::Inline,
+        AnyHtmlTagName::HtmlMemberName(_) => CssDisplay::Inline,
+        AnyHtmlTagName::HtmlTagName(tag_name) => {
+            let Ok(token) = tag_name.value_token() else {
+                return CssDisplay::Inline;
+            };
+            get_css_display(token.text_trimmed())
+        }
+    }
 }
 
 #[cfg(test)]

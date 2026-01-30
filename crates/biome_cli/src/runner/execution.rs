@@ -15,7 +15,10 @@ use tracing::info;
 
 pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
     /// The features that this command requires to be enabled.
-    fn features(&self) -> FeatureName;
+    fn wanted_features(&self) -> FeatureName;
+
+    /// The features that this command should be disabled.
+    fn not_requested_features(&self) -> FeatureName;
 
     /// Whether this command can handle the incoming file given its features.
     fn can_handle(&self, features: FeaturesSupported) -> bool;

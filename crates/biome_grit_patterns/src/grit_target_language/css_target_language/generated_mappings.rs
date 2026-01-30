@@ -26,6 +26,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssColorProfileAtRuleDeclarator" => lang::CssColorProfileAtRuleDeclarator::KIND_SET
             .iter()
             .next(),
+        "CssCommaSeparatedValue" => lang::CssCommaSeparatedValue::KIND_SET.iter().next(),
         "CssComplexSelector" => lang::CssComplexSelector::KIND_SET.iter().next(),
         "CssComposesImportSpecifier" => lang::CssComposesImportSpecifier::KIND_SET.iter().next(),
         "CssComposesProperty" => lang::CssComposesProperty::KIND_SET.iter().next(),
@@ -78,6 +79,12 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
                 .next()
         }
         "CssFunction" => lang::CssFunction::KIND_SET.iter().next(),
+        "CssFunctionAtRule" => lang::CssFunctionAtRule::KIND_SET.iter().next(),
+        "CssFunctionAtRuleDeclarator" => lang::CssFunctionAtRuleDeclarator::KIND_SET.iter().next(),
+        "CssFunctionParameter" => lang::CssFunctionParameter::KIND_SET.iter().next(),
+        "CssFunctionParameterDefaultValue" => lang::CssFunctionParameterDefaultValue::KIND_SET
+            .iter()
+            .next(),
         "CssGenericDelimiter" => lang::CssGenericDelimiter::KIND_SET.iter().next(),
         "CssGenericProperty" => lang::CssGenericProperty::KIND_SET.iter().next(),
         "CssIdSelector" => lang::CssIdSelector::KIND_SET.iter().next(),
@@ -197,6 +204,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssRegularDimension" => lang::CssRegularDimension::KIND_SET.iter().next(),
         "CssRegularSyntaxTypeName" => lang::CssRegularSyntaxTypeName::KIND_SET.iter().next(),
         "CssRelativeSelector" => lang::CssRelativeSelector::KIND_SET.iter().next(),
+        "CssReturnsStatement" => lang::CssReturnsStatement::KIND_SET.iter().next(),
         "CssRoot" => lang::CssRoot::KIND_SET.iter().next(),
         "CssRuleBlock" => lang::CssRuleBlock::KIND_SET.iter().next(),
         "CssScopeAtRule" => lang::CssScopeAtRule::KIND_SET.iter().next(),

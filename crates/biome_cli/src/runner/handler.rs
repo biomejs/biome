@@ -48,7 +48,7 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
                 .is_path_ignored(PathIsIgnoredParams {
                     project_key,
                     path: biome_path.clone(),
-                    features: execution.features(),
+                    features: execution.wanted_features(),
                     ignore_kind: IgnoreKind::Ancestors,
                 })
                 .unwrap_or_else(|err| {
@@ -67,9 +67,10 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
         let file_features = workspace.file_features(SupportsFeatureParams {
             project_key,
             path: biome_path.clone(),
-            features: execution.features(),
+            features: execution.wanted_features(),
             inline_config: None,
             skip_ignore_check: false,
+            not_requested_features: execution.not_requested_features(),
         });
 
         let can_read = DocumentFileSource::can_read(biome_path);

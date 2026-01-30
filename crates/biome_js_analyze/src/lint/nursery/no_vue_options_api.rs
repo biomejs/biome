@@ -116,7 +116,7 @@ declare_lint_rule! {
     /// - [Options API vs Composition API](https://vuejs.org/guide/introduction.html#api-styles)
     ///
     pub NoVueOptionsApi {
-        version: "next",
+        version: "2.3.12",
         name: "noVueOptionsApi",
         language: "js",
         recommended: false,
