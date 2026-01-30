@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::collections::HashSet;
 
 use biome_string_case::StrOnlyExtension;
@@ -34,7 +35,11 @@ pub(crate) fn normalize_reference_label(text: &str) -> String {
     }
 
     // CommonMark uses Unicode case folding for case-insensitive matching (utf8proc).
-    out.as_str().to_casefold_cow().into_owned()
+    let folded = out.as_str().to_casefold_cow();
+    match folded {
+        Cow::Borrowed(_) => out,
+        Cow::Owned(folded) => folded,
+    }
 }
 
 fn push_normalized_char(out: &mut String, c: char, saw_whitespace: &mut bool) {
