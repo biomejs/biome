@@ -13,7 +13,9 @@ publish              = true
 
 [dependencies]
 biome_rowan = { workspace = true, optional = true }
-utf8proc    = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+utf8proc = { workspace = true }
 
 [features]
 biome_rowan = ["dep:biome_rowan"]

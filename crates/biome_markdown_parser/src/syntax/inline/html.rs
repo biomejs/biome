@@ -465,7 +465,7 @@ pub(crate) fn parse_autolink(p: &mut MarkdownParser) -> ParsedSyntax {
     // Autolinks don't process backslash escapes, but the lexer may combine
     // `\>` into a single escape token. We re-lex in CodeSpan context where
     // backslash is literal, so `\` and `>` are separate tokens.
-    p.force_relex_code_span();
+    p.relex_code_span();
 
     let content_m = p.start();
     while !p.at(R_ANGLE) && !p.at(T![EOF]) && !p.at_inline_end() {

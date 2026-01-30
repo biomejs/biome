@@ -212,7 +212,7 @@ impl<'source> MarkdownParser<'source> {
     /// Force re-lex the current token in CodeSpan context.
     /// In this context, backslash is literal (not an escape character).
     /// Used for autolinks where `\>` should be `\` + `>` as separate tokens.
-    pub(crate) fn force_relex_code_span(&mut self) {
+    pub(crate) fn relex_code_span(&mut self) {
         self.source
             .force_relex_in_context(MarkdownLexContext::CodeSpan);
     }

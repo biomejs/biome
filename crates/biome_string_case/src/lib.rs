@@ -3,6 +3,7 @@
 #![deny(clippy::use_self)]
 
 use std::{borrow::Cow, cmp::Ordering, ffi::OsStr};
+#[cfg(not(target_arch = "wasm32"))]
 use utf8proc::transform::{TransformOptions, map};
 
 #[cfg(feature = "biome_rowan")]
@@ -701,16 +702,24 @@ impl StrOnlyExtension for str {
     }
 
     fn to_casefold_cow(&self) -> Cow<'_, Self> {
-        let mut options = TransformOptions::default();
-        options.case_fold = true;
-        let folded = match map(self, &options) {
-            Ok(value) => value,
-            Err(_) => return Cow::Borrowed(self),
-        };
-        if folded == self {
-            Cow::Borrowed(self)
-        } else {
-            Cow::Owned(folded)
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let mut options = TransformOptions::default();
+            options.case_fold = true;
+            let folded = match map(self, &options) {
+                Ok(value) => value,
+                Err(_) => return Cow::Borrowed(self),
+            };
+            if folded == self {
+                Cow::Borrowed(self)
+            } else {
+                Cow::Owned(folded)
+            }
+        }
+        #[cfg(target_arch = "wasm32")]
+        {
+            // utf8proc isn't available on wasm32-unknown-unknown; fall back to Unicode lowercase.
+            self.to_lowercase_cow()
         }
     }
 }
@@ -1200,6 +1209,7 @@ mod tests {
         assert!(matches!("tešt".to_lowercase_cow(), Cow::Borrowed(_)));
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn to_casefold_cow() {
         assert_eq!("ss", "ẞ".to_casefold_cow());

@@ -21,6 +21,9 @@ fn bsearch_range_table(c: char, r: &[(char, char)]) -> bool {
     .is_ok()
 }
 
+// Ranges are Unicode code points written as `\u{...}`. To translate them into
+// human-readable names, look them up in the Unicode charts:
+// https://www.unicode.org/charts/
 const PUNCTUATION_RANGES: &[(char, char)] = &[
     ('\u{0021}', '\u{002F}'),
     ('\u{003A}', '\u{0040}'),
