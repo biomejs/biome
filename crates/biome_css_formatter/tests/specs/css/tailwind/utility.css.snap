@@ -23,6 +23,9 @@ info: css/tailwind/utility.css
 @utility tab-4{tab-size:4;}
 
 @utility tab-*{tab-size:--value(--tab-size-*);}
+
+@utility px-*{padding-inline:--value(--padding-inline-*);}
+
 ```
 
 
@@ -68,6 +71,10 @@ Trailing newline: true
 	tab-size: --value(--tab-size-*);
 }
 
+@utility px-* {
+	padding-inline: --value(--padding-inline-*);
+}
+
 ```
 
 ## Output 1
@@ -106,6 +113,10 @@ Trailing newline: true
 
 @utility tab-* {
 	tab-size: --value(--tab-size-*);
+}
+
+@utility px-* {
+	padding-inline: --value(--padding-inline-*);
 }
 
 ```
