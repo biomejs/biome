@@ -275,13 +275,13 @@ impl Rule for NoDuplicateDependencies {
             RuleDiagnostic::new(
                 rule_category!(),
                 dupe.token.text_trimmed_range(),
-                markup!("The dependency "<Emphasis>{name}</Emphasis>" is listed twice under "<Emphasis>{dupe.group.to_string()}</Emphasis>"."),
+                markup!("The dependency "<Emphasis>{name}</Emphasis>" is listed twice under "<Emphasis>{dupe.group.clone()}</Emphasis>"."),
             )
         } else {
             RuleDiagnostic::new(
                 rule_category!(),
                 dupe.token.text_trimmed_range(),
-                markup!("The dependency "<Emphasis>{name}</Emphasis>" is also listed under "<Emphasis>{dupe.group.to_string()}</Emphasis>"."),
+                markup!("The dependency "<Emphasis>{name}</Emphasis>" is also listed under "<Emphasis>{dupe.group.clone()}</Emphasis>"."),
             )
         };
         diagnostic = diagnostic.detail(
