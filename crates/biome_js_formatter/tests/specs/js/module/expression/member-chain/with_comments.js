@@ -29,26 +29,3 @@ function test2() {
     fizz().g()
   )
 }
-
-// example from issue https://github.com/biomejs/biome/issues/4013
-const obj = {
-    __init({ commit, state }, { mainToken }) {
-        return new Promise((resolve, reject) => {
-            utils.tool.http('getMyInfo', {}).then(async (data) => {
-
-                await Promise.all([
-                    // NOTICE: Remove this comment and the result will be consistent with prettier
-                    utils.tool.http('getGroup').then((groups) => {
-                        commit('INIT_GROPUS', groups)
-                    }),
-                    // NOTICE: Remove this comment and the result will be consistent with prettier
-                    utils.tool.http('getChat', {}).then((chats) => {
-                        commit('INIT_RECENTCONTACTS', chats)
-                    })
-                ])
-
-                resolve()
-            })
-        })
-    }
-}
