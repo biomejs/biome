@@ -4,12 +4,13 @@ use js_sys::Error;
 use wasm_bindgen::prelude::*;
 
 use biome_service::workspace::{
-    self, ChangeFileParams, CloseFileParams, FileExitsParams, FixFileParams, FormatFileParams,
-    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams,
-    GetFormatterIRParams, GetModuleGraphParams, GetRegisteredTypesParams, GetSemanticModelParams,
-    GetSyntaxTreeParams, GetTypeInfoParams, OpenProjectParams, PathIsIgnoredParams,
-    PullActionsParams, PullDiagnosticsParams, RenameParams, ScanProjectParams,
-    UpdateModuleGraphParams, UpdateSettingsParams,
+    self, ChangeFileParams, CloseFileParams, DropPatternParams, FileExitsParams, FixFileParams,
+    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
+    GetFileContentParams, GetFormatterIRParams, GetModuleGraphParams, GetRegisteredTypesParams,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetTypeInfoParams, OpenProjectParams,
+    ParsePatternParams, PathIsIgnoredParams, PullActionsParams, PullDiagnosticsParams,
+    RenameParams, ScanProjectParams, SearchPatternParams, UpdateModuleGraphParams,
+    UpdateSettingsParams,
 };
 use biome_service::workspace::{OpenFileParams, SupportsFeatureParams};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -304,6 +305,33 @@ impl Workspace {
         to_value(&result)
             .map(IFixFileResult::from)
             .map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = parsePattern)]
+    pub fn parse_pattern(&self, params: IParsePatternParams) -> Result<IParsePatternResult, Error> {
+        let params: ParsePatternParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+        let result = self.inner.parse_pattern(params).map_err(into_error)?;
+        to_value(&result)
+            .map(IParsePatternResult::from)
+            .map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = searchPattern)]
+    pub fn search_pattern(&self, params: ISearchPatternParams) -> Result<ISearchResults, Error> {
+        let params: SearchPatternParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+        let result = self.inner.search_pattern(params).map_err(into_error)?;
+        to_value(&result)
+            .map(ISearchResults::from)
+            .map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = dropPattern)]
+    pub fn drop_pattern(&self, params: IDropPatternParams) -> Result<(), Error> {
+        let params: DropPatternParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+        self.inner.drop_pattern(params).map_err(into_error)
     }
 
     pub fn rename(&self, params: IRenameParams) -> Result<IRenameResult, Error> {
