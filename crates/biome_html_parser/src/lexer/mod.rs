@@ -219,7 +219,7 @@ impl<'src> HtmlLexer<'src> {
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
                 if self
                     .peek_byte()
-                    .is_some_and(|b| is_tag_name_byte(b) || b == b'!' || b == b'/' || b == b'>')
+                    .is_some_and(|b| is_tag_start_byte(b) || b == b'!' || b == b'/' || b == b'>')
                 {
                     self.consume_l_angle()
                 } else {
@@ -1236,6 +1236,12 @@ fn is_tag_name_byte(byte: u8) -> bool {
     // However, Prettier considers them to be valid characters in tag names, so we allow them to remain compatible.
 
     byte.is_ascii_alphanumeric() || byte == b'-' || byte == b':' || byte == b'.'
+}
+
+fn is_tag_start_byte(byte: u8) -> bool {
+    // Tag names must start with an ASCII letter (not a digit)
+    // https://html.spec.whatwg.org/#valid-custom-element-name
+    byte.is_ascii_alphabetic()
 }
 
 fn is_attribute_name_byte(byte: u8) -> bool {
