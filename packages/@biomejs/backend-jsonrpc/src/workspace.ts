@@ -986,7 +986,7 @@ export type VcsClientKind = "git";
 export interface Source {
 	/**
 	* Remove duplicate CSS classes.
-See <https://biomejs.dev/assist/actions/no-duplicate-classes> 
+See https://biomejs.dev/assist/actions/no-duplicate-classes 
 	 */
 	noDuplicateClasses?: NoDuplicateClassesConfiguration;
 	/**

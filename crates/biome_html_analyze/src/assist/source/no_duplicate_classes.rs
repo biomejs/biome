@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use biome_analyze::shared::class_dedup::find_duplicate_classes;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_source_rule,
@@ -11,7 +12,7 @@ use biome_html_syntax::{
     HtmlAttribute, HtmlString, HtmlSyntaxKind, HtmlSyntaxToken, inner_string_text,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_analyze::shared::class_dedup::find_duplicate_classes;
+use biome_rule_options::no_duplicate_classes_html::NoDuplicateClassesHtmlOptions;
 
 use crate::HtmlRuleAction;
 
@@ -60,7 +61,7 @@ impl Rule for NoDuplicateClasses {
     type Query = Ast<HtmlAttribute>;
     type State = DuplicateClassesState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicateClassesHtmlOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let attribute = ctx.query();

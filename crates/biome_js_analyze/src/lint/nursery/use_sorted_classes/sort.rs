@@ -3,10 +3,10 @@ use biome_rowan::{AstNode, TextRange, TextSize, TokenText};
 use std::cmp::Ordering;
 
 use super::{
-    any_class_string_like::AnyClassStringLike,
     class_info::{ClassInfo, get_class_info},
     sort_config::SortConfig,
 };
+use crate::shared::any_class_string_like::AnyClassStringLike;
 
 impl ClassInfo {
     /// Compare based on the existence of variants. Classes with variants go last.

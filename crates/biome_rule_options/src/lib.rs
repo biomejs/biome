@@ -60,6 +60,7 @@ pub mod no_duplicate_attributes;
 pub mod no_duplicate_case;
 pub mod no_duplicate_class_members;
 pub mod no_duplicate_classes;
+pub mod no_duplicate_classes_html;
 pub mod no_duplicate_custom_properties;
 pub mod no_duplicate_dependencies;
 pub mod no_duplicate_else_if;
