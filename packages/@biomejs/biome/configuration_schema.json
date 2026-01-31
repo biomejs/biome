@@ -2430,6 +2430,20 @@
 			"additionalProperties": false
 		},
 		"MaxSize": { "type": "integer", "format": "uint64", "minimum": 1 },
+		"MethodSignatureStyle": {
+			"oneOf": [
+				{
+					"description": "Enforce use of property-style signatures (`methodName: (args) => returnType`).",
+					"type": "string",
+					"const": "property"
+				},
+				{
+					"description": "Enforce use of method-style signatures (`methodName(args): returnType`).",
+					"type": "string",
+					"const": "method"
+				}
+			]
+		},
 		"Modifiers": {
 			"type": "array",
 			"items": { "$ref": "#/$defs/RestrictedModifier" },
@@ -5769,6 +5783,13 @@
 					"description": "Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.\nSee https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentGraphqlDescriptionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentMethodSignatures": {
+					"description": "Enforce consistent use of either method signatures or function properties within interfaces and type aliases.\nSee https://biomejs.dev/linter/rules/use-consistent-method-signatures",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentMethodSignaturesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9371,6 +9392,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentMethodSignaturesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentMethodSignaturesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentObjectDefinitionsOptions": {
 			"type": "object",
 			"properties": {
@@ -12326,6 +12356,26 @@
 				"accessibility": {
 					"description": "The kind of accessibility you want to enforce. Default to \"noPublic\"",
 					"anyOf": [{ "$ref": "#/$defs/Accessibility" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseConsistentMethodSignaturesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentMethodSignaturesOptions" }
+			]
+		},
+		"UseConsistentMethodSignaturesOptions": {
+			"description": "Options type for `useConsistentMethodSignatures`.",
+			"type": "object",
+			"properties": {
+				"style": {
+					"description": "The style of method signatures whose usage will be enforced.\n\nDefault: \"property\"",
+					"anyOf": [
+						{ "$ref": "#/$defs/MethodSignatureStyle" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
