@@ -1,10 +1,13 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use crate::services::semantic::Semantic;
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    AnyJsExportClause, AnyJsExpression, AnyJsModuleItem, JsModule,
+    export_ext::{AnyIdentifier, AnyJsExported}, AnyJsBinding, AnyJsBindingPattern, AnyJsExportClause,
+    AnyJsExpression, AnyJsModuleItem, JsModule,
 };
-use biome_rowan::{TextRange, TokenText};
+use biome_rowan::TextRange;
 use biome_rule_options::no_redundant_default_export::NoRedundantDefaultExportOptions;
 use rustc_hash::FxHashSet;
 
@@ -39,71 +42,146 @@ declare_lint_rule! {
     }
 }
 
-fn collect_exports(module: &JsModule) -> (FxHashSet<TokenText>, Option<(TokenText, TextRange)>) {
-    let mut named_export_names: FxHashSet<TokenText> = FxHashSet::default();
-    let mut default_export: Option<(TokenText, TextRange)> = None;
-    
-    for item in module.items() {
-        if let AnyJsModuleItem::JsExport(export) = item {
-            let export_clause = match export.export_clause() {
-                Ok(clause) => clause,
-                Err(_) => continue,
+fn get_binding_from_identifier(
+    identifier: &AnyIdentifier,
+    model: &SemanticModel,
+) -> Option<Binding> {
+    match identifier {
+        AnyIdentifier::AnyJsBindingPattern(binding_pattern) => {
+            let AnyJsBindingPattern::AnyJsBinding(binding) = binding_pattern else {
+                return None;
             };
-            
-            if matches!(
-                export_clause,
-                AnyJsExportClause::JsExportNamedFromClause(_)
-                    | AnyJsExportClause::JsExportFromClause(_)
-            ) {
+            let AnyJsBinding::JsIdentifierBinding(id_binding) = binding else {
+                return None;
+            };
+            Some(model.as_binding(id_binding))
+        }
+        AnyIdentifier::AnyTsIdentifierBinding(ts_binding) => {
+            ts_binding
+                .as_ts_identifier_binding()
+                .map(|binding| model.as_binding(binding))
+        }
+        AnyIdentifier::JsReferenceIdentifier(ref_id) => model.binding(ref_id),
+        AnyIdentifier::JsIdentifierExpression(id_expr) => {
+            id_expr.name().ok().and_then(|ref_id| model.binding(&ref_id))
+        }
+        AnyIdentifier::JsLiteralExportName(_) => None,
+    }
+}
+
+fn is_re_export(export_clause: &AnyJsExportClause) -> bool {
+    matches!(
+        export_clause,
+        AnyJsExportClause::JsExportNamedFromClause(_) | AnyJsExportClause::JsExportFromClause(_)
+    )
+}
+
+fn resolve_binding_and_range_from_exported_item(
+    exported_item: &biome_js_syntax::export_ext::ExportedItem,
+    model: &SemanticModel,
+) -> Option<(Binding, Option<TextRange>)> {
+    if exported_item.is_default {
+        if let Some(AnyJsExported::JsFunctionExportDefaultDeclaration(_) | AnyJsExported::JsClassExportDefaultDeclaration(_)) =
+            exported_item.exported.as_ref()
+        {
+            return None;
+        }
+    }
+
+    if let Some(identifier) = exported_item.identifier.as_ref() {
+        if let Some(binding) = get_binding_from_identifier(identifier, model) {
+            let range = identifier.name_token().map(|token| token.text_range());
+            return Some((binding, range));
+        }
+    }
+
+    if let Some(AnyJsExported::AnyIdentifier(identifier)) = exported_item.exported.as_ref() {
+        if let Some(binding) = get_binding_from_identifier(identifier, model) {
+            let range = identifier.name_token().map(|token| token.text_range());
+            return Some((binding, range));
+        }
+    }
+
+    None
+}
+
+fn extract_binding_from_default_expression_clause(
+    default_clause: &biome_js_syntax::JsExportDefaultExpressionClause,
+    model: &SemanticModel,
+) -> Option<(Binding, TextRange)> {
+    let expression = default_clause.expression().ok()?;
+    let AnyJsExpression::JsIdentifierExpression(identifier_expr) = expression else {
+        return None;
+    };
+    let reference_id = identifier_expr.name().ok()?;
+    let name_token = reference_id.value_token().ok()?;
+    let binding = model.binding(&reference_id)?;
+
+    Some((binding, name_token.text_range()))
+}
+
+fn collect_exports(
+    module: &JsModule,
+    model: &SemanticModel,
+) -> (FxHashSet<Binding>, Option<(Binding, TextRange)>) {
+    let mut named_export_bindings = FxHashSet::default();
+    let mut default_export: Option<(Binding, TextRange)> = None;
+
+    for item in module.items() {
+        let AnyJsModuleItem::JsExport(export) = item else {
+            continue;
+        };
+
+        let Ok(export_clause) = export.export_clause() else {
+            continue;
+        };
+
+        if is_re_export(&export_clause) {
+            continue;
+        }
+
+        if let AnyJsExportClause::JsExportDefaultExpressionClause(default_clause) = &export_clause {
+            if let Some((binding, range)) =
+                extract_binding_from_default_expression_clause(default_clause, model)
+            {
+                default_export = Some((binding, range));
+            }
+            continue;
+        }
+
+        for exported_item in export.get_exported_items() {
+            let Some((binding, range)) =
+                resolve_binding_and_range_from_exported_item(&exported_item, model)
+            else {
                 continue;
-            }
-            
-            if !matches!(
-                export_clause,
-                AnyJsExportClause::JsExportDefaultDeclarationClause(_)
-                    | AnyJsExportClause::JsExportDefaultExpressionClause(_)
-            ) {
-                for exported_item in export.get_exported_items() {
-                    if !exported_item.is_default {
-                        if let Some(identifier) = exported_item.identifier {
-                            if let Some(name_token) = identifier.name_token() {
-                                named_export_names.insert(name_token.token_text_trimmed());
-                            }
-                        }
-                    }
+            };
+
+            if exported_item.is_default {
+                if let Some(range) = range {
+                    default_export = Some((binding, range));
                 }
-            }
-            
-            if let AnyJsExportClause::JsExportDefaultExpressionClause(default_clause) = export_clause {
-                if let Ok(expression) = default_clause.expression() {
-                    if let AnyJsExpression::JsIdentifierExpression(identifier_expr) = expression {
-                        if let Ok(reference_id) = identifier_expr.name() {
-                            if let Ok(name_token) = reference_id.value_token() {
-                                let name = name_token.token_text_trimmed();
-                                default_export = Some((name, name_token.text_range()));
-                            }
-                        }
-                    }
-                }
+            } else {
+                named_export_bindings.insert(binding);
             }
         }
     }
-    
-    (named_export_names, default_export)
+
+    (named_export_bindings, default_export)
 }
 
 impl Rule for NoRedundantDefaultExport {
-    type Query = Ast<JsModule>;
+    type Query = Semantic<JsModule>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = NoRedundantDefaultExportOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let module = ctx.query();
-        let (named_export_names, default_export) = collect_exports(module);
+        let model = ctx.model();
+        let (named_export_bindings, default_export) = collect_exports(module, model);
         
-        if let Some((name, range)) = default_export {
-            if named_export_names.contains(&name) {
+        if let Some((binding, range)) = default_export {
+            if named_export_bindings.contains(&binding) {
                 return Some(range);
             }
         }
