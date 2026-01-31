@@ -5368,6 +5368,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueArrowFuncInWatchConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueArrowFuncInWatchOptions" }
+			]
+		},
+		"NoVueArrowFuncInWatchOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDataObjectDeclarationConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5805,6 +5815,13 @@
 					"description": "Disallow the use of useless undefined.\nSee https://biomejs.dev/linter/rules/no-useless-undefined",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessUndefinedConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueArrowFuncInWatch": {
+					"description": "Disallows using arrow functions when defining a watcher.\nSee https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueArrowFuncInWatchConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9207,6 +9224,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVoidTypeReturnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueArrowFuncInWatchOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueArrowFuncInWatchOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -17,6 +17,7 @@ name    = "html_analyzer"
 [dependencies]
 biome_analyze            = { workspace = true }
 biome_aria_metadata      = { workspace = true }
+biome_analyze_macros     = { workspace = true }
 biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
@@ -44,6 +45,9 @@ tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }
+
+[build-dependencies]
+filetime = { workspace = true }
 
 [features]
 schema = ["schemars"]

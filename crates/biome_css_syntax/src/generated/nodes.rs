@@ -11118,6 +11118,7 @@ impl AnyCssPageAtRuleBlock {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPageAtRuleItem {
     CssAtRule(CssAtRule),
+    CssBogus(CssBogus),
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
     CssEmptyDeclaration(CssEmptyDeclaration),
     CssMarginAtRule(CssMarginAtRule),
@@ -11126,6 +11127,12 @@ impl AnyCssPageAtRuleItem {
     pub fn as_css_at_rule(&self) -> Option<&CssAtRule> {
         match &self {
             Self::CssAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
+        match &self {
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -28648,6 +28655,11 @@ impl From<CssAtRule> for AnyCssPageAtRuleItem {
         Self::CssAtRule(node)
     }
 }
+impl From<CssBogus> for AnyCssPageAtRuleItem {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
+    }
+}
 impl From<CssDeclarationWithSemicolon> for AnyCssPageAtRuleItem {
     fn from(node: CssDeclarationWithSemicolon) -> Self {
         Self::CssDeclarationWithSemicolon(node)
@@ -28666,6 +28678,7 @@ impl From<CssMarginAtRule> for AnyCssPageAtRuleItem {
 impl AstNode for AnyCssPageAtRuleItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssAtRule::KIND_SET
+        .union(CssBogus::KIND_SET)
         .union(CssDeclarationWithSemicolon::KIND_SET)
         .union(CssEmptyDeclaration::KIND_SET)
         .union(CssMarginAtRule::KIND_SET);
@@ -28673,6 +28686,7 @@ impl AstNode for AnyCssPageAtRuleItem {
         matches!(
             kind,
             CSS_AT_RULE
+                | CSS_BOGUS
                 | CSS_DECLARATION_WITH_SEMICOLON
                 | CSS_EMPTY_DECLARATION
                 | CSS_MARGIN_AT_RULE
@@ -28681,6 +28695,7 @@ impl AstNode for AnyCssPageAtRuleItem {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_AT_RULE => Self::CssAtRule(CssAtRule { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_DECLARATION_WITH_SEMICOLON => {
                 Self::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon { syntax })
             }
@@ -28693,6 +28708,7 @@ impl AstNode for AnyCssPageAtRuleItem {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssAtRule(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssDeclarationWithSemicolon(it) => it.syntax(),
             Self::CssEmptyDeclaration(it) => it.syntax(),
             Self::CssMarginAtRule(it) => it.syntax(),
@@ -28701,6 +28717,7 @@ impl AstNode for AnyCssPageAtRuleItem {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssAtRule(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             Self::CssEmptyDeclaration(it) => it.into_syntax(),
             Self::CssMarginAtRule(it) => it.into_syntax(),
@@ -28711,6 +28728,7 @@ impl std::fmt::Debug for AnyCssPageAtRuleItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
             Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMarginAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -28721,6 +28739,7 @@ impl From<AnyCssPageAtRuleItem> for SyntaxNode {
     fn from(n: AnyCssPageAtRuleItem) -> Self {
         match n {
             AnyCssPageAtRuleItem::CssAtRule(it) => it.into_syntax(),
+            AnyCssPageAtRuleItem::CssBogus(it) => it.into_syntax(),
             AnyCssPageAtRuleItem::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             AnyCssPageAtRuleItem::CssEmptyDeclaration(it) => it.into_syntax(),
             AnyCssPageAtRuleItem::CssMarginAtRule(it) => it.into_syntax(),
