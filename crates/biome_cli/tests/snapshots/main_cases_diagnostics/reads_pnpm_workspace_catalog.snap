@@ -1,0 +1,122 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 432
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noReactForwardRef": "error"
+      }
+    }
+  }
+}
+```
+
+## `package.json`
+
+```json
+
+{
+  "name": "app",
+  "dependencies": {
+    "react": "catalog:react19"
+  }
+}
+
+```
+
+## `pnpm-workspace.yaml`
+
+```yaml
+
+packages:
+  - "src"
+catalogs:
+  react19:
+    react: 19.0.0
+
+```
+
+## `src/input.jsx`
+
+```jsx
+
+import { forwardRef } from "react";
+
+export const Component = forwardRef((props, ref) => {
+  return <div ref={ref} {...props} />;
+});
+
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/input.jsx:4:26 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use of forwardRef is detected, which is deprecated.
+  
+    2 │ import { forwardRef } from "react";
+    3 │ 
+  > 4 │ export const Component = forwardRef((props, ref) => {
+      │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 5 │   return <div ref={ref} {...props} />;
+  > 6 │ });
+      │ ^^
+    7 │ 
+  
+  i In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead.
+  
+  i Replace the use of forwardRef with passing ref as a prop.
+  
+  i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
+  
+    2 2 │   import { forwardRef } from "react";
+    3 3 │   
+    4   │ - export·const·Component·=·forwardRef((props,·ref)·=>·{
+      4 │ + export·const·Component·=·({·ref,·...props·})·=>·{
+    5 5 │     return <div ref={ref} {...props} />;
+    6   │ - });
+      6 │ + };
+    7 7 │   
+  
+
+```
+
+```block
+src/input.jsx format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - 
+    2 1 │   import { forwardRef } from "react";
+    3 2 │   
+    4 3 │   export const Component = forwardRef((props, ref) => {
+    5   │ - ··return·<div·ref={ref}·{...props}·/>;
+      4 │ + → return·<div·ref={ref}·{...props}·/>;
+    6 5 │   });
+    7 6 │   
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```
