@@ -613,6 +613,22 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
               }
             }
           ]
+        },
+        {
+          "ruleId": "format",
+          "level": "error",
+          "message": {
+            "text": "File content differs from formatting output"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                }
+              }
+            }
+          ]
         }
       ]
     }

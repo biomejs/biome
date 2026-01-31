@@ -84,7 +84,7 @@ impl ReporterVisitor for SummaryReporterVisitor {
 
         let profiles = biome_analyze::profiling::drain_sorted_by_total(false);
         if !profiles.is_empty() {
-            self.0.log(markup! {{ DisplayProfiles(profiles, None) }});
+            writer.log(markup! {{ DisplayProfiles(profiles, None) }});
         }
 
         Ok(())

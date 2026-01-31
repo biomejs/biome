@@ -225,6 +225,72 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           ]
         },
         {
+          "ruleId": "lint/correctness/noUnusedImports",
+          "level": "warning",
+          "message": {
+            "text": "Several of these imports are unused."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 2,
+                  "startColumn": 10,
+                  "endLine": 2,
+                  "endColumn": 11
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/correctness/noUnusedVariables",
+          "level": "warning",
+          "message": {
+            "text": "This variable f is unused."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 8,
+                  "startColumn": 5,
+                  "endLine": 8,
+                  "endColumn": 6
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/correctness/noUnusedVariables",
+          "level": "warning",
+          "message": {
+            "text": "This variable f is unused."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 9,
+                  "startColumn": 7,
+                  "endLine": 9,
+                  "endColumn": 8
+                }
+              }
+            }
+          ]
+        },
+        {
           "ruleId": "assist/source/organizeImports",
           "level": "error",
           "message": {
@@ -543,6 +609,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
                   "startColumn": 7,
                   "endLine": 9,
                   "endColumn": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "format",
+          "level": "error",
+          "message": {
+            "text": "Formatter would have printed the following content:"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
                 }
               }
             }

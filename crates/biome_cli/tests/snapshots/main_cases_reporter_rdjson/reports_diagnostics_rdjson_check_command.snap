@@ -152,6 +152,66 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     },
     {
       "code": {
+        "url": "https://biomejs.dev/linter/rules/no-unused-imports",
+        "value": "lint/correctness/noUnusedImports"
+      },
+      "location": {
+        "path": "main.ts",
+        "range": {
+          "end": {
+            "column": 11,
+            "line": 2
+          },
+          "start": {
+            "column": 10,
+            "line": 2
+          }
+        }
+      },
+      "message": "Several of these imports are unused."
+    },
+    {
+      "code": {
+        "url": "https://biomejs.dev/linter/rules/no-unused-variables",
+        "value": "lint/correctness/noUnusedVariables"
+      },
+      "location": {
+        "path": "main.ts",
+        "range": {
+          "end": {
+            "column": 6,
+            "line": 8
+          },
+          "start": {
+            "column": 5,
+            "line": 8
+          }
+        }
+      },
+      "message": "This variable f is unused."
+    },
+    {
+      "code": {
+        "url": "https://biomejs.dev/linter/rules/no-unused-variables",
+        "value": "lint/correctness/noUnusedVariables"
+      },
+      "location": {
+        "path": "main.ts",
+        "range": {
+          "end": {
+            "column": 8,
+            "line": 9
+          },
+          "start": {
+            "column": 7,
+            "line": 9
+          }
+        }
+      },
+      "message": "This variable f is unused."
+    },
+    {
+      "code": {
         "url": "https://biomejs.dev/assist/actions/organize-imports",
         "value": "assist/source/organizeImports"
       },
@@ -495,6 +555,12 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           "text": "'f' is defined here:"
         }
       ]
+    },
+    {
+      "code": {
+        "value": "format"
+      },
+      "message": "Formatter would have printed the following content:"
     }
   ]
 }

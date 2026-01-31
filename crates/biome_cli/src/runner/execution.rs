@@ -29,17 +29,17 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
     }
 
     fn get_max_diagnostics(&self, cli_options: &CliOptions) -> u32 {
-        if !cli_options
+        if cli_options
             .cli_reporter
             .iter()
-            .any(|reporter| reporter.is_default())
+            .any(|reporter| !reporter.is_default())
         {
-            cli_options.max_diagnostics.into()
-        } else {
             info!(
                 "Removing the limit of --max-diagnostics, because of a reporter list contains a reporter different from the default one."
             );
             u32::MAX
+        } else {
+            cli_options.max_diagnostics.into()
         }
     }
 

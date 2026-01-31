@@ -1,6 +1,5 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 432
 expression: redactor(content)
 ---
 ## `index.css`
@@ -90,6 +89,8 @@ reporter/format ━━━━━━━━━━━━━━━━━━━━━�
   i The following files need to be formatted:
   
   - index.css
+  - index.ts
+  - main.ts
   
 reporter/violations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

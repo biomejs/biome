@@ -134,3 +134,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 ::error title=lint/suspicious/noRedeclare,file=main.ts,line=9,endLine=9,col=7,endColumn=8::Shouldn't redeclare 'f'. Consider to delete it or rename it.
 ```
+
+```block
+::error title=format,file=main.ts,line=1,endLine=1,col=2,endColumn=2::File content differs from formatting output
+```

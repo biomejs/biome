@@ -78,7 +78,7 @@ impl ReporterVisitor for ConsoleReporterVisitor {
         });
         let profiles = profiling::drain_sorted_by_total(false);
         if !profiles.is_empty() {
-            self.0.log(markup! {{ DisplayProfiles(profiles, None) }});
+            writer.log(markup! {{ DisplayProfiles(profiles, None) }});
         }
 
         Ok(())

@@ -72,6 +72,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     <error line="9" column="7" severity="error" message="This variable implicitly has the any type." source="lint/suspicious/noImplicitAnyLet" />
     <error line="2" column="10" severity="error" message="Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it." source="lint/suspicious/noRedeclare" />
     <error line="9" column="7" severity="error" message="Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it." source="lint/suspicious/noRedeclare" />
+    <error line="0" column="0" severity="error" message="File content differs from formatting output" source="format" />
   </file>
 </checkstyle>
 
