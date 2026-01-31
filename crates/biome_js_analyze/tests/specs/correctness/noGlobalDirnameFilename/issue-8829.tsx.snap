@@ -1,0 +1,432 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue-8829.tsx
+---
+# Input
+```tsx
+/**
+ * `correctness/noGlobalDirnameFilename` does not trigger
+ * in any of the following scenarios
+ */
+
+// String concatenation
+const path1 = __dirname + "/data";
+const path2 = "/data" + __filename;
+
+// Template string literals
+const command: string = `cat ${__filename}`;
+
+// Operators
+const target = process.env.DEBUG && __filename;
+const folder = __dirname || "./default";
+const dir: string = __dirname ?? "";
+const location = true ? __dirname : "unknown";
+
+// Array initialization
+const arr: string[] = [__filename];
+
+// Computed property access
+const cache: Record<string, string> = {};
+const value = cache[__dirname];
+
+// Function parameters
+function logPath(path = __dirname) {
+	console.log(path);
+}
+const arrowLog = (f = __filename) => console.log(f);
+
+// Type Assertions
+const fileAsAny = __filename as any;
+
+// JSX
+const Component = () => <div data-path={__dirname} />;
+
+// Class properties
+class FileLogger {
+	currentFile = __filename;
+}
+new FileLogger().currentFile = __filename;
+
+```
+
+# Diagnostics
+```
+issue-8829.tsx:7:15 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __dirname.
+  
+    6 │ // String concatenation
+  > 7 │ const path1 = __dirname + "/data";
+      │               ^^^^^^^^^^
+    8 │ const path2 = "/data" + __filename;
+    9 │ 
+  
+  i __dirname is not available in ES modules.
+  
+  i Safe fix: Replace __dirname with import.meta.dirname.
+  
+     5  5 │   
+     6  6 │   // String concatenation
+     7    │ - const·path1·=·__dirname·+·"/data";
+        7 │ + const·path1·=·import.meta.dirname·+·"/data";
+     8  8 │   const path2 = "/data" + __filename;
+     9  9 │   
+  
+
+```
+
+```
+issue-8829.tsx:8:25 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __filename.
+  
+     6 │ // String concatenation
+     7 │ const path1 = __dirname + "/data";
+   > 8 │ const path2 = "/data" + __filename;
+       │                         ^^^^^^^^^^
+     9 │ 
+    10 │ // Template string literals
+  
+  i __filename is not available in ES modules.
+  
+  i Safe fix: Replace __filename with import.meta.filename.
+  
+     6  6 │   // String concatenation
+     7  7 │   const path1 = __dirname + "/data";
+     8    │ - const·path2·=·"/data"·+·__filename;
+        8 │ + const·path2·=·"/data"·+·import.meta.filename;
+     9  9 │   
+    10 10 │   // Template string literals
+  
+
+```
+
+```
+issue-8829.tsx:11:32 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __filename.
+  
+    10 │ // Template string literals
+  > 11 │ const command: string = `cat ${__filename}`;
+       │                                ^^^^^^^^^^
+    12 │ 
+    13 │ // Operators
+  
+  i __filename is not available in ES modules.
+  
+  i Safe fix: Replace __filename with import.meta.filename.
+  
+     9  9 │   
+    10 10 │   // Template string literals
+    11    │ - const·command:·string·=·`cat·${__filename}`;
+       11 │ + const·command:·string·=·`cat·${import.meta.filename}`;
+    12 12 │   
+    13 13 │   // Operators
+  
+
+```
+
+```
+issue-8829.tsx:14:37 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __filename.
+  
+    13 │ // Operators
+  > 14 │ const target = process.env.DEBUG && __filename;
+       │                                     ^^^^^^^^^^
+    15 │ const folder = __dirname || "./default";
+    16 │ const dir: string = __dirname ?? "";
+  
+  i __filename is not available in ES modules.
+  
+  i Safe fix: Replace __filename with import.meta.filename.
+  
+    12 12 │   
+    13 13 │   // Operators
+    14    │ - const·target·=·process.env.DEBUG·&&·__filename;
+       14 │ + const·target·=·process.env.DEBUG·&&·import.meta.filename;
+    15 15 │   const folder = __dirname || "./default";
+    16 16 │   const dir: string = __dirname ?? "";
+  
+
+```
+
+```
+issue-8829.tsx:15:16 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __dirname.
+  
+    13 │ // Operators
+    14 │ const target = process.env.DEBUG && __filename;
+  > 15 │ const folder = __dirname || "./default";
+       │                ^^^^^^^^^^
+    16 │ const dir: string = __dirname ?? "";
+    17 │ const location = true ? __dirname : "unknown";
+  
+  i __dirname is not available in ES modules.
+  
+  i Safe fix: Replace __dirname with import.meta.dirname.
+  
+    13 13 │   // Operators
+    14 14 │   const target = process.env.DEBUG && __filename;
+    15    │ - const·folder·=·__dirname·||·"./default";
+       15 │ + const·folder·=·import.meta.dirname·||·"./default";
+    16 16 │   const dir: string = __dirname ?? "";
+    17 17 │   const location = true ? __dirname : "unknown";
+  
+
+```
+
+```
+issue-8829.tsx:16:21 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __dirname.
+  
+    14 │ const target = process.env.DEBUG && __filename;
+    15 │ const folder = __dirname || "./default";
+  > 16 │ const dir: string = __dirname ?? "";
+       │                     ^^^^^^^^^^
+    17 │ const location = true ? __dirname : "unknown";
+    18 │ 
+  
+  i __dirname is not available in ES modules.
+  
+  i Safe fix: Replace __dirname with import.meta.dirname.
+  
+    14 14 │   const target = process.env.DEBUG && __filename;
+    15 15 │   const folder = __dirname || "./default";
+    16    │ - const·dir:·string·=·__dirname·??·"";
+       16 │ + const·dir:·string·=·import.meta.dirname·??·"";
+    17 17 │   const location = true ? __dirname : "unknown";
+    18 18 │   
+  
+
+```
+
+```
+issue-8829.tsx:17:25 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __dirname.
+  
+    15 │ const folder = __dirname || "./default";
+    16 │ const dir: string = __dirname ?? "";
+  > 17 │ const location = true ? __dirname : "unknown";
+       │                         ^^^^^^^^^^
+    18 │ 
+    19 │ // Array initialization
+  
+  i __dirname is not available in ES modules.
+  
+  i Safe fix: Replace __dirname with import.meta.dirname.
+  
+    15 15 │   const folder = __dirname || "./default";
+    16 16 │   const dir: string = __dirname ?? "";
+    17    │ - const·location·=·true·?·__dirname·:·"unknown";
+       17 │ + const·location·=·true·?·import.meta.dirname·:·"unknown";
+    18 18 │   
+    19 19 │   // Array initialization
+  
+
+```
+
+```
+issue-8829.tsx:20:24 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __filename.
+  
+    19 │ // Array initialization
+  > 20 │ const arr: string[] = [__filename];
+       │                        ^^^^^^^^^^
+    21 │ 
+    22 │ // Computed property access
+  
+  i __filename is not available in ES modules.
+  
+  i Safe fix: Replace __filename with import.meta.filename.
+  
+    18 18 │   
+    19 19 │   // Array initialization
+    20    │ - const·arr:·string[]·=·[__filename];
+       20 │ + const·arr:·string[]·=·[import.meta.filename];
+    21 21 │   
+    22 22 │   // Computed property access
+  
+
+```
+
+```
+issue-8829.tsx:24:21 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __dirname.
+  
+    22 │ // Computed property access
+    23 │ const cache: Record<string, string> = {};
+  > 24 │ const value = cache[__dirname];
+       │                     ^^^^^^^^^
+    25 │ 
+    26 │ // Function parameters
+  
+  i __dirname is not available in ES modules.
+  
+  i Safe fix: Replace __dirname with import.meta.dirname.
+  
+    22 22 │   // Computed property access
+    23 23 │   const cache: Record<string, string> = {};
+    24    │ - const·value·=·cache[__dirname];
+       24 │ + const·value·=·cache[import.meta.dirname];
+    25 25 │   
+    26 26 │   // Function parameters
+  
+
+```
+
+```
+issue-8829.tsx:27:25 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __dirname.
+  
+    26 │ // Function parameters
+  > 27 │ function logPath(path = __dirname) {
+       │                         ^^^^^^^^^
+    28 │ 	console.log(path);
+    29 │ }
+  
+  i __dirname is not available in ES modules.
+  
+  i Safe fix: Replace __dirname with import.meta.dirname.
+  
+    25 25 │   
+    26 26 │   // Function parameters
+    27    │ - function·logPath(path·=·__dirname)·{
+       27 │ + function·logPath(path·=·import.meta.dirname)·{
+    28 28 │   	console.log(path);
+    29 29 │   }
+  
+
+```
+
+```
+issue-8829.tsx:30:23 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __filename.
+  
+    28 │ 	console.log(path);
+    29 │ }
+  > 30 │ const arrowLog = (f = __filename) => console.log(f);
+       │                       ^^^^^^^^^^
+    31 │ 
+    32 │ // Type Assertions
+  
+  i __filename is not available in ES modules.
+  
+  i Safe fix: Replace __filename with import.meta.filename.
+  
+    28 28 │   	console.log(path);
+    29 29 │   }
+    30    │ - const·arrowLog·=·(f·=·__filename)·=>·console.log(f);
+       30 │ + const·arrowLog·=·(f·=·import.meta.filename)·=>·console.log(f);
+    31 31 │   
+    32 32 │   // Type Assertions
+  
+
+```
+
+```
+issue-8829.tsx:33:19 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __filename.
+  
+    32 │ // Type Assertions
+  > 33 │ const fileAsAny = __filename as any;
+       │                   ^^^^^^^^^^^
+    34 │ 
+    35 │ // JSX
+  
+  i __filename is not available in ES modules.
+  
+  i Safe fix: Replace __filename with import.meta.filename.
+  
+    31 31 │   
+    32 32 │   // Type Assertions
+    33    │ - const·fileAsAny·=·__filename·as·any;
+       33 │ + const·fileAsAny·=·import.meta.filename·as·any;
+    34 34 │   
+    35 35 │   // JSX
+  
+
+```
+
+```
+issue-8829.tsx:36:41 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __dirname.
+  
+    35 │ // JSX
+  > 36 │ const Component = () => <div data-path={__dirname} />;
+       │                                         ^^^^^^^^^
+    37 │ 
+    38 │ // Class properties
+  
+  i __dirname is not available in ES modules.
+  
+  i Safe fix: Replace __dirname with import.meta.dirname.
+  
+    34 34 │   
+    35 35 │   // JSX
+    36    │ - const·Component·=·()·=>·<div·data-path={__dirname}·/>;
+       36 │ + const·Component·=·()·=>·<div·data-path={import.meta.dirname}·/>;
+    37 37 │   
+    38 38 │   // Class properties
+  
+
+```
+
+```
+issue-8829.tsx:40:16 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __filename.
+  
+    38 │ // Class properties
+    39 │ class FileLogger {
+  > 40 │ 	currentFile = __filename;
+       │ 	              ^^^^^^^^^^
+    41 │ }
+    42 │ new FileLogger().currentFile = __filename;
+  
+  i __filename is not available in ES modules.
+  
+  i Safe fix: Replace __filename with import.meta.filename.
+  
+    38 38 │   // Class properties
+    39 39 │   class FileLogger {
+    40    │ - → currentFile·=·__filename;
+       40 │ + → currentFile·=·import.meta.filename;
+    41 41 │   }
+    42 42 │   new FileLogger().currentFile = __filename;
+  
+
+```
+
+```
+issue-8829.tsx:42:32 lint/correctness/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use __filename.
+  
+    40 │ 	currentFile = __filename;
+    41 │ }
+  > 42 │ new FileLogger().currentFile = __filename;
+       │                                ^^^^^^^^^^
+    43 │ 
+  
+  i __filename is not available in ES modules.
+  
+  i Safe fix: Replace __filename with import.meta.filename.
+  
+    40 40 │   	currentFile = __filename;
+    41 41 │   }
+    42    │ - new·FileLogger().currentFile·=·__filename;
+       42 │ + new·FileLogger().currentFile·=·import.meta.filename;
+    43 43 │   
+  
+
+```
