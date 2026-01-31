@@ -307,7 +307,7 @@ impl HtmlSyntaxKind {
             OUT_KW => "out",
             STYLE_KW => "style",
             CLASS_KW => "class",
-            EOF => "EOF",
+            EOF => "",
             HTML_STRING_LITERAL => "string literal",
             _ => return None,
         };

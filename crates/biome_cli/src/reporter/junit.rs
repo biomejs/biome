@@ -1,7 +1,7 @@
-use crate::reporter::{Reporter, ReporterVisitor};
+use crate::reporter::{Reporter, ReporterVisitor, ReporterWriter};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
-use biome_console::{Console, ConsoleExt, markup};
+use biome_console::markup;
 use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, Resource};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -10,7 +10,7 @@ use std::fmt::{Display, Formatter};
 use std::io;
 
 pub(crate) struct JunitReporter<'a> {
-    pub(crate) diagnostics_payload: DiagnosticsPayload,
+    pub(crate) diagnostics_payload: &'a DiagnosticsPayload,
     pub(crate) execution: &'a dyn Execution,
     pub(crate) summary: TraversalSummary,
     pub(crate) verbose: bool,
@@ -18,9 +18,15 @@ pub(crate) struct JunitReporter<'a> {
 }
 
 impl Reporter for JunitReporter<'_> {
-    fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_summary(self.execution, self.summary, self.verbose)?;
+    fn write(
+        self,
+        writer: &mut dyn ReporterWriter,
+
+        visitor: &mut dyn ReporterVisitor,
+    ) -> io::Result<()> {
+        visitor.report_summary(writer, self.execution, self.summary, self.verbose)?;
         visitor.report_diagnostics(
+            writer,
             self.execution,
             self.diagnostics_payload,
             self.verbose,
@@ -40,18 +46,19 @@ impl Display for JunitDiagnostic<'_> {
     }
 }
 
-pub(crate) struct JunitReporterVisitor<'a>(pub(crate) Report, pub(crate) &'a mut dyn Console);
+pub(crate) struct JunitReporterVisitor(pub(crate) Report);
 
-impl<'a> JunitReporterVisitor<'a> {
-    pub(crate) fn new(console: &'a mut dyn Console) -> Self {
+impl JunitReporterVisitor {
+    pub(crate) fn new() -> Self {
         let report = Report::new("Biome");
-        Self(report, console)
+        Self(report)
     }
 }
 
-impl ReporterVisitor for JunitReporterVisitor<'_> {
+impl ReporterVisitor for JunitReporterVisitor {
     fn report_summary(
         &mut self,
+        _writer: &mut dyn ReporterWriter,
         _execution: &dyn Execution,
         summary: TraversalSummary,
         _verbose: bool,
@@ -64,8 +71,9 @@ impl ReporterVisitor for JunitReporterVisitor<'_> {
 
     fn report_diagnostics(
         &mut self,
+        writer: &mut dyn ReporterWriter,
         _execution: &dyn Execution,
-        payload: DiagnosticsPayload,
+        payload: &DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
@@ -125,8 +133,8 @@ impl ReporterVisitor for JunitReporterVisitor<'_> {
             }
         }
 
-        self.1.log(markup! {
-            {self.0.to_string().unwrap()}
+        writer.log(markup! {
+            {self.0.to_string().expect("To serialize report to string")}
         });
 
         Ok(())

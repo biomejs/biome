@@ -208,6 +208,7 @@ dependencies = [
  "biome_js_formatter",
  "biome_js_syntax",
  "biome_json_analyze",
+ "biome_json_factory",
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",

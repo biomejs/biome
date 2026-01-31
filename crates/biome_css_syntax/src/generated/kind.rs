@@ -1158,7 +1158,7 @@ impl CssSyntaxKind {
             FUNCTION_KW => "function",
             RETURNS_KW => "returns",
             FONT_FACE_KW => "font-face",
-            EOF => "EOF",
+            EOF => "",
             CSS_STRING_LITERAL => "string literal",
             _ => return None,
         };
