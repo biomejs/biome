@@ -170,12 +170,15 @@ fn is_in_font_face_at_rule(node: &CssGenericProperty) -> bool {
 }
 
 fn is_in_supports_at_rule(node: &CssGenericProperty) -> bool {
-    node.syntax()
-        .ancestors()
-        .find(|n| n.kind() == CssSyntaxKind::CSS_AT_RULE)
-        .and_then(|n| n.cast::<CssAtRule>())
-        .and_then(|n| n.rule().ok())
-        .is_some_and(|n| matches!(n, AnyCssAtRule::CssSupportsAtRule(_)))
+    // Check all ancestors, not just the first at-rule, because @supports may
+    // wrap other at-rules like @media. For example:
+    //   @supports (font: -apple-system-body) { @media screen { font: ... } }
+    node.syntax().ancestors().any(|n| {
+        n.kind() == CssSyntaxKind::CSS_AT_RULE
+            && n.cast::<CssAtRule>()
+                .and_then(|n| n.rule().ok())
+                .is_some_and(|n| matches!(n, AnyCssAtRule::CssSupportsAtRule(_)))
+    })
 }
 
 fn is_shorthand_font_property_with_keyword(properties: &CssGenericComponentValueList) -> bool {

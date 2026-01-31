@@ -36,4 +36,6 @@ a { font-family: revert }
 a { font-family: revert-layer }
 @supports (font: -apple-system-body) {}
 @supports (font-family: -apple-system) {}
+/* Nested at-rules inside @supports should also be ignored */
+@supports (font: -apple-system-body) { @media screen { a { font-family: -apple-system; } } }
 ```
