@@ -757,3 +757,46 @@ let {
         result,
     ));
 }
+#[test]
+fn no_useless_lone_block_statements_is_not_triggered() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<CollapsiblePrimitive.Content>
+	{#snippet child({ props, open })}
+		{#if open}
+			<div {...props} transition:slide={{ duration }}>
+				{@render children?.()}
+			</div>
+		{/if}
+	{/snippet}
+</CollapsiblePrimitive.Content>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUselessLoneBlockStatements", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_useless_lone_block_statements_is_not_triggered",
+        fs,
+        console,
+        result,
+    ));
+}
