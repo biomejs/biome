@@ -79,7 +79,15 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
             break_count += 1;
         }
 
-        return break_count >= THEMATIC_BREAK_MIN_CHARS;
+        let has_eol = p.lookahead(|p| {
+            p.bump(MD_TEXTUAL_LITERAL);
+            while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+                p.bump(MD_TEXTUAL_LITERAL);
+            }
+            p.at(NEWLINE) || p.at(T![EOF])
+        });
+
+        return break_count >= THEMATIC_BREAK_MIN_CHARS && has_eol;
     }
 
     // Get the break character from the first non-whitespace token
@@ -171,6 +179,16 @@ fn parse_thematic_break_tokens(p: &mut MarkdownParser) {
             .chars()
             .all(|c| c == ' ' || c == '\t' || c == '*' || c == '-' || c == '_')
     {
+        let has_eol = p.lookahead(|p| {
+            p.bump(MD_TEXTUAL_LITERAL);
+            while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+                p.bump(MD_TEXTUAL_LITERAL);
+            }
+            p.at(NEWLINE) || p.at(T![EOF])
+        });
+        if !has_eol {
+            return;
+        }
         p.bump_remap(MD_THEMATIC_BREAK_LITERAL);
         return;
     }
