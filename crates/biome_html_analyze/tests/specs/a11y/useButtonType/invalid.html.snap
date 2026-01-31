@@ -1,0 +1,168 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<button>Do something</button>
+<button type="incorrectType">Do something</button>
+<button type>Do something</button>
+<button type="">Do something</button>
+<button />
+<button type="incorrectType" />
+<button type />
+<button type="" />
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide an explicit type attribute for the button element.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <button>Do something</button>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <button type="incorrectType">Do something</button>
+    4 │ <button type>Do something</button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. 
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.html:3:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type attribute for the button element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <button>Do something</button>
+  > 3 │ <button type="incorrectType">Do something</button>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <button type>Do something</button>
+    5 │ <button type="">Do something</button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. 
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.html:4:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type attribute for the button element.
+  
+    2 │ <button>Do something</button>
+    3 │ <button type="incorrectType">Do something</button>
+  > 4 │ <button type>Do something</button>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <button type="">Do something</button>
+    6 │ <button />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. 
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.html:5:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type attribute for the button element.
+  
+    3 │ <button type="incorrectType">Do something</button>
+    4 │ <button type>Do something</button>
+  > 5 │ <button type="">Do something</button>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <button />
+    7 │ <button type="incorrectType" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. 
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.html:6:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide an explicit type attribute for the button element.
+  
+    4 │ <button type>Do something</button>
+    5 │ <button type="">Do something</button>
+  > 6 │ <button />
+      │ ^^^^^^^^^^
+    7 │ <button type="incorrectType" />
+    8 │ <button type />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. 
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.html:7:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type attribute for the button element.
+  
+    5 │ <button type="">Do something</button>
+    6 │ <button />
+  > 7 │ <button type="incorrectType" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <button type />
+    9 │ <button type="" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. 
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.html:8:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type attribute for the button element.
+  
+     6 │ <button />
+     7 │ <button type="incorrectType" />
+   > 8 │ <button type />
+       │ ^^^^^^^^^^^^^^^
+     9 │ <button type="" />
+    10 │ 
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. 
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.html:9:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type attribute for the button element.
+  
+     7 │ <button type="incorrectType" />
+     8 │ <button type />
+   > 9 │ <button type="" />
+       │ ^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. 
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```

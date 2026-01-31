@@ -67,6 +67,7 @@ impl std::fmt::Display for RuleGroup {
 pub enum ActionName {
     OrganizeImports,
     UseSortedAttributes,
+    UseSortedInterfaceMembers,
     UseSortedKeys,
     UseSortedProperties,
 }
@@ -75,6 +76,7 @@ impl ActionName {
         match self {
             Self::OrganizeImports => "organizeImports",
             Self::UseSortedAttributes => "useSortedAttributes",
+            Self::UseSortedInterfaceMembers => "useSortedInterfaceMembers",
             Self::UseSortedKeys => "useSortedKeys",
             Self::UseSortedProperties => "useSortedProperties",
         }
@@ -83,6 +85,7 @@ impl ActionName {
         match self {
             Self::OrganizeImports => RuleGroup::Source,
             Self::UseSortedAttributes => RuleGroup::Source,
+            Self::UseSortedInterfaceMembers => RuleGroup::Source,
             Self::UseSortedKeys => RuleGroup::Source,
             Self::UseSortedProperties => RuleGroup::Source,
         }
@@ -94,6 +97,7 @@ impl std::str::FromStr for ActionName {
         match s {
             "organizeImports" => Ok(Self::OrganizeImports),
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
+            "useSortedInterfaceMembers" => Ok(Self::UseSortedInterfaceMembers),
             "useSortedKeys" => Ok(Self::UseSortedKeys),
             "useSortedProperties" => Ok(Self::UseSortedProperties),
             _ => Err("This rule name doesn't exist."),

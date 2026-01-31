@@ -58,7 +58,7 @@ declare_lint_rule! {
         name: "useConsistentEnumValueType",
         language: "ts",
         recommended: false,
-        domains: &[RuleDomain::Project],
+        domains: &[RuleDomain::Types],
         sources: &[RuleSource::EslintTypeScript("no-mixed-enums").same()],
     }
 }

@@ -39,12 +39,14 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```jsx
 <div bar="foo" baz={"foo"}>
 	"123"
 </div>;
+
 ```
 
 ## Output 1
@@ -65,10 +67,12 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```jsx
 <div bar="foo" baz={'foo'}>
 	"123"
 </div>;
+
 ```

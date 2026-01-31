@@ -13,9 +13,9 @@ use crate::services::config_source::ConfigSource;
 use crate::suppression_action::JsonSuppressionAction;
 pub use biome_analyze::ExtendedConfigurationProvider;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
-    to_analyzer_suppressions,
+    AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, AnalyzerSuppression,
+    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage,
+    PluginVisitor, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
 use biome_diagnostics::Error;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, TextRange};
@@ -47,13 +47,22 @@ pub fn analyze<'a, F, B>(
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
     json_services: JsonAnalyzeServices,
+    plugins: AnalyzerPluginSlice<'a>,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
     F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, filter, |_| {}, options, json_services, emit_signal)
+    analyze_with_inspect_matcher(
+        root,
+        filter,
+        |_| {},
+        options,
+        json_services,
+        plugins,
+        emit_signal,
+    )
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -68,6 +77,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
     json_services: JsonAnalyzeServices,
+    plugins: AnalyzerPluginSlice<'a>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -120,6 +130,18 @@ where
 
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
+    }
+
+    for plugin in plugins {
+        // SAFETY: The plugin target language is correctly checked here.
+        unsafe {
+            if plugin.language() == PluginTargetLanguage::Json {
+                analyzer.add_visitor(
+                    Phases::Syntax,
+                    Box::new(PluginVisitor::new_unchecked(plugin.clone())),
+                )
+            }
+        }
     }
 
     services.insert_service(json_services.configuration_provider);
@@ -185,6 +207,7 @@ mod tests {
             },
             &options,
             services,
+            &[],
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());

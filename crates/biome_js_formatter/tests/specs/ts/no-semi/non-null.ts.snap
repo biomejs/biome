@@ -34,12 +34,14 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
 // the 2nd line needs ASI protection
 const el = ReactDOM.findDOMNode(ref);
 (el as HTMLElement)!.style.cursor = "pointer";
+
 ```
 
 ## Output 1
@@ -60,10 +62,12 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
 // the 2nd line needs ASI protection
 const el = ReactDOM.findDOMNode(ref)
 ;(el as HTMLElement)!.style.cursor = "pointer"
+
 ```

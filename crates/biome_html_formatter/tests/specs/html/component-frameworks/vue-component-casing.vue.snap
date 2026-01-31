@@ -35,6 +35,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```vue
@@ -48,6 +49,7 @@ import TextInput from './TextInput.vue';
 	<TextInput placeholder="enter text" />
 	<button>native button</button>
 </template>
+
 ```
 
 

@@ -111,7 +111,8 @@ pub(crate) fn analyze_and_snap(
                 );
                 let node = transformation.mutation.commit();
 
-                let formatted = format_node(JsFormatOptions::new(source_type), &node).unwrap();
+                let formatted =
+                    format_node(JsFormatOptions::new(source_type), &node, false).unwrap();
 
                 transformations.push(formatted.print().unwrap().as_code().to_string());
             }

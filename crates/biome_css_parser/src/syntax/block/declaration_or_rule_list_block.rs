@@ -30,7 +30,7 @@ impl ParseBlockBody for DeclarationOrRuleListBlock {
     }
 
     fn parse_list(&mut self, p: &mut CssParser) {
-        DeclarationOrRuleList.parse_list(p);
+        DeclarationOrRuleList::new(T!['}']).parse_list(p);
     }
 }
 
@@ -42,18 +42,36 @@ fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
         || is_at_metavariable(p)
 }
 
-struct DeclarationOrRuleListParseRecovery;
+struct DeclarationOrRuleListParseRecovery {
+    end_kind: CssSyntaxKind,
+}
+
+impl DeclarationOrRuleListParseRecovery {
+    fn new(end_kind: CssSyntaxKind) -> Self {
+        Self { end_kind }
+    }
+}
+
 impl ParseRecovery for DeclarationOrRuleListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}']) || is_at_declaration_or_rule_item(p)
+        p.at(self.end_kind) || is_at_declaration_or_rule_item(p)
     }
 }
 
-struct DeclarationOrRuleList;
+pub(crate) struct DeclarationOrRuleList {
+    end_kind: CssSyntaxKind,
+}
+
+impl DeclarationOrRuleList {
+    pub(crate) fn new(end_kind: CssSyntaxKind) -> Self {
+        Self { end_kind }
+    }
+}
+
 impl ParseNodeList for DeclarationOrRuleList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
@@ -101,7 +119,7 @@ impl ParseNodeList for DeclarationOrRuleList {
                 // } <---
                 // The closing brace indicates the end of the declaration block.
                 // If either condition is true, the declaration is considered valid.
-                if matches!(p.last(), Some(T![;])) || p.at(T!['}']) {
+                if matches!(p.last(), Some(T![;])) || p.at(self.end_kind) {
                     Ok(declaration)
                 } else {
                     Err(())
@@ -128,7 +146,7 @@ impl ParseNodeList for DeclarationOrRuleList {
                 // Check if the *last* token parsed is a closing brace (}).
                 // Indicates the end of a rule block.
                 // If true, the nested qualified rule is considered valid.
-                if matches!(p.last(), Some(T!['}'])) {
+                if p.last().is_some_and(|kind| kind == self.end_kind) {
                     Ok(rule)
                 } else {
                     // If the condition is not met, return an error to indicate parsing failure.
@@ -155,7 +173,7 @@ impl ParseNodeList for DeclarationOrRuleList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}'])
+        p.at(self.end_kind)
     }
 
     fn recover(
@@ -165,7 +183,7 @@ impl ParseNodeList for DeclarationOrRuleList {
     ) -> RecoveryResult {
         parsed_element.or_recover(
             p,
-            &DeclarationOrRuleListParseRecovery,
+            &DeclarationOrRuleListParseRecovery::new(self.end_kind),
             expected_any_declaration_or_at_rule,
         )
     }

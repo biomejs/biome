@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multiple_non_sortable.ts
+---
+# Input
+```ts
+interface _UnsortedInterface {
+	zProperty: string;
+	aProperty: number;
+	new (): any;  // Construct signature
+	(): void;  // Call signature
+	yMethod(): boolean;
+	[index: number]: string;  // Index signature with number
+	bMethod(): string;
+	[key: string]: any;  // Index signature with string
+	cField: object;
+}
+
+```
+
+# Diagnostics
+```
+multiple_non_sortable.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i The interface members are not sorted by key.
+  
+   > 1 │ interface _UnsortedInterface {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 2 │ 	zProperty: string;
+   > 3 │ 	aProperty: number;
+   > 4 │ 	new (): any;  // Construct signature
+        ...
+   > 9 │ 	[key: string]: any;  // Index signature with string
+  > 10 │ 	cField: object;
+  > 11 │ }
+       │ ^
+    12 │ 
+  
+  i Safe fix: Sort the interface members by key.
+  
+     1  1 │   interface _UnsortedInterface {
+     2    │ - → zProperty:·string;
+     3    │ - → aProperty:·number;
+     4    │ - → new·():·any;··//·Construct·signature
+     5    │ - → ():·void;··//·Call·signature
+     6    │ - → yMethod():·boolean;
+     7    │ - → [index:·number]:·string;··//·Index·signature·with·number
+     8    │ - → bMethod():·string;
+     9    │ - → [key:·string]:·any;··//·Index·signature·with·string
+    10    │ - → cField:·object;
+        2 │ + → aProperty:·number;
+        3 │ + → bMethod():·string;
+        4 │ + → cField:·object;
+        5 │ + → yMethod():·boolean;
+        6 │ + → zProperty:·string;
+        7 │ + → new·():·any;··//·Construct·signature
+        8 │ + → ():·void;··//·Call·signature
+        9 │ + → [index:·number]:·string;··//·Index·signature·with·number
+       10 │ + → [key:·string]:·any;··//·Index·signature·with·string
+    11 11 │   }
+    12 12 │   
+  
+
+```

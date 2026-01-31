@@ -128,14 +128,22 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
         self.tx.send(()).expect("can send notification");
     }
 
-    fn unload_file(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
+    fn unload_file(
+        &self,
+        path: &Utf8Path,
+        _project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.indexed_files.pin().remove(path);
         self.tx.send(()).expect("can send notification");
 
         Ok(vec![])
     }
 
-    fn unload_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
+    fn unload_path(
+        &self,
+        path: &Utf8Path,
+        _project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.indexed_files.pin().remove(path);
         self.indexed_folders.pin().remove(path);
         self.tx.send(()).expect("can send notification");

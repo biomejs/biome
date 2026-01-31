@@ -9,6 +9,7 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use camino::{Utf8Path, Utf8PathBuf};
+use directories::ProjectDirs;
 use regex::Regex;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
@@ -59,8 +60,8 @@ impl CliSnapshot {
         let mut content = String::new();
 
         for (configuration, file_name) in &self.configuration_list {
+            let file_name = redact_snapshot(file_name).unwrap_or(file_name.into());
             let redacted = redact_snapshot(configuration).unwrap_or(String::new().into());
-
             let parsed = parse_json(
                 &redacted,
                 JsonParserOptions::default()
@@ -86,10 +87,11 @@ impl CliSnapshot {
         }
 
         for (name, file_content) in &self.files {
+            let name = replace_config_dir(Cow::Borrowed(name));
             if !name.starts_with("biome.json") {
                 let extension = name.split('.').next_back().unwrap();
 
-                let redacted_name = redact_snapshot(name).unwrap_or(String::new().into());
+                let redacted_name = redact_snapshot(name.as_ref()).unwrap_or(String::new().into());
                 let redacted_content =
                     redact_snapshot(file_content).unwrap_or(String::new().into());
 
@@ -177,6 +179,7 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
 
     output = replace_temp_dir(output);
     output = replace_biome_dir(output);
+    output = replace_config_dir(output);
 
     // Normalize Windows-specific path separators to "/"
     if cfg!(windows) {
@@ -274,10 +277,56 @@ fn replace_biome_dir(input: Cow<str>) -> Cow<str> {
     while let Some(index) = rest.find(temp_dir) {
         let (before, after) = rest.split_at(index);
 
-        result.push_str(before);
+        result.push_str(before.trim());
+        result.push(' ');
         result.push_str("<BIOME_DIR>");
 
         let after = after.split_at(temp_dir.len()).1;
+        let header_line = after.lines().next().unwrap();
+
+        match header_line.split_once('\u{2501}') {
+            Some((between_temp_and_line, _)) => {
+                // Diagnostic header line, normalize the horizontal line
+                result.push_str(between_temp_and_line);
+                result.push_str(&"\u{2501}".repeat(20));
+                rest = after.split_at(header_line.len()).1;
+            }
+            None => {
+                // Not a header line, only replace tempdir
+                rest = after;
+            }
+        }
+    }
+
+    if result.is_empty() {
+        input
+    } else {
+        result.push_str(rest);
+        Cow::Owned(result)
+    }
+}
+
+/// Replace the path to the config directory with "<CONFIG_DIR>"
+/// And normalizes the count of `-` at the end of the diagnostic
+fn replace_config_dir(input: Cow<str>) -> Cow<str> {
+    let mut result = String::new();
+    let mut rest = input.as_ref();
+
+    let config_dir = ProjectDirs::from("", "", "biome")
+        .map(|path| path.config_dir().to_path_buf())
+        .unwrap()
+        .display()
+        .to_string();
+
+    let config_dir = config_dir.trim_end_matches(MAIN_SEPARATOR);
+
+    while let Some(index) = rest.find(config_dir) {
+        let (before, after) = rest.split_at(index);
+
+        result.push_str(before);
+        result.push_str("<CONFIG_DIR>");
+
+        let after = after.split_at(config_dir.len()).1;
         let header_line = after.lines().next().unwrap();
 
         match header_line.split_once('\u{2501}') {

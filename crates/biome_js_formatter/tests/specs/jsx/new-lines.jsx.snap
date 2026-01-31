@@ -81,6 +81,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```jsx
@@ -129,4 +130,5 @@ let myDiv3 = ReactTestUtils.renderIntoDocument(
 		<di key="theBird" className="bird" />
 	</div1>,
 );
+
 ```

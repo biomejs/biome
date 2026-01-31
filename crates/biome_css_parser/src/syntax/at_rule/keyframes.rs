@@ -10,7 +10,8 @@ use crate::syntax::css_modules::{
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::{
-    is_at_declaration, is_at_identifier, is_at_string, parse_custom_identifier, parse_string,
+    CssSyntaxFeatures, is_at_declaration, is_at_identifier, is_at_string, parse_custom_identifier,
+    parse_string,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -106,7 +107,7 @@ fn parse_keyframes_scoped_name(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![:]);
 
-    if p.options().is_css_modules_disabled() {
+    if CssSyntaxFeatures::CssModules.is_unsupported(p) {
         // :local and :global are not standard CSS features
         // provide a hint on how to enable parsing of these pseudo-classes
         p.error(local_or_global_not_allowed(p, p.cur_range()));

@@ -38,7 +38,8 @@ fn should_index_on_write_but_not_on_read() {
     let (mock_bridge, bridge_rx) =
         MockWorkspaceWatcherBridge::new(&os_fs, ProjectKey::new(), scan_kind.clone());
 
-    let (mut watcher, instruction_channel) = Watcher::new().expect("can create watcher");
+    let (mut watcher, instruction_channel) =
+        Watcher::new(WatcherOptions::default()).expect("can create watcher");
     thread::scope(|s| {
         s.spawn(|| watcher.run(&mock_bridge));
 
@@ -108,7 +109,8 @@ fn should_index_on_create_and_unload_on_delete() {
     let (mock_bridge, bridge_rx) =
         MockWorkspaceWatcherBridge::new(&os_fs, ProjectKey::new(), scan_kind.clone());
 
-    let (mut watcher, instruction_channel) = Watcher::new().expect("can create watcher");
+    let (mut watcher, instruction_channel) =
+        Watcher::new(WatcherOptions::default()).expect("can create watcher");
     thread::scope(|s| {
         s.spawn(|| watcher.run(&mock_bridge));
 

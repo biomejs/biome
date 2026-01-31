@@ -31,6 +31,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```astro
@@ -38,7 +39,8 @@ Self close void elements: never
 import Base from "$layouts/Base.astro";
 ---
 
-<Base title="500"></Base>
+<Base title="500"> </Base>
+
 ```
 
 

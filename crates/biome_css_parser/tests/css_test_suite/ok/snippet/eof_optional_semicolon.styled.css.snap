@@ -1,0 +1,88 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+/* The last semicolon can be omitted when it's embedded in JS. */
+background-color: blue;
+color: red
+
+```
+
+
+## AST
+
+```
+CssSnippetRoot {
+    items: CssDeclarationOrRuleList [
+        CssDeclarationWithSemicolon {
+            declaration: CssDeclaration {
+                property: CssGenericProperty {
+                    name: CssIdentifier {
+                        value_token: IDENT@0..82 "background-color" [Comments("/* The last semicolon ..."), Newline("\n")] [],
+                    },
+                    colon_token: COLON@82..84 ":" [] [Whitespace(" ")],
+                    value: CssGenericComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@84..88 "blue" [] [],
+                        },
+                    ],
+                },
+                important: missing (optional),
+            },
+            semicolon_token: SEMICOLON@88..89 ";" [] [],
+        },
+        CssDeclarationWithSemicolon {
+            declaration: CssDeclaration {
+                property: CssGenericProperty {
+                    name: CssIdentifier {
+                        value_token: IDENT@89..95 "color" [Newline("\n")] [],
+                    },
+                    colon_token: COLON@95..97 ":" [] [Whitespace(" ")],
+                    value: CssGenericComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@97..100 "red" [] [],
+                        },
+                    ],
+                },
+                important: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@100..101 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_SNIPPET_ROOT@0..101
+  0: CSS_DECLARATION_OR_RULE_LIST@0..100
+    0: CSS_DECLARATION_WITH_SEMICOLON@0..89
+      0: CSS_DECLARATION@0..88
+        0: CSS_GENERIC_PROPERTY@0..88
+          0: CSS_IDENTIFIER@0..82
+            0: IDENT@0..82 "background-color" [Comments("/* The last semicolon ..."), Newline("\n")] []
+          1: COLON@82..84 ":" [] [Whitespace(" ")]
+          2: CSS_GENERIC_COMPONENT_VALUE_LIST@84..88
+            0: CSS_IDENTIFIER@84..88
+              0: IDENT@84..88 "blue" [] []
+        1: (empty)
+      1: SEMICOLON@88..89 ";" [] []
+    1: CSS_DECLARATION_WITH_SEMICOLON@89..100
+      0: CSS_DECLARATION@89..100
+        0: CSS_GENERIC_PROPERTY@89..100
+          0: CSS_IDENTIFIER@89..95
+            0: IDENT@89..95 "color" [Newline("\n")] []
+          1: COLON@95..97 ":" [] [Whitespace(" ")]
+          2: CSS_GENERIC_COMPONENT_VALUE_LIST@97..100
+            0: CSS_IDENTIFIER@97..100
+              0: IDENT@97..100 "red" [] []
+        1: (empty)
+      1: (empty)
+  1: EOF@100..101 "" [Newline("\n")] []
+
+```

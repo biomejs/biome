@@ -11,7 +11,7 @@ use crate::file_handlers::{
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    Settings, check_feature_activity, check_override_feature_activity,
+    Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult};
 use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
@@ -21,7 +21,7 @@ use biome_configuration::graphql::{
 };
 use biome_formatter::{
     BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
-    QuoteStyle,
+    QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_graphql_analyze::analyze;
@@ -46,6 +46,7 @@ pub struct GraphqlFormatterSettings {
     pub quote_style: Option<QuoteStyle>,
     pub bracket_spacing: Option<BracketSpacing>,
     pub enabled: Option<GraphqlFormatterEnabled>,
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl From<GraphqlFormatterConfiguration> for GraphqlFormatterSettings {
@@ -58,6 +59,7 @@ impl From<GraphqlFormatterConfiguration> for GraphqlFormatterSettings {
             quote_style: configuration.quote_style,
             bracket_spacing: configuration.bracket_spacing,
             enabled: configuration.enabled,
+            trailing_newline: configuration.trailing_newline,
         }
     }
 }
@@ -145,6 +147,10 @@ impl ServiceLanguage for GraphqlLanguage {
             .bracket_spacing
             .or(global.bracket_spacing)
             .unwrap_or_default();
+        let trailing_newline = language
+            .trailing_newline
+            .or(global.trailing_newline)
+            .unwrap_or_default();
 
         let mut options = GraphqlFormatOptions::new(
             document_file_source
@@ -156,7 +162,8 @@ impl ServiceLanguage for GraphqlLanguage {
         .with_line_width(line_width)
         .with_line_ending(line_ending)
         .with_bracket_spacing(bracket_spacing)
-        .with_quote_style(language.quote_style.unwrap_or_default());
+        .with_quote_style(language.quote_style.unwrap_or_default())
+        .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_graphql_format_options(path, &mut options);
 
@@ -304,19 +311,19 @@ impl ExtensionHandler for GraphqlFileHandler {
     }
 }
 
-fn formatter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn formatter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.formatter_enabled_for_file_path::<GraphqlLanguage>(path)
 }
 
-fn linter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn linter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.linter_enabled_for_file_path::<GraphqlLanguage>(path)
 }
 
-fn assist_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.assist_enabled_for_file_path::<GraphqlLanguage>(path)
 }
 
-fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
+fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
@@ -324,7 +331,7 @@ fn parse(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    _settings: &Settings,
+    _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let parse = parse_graphql_with_cache(text, cache);
@@ -348,7 +355,7 @@ fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
 
@@ -364,7 +371,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
 
@@ -381,7 +388,7 @@ fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
@@ -395,7 +402,7 @@ fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
@@ -440,7 +447,7 @@ fn lint(params: LintParams) -> LintResults {
     let tree = params.parse.tree();
 
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(params.only)
             .with_skip(params.skip)
             .with_path(params.path.as_path())
@@ -505,7 +512,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     );
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
             .with_only(only)
             .with_skip(skip)
             .with_path(path.as_path())
@@ -545,14 +552,17 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut tree: GraphqlRoot = params.parse.tree();
 
     // Compute final rules (taking `overrides` into account)
-    let rules = params.settings.as_linter_rules(params.biome_path.as_path());
+    let rules = params
+        .settings
+        .as_ref()
+        .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<GraphqlLanguage>(
         params.biome_path,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(params.only)
             .with_skip(params.skip)
             .with_path(params.biome_path.as_path())

@@ -33,6 +33,28 @@ declare_lint_rule! {
     /// a { transform: scale(1); }
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `ignore`
+    ///
+    /// A list of unknown function names to ignore (case-insensitive).
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignore": [
+    ///       "custom-function"
+    ///     ]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```css,use_options
+    /// a { transform: custom-function(1); }
+    /// ```
+    ///
     pub NoUnknownFunction {
         version: "1.8.0",
         name: "noUnknownFunction",
@@ -69,6 +91,10 @@ impl Rule for NoUnknownFunction {
             return None;
         }
 
+        if should_ignore(function_name, ctx.options()) {
+            return None;
+        }
+
         Some(NoUnknownFunctionState {
             function_name: function_name.into(),
             span: node.name().ok()?.range(),
@@ -92,4 +118,13 @@ impl Rule for NoUnknownFunction {
             }),
         )
     }
+}
+
+fn should_ignore(name: &str, options: &NoUnknownFunctionOptions) -> bool {
+    for ignore_pattern in &options.ignore {
+        if name.eq_ignore_ascii_case(ignore_pattern) {
+            return true;
+        }
+    }
+    false
 }

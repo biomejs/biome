@@ -1,0 +1,547 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Biome",
+          "informationUri": "https://biomejs.dev",
+          "rules": [
+            {
+              "id": "lint/correctness/noUnusedImports",
+              "shortDescription": {
+                "text": "Disallow unused imports."
+              },
+              "helpUri": "https://biomejs.dev/linter/rules/no-unused-imports"
+            },
+            {
+              "id": "lint/correctness/noUnusedVariables",
+              "shortDescription": {
+                "text": "Disallow unused variables."
+              },
+              "helpUri": "https://biomejs.dev/linter/rules/no-unused-variables"
+            },
+            {
+              "id": "lint/suspicious/noDebugger",
+              "shortDescription": {
+                "text": "Disallow the use of `debugger`"
+              },
+              "helpUri": "https://biomejs.dev/linter/rules/no-debugger"
+            },
+            {
+              "id": "lint/suspicious/noDoubleEquals",
+              "shortDescription": {
+                "text": "Require the use of `===` and `!==`."
+              },
+              "helpUri": "https://biomejs.dev/linter/rules/no-double-equals"
+            },
+            {
+              "id": "lint/suspicious/noImplicitAnyLet",
+              "shortDescription": {
+                "text": "Disallow use of implicit `any` type on variable declarations."
+              },
+              "helpUri": "https://biomejs.dev/linter/rules/no-implicit-any-let"
+            },
+            {
+              "id": "lint/suspicious/noRedeclare",
+              "shortDescription": {
+                "text": "Disallow variable, function, class, and type redeclarations in the same scope."
+              },
+              "helpUri": "https://biomejs.dev/linter/rules/no-redeclare"
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "lint/correctness/noUnusedImports",
+          "level": "warning",
+          "message": {
+            "text": "This import is unused."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "index.ts"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 8,
+                  "endLine": 1,
+                  "endColumn": 12
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/correctness/noUnusedImports",
+          "level": "warning",
+          "message": {
+            "text": "Several of these imports are unused."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "index.ts"
+                },
+                "region": {
+                  "startLine": 2,
+                  "startColumn": 10,
+                  "endLine": 2,
+                  "endColumn": 11
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/correctness/noUnusedVariables",
+          "level": "warning",
+          "message": {
+            "text": "This variable f is unused."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "index.ts"
+                },
+                "region": {
+                  "startLine": 8,
+                  "startColumn": 5,
+                  "endLine": 8,
+                  "endColumn": 6
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/correctness/noUnusedVariables",
+          "level": "warning",
+          "message": {
+            "text": "This variable f is unused."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "index.ts"
+                },
+                "region": {
+                  "startLine": 9,
+                  "startColumn": 7,
+                  "endLine": 9,
+                  "endColumn": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/correctness/noUnusedImports",
+          "level": "warning",
+          "message": {
+            "text": "This import is unused."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 8,
+                  "endLine": 1,
+                  "endColumn": 12
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/correctness/noUnusedImports",
+          "level": "warning",
+          "message": {
+            "text": "Several of these imports are unused."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 2,
+                  "startColumn": 10,
+                  "endLine": 2,
+                  "endColumn": 11
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/correctness/noUnusedVariables",
+          "level": "warning",
+          "message": {
+            "text": "This variable f is unused."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 8,
+                  "startColumn": 5,
+                  "endLine": 8,
+                  "endColumn": 6
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/correctness/noUnusedVariables",
+          "level": "warning",
+          "message": {
+            "text": "This variable f is unused."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 9,
+                  "startColumn": 7,
+                  "endLine": 9,
+                  "endColumn": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/suspicious/noDoubleEquals",
+          "level": "error",
+          "message": {
+            "text": "Using == may be unsafe if you are relying on type coercion."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "index.ts"
+                },
+                "region": {
+                  "startLine": 4,
+                  "startColumn": 3,
+                  "endLine": 4,
+                  "endColumn": 5
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/suspicious/noDebugger",
+          "level": "error",
+          "message": {
+            "text": "This is an unexpected use of the debugger statement."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "index.ts"
+                },
+                "region": {
+                  "startLine": 6,
+                  "startColumn": 1,
+                  "endLine": 6,
+                  "endColumn": 9
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/suspicious/noImplicitAnyLet",
+          "level": "error",
+          "message": {
+            "text": "This variable implicitly has the any type."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "index.ts"
+                },
+                "region": {
+                  "startLine": 8,
+                  "startColumn": 5,
+                  "endLine": 8,
+                  "endColumn": 6
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/suspicious/noImplicitAnyLet",
+          "level": "error",
+          "message": {
+            "text": "This variable implicitly has the any type."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "index.ts"
+                },
+                "region": {
+                  "startLine": 9,
+                  "startColumn": 7,
+                  "endLine": 9,
+                  "endColumn": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/suspicious/noRedeclare",
+          "level": "error",
+          "message": {
+            "text": "Shouldn't redeclare 'z'. Consider to delete it or rename it."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "index.ts"
+                },
+                "region": {
+                  "startLine": 2,
+                  "startColumn": 10,
+                  "endLine": 2,
+                  "endColumn": 11
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/suspicious/noRedeclare",
+          "level": "error",
+          "message": {
+            "text": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "index.ts"
+                },
+                "region": {
+                  "startLine": 9,
+                  "startColumn": 7,
+                  "endLine": 9,
+                  "endColumn": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/suspicious/noDoubleEquals",
+          "level": "error",
+          "message": {
+            "text": "Using == may be unsafe if you are relying on type coercion."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 4,
+                  "startColumn": 3,
+                  "endLine": 4,
+                  "endColumn": 5
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/suspicious/noDebugger",
+          "level": "error",
+          "message": {
+            "text": "This is an unexpected use of the debugger statement."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 6,
+                  "startColumn": 1,
+                  "endLine": 6,
+                  "endColumn": 9
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/suspicious/noImplicitAnyLet",
+          "level": "error",
+          "message": {
+            "text": "This variable implicitly has the any type."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 8,
+                  "startColumn": 5,
+                  "endLine": 8,
+                  "endColumn": 6
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/suspicious/noImplicitAnyLet",
+          "level": "error",
+          "message": {
+            "text": "This variable implicitly has the any type."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 9,
+                  "startColumn": 7,
+                  "endLine": 9,
+                  "endColumn": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/suspicious/noRedeclare",
+          "level": "error",
+          "message": {
+            "text": "Shouldn't redeclare 'z'. Consider to delete it or rename it."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 2,
+                  "startColumn": 10,
+                  "endLine": 2,
+                  "endColumn": 11
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "lint/suspicious/noRedeclare",
+          "level": "error",
+          "message": {
+            "text": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 9,
+                  "startColumn": 7,
+                  "endLine": 9,
+                  "endColumn": 8
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```

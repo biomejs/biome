@@ -28,6 +28,9 @@ rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"], optional = true }
 
+[dev-dependencies]
+insta = { workspace = true }
+
 [features]
 schema = ["biome_console/schema", "dep:schemars", "serde"]
 serde  = ["dep:biome_deserialize", "dep:biome_deserialize_macros", "dep:serde"]

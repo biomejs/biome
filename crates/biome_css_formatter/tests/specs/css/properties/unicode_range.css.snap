@@ -80,6 +80,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
@@ -116,4 +117,5 @@ Quote style: Double Quotes
 	unicode-range: U+1e1ee?;
 	unicode-range: U+12-13;
 }
+
 ```

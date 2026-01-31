@@ -57,7 +57,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
                 source_type,
                 JsParserOptions::default(),
             );
-            let formatted = format_node(JsFormatOptions::default(), tree.tree().syntax())
+            let formatted = format_node(JsFormatOptions::default(), tree.tree().syntax(), false)
                 .unwrap()
                 .print()
                 .unwrap();

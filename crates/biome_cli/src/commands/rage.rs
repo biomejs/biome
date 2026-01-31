@@ -35,12 +35,12 @@ pub(crate) fn rage(
     let biome_env = biome_env();
 
     session.app.console.log(markup!("CLI:\n"
-    {KeyValuePair("Version", markup!({VERSION}))}
-    {KeyValuePair("Color support", markup!({DebugDisplay(terminal_supports_colors)}))}
+    {KeyValuePair::new("Version", markup!({VERSION}))}
+    {KeyValuePair::new("Color support", markup!({DebugDisplay(terminal_supports_colors)}))}
 
     {Section("Platform")}
-    {KeyValuePair("CPU Architecture", markup!({std::env::consts::ARCH}))}
-    {KeyValuePair("OS", markup!({std::env::consts::OS}))}
+    {KeyValuePair::new("CPU Architecture", markup!({std::env::consts::ARCH}))}
+    {KeyValuePair::new("OS", markup!({std::env::consts::OS}))}
     {Section("Environment")}
     {biome_env}
     {EnvVarOs("NO_COLOR")}
@@ -88,7 +88,7 @@ impl Display for WorkspaceRage<'_> {
                             Section(&title).fmt(fmt)?;
                         }
                         RageEntry::Pair { name, value } => {
-                            KeyValuePair(&name, markup!({ value })).fmt(fmt)?;
+                            KeyValuePair::new(&name, markup!({ value })).fmt(fmt)?;
                         }
                         RageEntry::Markup(markup) => markup.fmt(fmt)?,
                     }
@@ -126,7 +126,7 @@ impl Display for RunningBiomeServer {
                     Ok(None) => {
                         markup!(
                             {Section("Server")}
-                            {KeyValuePair("Status", markup!(<Dim>"stopped"</Dim>))}
+                            {KeyValuePair::new("Status", markup!(<Dim>"stopped"</Dim>))}
                         )
                         .fmt(f)?;
                         continue;
@@ -181,8 +181,8 @@ impl Display for RunningBiomeServer {
 
                 markup!(
                     {Section("Server")}
-                    {KeyValuePair("Version", markup!({version.as_str()}))}
-                    {KeyValuePair("Path", markup!({path.as_str()}))}
+                    {KeyValuePair::new("Version", markup!({version.as_str()}))}
+                    {KeyValuePair::new("Path", markup!({path.as_str()}))}
                 )
                 .fmt(f)?;
             }
@@ -206,7 +206,7 @@ impl Display for RageConfiguration<'_> {
             Ok(loaded_configuration) => {
                 if loaded_configuration.directory_path.is_none() {
                     markup! {
-                        {KeyValuePair("Status", markup!(<Dim>"Not set"</Dim>))}
+                        {KeyValuePair::new("Status", markup!(<Dim>"Not set"</Dim>))}
                         {ConfigPath("unset")}
                     }
                     .fmt(fmt)?;
@@ -217,6 +217,7 @@ impl Display for RageConfiguration<'_> {
                         directory_path,
                         file_path,
                         extended_configurations,
+                        loaded_location: _,
                     } = loaded_configuration;
                     let vcs_enabled = configuration.is_vcs_enabled();
                     let mut settings = Settings::default();
@@ -231,7 +232,7 @@ impl Display for RageConfiguration<'_> {
                     let status = if !diagnostics.is_empty() {
                         for diagnostic in diagnostics {
                             (markup! {
-                                 {KeyValuePair("Error", markup!{
+                                 {KeyValuePair::new("Error", markup!{
                                      {format!{"{}", PrintDescription(&diagnostic)}}
                                  })}
                             })
@@ -254,13 +255,13 @@ impl Display for RageConfiguration<'_> {
                     );
 
                     markup! (
-                        {KeyValuePair("Status", status)}
+                        {KeyValuePair::new("Status", status)}
                         {ConfigPath(config_path)}
-                        {KeyValuePair("Formatter enabled", markup!({DebugDisplay(settings.is_formatter_enabled())}))}
-                        {KeyValuePair("Linter enabled", markup!({DebugDisplay(settings.is_linter_enabled())}))}
-                        {KeyValuePair("Assist enabled", markup!({DebugDisplay(settings.is_assist_enabled())}))}
-                        {KeyValuePair("VCS enabled", markup!({DebugDisplay(vcs_enabled)}))}
-                        {KeyValuePair("HTML full support enabled", markup!({DisplayOption(configuration.html.as_ref().and_then(|html| html.experimental_full_support_enabled))}))}
+                        {KeyValuePair::new("Formatter enabled", markup!({DebugDisplay(settings.is_formatter_enabled())}))}
+                        {KeyValuePair::new("Linter enabled", markup!({DebugDisplay(settings.is_linter_enabled())}))}
+                        {KeyValuePair::new("Assist enabled", markup!({DebugDisplay(settings.is_assist_enabled())}))}
+                        {KeyValuePair::new("VCS enabled", markup!({DebugDisplay(vcs_enabled)}))}
+                        {KeyValuePair::new("HTML full support enabled", markup!({DisplayOption(configuration.html.as_ref().and_then(|html| html.experimental_full_support_enabled))}))}
                     ).fmt(fmt)?;
 
                     // Print formatter configuration if --formatter option is true
@@ -274,34 +275,34 @@ impl Display for RageConfiguration<'_> {
                         });
                         markup! (
                             {Section("Formatter")}
-                            {KeyValuePair("Format with errors", markup!({DisplayOption(configuration.get_formatter_configuration().format_with_errors)}))}
-                            {KeyValuePair("Indent style", markup!({DisplayOption(formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DisplayOption(formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DisplayOption(formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DisplayOption(formatter_configuration.line_width)}))}
-                            {KeyValuePair("Attribute position", markup!({DisplayOption(formatter_configuration.attribute_position)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DisplayOption(formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Includes", markup!({DisplayOption(includes)}))}
+                            {KeyValuePair::new("Format with errors", markup!({DisplayOption(configuration.get_formatter_configuration().format_with_errors)}))}
+                            {KeyValuePair::new("Indent style", markup!({DisplayOption(formatter_configuration.indent_style)}))}
+                            {KeyValuePair::new("Indent width", markup!({DisplayOption(formatter_configuration.indent_width)}))}
+                            {KeyValuePair::new("Line ending", markup!({DisplayOption(formatter_configuration.line_ending)}))}
+                            {KeyValuePair::new("Line width", markup!({DisplayOption(formatter_configuration.line_width)}))}
+                            {KeyValuePair::new("Attribute position", markup!({DisplayOption(formatter_configuration.attribute_position)}))}
+                            {KeyValuePair::new("Bracket spacing", markup!({DisplayOption(formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair::new("Includes", markup!({DisplayOption(includes)}))}
                         ).fmt(fmt)?;
 
                         let javascript_formatter_configuration =
                             configuration.get_javascript_formatter_configuration();
                         markup! (
                             {Section("JavaScript Formatter")}
-                            {KeyValuePair("Enabled", markup!({DisplayOption(javascript_formatter_configuration.enabled)}))}
-                            {KeyValuePair("JSX quote style", markup!({DisplayOption(javascript_formatter_configuration.jsx_quote_style)}))}
-                            {KeyValuePair("Quote properties", markup!({DisplayOption(javascript_formatter_configuration.quote_properties)}))}
-                            {KeyValuePair("Trailing commas", markup!({DisplayOption(javascript_formatter_configuration.trailing_commas)}))}
-                            {KeyValuePair("Semicolons", markup!({DisplayOption(javascript_formatter_configuration.semicolons)}))}
-                            {KeyValuePair("Arrow parentheses", markup!({DisplayOption(javascript_formatter_configuration.arrow_parentheses)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DisplayOption(javascript_formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Bracket same line", markup!({DisplayOption(javascript_formatter_configuration.bracket_same_line)}))}
-                            {KeyValuePair("Quote style", markup!({DisplayOption(javascript_formatter_configuration.quote_style)}))}
-                            {KeyValuePair("Indent style", markup!({DisplayOption(javascript_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DisplayOption(javascript_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DisplayOption(javascript_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DisplayOption(javascript_formatter_configuration.line_width.map(|lw| lw.value()))}))}
-                            {KeyValuePair("Attribute position", markup!({DisplayOption(javascript_formatter_configuration.attribute_position)}))}
+                            {KeyValuePair::new("Enabled", markup!({DisplayOption(javascript_formatter_configuration.enabled)}))}
+                            {KeyValuePair::new("JSX quote style", markup!({DisplayOption(javascript_formatter_configuration.jsx_quote_style)}))}
+                            {KeyValuePair::new("Quote properties", markup!({DisplayOption(javascript_formatter_configuration.quote_properties)}))}
+                            {KeyValuePair::new("Trailing commas", markup!({DisplayOption(javascript_formatter_configuration.trailing_commas)}))}
+                            {KeyValuePair::new("Semicolons", markup!({DisplayOption(javascript_formatter_configuration.semicolons)}))}
+                            {KeyValuePair::new("Arrow parentheses", markup!({DisplayOption(javascript_formatter_configuration.arrow_parentheses)}))}
+                            {KeyValuePair::new("Bracket spacing", markup!({DisplayOption(javascript_formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair::new("Bracket same line", markup!({DisplayOption(javascript_formatter_configuration.bracket_same_line)}))}
+                            {KeyValuePair::new("Quote style", markup!({DisplayOption(javascript_formatter_configuration.quote_style)}))}
+                            {KeyValuePair::new("Indent style", markup!({DisplayOption(javascript_formatter_configuration.indent_style)}))}
+                            {KeyValuePair::new("Indent width", markup!({DisplayOption(javascript_formatter_configuration.indent_width)}))}
+                            {KeyValuePair::new("Line ending", markup!({DisplayOption(javascript_formatter_configuration.line_ending)}))}
+                            {KeyValuePair::new("Line width", markup!({DisplayOption(javascript_formatter_configuration.line_width.map(|lw| lw.value()))}))}
+                            {KeyValuePair::new("Attribute position", markup!({DisplayOption(javascript_formatter_configuration.attribute_position)}))}
                         )
                         .fmt(fmt)?;
 
@@ -309,38 +310,38 @@ impl Display for RageConfiguration<'_> {
                             configuration.get_json_formatter_configuration();
                         markup! (
                             {Section("JSON Formatter")}
-                            {KeyValuePair("Enabled", markup!({DisplayOption(json_formatter_configuration.enabled)}))}
-                            {KeyValuePair("Indent style", markup!({DisplayOption(json_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DisplayOption(json_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DisplayOption(json_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DisplayOption(json_formatter_configuration.line_width.map(|lw| lw.value()))}))}
-                            {KeyValuePair("Trailing Commas", markup!({DisplayOption(json_formatter_configuration.trailing_commas)}))}
-                            {KeyValuePair("Expand lists", markup!({DisplayOption(json_formatter_configuration.expand)}))}
+                            {KeyValuePair::new("Enabled", markup!({DisplayOption(json_formatter_configuration.enabled)}))}
+                            {KeyValuePair::new("Indent style", markup!({DisplayOption(json_formatter_configuration.indent_style)}))}
+                            {KeyValuePair::new("Indent width", markup!({DisplayOption(json_formatter_configuration.indent_width)}))}
+                            {KeyValuePair::new("Line ending", markup!({DisplayOption(json_formatter_configuration.line_ending)}))}
+                            {KeyValuePair::new("Line width", markup!({DisplayOption(json_formatter_configuration.line_width.map(|lw| lw.value()))}))}
+                            {KeyValuePair::new("Trailing Commas", markup!({DisplayOption(json_formatter_configuration.trailing_commas)}))}
+                            {KeyValuePair::new("Expand lists", markup!({DisplayOption(json_formatter_configuration.expand)}))}
                         ).fmt(fmt)?;
 
                         let css_formatter_configuration =
                             configuration.get_css_formatter_configuration();
                         markup! (
                             {Section("CSS Formatter")}
-                            {KeyValuePair("Enabled", markup!({DisplayOption(css_formatter_configuration.enabled)}))}
-                            {KeyValuePair("Indent style", markup!({DisplayOption(css_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DisplayOption(css_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DisplayOption(css_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DisplayOption(css_formatter_configuration.line_width)}))}
-                            {KeyValuePair("Quote style", markup!({DisplayOption(css_formatter_configuration.quote_style)}))}
+                            {KeyValuePair::new("Enabled", markup!({DisplayOption(css_formatter_configuration.enabled)}))}
+                            {KeyValuePair::new("Indent style", markup!({DisplayOption(css_formatter_configuration.indent_style)}))}
+                            {KeyValuePair::new("Indent width", markup!({DisplayOption(css_formatter_configuration.indent_width)}))}
+                            {KeyValuePair::new("Line ending", markup!({DisplayOption(css_formatter_configuration.line_ending)}))}
+                            {KeyValuePair::new("Line width", markup!({DisplayOption(css_formatter_configuration.line_width)}))}
+                            {KeyValuePair::new("Quote style", markup!({DisplayOption(css_formatter_configuration.quote_style)}))}
                         ).fmt(fmt)?;
 
                         let graphql_formatter_configuration =
                             configuration.get_graphql_formatter_configuration();
                         markup! (
                             {Section("GraphQL Formatter")}
-                            {KeyValuePair("Enabled", markup!({DisplayOption(graphql_formatter_configuration.enabled)}))}
-                            {KeyValuePair("Indent style", markup!({DisplayOption(graphql_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DisplayOption(graphql_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DisplayOption(graphql_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DisplayOption(graphql_formatter_configuration.line_width)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DisplayOption(graphql_formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Quote style", markup!({DisplayOption(graphql_formatter_configuration.quote_style)}))}
+                            {KeyValuePair::new("Enabled", markup!({DisplayOption(graphql_formatter_configuration.enabled)}))}
+                            {KeyValuePair::new("Indent style", markup!({DisplayOption(graphql_formatter_configuration.indent_style)}))}
+                            {KeyValuePair::new("Indent width", markup!({DisplayOption(graphql_formatter_configuration.indent_width)}))}
+                            {KeyValuePair::new("Line ending", markup!({DisplayOption(graphql_formatter_configuration.line_ending)}))}
+                            {KeyValuePair::new("Line width", markup!({DisplayOption(graphql_formatter_configuration.line_width)}))}
+                            {KeyValuePair::new("Bracket spacing", markup!({DisplayOption(graphql_formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair::new("Quote style", markup!({DisplayOption(graphql_formatter_configuration.quote_style)}))}
                         ).fmt(fmt)?;
                     }
 
@@ -354,19 +355,19 @@ impl Display for RageConfiguration<'_> {
                         let graphql_linter = configuration.get_graphql_linter_configuration();
                         markup! (
                             {Section("Linter")}
-                            {KeyValuePair("JavaScript enabled", markup!({DisplayOption(javascript_linter.enabled)}))}
-                            {KeyValuePair("JSON enabled", markup!({DisplayOption(json_linter.enabled)}))}
-                            {KeyValuePair("CSS enabled", markup!({DisplayOption(css_linter.enabled)}))}
-                            {KeyValuePair("GraphQL enabled", markup!({DisplayOption(graphql_linter.enabled)}))}
-                            {KeyValuePair("Recommended", markup!({DisplayOption(linter_configuration.recommended)}))}
+                            {KeyValuePair::new("JavaScript enabled", markup!({DisplayOption(javascript_linter.enabled)}))}
+                            {KeyValuePair::new("JSON enabled", markup!({DisplayOption(json_linter.enabled)}))}
+                            {KeyValuePair::new("CSS enabled", markup!({DisplayOption(css_linter.enabled)}))}
+                            {KeyValuePair::new("GraphQL enabled", markup!({DisplayOption(graphql_linter.enabled)}))}
+                            {KeyValuePair::new("Recommended", markup!({DisplayOption(linter_configuration.recommended)}))}
                             {RageConfigurationLintRules("Enabled rules", linter_configuration)}
                         ).fmt(fmt)?;
                     }
                 }
             }
             Err(err) => markup! (
-                {KeyValuePair("Status", markup!(<Error>"Failed to load"</Error>))}
-                {KeyValuePair("Error", markup!({format!("{err}")}))}
+                {KeyValuePair::new("Status", markup!(<Error>"Failed to load"</Error>))}
+                {KeyValuePair::new("Error", markup!({format!("{err}")}))}
             )
             .fmt(fmt)?,
         }
@@ -401,8 +402,10 @@ impl fmt::Display for EnvVarOs {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         let name = self.0;
         match env::var_os(name) {
-            None => KeyValuePair(name, markup! { <Dim>"unset"</Dim> }).fmt(fmt),
-            Some(value) => KeyValuePair(name, markup! {{DisplayOption(value.to_str())}}).fmt(fmt),
+            None => KeyValuePair::new(name, markup! { <Dim>"unset"</Dim> }).fmt(fmt),
+            Some(value) => {
+                KeyValuePair::new(name, markup! {{DisplayOption(value.to_str())}}).fmt(fmt)
+            }
         }
     }
 }
@@ -461,9 +464,9 @@ impl Display for ConfigPath<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         let path = self.0;
         if path.is_empty() {
-            KeyValuePair("Path", markup! { <Dim>"unset"</Dim> }).fmt(fmt)
+            KeyValuePair::new("Path", markup! { <Dim>"unset"</Dim> }).fmt(fmt)
         } else {
-            KeyValuePair("Path", markup!({ DebugDisplay(path) })).fmt(fmt)
+            KeyValuePair::new("Path", markup!({ DebugDisplay(path) })).fmt(fmt)
         }
     }
 }

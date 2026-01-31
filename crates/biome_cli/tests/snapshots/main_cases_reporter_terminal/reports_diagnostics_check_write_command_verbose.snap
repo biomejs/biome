@@ -5,13 +5,12 @@ expression: redactor(content)
 ## `index.css`
 
 ```css
-
-
-.brokenStyle { color: f( }
+.brokenStyle {
+	color: f(
+}
 
 .style {
-                color:
-                fakeFunction()
+	color: fakeFunction();
 }
 
 ```
@@ -80,19 +79,23 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-index.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a declaration item but instead found '}'.
   
-  > 3 │ .brokenStyle { color: f( }
-      │                          ^
+    1 │ .brokenStyle {
+    2 │ 	color: f(
+  > 3 │ }
+      │ ^
     4 │ 
     5 │ .style {
   
   i Expected a declaration item here.
   
-  > 3 │ .brokenStyle { color: f( }
-      │                          ^
+    1 │ .brokenStyle {
+    2 │ 	color: f(
+  > 3 │ }
+      │ ^
     4 │ 
     5 │ .style {
   
@@ -100,14 +103,15 @@ index.css:3:26 parse ━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-index.css:3:23 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.css:2:9 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown function: f
   
-  > 3 │ .brokenStyle { color: f( }
-      │                       ^
+    1 │ .brokenStyle {
+  > 2 │ 	color: f(
+      │ 	       ^
+    3 │ }
     4 │ 
-    5 │ .style {
   
   i Use a known function instead.
   
@@ -117,16 +121,15 @@ index.css:3:23 lint/correctness/noUnknownFunction ━━━━━━━━━━
 ```
 
 ```block
-index.css:7:17 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.css:6:9 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown function: fakeFunction
   
     5 │ .style {
-    6 │                 color:
-  > 7 │                 fakeFunction()
-      │                 ^^^^^^^^^^^^
-    8 │ }
-    9 │ 
+  > 6 │ 	color: fakeFunction();
+      │ 	       ^^^^^^^^^^^^
+    7 │ }
+    8 │ 
   
   i Use a known function instead.
   
@@ -136,19 +139,23 @@ index.css:7:17 lint/correctness/noUnknownFunction ━━━━━━━━━━
 ```
 
 ```block
-index.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a declaration item but instead found '}'.
   
-  > 3 │ .brokenStyle { color: f( }
-      │                          ^
+    1 │ .brokenStyle {
+    2 │ 	color: f(
+  > 3 │ }
+      │ ^
     4 │ 
     5 │ .style {
   
   i Expected a declaration item here.
   
-  > 3 │ .brokenStyle { color: f( }
-      │                          ^
+    1 │ .brokenStyle {
+    2 │ 	color: f(
+  > 3 │ }
+      │ ^
     4 │ 
     5 │ .style {
   

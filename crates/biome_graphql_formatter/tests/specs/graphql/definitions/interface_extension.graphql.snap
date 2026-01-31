@@ -67,6 +67,7 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
@@ -87,4 +88,5 @@ extend interface User @deprecated {
 extend interface User implements Character @deprecated {
 	name: String
 }
+
 ```

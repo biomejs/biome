@@ -24,6 +24,7 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```json
@@ -32,6 +33,7 @@ Bracket spacing: true
 	"string": "some-string",
 	"object": { "object": { "number": 123, "boolean": false } }
 }
+
 ```
 
 ## Output 1
@@ -44,6 +46,7 @@ Line width: 80
 Trailing commas: None
 Expand: Always
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```json
@@ -57,4 +60,5 @@ Bracket spacing: true
 		}
 	}
 }
+
 ```

@@ -79,7 +79,7 @@
 			"type": "object",
 			"properties": {
 				"noAccessKey": {
-					"description": "Enforce that the accessKey attribute is not used on any HTML element.\nSee https://biomejs.dev/linter/rules/no-access-key",
+					"description": "Enforce that the accesskey attribute is not used on any HTML element.\nSee https://biomejs.dev/linter/rules/no-access-key",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoAccessKeyConfiguration" },
 						{ "type": "null" }
@@ -100,7 +100,7 @@
 					]
 				},
 				"noAutofocus": {
-					"description": "Enforce that autoFocus prop is not used on elements.\nSee https://biomejs.dev/linter/rules/no-autofocus",
+					"description": "Enforce that the autofocus attribute is not used on elements.\nSee https://biomejs.dev/linter/rules/no-autofocus",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoAutofocusConfiguration" },
 						{ "type": "null" }
@@ -162,7 +162,7 @@
 					]
 				},
 				"noPositiveTabindex": {
-					"description": "Prevent the usage of positive integers on tabIndex property.\nSee https://biomejs.dev/linter/rules/no-positive-tabindex",
+					"description": "Prevent the usage of positive integers on tabindex attribute.\nSee https://biomejs.dev/linter/rules/no-positive-tabindex",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoPositiveTabindexConfiguration" },
 						{ "type": "null" }
@@ -238,7 +238,7 @@
 					]
 				},
 				"useButtonType": {
-					"description": "Enforces the usage of the attribute type for the element button.\nSee https://biomejs.dev/linter/rules/use-button-type",
+					"description": "Enforces the usage and validity of the attribute type for the element button.\nSee https://biomejs.dev/linter/rules/use-button-type",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseButtonTypeConfiguration" },
 						{ "type": "null" }
@@ -1345,6 +1345,10 @@
 				"quoteStyle": {
 					"description": "The type of quotes used in CSS code. Defaults to double.",
 					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1369,7 +1373,7 @@
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
-					"description": "Enables parsing of CSS Modules specific features.",
+					"description": "Enables parsing of CSS Modules specific features. Enable this feature only\nwhen your files don't end in `.module.css`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"tailwindDirectives": {
@@ -1583,6 +1587,10 @@
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
 				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
+				},
 				"useEditorconfig": {
 					"description": "Use any `.editorconfig` files to configure the formatter. Configuration\nin `biome.json` will override `.editorconfig` configuration.\n\nDefault: `true`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -1668,6 +1676,10 @@
 					"description": "The type of quotes used in GraphQL code. Defaults to double.",
 					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }],
 					"default": null
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1744,6 +1756,10 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to Grit files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1920,6 +1936,10 @@
 						{ "type": "null" }
 					]
 				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
+				},
 				"whitespaceSensitivity": {
 					"description": "Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"css\".",
 					"anyOf": [
@@ -2017,6 +2037,10 @@
 						{ "$ref": "#/$defs/JsAssistConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"experimentalEmbeddedSnippetsEnabled": {
+					"description": "Enables support for embedding snippets.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"formatter": {
 					"description": "Formatting options",
@@ -2119,6 +2143,10 @@
 				"trailingCommas": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
 					"anyOf": [{ "$ref": "#/$defs/JsTrailingCommas" }, { "type": "null" }]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -2241,6 +2269,10 @@
 						{ "$ref": "#/$defs/JsonTrailingCommas" },
 						{ "type": "null" }
 					]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -4821,6 +4853,13 @@
 		},
 		"NoUnknownFunctionOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown function names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownMediaFeatureNameConfiguration": {
@@ -4841,6 +4880,13 @@
 		},
 		"NoUnknownPropertyOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown property names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownPseudoClassConfiguration": {
@@ -4851,6 +4897,13 @@
 		},
 		"NoUnknownPseudoClassOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown pseudo-class names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownPseudoElementConfiguration": {
@@ -4861,6 +4914,13 @@
 		},
 		"NoUnknownPseudoElementOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown pseudo-element names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownTypeSelectorConfiguration": {
@@ -6221,6 +6281,10 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- <https://thoughtbot.com/blog/no-newline-at-end-of-file>\n- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>\n- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -6512,6 +6576,14 @@
 			},
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseSortedInterfaceMembersOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedInterfaceMembersOptions" }
+			},
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithUseSortedKeysOptions": {
 			"type": "object",
 			"properties": {
@@ -6571,6 +6643,11 @@
 					"description": "Turborepo build system rules",
 					"type": "string",
 					"const": "turborepo"
+				},
+				{
+					"description": "Rules that require type inference",
+					"type": "string",
+					"const": "types"
 				}
 			]
 		},
@@ -10896,6 +10973,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSortedInterfaceMembers": {
+					"description": "Sort interface members by key.\nSee https://biomejs.dev/assist/actions/use-sorted-interface-members",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedInterfaceMembersConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedKeys": {
 					"description": "Sort the keys of a JSON object in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-keys",
 					"anyOf": [
@@ -11123,7 +11207,7 @@
 					]
 				},
 				"noValueAtRule": {
-					"description": "Disallow use of @value rule in css modules.\nSee https://biomejs.dev/linter/rules/no-value-at-rule",
+					"description": "Disallow use of @value rule in CSS modules.\nSee https://biomejs.dev/linter/rules/no-value-at-rule",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoValueAtRuleConfiguration" },
 						{ "type": "null" }
@@ -12152,6 +12236,7 @@
 			},
 			"additionalProperties": false
 		},
+		"TrailingNewline": { "type": "boolean" },
 		"UseAdjacentOverloadSignaturesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12905,6 +12990,11 @@
 		"UseImportExtensionsOptions": {
 			"type": "object",
 			"properties": {
+				"extensionMappings": {
+					"description": "A map of file extensions to their suggested replacements.\nFor example, `{\"ts\": \"js\"}` would suggest `.js` extensions for TypeScript imports.",
+					"type": ["object", "null"],
+					"additionalProperties": { "type": "string" }
+				},
 				"forceJsExtensions": {
 					"description": "If `true`, the suggested extension is always `.js` regardless of what\nextension the source file has in your project.",
 					"type": ["boolean", "null"]
@@ -12991,6 +13081,12 @@
 		},
 		"UseIterableCallbackReturnOptions": {
 			"type": "object",
+			"properties": {
+				"checkForEach": {
+					"description": "When `true`, the rule reports `forEach` callbacks that return a value (default behaviour).\nWhen `false` or unset, such callbacks are ignored.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseJsonImportAttributesConfiguration": {
@@ -13453,6 +13549,16 @@
 			},
 			"additionalProperties": false
 		},
+		"UseSortedInterfaceMembersConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedInterfaceMembersOptions" }
+			]
+		},
+		"UseSortedInterfaceMembersOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseSortedKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
@@ -13462,6 +13568,10 @@
 		"UseSortedKeysOptions": {
 			"type": "object",
 			"properties": {
+				"groupByNesting": {
+					"description": "When enabled, groups object keys by their value's nesting depth before sorting.\nSimple values (primitives, single-line arrays, single-line objects) are sorted first,\nfollowed by nested values (multi-line objects, multi-line arrays).",
+					"type": ["boolean", "null"]
+				},
 				"sortOrder": {
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				}
@@ -13567,6 +13677,16 @@
 		},
 		"UseUnifiedTypeSignaturesOptions": {
 			"type": "object",
+			"properties": {
+				"ignoreDifferentJsDoc": {
+					"description": "Whether to ignore overloads with different JSDoc comments.",
+					"type": ["boolean", "null"]
+				},
+				"ignoreDifferentlyNamedParameters": {
+					"description": "Whether to ignore overloads with differently named parameters.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseUniqueElementIdsConfiguration": {

@@ -32,6 +32,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -40,4 +41,5 @@ Operator linebreak: After
 @dec3
 @dec4
 export default class Foo {}
+
 ```

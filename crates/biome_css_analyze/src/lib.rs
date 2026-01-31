@@ -221,7 +221,7 @@ mod tests {
         @page :blank:unknown { }
         "#;
 
-        let parsed = parse_css(SOURCE, CssParserOptions::default());
+        let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClass");
@@ -275,7 +275,7 @@ mod tests {
 #bar {}
         ";
 
-        let parsed = parse_css(SOURCE, CssParserOptions::default());
+        let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
             categories: RuleCategoriesBuilder::default().with_syntax().build(),
@@ -326,7 +326,7 @@ a {
 }
         ";
 
-        let parsed = parse_css(SOURCE, CssParserOptions::default());
+        let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
             categories: RuleCategoriesBuilder::default().with_syntax().build(),
@@ -373,7 +373,7 @@ a {
 }
         ";
 
-        let parsed = parse_css(SOURCE, CssParserOptions::default());
+        let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
             categories: RuleCategoriesBuilder::default().with_syntax().build(),
@@ -417,7 +417,7 @@ a {
 #bar {}
         ";
 
-        let parsed = parse_css(SOURCE, CssParserOptions::default());
+        let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
             categories: RuleCategoriesBuilder::default().with_syntax().build(),

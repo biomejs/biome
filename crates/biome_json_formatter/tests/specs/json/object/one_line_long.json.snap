@@ -24,6 +24,7 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```json
@@ -31,4 +32,5 @@ Bracket spacing: true
 	"number": 1123123213123123123123122311231232131231231231231223,
 	"string": "some-long-long-long-long-long-long-long-string"
 }
+
 ```

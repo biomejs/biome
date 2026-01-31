@@ -284,4 +284,22 @@ impl AriaRoles {
         }
         false
     }
+
+    /// Check if the element's image-related role requires an accessible name.
+    ///
+    /// Ref:
+    /// - https://w3c.github.io/aria/#role_definitions
+    /// - https://www.w3.org/TR/2018/REC-graphics-aria-1.0-20181002/#role_definitions
+    pub fn has_name_required_image_role(&self, element: &impl Element) -> bool {
+        if let Some(role_name) = self.get_role_by_element_name(element) {
+            return matches!(
+                role_name,
+                AriaRole::Img
+                    | AriaRole::Image
+                    | AriaRole::GraphicsDocument
+                    | AriaRole::GraphicsSymbol
+            );
+        }
+        false
+    }
 }

@@ -1,20 +1,90 @@
-use std::path::PathBuf;
-
 use super::WorkspaceWatcherBridge;
 use crate::WorkspaceError;
 use crate::diagnostics::WatchError;
 use biome_diagnostics::PrintDescription;
 use biome_diagnostics::serde::Diagnostic;
+use bpaf::Bpaf;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::{Receiver, Sender, bounded, unbounded};
 use notify::event::{CreateKind, ModifyKind, RemoveKind, RenameMode};
 use notify::recommended_watcher;
 use notify::{
-    Error as NotifyError, Event as NotifyEvent, EventKind, RecursiveMode, Result as NotifyResult,
-    Watcher as NotifyWatcher,
+    Config, Error as NotifyError, Event as NotifyEvent, EventKind, PollWatcher, RecursiveMode,
+    Result as NotifyResult, Watcher as NotifyWatcher,
 };
 use rustc_hash::FxHashSet;
-use tracing::{debug, error, warn};
+use std::fmt::{Display, Formatter};
+use std::path::PathBuf;
+use std::str::FromStr;
+use std::time::Duration;
+use tracing::{debug, error, info, warn};
+
+/// Controls various aspects of the Biome Daemon.
+#[derive(Clone, Debug, Eq, PartialEq, Bpaf)]
+pub struct WatcherOptions {
+    /// Controls how the Biome file watcher should behave.
+    #[bpaf(
+        env("BIOME_WATCHER_KIND"),
+        long("watcher-kind"),
+        argument("polling|recommended|none"),
+        fallback(WatcherKind::Recommended),
+        display_fallback
+    )]
+    pub watcher_kind: WatcherKind,
+
+    /// The polling interval in milliseconds. This is only applicable when using the polling watcher.
+    #[bpaf(
+        env("BIOME_WATCHER_POLLING_INTERVAL"),
+        long("watcher-polling-interval"),
+        argument("NUMBER"),
+        fallback(2000),
+        display_fallback
+    )]
+    pub polling_interval: u32,
+}
+
+impl Default for WatcherOptions {
+    fn default() -> Self {
+        Self {
+            watcher_kind: WatcherKind::Recommended,
+            polling_interval: 2000,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Bpaf, Default)]
+pub enum WatcherKind {
+    /// It uses the polling strategy. It's slower than the recommended, by it avoids locking folders in Windows systems.
+    Polling,
+    /// It uses the recommended strategy of the current OS. It's faster than polling in some cases, but it might behaves differently based on the OS.
+    #[default]
+    Recommended,
+    /// The file watcher is disabled, which means that changes aren't tracked, causing linting not working properly inside editors or
+    /// when using the Biome daemon. It's useful for testing purposes or when the file watcher isn't needed.
+    None,
+}
+
+impl Display for WatcherKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Polling => write!(f, "polling"),
+            Self::Recommended => write!(f, "recommended"),
+            Self::None => write!(f, "none"),
+        }
+    }
+}
+
+impl FromStr for WatcherKind {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "polling" => Ok(Self::Polling),
+            "recommended" => Ok(Self::Recommended),
+            "none" => Ok(Self::None),
+            _ => Err("Invalid watcherKind. Valid values are: polling, recommended, none"),
+        }
+    }
+}
 
 /// Instructions to let the watcher either watch or unwatch a given folder.
 #[derive(Debug, Eq, PartialEq)]
@@ -63,7 +133,7 @@ pub struct Watcher {
     /// Internal [`notify::Watcher`] instance.
     // Note: The `Watcher` trait doesn't require its implementations to be
     //       `Send`, but it appears all platform implementations are.
-    watcher: Box<dyn NotifyWatcher + Send>,
+    watcher: Option<Box<dyn NotifyWatcher + Send>>,
 
     /// Channel receiver for the events from our
     /// [internal watcher](Self::watcher).
@@ -78,7 +148,9 @@ impl Watcher {
     ///
     /// Returns the watcher as well as a channel for sending instructions to the
     /// watcher.
-    pub fn new() -> Result<(Self, WatcherInstructionChannel), WorkspaceError> {
+    pub fn new(
+        watcher_configuration: WatcherOptions,
+    ) -> Result<(Self, WatcherInstructionChannel), WorkspaceError> {
         // We use a bounded channel, because watchers are
         // [intrinsically unreliable](https://docs.rs/notify/latest/notify/#watching-large-directories).
         // If we block the sender, some events may get dropped, but that was
@@ -89,14 +161,35 @@ impl Watcher {
         // tweak if we find a need for it.
         let (tx, rx) = bounded::<NotifyResult<NotifyEvent>>(128);
 
-        let watcher = recommended_watcher(tx)?;
+        info!(
+            "Starting file watcher with kind \"{}\" with interval \"{}\"",
+            watcher_configuration.watcher_kind, watcher_configuration.polling_interval
+        );
+
+        let watcher: Option<Box<dyn NotifyWatcher + Send>> =
+            match &watcher_configuration.watcher_kind {
+                WatcherKind::Polling => {
+                    let watcher = PollWatcher::new(
+                        tx.clone(),
+                        Config::default().with_poll_interval(Duration::from_millis(
+                            watcher_configuration.polling_interval as u64,
+                        )),
+                    )?;
+                    Some(Box::new(watcher))
+                }
+                WatcherKind::Recommended => {
+                    let watcher = recommended_watcher(tx)?;
+                    Some(Box::new(watcher))
+                }
+                WatcherKind::None => None,
+            };
 
         let (instruction_tx, instruction_rx) = unbounded();
         let instruction_channel = WatcherInstructionChannel {
             sender: instruction_tx,
         };
         let watcher = Self {
-            watcher: Box::new(watcher),
+            watcher,
             notify_rx: rx,
             instruction_rx,
         };
@@ -113,6 +206,9 @@ impl Watcher {
     /// terminates.
     #[tracing::instrument(level = "debug", skip(self, workspace))]
     pub fn run(&mut self, workspace: &impl WorkspaceWatcherBridge) {
+        if self.watcher.is_none() {
+            return;
+        }
         loop {
             crossbeam::channel::select! {
                 recv(self.notify_rx) -> event => match event {
@@ -294,7 +390,10 @@ impl Watcher {
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let mut diagnostics = vec![];
         for path in paths {
-            diagnostics.extend(workspace.unload_file(&path)?);
+            let Some(project_key) = workspace.find_project_for_path(&path) else {
+                return Ok(vec![]);
+            };
+            diagnostics.extend(workspace.unload_file(&path, project_key)?);
         }
 
         Ok(diagnostics)
@@ -310,7 +409,10 @@ impl Watcher {
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let mut diagnostics = vec![];
         for path in &paths {
-            let result = workspace.unload_path(path)?;
+            let Some(project_key) = workspace.find_project_for_path(path) else {
+                return Ok(vec![]);
+            };
+            let result = workspace.unload_path(path, project_key)?;
             diagnostics.extend(result);
         }
 
@@ -323,10 +425,13 @@ impl Watcher {
         to: &Utf8Path,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let mut diagnostics = vec![];
+        let Some(project_key) = workspace.find_project_for_path(from) else {
+            return Ok(vec![]);
+        };
         if workspace.fs().path_is_file(from) {
-            diagnostics.extend(workspace.unload_file(from)?);
+            diagnostics.extend(workspace.unload_file(from, project_key)?);
         } else {
-            diagnostics.extend(workspace.unload_path(from)?);
+            diagnostics.extend(workspace.unload_path(from, project_key)?);
         }
         diagnostics.extend(Self::index_path(workspace, to)?);
         Ok(diagnostics)
@@ -351,45 +456,45 @@ impl Watcher {
         workspace: &impl WorkspaceWatcherBridge,
         paths: FxHashSet<Utf8PathBuf>,
     ) {
-        let mut watcher_paths = self.watcher.paths_mut();
+        if let Some(mut watcher_paths) = self.watcher.as_mut().map(|w| w.paths_mut()) {
+            for path in paths {
+                let std_path = path.as_std_path();
+                if !workspace.insert_watched_folder(path.clone()) {
+                    continue; // Already watching.
+                }
 
-        for path in paths {
-            let std_path = path.as_std_path();
-            if !workspace.insert_watched_folder(path.clone()) {
-                continue; // Already watching.
+                if let Err(error) = watcher_paths.add(std_path, RecursiveMode::NonRecursive) {
+                    // TODO: Improve error propagation.
+                    warn!("Error watching path {path}: {error}");
+                }
             }
 
-            if let Err(error) = watcher_paths.add(std_path, RecursiveMode::NonRecursive) {
+            if let Err(error) = watcher_paths.commit() {
                 // TODO: Improve error propagation.
-                warn!("Error watching path {path}: {error}");
+                warn!("Error committing the watched paths: {error}");
             }
-        }
-
-        if let Err(error) = watcher_paths.commit() {
-            // TODO: Improve error propagation.
-            warn!("Error committing the watched paths: {error}");
         }
     }
 
     #[tracing::instrument(level = "debug", skip(self, workspace))]
     fn unwatch_folder(&mut self, workspace: &impl WorkspaceWatcherBridge, path: Utf8PathBuf) {
-        let mut watcher_paths = self.watcher.paths_mut();
-
-        workspace.remove_watched_folders(|watched_path| {
-            if watched_path.starts_with(path.as_std_path()) {
-                if let Err(error) = watcher_paths.remove(watched_path.as_std_path()) {
-                    // TODO: Improve error propagation.
-                    warn!("Error unwatching path {}: {error}", watched_path);
+        if let Some(mut watcher_paths) = self.watcher.as_mut().map(|w| w.paths_mut()) {
+            workspace.remove_watched_folders(|watched_path| {
+                if watched_path.starts_with(path.as_std_path()) {
+                    if let Err(error) = watcher_paths.remove(watched_path.as_std_path()) {
+                        // TODO: Improve error propagation.
+                        warn!("Error unwatching path {}: {error}", watched_path);
+                    }
+                    true
+                } else {
+                    false
                 }
-                true
-            } else {
-                false
-            }
-        });
+            });
 
-        if let Err(error) = watcher_paths.commit() {
-            // TODO: Improve error propagation.
-            warn!("Error committing the watched paths: {error}");
+            if let Err(error) = watcher_paths.commit() {
+                // TODO: Improve error propagation.
+                warn!("Error committing the watched paths: {error}");
+            }
         }
     }
 }

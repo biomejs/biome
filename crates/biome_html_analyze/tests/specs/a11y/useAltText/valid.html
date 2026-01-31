@@ -1,0 +1,56 @@
+<!-- should not generate diagnostics -->
+
+<!-- img with alt -->
+<img src="image.png" alt="A beautiful landscape" />
+<img src="photo.jpg" alt="Profile picture" />
+
+<!-- img with empty alt (decorative) -->
+<img src="decorative.png" alt="" />
+
+<!-- img with aria-label -->
+<img src="image.png" aria-label="Description" />
+
+<!-- img with aria-labelledby -->
+<img src="image.png" aria-labelledby="desc-id" />
+
+<!-- img with aria-hidden="true" -->
+<img src="decorative.png" aria-hidden="true" />
+
+<!-- area with alt -->
+<map name="map">
+    <area shape="rect" coords="0,0,100,100" href="link" alt="Link area" />
+</map>
+
+<!-- area with aria-label -->
+<area href="foo" aria-label="Link description" />
+
+<!-- input type="image" with alt -->
+<input type="image" src="submit.png" alt="Submit form" />
+
+<!-- input type="image" with aria-label -->
+<input type="image" src="button.png" aria-label="Click me" />
+
+<!-- input type="image" with aria-labelledby -->
+<input type="image" src="button.png" aria-labelledby="button-desc" />
+
+<!-- input type="text" doesn't need alt -->
+<input type="text" />
+<input type="submit" value="Submit" />
+
+<!-- object with title -->
+<object data="movie.swf" title="Video player"></object>
+
+<!-- object with aria-label -->
+<object data="document.pdf" aria-label="PDF document"></object>
+
+<!-- object with aria-labelledby -->
+<object data="app.swf" aria-labelledby="app-title"></object>
+
+<!-- object with aria-hidden -->
+<object data="decorative.swf" aria-hidden="true"></object>
+
+<!-- Case insensitivity in HTML -->
+<IMG src="image.png" alt="Image" />
+<AREA href="link" alt="Link" />
+<INPUT type="image" alt="Submit" />
+<OBJECT data="file.pdf" title="PDF"></OBJECT>

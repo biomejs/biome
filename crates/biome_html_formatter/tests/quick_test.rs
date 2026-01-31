@@ -28,7 +28,7 @@ fn quick_test() {
     </div>
 {/snippet}
 "#;
-    let source_type = HtmlFileSource::astro();
+    let source_type = HtmlFileSource::html();
     let tree = parse_html(src, HtmlParseOptions::from(&source_type));
     let options = HtmlFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)

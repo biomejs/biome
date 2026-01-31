@@ -1,8 +1,9 @@
+use crate::cli_options::ColorsArg;
+use bpaf::Bpaf;
+use camino::Utf8PathBuf;
 use std::fmt::{Display, Formatter};
 use std::fs::File;
 use std::str::FromStr;
-
-use crate::cli_options::ColorsArg;
 use tracing::Metadata;
 use tracing::subscriber::Interest;
 use tracing_subscriber::filter::LevelFilter;
@@ -11,6 +12,76 @@ use tracing_subscriber::fmt::writer::MakeWriterExt;
 use tracing_subscriber::layer::{Context, Filter, SubscriberExt};
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{Layer as _, registry};
+
+/// Options to control logging (CLI and Daemon)
+#[derive(Debug, Clone, Bpaf)]
+pub struct LogOptions {
+    /// Optional path/file to redirect log messages to. This option is applicable only to the CLI.
+    ///
+    /// If omitted, logs are printed to stdout.
+    #[bpaf(
+        long("log-file"),
+        env("BIOME_LOG_FILE"),
+        argument("STRING"),
+        hide_usage
+    )]
+    pub log_file: Option<String>,
+
+    // Allows changing the prefix applied to the file name of the logs. This option is applicable only to the daemon.
+    #[bpaf(
+        env("BIOME_LOG_PREFIX_NAME"),
+        long("log-prefix-name"),
+        argument("STRING"),
+        fallback(String::from("server.log")),
+        display_fallback
+    )]
+    pub log_prefix_name: String,
+
+    /// Allows changing the folder where logs are stored. This option is applicable only to the daemon.
+    #[bpaf(
+        env("BIOME_LOG_PATH"),
+        long("log-path"),
+        argument("PATH"),
+        fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
+        display_fallback
+    )]
+    pub log_path: Utf8PathBuf,
+
+    /// The level of logging. In order, from the most verbose to the least
+    /// verbose: debug, info, warn, error.
+    ///
+    /// The value `none` won't show any logging.
+    #[bpaf(
+        long("log-level"),
+        env("BIOME_LOG_LEVEL"),
+        argument("none|debug|info|warn|error"),
+        fallback(LoggingLevel::default()),
+        display_fallback
+    )]
+    pub log_level: LoggingLevel,
+
+    /// What the log should look like.
+    #[bpaf(
+        long("log-kind"),
+        env("BIOME_LOG_KIND"),
+        argument("pretty|compact|json"),
+        fallback(LoggingKind::default()),
+        display_fallback
+    )]
+    pub log_kind: LoggingKind,
+}
+
+impl Default for LogOptions {
+    fn default() -> Self {
+        Self {
+            log_file: None,
+            log_prefix_name: String::from("server.log"),
+            log_path: biome_fs::ensure_cache_dir().join("biome-logs"),
+            log_level: LoggingLevel::default(),
+            log_kind: LoggingKind::default(),
+        }
+    }
+}
 
 pub fn setup_cli_subscriber(
     file: Option<&str>,

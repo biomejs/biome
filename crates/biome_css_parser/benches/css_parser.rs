@@ -1,4 +1,5 @@
 use biome_css_parser::{CssParserOptions, parse_css_with_cache};
+use biome_css_syntax::CssFileSource;
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
 use biome_rowan::NodeCache;
 use biome_test_utils::BenchCase;
@@ -34,6 +35,7 @@ fn bench_css_parser(criterion: &mut Criterion) {
         match test_case {
             Ok(test_case) => {
                 let code = test_case.code();
+                let source_type = CssFileSource::css();
                 let mut diagnostics = vec![];
                 group.throughput(Throughput::Bytes(code.len() as u64));
                 group.bench_with_input(
@@ -43,6 +45,7 @@ fn bench_css_parser(criterion: &mut Criterion) {
                         b.iter(|| {
                             let result = black_box(biome_css_parser::parse_css(
                                 code,
+                                source_type,
                                 CssParserOptions::default(),
                             ));
                             diagnostics.extend(result.into_diagnostics());
@@ -62,12 +65,18 @@ fn bench_css_parser(criterion: &mut Criterion) {
                         b.iter_batched(
                             || {
                                 let mut cache = NodeCache::default();
-                                parse_css_with_cache(code, &mut cache, CssParserOptions::default());
+                                parse_css_with_cache(
+                                    code,
+                                    source_type,
+                                    &mut cache,
+                                    CssParserOptions::default(),
+                                );
                                 cache
                             },
                             |mut cache| {
                                 black_box(parse_css_with_cache(
                                     code,
+                                    source_type,
                                     &mut cache,
                                     CssParserOptions::default(),
                                 ));

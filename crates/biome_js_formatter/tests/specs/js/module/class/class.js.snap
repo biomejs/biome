@@ -101,6 +101,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -165,4 +166,5 @@ export class Task {
 		this.args = args;
 	}
 }
+
 ```

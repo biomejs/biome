@@ -7,7 +7,7 @@ use crate::{
     CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, PARSE_ERROR, UNFORMATTED, assert_cli_snapshot,
     run_cli,
 };
-use biome_console::{BufferConsole, MarkupBuf};
+use biome_console::{BufferConsole, LogLevel, MarkupBuf};
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -965,4 +965,195 @@ fn ci_does_not_enable_assist() {
         console,
         result,
     ));
+}
+
+#[test]
+fn ci_only_applies_selected_rule() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.js");
+    fs.insert(file.into(), "debugger;\n".as_bytes());
+
+    let (_fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["ci", "--only=suspicious/noDebugger", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    let messages = &console.out_buffer;
+    let error_count = messages
+        .iter()
+        .filter(|m| m.level == LogLevel::Error)
+        .filter(|m| {
+            let content = format!("{:#?}", m.content);
+            content.contains("suspicious/noDebugger")
+        })
+        .count();
+
+    assert_eq!(
+        error_count, 1,
+        "expected 1 suspicious/noDebugger error, found {error_count:?}: {messages:?}"
+    );
+}
+
+#[test]
+fn ci_skip_suppresses_rule() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.js");
+    fs.insert(file.into(), "debugger;\n".as_bytes());
+
+    let (_fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["ci", "--skip=suspicious/noDebugger", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let messages = &console.out_buffer;
+    let error_count = messages
+        .iter()
+        .filter(|m| m.level == LogLevel::Error)
+        .filter(|m| {
+            let content = format!("{:#?}", m.content);
+            content.contains("suspicious/noDebugger")
+        })
+        .count();
+
+    assert_eq!(
+        error_count, 0,
+        "expected suspicious/noDebugger to be skipped, found {error_count:?}: {messages:?}"
+    );
+}
+
+#[test]
+fn ci_skip_takes_precedence_over_only() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.js");
+    fs.insert(file.into(), "debugger;\n".as_bytes());
+
+    let (_fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "ci",
+                "--only=suspicious/noDebugger",
+                "--skip=suspicious/noDebugger",
+                file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let messages = &console.out_buffer;
+    let error_count = messages
+        .iter()
+        .filter(|m| m.level == LogLevel::Error)
+        .filter(|m| {
+            let content = format!("{:#?}", m.content);
+            content.contains("suspicious/noDebugger")
+        })
+        .count();
+
+    assert_eq!(
+        error_count, 0,
+        "expected skip to override only, found {error_count:?}: {messages:?}"
+    );
+}
+
+#[test]
+fn ci_only_assist_action() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.js");
+    fs.insert(
+        file.into(),
+        "import b from \"b\";\nimport a from \"a\";\n".as_bytes(),
+    );
+
+    let (_fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "ci",
+                "--assist-enabled=true",
+                "--only=assist/source/organizeImports",
+                file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    let messages = &console.out_buffer;
+    let error_count = messages
+        .iter()
+        .filter(|m| m.level == LogLevel::Error)
+        .filter(|m| {
+            let content = format!("{:#?}", m.content);
+            content.contains("assist/source/organizeImports")
+        })
+        .count();
+
+    assert_eq!(
+        error_count, 1,
+        "expected assist action to be enforced when selected with --only, found {error_count:?}: {messages:?}"
+    );
+}
+
+#[test]
+fn ci_skip_assist_action_and_group() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.js");
+    fs.insert(
+        file.into(),
+        "import b from \"b\";\nimport a from \"a\";\n".as_bytes(),
+    );
+
+    let (_fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "ci",
+                "--assist-enabled=true",
+                "--only=assist/source",
+                "--skip=assist/source/organizeImports",
+                file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let messages = &console.out_buffer;
+    let error_count = messages
+        .iter()
+        .filter(|m| m.level == LogLevel::Error)
+        .filter(|m| {
+            let content = format!("{:#?}", m.content);
+            content.contains("assist/source/organizeImports")
+        })
+        .count();
+
+    assert_eq!(
+        error_count, 0,
+        "expected assist action to be skipped when group and action are both provided, found {error_count:?}: {messages:?}"
+    );
 }

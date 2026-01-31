@@ -37,6 +37,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -44,4 +45,5 @@ Operator linebreak: After
 /****/ (123).toString;
 (123) /**/.toString;
 (123).toString;
+
 ```

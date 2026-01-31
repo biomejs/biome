@@ -34,6 +34,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```astro
@@ -46,6 +47,7 @@ import TextInput from './TextInput.astro';
 <TextInput placeholder="enter text" />
 <button>native button</button>
 <input type="text">
+
 ```
 
 

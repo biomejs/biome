@@ -5,3 +5,13 @@ a {
 a {
   my-property: 1;
 }
+
+.invalid-use-of-return {
+	result: 1;
+}
+
+@function --test-fn() {
+  bad-prop: blue;
+  /* should be valid in function body */
+  result: 1;
+}

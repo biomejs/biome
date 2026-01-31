@@ -32,10 +32,12 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
 ("Jan 1, 2018 – Jan 1, 2019")
+
 ```
 
 ## Output 1
@@ -56,8 +58,10 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
 ("Jan 1, 2018 – Jan 1, 2019")
+
 ```

@@ -145,20 +145,18 @@ impl Rule for NoDuplicateDependencies {
             .iter()
             .flatten()
             .filter(|member| {
-                let name = member.name();
-                if let Ok(name) = name {
-                    let text = name.inner_string_text();
-                    if let Ok(text) = text {
-                        return DUPLICATE_PROPERTY_KEYS.contains(&text.text());
-                    }
-                }
-                false
+                member
+                    .name()
+                    .ok()
+                    .and_then(|name| name.inner_string_text())
+                    .and_then(|text| text.ok())
+                    .is_some_and(|text| DUPLICATE_PROPERTY_KEYS.contains(&text.text()))
             });
 
         // Loop through all the dependency groups to map all dependencies & check for duplicates within the same dependency group
         for dependency_group in groups {
             let dependency_group_name = dependency_group.name().ok()?;
-            let dependency_group_text = dependency_group_name.inner_string_text().ok()?;
+            let dependency_group_text = dependency_group_name.inner_string_text()?.ok()?;
             let dependency_group_value = dependency_group.value().ok()?;
 
             let mut deps = FxHashMap::<String, JsonSyntaxToken>::default();
@@ -169,7 +167,8 @@ impl Rule for NoDuplicateDependencies {
 
                     for dependency in object_value.json_member_list().iter().flatten() {
                         let dependency_name = dependency.name().ok()?;
-                        let dependency_text = dependency_name.inner_string_text().ok()?;
+                        let member_name = dependency_name.as_json_member_name()?;
+                        let dependency_text = member_name.inner_string_text().ok()?;
 
                         // Add dependencies to deps if not exists else to duplicates
                         if let Some(original_member) = deps.get(&dependency_text.to_string()) {
@@ -179,14 +178,14 @@ impl Rule for NoDuplicateDependencies {
                             };
                             let dupe = Dependency {
                                 group: dependency_group_text.to_string(),
-                                token: dependency_name.value_token().ok()?,
+                                token: member_name.value_token().ok()?,
                             };
 
                             return Some((original, dupe));
                         } else {
                             deps.insert(
                                 dependency_text.to_string(),
-                                dependency_name.value_token().ok()?,
+                                member_name.value_token().ok()?,
                             );
                         }
                     }
