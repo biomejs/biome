@@ -249,6 +249,10 @@ const BLOCK_TAGS: &[&str] = &[
 /// Only block-level HTML and special constructs interrupt paragraphs.
 pub(crate) fn at_html_block_interrupt(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
+        if p.line_start_leading_indent() > 3 {
+            return false;
+        }
+
         let Some(kind) = html_block_kind(p) else {
             return false;
         };
