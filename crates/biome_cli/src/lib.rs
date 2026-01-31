@@ -45,10 +45,6 @@ pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
     None => env!("CARGO_PKG_VERSION"),
 };
 
-/// JSON file that is temporarily to handle internal files via [Workspace].
-/// When using this file, make sure to close it via [Workspace::close_file].
-pub const TEMPORARY_INTERNAL_REPORTER_FILE: &str = "__BIOME_INTERNAL_FILE__.json";
-
 /// Global context for an execution of the CLI
 pub struct CliSession<'app> {
     /// Instance of [App] used by this run of the CLI

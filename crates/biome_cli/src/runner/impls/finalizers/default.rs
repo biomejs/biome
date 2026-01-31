@@ -12,11 +12,12 @@ use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::reporter::{ConsoleReporterWriter, FileReporterWriter, Reporter, ReporterWriter};
 use crate::runner::finalizer::{FinalizePayload, Finalizer};
 use crate::runner::impls::commands::traversal::TraverseResult;
-use crate::{CliDiagnostic, DiagnosticsPayload, TEMPORARY_INTERNAL_REPORTER_FILE};
+use crate::{CliDiagnostic, DiagnosticsPayload};
 use biome_console::markup;
 use biome_diagnostics::{PrintDiagnostic, Resource, SerdeJsonError};
-use biome_fs::{BiomePath, OpenOptions};
-use biome_service::workspace::{CloseFileParams, FileContent, FormatFileParams, OpenFileParams};
+use biome_fs::OpenOptions;
+use biome_json_formatter::context::JsonFormatOptions;
+use biome_rowan::AstNode;
 use std::cmp::Ordering;
 
 pub(crate) struct DefaultFinalizer;
@@ -122,36 +123,24 @@ impl Finalizer for DefaultFinalizer {
                         };
                         let mut buffer = JsonReporterVisitor::new(summary);
                         reporter.write(&mut console_reporter_writer, &mut buffer)?;
+                        let root = buffer.to_json();
                         if cli_reporter.kind == CliReporterKind::JsonPretty {
-                            let content = serde_json::to_string(&buffer).map_err(|error| {
-                                CliDiagnostic::Report(ReportDiagnostic::Serialization(
-                                    SerdeJsonError::from(error),
-                                ))
-                            })?;
-                            let report_file = BiomePath::new(TEMPORARY_INTERNAL_REPORTER_FILE);
-                            workspace.open_file(OpenFileParams {
-                                project_key,
-                                content: FileContent::from_client(content),
-                                path: report_file.clone(),
-                                document_file_source: None,
-                                persist_node_cache: false,
-                                inline_config: None,
-                            })?;
-                            let code = workspace.format_file(FormatFileParams {
-                                project_key,
-                                path: report_file.clone(),
-                                inline_config: None,
-                            })?;
+                            let formatted = biome_json_formatter::format_node(
+                                JsonFormatOptions::default(),
+                                root.syntax(),
+                            )
+                            .expect("To format the JSON report")
+                            .print()
+                            .expect("To print the JSON report");
+
                             console_reporter_writer.log(markup! {
-                                {code.as_code()}
+                                {formatted.as_code()}
                             });
-                            workspace.close_file(CloseFileParams {
-                                project_key,
-                                path: report_file,
-                            })?;
                         } else {
+                            dbg!(&root);
+                            let code = root.to_string();
                             console_reporter_writer.log(markup! {
-                                {buffer}
+                                {code}
                             });
                         }
                     }

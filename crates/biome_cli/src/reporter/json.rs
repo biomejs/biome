@@ -7,6 +7,8 @@ use biome_diagnostics::display::{SourceFile, markup_to_string};
 use biome_diagnostics::{
     Category, Error, Location, LogCategory, PrintDescription, Severity, Visit,
 };
+use biome_json_factory::make::*;
+use biome_json_syntax::{AnyJsonMemberName, AnyJsonValue, JsonRoot, JsonSyntaxKind, T};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
 
@@ -26,6 +28,188 @@ impl JsonReporterVisitor {
             command: String::new(),
         }
     }
+
+    pub(crate) fn to_json(&self) -> JsonRoot {
+        let diagnostics_elements: Vec<AnyJsonValue> =
+            self.diagnostics.iter().map(report_to_json).collect();
+
+        let diagnostics_separators =
+            vec![token(T![,]); diagnostics_elements.len().saturating_sub(1)];
+
+        let root_members = vec![
+            self.summary.to_json_member(),
+            json_member(
+                AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal(
+                    "diagnostics",
+                ))),
+                token(T![:]),
+                AnyJsonValue::JsonArrayValue(json_array_value(
+                    token(T!['[']),
+                    json_array_element_list(diagnostics_elements, diagnostics_separators),
+                    token(T![']']),
+                )),
+            ),
+            json_member(
+                AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("command"))),
+                token(T![:]),
+                AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(
+                    &self.command,
+                ))),
+            ),
+        ];
+
+        let root_separators = vec![token(T![,]); root_members.len() - 1];
+
+        json_root(
+            AnyJsonValue::JsonObjectValue(json_object_value(
+                token(T!['{']),
+                json_member_list(root_members, root_separators),
+                token(T!['}']),
+            )),
+            token(JsonSyntaxKind::EOF),
+        )
+        .build()
+    }
+}
+
+fn location_span_to_json(span: &LocationSpan) -> AnyJsonValue {
+    let members = vec![
+        json_member(
+            AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("line"))),
+            token(T![:]),
+            AnyJsonValue::JsonNumberValue(json_number_value(json_number_literal(span.line))),
+        ),
+        json_member(
+            AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("column"))),
+            token(T![:]),
+            AnyJsonValue::JsonNumberValue(json_number_value(json_number_literal(span.column))),
+        ),
+    ];
+    let separators = vec![token(T![,])];
+
+    AnyJsonValue::JsonObjectValue(json_object_value(
+        token(T!['{']),
+        json_member_list(members, separators),
+        token(T!['}']),
+    ))
+}
+
+fn location_report_to_json(location: &LocationReport) -> AnyJsonValue {
+    let members = vec![
+        json_member(
+            AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("path"))),
+            token(T![:]),
+            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&location.path))),
+        ),
+        json_member(
+            AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("start"))),
+            token(T![:]),
+            location_span_to_json(&location.start),
+        ),
+        json_member(
+            AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("end"))),
+            token(T![:]),
+            location_span_to_json(&location.end),
+        ),
+    ];
+    let separators = vec![token(T![,]); members.len() - 1];
+
+    AnyJsonValue::JsonObjectValue(json_object_value(
+        token(T!['{']),
+        json_member_list(members, separators),
+        token(T!['}']),
+    ))
+}
+
+fn suggestion_to_json(suggestion: &JsonSuggestion) -> AnyJsonValue {
+    let members = vec![
+        json_member(
+            AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("start"))),
+            token(T![:]),
+            location_span_to_json(&suggestion.start),
+        ),
+        json_member(
+            AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("end"))),
+            token(T![:]),
+            location_span_to_json(&suggestion.end),
+        ),
+        json_member(
+            AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("text"))),
+            token(T![:]),
+            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&suggestion.text))),
+        ),
+    ];
+    let separators = vec![token(T![,]); members.len() - 1];
+
+    AnyJsonValue::JsonObjectValue(json_object_value(
+        token(T!['{']),
+        json_member_list(members, separators),
+        token(T!['}']),
+    ))
+}
+
+fn report_to_json(report: &JsonReport) -> AnyJsonValue {
+    let severity_str = match report.severity {
+        Severity::Hint => "hint",
+        Severity::Information => "info",
+        Severity::Warning => "warning",
+        Severity::Error => "error",
+        Severity::Fatal => "fatal",
+    };
+
+    let mut members = vec![
+        json_member(
+            AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("severity"))),
+            token(T![:]),
+            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(severity_str))),
+        ),
+        json_member(
+            AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("message"))),
+            token(T![:]),
+            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&report.message))),
+        ),
+    ];
+
+    // Add category if present
+    if let Some(category) = report.category {
+        members.push(json_member(
+            AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("category"))),
+            token(T![:]),
+            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(category.name()))),
+        ));
+    }
+
+    // Add location if present
+    if let Some(ref location) = report.location {
+        members.push(json_member(
+            AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("location"))),
+            token(T![:]),
+            location_report_to_json(location),
+        ));
+    }
+
+    // Add advices array
+    let advice_elements: Vec<AnyJsonValue> =
+        report.advices.iter().map(suggestion_to_json).collect();
+    let advice_separators = vec![token(T![,]); advice_elements.len().saturating_sub(1)];
+
+    members.push(json_member(
+        AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("advices"))),
+        token(T![:]),
+        AnyJsonValue::JsonArrayValue(json_array_value(
+            token(T!['[']),
+            json_array_element_list(advice_elements, advice_separators),
+            token(T![']']),
+        )),
+    ));
+
+    let separators = vec![token(T![,]); members.len() - 1];
+
+    AnyJsonValue::JsonObjectValue(json_object_value(
+        token(T!['{']),
+        json_member_list(members, separators),
+        token(T!['}']),
+    ))
 }
 
 impl Display for JsonReporterVisitor {

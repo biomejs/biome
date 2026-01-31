@@ -40,15 +40,15 @@ The --json option is unstable/experimental and its output might change between p
 	},
 	"diagnostics": [
 		{
-			"category": "format",
 			"severity": "error",
 			"message": "Formatter would have printed the following content:",
-			"advices": [],
+			"category": "format",
 			"location": {
 				"path": "format.js",
-				"start": { "column": 0, "line": 0 },
-				"end": { "column": 0, "line": 0 }
-			}
+				"start": { "line": 0, "column": 0 },
+				"end": { "line": 0, "column": 0 }
+			},
+			"advices": []
 		}
 	],
 	"command": "format"
