@@ -8,11 +8,14 @@ use biome_rule_options::use_consistent_method_signatures::{
     MethodSignatureStyle, UseConsistentMethodSignaturesOptions,
 };
 
+// TODO: Highlight lines 2-3 and 4-6 of the codeblock if/when the doctest parser learns to ignore patterns like 
+// ```ts {2-3, 4,6}
+
 declare_lint_rule! {
     /// Enforce consistent use of either method signatures or function properties within interfaces and type aliases.
     ///
     /// TypeScript provides 2 different ways to declare methods within interfaces and object types:
-    /// ```ts,ignore {2-3, 5-6}
+    /// ```ts,ignore
     /// interface Example {
     ///   // method shorthand syntax
     ///   methodFunc(arg: string): void;
