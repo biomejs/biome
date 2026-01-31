@@ -937,6 +937,8 @@ impl<'src> CssLexer<'src> {
             b"composes" => COMPOSES_KW,
             b"position-try" => POSITION_TRY_KW,
             b"view-transition" => VIEW_TRANSITION_KW,
+            b"function" => FUNCTION_KW,
+            b"returns" => RETURNS_KW,
             // Tailwind CSS 4.0 keywords
             b"theme" => THEME_KW,
             b"utility" => UTILITY_KW,

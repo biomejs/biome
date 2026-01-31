@@ -1,0 +1,3 @@
+<template>
+  <AvatarPrimitive.Fallback />
+</template>

@@ -18,6 +18,9 @@ const VAULT = {
   token: "AAAAAAAAAAAAAAAAAAAAAMLheAAAAAAA0%2BuSeid%2BULvsea4JtiGRiSDSJSI%3DEUifiRBkKG5E2XzMDjRfl76ZC9Ub0wnz4XsNiRVBChTYbJcE3F"
 };
 
+// Alternating case patterns - SHOULD trigger (suspicious, unlike CamelCase)
+const suspiciousString = "aBcDeFgHiJkLmNoPq";
+
 // TODO: Get these to work, they seem common and important
 // const herokuApiKey = "abcd1234-5678-90ef-ghij-klmnopqrstuv";
 // const BASIC_AUTH_HEADER = "Authorization: Basic QWxhZGRpbjpPcGVuU2VzYW1l";

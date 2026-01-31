@@ -1,0 +1,393 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<template
+  v-for="episode in episodes"
+  #[`${episode.id}-cell`]="{ row }"
+  :key="episode.id"
+>
+  ...
+</template>
+
+<template
+  v-for="episode in episodes"
+  v-slot:[`${episode.id}-cell`]="{ row }"
+  :key="episode.id"
+>
+  ...
+</template>
+
+<template
+  v-for="episode in episodes"
+  #[episode.id]="{ row }"
+  :key="episode.id"
+>
+  ...
+</template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [
+                    VueDirective {
+                        name_token: IDENT@9..17 "v-for" [Newline("\n"), Whitespace("  ")] [],
+                        arg: missing (optional),
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@17..18 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@18..39 "\"episode in episodes\"" [] [],
+                            },
+                        },
+                    },
+                    VueVSlotShorthandDirective {
+                        hash_token: HASH@39..43 "#" [Newline("\n"), Whitespace("  ")] [],
+                        arg: VueDynamicArgument {
+                            l_brack_token: L_BRACKET@43..44 "[" [] [],
+                            name_token: HTML_LITERAL@44..64 "`${episode.id}-cell`" [] [],
+                            r_brack_token: R_BRACKET@64..65 "]" [] [],
+                        },
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@65..66 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@66..75 "\"{ row }\"" [] [],
+                            },
+                        },
+                    },
+                    VueVBindShorthandDirective {
+                        arg: VueDirectiveArgument {
+                            colon_token: COLON@75..79 ":" [Newline("\n"), Whitespace("  ")] [],
+                            arg: VueStaticArgument {
+                                name_token: HTML_LITERAL@79..82 "key" [] [],
+                            },
+                        },
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@82..83 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@83..95 "\"episode.id\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@95..97 ">" [Newline("\n")] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@97..103 "..." [Newline("\n"), Whitespace("  ")] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@103..105 "<" [Newline("\n")] [],
+                slash_token: SLASH@105..106 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@106..114 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@114..115 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@115..118 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@118..126 "template" [] [],
+                },
+                attributes: HtmlAttributeList [
+                    VueDirective {
+                        name_token: IDENT@126..134 "v-for" [Newline("\n"), Whitespace("  ")] [],
+                        arg: missing (optional),
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@134..135 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@135..156 "\"episode in episodes\"" [] [],
+                            },
+                        },
+                    },
+                    VueDirective {
+                        name_token: IDENT@156..165 "v-slot" [Newline("\n"), Whitespace("  ")] [],
+                        arg: VueDirectiveArgument {
+                            colon_token: COLON@165..166 ":" [] [],
+                            arg: VueDynamicArgument {
+                                l_brack_token: L_BRACKET@166..167 "[" [] [],
+                                name_token: HTML_LITERAL@167..187 "`${episode.id}-cell`" [] [],
+                                r_brack_token: R_BRACKET@187..188 "]" [] [],
+                            },
+                        },
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@188..189 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@189..198 "\"{ row }\"" [] [],
+                            },
+                        },
+                    },
+                    VueVBindShorthandDirective {
+                        arg: VueDirectiveArgument {
+                            colon_token: COLON@198..202 ":" [Newline("\n"), Whitespace("  ")] [],
+                            arg: VueStaticArgument {
+                                name_token: HTML_LITERAL@202..205 "key" [] [],
+                            },
+                        },
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@205..206 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@206..218 "\"episode.id\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@218..220 ">" [Newline("\n")] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@220..226 "..." [Newline("\n"), Whitespace("  ")] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@226..228 "<" [Newline("\n")] [],
+                slash_token: SLASH@228..229 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@229..237 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@237..238 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@238..241 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@241..249 "template" [] [],
+                },
+                attributes: HtmlAttributeList [
+                    VueDirective {
+                        name_token: IDENT@249..257 "v-for" [Newline("\n"), Whitespace("  ")] [],
+                        arg: missing (optional),
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@257..258 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@258..279 "\"episode in episodes\"" [] [],
+                            },
+                        },
+                    },
+                    VueVSlotShorthandDirective {
+                        hash_token: HASH@279..283 "#" [Newline("\n"), Whitespace("  ")] [],
+                        arg: VueDynamicArgument {
+                            l_brack_token: L_BRACKET@283..284 "[" [] [],
+                            name_token: HTML_LITERAL@284..294 "episode.id" [] [],
+                            r_brack_token: R_BRACKET@294..295 "]" [] [],
+                        },
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@295..296 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@296..305 "\"{ row }\"" [] [],
+                            },
+                        },
+                    },
+                    VueVBindShorthandDirective {
+                        arg: VueDirectiveArgument {
+                            colon_token: COLON@305..309 ":" [Newline("\n"), Whitespace("  ")] [],
+                            arg: VueStaticArgument {
+                                name_token: HTML_LITERAL@309..312 "key" [] [],
+                            },
+                        },
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@312..313 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@313..325 "\"episode.id\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@325..327 ">" [Newline("\n")] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@327..333 "..." [Newline("\n"), Whitespace("  ")] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@333..335 "<" [Newline("\n")] [],
+                slash_token: SLASH@335..336 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@336..344 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@344..345 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@345..346 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..346
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..345
+    0: HTML_ELEMENT@0..115
+      0: HTML_OPENING_ELEMENT@0..97
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: HTML_LITERAL@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..95
+          0: VUE_DIRECTIVE@9..39
+            0: IDENT@9..17 "v-for" [Newline("\n"), Whitespace("  ")] []
+            1: (empty)
+            2: VUE_MODIFIER_LIST@17..17
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@17..39
+              0: EQ@17..18 "=" [] []
+              1: HTML_STRING@18..39
+                0: HTML_STRING_LITERAL@18..39 "\"episode in episodes\"" [] []
+          1: VUE_V_SLOT_SHORTHAND_DIRECTIVE@39..75
+            0: HASH@39..43 "#" [Newline("\n"), Whitespace("  ")] []
+            1: VUE_DYNAMIC_ARGUMENT@43..65
+              0: L_BRACKET@43..44 "[" [] []
+              1: HTML_LITERAL@44..64 "`${episode.id}-cell`" [] []
+              2: R_BRACKET@64..65 "]" [] []
+            2: VUE_MODIFIER_LIST@65..65
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@65..75
+              0: EQ@65..66 "=" [] []
+              1: HTML_STRING@66..75
+                0: HTML_STRING_LITERAL@66..75 "\"{ row }\"" [] []
+          2: VUE_V_BIND_SHORTHAND_DIRECTIVE@75..95
+            0: VUE_DIRECTIVE_ARGUMENT@75..82
+              0: COLON@75..79 ":" [Newline("\n"), Whitespace("  ")] []
+              1: VUE_STATIC_ARGUMENT@79..82
+                0: HTML_LITERAL@79..82 "key" [] []
+            1: VUE_MODIFIER_LIST@82..82
+            2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@82..95
+              0: EQ@82..83 "=" [] []
+              1: HTML_STRING@83..95
+                0: HTML_STRING_LITERAL@83..95 "\"episode.id\"" [] []
+        3: R_ANGLE@95..97 ">" [Newline("\n")] []
+      1: HTML_ELEMENT_LIST@97..103
+        0: HTML_CONTENT@97..103
+          0: HTML_LITERAL@97..103 "..." [Newline("\n"), Whitespace("  ")] []
+      2: HTML_CLOSING_ELEMENT@103..115
+        0: L_ANGLE@103..105 "<" [Newline("\n")] []
+        1: SLASH@105..106 "/" [] []
+        2: HTML_TAG_NAME@106..114
+          0: HTML_LITERAL@106..114 "template" [] []
+        3: R_ANGLE@114..115 ">" [] []
+    1: HTML_ELEMENT@115..238
+      0: HTML_OPENING_ELEMENT@115..220
+        0: L_ANGLE@115..118 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@118..126
+          0: HTML_LITERAL@118..126 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@126..218
+          0: VUE_DIRECTIVE@126..156
+            0: IDENT@126..134 "v-for" [Newline("\n"), Whitespace("  ")] []
+            1: (empty)
+            2: VUE_MODIFIER_LIST@134..134
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@134..156
+              0: EQ@134..135 "=" [] []
+              1: HTML_STRING@135..156
+                0: HTML_STRING_LITERAL@135..156 "\"episode in episodes\"" [] []
+          1: VUE_DIRECTIVE@156..198
+            0: IDENT@156..165 "v-slot" [Newline("\n"), Whitespace("  ")] []
+            1: VUE_DIRECTIVE_ARGUMENT@165..188
+              0: COLON@165..166 ":" [] []
+              1: VUE_DYNAMIC_ARGUMENT@166..188
+                0: L_BRACKET@166..167 "[" [] []
+                1: HTML_LITERAL@167..187 "`${episode.id}-cell`" [] []
+                2: R_BRACKET@187..188 "]" [] []
+            2: VUE_MODIFIER_LIST@188..188
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@188..198
+              0: EQ@188..189 "=" [] []
+              1: HTML_STRING@189..198
+                0: HTML_STRING_LITERAL@189..198 "\"{ row }\"" [] []
+          2: VUE_V_BIND_SHORTHAND_DIRECTIVE@198..218
+            0: VUE_DIRECTIVE_ARGUMENT@198..205
+              0: COLON@198..202 ":" [Newline("\n"), Whitespace("  ")] []
+              1: VUE_STATIC_ARGUMENT@202..205
+                0: HTML_LITERAL@202..205 "key" [] []
+            1: VUE_MODIFIER_LIST@205..205
+            2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@205..218
+              0: EQ@205..206 "=" [] []
+              1: HTML_STRING@206..218
+                0: HTML_STRING_LITERAL@206..218 "\"episode.id\"" [] []
+        3: R_ANGLE@218..220 ">" [Newline("\n")] []
+      1: HTML_ELEMENT_LIST@220..226
+        0: HTML_CONTENT@220..226
+          0: HTML_LITERAL@220..226 "..." [Newline("\n"), Whitespace("  ")] []
+      2: HTML_CLOSING_ELEMENT@226..238
+        0: L_ANGLE@226..228 "<" [Newline("\n")] []
+        1: SLASH@228..229 "/" [] []
+        2: HTML_TAG_NAME@229..237
+          0: HTML_LITERAL@229..237 "template" [] []
+        3: R_ANGLE@237..238 ">" [] []
+    2: HTML_ELEMENT@238..345
+      0: HTML_OPENING_ELEMENT@238..327
+        0: L_ANGLE@238..241 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@241..249
+          0: HTML_LITERAL@241..249 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@249..325
+          0: VUE_DIRECTIVE@249..279
+            0: IDENT@249..257 "v-for" [Newline("\n"), Whitespace("  ")] []
+            1: (empty)
+            2: VUE_MODIFIER_LIST@257..257
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@257..279
+              0: EQ@257..258 "=" [] []
+              1: HTML_STRING@258..279
+                0: HTML_STRING_LITERAL@258..279 "\"episode in episodes\"" [] []
+          1: VUE_V_SLOT_SHORTHAND_DIRECTIVE@279..305
+            0: HASH@279..283 "#" [Newline("\n"), Whitespace("  ")] []
+            1: VUE_DYNAMIC_ARGUMENT@283..295
+              0: L_BRACKET@283..284 "[" [] []
+              1: HTML_LITERAL@284..294 "episode.id" [] []
+              2: R_BRACKET@294..295 "]" [] []
+            2: VUE_MODIFIER_LIST@295..295
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@295..305
+              0: EQ@295..296 "=" [] []
+              1: HTML_STRING@296..305
+                0: HTML_STRING_LITERAL@296..305 "\"{ row }\"" [] []
+          2: VUE_V_BIND_SHORTHAND_DIRECTIVE@305..325
+            0: VUE_DIRECTIVE_ARGUMENT@305..312
+              0: COLON@305..309 ":" [Newline("\n"), Whitespace("  ")] []
+              1: VUE_STATIC_ARGUMENT@309..312
+                0: HTML_LITERAL@309..312 "key" [] []
+            1: VUE_MODIFIER_LIST@312..312
+            2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@312..325
+              0: EQ@312..313 "=" [] []
+              1: HTML_STRING@313..325
+                0: HTML_STRING_LITERAL@313..325 "\"episode.id\"" [] []
+        3: R_ANGLE@325..327 ">" [Newline("\n")] []
+      1: HTML_ELEMENT_LIST@327..333
+        0: HTML_CONTENT@327..333
+          0: HTML_LITERAL@327..333 "..." [Newline("\n"), Whitespace("  ")] []
+      2: HTML_CLOSING_ELEMENT@333..345
+        0: L_ANGLE@333..335 "<" [Newline("\n")] []
+        1: SLASH@335..336 "/" [] []
+        2: HTML_TAG_NAME@336..344
+          0: HTML_LITERAL@336..344 "template" [] []
+        3: R_ANGLE@344..345 ">" [] []
+  4: EOF@345..346 "" [Newline("\n")] []
+
+```

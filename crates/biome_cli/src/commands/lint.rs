@@ -49,6 +49,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) graphql_linter: Option<GraphqlLinterConfiguration>,
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
+    pub(crate) profile_rules: bool,
 }
 
 struct LintExecution {
@@ -79,8 +80,16 @@ struct LintExecution {
 }
 
 impl Execution for LintExecution {
-    fn features(&self) -> FeatureName {
+    fn wanted_features(&self) -> FeatureName {
         FeaturesBuilder::new().with_linter().build()
+    }
+
+    fn not_requested_features(&self) -> FeatureName {
+        FeaturesBuilder::new()
+            .with_formatter()
+            .with_assist()
+            .with_search()
+            .build()
     }
 
     fn can_handle(&self, features: FeaturesSupported) -> bool {
@@ -169,6 +178,11 @@ impl TraversalCommand for LintCommandPayload {
             suppress: self.suppress,
             suppression_reason: self.suppression_reason.clone(),
         })?;
+
+        if self.profile_rules {
+            biome_analyze::profiling::enable();
+        }
+
         Ok(Box::new(LintExecution {
             fix_file_mode,
             stdin_file_path: self.stdin_file_path.clone(),

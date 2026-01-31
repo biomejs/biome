@@ -1,34 +1,24 @@
 use std::{borrow::Cow, collections::HashMap, sync::LazyLock};
 
-use biome_html_syntax::{AnyHtmlElement, HtmlAttributeName, HtmlTagName};
+use biome_html_syntax::{AnyHtmlElement, AnyHtmlTagName, HtmlAttributeName, HtmlTagName};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
-use crate::HtmlFormatter;
-
-/// HTML tags that have an "inline" layout by default.
-///
-/// In HTML, The inline layout treats the element as if it were a single line of text. This means that the element does not start on a new line, and only takes up as much width as necessary.
-/// In contrast, block layout elements start on a new line and take up the full width of the parent element.
-///
-/// ### References
-///  - Pretter uses: [html-ua-styles](https://github.com/prettier/html-ua-styles) to determined which tags are inline by default.
-///  - HTML WHATWG spec: <https://html.spec.whatwg.org/multipage/rendering.html#the-css-user-agent-style-sheet-and-presentational-hints>
-///  - <https://developer.mozilla.org/en-US/docs/Glossary/Inline-level_content>
-///  - <https://developer.mozilla.org/en-US/docs/Glossary/Block-level_content>
-pub const HTML_INLINE_TAGS: &[&str] = &[
-    // TODO: this is incomplete. derive this from the HTML spec.
-    "b", "i", "u", "span", "a", "strong", "em", "small", "big",
-];
+use crate::{
+    HtmlFormatter,
+    utils::css_display::{CssDisplay, get_css_display},
+};
 
 /// HTML tags that have a "block" layout, or anything that is not inline by default.
 ///
-/// See also: [HTML_INLINE_TAGS]
+/// **NOTE**: This list is kept for reference but is no longer used directly.
+/// Use [`crate::utils::css_display::get_css_display`] instead for accurate CSS display values.
 ///
 /// ### References
 ///  - <https://html.spec.whatwg.org/#flow-content-3>
 ///  - <https://html.spec.whatwg.org/#sections-and-headings>
 ///  - <https://html.spec.whatwg.org/#lists>
 ///  - <https://github.com/prettier/prettier/blob/af6e7215ce0e0d243cb34a85174af65ab4177f47/src/language-html/constants.evaluate.js>
+#[deprecated]
 pub const HTML_BLOCK_TAGS: &[&str] = &[
     // These have `block` explicitly
     "html",
@@ -708,6 +698,102 @@ pub static HTML_ATTRIBUTES_BY_TAG: LazyLock<HashMap<&str, &[&str]>> = LazyLock::
     attributes_by_tag.iter().map(|(k, v)| (*k, *v)).collect()
 });
 
+pub static SVG_ALL_TAGS: &[&str] = &[
+    "animate",
+    "animatemotion",
+    "animatetransform",
+    "circle",
+    "clippath",
+    "defs",
+    "desc",
+    "ellipse",
+    "feblend",
+    "fecolormatrix",
+    "fecomponenttransfer",
+    "fecomposite",
+    "feconvolvematrix",
+    "fediffuselighting",
+    "fedisplacementmap",
+    "fedistantlight",
+    "fedropshadow",
+    "feflood",
+    "fefunca",
+    "fefuncb",
+    "fefuncg",
+    "fefuncr",
+    "fegaussianblur",
+    "feimage",
+    "femerge",
+    "femergenode",
+    "femorphology",
+    "feoffset",
+    "fepointlight",
+    "fespecularlighting",
+    "fespotlight",
+    "fetile",
+    "feturbulence",
+    "filter",
+    "foreignobject",
+    "g",
+    "image",
+    "line",
+    "lineargradient",
+    "marker",
+    "mask",
+    "metadata",
+    "mpath",
+    "path",
+    "pattern",
+    "polygon",
+    "polyline",
+    "radialgradient",
+    "rect",
+    "set",
+    "stop",
+    "switch",
+    "symbol",
+    "text",
+    "textpath",
+    "tspan",
+    "use",
+    "view",
+];
+
+pub static MATHML_ALL_TAGS: &[&str] = &[
+    "annotation",
+    "annotation-xml",
+    "maction",
+    "math",
+    "menclose",
+    "merror",
+    "mfenced",
+    "mfrac",
+    "mi",
+    "mmultiscripts",
+    "mn",
+    "mo",
+    "mover",
+    "mpadded",
+    "mphantom",
+    "mprescripts",
+    "mroot",
+    "mrow",
+    "ms",
+    "mspace",
+    "msqrt",
+    "mstyle",
+    "msub",
+    "msubsup",
+    "msup",
+    "mtable",
+    "mtd",
+    "mtext",
+    "mtr",
+    "munder",
+    "munderover",
+    "semantics",
+];
+
 /// Whether the given tag name is a known HTML element. See also: [`HTML_ALL_TAGS`].
 pub(crate) fn is_canonical_html_tag_name(tag_name: &str) -> bool {
     match tag_name.to_ascii_lowercase_cow() {
@@ -761,91 +847,114 @@ pub(crate) fn is_canonical_html_attribute_name(tag_name: &str, attribute_name: &
 ///
 /// See [`HTML_ATTRIBUTES_BY_TAG`], [`HTML_GLOBAL_ATTRIBUTES`].
 pub(crate) fn is_canonical_html_attribute(
-    tag_name: &HtmlTagName,
+    tag_name: &AnyHtmlTagName,
     attribute_name: &HtmlAttributeName,
 ) -> bool {
-    let Ok(tag_name) = tag_name.value_token() else {
-        return false;
-    };
-    let Ok(attribute_name) = attribute_name.value_token() else {
-        return false;
-    };
-    is_canonical_html_attribute_name(tag_name.text_trimmed(), attribute_name.text_trimmed())
-}
+    // Only check for canonical attributes on regular HTML tags, not components
+    match tag_name {
+        AnyHtmlTagName::HtmlTagName(tag) => {
+            let Ok(tag_token) = tag.value_token() else {
+                return false;
+            };
+            let tag_name_text = tag_token.text_trimmed();
 
-/// Whether an element should be considered whitespace sensitive, considering the element's tag name and the
-/// formatter's whitespace sensitivity options.
-pub(crate) fn is_element_whitespace_sensitive_from_element(
-    f: &HtmlFormatter,
-    element: &AnyHtmlElement,
-) -> bool {
-    let name = match element {
-        AnyHtmlElement::HtmlElement(element) => {
-            element.opening_element().and_then(|element| element.name())
+            let Ok(attribute_token) = attribute_name.value_token() else {
+                return false;
+            };
+            let attribute_name_text = attribute_token.text_trimmed();
+
+            is_canonical_html_attribute_name(tag_name_text, attribute_name_text)
         }
-        AnyHtmlElement::HtmlSelfClosingElement(element) => element.name(),
-        _ => return false,
-    };
-    let Ok(name) = name else {
-        return false;
-    };
-
-    is_element_whitespace_sensitive(f, &name)
+        // Component names and member names are not canonical HTML
+        AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_) => false,
+    }
 }
 
-/// Whether an element should be considered whitespace sensitive, considering the element's tag name and the
-/// formatter's whitespace sensitivity options.
-pub(crate) fn is_element_whitespace_sensitive(f: &HtmlFormatter, tag_name: &HtmlTagName) -> bool {
-    let sensitivity = f.options().whitespace_sensitivity();
-    sensitivity.is_css() && is_inline_element(tag_name) || sensitivity.is_strict()
+/// Gets the CSS display value for an HTML element.
+pub(crate) fn get_element_css_display(element: &AnyHtmlElement) -> CssDisplay {
+    use biome_html_syntax::AnySvelteBlock;
+
+    // Check for Svelte blocks and classify them appropriately
+    if let Some(svelte_block) = element.clone().as_svelte_block() {
+        return match svelte_block {
+            // {@html ...} and {@render ...} are "tag" expressions that inject content inline
+            // They should be treated as inline elements for whitespace sensitivity purposes
+            AnySvelteBlock::SvelteHtmlBlock(_) | AnySvelteBlock::SvelteRenderBlock(_) => {
+                CssDisplay::Inline
+            }
+            // Control flow blocks ({#if}, {#each}, etc.) and other constructs are block-level
+            AnySvelteBlock::SvelteIfBlock(_)
+            | AnySvelteBlock::SvelteEachBlock(_)
+            | AnySvelteBlock::SvelteAwaitBlock(_)
+            | AnySvelteBlock::SvelteKeyBlock(_)
+            | AnySvelteBlock::SvelteSnippetBlock(_)
+            | AnySvelteBlock::SvelteConstBlock(_)
+            | AnySvelteBlock::SvelteDebugBlock(_)
+            | AnySvelteBlock::SvelteBogusBlock(_) => CssDisplay::Block,
+        };
+    }
+
+    if let Some(tag_name) = element.name() {
+        get_css_display(&tag_name)
+    } else {
+        CssDisplay::Inline
+    }
 }
 
-pub(crate) fn is_inline_element(tag_name: &HtmlTagName) -> bool {
-    let Ok(tag_name) = tag_name.value_token() else {
-        return false;
-    };
-    HTML_INLINE_TAGS
-        .iter()
-        .any(|tag| tag_name.text_trimmed().eq_ignore_ascii_case(tag))
+/// CSS whitespace handling modes.
+///
+/// Directly corresponds to [`white-space` CSS property values](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/white-space).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[expect(dead_code)]
+pub(crate) enum CssWhitespace {
+    #[default]
+    Normal,
+    Pre,
+    PreWrap,
+    PreLine,
+    Wrap,
+    Collapse,
+    PreserveNoWrap,
 }
 
-/// Checks if an element is an inline element based on its tag name.
-pub(crate) fn is_inline_element_from_element(element: &AnyHtmlElement) -> bool {
-    let name = match element {
-        AnyHtmlElement::HtmlElement(element) => {
-            element.opening_element().and_then(|element| element.name())
-        }
-        AnyHtmlElement::HtmlSelfClosingElement(element) => element.name(),
-        _ => return false,
-    };
-    let Ok(name) = name else {
-        return false;
-    };
+#[cfg_attr(not(test), expect(dead_code))]
+pub(crate) fn get_css_whitespace(tag_name: &str) -> CssWhitespace {
+    // Mirrors Prettier's CSS white-space lookup:
+    // prettier/src/language-html/constants.evaluate.js
+    // prettier/src/language-html/utilities/index.js#getNodeCssStyleWhiteSpace
+    //
+    // Final tag mapping in Prettier:
+    // - listing, plaintext, pre, xmp: "pre"
+    // - textarea: "pre-wrap"
+    // - nobr: "nowrap"
+    // - table: "initial" (effectively treated as default "normal")
 
-    is_inline_element(&name)
+    // The cow makes this have a lower allocation chance. Also, this intentionally
+    // avoids using multiple `eq_ignore_ascii_case` checks because this optimizes
+    // into SIMD instructions, and overall less CPU instructions.
+    let tag_name = tag_name.to_ascii_lowercase_cow();
+    let tag_name = tag_name.as_ref();
+    match tag_name {
+        "listing" | "plaintext" | "pre" | "xmp" => CssWhitespace::Pre,
+        "textarea" => CssWhitespace::PreWrap,
+        "nobr" => CssWhitespace::PreserveNoWrap,
+        // In Prettier this is "initial", which computes to the initial value (`normal`).
+        "table" => CssWhitespace::Normal,
+        _ => CssWhitespace::Normal,
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[test]
-    fn no_overlap_in_inline_and_block_element_arrays() {
-        for tag in HTML_INLINE_TAGS {
-            assert!(
-                !HTML_BLOCK_TAGS.contains(tag),
-                "Inline tag '{tag}' is also a block tag. It must be only in one of the arrays."
-            );
-        }
-    }
-
     // Enforce this invariant to allow for binary search.
     #[test]
-    fn all_tags_is_sorted() {
+    fn html_all_tags_is_sorted() {
         if !HTML_ALL_TAGS.is_sorted() {
             let mut sorted = HTML_ALL_TAGS.to_vec();
             sorted.sort_unstable();
-            panic!("All tags array is not sorted. Here it is sorted {sorted:?}",);
+            panic!("All tags array is not sorted. Here it is sorted {sorted:?}");
         }
     }
 
@@ -873,19 +982,23 @@ mod tests {
         });
     }
 
+    // Enforce this invariant to allow for binary search.
     #[test]
-    fn all_tag_subsets_included_in_all_tags() {
-        for tag in HTML_INLINE_TAGS {
-            assert!(
-                is_canonical_html_tag_name(tag),
-                "Inline tag '{tag}' is not included in the all tags array."
-            );
+    fn svg_all_tags_is_sorted() {
+        if !SVG_ALL_TAGS.is_sorted() {
+            let mut sorted = SVG_ALL_TAGS.to_vec();
+            sorted.sort_unstable();
+            panic!("SVG tags array is not sorted. Here it is sorted {sorted:?}");
         }
-        for tag in HTML_BLOCK_TAGS {
-            assert!(
-                is_canonical_html_tag_name(tag),
-                "Block tag '{tag}' is not included in the all tags array."
-            );
+    }
+
+    // Enforce this invariant to allow for binary search.
+    #[test]
+    fn mathml_all_tags_is_sorted() {
+        if !MATHML_ALL_TAGS.is_sorted() {
+            let mut sorted = MATHML_ALL_TAGS.to_vec();
+            sorted.sort_unstable();
+            panic!("MathML tags array is not sorted. Here it is sorted {sorted:?}");
         }
     }
 
@@ -898,5 +1011,28 @@ mod tests {
                 "Did not recognize '{case}' as a canonical HTML tag name, but it should be."
             );
         }
+    }
+
+    #[test]
+    fn test_get_css_whitespace_matches_prettier() {
+        // From Prettier's computed `CSS_WHITE_SPACE_TAGS` mapping:
+        // prettier/src/language-html/constants.evaluate.js
+        assert_eq!(get_css_whitespace("pre"), CssWhitespace::Pre);
+        assert_eq!(get_css_whitespace("listing"), CssWhitespace::Pre);
+        assert_eq!(get_css_whitespace("plaintext"), CssWhitespace::Pre);
+        assert_eq!(get_css_whitespace("xmp"), CssWhitespace::Pre);
+
+        assert_eq!(get_css_whitespace("textarea"), CssWhitespace::PreWrap);
+        assert_eq!(get_css_whitespace("nobr"), CssWhitespace::PreserveNoWrap);
+
+        // Prettier returns the CSS value "initial" for table, which computes to `normal`.
+        assert_eq!(get_css_whitespace("table"), CssWhitespace::Normal);
+
+        // Default value
+        assert_eq!(get_css_whitespace("div"), CssWhitespace::Normal);
+
+        // Case-insensitive
+        assert_eq!(get_css_whitespace("PRE"), CssWhitespace::Pre);
+        assert_eq!(get_css_whitespace("NoBr"), CssWhitespace::PreserveNoWrap);
     }
 }

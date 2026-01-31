@@ -1,0 +1,54 @@
+@function --test  ( ) { }
+@function --test  (--param  ) { }
+@function --test  ( --param <string> ) { }
+@function --test  ( --param   <string>: rem ) {}
+@function --test  ( --param <string>: rem ) returns <string> { }
+@function --test  ( --param <string>: rem , --param2) {}
+@function --test  ( --param     <string>: rem , --param2: red ) {         }
+
+@function --test(--param   : rem     ,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param) { }
+
+@function --test(--param1 type(
+<string> | <color> | <length> | <length-percentage> | <number> | <percentage> | <transform-function> | <url>
+)
+) { }
+
+@function --test(
+--param,
+--param,
+--param type(
+<string> | <color> | <length> | <length-percentage> | <number> | <percentage> | <transform-function> | <url>
+),
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param type(
+<string> | <color> | <length> | <length-percentage> | <number> | <percentage> | <transform-function> | <url>
+)
+) {
+}
+
+@function --test() returns type(
+<string> | <color> | <length> | <length-percentage> | <number> | <percentage> | <transform-function> | <url>
+) {
+}
+
+
+@function --transparent(--color <color>, --alpha type(<number> | <percentage>))
+  returns <color> {
+  result: oklch(from var(--color) l c h / var(--alpha));
+}

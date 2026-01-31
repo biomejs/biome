@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 432
 expression: redactor(content)
 ---
 ## `index.css`
@@ -89,6 +90,8 @@ reporter/format ━━━━━━━━━━━━━━━━━━━━━�
   i The following files need to be formatted:
   
   - index.css
+  - index.ts
+  - main.ts
   
 reporter/violations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -97,17 +100,21 @@ reporter/violations ━━━━━━━━━━━━━━━━━━━━
   i The following files have violations:
   
   - index.css (2 errors)
-  - index.ts (15 errors)
+  - index.ts (21 errors, 8 warnings)
+  - main.ts (21 errors, 8 warnings)
   
   i The following lint rules have violations:
   
   Rule Name                                        Diagnostics
   
+  lint/correctness/noUnusedVariables               12 (12 warnings)
   lint/correctness/noUnknownFunction               2 (2 errors)
-  lint/suspicious/noImplicitAnyLet                 6 (6 errors)
-  lint/suspicious/noDoubleEquals                   4 (4 errors)
-  assist/source/organizeImports                    1 (1 error)
-  lint/suspicious/noDebugger                       4 (4 errors)
+  lint/suspicious/noImplicitAnyLet                 12 (12 errors)
+  lint/correctness/noUnusedImports                 4 (4 warnings)
+  lint/suspicious/noDoubleEquals                   8 (8 errors)
+  assist/source/organizeImports                    2 (2 errors)
+  lint/suspicious/noRedeclare                      12 (12 errors)
+  lint/suspicious/noDebugger                       8 (8 errors)
 
 ```
 
@@ -131,11 +138,6 @@ reporter/violations ━━━━━━━━━━━━━━━━━━━━
   ! The list is empty.
   
 
-```
-
-```block
-The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
-Diagnostics not shown: 45.
 ```
 
 ```block

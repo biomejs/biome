@@ -3,6 +3,8 @@ use crate::reporter::{
     ReporterWriter, TraversalSummary,
 };
 use crate::runner::execution::Execution;
+use biome_analyze::profiling;
+use biome_analyze::profiling::DisplayProfiles;
 use biome_console::fmt::Formatter;
 use biome_console::{fmt, markup};
 use biome_diagnostics::PrintDiagnostic;
@@ -74,6 +76,10 @@ impl ReporterVisitor for ConsoleReporterVisitor {
         writer.log(markup! {
             {ConsoleTraversalSummary(execution, &summary, verbose)}
         });
+        let profiles = profiling::drain_sorted_by_total(false);
+        if !profiles.is_empty() {
+            self.0.log(markup! {{ DisplayProfiles(profiles, None) }});
+        }
 
         Ok(())
     }

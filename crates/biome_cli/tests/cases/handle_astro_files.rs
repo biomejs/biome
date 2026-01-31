@@ -770,6 +770,7 @@ fn embedded_bindings_are_tracked_correctly() {
 import { Component } from "./component.svelte";
 let hello = "Hello World";
 let array = [];
+let props = [];
 ---
 
 <html>
@@ -777,6 +778,7 @@ let array = [];
     <span>{notDefined}</span>
     { array.map(item => (<span>{item}</span>)) }
     <Component />
+    <input {...props}>
 </html>
 "#
         .as_bytes(),
@@ -875,6 +877,142 @@ import Component from "./Component.vue"
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "no_unused_imports_is_not_triggered_in_snippet_sources",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn issue_7912() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "experimentalFullSupportEnabled": true, "formatter": { "enabled": true } } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        r#"---
+            const title = "Hello World";
+---
+
+<html>
+  <head>
+            <title>{title}</title>
+  </head>
+  <body>
+            <h1>{title}</h1>
+  </body>
+</html>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--write",
+                "--only=suspicious/noDebugger",
+                astro_file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_7912",
+        fs,
+        console,
+        result,
+    ));
+}
+
+const ASTRO_ENUM_IN_TEMPLATE: &str = r#"---
+import { Component, FooEnum } from './types';
+---
+<main>
+  <Component />
+  {FooEnum.Foo}
+</main>"#;
+
+#[test]
+fn use_import_type_not_triggered_for_enum_in_template() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.astro");
+    fs.insert(file.into(), ASTRO_ENUM_IN_TEMPLATE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_import_type_not_triggered_for_enum_in_template",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_import_type_not_triggered_for_enum_in_template_v2() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.astro");
+    fs.insert(
+        file.into(),
+        r#"---
+import { Avatar as AvatarPrimitive } from "bits-ui";
+import { cn } from "$lib/utils.js";
+
+let {
+	ref = $bindable(null),
+	class: className,
+}: AvatarPrimitive.FallbackProps = $props();
+---
+
+<!-- used as value here -->
+<AvatarPrimitive.Fallback
+	bind:ref
+	class="something nice"
+/>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_import_type_not_triggered_for_enum_in_template_v2",
         fs,
         console,
         result,

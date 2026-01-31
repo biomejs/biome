@@ -1,11 +1,12 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `fix.js`
 
 ```js
 function _13_1_3_fun(arguments) { }
+
 ```
 
 # Termination Message
@@ -28,6 +29,7 @@ fix.js:1:22 parse ━━━━━━━━━━━━━━━━━━━━�
   
   > 1 │ function _13_1_3_fun(arguments) { }
       │                      ^^^^^^^^^
+    2 │ 
   
 
 ```
@@ -39,6 +41,7 @@ fix.js:1:22 parse ━━━━━━━━━━━━━━━━━━━━�
   
   > 1 │ function _13_1_3_fun(arguments) { }
       │                      ^^^^^^^^^
+    2 │ 
   
 
 ```

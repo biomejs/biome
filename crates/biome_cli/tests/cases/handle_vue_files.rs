@@ -522,6 +522,50 @@ schema + sure()
 }
 
 #[test]
+fn parse_vue_css_v_bind_function() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let vue_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        r#"<template>
+  <div class="red"></div>
+</template>
+
+<style>
+.red {
+  color: v-bind(color);
+}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", vue_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "parse_vue_css_v_bind_function",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn full_support_ts() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -1090,6 +1134,96 @@ import Component from "./Component.vue"
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "no_unused_imports_is_not_triggered_in_snippet_sources",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_import_type_not_triggered_for_enum_in_template() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script setup lang="ts">
+import { Component, FooEnum } from './types';
+</script>
+<template>
+  <Component />
+  <div>{{ FooEnum.Foo }}</div>
+</template>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_import_type_not_triggered_for_enum_in_template",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_import_type_not_triggered_for_enum_in_template_v2() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+import { Avatar as AvatarPrimitive } from "bits-ui"; // <-- false positive
+import { cn } from "$lib/utils.js";
+
+let {
+	ref = $bindable(null),
+	class: className,
+}: AvatarPrimitive.FallbackProps = $props();
+</script>
+
+<!-- used as value here -->
+<AvatarPrimitive.Fallback
+	bind:ref
+	class="something nice"
+/>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_import_type_not_triggered_for_enum_in_template_v2",
         fs,
         console,
         result,

@@ -13,6 +13,7 @@ pub(crate) mod declaration_or_rule_list;
 pub(crate) mod document_matcher_list;
 pub(crate) mod font_family_name_list;
 pub(crate) mod font_feature_values_item_list;
+pub(crate) mod function_parameter_list;
 pub(crate) mod generic_component_value_list;
 pub(crate) mod if_branch_list;
 pub(crate) mod keyframes_item_list;

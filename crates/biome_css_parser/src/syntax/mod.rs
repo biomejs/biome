@@ -42,7 +42,7 @@ pub(crate) enum CssSyntaxFeatures {
     /// Enable support for CSS Modules syntax.
     CssModules,
 
-    /// Enable support for CSS Modules syntax plus parsing of pseudo selectors fo `:slotted` and `:deep`
+    /// Enable support for CSS Modules syntax plus parsing of pseudo selectors for `:slotted`, `:deep`, and the `v-bind()` function.
     CssModulesWithVue,
 }
 

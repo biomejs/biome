@@ -13,6 +13,9 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
     let mut visitor = EslintLintRulesVisitor::default();
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
+    biome_graphql_analyze::visit_registry(&mut visitor);
+    biome_css_analyze::visit_registry(&mut visitor);
+    biome_html_analyze::visit_registry(&mut visitor);
     let mut lines = Vec::with_capacity(visitor.0.len());
     for ((eslint_name, source_kind), (group_name, rule_metadata)) in visitor.0 {
         let name = rule_metadata.name;

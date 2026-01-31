@@ -66,6 +66,9 @@ CssBogusIfTest = SyntaxElement*
 CssBogusSyntax = SyntaxElement*
 CssBogusSyntaxSingleComponent = SyntaxElement*
 CssBogusAttrName = SyntaxElement*
+CssBogusFunctionParameter = SyntaxElement*
+CssBogusType = SyntaxElement*
+CssBogusIfTestBooleanExpr = SyntaxElement*
 
 AnyCssRoot =
 	CssRoot
@@ -663,6 +666,7 @@ AnyCssAtRule =
 	| CssValueAtRule
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
+	| CssFunctionAtRule
 	// Tailwind CSS 4.0 at rules
 	| TwThemeAtRule
 	| TwSourceAtRule
@@ -698,6 +702,7 @@ AnyCssAtRuleDeclarator =
 	| CssSupportsAtRuleDeclarator
 	| CssScopeAtRuleDeclarator
 	| CssStartingStyleAtRuleDeclarator
+	| CssFunctionAtRuleDeclarator
 
 // Conditional block declarator nodes
 CssMediaAtRuleDeclarator =
@@ -746,6 +751,14 @@ CssPositionTryAtRuleDeclarator =
 
 CssViewTransitionAtRuleDeclarator =
 	'view-transition'
+
+CssFunctionAtRuleDeclarator =
+	'function'
+	name: CssDashedIdentifier
+	'('
+	parameters: CssFunctionParameterList
+	')'
+	returns: CssReturnsStatement?
 
 // @charset "UTF-8";
 // ^^^^^^^^^^^^^^^^^
@@ -1346,6 +1359,7 @@ AnyCssPageAtRuleItem =
 	| CssEmptyDeclaration
 	| CssAtRule
 	| CssMarginAtRule
+	| CssBogus
 
 // @page :left { @left-middle {} background: red; }
 // 						   ^^^^^^^^^^^^^^^
@@ -1750,6 +1764,55 @@ CssViewTransitionAtRule =
 	declarator: CssViewTransitionAtRuleDeclarator
 	block: AnyCssDeclarationBlock
 
+// https://drafts.csswg.org/css-mixins-1/#function-rule
+// @function <function-token> <function-parameter>#? ) [ returns <css-type> ]? { <declaration-list> }
+//
+// @function --transparent(--color, --alpha) { }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssFunctionAtRule =
+	declarator: CssFunctionAtRuleDeclarator
+	block: CssDeclarationOrAtRuleBlock
+
+// <function-parameter>#?
+//
+/// @function --transparent(--color, --alpha) { }
+//                          ^^^^^^^^^^^^^^^^
+CssFunctionParameterList = AnyCssFunctionParameter (',' AnyCssFunctionParameter)*
+
+AnyCssFunctionParameter =
+	CssFunctionParameter
+	| CssBogusFunctionParameter
+
+// <css-type>
+//
+// @function --transparent(--color <color>, --alpha <number>) { }
+//                                 ^^^^^^^          ^^^^^^^^
+AnyCssType =
+	CssTypeFunction
+	| AnyCssSyntaxComponent
+	| CssBogusType
+
+// @function --transparent(--color <color>: red, --alpha <number>: 0.5) { }
+//                         ^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^
+CssFunctionParameter =
+	name: CssDashedIdentifier
+	type:  AnyCssType?
+	default_value: CssFunctionParameterDefaultValue?
+
+// @function --transparent(--color <color>: red, --alpha <number>: 0.5) { }
+//                                        ^^^^^                  ^^^^^
+CssFunctionParameterDefaultValue =
+	':'
+	value: AnyCssValue
+
+// returns <css-type>
+//
+// @function --transparent(--color <color>: red, --alpha <number>: 0.5) returns <color> { }
+//                                                                      ^^^^^^^^^^^^^^^
+CssReturnsStatement =
+	'returns'
+	type: AnyCssType
+
 ///////////////
 // AUXILIARY
 ///////////////
@@ -1871,12 +1934,16 @@ CssParameter = AnyCssExpression
 //  supports( [ <ident> : <declaration-value> ] | <supports-condition> ) |
 //  media( <media-feature> | <media-condition> ) |
 //  style( <style-query> )
+//
+// if(style(--color: green)): red);
 CssIfFunction =
 	'if'
 	'('
 	CssIfBranchList
 	')'
 
+// if(style(--theme: dark): red; else: blue)
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssIfBranchList = AnyCssIfBranch (';' AnyCssIfBranch)* ';'?
 
 // https://drafts.csswg.org/css-values-5/#typedef-boolean-expr
@@ -1888,8 +1955,12 @@ AnyCssIfTestBooleanExpr =
 	CssIfTestBooleanNotExpr
 	| AnyCssIfTestBooleanAndCombinableExpr
 	| AnyCssIfTestBooleanOrCombinableExpr
+	| CssBogusIfTestBooleanExpr
 
 // not <boolean-expr-group>
+//
+// if(not style(--color: green): red)
+//    ^^^^^^^^^^^^^^^^^^^^^^^^
 CssIfTestBooleanNotExpr =
 	'not'
 	expression: AnyCssIfTestBooleanExprGroup
@@ -1898,6 +1969,8 @@ AnyCssIfTestBooleanAndCombinableExpr =
 	AnyCssIfTestBooleanExprGroup
 	| CssIfTestBooleanAndExpr
 
+// if(style(--color: green) and style(--color: blue)): red)
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssIfTestBooleanAndExpr =
 	left: AnyCssIfTestBooleanExprGroup
 	'and'
@@ -1907,6 +1980,8 @@ AnyCssIfTestBooleanOrCombinableExpr =
 	AnyCssIfTestBooleanExprGroup
 	| CssIfTestBooleanOrExpr
 
+// if(style(--color: green) or style(--color: blue)): red)
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssIfTestBooleanOrExpr =
 	left: AnyCssIfTestBooleanExprGroup
 	'or'
@@ -1918,15 +1993,22 @@ AnyCssIfTestBooleanExprGroup =
 	| CssIfTestBooleanExprInParens
 
 // ( <boolean-expr> )
+//
+// if(style(--foo: bar) and (style(--fiz: buzz) or style(--baz: qux)): red)
+//                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssIfTestBooleanExprInParens =
 	'('
 	expression: AnyCssIfTestBooleanExpr
 	')'
 
+// if(media(width < 700px): 0 auto; else: 20px auto;);
+//                                  ^^^^
 CssElseKeyword = 'else'
 
 AnyCssIfCondition = AnyCssIfTestBooleanExpr | CssElseKeyword
 
+// if(style(--color: green): red; else: blue)
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^
 CssIfBranch =
 	condition: AnyCssIfCondition
 	':'
@@ -1936,6 +2018,8 @@ AnyCssIfBranch =
 	CssIfBranch
 	| CssBogusIfBranch
 
+// supports(color: lch(75% 0 0)): lch(75% 0 0)
+//          ^^^^^^^^^^^^^^^^^^^
 CssIfSupportsIdentifierTest =
 	ident: CssIdentifier
 	':'
@@ -1945,6 +2029,8 @@ AnyCssIfSupportsTestCondition =
 	CssIfSupportsIdentifierTest
 	| AnyCssImportSupportsCondition
 
+// if(supports(selector(:buffering)): 1em;)
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssIfSupportsTest =
 	'supports'
 	'('
@@ -1955,6 +2041,8 @@ AnyCssIfMediaTestQuery =
 	AnyCssMediaCondition
 	| AnyCssQueryFeature
 
+// if(media(width > 700px): calc(3rem + 2vw))
+//    ^^^^^^^^^^^^^^^^^^^^
 CssIfMediaTest =
 	'media'
 	'('
@@ -1978,8 +2066,14 @@ AnyCssExpression =
 	CssBinaryExpression
 	| CssParenthesizedExpression
 	| CssListOfComponentValuesExpression
+	| CssCommaSeparatedValue
 
 CssListOfComponentValuesExpression = CssComponentValueList
+
+CssCommaSeparatedValue =
+	'{'
+	items: CssGenericComponentValueList
+	'}'
 
 CssBinaryExpression =
 	left: AnyCssExpression
@@ -1987,7 +2081,6 @@ CssBinaryExpression =
 		'+' | '-' | '*' | '/'
 	)
 	right: AnyCssExpression
-
 
 CssParenthesizedExpression =
 	'(' expression: AnyCssExpression? ')'

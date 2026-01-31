@@ -139,9 +139,23 @@ dependencies = [
  "camino",
  "enumflags2",
  "indexmap",
+ "insta",
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
+]
+
+[[package]]
+name = "biome_analyze_macros"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "biome_string_case",
+ "camino",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
 ]
 
 [[package]]
@@ -313,6 +327,7 @@ name = "biome_css_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_console",
  "biome_css_factory",
  "biome_css_parser",
@@ -330,6 +345,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "codspeed-criterion-compat",
+ "filetime",
  "insta",
  "mimalloc",
  "regex",
@@ -589,6 +605,7 @@ name = "biome_graphql_analyze"
 version = "0.0.1"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -602,6 +619,7 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "filetime",
  "insta",
  "jiff",
  "rustc-hash 2.1.1",
@@ -790,6 +808,7 @@ name = "biome_html_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_aria_metadata",
  "biome_console",
  "biome_deserialize",
@@ -805,8 +824,10 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "codspeed-criterion-compat",
+ "filetime",
  "insta",
  "mimalloc",
+ "phf 0.13.1",
  "schemars",
  "serde",
  "tests_macros",
@@ -843,6 +864,7 @@ dependencies = [
  "camino",
  "codspeed-criterion-compat",
  "countme",
+ "enumflags2",
  "mimalloc",
  "schemars",
  "serde",
@@ -891,6 +913,7 @@ name = "biome_js_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_aria",
  "biome_aria_metadata",
  "biome_console",
@@ -922,6 +945,7 @@ dependencies = [
  "camino",
  "codspeed-criterion-compat",
  "enumflags2",
+ "filetime",
  "globset",
  "insta",
  "mimalloc",
@@ -1119,6 +1143,7 @@ name = "biome_json_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_configuration",
  "biome_console",
  "biome_diagnostics",
@@ -1132,6 +1157,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "codspeed-criterion-compat",
+ "filetime",
  "insta",
  "mimalloc",
  "rustc-hash 2.1.1",
@@ -1290,14 +1316,18 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_markdown_factory",
+ "biome_markdown_parser",
  "biome_markdown_syntax",
  "biome_parser",
  "biome_rowan",
  "biome_test_utils",
  "biome_unicode_table",
+ "htmlize",
  "insta",
  "quickcheck",
  "quickcheck_macros",
+ "serde",
+ "serde_json",
  "tests_macros",
  "tracing",
  "unicode-bom",
@@ -1316,6 +1346,7 @@ dependencies = [
 name = "biome_markup"
 version = "0.5.7"
 dependencies = [
+ "biome_console",
  "proc-macro-error2",
  "proc-macro2",
  "quote",
@@ -1932,7 +1963,7 @@ dependencies = [
  "hashbrown 0.16.1",
  "indexmap",
  "once_cell",
- "phf",
+ "phf 0.13.1",
  "rustc-hash 2.1.1",
  "static_assertions",
 ]
@@ -2778,6 +2809,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
+name = "filetime"
+version = "0.2.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f98844151eee8917efc50bd9e8318cb963ae8b297431495d3f758616ea5c57db"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "libredox",
+]
+
+[[package]]
 name = "fixedbitset"
 version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3155,6 +3197,19 @@ name = "hermit-abi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
+
+[[package]]
+name = "htmlize"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d347c0de239be20ba0982e4822de3124404281e119ae3e11f5d7425a414e1935"
+dependencies = [
+ "memchr",
+ "pastey",
+ "phf 0.11.3",
+ "phf_codegen",
+ "serde_json",
+]
 
 [[package]]
 name = "http"
@@ -3674,6 +3729,7 @@ checksum = "c0ff37bd590ca25063e35af745c343cb7a0271906fb7b37e4813e8f79f00268d"
 dependencies = [
  "bitflags 2.9.3",
  "libc",
+ "redox_syscall",
 ]
 
 [[package]]
@@ -4026,6 +4082,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
+name = "pastey"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "35fb2e5f958ec131621fdd531e9fc186ed768cbe395337403ae56c17a74c68ec"
+
+[[package]]
 name = "path-absolutize"
 version = "3.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4051,12 +4113,42 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
 name = "phf"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fd6780a80ae0c52cc120a26a1a42c1ae51b247a253e4e06113d23d2c2edd078"
+dependencies = [
+ "phf_shared 0.11.3",
+]
+
+[[package]]
+name = "phf"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1562dc717473dbaa4c1f85a36410e03c047b2e7df7f45ee938fbef64ae7fadf"
 dependencies = [
  "phf_macros",
- "phf_shared",
+ "phf_shared 0.13.1",
+ "serde",
+]
+
+[[package]]
+name = "phf_codegen"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aef8048c789fa5e851558d709946d6d79a8ff88c0440c587967f8e94bfb1216a"
+dependencies = [
+ "phf_generator 0.11.3",
+ "phf_shared 0.11.3",
+]
+
+[[package]]
+name = "phf_generator"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c80231409c20246a13fddb31776fb942c38553c51e871f8cbd687a4cfb5843d"
+dependencies = [
+ "phf_shared 0.11.3",
+ "rand 0.8.5",
 ]
 
 [[package]]
@@ -4066,7 +4158,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "135ace3a761e564ec88c03a77317a7c6b80bb7f7135ef2544dbe054243b89737"
 dependencies = [
  "fastrand",
- "phf_shared",
+ "phf_shared 0.13.1",
 ]
 
 [[package]]
@@ -4075,11 +4167,20 @@ version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "812f032b54b1e759ccd5f8b6677695d5268c588701effba24601f6932f8269ef"
 dependencies = [
- "phf_generator",
- "phf_shared",
+ "phf_generator 0.13.1",
+ "phf_shared 0.13.1",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
+]
+
+[[package]]
+name = "phf_shared"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "67eabc2ef2a60eb7faa00097bd1ffdb5bd28e62bf39990626a582201b7a754e5"
+dependencies = [
+ "siphasher",
 ]
 
 [[package]]
@@ -4241,9 +4342,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.105"
+version = "1.0.106"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "535d180e0ecab6268a3e718bb9fd44db66bbbc256257165fc699dadf70d16fe7"
+checksum = "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934"
 dependencies = [
  "unicode-ident",
 ]
@@ -4315,9 +4416,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.43"
+version = "1.0.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc74d9a594b72ae6656596548f56f667211f8a97b3d4c3d467150794690dc40a"
+checksum = "21b2ebcf727b7760c461f091f9f0f539b77b8e87f2fd88131e7f1b433b3cece4"
 dependencies = [
  "proc-macro2",
 ]
@@ -4692,9 +4793,9 @@ dependencies = [
 
 [[package]]
 name = "schemars"
-version = "1.1.0"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9558e172d4e8533736ba97870c4b2cd63f84b382a3d6eb063da41b91cce17289"
+checksum = "54e910108742c57a770f492731f99be216a52fadd361b06c8fb59d74ccc267d2"
 dependencies = [
  "dyn-clone",
  "indexmap",
@@ -4707,9 +4808,9 @@ dependencies = [
 
 [[package]]
 name = "schemars_derive"
-version = "1.1.0"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "301858a4023d78debd2353c7426dc486001bddc91ae31a76fb1f55132f7e2633"
+checksum = "4908ad288c5035a8eb12cfdf0d49270def0a268ee162b75eeee0f85d155a7c45"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5242,9 +5343,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.48.0"
+version = "1.49.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff360e02eab121e0bc37a2d3b4d4dc622e6eda3a8e5253d5435ecf5bd4c68408"
+checksum = "72a2903cd7736441aac9df9d7688bd0ce48edccaadf181c3b90be801e81d3d86"
 dependencies = [
  "bytes",
  "libc",
@@ -6376,6 +6477,8 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
+ "biome_markdown_parser",
+ "biome_markdown_syntax",
  "biome_parser",
  "biome_rowan",
  "biome_string_case",

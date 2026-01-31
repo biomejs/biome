@@ -6,7 +6,9 @@ use std::{fmt::Debug, sync::Arc};
 use biome_rowan::{AnySyntaxNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode, WalkEvent};
 
 use crate::matcher::SignalRuleKey;
-use crate::{DiagnosticSignal, RuleCategory, RuleDiagnostic, SignalEntry, Visitor, VisitorContext};
+use crate::{
+    DiagnosticSignal, RuleCategory, RuleDiagnostic, SignalEntry, Visitor, VisitorContext, profiling,
+};
 
 /// Slice of analyzer plugins that can be cheaply cloned.
 pub type AnalyzerPluginSlice<'a> = &'a [Arc<Box<dyn AnalyzerPlugin>>];
@@ -100,24 +102,26 @@ where
             return;
         }
 
-        let signals = self
+        let rule_timer = profiling::start_plugin_rule("plugin");
+        let diagnostics = self
             .plugin
-            .evaluate(node.clone().into(), ctx.options.file_path.clone())
-            .into_iter()
-            .map(|diagnostic| {
-                let name = diagnostic
-                    .subcategory
-                    .clone()
-                    .unwrap_or_else(|| "anonymous".into());
+            .evaluate(node.clone().into(), ctx.options.file_path.clone());
+        rule_timer.stop();
 
-                SignalEntry {
-                    text_range: diagnostic.span().unwrap_or_default(),
-                    signal: Box::new(DiagnosticSignal::new(move || diagnostic.clone())),
-                    rule: SignalRuleKey::Plugin(name.into()),
-                    category: RuleCategory::Lint,
-                    instances: Default::default(),
-                }
-            });
+        let signals = diagnostics.into_iter().map(|diagnostic| {
+            let name = diagnostic
+                .subcategory
+                .clone()
+                .unwrap_or_else(|| "anonymous".into());
+
+            SignalEntry {
+                text_range: diagnostic.span().unwrap_or_default(),
+                signal: Box::new(DiagnosticSignal::new(move || diagnostic.clone())),
+                rule: SignalRuleKey::Plugin(name.into()),
+                category: RuleCategory::Lint,
+                instances: Default::default(),
+            }
+        });
 
         ctx.signal_queue.extend(signals);
     }

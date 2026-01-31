@@ -8,7 +8,7 @@ use crate::{
 };
 use biome_formatter::{FormatContext, FormatRuleWithOptions, write};
 use biome_html_syntax::{
-    AnyHtmlAttributeInitializer, HtmlAttribute, HtmlAttributeFields, HtmlTagName,
+    AnyHtmlAttributeInitializer, AnyHtmlTagName, HtmlAttribute, HtmlAttributeFields,
 };
 use std::fmt::Debug;
 
@@ -18,7 +18,7 @@ pub(crate) struct FormatHtmlAttribute {
     pub is_canonical_html_element: bool,
 
     /// The name of the tag this attribute belongs to.
-    pub tag_name: Option<HtmlTagName>,
+    pub tag_name: Option<AnyHtmlTagName>,
 
     /// Whether it should be formatted in compact mode. In compact mode, all tokens and children
     /// are removed
@@ -30,7 +30,7 @@ pub(crate) struct FormatHtmlAttributeOptions {
     pub is_canonical_html_element: bool,
 
     /// The name of the tag this attribute belongs to.
-    pub tag_name: Option<HtmlTagName>,
+    pub tag_name: Option<AnyHtmlTagName>,
 
     /// Whether it should be formatted in compact mode. In compact mode, all tokens and children
     /// are removed

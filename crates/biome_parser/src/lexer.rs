@@ -499,6 +499,10 @@ impl<'l, Lex: Lexer<'l>> BufferedLexer<Lex::Kind, Lex> {
         }
     }
 
+    pub fn lexer_mut(&mut self) -> &mut Lex {
+        &mut self.inner
+    }
+
     /// Returns the kind of the next token and any associated diagnostic.
     ///
     /// [See `Lexer.next_token`](Lexer::next_token)
@@ -587,8 +591,10 @@ impl<'l, Lex: Lexer<'l>> BufferedLexer<Lex::Kind, Lex> {
     fn reset_lookahead(&mut self) {
         if let Some(current) = self.current.take() {
             self.inner.rewind(current);
-            self.lookahead.clear();
+        } else if let Some(first) = self.lookahead.get_checkpoint(0).cloned() {
+            self.inner.rewind(first);
         }
+        self.lookahead.clear();
     }
 
     /// Returns an iterator over the tokens following the current token to perform lookahead.
@@ -609,26 +615,59 @@ where
 {
     /// Re-lex the current token in the given context
     pub fn re_lex(&mut self, context: Lex::ReLexContext) -> Lex::Kind {
-        let current_kind = self.current();
-        let current_checkpoint = self.inner.checkpoint();
-
         if let Some(current) = self.current.take() {
             self.inner.rewind(current);
+        } else if let Some(first) = self.lookahead.get_checkpoint(0).cloned() {
+            self.inner.rewind(first);
         }
 
         let new_kind = self.inner.re_lex(context);
-
-        if new_kind != current_kind {
-            // The token has changed, clear the lookahead
-            self.lookahead.clear();
-        } else if !self.lookahead.is_empty() {
-            // It's still the same kind. So let's move the lexer back to the position it was before re-lexing
-            // and keep the lookahead as is.
-            self.current = Some(self.inner.checkpoint());
-            self.inner.rewind(current_checkpoint);
-        }
+        self.current = Some(self.inner.checkpoint());
+        self.lookahead.clear();
 
         new_kind
+    }
+
+    /// Force re-lex the current token in a new lex context, clearing all lookahead.
+    ///
+    /// Use this after lookahead operations when you need to switch lexing context
+    /// and ensure cached tokens from the previous context don't leak through.
+    ///
+    /// This method:
+    /// 1. Rewinds to the current token's START position
+    /// 2. Clears all lookahead cache
+    /// 3. Re-lexes the current token fresh in the new context
+    pub fn force_relex_in_context(&mut self, context: Lex::LexContext) -> Lex::Kind {
+        let checkpoint = if let Some(current) = self.current.clone() {
+            current
+        } else if let Some(first) = self.lookahead.get_checkpoint(0).cloned() {
+            first
+        } else {
+            self.inner.checkpoint()
+        };
+
+        // Rewind to the START of the current token (not the end).
+        // Use neutral values for kind/flags since they're immediately
+        // overwritten by next_token and shouldn't leak old context state.
+        let rewind_checkpoint = LexerCheckpoint {
+            position: checkpoint.current_start,
+            current_start: checkpoint.current_start,
+            current_kind: Lex::Kind::EOF,
+            current_flags: TokenFlags::empty(),
+            after_line_break: checkpoint.after_line_break,
+            unicode_bom_length: checkpoint.unicode_bom_length,
+            diagnostics_pos: checkpoint.diagnostics_pos,
+        };
+
+        self.inner.rewind(rewind_checkpoint);
+        self.current = None;
+        self.lookahead.clear();
+
+        // Lex the token fresh in the new context
+        let kind = self.inner.next_token(context);
+        self.current = Some(self.inner.checkpoint());
+
+        kind
     }
 }
 

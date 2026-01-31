@@ -64,6 +64,10 @@ impl HtmlFileSource {
         matches!(self.variant, HtmlVariant::Astro)
     }
 
+    pub const fn supports_components(&self) -> bool {
+        self.is_vue() || self.is_svelte() || self.is_astro()
+    }
+
     pub fn variant(&self) -> &HtmlVariant {
         &self.variant
     }

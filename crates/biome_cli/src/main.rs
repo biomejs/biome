@@ -34,7 +34,7 @@ static GLOBAL: std::alloc::System = std::alloc::System;
 
 fn main() -> ExitCode {
     setup_panic_handler();
-    set_bottom_frame(main as usize);
+    set_bottom_frame(main as *const () as usize);
 
     let mut console = EnvConsole::default();
     let command = biome_command().fallback_to_usage().run();

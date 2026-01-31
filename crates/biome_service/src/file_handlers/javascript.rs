@@ -925,8 +925,12 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     let mut services =
         JsAnalyzerServices::from((params.module_graph, params.project_layout, file_source));
 
-    if let Some(embedded_bindings) = params.embedded_exported_bindings {
+    if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
         services.set_embedded_bindings(embedded_bindings.bindings)
+    }
+
+    if let Some(value_refs) = params.document_services.embedded_value_references() {
+        services.set_embedded_value_references(value_refs.references)
     }
 
     let (_, analyze_diagnostics) = analyze(

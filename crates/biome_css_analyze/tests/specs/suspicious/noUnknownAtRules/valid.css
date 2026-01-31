@@ -122,3 +122,7 @@ url-prefix(http: //www.w3.org/Style/), domain(mozilla.org), regexp('https:.*')
      orientation: landscape;
  } */
 
+
+@function --test-fn() {
+  result: 1;
+}

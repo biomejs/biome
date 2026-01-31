@@ -4,6 +4,8 @@ use crate::reporter::{
 };
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
+
+use biome_analyze::profiling::DisplayProfiles;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::advice::ListAdvice;
@@ -79,6 +81,11 @@ impl ReporterVisitor for SummaryReporterVisitor {
         writer.log(markup! {
             {ConsoleTraversalSummary(execution, &summary, verbose)}
         });
+
+        let profiles = biome_analyze::profiling::drain_sorted_by_total(false);
+        if !profiles.is_empty() {
+            self.0.log(markup! {{ DisplayProfiles(profiles, None) }});
+        }
 
         Ok(())
     }
@@ -485,7 +492,7 @@ impl PartialOrd<Self> for RuleName {
 
 impl Ord for RuleName {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.0.len().cmp(&other.0.len())
+        (self.0.len(), self.0).cmp(&(other.0.len(), other.0))
     }
 }
 impl Display for RuleName {

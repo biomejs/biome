@@ -26,20 +26,18 @@ Click here! Click here! Click here! Click here! Click here! Click here!
 ```diff
 --- Prettier
 +++ Biome
-@@ -6,10 +6,11 @@
+@@ -6,9 +6,9 @@
  </button>
  <div>
    <button>
 -    Click here! Click here! Click here! Click here! Click here! Click here!</button
 -  ><button>
      Click here! Click here! Click here! Click here! Click here! Click here!
-   </button>
-+  <button>
++  </button><button>
 +    Click here! Click here! Click here! Click here! Click here! Click here!
-+  </button>
+   </button>
  </div>
  <div>
-   <button>
 ```
 
 # Output
@@ -54,8 +52,7 @@ Click here! Click here! Click here! Click here! Click here! Click here!
 <div>
   <button>
     Click here! Click here! Click here! Click here! Click here! Click here!
-  </button>
-  <button>
+  </button><button>
     Click here! Click here! Click here! Click here! Click here! Click here!
   </button>
 </div>
