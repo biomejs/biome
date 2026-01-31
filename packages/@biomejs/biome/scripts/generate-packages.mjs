@@ -125,6 +125,7 @@ function updateWasmPackage(target) {
 
 const PLATFORMS = ["win32-%s", "darwin-%s", "linux-%s", "linux-%s-musl"];
 const ARCHITECTURES = ["x64", "arm64"];
+const LINUX_ONLY_ARCHITECTURES = ["loong64"];
 const WASM_TARGETS = ["bundler", "nodejs", "web"];
 const JS_PACKAGES = ["backend-jsonrpc", "biome", "js-api"];
 
@@ -137,6 +138,8 @@ for (const platform of PLATFORMS) {
 		copyBinaryToNativePackage(platform, arch);
 	}
 }
+for (const arch of LINUX_ONLY_ARCHITECTURES)
+	copyBinaryToNativePackage("linux-%s", arch)
 
 for (const jsPackage of JS_PACKAGES) {
 	updateVersionInJsPackage(jsPackage);
