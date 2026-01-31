@@ -185,7 +185,7 @@ fn reports_diagnostics_rdjson_check_command_file() {
         &mut console,
         Args::from(
             [
-                "format",
+                "check",
                 "--reporter=rdjson",
                 "--reporter-file=file.json",
                 file_path1.as_str(),

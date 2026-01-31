@@ -264,7 +264,7 @@ impl Finalizer for DefaultFinalizer {
                         Ok(file) => file,
                         Err(err) => {
                             let diagnostics = CliDiagnostic::from(err);
-                            file_reporter_writer.error(markup! {
+                            console_reporter_writer.error(markup! {
                                 {PrintDiagnostic::simple(&diagnostics)}
                             });
                             continue;
@@ -274,7 +274,7 @@ impl Finalizer for DefaultFinalizer {
                     let result = file.set_content(output.as_bytes());
                     if let Err(err) = result {
                         let diagnostics = CliDiagnostic::from(err);
-                        file_reporter_writer.error(markup! {
+                        console_reporter_writer.error(markup! {
                             {PrintDiagnostic::simple(&diagnostics)}
                         })
                     }

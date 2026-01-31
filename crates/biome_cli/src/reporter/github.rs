@@ -53,9 +53,9 @@ impl ReporterVisitor for GithubReporterVisitor {
     ) -> io::Result<()> {
         for diagnostic in &diagnostics_payload.diagnostics {
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
-                if diagnostic.tags().is_verbose() && verbose {
+                if !diagnostic.tags().is_verbose() {
                     writer.log(markup! {{PrintGitHubDiagnostic(diagnostic)}});
-                } else if !verbose {
+                } else if diagnostic.tags().is_verbose() && verbose {
                     writer.log(markup! {{PrintGitHubDiagnostic(diagnostic)}});
                 }
             }

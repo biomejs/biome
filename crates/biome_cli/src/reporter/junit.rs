@@ -134,7 +134,7 @@ impl ReporterVisitor for JunitReporterVisitor {
         }
 
         writer.log(markup! {
-            {self.0.to_string().unwrap()}
+            {self.0.to_string().expect("To serialize report to string")}
         });
 
         Ok(())
