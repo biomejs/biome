@@ -396,6 +396,25 @@
 			"type": "boolean"
 		},
 		"BracketSpacing": { "type": "boolean" },
+		"CheckInputType": {
+			"oneOf": [
+				{
+					"description": "Don't check the input type",
+					"type": "string",
+					"const": "off"
+				},
+				{
+					"description": "Check the input type (case-insensitive)",
+					"type": "string",
+					"const": "loose"
+				},
+				{
+					"description": "Check the input type (case-sensitive)",
+					"type": "string",
+					"const": "strict"
+				}
+			]
+		},
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -2907,6 +2926,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDeprecatedMediaTypeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDeprecatedMediaTypeOptions" }
+			]
+		},
+		"NoDeprecatedMediaTypeOptions": {
+			"type": "object",
+			"properties": {
+				"allow": {
+					"description": "Media types to allow (case-insensitive).",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoDescendingSpecificityConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3627,6 +3663,13 @@
 			]
 		},
 		"NoHeaderScopeOptions": { "type": "object", "additionalProperties": false },
+		"NoHexColorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoHexColorsOptions" }
+			]
+		},
+		"NoHexColorsOptions": { "type": "object", "additionalProperties": false },
 		"NoImgElementConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5279,6 +5322,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueArrowFuncInWatchConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueArrowFuncInWatchOptions" }
+			]
+		},
+		"NoVueArrowFuncInWatchOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDataObjectDeclarationConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5401,6 +5454,13 @@
 					"description": "Restrict imports of deprecated exports.\nSee https://biomejs.dev/linter/rules/no-deprecated-imports",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDeprecatedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDeprecatedMediaType": {
+					"description": "Disallow deprecated media types.\nSee https://biomejs.dev/linter/rules/no-deprecated-media-type",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDeprecatedMediaTypeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5527,6 +5587,13 @@
 					"description": "Disallow iterating using a for-in loop.\nSee https://biomejs.dev/linter/rules/no-for-in",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoForInConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noHexColors": {
+					"description": "Disallow hex colors.\nSee https://biomejs.dev/linter/rules/no-hex-colors",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoHexColorsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5705,6 +5772,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueArrowFuncInWatch": {
+					"description": "Disallows using arrow functions when defining a watcher.\nSee https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueArrowFuncInWatchConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVueDataObjectDeclaration": {
 					"description": "Enforce that Vue component data options are declared as functions.\nSee https://biomejs.dev/linter/rules/no-vue-data-object-declaration",
 					"anyOf": [
@@ -5779,6 +5853,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentEnumValueType": {
+					"description": "Disallow enums from having both number and string members.\nSee https://biomejs.dev/linter/rules/use-consistent-enum-value-type",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentEnumValueTypeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentGraphqlDescriptions": {
 					"description": "Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.\nSee https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
 					"anyOf": [
@@ -5839,6 +5920,13 @@
 					"description": "Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.\nSee https://biomejs.dev/linter/rules/use-inline-script-id",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseInlineScriptIdConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useInputName": {
+					"description": "Require mutation argument to be always called \"input\".\nSee https://biomejs.dev/linter/rules/use-input-name",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseInputNameConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6974,6 +7062,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoDeprecatedMediaTypeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDeprecatedMediaTypeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoDescendingSpecificityOptions": {
 			"type": "object",
 			"properties": {
@@ -7598,6 +7695,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoHeaderScopeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoHexColorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoHexColorsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9066,6 +9172,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueArrowFuncInWatchOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueArrowFuncInWatchOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoVueDataObjectDeclarationOptions": {
 			"type": "object",
 			"properties": {
@@ -9370,6 +9486,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseConsistentCurlyBracesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseConsistentEnumValueTypeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentEnumValueTypeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9802,6 +9927,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseInlineScriptIdOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseInputNameOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseInputNameOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12319,6 +12453,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseConsistentEnumValueTypeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentEnumValueTypeOptions" }
+			]
+		},
+		"UseConsistentEnumValueTypeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseConsistentGraphqlDescriptionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12857,6 +13001,22 @@
 		},
 		"UseInlineScriptIdOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseInputNameConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseInputNameOptions" }
+			]
+		},
+		"UseInputNameOptions": {
+			"type": "object",
+			"properties": {
+				"checkInputType": {
+					"description": "Check that the input type name follows the convention <mutationName>Input",
+					"anyOf": [{ "$ref": "#/$defs/CheckInputType" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseIsArrayConfiguration": {

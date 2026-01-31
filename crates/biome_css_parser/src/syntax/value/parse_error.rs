@@ -30,3 +30,10 @@ pub(crate) fn expected_if_test_boolean_expr_group(
 ) -> ParseDiagnostic {
     expected_any(&["parenthesized boolean expression", "if test"], range, p)
 }
+
+pub(crate) fn expected_if_test_boolean_not_expr(
+    p: &CssParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    expected_any(&["not boolean expression", "if test"], range, p)
+}

@@ -72,9 +72,23 @@ impl ParseNodeList for DeclarationOrRuleList {
             //         font-weight: 500;
             //     }
             // }
+
+            // Reset the if-function flag before parsing. This flag is used to detect
+            // if we encountered an if() function during speculative parsing.
+            p.state_mut().encountered_if_function = false;
+
             // Attempt to parse the current block as a declaration.
             let declaration = try_parse(p, |p| {
                 let declaration = parse_any_declaration_with_semicolon(p);
+
+                // If we encountered an if() function, always fail speculative parsing.
+                // The if() function uses semicolons as branch separators, which can cause
+                // p.last() to be `;` even when the declaration is incomplete. By failing
+                // here, we force a non-speculative retry where recovery is enabled.
+                if p.state().encountered_if_function {
+                    return Err(());
+                }
+
                 // Check if the *last* token parsed is a semicolon
                 // (;) or if the parser is at a closing brace (}).
                 // ; - Indicates the end of a declaration.
@@ -97,6 +111,13 @@ impl ParseNodeList for DeclarationOrRuleList {
             // If parsing as a declaration was successful, return the parsed declaration.
             if let Ok(declaration) = declaration {
                 return declaration;
+            }
+
+            // If the speculative parse failed and we encountered an if() function,
+            // we know this is a declaration (not a rule) because if() can only appear
+            // in declaration values. Parse again with recovery enabled.
+            if std::mem::take(&mut p.state_mut().encountered_if_function) {
+                return parse_any_declaration_with_semicolon(p);
             }
 
             // If parsing as a declaration failed,

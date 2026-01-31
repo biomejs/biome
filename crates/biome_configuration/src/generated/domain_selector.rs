@@ -33,6 +33,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noUnresolvedImports"),
         RuleFilter::Rule("nursery", "useArraySortCompare"),
         RuleFilter::Rule("nursery", "useAwaitThenable"),
+        RuleFilter::Rule("nursery", "useConsistentEnumValueType"),
         RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
         RuleFilter::Rule("nursery", "useFind"),
         RuleFilter::Rule("nursery", "useRegexpExec"),
@@ -92,6 +93,7 @@ static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
     LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noUndeclaredEnvVars")]);
 static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("nursery", "noVueArrowFuncInWatch"),
         RuleFilter::Rule("nursery", "noVueDataObjectDeclaration"),
         RuleFilter::Rule("nursery", "noVueDuplicateKeys"),
         RuleFilter::Rule("nursery", "noVueOptionsApi"),

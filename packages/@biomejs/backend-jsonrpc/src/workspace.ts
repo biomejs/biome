@@ -1879,6 +1879,11 @@ See https://biomejs.dev/linter/rules/no-deprecated-imports
 	 */
 	noDeprecatedImports?: NoDeprecatedImportsConfiguration;
 	/**
+	* Disallow deprecated media types.
+See https://biomejs.dev/linter/rules/no-deprecated-media-type 
+	 */
+	noDeprecatedMediaType?: NoDeprecatedMediaTypeConfiguration;
+	/**
 	* Disallow equal signs explicitly at the beginning of regular expressions.
 See https://biomejs.dev/linter/rules/no-div-regex 
 	 */
@@ -1968,6 +1973,11 @@ See https://biomejs.dev/linter/rules/no-floating-promises
 See https://biomejs.dev/linter/rules/no-for-in 
 	 */
 	noForIn?: NoForInConfiguration;
+	/**
+	* Disallow hex colors.
+See https://biomejs.dev/linter/rules/no-hex-colors 
+	 */
+	noHexColors?: NoHexColorsConfiguration;
 	/**
 	* Prevent import cycles.
 See https://biomejs.dev/linter/rules/no-import-cycles 
@@ -2094,6 +2104,11 @@ See https://biomejs.dev/linter/rules/no-useless-undefined
 	 */
 	noUselessUndefined?: NoUselessUndefinedConfiguration;
 	/**
+	* Disallows using arrow functions when defining a watcher.
+See https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch 
+	 */
+	noVueArrowFuncInWatch?: NoVueArrowFuncInWatchConfiguration;
+	/**
 	* Enforce that Vue component data options are declared as functions.
 See https://biomejs.dev/linter/rules/no-vue-data-object-declaration 
 	 */
@@ -2148,6 +2163,11 @@ See https://biomejs.dev/linter/rules/use-consistent-arrow-return
 	 */
 	useConsistentArrowReturn?: UseConsistentArrowReturnConfiguration;
 	/**
+	* Disallow enums from having both number and string members.
+See https://biomejs.dev/linter/rules/use-consistent-enum-value-type 
+	 */
+	useConsistentEnumValueType?: UseConsistentEnumValueTypeConfiguration;
+	/**
 	* Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.
 See https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions 
 	 */
@@ -2192,6 +2212,11 @@ See https://biomejs.dev/linter/rules/use-find
 See https://biomejs.dev/linter/rules/use-inline-script-id 
 	 */
 	useInlineScriptId?: UseInlineScriptIdConfiguration;
+	/**
+	* Require mutation argument to be always called "input".
+See https://biomejs.dev/linter/rules/use-input-name 
+	 */
+	useInputName?: UseInputNameConfiguration;
 	/**
 	* Disallow anonymous operations when more than one operation specified in document.
 See https://biomejs.dev/linter/rules/use-lone-anonymous-operation 
@@ -3768,6 +3793,9 @@ export type NoContinueConfiguration =
 export type NoDeprecatedImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDeprecatedImportsOptions;
+export type NoDeprecatedMediaTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDeprecatedMediaTypeOptions;
 export type NoDivRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDivRegexOptions;
@@ -3822,6 +3850,9 @@ export type NoFloatingPromisesConfiguration =
 export type NoForInConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoForInOptions;
+export type NoHexColorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoHexColorsOptions;
 export type NoImportCyclesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImportCyclesOptions;
@@ -3897,6 +3928,9 @@ export type NoUselessCatchBindingConfiguration =
 export type NoUselessUndefinedConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessUndefinedOptions;
+export type NoVueArrowFuncInWatchConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueArrowFuncInWatchOptions;
 export type NoVueDataObjectDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDataObjectDeclarationOptions;
@@ -3927,6 +3961,9 @@ export type UseAwaitThenableConfiguration =
 export type UseConsistentArrowReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentArrowReturnOptions;
+export type UseConsistentEnumValueTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentEnumValueTypeOptions;
 export type UseConsistentGraphqlDescriptionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentGraphqlDescriptionsOptions;
@@ -3954,6 +3991,9 @@ export type UseFindConfiguration =
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
+export type UseInputNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseInputNameOptions;
 export type UseLoneAnonymousOperationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneAnonymousOperationOptions;
@@ -5281,6 +5321,10 @@ export interface RuleWithNoDeprecatedImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDeprecatedImportsOptions;
 }
+export interface RuleWithNoDeprecatedMediaTypeOptions {
+	level: RulePlainConfiguration;
+	options?: NoDeprecatedMediaTypeOptions;
+}
 export interface RuleWithNoDivRegexOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -5355,6 +5399,10 @@ export interface RuleWithNoFloatingPromisesOptions {
 export interface RuleWithNoForInOptions {
 	level: RulePlainConfiguration;
 	options?: NoForInOptions;
+}
+export interface RuleWithNoHexColorsOptions {
+	level: RulePlainConfiguration;
+	options?: NoHexColorsOptions;
 }
 export interface RuleWithNoImportCyclesOptions {
 	level: RulePlainConfiguration;
@@ -5461,6 +5509,11 @@ export interface RuleWithNoUselessUndefinedOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessUndefinedOptions;
 }
+export interface RuleWithNoVueArrowFuncInWatchOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueArrowFuncInWatchOptions;
+}
 export interface RuleWithNoVueDataObjectDeclarationOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -5503,6 +5556,10 @@ export interface RuleWithUseConsistentArrowReturnOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentArrowReturnOptions;
 }
+export interface RuleWithUseConsistentEnumValueTypeOptions {
+	level: RulePlainConfiguration;
+	options?: UseConsistentEnumValueTypeOptions;
+}
 export interface RuleWithUseConsistentGraphqlDescriptionsOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentGraphqlDescriptionsOptions;
@@ -5539,6 +5596,10 @@ export interface RuleWithUseFindOptions {
 export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
 	options?: UseInlineScriptIdOptions;
+}
+export interface RuleWithUseInputNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseInputNameOptions;
 }
 export interface RuleWithUseLoneAnonymousOperationOptions {
 	level: RulePlainConfiguration;
@@ -6767,6 +6828,12 @@ export interface NoAmbiguousAnchorTextOptions {
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
+export interface NoDeprecatedMediaTypeOptions {
+	/**
+	 * Media types to allow (case-insensitive).
+	 */
+	allow?: string[];
+}
 export type NoDivRegexOptions = {};
 export type NoDuplicateArgumentNamesOptions = {};
 export type NoDuplicateAttributesOptions = {};
@@ -6804,6 +6871,7 @@ export interface NoExcessiveLinesPerFileOptions {
 export type NoFloatingClassesOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
+export type NoHexColorsOptions = {};
 export interface NoImportCyclesOptions {
 	/**
 	* Ignores type-only imports when finding an import cycle. A type-only import (`import type`)
@@ -6875,6 +6943,7 @@ Currently empty; reserved for future extensions (e.g. allowlist of names).
 	 */
 export type NoUselessCatchBindingOptions = {};
 export type NoUselessUndefinedOptions = {};
+export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueDataObjectDeclarationOptions = {};
 export type NoVueDuplicateKeysOptions = {};
 export type NoVueOptionsApiOptions = {};
@@ -6899,6 +6968,7 @@ This option is only applicable when used in conjunction with the `asNeeded` opti
 	 */
 	style?: UseConsistentArrowReturnStyle;
 }
+export type UseConsistentEnumValueTypeOptions = {};
 export interface UseConsistentGraphqlDescriptionsOptions {
 	/**
 	 * The description style to enforce. Defaults to "block"
@@ -6933,6 +7003,12 @@ export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseInlineScriptIdOptions = {};
+export interface UseInputNameOptions {
+	/**
+	 * Check that the input type name follows the convention <mutationName>Input
+	 */
+	checkInputType?: CheckInputType;
+}
 export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
 export interface UseMaxParamsOptions {
@@ -7385,6 +7461,7 @@ export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
 export type MethodSignatureStyle = "property" | "method";
+export type CheckInputType = "off" | "loose" | "strict";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
 export type VueDirectiveStyle2 = "shorthand" | "longhand";
@@ -7738,6 +7815,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDeprecatedMediaType"
 	| "lint/nursery/noDivRegex"
 	| "lint/nursery/noDuplicateArgumentNames"
 	| "lint/nursery/noDuplicateAttributes"
@@ -7756,6 +7834,7 @@ export type Category =
 	| "lint/nursery/noFloatingClasses"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
+	| "lint/nursery/noHexColors"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noIncrementDecrement"
@@ -7785,6 +7864,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCatchBinding"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/noVueArrowFuncInWatch"
 	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/noVueDuplicateKeys"
 	| "lint/nursery/noVueOptionsApi"
@@ -7796,6 +7876,7 @@ export type Category =
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
+	| "lint/nursery/useConsistentEnumValueType"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
 	| "lint/nursery/useConsistentMethodSignatures"
 	| "lint/nursery/useConsistentObjectDefinition"
@@ -7807,11 +7888,12 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useInputName"
 	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useMaxParams"
-	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"
