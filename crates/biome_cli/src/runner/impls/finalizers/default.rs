@@ -137,7 +137,6 @@ impl Finalizer for DefaultFinalizer {
                                 {formatted.as_code()}
                             });
                         } else {
-                            dbg!(&root);
                             let code = root.to_string();
                             console_reporter_writer.log(markup! {
                                 {code}
