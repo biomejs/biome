@@ -32,6 +32,23 @@ pub(crate) fn normalize_reference_label(text: &str) -> String {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::normalize_reference_label;
+
+    #[test]
+    fn normalizes_whitespace_and_case() {
+        assert_eq!(normalize_reference_label("  Foo\tBar  "), "foo bar");
+        assert_eq!(normalize_reference_label("Foo   Bar Baz"), "foo bar baz");
+    }
+
+    #[test]
+    fn preserves_backslash_escapes() {
+        assert_eq!(normalize_reference_label(r"foo\!"), r"foo\!");
+        assert_eq!(normalize_reference_label(r"Foo\! Bar"), r"foo\! bar");
+    }
+}
+
 fn push_normalized_char(out: &mut String, c: char, saw_whitespace: &mut bool) {
     if *saw_whitespace && !out.is_empty() {
         out.push(' ');
