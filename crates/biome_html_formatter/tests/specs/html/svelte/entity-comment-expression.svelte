@@ -1,0 +1,4 @@
+<div>
+    &thinsp;<!--
+    -->{ expression }
+</div>
