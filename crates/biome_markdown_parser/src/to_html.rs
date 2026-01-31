@@ -1532,8 +1532,8 @@ fn percent_encode_uri(value: &str) -> String {
         if c == '%' {
             let bytes = value.as_bytes();
             if i + 2 < bytes.len()
-                && bytes[i + 1].is_ascii_alphanumeric()
-                && bytes[i + 2].is_ascii_alphanumeric()
+                && bytes[i + 1].is_ascii_hexdigit()
+                && bytes[i + 2].is_ascii_hexdigit()
             {
                 if last < i {
                     result.push_str(
