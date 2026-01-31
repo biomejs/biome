@@ -838,7 +838,7 @@ impl<'a> HtmlRenderer<'a> {
                 self.push_str(" />");
             } else {
                 self.push_str("![");
-                self.push_str(&alt);
+                self.push_str(&escape_html(&alt));
                 self.push_str("]");
                 if let Some(label) = label_display {
                     self.push_str("[");
@@ -1607,9 +1607,16 @@ fn extract_alt_text(
 }
 
 fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &mut String) {
+    // NOTE: This function collects raw text WITHOUT HTML escaping.
+    // The final escaping happens in escape_html_attribute when writing the alt attribute.
     match inline {
         AnyMdInline::MdTextual(text) => {
-            render_textual(text, out);
+            // Process backslash escapes but don't escape HTML
+            if let Ok(token) = text.value_token() {
+                let raw = token.text_trimmed();
+                let processed = process_escapes(raw);
+                out.push_str(&processed);
+            }
         }
         AnyMdInline::MdInlineEmphasis(em) => {
             out.push_str(&extract_alt_text(&em.content(), ctx));
@@ -1630,7 +1637,7 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
             } else {
                 content
             };
-            out.push_str(&escape_html(&content));
+            out.push_str(&content);
         }
         AnyMdInline::MdInlineLink(link) => {
             // Extract text content from link text
@@ -1648,13 +1655,22 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         }
         AnyMdInline::MdAutolink(autolink) => {
             let content = collect_raw_inline_text(&autolink.value());
-            out.push_str(&escape_html(&content));
+            out.push_str(&content);
         }
         AnyMdInline::MdHardLine(_) | AnyMdInline::MdSoftBreak(_) => {
             out.push(' ');
         }
         AnyMdInline::MdEntityReference(entity) => {
-            render_entity_reference(entity, out);
+            // Decode entity but don't escape HTML
+            if let Ok(token) = entity.value_token() {
+                let text = token.text();
+                if let Some(decoded) = decode_entity(text) {
+                    out.push_str(&decoded);
+                } else {
+                    // Unknown entity - pass through as-is
+                    out.push_str(text);
+                }
+            }
         }
         AnyMdInline::MdInlineHtml(_) | AnyMdInline::MdHtmlBlock(_) => {
             // HTML tags are stripped in alt text

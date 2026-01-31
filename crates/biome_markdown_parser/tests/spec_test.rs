@@ -188,4 +188,9 @@ pub fn quick_test() {
         "   > > 1.  one\n>>\n>>     two\n",
         "<blockquote>\n<blockquote>\n<ol>\n<li>\n<p>one</p>\n<p>two</p>\n</li>\n</ol>\n</blockquote>\n</blockquote>\n",
     );
+    test_example(
+        9991,
+        "![a & b < c](url)\n",
+        "<p><img src=\"url\" alt=\"a &amp; b &lt; c\" /></p>\n",
+    );
 }
