@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -138,6 +137,22 @@ function Component10() {
             {({ things }) => things.map((_, index) => <Component key={"test" + index + "test"} />)}
         </HoC>
     );
+}
+
+// index appears before item in template string (issue #8812)
+function Component11() {
+    const arr = [1,2,3];
+    return arr.map((item, index) => {
+        return <div key={`${index}-${item}`}>{item}</div>;
+    })
+}
+
+// index appears before item in binary expression
+function Component12() {
+    const arr = [1,2,3];
+    return arr.map((item, index) => {
+        return <div key={index + "-" + item}>{item}</div>;
+    })
 }
 ```
 
@@ -928,6 +943,62 @@ invalid.jsx:131:80 lint/suspicious/noArrayIndexKey ━━━━━━━━━�
         │                                             ^^^^^
     132 │         </HoC>
     133 │     );
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:140:29 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    138 │     const arr = [1,2,3];
+    139 │     return arr.map((item, index) => {
+  > 140 │         return <div key={`${index}-${item}`}>{item}</div>;
+        │                             ^^^^^
+    141 │     })
+    142 │ }
+  
+  i This is the source of the key value.
+  
+    137 │ function Component11() {
+    138 │     const arr = [1,2,3];
+  > 139 │     return arr.map((item, index) => {
+        │                           ^^^^^
+    140 │         return <div key={`${index}-${item}`}>{item}</div>;
+    141 │     })
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:148:26 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    146 │     const arr = [1,2,3];
+    147 │     return arr.map((item, index) => {
+  > 148 │         return <div key={index + "-" + item}>{item}</div>;
+        │                          ^^^^^
+    149 │     })
+    150 │ }
+  
+  i This is the source of the key value.
+  
+    145 │ function Component12() {
+    146 │     const arr = [1,2,3];
+  > 147 │     return arr.map((item, index) => {
+        │                           ^^^^^
+    148 │         return <div key={index + "-" + item}>{item}</div>;
+    149 │     })
   
   i The order of the items may change, and this also affects performances and component state.
   
