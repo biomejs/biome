@@ -1,0 +1,110 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<a href={null}>invalid</a>
+<a href="javascript:void(0)">invalid</a>
+<a href>invalid</a>
+<a href={undefined}>invalid</a>
+<a onclick={something}>invalid</a>
+
+```
+
+_Note: The parser emitted 6 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.html:2:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a href attribute for the a element.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <a href={null}>invalid</a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <a href="javascript:void(0)">invalid</a>
+    4 │ <a href>invalid</a>
+  
+  i An anchor element should always have a href
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.html:3:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the attribute href.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <a href={null}>invalid</a>
+  > 3 │ <a href="javascript:void(0)">invalid</a>
+      │    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <a href>invalid</a>
+    5 │ <a href={undefined}>invalid</a>
+  
+  i The href attribute should be a valid a URL
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.html:4:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the attribute href.
+  
+    2 │ <a href={null}>invalid</a>
+    3 │ <a href="javascript:void(0)">invalid</a>
+  > 4 │ <a href>invalid</a>
+      │    ^^^^
+    5 │ <a href={undefined}>invalid</a>
+    6 │ <a onclick={something}>invalid</a>
+  
+  i The href attribute should be a valid a URL
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.html:5:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a href attribute for the a element.
+  
+    3 │ <a href="javascript:void(0)">invalid</a>
+    4 │ <a href>invalid</a>
+  > 5 │ <a href={undefined}>invalid</a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <a onclick={something}>invalid</a>
+    7 │ 
+  
+  i An anchor element should always have a href
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.html:6:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a href attribute for the a element.
+  
+    4 │ <a href>invalid</a>
+    5 │ <a href={undefined}>invalid</a>
+  > 6 │ <a onclick={something}>invalid</a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i An anchor element should always have a href
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```

@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<a href="#id">ok</a>
+<a href="https://example.com">ok</a>
+<a href={somewhere}>ok</a>
+
+```

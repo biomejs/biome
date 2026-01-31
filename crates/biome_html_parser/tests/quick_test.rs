@@ -6,6 +6,7 @@ use biome_test_utils::has_bogus_nodes_or_empty_slots;
 #[test]
 pub fn quick_test() {
     let code = r#"<p {...prop}>Multiple shorthand</p>
+    <a href={null}>invalid</a>
 
 
 <Base title="500"></Base>
