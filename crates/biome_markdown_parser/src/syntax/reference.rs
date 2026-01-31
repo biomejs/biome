@@ -24,12 +24,20 @@ pub(crate) fn normalize_reference_label(text: &str) -> String {
         push_normalized_char(&mut out, c, &mut saw_whitespace);
     }
 
-    // CommonMark uses Unicode case folding for case-insensitive matching (utf8proc).
+    // CommonMark uses Unicode case folding for case-insensitive matching.
     let folded = out.as_str().to_casefold_cow();
     match folded {
         Cow::Borrowed(_) => out,
         Cow::Owned(folded) => folded,
     }
+}
+
+fn push_normalized_char(out: &mut String, c: char, saw_whitespace: &mut bool) {
+    if *saw_whitespace && !out.is_empty() {
+        out.push(' ');
+    }
+    *saw_whitespace = false;
+    out.push(c);
 }
 
 #[cfg(test)]
@@ -47,12 +55,4 @@ mod tests {
         assert_eq!(normalize_reference_label(r"foo\!"), r"foo\!");
         assert_eq!(normalize_reference_label(r"Foo\! Bar"), r"foo\! bar");
     }
-}
-
-fn push_normalized_char(out: &mut String, c: char, saw_whitespace: &mut bool) {
-    if *saw_whitespace && !out.is_empty() {
-        out.push(' ');
-    }
-    *saw_whitespace = false;
-    out.push(c);
 }
