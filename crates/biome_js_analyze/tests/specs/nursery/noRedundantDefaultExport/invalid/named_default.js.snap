@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: named_default.js
+---
+# Input
+```js
+const foo = 1;
+
+export { foo as default };
+export { foo };
+```
+
+# Diagnostics
+```
+named_default.js:3:10 lint/nursery/noRedundantDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Default export exports the same symbol as a named export.
+  
+    1 │ const foo = 1;
+    2 │ 
+  > 3 │ export { foo as default };
+      │          ^^^^
+    4 │ export { foo };
+  
+  i Exporting the same identifier as both a named export and a default export is redundant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

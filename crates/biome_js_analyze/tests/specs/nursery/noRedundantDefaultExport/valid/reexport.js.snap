@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: reexport.js
+---
+# Input
+```js
+export { foo } from "./other";
+
+const foo = 1;
+export default foo;
+```
