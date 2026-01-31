@@ -230,6 +230,7 @@ define_categories! {
     "lint/nursery/useConsistentArrowReturn": "https://biomejs.dev/linter/rules/use-consistent-arrow-return",
     "lint/nursery/useConsistentEnumValueType": "https://biomejs.dev/linter/rules/use-consistent-enum-value-type",
     "lint/nursery/useConsistentGraphqlDescriptions": "https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
+    "lint/nursery/useConsistentMethodSignatures": "https://biomejs.dev/linter/rules/use-consistent-method-signatures",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
     "lint/nursery/useDeprecatedDate": "https://biomejs.dev/linter/rules/use-deprecated-date",
     "lint/nursery/useDestructuring": "https://biomejs.dev/linter/rules/use-destructuring",
