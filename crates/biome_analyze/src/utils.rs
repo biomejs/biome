@@ -158,3 +158,31 @@ pub fn fix_separators<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
         }
     }
 }
+
+/// Counts lines in a syntax tree, used by `noExcessiveLinesPerFile`.
+///
+/// When `skip_blank_lines` is true, counts tokens with leading newlines (excluding blank lines).
+/// When false, counts all newline characters in leading trivia (trailing trivia is trimmed
+/// to prevent double-counting). Returns total + 1 to account for the first line.
+pub fn count_lines_in_file<L: Language>(
+    node: &SyntaxNode<L>,
+    is_eof_token: impl Fn(&SyntaxToken<L>) -> bool,
+    skip_blank_lines: bool,
+) -> usize {
+    node.descendants()
+        .flat_map(|descendant| descendant.tokens().collect::<Vec<_>>())
+        .filter(|token| !is_eof_token(token))
+        .fold(0, |acc, token| {
+            if skip_blank_lines {
+                return acc + token.has_leading_newline() as usize;
+            }
+
+            acc + token
+                .trim_trailing_trivia()
+                .leading_trivia()
+                .pieces()
+                .filter(|piece| piece.is_newline())
+                .count()
+        })
+        + 1 // Add 1 for the first line
+}

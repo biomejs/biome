@@ -1,0 +1,7 @@
+# should not generate diagnostics
+query {
+	...Foo
+}
+fragment Foo on Type {
+	field
+}

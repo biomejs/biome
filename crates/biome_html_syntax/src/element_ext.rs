@@ -1,7 +1,7 @@
 use crate::{
-    AnyHtmlElement, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeList, HtmlElement,
-    HtmlEmbeddedContent, HtmlOpeningElement, HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName,
-    ScriptType, inner_string_text,
+    AnyHtmlContent, AnyHtmlElement, AnyHtmlTextExpression, AnySvelteBlock, AstroEmbeddedContent,
+    HtmlAttribute, HtmlAttributeList, HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement,
+    HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName, ScriptType, inner_string_text,
 };
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
 
@@ -55,23 +55,56 @@ impl AnyHtmlElement {
 
     pub fn name(&self) -> Option<TokenText> {
         match self {
-            Self::HtmlElement(el) => {
-                let opening_element = el.opening_element().ok()?;
-                let name = opening_element.name().ok()?;
-                let name_token = name.value_token().ok()?;
-                Some(name_token.token_text_trimmed())
-            }
-            Self::HtmlSelfClosingElement(el) => {
-                let name = el.name().ok()?;
-                let name_token = name.value_token().ok()?;
-                Some(name_token.token_text_trimmed())
-            }
+            Self::HtmlElement(el) => el.tag_name(),
+            Self::HtmlSelfClosingElement(el) => el.tag_name(),
             _ => None,
+        }
+    }
+
+    /// Returns the closing `>` token from this element's closing tag, if it has one.
+    ///
+    /// This is used for "borrowing" the closing `>` when formatting adjacent inline elements
+    /// to avoid introducing whitespace between them.
+    ///
+    /// Only returns a token for `HtmlElement` (which has actual closing tags like `</span>`).
+    /// Self-closing elements like `<img />` don't have a separate closing tag to borrow from.
+    pub fn closing_r_angle_token(&self) -> Option<HtmlSyntaxToken> {
+        match self {
+            Self::HtmlElement(el) => el.closing_element().ok()?.r_angle_token().ok(),
+            // Self-closing elements don't have a closing tag to borrow from
+            _ => None,
+        }
+    }
+
+    pub fn is_svelte_block(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyHtmlContent(AnyHtmlContent::AnyHtmlTextExpression(
+                AnyHtmlTextExpression::AnySvelteBlock(_)
+            ))
+        )
+    }
+
+    pub fn as_svelte_block(self) -> Option<AnySvelteBlock> {
+        if let Self::AnyHtmlContent(AnyHtmlContent::AnyHtmlTextExpression(
+            AnyHtmlTextExpression::AnySvelteBlock(block),
+        )) = self
+        {
+            Some(block)
+        } else {
+            None
         }
     }
 }
 
 impl HtmlSelfClosingElement {
+    /// Returns the tag name of the element (trimmed), if it has one.
+    pub fn tag_name(&self) -> Option<TokenText> {
+        let name = self.name().ok()?;
+        let name_token = name.value_token().ok()?;
+        Some(name_token.token_text_trimmed())
+    }
+
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
         self.attributes().iter().find_map(|attr| {
             let attribute = attr.as_html_attribute()?;
@@ -90,6 +123,13 @@ impl HtmlSelfClosingElement {
 }
 
 impl HtmlOpeningElement {
+    /// Returns the tag name of the element (trimmed), if it has one.
+    pub fn tag_name(&self) -> Option<TokenText> {
+        let name = self.name().ok()?;
+        let name_token = name.value_token().ok()?;
+        Some(name_token.token_text_trimmed())
+    }
+
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
         self.attributes().iter().find_map(|attr| {
             let attribute = attr.as_html_attribute()?;
@@ -108,6 +148,12 @@ impl HtmlOpeningElement {
 }
 
 impl HtmlElement {
+    /// Returns the tag name of the element (trimmed), if it has one.
+    pub fn tag_name(&self) -> Option<TokenText> {
+        let opening_element = self.opening_element().ok()?;
+        opening_element.tag_name()
+    }
+
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
         self.opening_element()
             .ok()?

@@ -91,10 +91,11 @@ invalid.ts:3:8 lint/complexity/noBannedTypes ━━━━━━━━━━━�
     4 │ 
     5 │ let b: { c: String };
   
-  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+  i 'Object' accepts any non-nullish value, including non-object primitives like '123' and 'true'.
     - If you want a type meaning "any arbitrary object", use 'object' instead.
     - If you want a type meaning "any value", use 'unknown' instead.
-    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+    - If you want a type meaning "an object whose properties cannot be used", use '{ [k: keyof any]: never }' or 'Record<keyof any, never>' instead.
+    - If you want a type meaning "an object that cannot contain any properties whatsoever", use '{ [uniqueSymbol]?: never }' with an unexported unique symbol in the same file.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -263,10 +264,11 @@ invalid.ts:11:58 lint/complexity/noBannedTypes ━━━━━━━━━━━
     12 │   constructor(foo: String | Object) {}
     13 │ 
   
-  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+  i 'Object' accepts any non-nullish value, including non-object primitives like '123' and 'true'.
     - If you want a type meaning "any arbitrary object", use 'object' instead.
     - If you want a type meaning "any value", use 'unknown' instead.
-    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+    - If you want a type meaning "an object whose properties cannot be used", use '{ [k: keyof any]: never }' or 'Record<keyof any, never>' instead.
+    - If you want a type meaning "an object that cannot contain any properties whatsoever", use '{ [uniqueSymbol]?: never }' with an unexported unique symbol in the same file.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -313,10 +315,11 @@ invalid.ts:12:29 lint/complexity/noBannedTypes ━━━━━━━━━━━
     13 │ 
     14 │   exit(): Array<String> {
   
-  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+  i 'Object' accepts any non-nullish value, including non-object primitives like '123' and 'true'.
     - If you want a type meaning "any arbitrary object", use 'object' instead.
     - If you want a type meaning "any value", use 'unknown' instead.
-    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+    - If you want a type meaning "an object whose properties cannot be used", use '{ [k: keyof any]: never }' or 'Record<keyof any, never>' instead.
+    - If you want a type meaning "an object that cannot contain any properties whatsoever", use '{ [uniqueSymbol]?: never }' with an unexported unique symbol in the same file.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -483,10 +486,11 @@ invalid.ts:23:14 lint/complexity/noBannedTypes ━━━━━━━━━━━
     24 │ 
     25 │ let fn: Function = () => true
   
-  i '{}' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+  i '{}' accepts any non-nullish value, including non-object primitives like '123' and 'true'.
     - If you want a type meaning "any arbitrary object", use 'object' instead.
     - If you want a type meaning "any value", use 'unknown' instead.
-    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+    - If you want a type meaning "an object whose properties cannot be used", use '{ [k: keyof any]: never }' or 'Record<keyof any, never>' instead.
+    - If you want a type meaning "an object that cannot contain any properties whatsoever", use '{ [uniqueSymbol]?: never }' with an unexported unique symbol in the same file.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -676,10 +680,11 @@ invalid.ts:37:17 lint/complexity/noBannedTypes ━━━━━━━━━━━
     38 │ 
     39 │ const capitalObj: Object = { a: 'string' };
   
-  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+  i 'Object' accepts any non-nullish value, including non-object primitives like '123' and 'true'.
     - If you want a type meaning "any arbitrary object", use 'object' instead.
     - If you want a type meaning "any value", use 'unknown' instead.
-    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+    - If you want a type meaning "an object whose properties cannot be used", use '{ [k: keyof any]: never }' or 'Record<keyof any, never>' instead.
+    - If you want a type meaning "an object that cannot contain any properties whatsoever", use '{ [uniqueSymbol]?: never }' with an unexported unique symbol in the same file.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -698,10 +703,11 @@ invalid.ts:39:19 lint/complexity/noBannedTypes ━━━━━━━━━━━
     40 │ 
     41 │ const curly1: {
   
-  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+  i 'Object' accepts any non-nullish value, including non-object primitives like '123' and 'true'.
     - If you want a type meaning "any arbitrary object", use 'object' instead.
     - If you want a type meaning "any value", use 'unknown' instead.
-    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+    - If you want a type meaning "an object whose properties cannot be used", use '{ [k: keyof any]: never }' or 'Record<keyof any, never>' instead.
+    - If you want a type meaning "an object that cannot contain any properties whatsoever", use '{ [uniqueSymbol]?: never }' with an unexported unique symbol in the same file.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -723,10 +729,11 @@ invalid.ts:41:15 lint/complexity/noBannedTypes ━━━━━━━━━━━
     44 │ 
     45 │ const curly2: {} = { a: 'string' };
   
-  i '{}' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+  i '{}' accepts any non-nullish value, including non-object primitives like '123' and 'true'.
     - If you want a type meaning "any arbitrary object", use 'object' instead.
     - If you want a type meaning "any value", use 'unknown' instead.
-    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+    - If you want a type meaning "an object whose properties cannot be used", use '{ [k: keyof any]: never }' or 'Record<keyof any, never>' instead.
+    - If you want a type meaning "an object that cannot contain any properties whatsoever", use '{ [uniqueSymbol]?: never }' with an unexported unique symbol in the same file.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -744,10 +751,11 @@ invalid.ts:45:15 lint/complexity/noBannedTypes ━━━━━━━━━━━
        │               ^^
     46 │ 
   
-  i '{}' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+  i '{}' accepts any non-nullish value, including non-object primitives like '123' and 'true'.
     - If you want a type meaning "any arbitrary object", use 'object' instead.
     - If you want a type meaning "any value", use 'unknown' instead.
-    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+    - If you want a type meaning "an object whose properties cannot be used", use '{ [k: keyof any]: never }' or 'Record<keyof any, never>' instead.
+    - If you want a type meaning "an object that cannot contain any properties whatsoever", use '{ [uniqueSymbol]?: never }' with an unexported unique symbol in the same file.
   
   i If that's really what you want, use an inline disable comment.
   

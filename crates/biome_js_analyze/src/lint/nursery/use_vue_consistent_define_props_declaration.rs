@@ -38,7 +38,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueConsistentDefinePropsDeclaration {
-        version: "next",
+        version: "2.3.11",
         name: "useVueConsistentDefinePropsDeclaration",
         language: "js",
         sources: &[RuleSource::EslintVueJs("define-props-declaration").same()],

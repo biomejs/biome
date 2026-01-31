@@ -1,0 +1,112 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+type Mutation { SetMessage(record: String): String }
+
+type Mutation { SetMessage(record: SetMessageInput): String }
+
+type Mutation { SetMessage(record: setMessageInput): String }
+
+type Mutation { SetMessage(record: SetMessageInput!): String }
+
+type Mutation { SetMessage(record: [SetMessageInput]): String }
+
+```
+
+# Diagnostics
+```
+invalid.graphql:2:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected input name, expected the input name "record" to be named "input".
+  
+    1 │ # should generate diagnostics
+  > 2 │ type Mutation { SetMessage(record: String): String }
+      │                            ^^^^^^^^^^^^^^
+    3 │ 
+    4 │ type Mutation { SetMessage(record: SetMessageInput): String }
+  
+  i Using the same name for all input parameters will make your schemas easier to consume and more predictable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:4:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected input name, expected the input name "record" to be named "input".
+  
+    2 │ type Mutation { SetMessage(record: String): String }
+    3 │ 
+  > 4 │ type Mutation { SetMessage(record: SetMessageInput): String }
+      │                            ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ type Mutation { SetMessage(record: setMessageInput): String }
+  
+  i Using the same name for all input parameters will make your schemas easier to consume and more predictable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:6:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected input name, expected the input name "record" to be named "input".
+  
+    4 │ type Mutation { SetMessage(record: SetMessageInput): String }
+    5 │ 
+  > 6 │ type Mutation { SetMessage(record: setMessageInput): String }
+      │                            ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ type Mutation { SetMessage(record: SetMessageInput!): String }
+  
+  i Using the same name for all input parameters will make your schemas easier to consume and more predictable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:8:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected input name, expected the input name "record" to be named "input".
+  
+     6 │ type Mutation { SetMessage(record: setMessageInput): String }
+     7 │ 
+   > 8 │ type Mutation { SetMessage(record: SetMessageInput!): String }
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ type Mutation { SetMessage(record: [SetMessageInput]): String }
+  
+  i Using the same name for all input parameters will make your schemas easier to consume and more predictable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:10:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected input name, expected the input name "record" to be named "input".
+  
+     8 │ type Mutation { SetMessage(record: SetMessageInput!): String }
+     9 │ 
+  > 10 │ type Mutation { SetMessage(record: [SetMessageInput]): String }
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i Using the same name for all input parameters will make your schemas easier to consume and more predictable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

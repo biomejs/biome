@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueValidVCloak {
-        version: "next",
+        version: "2.3.11",
         name: "useVueValidVCloak",
         language: "html",
         recommended: true,

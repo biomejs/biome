@@ -181,3 +181,11 @@ function testMixed(a: boolean, b: boolean) {
   return a || b;  // Both could be false
   return a && b;  // Either could be false
 }
+
+// Optional fallback
+type Options = {
+  format?: 'image/png' | 'image/jpeg';
+};
+function svgToImage(options?: Options) {
+  const { format = 'image/png' } = options || {};
+}

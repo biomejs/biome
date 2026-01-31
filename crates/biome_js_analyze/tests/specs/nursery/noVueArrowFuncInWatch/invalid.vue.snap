@@ -1,0 +1,264 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```ts
+/* should generate diagnostics */
+export default {
+  watch: {
+    foo: (val, oldVal) => {
+      console.log('new: %s, old: %s', val, oldVal)
+    },
+    bar: {
+      handler: (val, oldVal) => {
+        console.log('new: %s, old: %s', val, oldVal)
+      }
+    },
+    short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+    qux: async (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+    empty: () => { },
+    nobody: () => (foo++),
+    single: x => { /* body */ },
+		comments: x /* comment */ => { /* body */ },
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:10 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found arrow function in Vue watcher definition.
+  
+    2 │ export default {
+    3 │   watch: {
+  > 4 │     foo: (val, oldVal) => {
+      │          ^^^^^^^^^^^^^^^^^^
+  > 5 │       console.log('new: %s, old: %s', val, oldVal)
+  > 6 │     },
+      │     ^
+    7 │     bar: {
+    8 │       handler: (val, oldVal) => {
+  
+  i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the arrow function into a function expression.
+  
+     2  2 │   export default {
+     3  3 │     watch: {
+     4    │ - ····foo:·(val,·oldVal)·=>·{
+        4 │ + ····foo:·function(val,·oldVal)·{
+     5  5 │         console.log('new: %s, old: %s', val, oldVal)
+     6  6 │       },
+  
+
+```
+
+```
+invalid.vue:8:16 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found arrow function in Vue watcher definition.
+  
+     6 │     },
+     7 │     bar: {
+   > 8 │       handler: (val, oldVal) => {
+       │                ^^^^^^^^^^^^^^^^^^
+   > 9 │         console.log('new: %s, old: %s', val, oldVal)
+  > 10 │       }
+       │       ^
+    11 │     },
+    12 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+  
+  i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the arrow function into a function expression.
+  
+     6  6 │       },
+     7  7 │       bar: {
+     8    │ - ······handler:·(val,·oldVal)·=>·{
+        8 │ + ······handler:·function(val,·oldVal)·{
+     9  9 │           console.log('new: %s, old: %s', val, oldVal)
+    10 10 │         }
+  
+
+```
+
+```
+invalid.vue:12:12 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found arrow function in Vue watcher definition.
+  
+    10 │       }
+    11 │     },
+  > 12 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │     qux: async (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+    14 │     empty: () => { },
+  
+  i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the arrow function into a function expression.
+  
+    10 10 │         }
+    11 11 │       },
+    12    │ - ····short:·(val,·oldVal)·=>·console.log('new:·%s,·old:·%s',·val,·oldVal),
+       12 │ + ····short:·function(val,·oldVal)·{
+       13 │ + return·console.log('new:·%s,·old:·%s',·val,·oldVal)
+       14 │ + },
+    13 15 │       qux: async (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+    14 16 │       empty: () => { },
+  
+
+```
+
+```
+invalid.vue:13:10 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found arrow function in Vue watcher definition.
+  
+    11 │     },
+    12 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+  > 13 │     qux: async (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │     empty: () => { },
+    15 │     nobody: () => (foo++),
+  
+  i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the arrow function into a function expression.
+  
+    11 11 │       },
+    12 12 │       short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+    13    │ - ····qux:·async·(val,·oldVal)·=>·console.log('new:·%s,·old:·%s',·val,·oldVal),
+       13 │ + ····qux:·async·function(val,·oldVal)·{
+       14 │ + return·console.log('new:·%s,·old:·%s',·val,·oldVal)
+       15 │ + },
+    14 16 │       empty: () => { },
+    15 17 │       nobody: () => (foo++),
+  
+
+```
+
+```
+invalid.vue:14:12 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found arrow function in Vue watcher definition.
+  
+    12 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+    13 │     qux: async (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+  > 14 │     empty: () => { },
+       │            ^^^^^^^^^
+    15 │     nobody: () => (foo++),
+    16 │     single: x => { /* body */ },
+  
+  i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the arrow function into a function expression.
+  
+    12 12 │       short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+    13 13 │       qux: async (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+    14    │ - ····empty:·()·=>·{·},
+       14 │ + ····empty:·function()·{·},
+    15 15 │       nobody: () => (foo++),
+    16 16 │       single: x => { /* body */ },
+  
+
+```
+
+```
+invalid.vue:15:13 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found arrow function in Vue watcher definition.
+  
+    13 │     qux: async (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+    14 │     empty: () => { },
+  > 15 │     nobody: () => (foo++),
+       │             ^^^^^^^^^^^^^
+    16 │     single: x => { /* body */ },
+    17 │ 		comments: x /* comment */ => { /* body */ },
+  
+  i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the arrow function into a function expression.
+  
+    13 13 │       qux: async (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
+    14 14 │       empty: () => { },
+    15    │ - ····nobody:·()·=>·(foo++),
+       15 │ + ····nobody:·function()·{
+       16 │ + return·(foo++)
+       17 │ + },
+    16 18 │       single: x => { /* body */ },
+    17 19 │   		comments: x /* comment */ => { /* body */ },
+  
+
+```
+
+```
+invalid.vue:16:13 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found arrow function in Vue watcher definition.
+  
+    14 │     empty: () => { },
+    15 │     nobody: () => (foo++),
+  > 16 │     single: x => { /* body */ },
+       │             ^^^^^^^^^^^^^^^^^^^
+    17 │ 		comments: x /* comment */ => { /* body */ },
+    18 │   }
+  
+  i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the arrow function into a function expression.
+  
+    14 14 │       empty: () => { },
+    15 15 │       nobody: () => (foo++),
+    16    │ - ····single:·x·=>·{·/*·body·*/·},
+       16 │ + ····single:·function(x)·{·/*·body·*/·},
+    17 17 │   		comments: x /* comment */ => { /* body */ },
+    18 18 │     }
+  
+
+```
+
+```
+invalid.vue:17:13 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found arrow function in Vue watcher definition.
+  
+    15 │     nobody: () => (foo++),
+    16 │     single: x => { /* body */ },
+  > 17 │ 		comments: x /* comment */ => { /* body */ },
+       │ 		          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │   }
+    19 │ }
+  
+  i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the arrow function into a function expression.
+  
+    15 15 │       nobody: () => (foo++),
+    16 16 │       single: x => { /* body */ },
+    17    │ - → → comments:·x·/*·comment·*/·=>·{·/*·body·*/·},
+       17 │ + → → comments:·function(x·/*·comment·*/)·{·/*·body·*/·},
+    18 18 │     }
+    19 19 │   }
+  
+
+```

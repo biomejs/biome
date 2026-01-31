@@ -56,9 +56,16 @@ pub fn generate_analyzer_rule_options(
 fn register_analyzer_rule_options(mod_name: &str) -> Result<()> {
     let lib_path = get_analyzer_rule_options_path().join("lib.rs");
     let current_lib_content = std::fs::read_to_string(&lib_path)?;
+    let mod_declaration = format!("pub mod {mod_name};");
+    if current_lib_content
+        .lines()
+        .any(|line| line.trim() == mod_declaration)
+    {
+        return Ok(());
+    }
     std::fs::write(
         &lib_path,
-        format!("{current_lib_content}pub mod {mod_name};\n"),
+        format!("{current_lib_content}{mod_declaration}\n"),
     )?;
     Ok(())
 }

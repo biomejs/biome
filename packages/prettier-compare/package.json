@@ -1,0 +1,26 @@
+{
+  "name": "@biomejs/prettier-compare",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Compare Biome and Prettier formatting output and IR side-by-side",
+  "bin": {
+    "prettier-compare": "./bin/prettier-compare.js"
+  },
+  "dependencies": {
+    "@biomejs/js-api": "workspace:*",
+    "@biomejs/wasm-nodejs": "workspace:*",
+    "@opentui/core": "^0.1.74",
+    "@opentui/react": "^0.1.74",
+    "prettier": "^3.8.1",
+    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-svelte": "^3.4.1",
+    "react": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.7",
+    "@types/react": "19.2.9",
+    "typescript": "5.9.3"
+  },
+  "license": "MIT OR Apache-2.0"
+}
