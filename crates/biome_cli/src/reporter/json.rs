@@ -37,7 +37,7 @@ impl JsonReporterVisitor {
             vec![token(T![,]); diagnostics_elements.len().saturating_sub(1)];
 
         let root_members = vec![
-            self.summary.to_json_member(),
+            self.summary.json_member(),
             json_member(
                 AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal(
                     "diagnostics",

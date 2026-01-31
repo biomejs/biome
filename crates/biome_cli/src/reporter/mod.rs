@@ -54,7 +54,7 @@ pub struct TraversalSummary {
 }
 
 impl TraversalSummary {
-    pub(crate) fn to_json_member(&self) -> JsonMember {
+    pub(crate) fn json_member(&self) -> JsonMember {
         let members = vec![
             json_member(
                 AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("changed"))),

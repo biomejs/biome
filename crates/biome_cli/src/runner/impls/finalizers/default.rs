@@ -1,5 +1,4 @@
 use crate::cli_options::CliReporterKind;
-use crate::diagnostics::ReportDiagnostic;
 use crate::reporter::checkstyle::CheckstyleReporter;
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
@@ -14,7 +13,7 @@ use crate::runner::finalizer::{FinalizePayload, Finalizer};
 use crate::runner::impls::commands::traversal::TraverseResult;
 use crate::{CliDiagnostic, DiagnosticsPayload};
 use biome_console::markup;
-use biome_diagnostics::{PrintDiagnostic, Resource, SerdeJsonError};
+use biome_diagnostics::{PrintDiagnostic, Resource};
 use biome_fs::OpenOptions;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_rowan::AstNode;
@@ -27,7 +26,6 @@ impl Finalizer for DefaultFinalizer {
 
     fn finalize(payload: FinalizePayload<'_, Self::Input>) -> Result<(), CliDiagnostic> {
         let FinalizePayload {
-            project_key,
             fs,
             workspace,
             scan_duration,
