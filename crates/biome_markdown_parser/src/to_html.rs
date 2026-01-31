@@ -297,7 +297,7 @@ impl HtmlRenderContext {
     /// Look up a link reference definition by normalized label.
     pub fn get_link_definition(&self, label: &str) -> Option<&(String, Option<String>)> {
         let normalized = normalize_reference_label(label);
-        self.link_definitions.get(&normalized)
+        self.link_definitions.get(normalized.as_ref())
     }
 
     /// Check if a list at the given range is tight.
@@ -344,7 +344,7 @@ fn collect_link_definitions(document: &MdDocument) -> HashMap<String, (String, O
             }
 
             // Only keep first definition (per CommonMark spec)
-            if definitions.contains_key(&normalized) {
+            if definitions.contains_key(normalized.as_ref()) {
                 continue;
             }
 
@@ -356,7 +356,7 @@ fn collect_link_definitions(document: &MdDocument) -> HashMap<String, (String, O
                 process_link_title(&text)
             });
 
-            definitions.insert(normalized, (url, title));
+            definitions.insert(normalized.into_owned(), (url, title));
         }
     }
 

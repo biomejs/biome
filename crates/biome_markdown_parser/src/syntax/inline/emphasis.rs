@@ -256,7 +256,7 @@ fn collect_delimiter_runs(source: &str, reference_checker: impl Fn(&str) -> bool
                 // Could be a shortcut reference - check if definition exists
                 let label = extract_label_text(source, pos, result.close_pos);
                 let normalized = normalize_reference_label(label);
-                if !normalized.is_empty() && reference_checker(&normalized) {
+                if !normalized.is_empty() && reference_checker(normalized.as_ref()) {
                     link_bracket_starts.push(pos);
                 }
             }

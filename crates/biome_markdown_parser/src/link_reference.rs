@@ -31,7 +31,7 @@ pub(crate) fn collect_link_reference_definitions(
             let raw = label.syntax().text_trimmed().to_string();
             let normalized = normalize_reference_label(&raw);
             if !normalized.is_empty() {
-                definitions.insert(normalized);
+                definitions.insert(normalized.into_owned());
             }
         }
     }

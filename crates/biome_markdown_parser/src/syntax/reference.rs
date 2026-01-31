@@ -11,38 +11,59 @@ use biome_string_case::StrOnlyExtension;
 /// IMPORTANT: Backslash escapes are NOT stripped during normalization.
 /// This means `[foo\!]` does NOT match `[foo!]` - the backslash is preserved.
 /// This matches cmark's reference implementation behavior.
-pub(crate) fn normalize_reference_label(text: &str) -> String {
+pub(crate) fn normalize_reference_label(text: &str) -> Cow<'_, str> {
+    if is_whitespace_normalized(text) {
+        // Apply Unicode case folding for case-insensitive matching.
+        return text.to_casefold_cow();
+    }
+
     let mut out = String::new();
     let mut saw_whitespace = false;
 
     for c in text.chars() {
         if c.is_whitespace() {
             saw_whitespace = true;
-            continue;
+        } else {
+            if saw_whitespace && !out.is_empty() {
+                out.push(' ');
+            }
+            saw_whitespace = false;
+            out.push(c);
         }
-
-        push_normalized_char(&mut out, c, &mut saw_whitespace);
     }
 
-    // CommonMark uses Unicode case folding for case-insensitive matching.
     let folded = out.as_str().to_casefold_cow();
     match folded {
-        Cow::Borrowed(_) => out,
-        Cow::Owned(folded) => folded,
+        Cow::Borrowed(_) => Cow::Owned(out),
+        Cow::Owned(folded) => Cow::Owned(folded),
     }
 }
 
-fn push_normalized_char(out: &mut String, c: char, saw_whitespace: &mut bool) {
-    if *saw_whitespace && !out.is_empty() {
-        out.push(' ');
+fn is_whitespace_normalized(text: &str) -> bool {
+    let mut saw_non_whitespace = false;
+    let mut last_was_space = false;
+
+    for c in text.chars() {
+        if c.is_whitespace() {
+            if c != ' ' {
+                return false;
+            }
+            if !saw_non_whitespace || last_was_space {
+                return false;
+            }
+            last_was_space = true;
+        } else {
+            saw_non_whitespace = true;
+            last_was_space = false;
+        }
     }
-    *saw_whitespace = false;
-    out.push(c);
+
+    !last_was_space
 }
 
 #[cfg(test)]
 mod tests {
-    use super::normalize_reference_label;
+    use crate::syntax::reference::normalize_reference_label;
 
     #[test]
     fn normalizes_whitespace_and_case() {
@@ -54,5 +75,11 @@ mod tests {
     fn preserves_backslash_escapes() {
         assert_eq!(normalize_reference_label(r"foo\!"), r"foo\!");
         assert_eq!(normalize_reference_label(r"Foo\! Bar"), r"foo\! bar");
+    }
+
+    #[test]
+    fn avoids_allocation_for_normalized_labels() {
+        let normalized = normalize_reference_label("foo bar");
+        assert!(matches!(normalized, std::borrow::Cow::Borrowed(_)));
     }
 }

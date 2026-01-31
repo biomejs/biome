@@ -294,7 +294,7 @@ struct ReferenceLinkLookahead {
 impl ReferenceLinkLookahead {
     fn is_defined(&self, p: &MarkdownParser) -> bool {
         let normalized = normalize_reference_label(&self.label_raw);
-        p.has_link_reference_definition(&normalized)
+        p.has_link_reference_definition(normalized.as_ref())
     }
 }
 
