@@ -678,7 +678,6 @@ pub const FUNCTION_KEYWORDS: &[&str] = &[
     "hue-rotate",
     "hwb",
     "hypot",
-    "if",
     "image",
     "image-rect",
     "image-set",

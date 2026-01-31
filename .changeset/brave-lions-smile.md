@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-`noUnknownFunction` now recognizes `contrast-color`, `dynamic-range-limit-mix`, `if`, `progress`, and `superellipse` CSS functions
+`noUnknownFunction` now recognizes `contrast-color`, `dynamic-range-limit-mix`, `progress`, and `superellipse` CSS functions

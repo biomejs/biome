@@ -17,7 +17,6 @@ a { animation-delay: calc(sibling-index() * 100ms); }
 a { animation-delay: calc(sibling-count() * 50ms); }
 a { color: contrast-color(#000); }
 a { color: dynamic-range-limit-mix(standard 50%, high 50%); }
-a { width: if(style(--responsive), 100%, 50%); }
 a { animation-delay: progress(scroll() from 0% to 100%); }
 a { clip-path: superellipse(50% 50%, 80% 80%, 2.5); }
 @font-face {
