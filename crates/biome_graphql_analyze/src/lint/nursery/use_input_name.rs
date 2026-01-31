@@ -97,7 +97,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseInputName {
-        version: "next",
+        version: "2.3.14",
         name: "useInputName",
         language: "graphql",
         recommended: false,
