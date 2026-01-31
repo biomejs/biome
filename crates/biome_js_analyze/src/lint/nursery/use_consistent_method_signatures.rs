@@ -8,8 +8,8 @@ use biome_rule_options::use_consistent_method_signatures::{
     MethodSignatureStyle, UseConsistentMethodSignaturesOptions,
 };
 
-// TODO: Highlight lines 2-3 and 4-6 of the codeblock if/when the doctest parser learns to ignore patterns like 
-// ```ts {2-3, 4,6}
+// TODO: Highlight lines 2-3 and 4-6 of the codeblock if/when the doctest parser learns to ignore such patterns 
+// ```ts,ignore {2-3, 4,6}
 
 declare_lint_rule! {
     /// Enforce consistent use of either method signatures or function properties within interfaces and type aliases.
@@ -93,7 +93,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,use_options,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// type Union =
     ///   | {
     ///     foo(bar: number): number;
@@ -126,7 +126,7 @@ declare_lint_rule! {
     /// type Callback = () => void;
     /// ```
     ///
-    /// Classes (as well as interfaces lacking function declarations) are not checked by either option:
+    /// Classes (as well as interfaces lacking function declarations) are always ignored:
     /// ```ts
     /// interface Example {
     ///   notAFunc: number;
