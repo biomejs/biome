@@ -125,7 +125,7 @@ grit-util                    = "0.5.1"
 hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.13.0" }
-insta                        = "1.43.2"
+insta                        = "1.46.2"
 jiff                         = "0.2.18"
 libc                         = "0.2.180"
 mimalloc                     = "0.1.48"
