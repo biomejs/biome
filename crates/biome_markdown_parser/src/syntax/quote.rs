@@ -38,9 +38,10 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 
-use super::is_paragraph_like;
-use super::parse_error::quote_nesting_too_deep;
 use crate::MarkdownParser;
+use crate::syntax::parse_any_block_with_indent_code_policy;
+use crate::syntax::parse_error::quote_nesting_too_deep;
+use crate::syntax::{INDENT_CODE_BLOCK_SPACES, TAB_STOP_SPACES, is_paragraph_like};
 
 /// Check if we're at the start of a block quote (`>`).
 pub(crate) fn at_quote(p: &mut MarkdownParser) -> bool {
@@ -195,7 +196,11 @@ impl ParseNodeList for QuoteBlockList {
         }
 
         // Parse regular block
-        let parsed = super::parse_any_block_with_indent_code_policy(p, true);
+        // Treat content after '>' as column 0 for block parsing (fence detection).
+        let prev_virtual = p.state().virtual_line_start;
+        p.state_mut().virtual_line_start = Some(p.cur_range().start());
+        let parsed = parse_any_block_with_indent_code_policy(p, true);
+        p.state_mut().virtual_line_start = prev_virtual;
         if let Present(ref marker) = parsed {
             self.last_block_was_paragraph = is_paragraph_like(marker.kind(p));
         } else {
@@ -222,13 +227,13 @@ impl ParseNodeList for QuoteBlockList {
     }
 }
 
-fn parse_quote_block_list(p: &mut MarkdownParser) {
+pub(crate) fn parse_quote_block_list(p: &mut MarkdownParser) {
     let depth = p.state().block_quote_depth;
     let mut list = QuoteBlockList::new(depth);
     list.parse_list(p);
 }
 
-fn line_has_quote_prefix_at_current(p: &MarkdownParser, depth: usize) -> bool {
+pub(crate) fn line_has_quote_prefix_at_current(p: &MarkdownParser, depth: usize) -> bool {
     if depth == 0 {
         return false;
     }
@@ -246,7 +251,7 @@ fn line_has_quote_prefix_at_current(p: &MarkdownParser, depth: usize) -> bool {
                 idx += 1;
             }
             b'\t' => {
-                indent += 4;
+                indent += TAB_STOP_SPACES;
                 idx += 1;
             }
             _ => break,
@@ -287,12 +292,12 @@ fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
     for c in p.source_after_current().chars() {
         match c {
             ' ' => column += 1,
-            '\t' => column += 4 - (column % 4),
+            '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
             _ => break,
         }
     }
 
-    column >= 4
+    column >= INDENT_CODE_BLOCK_SPACES
 }
 
 fn parse_quote_indented_code_block(p: &mut MarkdownParser, depth: usize) -> ParsedSyntax {
@@ -371,6 +376,7 @@ pub(crate) fn consume_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool
     consume_quote_prefix_impl(p, depth, true)
 }
 
+/// Check if a quote prefix starts at the current position.
 pub(crate) fn consume_quote_prefix_without_virtual(p: &mut MarkdownParser, depth: usize) -> bool {
     if depth == 0 || !has_quote_prefix(p, depth) {
         return false;

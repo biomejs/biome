@@ -7,7 +7,9 @@ use biome_parser::{ParserContextCheckpoint, diagnostic::merge_diagnostics};
 use biome_rowan::{TextRange, TextSize};
 use std::collections::HashSet;
 
+use crate::lexer::{MarkdownLexContext, MarkdownReLexContext};
 use crate::syntax::inline::EmphasisContext;
+use crate::syntax::parse_error::DEFAULT_MAX_NESTING_DEPTH;
 use crate::token_source::{MarkdownTokenSource, MarkdownTokenSourceCheckpoint};
 
 /// Options for configuring the markdown parser.
@@ -23,7 +25,7 @@ pub struct MarkdownParseOptions {
 impl Default for MarkdownParseOptions {
     fn default() -> Self {
         Self {
-            max_nesting_depth: crate::syntax::parse_error::DEFAULT_MAX_NESTING_DEPTH,
+            max_nesting_depth: DEFAULT_MAX_NESTING_DEPTH,
         }
     }
 }
@@ -195,8 +197,7 @@ impl<'source> MarkdownParser<'source> {
     /// Re-lex the current token using LinkDefinition context.
     /// This makes whitespace produce separate tokens for destination/title parsing.
     pub(crate) fn re_lex_link_definition(&mut self) {
-        self.source
-            .re_lex(crate::lexer::MarkdownReLexContext::LinkDefinition);
+        self.source.re_lex(MarkdownReLexContext::LinkDefinition);
     }
 
     /// Force re-lex the current token in Regular context.
@@ -205,7 +206,28 @@ impl<'source> MarkdownParser<'source> {
     /// e.g., when entering title content where whitespace should not split tokens.
     pub(crate) fn force_relex_regular(&mut self) {
         self.source
-            .force_relex_in_context(crate::lexer::MarkdownLexContext::Regular);
+            .force_relex_in_context(MarkdownLexContext::Regular);
+    }
+
+    /// Force re-lex the current token in CodeSpan context.
+    /// In this context, backslash is literal (not an escape character).
+    /// Used for autolinks where `\>` should be `\` + `>` as separate tokens.
+    pub(crate) fn relex_code_span(&mut self) {
+        self.source
+            .force_relex_in_context(MarkdownLexContext::CodeSpan);
+    }
+
+    /// Re-lex the current token as single-char emphasis delimiter.
+    ///
+    /// Use this when the emphasis matching algorithm needs to partially consume
+    /// a DOUBLE_STAR or DOUBLE_UNDERSCORE token. After re-lexing, the token will
+    /// be either STAR or UNDERSCORE (single char).
+    ///
+    /// Note
+    /// Only call on the current token, NOT inside lookahead closures.
+    /// This invalidates any buffered lookahead, so ensure no lookahead is active.
+    pub(crate) fn force_relex_emphasis_inline(&mut self) -> MarkdownSyntaxKind {
+        self.source.re_lex(MarkdownReLexContext::EmphasisInline)
     }
 
     pub(crate) fn set_force_ordered_list_marker(&mut self, value: bool) {

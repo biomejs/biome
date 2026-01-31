@@ -25,18 +25,15 @@ MdDocument {
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@1..4 "foo" [] [],
                         },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@4..5 "\n" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@5..8 "bar" [] [],
+                        },
                     ],
-                    r_brack_token: missing (required),
+                    r_brack_token: R_BRACK@8..9 "]" [] [],
                     label: missing (optional),
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@4..5 "\n" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@5..8 "bar" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@8..9 "]" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@9..10 "\n" [] [],
@@ -57,45 +54,20 @@ MdDocument {
   1: MD_BLOCK_LIST@0..10
     0: MD_PARAGRAPH@0..10
       0: MD_INLINE_ITEM_LIST@0..10
-        0: MD_REFERENCE_LINK@0..4
+        0: MD_REFERENCE_LINK@0..9
           0: L_BRACK@0..1 "[" [] []
-          1: MD_INLINE_ITEM_LIST@1..4
+          1: MD_INLINE_ITEM_LIST@1..8
             0: MD_TEXTUAL@1..4
               0: MD_TEXTUAL_LITERAL@1..4 "foo" [] []
-          2: (empty)
+            1: MD_TEXTUAL@4..5
+              0: MD_TEXTUAL_LITERAL@4..5 "\n" [] []
+            2: MD_TEXTUAL@5..8
+              0: MD_TEXTUAL_LITERAL@5..8 "bar" [] []
+          2: R_BRACK@8..9 "]" [] []
           3: (empty)
-        1: MD_TEXTUAL@4..5
-          0: MD_TEXTUAL_LITERAL@4..5 "\n" [] []
-        2: MD_TEXTUAL@5..8
-          0: MD_TEXTUAL_LITERAL@5..8 "bar" [] []
-        3: MD_TEXTUAL@8..9
-          0: MD_TEXTUAL_LITERAL@8..9 "]" [] []
-        4: MD_TEXTUAL@9..10
+        1: MD_TEXTUAL@9..10
           0: MD_TEXTUAL_LITERAL@9..10 "\n" [] []
       1: (empty)
   2: EOF@10..10 "" [] []
 
-```
-
-## Diagnostics
-
-```
-multiline_label_reference.md:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unclosed link, expected `]` to close link text.
-  
-  > 1 │ [foo
-      │ ^^^^
-    2 │ bar]
-    3 │ 
-  
-  i link started here
-  
-  > 1 │ [foo
-      │ ^^^^
-    2 │ bar]
-    3 │ 
-  
-  i Format: [link text](url)
-  
 ```

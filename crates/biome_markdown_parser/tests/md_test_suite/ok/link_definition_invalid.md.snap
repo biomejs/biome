@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 131
 expression: snapshot
 ---
 ## Input
@@ -184,11 +183,11 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@353..354 "\n" [] [],
                 },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@354..355 "[" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@355..356 "]" [] [],
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@354..355 "[" [] [],
+                    text: MdInlineItemList [],
+                    r_brack_token: R_BRACK@355..356 "]" [] [],
+                    label: missing (optional),
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@356..357 ":" [] [],
@@ -315,15 +314,16 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@330..353 "Empty label is invalid:" [] []
         1: MD_TEXTUAL@353..354
           0: MD_TEXTUAL_LITERAL@353..354 "\n" [] []
-        2: MD_TEXTUAL@354..355
-          0: MD_TEXTUAL_LITERAL@354..355 "[" [] []
-        3: MD_TEXTUAL@355..356
-          0: MD_TEXTUAL_LITERAL@355..356 "]" [] []
-        4: MD_TEXTUAL@356..357
+        2: MD_REFERENCE_LINK@354..356
+          0: L_BRACK@354..355 "[" [] []
+          1: MD_INLINE_ITEM_LIST@355..355
+          2: R_BRACK@355..356 "]" [] []
+          3: (empty)
+        3: MD_TEXTUAL@356..357
           0: MD_TEXTUAL_LITERAL@356..357 ":" [] []
-        5: MD_TEXTUAL@357..362
+        4: MD_TEXTUAL@357..362
           0: MD_TEXTUAL_LITERAL@357..362 " /url" [] []
-        6: MD_TEXTUAL@362..363
+        5: MD_TEXTUAL@362..363
           0: MD_TEXTUAL_LITERAL@362..363 "\n" [] []
       1: (empty)
   2: EOF@363..363 "" [] []

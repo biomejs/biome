@@ -327,20 +327,23 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@442..443 "\n" [] [],
                 },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@443..450 "```" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@450..451 "\n" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@451..471 "not a code fence" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@471..472 "\n" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@472..479 "```" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                MdInlineCode {
+                    l_tick_token: BACKTICK@443..450 "```" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@450..451 "\n" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@451..471 "    not a code fence" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@471..472 "\n" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@472..476 "    " [] [],
+                        },
+                    ],
+                    r_tick_token: BACKTICK@476..479 "```" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@479..480 "\n" [] [],
@@ -549,21 +552,23 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@418..442 "Para with indented fence" [] []
         1: MD_TEXTUAL@442..443
           0: MD_TEXTUAL_LITERAL@442..443 "\n" [] []
-        2: MD_TEXTUAL@443..450
-          0: MD_TEXTUAL_LITERAL@443..450 "```" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
-        3: MD_TEXTUAL@450..451
-          0: MD_TEXTUAL_LITERAL@450..451 "\n" [] []
-        4: MD_TEXTUAL@451..471
-          0: MD_TEXTUAL_LITERAL@451..471 "not a code fence" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
-        5: MD_TEXTUAL@471..472
-          0: MD_TEXTUAL_LITERAL@471..472 "\n" [] []
-        6: MD_TEXTUAL@472..479
-          0: MD_TEXTUAL_LITERAL@472..479 "```" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
-        7: MD_TEXTUAL@479..480
+        2: MD_INLINE_CODE@443..479
+          0: BACKTICK@443..450 "```" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+          1: MD_INLINE_ITEM_LIST@450..476
+            0: MD_TEXTUAL@450..451
+              0: MD_TEXTUAL_LITERAL@450..451 "\n" [] []
+            1: MD_TEXTUAL@451..471
+              0: MD_TEXTUAL_LITERAL@451..471 "    not a code fence" [] []
+            2: MD_TEXTUAL@471..472
+              0: MD_TEXTUAL_LITERAL@471..472 "\n" [] []
+            3: MD_TEXTUAL@472..476
+              0: MD_TEXTUAL_LITERAL@472..476 "    " [] []
+          2: BACKTICK@476..479 "```" [] []
+        3: MD_TEXTUAL@479..480
           0: MD_TEXTUAL_LITERAL@479..480 "\n" [] []
-        8: MD_TEXTUAL@480..504
+        4: MD_TEXTUAL@480..504
           0: MD_TEXTUAL_LITERAL@480..504 "still the same paragraph" [] []
-        9: MD_TEXTUAL@504..505
+        5: MD_TEXTUAL@504..505
           0: MD_TEXTUAL_LITERAL@504..505 "\n" [] []
       1: (empty)
   2: EOF@505..505 "" [] []

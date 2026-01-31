@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 131
 expression: snapshot
 ---
 ## Input
@@ -150,25 +149,21 @@ MdDocument {
                                             ],
                                             hard_line: missing (optional),
                                         },
-                                        MdBulletListItem {
-                                            md_bullet_list: MdBulletList [
-                                                MdBullet {
-                                                    bullet: MINUS@130..133 "-" [Skipped(" "), Skipped(" ")] [],
-                                                    content: MdBlockList [
-                                                        MdParagraph {
-                                                            list: MdInlineItemList [
-                                                                MdTextual {
-                                                                    value_token: MD_TEXTUAL_LITERAL@133..147 " Another child" [] [],
-                                                                },
-                                                                MdTextual {
-                                                                    value_token: MD_TEXTUAL_LITERAL@147..148 "\n" [] [],
-                                                                },
-                                                            ],
-                                                            hard_line: missing (optional),
-                                                        },
-                                                    ],
+                                    ],
+                                },
+                                MdBullet {
+                                    bullet: MINUS@130..133 "-" [Skipped(" "), Skipped(" ")] [],
+                                    content: MdBlockList [
+                                        MdParagraph {
+                                            list: MdInlineItemList [
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@133..147 " Another child" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@147..148 "\n" [] [],
                                                 },
                                             ],
+                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -275,9 +270,9 @@ MdDocument {
               1: (empty)
             1: MD_BULLET_LIST_ITEM@115..148
               0: MD_BULLET_LIST@115..148
-                0: MD_BULLET@115..148
+                0: MD_BULLET@115..130
                   0: MINUS@115..118 "-" [Skipped(" "), Skipped(" ")] []
-                  1: MD_BLOCK_LIST@118..148
+                  1: MD_BLOCK_LIST@118..130
                     0: MD_PARAGRAPH@118..130
                       0: MD_INLINE_ITEM_LIST@118..130
                         0: MD_TEXTUAL@118..129
@@ -285,18 +280,16 @@ MdDocument {
                         1: MD_TEXTUAL@129..130
                           0: MD_TEXTUAL_LITERAL@129..130 "\n" [] []
                       1: (empty)
-                    1: MD_BULLET_LIST_ITEM@130..148
-                      0: MD_BULLET_LIST@130..148
-                        0: MD_BULLET@130..148
-                          0: MINUS@130..133 "-" [Skipped(" "), Skipped(" ")] []
-                          1: MD_BLOCK_LIST@133..148
-                            0: MD_PARAGRAPH@133..148
-                              0: MD_INLINE_ITEM_LIST@133..148
-                                0: MD_TEXTUAL@133..147
-                                  0: MD_TEXTUAL_LITERAL@133..147 " Another child" [] []
-                                1: MD_TEXTUAL@147..148
-                                  0: MD_TEXTUAL_LITERAL@147..148 "\n" [] []
-                              1: (empty)
+                1: MD_BULLET@130..148
+                  0: MINUS@130..133 "-" [Skipped(" "), Skipped(" ")] []
+                  1: MD_BLOCK_LIST@133..148
+                    0: MD_PARAGRAPH@133..148
+                      0: MD_INLINE_ITEM_LIST@133..148
+                        0: MD_TEXTUAL@133..147
+                          0: MD_TEXTUAL_LITERAL@133..147 " Another child" [] []
+                        1: MD_TEXTUAL@147..148
+                          0: MD_TEXTUAL_LITERAL@147..148 "\n" [] []
+                      1: (empty)
         1: MD_BULLET@148..165
           0: MINUS@148..149 "-" [] []
           1: MD_BLOCK_LIST@149..165
