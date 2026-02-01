@@ -14,7 +14,7 @@ use biome_js_syntax::{
     AnyJsMemberExpression, AnyJsObjectBindingPatternMember, JsArrayBindingPattern,
     JsArrayBindingPatternElement, JsArrayBindingPatternElementList, JsArrayExpression,
     JsComputedMemberExpression, JsObjectBindingPattern, JsObjectBindingPatternPropertyList,
-    JsReferenceIdentifier, JsVariableDeclarator, T, TsTypeofType,
+    JsReferenceIdentifier, JsVariableDeclarator, JsxReferenceIdentifier, T, TsTypeofType,
     is_transparent_expression_wrapper,
 };
 use biome_js_syntax::{
@@ -527,7 +527,7 @@ pub enum UnstableDependencyKind {
 }
 
 declare_node_union! {
-    pub AnyExpressionCandidate = AnyJsExpression | JsReferenceIdentifier
+    pub AnyExpressionCandidate = AnyJsExpression | JsReferenceIdentifier | JsxReferenceIdentifier
 }
 
 /// Returns expression candidates for a given reference for further checking.
@@ -535,6 +535,14 @@ declare_node_union! {
 /// Example: if the expression is `a.b[c]` it will return 3 candidates: `a`, `a.b`, `a.b[c]`
 fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> {
     let mut result = Vec::new();
+
+    if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(&node) {
+        result.push(AnyExpressionCandidate::JsxReferenceIdentifier(
+            jsx_ref.clone(),
+        ));
+        return result;
+    }
+
     let mut prev_node = node;
     while let Some(parent) = prev_node.parent() {
         if matches!(
@@ -635,6 +643,20 @@ fn capture_needs_to_be_in_the_dependency_list(
                 0,
             ),
             AnyExpressionCandidate::JsReferenceIdentifier(reference_identifier) => {
+                if let Some(binding) = model.binding(reference_identifier) {
+                    is_stable_binding(
+                        &binding.tree(),
+                        None,
+                        component_function_range,
+                        model,
+                        options,
+                        0,
+                    )
+                } else {
+                    true
+                }
+            }
+            AnyExpressionCandidate::JsxReferenceIdentifier(reference_identifier) => {
                 if let Some(binding) = model.binding(reference_identifier) {
                     is_stable_binding(
                         &binding.tree(),
