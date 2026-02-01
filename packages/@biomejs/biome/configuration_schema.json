@@ -5917,7 +5917,7 @@
 					]
 				},
 				"useGlobalThis": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-global-this",
+					"description": "Enforce the use of globalThis over window, self, and global.\nSee https://biomejs.dev/linter/rules/use-global-this",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseGlobalThisConfiguration" },
 						{ "type": "null" }

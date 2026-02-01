@@ -2208,7 +2208,7 @@ See https://biomejs.dev/linter/rules/use-find
 	 */
 	useFind?: UseFindConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Enforce the use of globalThis over window, self, and global.
 See https://biomejs.dev/linter/rules/use-global-this 
 	 */
 	useGlobalThis?: UseGlobalThisConfiguration;
