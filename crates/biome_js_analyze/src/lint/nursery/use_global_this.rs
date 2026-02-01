@@ -206,11 +206,11 @@ impl Rule for UseGlobalThis {
                 rule_category!(),
                 state,
                 markup! {
-                    "Prefer "<Emphasis>"globalThis"</Emphasis>" over "<Emphasis>"window"</Emphasis>", "<Emphasis>"self"</Emphasis>" and "<Emphasis>"global"</Emphasis>""
+                    "Prefer "<Emphasis>"globalThis"</Emphasis>" over "<Emphasis>"window"</Emphasis>", "<Emphasis>"self"</Emphasis>" and "<Emphasis>"global"</Emphasis>"."
                 },
             )
             .note(markup! {
-                "The "<Emphasis>"globalThis"</Emphasis>" is the standard way to access the global object across environments."
+                ""<Emphasis>"globalThis"</Emphasis>" is the standard way to access the global object across environments, which improves code portability."
             }),
         )
     }
