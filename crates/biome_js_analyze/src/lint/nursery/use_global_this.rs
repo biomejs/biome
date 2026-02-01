@@ -12,123 +12,123 @@ use biome_rule_options::use_global_this::UseGlobalThisOptions;
 
 use crate::services::semantic::Semantic;
 
-const GLOBAL_IDENTIFIERS: [&str; 3] = ["window", "self", "global"];
+const GLOBAL_IDENTIFIERS: [&str; 3] = ["global", "self", "window"];
 
 const WINDOW_SPECIFIC_EVENTS: [&str; 15] = [
-    "resize",
+    "beforeunload", // Browsers might have specific behaviors on exactly `window.onbeforeunload =`
     "blur",
     "focus",
     "load",
-    "scroll",
-    "scrollend",
-    "wheel",
-    "beforeunload", // Browsers might have specific behaviors on exactly `window.onbeforeunload =`
     "message",
     "messageerror",
     "pagehide",
     "pagereveal",
     "pageshow",
     "pageswap",
+    "resize",
+    "scroll",
+    "scrollend",
     "unload",
+    "wheel",
 ];
 
+// Window-specific properties, methods, and event handlers
+// References:
+// - https://html.spec.whatwg.org/multipage/nav-history-apis.html#the-window-object
+// - https://dom.spec.whatwg.org/#idl-index
+// - https://drafts.csswg.org/cssom-view/#idl-index
 const WINDOW_SPECIFIC_APIS: [&str; 66] = [
-    // Properties and methods
-    // https://html.spec.whatwg.org/multipage/nav-history-apis.html#the-window-object
-    "name",
-    "locationbar",
-    "menubar",
-    "personalbar",
-    "scrollbars",
-    "statusbar",
-    "toolbar",
-    "status",
+    "addEventListener",
+    "blur",
     "close",
     "closed",
-    "stop",
+    "devicePixelRatio",
+    "dispatchEvent",
+    "event", // Deprecated and quirky, best left untouched
     "focus",
-    "blur",
-    "frames",
-    "length",
-    "top",
-    "opener",
-    "parent",
     "frameElement",
-    "open",
-    "originAgentCluster",
-    "postMessage",
+    "frames",
+    "innerHeight",
+    "innerWidth",
+    "length",
+    "locationbar",
+    "menubar",
+    "moveBy",
+    "moveTo",
+    "name",
     "navigation",
-    // Events commonly associated with "window"
-    "onresize",
+    "onbeforeunload", // Browsers might have specific behaviors on exactly `window.onbeforeunload =`
     "onblur",
     "onfocus",
     "onload",
-    "onscroll",
-    "onscrollend",
-    "onwheel",
-    "onbeforeunload", // Browsers might have specific behaviors on exactly `window.onbeforeunload =`
     "onmessage",
     "onmessageerror",
     "onpagehide",
     "onpagereveal",
     "onpageshow",
     "onpageswap",
+    "onresize",
+    "onscroll",
+    "onscrollend",
     "onunload",
-    // To add/remove/dispatch events that are commonly associated with "window"
-    // https://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-flow
-    "addEventListener",
-    "removeEventListener",
-    "dispatchEvent",
-    // https://dom.spec.whatwg.org/#idl-index
-    "event", // Deprecated and quirky, best left untouched
-    // https://drafts.csswg.org/cssom-view/#idl-index
-    "screen",
-    "visualViewport",
-    "moveTo",
-    "moveBy",
-    "resizeTo",
-    "resizeBy",
-    "innerWidth",
-    "innerHeight",
-    "outerWidth",
+    "onwheel",
+    "open",
+    "opener",
+    "originAgentCluster",
     "outerHeight",
-    "scrollX",
+    "outerWidth",
     "pageXOffset",
-    "scrollY",
     "pageYOffset",
-    "scroll",
-    "scrollTo",
-    "scrollBy",
-    "screenX",
+    "parent",
+    "personalbar",
+    "postMessage",
+    "removeEventListener",
+    "resizeBy",
+    "resizeTo",
+    "screen",
+    "screenHeight",
     "screenLeft",
-    "screenY",
     "screenTop",
     "screenWidth",
-    "screenHeight",
-    "devicePixelRatio",
+    "screenX",
+    "screenY",
+    "scroll",
+    "scrollBy",
+    "scrollTo",
+    "scrollX",
+    "scrollY",
+    "scrollbars",
+    "status",
+    "statusbar",
+    "stop",
+    "toolbar",
+    "top",
+    "visualViewport",
 ];
 
+// Web Worker-specific properties, methods, and event handlers
+// References:
+// - https://html.spec.whatwg.org/multipage/workers.html#the-workerglobalscope-common-interface
+// - https://html.spec.whatwg.org/multipage/workers.html#dedicated-workers-and-the-dedicatedworkerglobalscope-interface
+// - https://html.spec.whatwg.org/multipage/workers.html#sharedworkerglobalscope
 const WEB_WORKER_SPECIFIC_APIS: [&str; 17] = [
     "addEventListener",
-    "removeEventListener",
+    "close",
     "dispatchEvent",
-    // https://html.spec.whatwg.org/multipage/workers.html#the-workerglobalscope-common-interface
-    "self",
-    "location",
-    "navigator",
     "importScripts",
+    "location",
+    "name",
+    "navigator",
+    "onconnect",
     "onerror",
     "onlanguagechange",
     "onoffline",
     "ononline",
     "onrejectionhandled",
     "onunhandledrejection",
-    // https://html.spec.whatwg.org/multipage/workers.html#dedicated-workers-and-the-dedicatedworkerglobalscope-interface
-    "name",
     "postMessage",
-    "close",
-    // https://html.spec.whatwg.org/multipage/workers.html#sharedworkerglobalscope
-    "onconnect",
+    "removeEventListener",
+    "self",
 ];
 
 declare_lint_rule! {
@@ -323,17 +323,17 @@ fn check_is_web_worker_specific_api(obj_name: &str, member_name: &str) -> bool {
 }
 
 fn is_global_identifier(name: &str) -> bool {
-    GLOBAL_IDENTIFIERS.contains(&name)
+    GLOBAL_IDENTIFIERS.binary_search(&name).is_ok()
 }
 
 fn is_window_specific_api(name: &str) -> bool {
-    WINDOW_SPECIFIC_APIS.contains(&name)
+    WINDOW_SPECIFIC_APIS.binary_search(&name).is_ok()
 }
 
 fn is_web_workers_specific_api(name: &str) -> bool {
-    WEB_WORKER_SPECIFIC_APIS.contains(&name)
+    WEB_WORKER_SPECIFIC_APIS.binary_search(&name).is_ok()
 }
 
 fn is_window_specific_event(name: &str) -> bool {
-    WINDOW_SPECIFIC_EVENTS.contains(&name)
+    WINDOW_SPECIFIC_EVENTS.binary_search(&name).is_ok()
 }
