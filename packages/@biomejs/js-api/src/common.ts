@@ -8,6 +8,104 @@ import type {
 } from "./wasm";
 import { tryCatchWrapper } from "./wasm";
 
+/**
+ * Get the UTF-8 byte length of a UTF-16 code unit.
+ *
+ * @param codeUnit A single character (UTF-16 code unit)
+ * @returns The number of bytes this code unit takes in UTF-8 encoding
+ */
+function getUtf8ByteLength(codeUnit: string): number {
+	const code = codeUnit.charCodeAt(0);
+	if (code < 128) {
+		return 1;
+	}
+	if (code < 2048) {
+		return 2;
+	}
+	// UTF-16 high surrogate
+	if (55296 <= code && code <= 56319) {
+		return 4;
+	}
+	// UTF-16 low surrogate
+	if (56320 <= code && code <= 57343) {
+		return 0;
+	}
+	if (code < 65536) {
+		return 3;
+	}
+	throw new Error(`Bad UTF-16 code unit "${codeUnit}" with code ${code}`);
+}
+
+/**
+ * Convert a byte-based span to a UTF-16 code unit span.
+ *
+ * Biome internally uses UTF-8 byte offsets for spans, but JavaScript strings
+ * use UTF-16 code units. This function converts a span from byte offsets to
+ * code unit offsets, allowing you to use `string.slice(start, end)` correctly
+ * with non-ASCII content.
+ *
+ * @param span A tuple of [startInBytes, endInBytes] from Biome diagnostics
+ * @param str The original string that the span refers to
+ * @returns A tuple of [startInCodeUnits, endInCodeUnits] for use with string.slice()
+ *
+ * @example
+ * ```ts
+ * const content = "/** Franççççais *\/ let a = 123";
+ * const result = biome.lintContent(projectKey, content, { filePath: "example.js" });
+ *
+ * for (const diagnostic of result.diagnostics) {
+ *     const [start, end] = spanInBytesToSpanInCodeUnits(
+ *         diagnostic.location.span,
+ *         content
+ *     );
+ *     const text = content.slice(start, end);
+ *     console.log(text); // Correctly extracts the text
+ * }
+ * ```
+ */
+export function spanInBytesToSpanInCodeUnits(
+	span: [number, number],
+	str: string,
+): [number, number] {
+	const [startInBytes, endInBytes] = span;
+	const spanInCodeUnits: [number, number] = [startInBytes, endInBytes];
+
+	let currCodeUnitIndex = 0;
+
+	// Scan through the string, looking for the start of the substring
+	let bytePos = 0;
+	while (bytePos < startInBytes && currCodeUnitIndex < str.length) {
+		const byteLength = getUtf8ByteLength(str.charAt(currCodeUnitIndex));
+		bytePos += byteLength;
+		++currCodeUnitIndex;
+
+		// Make sure to include low surrogate
+		if (byteLength === 4 && bytePos === startInBytes) {
+			++currCodeUnitIndex;
+		}
+	}
+
+	// We've found the start, we update the start of spanInCodeUnits
+	spanInCodeUnits[0] = currCodeUnitIndex;
+
+	// Now scan through the following string to find the end
+	while (bytePos < endInBytes && currCodeUnitIndex < str.length) {
+		const byteLength = getUtf8ByteLength(str.charAt(currCodeUnitIndex));
+		bytePos += byteLength;
+		++currCodeUnitIndex;
+
+		// Make sure to include low surrogate
+		if (byteLength === 4 && bytePos === endInBytes) {
+			++currCodeUnitIndex;
+		}
+	}
+
+	// We've found the end, we update the end of spanInCodeUnits
+	spanInCodeUnits[1] = currCodeUnitIndex;
+
+	return spanInCodeUnits;
+}
+
 export interface FormatContentDebugOptions extends FormatContentOptions {
 	/**
 	 * If `true`, you'll be able to inspect the IR of the formatter
