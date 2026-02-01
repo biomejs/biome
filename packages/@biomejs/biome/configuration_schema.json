@@ -5678,7 +5678,7 @@
 					]
 				},
 				"noRedundantDefaultExport": {
-					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/no-redundant-default-export>",
+					"description": "Checks if a default export exports the same symbol as a named export.\nSee https://biomejs.dev/linter/rules/no-redundant-default-export",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoRedundantDefaultExportConfiguration" },
 						{ "type": "null" }
