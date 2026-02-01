@@ -8292,6 +8292,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssRelativeSelectorList 
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssRootItemList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssRootItemList,
+        crate::css::lists::root_item_list::FormatCssRootItemList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::lists::root_item_list::FormatCssRootItemList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssRootItemList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssRootItemList,
+        crate::css::lists::root_item_list::FormatCssRootItemList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::lists::root_item_list::FormatCssRootItemList::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssRuleList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -11571,6 +11596,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssRoot {
         FormatOwnedWithRule<biome_css_syntax::AnyCssRoot, crate::css::any::root::FormatAnyCssRoot>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::css::any::root::FormatAnyCssRoot::default())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssRootItem {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssRootItem,
+        crate::css::any::root_item::FormatAnyCssRootItem,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::root_item::FormatAnyCssRootItem::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssRootItem {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssRootItem,
+        crate::css::any::root_item::FormatAnyCssRootItem,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::root_item::FormatAnyCssRootItem::default(),
+        )
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssRule {

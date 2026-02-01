@@ -12,7 +12,6 @@ impl FormatRule<AnyCssRule> for FormatAnyCssRule {
             AnyCssRule::CssBogusRule(node) => node.format().fmt(f),
             AnyCssRule::CssNestedQualifiedRule(node) => node.format().fmt(f),
             AnyCssRule::CssQualifiedRule(node) => node.format().fmt(f),
-            AnyCssRule::ScssDeclaration(node) => node.format().fmt(f),
         }
     }
 }
