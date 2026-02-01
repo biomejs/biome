@@ -25,7 +25,7 @@ HtmlRoot {
                     value_token: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
-                    HtmlSingleTextExpression {
+                    HtmlAttributeSingleTextExpression {
                         l_curly_token: L_CURLY@8..9 "{" [] [],
                         expression: HtmlTextExpression {
                             html_literal_token: HTML_LITERAL@9..17 "disabled" [] [],
@@ -68,7 +68,7 @@ HtmlRoot {
         1: HTML_TAG_NAME@1..8
           0: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@8..18
-          0: HTML_SINGLE_TEXT_EXPRESSION@8..18
+          0: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@8..18
             0: L_CURLY@8..9 "{" [] []
             1: HTML_TEXT_EXPRESSION@9..17
               0: HTML_LITERAL@9..17 "disabled" [] []

@@ -8,7 +8,9 @@ impl FormatRule<AnyHtmlAttributeInitializer> for FormatAnyHtmlAttributeInitializ
     type Context = HtmlFormatContext;
     fn fmt(&self, node: &AnyHtmlAttributeInitializer, f: &mut HtmlFormatter) -> FormatResult<()> {
         match node {
-            AnyHtmlAttributeInitializer::HtmlSingleTextExpression(node) => node.format().fmt(f),
+            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(node) => {
+                node.format().fmt(f)
+            }
             AnyHtmlAttributeInitializer::HtmlString(node) => node.format().fmt(f),
         }
     }

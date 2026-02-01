@@ -120,6 +120,19 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttribute {
         )
     }
 }
+impl FormatRule < biome_html_syntax :: HtmlAttributeDoubleTextExpression > for crate :: html :: auxiliary :: attribute_double_text_expression :: FormatHtmlAttributeDoubleTextExpression { type Context = HtmlFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_html_syntax :: HtmlAttributeDoubleTextExpression , f : & mut HtmlFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_html_syntax :: HtmlAttributeDoubleTextExpression > :: fmt (self , node , f) } }
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttributeDoubleTextExpression {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_html_syntax :: HtmlAttributeDoubleTextExpression , crate :: html :: auxiliary :: attribute_double_text_expression :: FormatHtmlAttributeDoubleTextExpression > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: html :: auxiliary :: attribute_double_text_expression :: FormatHtmlAttributeDoubleTextExpression :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttributeDoubleTextExpression {
+    type Format = FormatOwnedWithRule < biome_html_syntax :: HtmlAttributeDoubleTextExpression , crate :: html :: auxiliary :: attribute_double_text_expression :: FormatHtmlAttributeDoubleTextExpression > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: html :: auxiliary :: attribute_double_text_expression :: FormatHtmlAttributeDoubleTextExpression :: default ())
+    }
+}
 impl FormatRule<biome_html_syntax::HtmlAttributeInitializerClause>
     for crate::html::auxiliary::attribute_initializer_clause::FormatHtmlAttributeInitializerClause
 {
@@ -188,6 +201,19 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttributeName {
             self,
             crate::html::auxiliary::attribute_name::FormatHtmlAttributeName::default(),
         )
+    }
+}
+impl FormatRule < biome_html_syntax :: HtmlAttributeSingleTextExpression > for crate :: html :: auxiliary :: attribute_single_text_expression :: FormatHtmlAttributeSingleTextExpression { type Context = HtmlFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_html_syntax :: HtmlAttributeSingleTextExpression , f : & mut HtmlFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_html_syntax :: HtmlAttributeSingleTextExpression > :: fmt (self , node , f) } }
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttributeSingleTextExpression {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_html_syntax :: HtmlAttributeSingleTextExpression , crate :: html :: auxiliary :: attribute_single_text_expression :: FormatHtmlAttributeSingleTextExpression > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: html :: auxiliary :: attribute_single_text_expression :: FormatHtmlAttributeSingleTextExpression :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttributeSingleTextExpression {
+    type Format = FormatOwnedWithRule < biome_html_syntax :: HtmlAttributeSingleTextExpression , crate :: html :: auxiliary :: attribute_single_text_expression :: FormatHtmlAttributeSingleTextExpression > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: html :: auxiliary :: attribute_single_text_expression :: FormatHtmlAttributeSingleTextExpression :: default ())
     }
 }
 impl FormatRule<biome_html_syntax::HtmlCdataSection>

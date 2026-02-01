@@ -31,7 +31,7 @@ HtmlRoot {
                         },
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@16..17 "=" [] [],
-                            value: HtmlSingleTextExpression {
+                            value: HtmlAttributeSingleTextExpression {
                                 l_curly_token: L_CURLY@17..18 "{" [] [],
                                 expression: HtmlTextExpression {
                                     html_literal_token: HTML_LITERAL@18..23 "false" [] [],
@@ -81,7 +81,7 @@ HtmlRoot {
               0: HTML_LITERAL@8..16 "disabled" [] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@16..24
               0: EQ@16..17 "=" [] []
-              1: HTML_SINGLE_TEXT_EXPRESSION@17..24
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@17..24
                 0: L_CURLY@17..18 "{" [] []
                 1: HTML_TEXT_EXPRESSION@18..23
                   0: HTML_LITERAL@18..23 "false" [] []
