@@ -1256,6 +1256,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssRelativeSelectorList::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_ROOT_ITEM_LIST => {
+                    let $pattern = unsafe { $crate::CssRootItemList::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_RULE_LIST => {
                     let $pattern = unsafe { $crate::CssRuleList::new_unchecked(node) };
                     $body

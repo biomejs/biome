@@ -276,6 +276,7 @@ pub enum CssSyntaxKind {
     MULTILINE_COMMENT,
     GRIT_METAVARIABLE,
     CSS_ROOT,
+    CSS_ROOT_ITEM_LIST,
     CSS_SNIPPET_ROOT,
     CSS_RULE_LIST,
     CSS_QUALIFIED_RULE,
@@ -664,7 +665,8 @@ impl CssSyntaxKind {
     pub const fn is_list(self) -> bool {
         matches!(
             self,
-            CSS_RULE_LIST
+            CSS_ROOT_ITEM_LIST
+                | CSS_RULE_LIST
                 | CSS_SELECTOR_LIST
                 | CSS_DECLARATION_OR_RULE_LIST
                 | CSS_DECLARATION_OR_AT_RULE_LIST

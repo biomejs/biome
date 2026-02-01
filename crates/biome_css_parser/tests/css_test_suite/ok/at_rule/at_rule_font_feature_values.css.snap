@@ -65,7 +65,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssFontFeatureValuesAtRule {
@@ -719,7 +719,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..861
   0: (empty)
-  1: CSS_RULE_LIST@0..859
+  1: CSS_ROOT_ITEM_LIST@0..859
     0: CSS_AT_RULE@0..31
       0: AT@0..1 "@" [] []
       1: CSS_FONT_FEATURE_VALUES_AT_RULE@1..31

@@ -22,7 +22,7 @@ $height: 50vh !
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         ScssDeclaration {
             name: ScssIdentifier {
                 dollar_token: DOLLAR@0..37 "$" [Comments("// Exclamation mark b ..."), Newline("\n")] [],
@@ -98,7 +98,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..165
   0: (empty)
-  1: CSS_RULE_LIST@0..164
+  1: CSS_ROOT_ITEM_LIST@0..164
     0: SCSS_DECLARATION@0..50
       0: SCSS_IDENTIFIER@0..42
         0: DOLLAR@0..37 "$" [Comments("// Exclamation mark b ..."), Newline("\n")] []

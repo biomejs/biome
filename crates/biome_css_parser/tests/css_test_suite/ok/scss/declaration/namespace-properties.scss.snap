@@ -16,7 +16,7 @@ ns.$var: value;
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         ScssDeclaration {
             name: ScssNamespacedIdentifier {
                 namespace: CssIdentifier {
@@ -49,7 +49,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..17
   0: (empty)
-  1: CSS_RULE_LIST@0..15
+  1: CSS_ROOT_ITEM_LIST@0..15
     0: SCSS_DECLARATION@0..15
       0: SCSS_NAMESPACED_IDENTIFIER@0..7
         0: CSS_IDENTIFIER@0..2

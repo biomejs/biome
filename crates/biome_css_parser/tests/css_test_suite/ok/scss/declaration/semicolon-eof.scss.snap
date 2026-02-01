@@ -16,7 +16,7 @@ $size: 10px
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         ScssDeclaration {
             name: ScssIdentifier {
                 dollar_token: DOLLAR@0..1 "$" [] [],
@@ -60,7 +60,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..25
   0: (empty)
-  1: CSS_RULE_LIST@0..24
+  1: CSS_ROOT_ITEM_LIST@0..24
     0: SCSS_DECLARATION@0..12
       0: SCSS_IDENTIFIER@0..6
         0: DOLLAR@0..1 "$" [] []

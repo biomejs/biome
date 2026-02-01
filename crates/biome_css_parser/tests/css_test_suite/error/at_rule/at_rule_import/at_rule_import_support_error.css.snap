@@ -22,7 +22,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..51 "@" [Comments("/*invalid query insid ..."), Newline("\n")] [],
             rule: CssBogusAtRule {
@@ -138,7 +138,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..343
   0: (empty)
-  1: CSS_RULE_LIST@0..342
+  1: CSS_ROOT_ITEM_LIST@0..342
     0: CSS_AT_RULE@0..100
       0: AT@0..51 "@" [Comments("/*invalid query insid ..."), Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@51..100

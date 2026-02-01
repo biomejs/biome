@@ -32,7 +32,7 @@ h1:-webkit-any(.h1class, #bar) {}
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
@@ -964,7 +964,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..554
   0: (empty)
-  1: CSS_RULE_LIST@0..553
+  1: CSS_ROOT_ITEM_LIST@0..553
     0: CSS_QUALIFIED_RULE@0..25
       0: CSS_SELECTOR_LIST@0..23
         0: CSS_COMPOUND_SELECTOR@0..23

@@ -80,10 +80,65 @@ pub(crate) fn parse_root(p: &mut CssParser) {
         EmbeddingKind::None | EmbeddingKind::Html(_) => {
             p.eat(UNICODE_BOM);
 
-            RuleList::new(EOF).parse_list(p);
+            RootItemList.parse_list(p);
 
             m.complete(p, CSS_ROOT);
         }
+    }
+}
+
+struct RootItemList;
+
+#[inline]
+pub(crate) fn is_at_root_item_list_element(p: &mut CssParser) -> bool {
+    is_at_at_rule(p) || is_at_scss_declaration(p) || is_at_qualified_rule(p)
+}
+
+struct RootItemListParseRecovery;
+
+impl ParseRecovery for RootItemListParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_RULE;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(EOF) || is_at_root_item_list_element(p)
+    }
+}
+
+impl ParseNodeList for RootItemList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_ROOT_ITEM_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if is_at_at_rule(p) {
+            parse_at_rule(p)
+        } else if is_at_scss_declaration(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_declaration,
+                |p, marker| {
+                    scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+                },
+            )
+        } else if is_at_qualified_rule(p) {
+            parse_qualified_rule(p)
+        } else {
+            Absent
+        }
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(EOF)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(p, &RootItemListParseRecovery, expected_any_rule)
     }
 }
 
@@ -99,7 +154,7 @@ impl RuleList {
 
 #[inline]
 pub(crate) fn is_at_rule_list_element(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_scss_declaration(p) || is_at_qualified_rule(p)
+    is_at_at_rule(p) || is_at_qualified_rule(p)
 }
 
 struct RuleListParseRecovery {
@@ -130,14 +185,6 @@ impl ParseNodeList for RuleList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
-        } else if is_at_scss_declaration(p) {
-            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
-                p,
-                parse_scss_declaration,
-                |p, marker| {
-                    scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
-                },
-            )
         } else if is_at_qualified_rule(p) {
             parse_qualified_rule(p)
         } else {

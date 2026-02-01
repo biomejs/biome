@@ -21,15 +21,6 @@ $line-comment: true;
   background: white;
 }
 
-/**
- * Documentation style comment
- * @param $size - The size value
- * @returns Computed size
- */
-@function compute-size($size) {
-  @return $size * 2;
-}
-
 /* Comment with special chars: @#$%^&*() */
 $special: 10px;
 

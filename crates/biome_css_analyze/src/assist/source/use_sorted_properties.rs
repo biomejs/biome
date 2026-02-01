@@ -248,7 +248,6 @@ impl RecessOrderMember {
                 AnyCssRule::CssBogusRule(_) => NodeKindOrder::UnknownKind,
                 AnyCssRule::CssNestedQualifiedRule(_) => NodeKindOrder::NestedRuleOrAtRule,
                 AnyCssRule::CssQualifiedRule(_) => NodeKindOrder::UnknownKind,
-                AnyCssRule::ScssDeclaration(_) => NodeKindOrder::UnknownKind,
             },
             AnyCssDeclarationOrRule::CssEmptyDeclaration(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) => {

@@ -2335,15 +2335,15 @@ pub fn css_returns_statement(returns_token: SyntaxToken, ty: AnyCssType) -> CssR
         ],
     ))
 }
-pub fn css_root(rules: CssRuleList, eof_token: SyntaxToken) -> CssRootBuilder {
+pub fn css_root(items: CssRootItemList, eof_token: SyntaxToken) -> CssRootBuilder {
     CssRootBuilder {
-        rules,
+        items,
         eof_token,
         bom_token: None,
     }
 }
 pub struct CssRootBuilder {
-    rules: CssRuleList,
+    items: CssRootItemList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
 }
@@ -2357,7 +2357,7 @@ impl CssRootBuilder {
             CssSyntaxKind::CSS_ROOT,
             [
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.rules.into_syntax())),
+                Some(SyntaxElement::Node(self.items.into_syntax())),
                 Some(SyntaxElement::Token(self.eof_token)),
             ],
         ))
@@ -3801,6 +3801,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn css_root_item_list<I>(items: I) -> CssRootItemList
+where
+    I: IntoIterator<Item = AnyCssRootItem>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssRootItemList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ROOT_ITEM_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_rule_list<I>(items: I) -> CssRuleList

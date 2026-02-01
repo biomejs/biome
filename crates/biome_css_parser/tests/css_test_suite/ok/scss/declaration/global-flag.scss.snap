@@ -33,7 +33,7 @@ $global-var: initial;
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         ScssDeclaration {
             name: ScssIdentifier {
                 dollar_token: DOLLAR@0..22 "$" [Comments("// Global flag usage"), Newline("\n")] [],
@@ -239,7 +239,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..381
   0: (empty)
-  1: CSS_RULE_LIST@0..380
+  1: CSS_ROOT_ITEM_LIST@0..380
     0: SCSS_DECLARATION@0..42
       0: SCSS_IDENTIFIER@0..32
         0: DOLLAR@0..22 "$" [Comments("// Global flag usage"), Newline("\n")] []

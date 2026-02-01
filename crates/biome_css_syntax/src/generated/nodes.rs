@@ -6761,14 +6761,14 @@ impl CssRoot {
     pub fn as_fields(&self) -> CssRootFields {
         CssRootFields {
             bom_token: self.bom_token(),
-            rules: self.rules(),
+            items: self.items(),
             eof_token: self.eof_token(),
         }
     }
     pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn rules(&self) -> CssRuleList {
+    pub fn items(&self) -> CssRootItemList {
         support::list(&self.syntax, 1usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -6786,7 +6786,7 @@ impl Serialize for CssRoot {
 #[derive(Serialize)]
 pub struct CssRootFields {
     pub bom_token: Option<SyntaxToken>,
-    pub rules: CssRuleList,
+    pub items: CssRootItemList,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -11752,12 +11752,37 @@ impl AnyCssRoot {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssRootItem {
+    AnyCssRule(AnyCssRule),
+    CssBogus(CssBogus),
+    ScssDeclaration(ScssDeclaration),
+}
+impl AnyCssRootItem {
+    pub fn as_any_css_rule(&self) -> Option<&AnyCssRule> {
+        match &self {
+            Self::AnyCssRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
+        match &self {
+            Self::CssBogus(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_declaration(&self) -> Option<&ScssDeclaration> {
+        match &self {
+            Self::ScssDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssRule {
     CssAtRule(CssAtRule),
     CssBogusRule(CssBogusRule),
     CssNestedQualifiedRule(CssNestedQualifiedRule),
     CssQualifiedRule(CssQualifiedRule),
-    ScssDeclaration(ScssDeclaration),
 }
 impl AnyCssRule {
     pub fn as_css_at_rule(&self) -> Option<&CssAtRule> {
@@ -11781,12 +11806,6 @@ impl AnyCssRule {
     pub fn as_css_qualified_rule(&self) -> Option<&CssQualifiedRule> {
         match &self {
             Self::CssQualifiedRule(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_scss_declaration(&self) -> Option<&ScssDeclaration> {
-        match &self {
-            Self::ScssDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -20720,7 +20739,7 @@ impl std::fmt::Debug for CssRoot {
                     "bom_token",
                     &support::DebugOptionalElement(self.bom_token()),
                 )
-                .field("rules", &self.rules())
+                .field("items", &self.items())
                 .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
                 .finish()
         } else {
@@ -30280,6 +30299,80 @@ impl From<AnyCssRoot> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogus> for AnyCssRootItem {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
+    }
+}
+impl From<ScssDeclaration> for AnyCssRootItem {
+    fn from(node: ScssDeclaration) -> Self {
+        Self::ScssDeclaration(node)
+    }
+}
+impl AstNode for AnyCssRootItem {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssRule::KIND_SET
+        .union(CssBogus::KIND_SET)
+        .union(ScssDeclaration::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_BOGUS | SCSS_DECLARATION => true,
+            k if AnyCssRule::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
+            SCSS_DECLARATION => Self::ScssDeclaration(ScssDeclaration { syntax }),
+            _ => {
+                if let Some(any_css_rule) = AnyCssRule::cast(syntax) {
+                    return Some(Self::AnyCssRule(any_css_rule));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssBogus(it) => it.syntax(),
+            Self::ScssDeclaration(it) => it.syntax(),
+            Self::AnyCssRule(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssBogus(it) => it.into_syntax(),
+            Self::ScssDeclaration(it) => it.into_syntax(),
+            Self::AnyCssRule(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssRootItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssDeclaration(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssRootItem> for SyntaxNode {
+    fn from(n: AnyCssRootItem) -> Self {
+        match n {
+            AnyCssRootItem::AnyCssRule(it) => it.into_syntax(),
+            AnyCssRootItem::CssBogus(it) => it.into_syntax(),
+            AnyCssRootItem::ScssDeclaration(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssRootItem> for SyntaxElement {
+    fn from(n: AnyCssRootItem) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssAtRule> for AnyCssRule {
     fn from(node: CssAtRule) -> Self {
         Self::CssAtRule(node)
@@ -30300,26 +30393,16 @@ impl From<CssQualifiedRule> for AnyCssRule {
         Self::CssQualifiedRule(node)
     }
 }
-impl From<ScssDeclaration> for AnyCssRule {
-    fn from(node: ScssDeclaration) -> Self {
-        Self::ScssDeclaration(node)
-    }
-}
 impl AstNode for AnyCssRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssAtRule::KIND_SET
         .union(CssBogusRule::KIND_SET)
         .union(CssNestedQualifiedRule::KIND_SET)
-        .union(CssQualifiedRule::KIND_SET)
-        .union(ScssDeclaration::KIND_SET);
+        .union(CssQualifiedRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_AT_RULE
-                | CSS_BOGUS_RULE
-                | CSS_NESTED_QUALIFIED_RULE
-                | CSS_QUALIFIED_RULE
-                | SCSS_DECLARATION
+            CSS_AT_RULE | CSS_BOGUS_RULE | CSS_NESTED_QUALIFIED_RULE | CSS_QUALIFIED_RULE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -30330,7 +30413,6 @@ impl AstNode for AnyCssRule {
                 Self::CssNestedQualifiedRule(CssNestedQualifiedRule { syntax })
             }
             CSS_QUALIFIED_RULE => Self::CssQualifiedRule(CssQualifiedRule { syntax }),
-            SCSS_DECLARATION => Self::ScssDeclaration(ScssDeclaration { syntax }),
             _ => return None,
         };
         Some(res)
@@ -30341,7 +30423,6 @@ impl AstNode for AnyCssRule {
             Self::CssBogusRule(it) => it.syntax(),
             Self::CssNestedQualifiedRule(it) => it.syntax(),
             Self::CssQualifiedRule(it) => it.syntax(),
-            Self::ScssDeclaration(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -30350,7 +30431,6 @@ impl AstNode for AnyCssRule {
             Self::CssBogusRule(it) => it.into_syntax(),
             Self::CssNestedQualifiedRule(it) => it.into_syntax(),
             Self::CssQualifiedRule(it) => it.into_syntax(),
-            Self::ScssDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -30361,7 +30441,6 @@ impl std::fmt::Debug for AnyCssRule {
             Self::CssBogusRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssNestedQualifiedRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssQualifiedRule(it) => std::fmt::Debug::fmt(it, f),
-            Self::ScssDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -30372,7 +30451,6 @@ impl From<AnyCssRule> for SyntaxNode {
             AnyCssRule::CssBogusRule(it) => it.into_syntax(),
             AnyCssRule::CssNestedQualifiedRule(it) => it.into_syntax(),
             AnyCssRule::CssQualifiedRule(it) => it.into_syntax(),
-            AnyCssRule::ScssDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -32885,6 +32963,11 @@ impl std::fmt::Display for AnyCssRelativeSelector {
     }
 }
 impl std::fmt::Display for AnyCssRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssRootItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -38487,6 +38570,88 @@ impl IntoIterator for CssRelativeSelectorList {
 impl IntoIterator for &CssRelativeSelectorList {
     type Item = SyntaxResult<AnyCssRelativeSelector>;
     type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssRelativeSelector>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssRootItemList {
+    syntax_list: SyntaxList,
+}
+impl CssRootItemList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssRootItemList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ROOT_ITEM_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_ROOT_ITEM_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for CssRootItemList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for CssRootItemList {
+    type Language = Language;
+    type Node = AnyCssRootItem;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssRootItemList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssRootItemList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &CssRootItemList {
+    type Item = AnyCssRootItem;
+    type IntoIter = AstNodeListIterator<Language, AnyCssRootItem>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for CssRootItemList {
+    type Item = AnyCssRootItem;
+    type IntoIter = AstNodeListIterator<Language, AnyCssRootItem>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

@@ -28,8 +28,8 @@ $margin: 10px !wrong !invalid;
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
-        CssBogusRule {
+    items: CssRootItemList [
+        CssBogus {
             items: [
                 ScssIdentifier {
                     dollar_token: DOLLAR@0..79 "$" [Comments("// Invalid modifier - ..."), Newline("\n")] [],
@@ -56,7 +56,7 @@ CssRoot {
                 SEMICOLON@100..101 ";" [] [],
             ],
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 ScssIdentifier {
                     dollar_token: DOLLAR@101..145 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] [],
@@ -84,7 +84,7 @@ CssRoot {
                 SEMICOLON@165..166 ";" [] [],
             ],
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 ScssIdentifier {
                     dollar_token: DOLLAR@166..207 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] [],
@@ -112,7 +112,7 @@ CssRoot {
                 SEMICOLON@227..228 ";" [] [],
             ],
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 ScssIdentifier {
                     dollar_token: DOLLAR@228..268 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] [],
@@ -140,7 +140,7 @@ CssRoot {
                 SEMICOLON@290..291 ";" [] [],
             ],
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 ScssIdentifier {
                     dollar_token: DOLLAR@291..324 "$" [Newline("\n"), Newline("\n"), Comments("// Multiple invalid m ..."), Newline("\n")] [],
@@ -184,8 +184,8 @@ CssRoot {
 ```
 0: CSS_ROOT@0..354
   0: (empty)
-  1: CSS_RULE_LIST@0..353
-    0: CSS_BOGUS_RULE@0..101
+  1: CSS_ROOT_ITEM_LIST@0..353
+    0: CSS_BOGUS@0..101
       0: SCSS_IDENTIFIER@0..84
         0: DOLLAR@0..79 "$" [Comments("// Invalid modifier - ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@79..84
@@ -199,7 +199,7 @@ CssRoot {
           0: BANG@90..91 "!" [] []
           1: IMPORTANT_KW@91..100 "important" [] []
       4: SEMICOLON@100..101 ";" [] []
-    1: CSS_BOGUS_RULE@101..166
+    1: CSS_BOGUS@101..166
       0: SCSS_IDENTIFIER@101..150
         0: DOLLAR@101..145 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@145..150
@@ -214,7 +214,7 @@ CssRoot {
           0: BANG@158..159 "!" [] []
           1: IDENT@159..165 "random" [] []
       4: SEMICOLON@165..166 ";" [] []
-    2: CSS_BOGUS_RULE@166..228
+    2: CSS_BOGUS@166..228
       0: SCSS_IDENTIFIER@166..213
         0: DOLLAR@166..207 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@207..213
@@ -229,7 +229,7 @@ CssRoot {
           0: BANG@220..221 "!" [] []
           1: IDENT@221..227 "defalt" [] []
       4: SEMICOLON@227..228 ";" [] []
-    3: CSS_BOGUS_RULE@228..291
+    3: CSS_BOGUS@228..291
       0: SCSS_IDENTIFIER@228..277
         0: DOLLAR@228..268 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@268..277
@@ -244,7 +244,7 @@ CssRoot {
           0: BANG@284..285 "!" [] []
           1: IDENT@285..290 "globl" [] []
       4: SEMICOLON@290..291 ";" [] []
-    4: CSS_BOGUS_RULE@291..353
+    4: CSS_BOGUS@291..353
       0: SCSS_IDENTIFIER@291..330
         0: DOLLAR@291..324 "$" [Newline("\n"), Newline("\n"), Comments("// Multiple invalid m ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@324..330

@@ -78,7 +78,7 @@ impl Rule for NoEmptySource {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
 
-        if node.rules().len() > 0 {
+        if node.items().len() > 0 {
             return None;
         }
 

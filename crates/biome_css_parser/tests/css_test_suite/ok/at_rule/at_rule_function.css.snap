@@ -118,7 +118,7 @@ p {
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssFunctionAtRule {
@@ -2489,7 +2489,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..2112
   0: (empty)
-  1: CSS_RULE_LIST@0..2111
+  1: CSS_ROOT_ITEM_LIST@0..2111
     0: CSS_AT_RULE@0..102
       0: AT@0..1 "@" [] []
       1: CSS_FUNCTION_AT_RULE@1..102

@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -23,7 +22,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssNamespaceAtRule {
@@ -154,7 +153,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..316
   0: (empty)
-  1: CSS_RULE_LIST@0..315
+  1: CSS_ROOT_ITEM_LIST@0..315
     0: CSS_AT_RULE@0..20
       0: AT@0..1 "@" [] []
       1: CSS_NAMESPACE_AT_RULE@1..20
@@ -246,5 +245,3 @@ CssRoot {
   2: EOF@315..316 "" [Newline("\n")] []
 
 ```
-
-

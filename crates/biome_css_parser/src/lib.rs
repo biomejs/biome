@@ -73,9 +73,9 @@ impl CssParse {
     /// use biome_css_parser::CssParserOptions;
     /// let parse = parse_css(r#""#, CssFileSource::css(), CssParserOptions::default());
     ///
-    /// let root_value = parse.tree().as_css_root().unwrap().rules();
+    /// let root_value = parse.tree().as_css_root().unwrap().items();
     ///
-    /// assert_eq!(root_value.syntax().kind(), CssSyntaxKind::CSS_RULE_LIST);
+    /// assert_eq!(root_value.syntax().kind(), CssSyntaxKind::CSS_ROOT_ITEM_LIST);
     ///
     /// # Ok(())
     /// # }

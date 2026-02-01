@@ -2720,7 +2720,7 @@ impl CssRoot {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_rules(self, element: CssRuleList) -> Self {
+    pub fn with_items(self, element: CssRootItemList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),

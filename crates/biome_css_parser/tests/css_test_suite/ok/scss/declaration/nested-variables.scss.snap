@@ -18,7 +18,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
@@ -88,7 +88,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..51
   0: (empty)
-  1: CSS_RULE_LIST@0..50
+  1: CSS_ROOT_ITEM_LIST@0..50
     0: CSS_QUALIFIED_RULE@0..50
       0: CSS_SELECTOR_LIST@0..8
         0: CSS_COMPOUND_SELECTOR@0..8

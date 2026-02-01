@@ -76,12 +76,19 @@ AnyCssRoot =
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
-	rules: CssRuleList
+	items: CssRootItemList
 	eof: 'EOF'
 
 CssSnippetRoot =
 	items: CssDeclarationOrRuleList
 	eof: 'EOF'
+
+CssRootItemList = AnyCssRootItem*
+
+AnyCssRootItem =
+	AnyCssRule
+	| ScssDeclaration
+	| CssBogus
 
 CssRuleList = AnyCssRule*
 
@@ -89,7 +96,6 @@ AnyCssRule =
 	CssQualifiedRule
 	| CssNestedQualifiedRule
 	| CssAtRule
-	| ScssDeclaration
 	| CssBogusRule
 
 // .header { color: red }
