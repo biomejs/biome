@@ -7,7 +7,7 @@ use biome_js_syntax::{
     JsIdentifierAssignment, JsIdentifierExpression, JsStaticMemberAssignment,
     JsStaticMemberExpression, JsSyntaxKind,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeCast, TextRange, declare_node_union};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeCast, TextRange, TokenText, declare_node_union};
 use biome_rule_options::use_global_this::UseGlobalThisOptions;
 
 use crate::services::semantic::Semantic;
@@ -101,7 +101,8 @@ fn check_expression(expr: &UseGlobalThisQuery, model: &SemanticModel) -> Option<
     match expr {
         UseGlobalThisQuery::JsIdentifierExpression(expr) => {
             let reference = expr.name().ok()?;
-            let ident_name = reference.to_trimmed_text();
+            let ident_name = reference.value_token().ok()?;
+            let ident_name = ident_name.token_text_trimmed();
             if !is_global_identifier(&ident_name) || model.binding(&reference).is_some() {
                 return None;
             }
@@ -110,7 +111,8 @@ fn check_expression(expr: &UseGlobalThisQuery, model: &SemanticModel) -> Option<
             match parent.kind() {
                 JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => {
                     let assignment = parent.cast::<JsStaticMemberAssignment>()?;
-                    let member_name = assignment.member().ok()?.as_js_name()?.to_trimmed_text();
+                    let member_name = assignment.member().ok()?.as_js_name()?.value_token().ok()?;
+                    let member_name = member_name.token_text_trimmed();
                     if check_is_window_specific_api(&ident_name, &member_name, None)
                         || check_is_web_worker_specific_api(&ident_name, &member_name)
                     {
@@ -119,7 +121,8 @@ fn check_expression(expr: &UseGlobalThisQuery, model: &SemanticModel) -> Option<
                 }
                 JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION => {
                     let expr = parent.cast::<JsStaticMemberExpression>()?;
-                    let member_name = expr.member().ok()?.as_js_name()?.to_trimmed_text();
+                    let member_name = expr.member().ok()?.as_js_name()?.value_token().ok()?;
+                    let member_name = member_name.token_text_trimmed();
                     let call_expr = expr
                         .syntax()
                         .parent()
@@ -132,24 +135,28 @@ fn check_expression(expr: &UseGlobalThisQuery, model: &SemanticModel) -> Option<
                 }
                 JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => {
                     let assignment = parent.cast::<JsComputedMemberAssignment>()?;
-                    let member_name = assignment.member().ok()?.to_trimmed_text();
-                    let member_name = member_name.trim_matches(['\'', '"', '`']);
-                    if check_is_window_specific_api(&ident_name, member_name, None)
-                        || check_is_web_worker_specific_api(&ident_name, member_name)
+                    let member_expr = assignment.member().ok()?;
+                    let member_expr = member_expr.as_any_js_literal_expression()?;
+                    let member_expr = member_expr.as_js_string_literal_expression()?;
+                    let member_name = member_expr.inner_string_text().ok()?;
+                    if check_is_window_specific_api(&ident_name, &member_name, None)
+                        || check_is_web_worker_specific_api(&ident_name, &member_name)
                     {
                         return None;
                     }
                 }
                 JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
                     let expr = parent.cast::<JsComputedMemberExpression>()?;
-                    let member_name = expr.member().ok()?.to_trimmed_text();
-                    let member_name = member_name.trim_matches(['\'', '"', '`']);
+                    let member_expr = expr.member().ok()?;
+                    let member_expr = member_expr.as_any_js_literal_expression()?;
+                    let member_expr = member_expr.as_js_string_literal_expression()?;
+                    let member_name = member_expr.inner_string_text().ok()?;
                     let call_expr = expr
                         .syntax()
                         .parent()
                         .and_then(|node| node.cast::<JsCallExpression>());
-                    if check_is_window_specific_api(&ident_name, member_name, call_expr)
-                        || check_is_web_worker_specific_api(&ident_name, member_name)
+                    if check_is_window_specific_api(&ident_name, &member_name, call_expr)
+                        || check_is_web_worker_specific_api(&ident_name, &member_name)
                     {
                         return None;
                     }
@@ -159,7 +166,8 @@ fn check_expression(expr: &UseGlobalThisQuery, model: &SemanticModel) -> Option<
             Some(expr.range())
         }
         UseGlobalThisQuery::JsIdentifierAssignment(assignment) => {
-            let name = assignment.to_trimmed_text();
+            let name = assignment.name_token().ok()?;
+            let name = name.token_text_trimmed();
             if !is_global_identifier(&name) || model.binding(assignment).is_some() {
                 return None;
             }
@@ -291,11 +299,11 @@ const EVENT_TARGET_METHODS: [&str; 3] =
     ["addEventListener", "removeEventListener", "dispatchEvent"];
 
 fn check_is_window_specific_api(
-    obj_name: &str,
-    member_name: &str,
+    obj_name: &TokenText,
+    member_name: &TokenText,
     call_expr: Option<JsCallExpression>,
 ) -> bool {
-    if obj_name != "window" {
+    if obj_name.text() != "window" {
         return false;
     }
 
@@ -305,21 +313,23 @@ fn check_is_window_specific_api(
 
     // For addEventListener/removeEventListener/dispatchEvent, check if the event is window-specific
     if let Some(call_expr) = call_expr
-        && EVENT_TARGET_METHODS.contains(&member_name)
+        && EVENT_TARGET_METHODS.contains(&member_name.text())
         && let Ok(args) = call_expr.arguments()
         && let Some(Ok(first_arg)) = args.args().first()
-    {
-        let event = first_arg.to_trimmed_text();
-        let event = event.trim_matches(['\'', '"', '`']);
-        return is_window_specific_event(event);
+        && let Some(first_arg_expr) = first_arg.as_any_js_expression()
+        && let Some(first_arg_expr) = first_arg_expr.as_any_js_literal_expression()
+        && let Some(first_arg_expr) = first_arg_expr.as_js_string_literal_expression()
+        && let Ok(event) = first_arg_expr.value_token() {
+            let event = event.token_text_trimmed();
+            return is_window_specific_event(&event);
     }
 
     // For other window-specific APIs, always return true
     true
 }
 
-fn check_is_web_worker_specific_api(obj_name: &str, member_name: &str) -> bool {
-    obj_name == "self" && is_web_workers_specific_api(member_name)
+fn check_is_web_worker_specific_api(obj_name: &TokenText, member_name: &str) -> bool {
+    obj_name.text() == "self" && is_web_workers_specific_api(member_name)
 }
 
 fn is_global_identifier(name: &str) -> bool {
