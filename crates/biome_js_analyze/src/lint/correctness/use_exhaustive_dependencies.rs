@@ -183,7 +183,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// import { useCallback } from "react";
     ///
     /// function component() {
