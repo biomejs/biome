@@ -843,6 +843,235 @@ impl<'a> ProcessFixAll<'a> {
     }
 }
 
+/// Represents a collected action with its affected text range for conflict detection.
+///
+/// Used by `ProcessFixAllBatched` to track actions and their ranges so that
+/// non-overlapping fixes can be batched together.
+pub(crate) struct CollectedAction<L: biome_rowan::Language> {
+    pub(crate) action: AnalyzerAction<L>,
+    pub(crate) range: TextRange,
+}
+
+/// Given a list of actions, return a subset of non-overlapping actions.
+///
+/// Uses a greedy algorithm: Process actions in order, skip any that overlap with already-selected actions
+pub(crate) fn select_non_overlapping<L: biome_rowan::Language>(
+    actions: Vec<CollectedAction<L>>,
+) -> Vec<AnalyzerAction<L>> {
+    if actions.is_empty() {
+        return Vec::new();
+    }
+
+    let mut selected: Vec<CollectedAction<L>> = Vec::new();
+
+    for candidate in actions {
+        // Check if this action overlaps with any already-selected action
+        let overlaps = selected
+            .iter()
+            .any(|s| s.range.intersect(candidate.range).is_some());
+
+        if !overlaps {
+            selected.push(candidate);
+        }
+    }
+
+    selected.into_iter().map(|a| a.action).collect()
+}
+
+/// Batched version of ProcessFixAll that collects multiple non-overlapping
+/// fixes per analysis pass for improved performance.
+///
+/// Unlike `ProcessFixAll` which breaks on the first applicable fix,
+/// this collects ALL applicable fixes during a single analysis pass,
+/// filters out overlapping ones, and applies them all at once.
+///
+/// This reduces the number of analysis passes from O(N) to approximately O(log N)
+/// for typical cases where most fixes don't overlap.
+pub(crate) struct ProcessFixAllBatched<'a, L: biome_rowan::Language> {
+    fix_file_mode: &'a FixFileMode,
+    errors: usize,
+    rules: Option<Cow<'a, Rules>>,
+    skipped_suggested_fixes: u32,
+    applied_actions: Vec<FixAction>,
+    growth_guard: GrowthGuard,
+    /// Actions collected during current analysis pass
+    collected_actions: Vec<CollectedAction<L>>,
+    /// Whether we're in the first analysis pass. Skipped fixes are only counted in the first pass
+    /// to maintain consistent behavior with the non-batched approach.
+    first_pass: bool,
+}
+
+impl<'a, L: biome_rowan::Language> ProcessFixAllBatched<'a, L> {
+    pub(crate) fn new(
+        params: &'a FixAllParams,
+        rules: Option<Cow<'a, Rules>>,
+        syntax_len: u32,
+    ) -> Self {
+        Self {
+            fix_file_mode: &params.fix_file_mode,
+            errors: 0,
+            rules,
+            skipped_suggested_fixes: 0,
+            applied_actions: Vec::new(),
+            growth_guard: GrowthGuard::new(syntax_len),
+            collected_actions: Vec::new(),
+            first_pass: true,
+        }
+    }
+
+    /// Process a signal and COLLECT applicable actions.
+    ///
+    /// Unlike `ProcessFixAll::process_signal`, this never returns `Break` -
+    /// it collects all applicable actions for later batch processing.
+    pub(crate) fn collect_signal(&mut self, signal: &dyn AnalyzerSignal<L>) -> ControlFlow<Never> {
+        let current_diagnostic = signal.diagnostic();
+
+        if let Some(diagnostic) = current_diagnostic.as_ref()
+            && is_diagnostic_error(diagnostic, self.rules.as_deref())
+        {
+            self.errors += 1;
+        }
+
+        for action in signal.actions() {
+            let dominated = match self.fix_file_mode {
+                FixFileMode::ApplySuppressions => action.is_suppression(),
+                FixFileMode::SafeFixes => {
+                    if action.is_suppression() {
+                        continue;
+                    }
+                    if action.applicability == Applicability::MaybeIncorrect {
+                        // Only count skipped fixes in the first pass to maintain
+                        // consistent behavior with the non-batched approach
+                        if self.first_pass {
+                            self.skipped_suggested_fixes += 1;
+                        }
+                        continue;
+                    }
+                    action.applicability == Applicability::Always
+                }
+                FixFileMode::SafeAndUnsafeFixes => {
+                    if action.is_suppression() {
+                        continue;
+                    }
+                    matches!(
+                        action.applicability,
+                        Applicability::Always | Applicability::MaybeIncorrect
+                    )
+                }
+            };
+
+            if dominated {
+                // Clone mutation to get range without consuming it
+                if let Some((range, _)) = action.mutation.clone().to_text_range_and_edit() {
+                    self.collected_actions
+                        .push(CollectedAction { action, range });
+                }
+            }
+        }
+
+        ControlFlow::Continue(())
+    }
+
+    /// After analysis completes, extract non-overlapping actions.
+    /// Clears the collection for the next pass.
+    pub(crate) fn take_batch(&mut self) -> Vec<AnalyzerAction<L>> {
+        let actions = std::mem::take(&mut self.collected_actions);
+        // Mark that we're no longer in the first pass
+        self.first_pass = false;
+        select_non_overlapping(actions)
+    }
+
+    /// Merge multiple actions into a single `BatchMutation`.
+    ///
+    /// Returns `None` if the batch is empty.
+    /// This also updates the applied_actions list and decrements error count.
+    pub(crate) fn merge_actions(
+        &mut self,
+        actions: Vec<AnalyzerAction<L>>,
+    ) -> Option<biome_rowan::BatchMutation<L>> {
+        if actions.is_empty() {
+            return None;
+        }
+
+        // Start with first action's mutation
+        let mut iter = actions.into_iter();
+        let first = iter.next().expect("actions is not empty");
+
+        // Track this action
+        if let Some((range, _)) = first.mutation.clone().to_text_range_and_edit() {
+            self.applied_actions.push(FixAction {
+                rule_name: first
+                    .rule_name
+                    .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                range,
+            });
+        }
+        self.errors = self.errors.saturating_sub(1);
+
+        let mut combined = first.mutation;
+
+        // Merge remaining actions
+        for action in iter {
+            if let Some((range, _)) = action.mutation.clone().to_text_range_and_edit() {
+                self.applied_actions.push(FixAction {
+                    rule_name: action
+                        .rule_name
+                        .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                    range,
+                });
+            }
+            self.errors = self.errors.saturating_sub(1);
+            combined.merge(action.mutation);
+        }
+
+        Some(combined)
+    }
+
+    /// Check growth guard and return error if exceeded.
+    pub(crate) fn check_growth(&mut self, new_len: u32) -> Result<(), WorkspaceError> {
+        if !self.growth_guard.check(new_len) {
+            // In order to provide a useful diagnostic, we want to flag the rules that caused the conflict.
+            // We can do this by inspecting the last few fixes that were applied.
+            // We limit it to the last 10 fixes. If there is a chain of conflicting fixes longer than that, something is **really** fucked up.
+
+            let mut seen_rules = HashSet::new();
+            for action in self.applied_actions.iter().rev().take(10) {
+                if let Some((group, rule)) = action.rule_name.as_ref() {
+                    seen_rules.insert((group.clone(), rule.clone()));
+                }
+            }
+
+            return Err(WorkspaceError::RuleError(
+                RuleError::ConflictingRuleFixesError {
+                    rules: seen_rules.into_iter().collect(),
+                },
+            ));
+        }
+        Ok(())
+    }
+
+    /// Finish processing and return the final result.
+    ///
+    /// The `format_tree` closure must return the final code (formatted, if needed).
+    pub(crate) fn finish<F, C>(self, format_tree: F) -> Result<FixFileResult, WorkspaceError>
+    where
+        F: FnOnce() -> Result<Either<FormatResult<Formatted<C>>, String>, WorkspaceError>,
+        C: FormatContext,
+    {
+        let code = match format_tree()? {
+            Either::Left(formatted) => formatted?.print()?.into_code(),
+            Either::Right(code) => code,
+        };
+
+        Ok(FixFileResult {
+            code,
+            actions: self.applied_actions,
+            errors: self.errors,
+            skipped_suggested_fixes: self.skipped_suggested_fixes,
+        })
+    }
+}
+
 pub(crate) struct ProcessDiagnosticsAndActions {
     diagnostics: Vec<(biome_diagnostics::serde::Diagnostic, Vec<CodeAction>)>,
     diagnostic_offset: Option<TextSize>,

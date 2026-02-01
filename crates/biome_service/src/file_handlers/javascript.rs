@@ -2,7 +2,7 @@ use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
     DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler, FormatterCapabilities,
     LintParams, LintResults, ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions,
-    ProcessFixAll, ProcessLint, SearchCapabilities, search,
+    ProcessFixAllBatched, ProcessLint, SearchCapabilities, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -19,7 +19,7 @@ use crate::{
 use biome_analyze::options::{PreferredIndentation, PreferredQuote};
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
-    RuleCategoriesBuilder, RuleFilter,
+    RuleCategoriesBuilder, RuleError, RuleFilter,
 };
 use biome_configuration::javascript::{
     JsAssistConfiguration, JsAssistEnabled, JsFormatterConfiguration, JsFormatterEnabled,
@@ -853,6 +853,9 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 }
 
 /// If applies all the safe fixes to the given syntax tree.
+///
+/// This uses a batched approach that collects multiple non-overlapping fixes
+/// per analysis pass for improved performance.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let mut tree: AnyJsRoot = params.parse.tree();
 
@@ -887,7 +890,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         return Err(extension_error(params.biome_path));
     };
 
-    let mut process_fix_all = ProcessFixAll::new(
+    let mut process = ProcessFixAllBatched::<JsLanguage>::new(
         &params,
         rules,
         tree.syntax().text_range_with_trivia().len().into(),
@@ -900,25 +903,22 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             file_source,
         ));
 
-        let (action, _) = analyze(
+        // Analyze and collect ALL applicable actions (never breaks early)
+        let (_, _) = analyze(
             &tree,
             filter,
             &analyzer_options,
             &params.plugins,
             services,
-            |signal| process_fix_all.process_signal(signal),
+            |signal| process.collect_signal(signal),
         );
 
-        let result = process_fix_all.process_action(action, |root| {
-            tree = match AnyJsRoot::cast(root) {
-                Some(tree) => tree,
-                None => return None,
-            };
-            Some(tree.syntax().text_range_with_trivia().len().into())
-        })?;
+        // Get non-overlapping batch of actions
+        let batch = process.take_batch();
 
-        if result.is_none() {
-            return process_fix_all.finish(|| {
+        if batch.is_empty() {
+            // No more fixes to apply - we're done
+            return process.finish(|| {
                 Ok(if params.should_format {
                     Either::Left(format_node(
                         params.settings.format_options::<JsLanguage>(
@@ -931,6 +931,23 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     Either::Right(tree.syntax().to_string())
                 })
             });
+        }
+
+        // Merge all actions into one mutation and apply
+        if let Some(combined_mutation) = process.merge_actions(batch) {
+            let (new_root, _) = combined_mutation.commit_with_text_range_and_edit(true);
+            tree = match AnyJsRoot::cast(new_root) {
+                Some(tree) => tree,
+                None => {
+                    return Err(WorkspaceError::RuleError(
+                        RuleError::ReplacedRootWithNonRootError { rule_name: None },
+                    ));
+                }
+            };
+
+            // Check for runaway growth
+            let new_len: u32 = tree.syntax().text_range_with_trivia().len().into();
+            process.check_growth(new_len)?;
         }
     }
 }
