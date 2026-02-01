@@ -25,9 +25,9 @@ describe("spanInBytesToSpanInCodeUnits", () => {
 			filePath: "example.js",
 		});
 
-		// Find the diagnostic for unused variable 'a'
-		const diagnostic = result.diagnostics.find((d) =>
-			d.description?.includes("unused"),
+		// Find the diagnostic for unused variable 'a' using category (stable across locales)
+		const diagnostic = result.diagnostics.find(
+			(d) => d.category === "lint/correctness/noUnusedVariables",
 		);
 		expect(diagnostic).toBeDefined();
 
@@ -52,8 +52,8 @@ describe("spanInBytesToSpanInCodeUnits", () => {
 			filePath: "example.js",
 		});
 
-		const diagnostic = result.diagnostics.find((d) =>
-			d.description?.includes("unused"),
+		const diagnostic = result.diagnostics.find(
+			(d) => d.category === "lint/correctness/noUnusedVariables",
 		);
 		expect(diagnostic).toBeDefined();
 
@@ -72,8 +72,8 @@ describe("spanInBytesToSpanInCodeUnits", () => {
 			filePath: "example.js",
 		});
 
-		const diagnostic = result.diagnostics.find((d) =>
-			d.description?.includes("unused"),
+		const diagnostic = result.diagnostics.find(
+			(d) => d.category === "lint/correctness/noUnusedVariables",
 		);
 		expect(diagnostic).toBeDefined();
 
@@ -92,13 +92,33 @@ describe("spanInBytesToSpanInCodeUnits", () => {
 			filePath: "example.js",
 		});
 
-		const diagnostic = result.diagnostics.find((d) =>
-			d.description?.includes("unused"),
+		const diagnostic = result.diagnostics.find(
+			(d) => d.category === "lint/correctness/noUnusedVariables",
 		);
 		expect(diagnostic).toBeDefined();
 
 		const [startCodeUnits, endCodeUnits] = spanInBytesToSpanInCodeUnits(
 			diagnostic!.location.span,
+			content,
+		);
+		const slice = content.slice(startCodeUnits, endCodeUnits);
+		expect(slice).toBe("x");
+	});
+
+	it("should handle unpaired surrogates correctly", () => {
+		// Unpaired surrogates are replaced with U+FFFD (3 bytes) by TextEncoder/wasm-bindgen
+		// High surrogate \uD800 without a following low surrogate
+		const unpairedHigh = "\uD800";
+		const content = `/* ${unpairedHigh} */ let x = 1`;
+
+		// Calculate expected byte positions using TextEncoder (same as wasm-bindgen)
+		const encoder = new TextEncoder();
+		const encoded = encoder.encode(content);
+		const xBytePos = encoded.indexOf("x".charCodeAt(0));
+
+		// Convert the byte span to code unit span
+		const [startCodeUnits, endCodeUnits] = spanInBytesToSpanInCodeUnits(
+			[xBytePos, xBytePos + 1],
 			content,
 		);
 		const slice = content.slice(startCodeUnits, endCodeUnits);

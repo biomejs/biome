@@ -9,31 +9,61 @@ import type {
 import { tryCatchWrapper } from "./wasm";
 
 /**
- * Get the UTF-8 byte length of a UTF-16 code unit.
- *
- * @param codeUnit A single character (UTF-16 code unit)
- * @returns The number of bytes this code unit takes in UTF-8 encoding
+ * Check if a code point is a UTF-16 high surrogate (U+D800-U+DBFF).
  */
-function getUtf8ByteLength(codeUnit: string): number {
-	const code = codeUnit.charCodeAt(0);
-	if (code < 128) {
-		return 1;
+function isHighSurrogate(code: number): boolean {
+	return code >= 0xd800 && code <= 0xdbff;
+}
+
+/**
+ * Check if a code point is a UTF-16 low surrogate (U+DC00-U+DFFF).
+ */
+function isLowSurrogate(code: number): boolean {
+	return code >= 0xdc00 && code <= 0xdfff;
+}
+
+/**
+ * Get the UTF-8 byte length for a code unit at a given index, with lookahead
+ * for proper surrogate pair handling.
+ *
+ * When TextEncoder (used by wasm-bindgen) encounters an unpaired surrogate,
+ * it replaces it with U+FFFD (3 bytes). This function handles that case.
+ *
+ * @param str The string containing the code unit
+ * @param index The index of the code unit
+ * @returns A tuple of [byteLength, codeUnitsConsumed]
+ */
+function getUtf8ByteLengthAt(str: string, index: number): [number, number] {
+	const code = str.charCodeAt(index);
+
+	// ASCII: 1 byte, 1 code unit
+	if (code < 0x80) {
+		return [1, 1];
 	}
-	if (code < 2048) {
-		return 2;
+
+	// 2-byte UTF-8 (U+0080-U+07FF): 2 bytes, 1 code unit
+	if (code < 0x800) {
+		return [2, 1];
 	}
-	// UTF-16 high surrogate
-	if (55296 <= code && code <= 56319) {
-		return 4;
+
+	// High surrogate: check if followed by low surrogate
+	if (isHighSurrogate(code)) {
+		const nextCode = str.charCodeAt(index + 1);
+		if (isLowSurrogate(nextCode)) {
+			// Valid surrogate pair: 4 bytes, 2 code units
+			return [4, 2];
+		}
+		// Unpaired high surrogate: replaced with U+FFFD (3 bytes), 1 code unit
+		return [3, 1];
 	}
-	// UTF-16 low surrogate
-	if (56320 <= code && code <= 57343) {
-		return 0;
+
+	// Unpaired low surrogate: replaced with U+FFFD (3 bytes), 1 code unit
+	if (isLowSurrogate(code)) {
+		return [3, 1];
 	}
-	if (code < 65536) {
-		return 3;
-	}
-	throw new Error(`Bad UTF-16 code unit "${codeUnit}" with code ${code}`);
+
+	// BMP character (U+0800-U+FFFF, excluding surrogates): 3 bytes, 1 code unit
+	return [3, 1];
 }
 
 /**
@@ -71,18 +101,16 @@ export function spanInBytesToSpanInCodeUnits(
 	const spanInCodeUnits: [number, number] = [startInBytes, endInBytes];
 
 	let currCodeUnitIndex = 0;
+	let bytePos = 0;
 
 	// Scan through the string, looking for the start of the substring
-	let bytePos = 0;
 	while (bytePos < startInBytes && currCodeUnitIndex < str.length) {
-		const byteLength = getUtf8ByteLength(str.charAt(currCodeUnitIndex));
+		const [byteLength, codeUnitsConsumed] = getUtf8ByteLengthAt(
+			str,
+			currCodeUnitIndex,
+		);
 		bytePos += byteLength;
-		++currCodeUnitIndex;
-
-		// Make sure to include low surrogate
-		if (byteLength === 4 && bytePos === startInBytes) {
-			++currCodeUnitIndex;
-		}
+		currCodeUnitIndex += codeUnitsConsumed;
 	}
 
 	// We've found the start, we update the start of spanInCodeUnits
@@ -90,14 +118,12 @@ export function spanInBytesToSpanInCodeUnits(
 
 	// Now scan through the following string to find the end
 	while (bytePos < endInBytes && currCodeUnitIndex < str.length) {
-		const byteLength = getUtf8ByteLength(str.charAt(currCodeUnitIndex));
+		const [byteLength, codeUnitsConsumed] = getUtf8ByteLengthAt(
+			str,
+			currCodeUnitIndex,
+		);
 		bytePos += byteLength;
-		++currCodeUnitIndex;
-
-		// Make sure to include low surrogate
-		if (byteLength === 4 && bytePos === endInBytes) {
-			++currCodeUnitIndex;
-		}
+		currCodeUnitIndex += codeUnitsConsumed;
 	}
 
 	// We've found the end, we update the end of spanInCodeUnits
