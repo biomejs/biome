@@ -329,8 +329,7 @@ fn check_is_window_specific_api(
         && let Some(first_arg_expr) = first_arg.as_any_js_expression()
         && let Some(first_arg_expr) = first_arg_expr.as_any_js_literal_expression()
         && let Some(first_arg_expr) = first_arg_expr.as_js_string_literal_expression()
-        && let Ok(event) = first_arg_expr.value_token() {
-            let event = event.token_text_trimmed();
+        && let Ok(event) = first_arg_expr.inner_string_text() {
             return is_window_specific_event(&event);
     }
 
