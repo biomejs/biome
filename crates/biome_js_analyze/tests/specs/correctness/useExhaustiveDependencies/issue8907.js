@@ -1,0 +1,25 @@
+/* should not generate diagnostics */
+
+import { useEffect, useState, useRef } from "react";
+
+// Issue #8907: useState setters and refs declared with `let` should be stable
+export const Component = () => {
+  let [a, setA] = useState(0);
+  let b = useRef("");
+
+  useEffect(() => {
+    setA(1);
+    b.current = "test";
+  }, []);
+};
+
+// Also test with const for comparison (should still work)
+export const Component2 = () => {
+  const [a, setA] = useState(0);
+  const b = useRef("");
+
+  useEffect(() => {
+    setA(1);
+    b.current = "test";
+  }, []);
+};
