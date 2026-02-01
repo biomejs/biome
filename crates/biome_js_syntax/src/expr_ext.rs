@@ -2085,10 +2085,10 @@ impl JsCallExpression {
                 }
 
                 // Pattern: (name, options, callback)
-                if is_object_expression(&second) {
-                    if let Some(Ok(third_arg)) = third {
-                        return is_function_with_block_body(&third_arg);
-                    }
+                if is_object_expression(&second)
+                    && let Some(Ok(third_arg)) = third
+                {
+                    return is_function_with_block_body(&third_arg);
                 }
 
                 Ok(false)
