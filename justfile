@@ -274,3 +274,7 @@ ready:
 # Creates a new changeset for the final changelog
 new-changeset:
   pnpm changeset
+
+# Create new crate
+new-crate name:
+  cargo new crates/{{name}} --lib
