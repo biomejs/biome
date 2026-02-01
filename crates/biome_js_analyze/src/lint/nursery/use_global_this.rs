@@ -110,55 +110,65 @@ fn check_expression(expr: &UseGlobalThisQuery, model: &SemanticModel) -> Option<
             let parent = expr.syntax().parent()?;
             match parent.kind() {
                 JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => {
-                    let assignment = parent.cast::<JsStaticMemberAssignment>()?;
-                    let member_name = assignment.member().ok()?.as_js_name()?.value_token().ok()?;
-                    let member_name = member_name.token_text_trimmed();
-                    if check_is_window_specific_api(&ident_name, &member_name, None)
-                        || check_is_web_worker_specific_api(&ident_name, &member_name)
+                    if let Some(assignment) = parent.cast::<JsStaticMemberAssignment>()
+                        && let Ok(member) = assignment.member()
+                        && let Some(member_name) = member.as_js_name()
+                        && let Ok(member_name) = member_name.value_token()
                     {
-                        return None;
+                        let member_name = member_name.token_text_trimmed();
+                        if check_is_window_specific_api(&ident_name, &member_name, None)
+                            || check_is_web_worker_specific_api(&ident_name, &member_name)
+                        {
+                            return None;
+                        }
                     }
                 }
                 JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION => {
-                    let expr = parent.cast::<JsStaticMemberExpression>()?;
-                    let member_name = expr.member().ok()?.as_js_name()?.value_token().ok()?;
-                    let member_name = member_name.token_text_trimmed();
-                    let call_expr = expr
-                        .syntax()
-                        .parent()
-                        .and_then(|node| node.cast::<JsCallExpression>());
-                    if check_is_window_specific_api(&ident_name, &member_name, call_expr)
-                        || check_is_web_worker_specific_api(&ident_name, &member_name)
+                    if let Some(expr) = parent.cast::<JsStaticMemberExpression>()
+                        && let Ok(member) = expr.member()
+                        && let Some(member_name) = member.as_js_name()
+                        && let Ok(member_name) = member_name.value_token()
                     {
-                        return None;
+                        let member_name = member_name.token_text_trimmed();
+                        let call_expr = expr
+                            .syntax()
+                            .parent()
+                            .and_then(|node| node.cast::<JsCallExpression>());
+                        if check_is_window_specific_api(&ident_name, &member_name, call_expr)
+                            || check_is_web_worker_specific_api(&ident_name, &member_name)
+                        {
+                            return None;
+                        }
                     }
                 }
                 JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => {
-                    let assignment = parent.cast::<JsComputedMemberAssignment>()?;
-                    let member_expr = assignment.member().ok()?;
-                    let member_expr = member_expr.as_any_js_literal_expression()?;
-                    let member_expr = member_expr.as_js_string_literal_expression()?;
-                    let member_name = member_expr.inner_string_text().ok()?;
-                    if check_is_window_specific_api(&ident_name, &member_name, None)
-                        || check_is_web_worker_specific_api(&ident_name, &member_name)
-                    {
-                        return None;
-                    }
+                    if let Some(assignment) = parent.cast::<JsComputedMemberAssignment>()
+                        && let Ok(member_expr) = assignment.member()
+                        && let Some(member_expr) = member_expr.as_any_js_literal_expression()
+                        && let Some(member_expr) = member_expr.as_js_string_literal_expression()
+                        && let Ok(member_name) = member_expr.inner_string_text()
+                        && (check_is_window_specific_api(&ident_name, &member_name, None)
+                            || check_is_web_worker_specific_api(&ident_name, &member_name))
+                        {
+                            return None;
+                        }
                 }
                 JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
-                    let expr = parent.cast::<JsComputedMemberExpression>()?;
-                    let member_expr = expr.member().ok()?;
-                    let member_expr = member_expr.as_any_js_literal_expression()?;
-                    let member_expr = member_expr.as_js_string_literal_expression()?;
-                    let member_name = member_expr.inner_string_text().ok()?;
-                    let call_expr = expr
-                        .syntax()
-                        .parent()
-                        .and_then(|node| node.cast::<JsCallExpression>());
-                    if check_is_window_specific_api(&ident_name, &member_name, call_expr)
-                        || check_is_web_worker_specific_api(&ident_name, &member_name)
+                    if let Some(expr) = parent.cast::<JsComputedMemberExpression>()
+                        && let Ok(member_expr) = expr.member()
+                        && let Some(member_expr) = member_expr.as_any_js_literal_expression()
+                        && let Some(member_expr) = member_expr.as_js_string_literal_expression()
+                        && let Ok(member_name) = member_expr.inner_string_text()
                     {
-                        return None;
+                        let call_expr = expr
+                            .syntax()
+                            .parent()
+                            .and_then(|node| node.cast::<JsCallExpression>());
+                        if check_is_window_specific_api(&ident_name, &member_name, call_expr)
+                            || check_is_web_worker_specific_api(&ident_name, &member_name)
+                        {
+                            return None;
+                        }
                     }
                 }
                 _ => {}
