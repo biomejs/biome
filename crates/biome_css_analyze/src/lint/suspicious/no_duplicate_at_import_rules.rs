@@ -68,58 +68,55 @@ impl Rule for NoDuplicateAtImportRules {
         let node = ctx.query();
         let mut import_url_map: HashMap<String, HashSet<String>> = HashMap::new();
         for item in node {
-            match item {
-                AnyCssRootItem::AnyCssRule(AnyCssRule::CssAtRule(at_rule)) => {
-                    match at_rule.rule().ok()? {
-                        AnyCssAtRule::CssImportAtRule(import_rule) => {
-                            let import_url = import_rule
-                                .url()
-                                .ok()?
-                                .to_trimmed_text()
-                                .to_lowercase_cow()
-                                .replace("url(", "")
-                                .replace(')', "")
-                                .replace('"', "'");
-                            if let Some(media_query_set) = import_url_map.get_mut(&import_url) {
-                                // if the current import_rule has no media queries or there are no queries saved in the
-                                // media_query_set, this is always a duplicate
-                                if import_rule.media().to_trimmed_text().is_empty()
-                                    || media_query_set.is_empty()
-                                {
-                                    return Some(import_rule);
-                                }
+            let AnyCssRootItem::AnyCssRule(AnyCssRule::CssAtRule(at_rule)) = item else {
+                continue;
+            };
+            let AnyCssAtRule::CssImportAtRule(import_rule) = at_rule.rule().ok()? else {
+                continue;
+            };
 
-                                for media in import_rule.media() {
-                                    match media {
-                                        Ok(media) => {
-                                            if !media_query_set.insert(
-                                                media.to_trimmed_text().to_lowercase_cow().into(),
-                                            ) {
-                                                return Some(import_rule);
-                                            }
-                                        }
-                                        _ => return None,
-                                    }
-                                }
-                            } else {
-                                let mut media_set: HashSet<String> = HashSet::new();
-                                for media in import_rule.media() {
-                                    match media {
-                                        Ok(media) => {
-                                            media_set.insert(
-                                                media.to_trimmed_text().to_lowercase_cow().into(),
-                                            );
-                                        }
-                                        _ => return None,
-                                    }
-                                }
-                                import_url_map.insert(import_url, media_set);
+            let import_url = import_rule
+                .url()
+                .ok()?
+                .to_trimmed_text()
+                .to_lowercase_cow()
+                .replace("url(", "")
+                .replace(')', "")
+                .replace('"', "'");
+            if let Some(media_query_set) = import_url_map.get_mut(&import_url) {
+                // if the current import_rule has no media queries or there are no queries saved in the
+                // media_query_set, this is always a duplicate
+                if import_rule.media().to_trimmed_text().is_empty()
+                    || media_query_set.is_empty()
+                {
+                    return Some(import_rule);
+                }
+
+                for media in import_rule.media() {
+                    match media {
+                        Ok(media) => {
+                            if !media_query_set.insert(
+                                media.to_trimmed_text().to_lowercase_cow().into(),
+                            ) {
+                                return Some(import_rule);
                             }
                         }
-                        _ => continue,
+                        _ => return None,
                     }
                 }
-                _ => continue,
+            } else {
+                let mut media_set: HashSet<String> = HashSet::new();
+                for media in import_rule.media() {
+                    match media {
+                        Ok(media) => {
+                            media_set.insert(
+                                media.to_trimmed_text().to_lowercase_cow().into(),
+                            );
+                        }
+                        _ => return None,
+                    }
+                }
+                import_url_map.insert(import_url, media_set);
             }
         }
         None
