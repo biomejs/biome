@@ -546,7 +546,6 @@ fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> 
     let mut result = Vec::new();
 
     if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(&node) {
-        panic!("DEBUG: Found likely JsxReferenceIdentifier: {:?}", jsx_ref);
         result.push(AnyExpressionCandidate::JsxReferenceIdentifier(
             jsx_ref.clone(),
         ));
