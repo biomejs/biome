@@ -546,6 +546,7 @@ fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> 
     let mut result = Vec::new();
 
     if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(&node) {
+        panic!("DEBUG: Found likely JsxReferenceIdentifier: {:?}", jsx_ref);
         result.push(AnyExpressionCandidate::JsxReferenceIdentifier(
             jsx_ref.clone(),
         ));
@@ -1579,6 +1580,14 @@ impl Rule for UseExhaustiveDependencies {
                 ..
             } => {
                 let new_elements = captures.first().into_iter().filter_map(|node| {
+                    if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(node) {
+                        return Some(AnyJsArrayElement::AnyJsExpression(
+                             make::js_identifier_expression(
+                                 make::js_reference_identifier(jsx_ref.value_token().ok()?)
+                             ).into()
+                        ));
+                    }
+                    
                     node.ancestors()
                         .find_map(|node| match JsReferenceIdentifier::cast_ref(&node) {
                             Some(node) => Some(make::js_identifier_expression(node).into()),
