@@ -7,7 +7,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_semantic::{CanBeImportedExported, ClosureExtensions, SemanticModel, is_constant};
+use biome_js_semantic::{CanBeImportedExported, ClosureExtensions, ReferencesExtensions, SemanticModel, is_constant};
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression,
@@ -709,18 +709,52 @@ fn is_stable_binding(
                 return true;
             };
 
-            // Only `const` variables are considered stable
-            if !declaration.is_const() {
-                return false;
-            }
-
             let Some(initializer_expression) = declarator
                 .initializer()
                 .and_then(|initializer| initializer.expression().ok())
             else {
-                // This shouldn't happen because we check for `const` above
-                return true;
+                // No initializer - only `const` without initializer is stable
+                // (this shouldn't happen for valid code, but handle gracefully)
+                return declaration.is_const();
             };
+
+            // For non-const declarations, only stable hook results (like useState setters
+            // or useRef) are considered stable, AND only if the binding is never reassigned.
+            if !declaration.is_const() {
+                // First check if the binding was ever reassigned - if so, it's not stable
+                if binding.all_writes(model).next().is_some() {
+                    return false;
+                }
+
+                // Check if this is a stable hook result (e.g., setA from useState)
+                return match get_single_pattern_member(binding, &declarator) {
+                    GetSinglePatternMemberResult::Member(pattern_member) => {
+                        if member.is_some() {
+                            return false;
+                        }
+                        // Only check if initializer is a stable hook call
+                        if let AnyJsExpression::JsCallExpression(call) = &initializer_expression {
+                            is_react_hook_call_stable(
+                                call,
+                                Some(&pattern_member),
+                                model,
+                                &options.stable_config,
+                            )
+                        } else {
+                            false
+                        }
+                    }
+                    GetSinglePatternMemberResult::NoPattern => {
+                        // For non-destructured let bindings like `let ref = useRef()`
+                        if let AnyJsExpression::JsCallExpression(call) = &initializer_expression {
+                            is_react_hook_call_stable(call, member, model, &options.stable_config)
+                        } else {
+                            false
+                        }
+                    }
+                    _ => false,
+                };
+            }
 
             match get_single_pattern_member(binding, &declarator) {
                 GetSinglePatternMemberResult::Member(pattern_member) => {
