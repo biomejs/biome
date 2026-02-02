@@ -132,3 +132,13 @@ function Component10() {
         </HoC>
     );
 }
+
+// Issue #8812: template string with index NOT at the end should still trigger
+function Component11() {
+    return things.map((item, index) => <div key={`${index}-${item}`}>{item}</div>);
+}
+
+// Issue #8812: object property access after index should still trigger
+function Component12() {
+    return things.map((item, index) => <div key={`${index}-${item.title}`}>{item.title}</div>);
+}

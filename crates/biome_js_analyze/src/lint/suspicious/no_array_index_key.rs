@@ -150,13 +150,17 @@ impl Rule for NoArrayIndexKey {
                 let template_elements = template_expression.elements();
                 for element in template_elements {
                     if let AnyJsTemplateElement::JsTemplateElement(template_element) = element {
-                        let cap_index_value = template_element
-                            .expression()
-                            .ok()?
-                            .as_js_identifier_expression()?
-                            .name()
-                            .ok();
-                        capture_array_index = cap_index_value;
+                        // Check if this element is an identifier expression (potential array index)
+                        if let Some(identifier_expr) =
+                            template_element.expression().ok()?.as_js_identifier_expression()
+                        {
+                            if let Ok(name) = identifier_expr.name() {
+                                // Found a potential array index reference, use it and stop searching
+                                // This fixes the issue where index position in template doesn't matter
+                                capture_array_index = Some(name);
+                                break;
+                            }
+                        }
                     }
                 }
             }
