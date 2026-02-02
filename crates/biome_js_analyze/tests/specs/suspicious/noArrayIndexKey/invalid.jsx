@@ -142,3 +142,8 @@ function Component11() {
 function Component12() {
     return things.map((item, index) => <div key={`${index}-${item.title}`}>{item.title}</div>);
 }
+
+// Issue #8812: value-first order should still trigger
+function Component13() {
+    return things.map((item, index) => <div key={`${item}-${index}`}>{item}</div>);
+}
