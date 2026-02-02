@@ -322,15 +322,19 @@ fn check_is_window_specific_api(
     }
 
     // For addEventListener/removeEventListener/dispatchEvent, check if the event is window-specific
-    if let Some(call_expr) = call_expr
-        && EVENT_TARGET_METHODS.contains(&member_name.text())
-        && let Ok(args) = call_expr.arguments()
-        && let Some(Ok(first_arg)) = args.args().first()
-        && let Some(first_arg_expr) = first_arg.as_any_js_expression()
-        && let Some(first_arg_expr) = first_arg_expr.as_any_js_literal_expression()
-        && let Some(first_arg_expr) = first_arg_expr.as_js_string_literal_expression()
-        && let Ok(event) = first_arg_expr.inner_string_text() {
-            return is_window_specific_event(&event);
+    if let Some(call_expr) = call_expr 
+        && EVENT_TARGET_METHODS.contains(&member_name.text()) {
+
+        if let Ok(args) = call_expr.arguments()
+            && let Some(Ok(first_arg)) = args.args().first()
+            && let Some(first_arg_expr) = first_arg.as_any_js_expression()
+            && let Some(first_arg_expr) = first_arg_expr.as_any_js_literal_expression()
+            && let Some(first_arg_expr) = first_arg_expr.as_js_string_literal_expression()
+            && let Ok(event) = first_arg_expr.inner_string_text() {
+                return is_window_specific_event(&event);
+            } else {
+                return false;
+            }
     }
 
     // For other window-specific APIs, always return true
