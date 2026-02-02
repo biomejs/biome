@@ -6,7 +6,7 @@ Added support for multiple reporters, and the ability to save reporters on arbit
 
 #### Combine two reporters in CI
 
-If you run Biome on GitHub, take advantage of the reporter and still see the erros in console, you can now use both reporters:
+If you run Biome on GitHub, take advantage of the reporter and still see the errors in console, you can now use both reporters:
 
 ```shell
 biome ci --reporter=default --reporter=github
