@@ -4358,6 +4358,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoRedundantDefaultExportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoRedundantDefaultExportOptions" }
+			]
+		},
+		"NoRedundantDefaultExportOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoRedundantRolesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5678,6 +5688,13 @@
 					"description": "Replaces usages of forwardRef with passing ref as a prop.\nSee https://biomejs.dev/linter/rules/no-react-forward-ref",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReactForwardRefConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRedundantDefaultExport": {
+					"description": "Checks if a default export exports the same symbol as a named export.\nSee https://biomejs.dev/linter/rules/no-redundant-default-export",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoRedundantDefaultExportConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8326,6 +8343,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoRedundantAltOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoRedundantDefaultExportOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoRedundantDefaultExportOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
