@@ -91,7 +91,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@887bc4e03483810873d617344dd5189cd82e7b8b # v2.67.11
+        uses: taiki-e/install-action@650c5ca14212efbbf3e580844b04bdccf68dac31 # v2.67.18
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -122,7 +122,7 @@ jobs:
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@00014ed6ed5efc5b1ab7f7f34a39eb55d41aa4f8 # v3.1.0
+        uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0
         with:
           subject-path: ./dist/biome-*
 
@@ -186,7 +186,7 @@ jobs:
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@00014ed6ed5efc5b1ab7f7f34a39eb55d41aa4f8 # v3.1.0
+        uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0
         with:
           subject-path: ./dist/biome-*
 
