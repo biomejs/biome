@@ -28,7 +28,4 @@ You can combine these two features. Form example, have the `default` reporter wr
 biome ci --reporter=default --reporter=rdjson --reporter-file=/etc/tmp/report.json
 ```
 
-*The `--reporter` and `--reporter-file` flags must appear next to each other, otherwise an error is thrown.**
-
-
-
+**The `--reporter` and `--reporter-file` flags must appear next to each other, otherwise an error is thrown.**
