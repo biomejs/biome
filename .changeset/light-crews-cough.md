@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Added new lint rule “noRedundantDefaultExport”
+Added the new nursery rule [`noRedundantDefaultExport`](https://biomejs.dev/linter/rules/no-redundant-default-export/). <brief explanation>
