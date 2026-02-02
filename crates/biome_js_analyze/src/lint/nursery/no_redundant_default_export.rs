@@ -74,6 +74,9 @@ impl Rule for NoRedundantDefaultExport {
             )
             .note(markup! {
                 "Exporting the same identifier as both a named export and a default export is redundant."
+            })
+            .note(markup! {
+                "Remove either the default export or the named export to avoid redundancy."
             }),
         )
     }
