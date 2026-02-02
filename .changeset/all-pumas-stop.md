@@ -22,7 +22,7 @@ biome ci --reporter=rdjson --reporter-file=/etc/tmp/report.json
 biome ci --reporter=summary --reporter-file=./reports/file.txt
 ```
 
-You can combine these two features. Form example, have the `default` reporter written on terminal, and the `rdjson` reporter written on file:
+You can combine these two features. For example, have the `default` reporter written on terminal, and the `rdjson` reporter written on file:
 
 ```shell
 biome ci --reporter=default --reporter=rdjson --reporter-file=/etc/tmp/report.json
