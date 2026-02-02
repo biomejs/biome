@@ -54,10 +54,10 @@ impl Rule for NoRedundantDefaultExport {
         let model = ctx.model();
         let (named_export_bindings, default_export) = collect_exports(module, model);
         
-        if let Some((binding, range)) = default_export {
-            if named_export_bindings.contains(&binding) {
-                return Some(range);
-            }
+        if let Some((binding, range)) = default_export
+            && named_export_bindings.contains(&binding)
+        {
+            return Some(range);
         }
         
         None
@@ -120,26 +120,25 @@ fn resolve_binding_and_range_from_exported_item(
     exported_item: &biome_js_syntax::export_ext::ExportedItem,
     model: &SemanticModel,
 ) -> Option<(Binding, Option<TextRange>)> {
-    if exported_item.is_default {
-        if let Some(AnyJsExported::JsFunctionExportDefaultDeclaration(_) | AnyJsExported::JsClassExportDefaultDeclaration(_)) =
+    if exported_item.is_default
+        && let Some(AnyJsExported::JsFunctionExportDefaultDeclaration(_) | AnyJsExported::JsClassExportDefaultDeclaration(_)) =
             exported_item.exported.as_ref()
-        {
-            return None;
-        }
+    {
+        return None;
     }
 
-    if let Some(identifier) = exported_item.identifier.as_ref() {
-        if let Some(binding) = get_binding_from_identifier(identifier, model) {
-            let range = identifier.name_token().map(|token| token.text_range());
-            return Some((binding, range));
-        }
+    if let Some(identifier) = exported_item.identifier.as_ref()
+        && let Some(binding) = get_binding_from_identifier(identifier, model)
+    {
+        let range = identifier.name_token().map(|token| token.text_range());
+        return Some((binding, range));
     }
 
-    if let Some(AnyJsExported::AnyIdentifier(identifier)) = exported_item.exported.as_ref() {
-        if let Some(binding) = get_binding_from_identifier(identifier, model) {
-            let range = identifier.name_token().map(|token| token.text_range());
-            return Some((binding, range));
-        }
+    if let Some(AnyJsExported::AnyIdentifier(identifier)) = exported_item.exported.as_ref()
+        && let Some(binding) = get_binding_from_identifier(identifier, model)
+    {
+        let range = identifier.name_token().map(|token| token.text_range());
+        return Some((binding, range));
     }
 
     None
