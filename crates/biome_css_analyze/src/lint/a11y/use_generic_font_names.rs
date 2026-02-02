@@ -27,6 +27,7 @@ declare_lint_rule! {
     /// - Property with a keyword value such as `inherit`, `initial`.
     /// - The last value being a CSS variable.
     /// - `font-family` property in an `@font-face` rule.
+    /// - `font-family` declaration inside a `@supports` condition (feature detection).
     ///
     /// ## Examples
     ///

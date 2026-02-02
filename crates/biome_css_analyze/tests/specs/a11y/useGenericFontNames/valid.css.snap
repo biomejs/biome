@@ -36,7 +36,6 @@ a { font-family: revert }
 a { font-family: revert-layer }
 
 /* @supports feature declarations (the condition part) should not trigger the rule */
-@supports (font: -apple-system-body) {
-  /* styles inside @supports block will be checked separately */
-}
+@supports (font-family: Arial) { a { color: red; } }
+@supports (font: -apple-system-body) { a { color: red; } }
 ```
