@@ -341,7 +341,7 @@ fn check_is_window_specific_api(
     true
 }
 
-fn check_is_web_worker_specific_api(obj_name: &TokenText, member_name: &str) -> bool {
+fn check_is_web_worker_specific_api(obj_name: &TokenText, member_name: &TokenText) -> bool {
     obj_name.text() == "self" && is_web_workers_specific_api(member_name)
 }
 
