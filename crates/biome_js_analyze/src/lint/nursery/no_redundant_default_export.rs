@@ -42,6 +42,42 @@ declare_lint_rule! {
     }
 }
 
+impl Rule for NoRedundantDefaultExport {
+    type Query = Semantic<JsModule>;
+    type State = TextRange;
+    type Signals = Option<Self::State>;
+    type Options = NoRedundantDefaultExportOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let module = ctx.query();
+        let model = ctx.model();
+        let (named_export_bindings, default_export) = collect_exports(module, model);
+        
+        if let Some((binding, range)) = default_export {
+            if named_export_bindings.contains(&binding) {
+                return Some(range);
+            }
+        }
+        
+        None
+    }
+
+    fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                range,
+                markup! {
+                    "Default export exports the same symbol as a named export."
+                },
+            )
+            .note(markup! {
+                "Exporting the same identifier as both a named export and a default export is redundant."
+            }),
+        )
+    }
+}
+
 fn get_binding_from_identifier(
     identifier: &AnyIdentifier,
     model: &SemanticModel,
@@ -167,40 +203,4 @@ fn collect_exports(
     }
 
     (named_export_bindings, default_export)
-}
-
-impl Rule for NoRedundantDefaultExport {
-    type Query = Semantic<JsModule>;
-    type State = TextRange;
-    type Signals = Option<Self::State>;
-    type Options = NoRedundantDefaultExportOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module = ctx.query();
-        let model = ctx.model();
-        let (named_export_bindings, default_export) = collect_exports(module, model);
-        
-        if let Some((binding, range)) = default_export {
-            if named_export_bindings.contains(&binding) {
-                return Some(range);
-            }
-        }
-        
-        None
-    }
-
-    fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                range,
-                markup! {
-                    "Default export exports the same symbol as a named export."
-                },
-            )
-            .note(markup! {
-                "Exporting the same identifier as both a named export and a default export is redundant."
-            }),
-        )
-    }
 }
