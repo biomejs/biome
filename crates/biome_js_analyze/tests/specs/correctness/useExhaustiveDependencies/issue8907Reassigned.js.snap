@@ -1,0 +1,96 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue8907Reassigned.js
+---
+# Input
+```js
+import { useEffect, useState, useRef } from "react";
+
+// Issue #8907: If a let binding is reassigned, it's no longer stable
+export const Component3 = () => {
+  let [a, setA] = useState(0);
+  setA = () => {}; // reassigned!
+
+  useEffect(() => {
+    setA(1); // should now require setA in deps
+  }, []);
+};
+
+// Same for useRef
+export const Component4 = () => {
+  let b = useRef("");
+  b = { current: "other" }; // reassigned!
+
+  useEffect(() => {
+    console.log(b.current); // should now require b in deps
+  }, []);
+};
+
+```
+
+# Diagnostics
+```
+issue8907Reassigned.js:8:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on setA.
+  
+     6 │   setA = () => {}; // reassigned!
+     7 │ 
+   > 8 │   useEffect(() => {
+       │   ^^^^^^^^^
+     9 │     setA(1); // should now require setA in deps
+    10 │   }, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+     8 │   useEffect(() => {
+   > 9 │     setA(1); // should now require setA in deps
+       │     ^^^^
+    10 │   }, []);
+    11 │ };
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    10 │ ··},·[setA]);
+       │       ++++   
+
+```
+
+```
+issue8907Reassigned.js:18:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on b.current.
+  
+    16 │   b = { current: "other" }; // reassigned!
+    17 │ 
+  > 18 │   useEffect(() => {
+       │   ^^^^^^^^^
+    19 │     console.log(b.current); // should now require b in deps
+    20 │   }, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    18 │   useEffect(() => {
+  > 19 │     console.log(b.current); // should now require b in deps
+       │                 ^^^^^^^^^
+    20 │   }, []);
+    21 │ };
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    20 │ ··},·[b.current]);
+       │       +++++++++   
+
+```

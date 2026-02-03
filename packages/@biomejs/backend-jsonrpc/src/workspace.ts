@@ -2039,6 +2039,11 @@ See https://biomejs.dev/linter/rules/no-react-forward-ref
 	 */
 	noReactForwardRef?: NoReactForwardRefConfiguration;
 	/**
+	* Checks if a default export exports the same symbol as a named export.
+See https://biomejs.dev/linter/rules/no-redundant-default-export 
+	 */
+	noRedundantDefaultExport?: NoRedundantDefaultExportConfiguration;
+	/**
 	* Disallow assignments in return statements.
 See https://biomejs.dev/linter/rules/no-return-assign 
 	 */
@@ -2207,6 +2212,11 @@ See https://biomejs.dev/linter/rules/use-explicit-type
 See https://biomejs.dev/linter/rules/use-find 
 	 */
 	useFind?: UseFindConfiguration;
+	/**
+	* Enforce the use of globalThis over window, self, and global.
+See https://biomejs.dev/linter/rules/use-global-this 
+	 */
+	useGlobalThis?: UseGlobalThisConfiguration;
 	/**
 	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
 See https://biomejs.dev/linter/rules/use-inline-script-id 
@@ -3889,6 +3899,9 @@ export type NoProtoConfiguration =
 export type NoReactForwardRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactForwardRefOptions;
+export type NoRedundantDefaultExportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoRedundantDefaultExportOptions;
 export type NoReturnAssignConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnAssignOptions;
@@ -3988,6 +4001,9 @@ export type UseExplicitTypeConfiguration =
 export type UseFindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFindOptions;
+export type UseGlobalThisConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseGlobalThisOptions;
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
@@ -5455,6 +5471,10 @@ export interface RuleWithNoReactForwardRefOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactForwardRefOptions;
 }
+export interface RuleWithNoRedundantDefaultExportOptions {
+	level: RulePlainConfiguration;
+	options?: NoRedundantDefaultExportOptions;
+}
 export interface RuleWithNoReturnAssignOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnAssignOptions;
@@ -5592,6 +5612,10 @@ export interface RuleWithUseExplicitTypeOptions {
 export interface RuleWithUseFindOptions {
 	level: RulePlainConfiguration;
 	options?: UseFindOptions;
+}
+export interface RuleWithUseGlobalThisOptions {
+	level: RulePlainConfiguration;
+	options?: UseGlobalThisOptions;
 }
 export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
@@ -6910,6 +6934,7 @@ export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoProtoOptions = {};
 export type NoReactForwardRefOptions = {};
+export type NoRedundantDefaultExportOptions = {};
 export type NoReturnAssignOptions = {};
 export interface NoRootTypeOptions {
 	/**
@@ -7002,6 +7027,7 @@ export interface UseErrorCauseOptions {
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
+export type UseGlobalThisOptions = {};
 export type UseInlineScriptIdOptions = {};
 export interface UseInputNameOptions {
 	/**
@@ -7849,6 +7875,7 @@ export type Category =
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
+	| "lint/nursery/noRedundantDefaultExport"
 	| "lint/nursery/noReturnAssign"
 	| "lint/nursery/noRootType"
 	| "lint/nursery/noScriptUrl"
@@ -7887,9 +7914,10 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
+	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useInputName"
 	| "lint/nursery/useInlineScriptId"
+	| "lint/nursery/useInputName"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
