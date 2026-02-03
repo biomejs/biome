@@ -45,9 +45,10 @@
         "getrandom",
         "rand",
       	// Needs to be updated manually
-        "wasm-bindgen-cli"
-      ]
-    },
+        "wasm-bindgen-cli",
+        "wasm-bindgen"
+			]
+		},
     {
       "groupName": "@biomejs packages",
       "matchFileNames": [
