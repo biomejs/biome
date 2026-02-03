@@ -866,7 +866,19 @@ fn is_stable_expression(
     }
 
     if model.is_constant(expression) {
-        return true;
+        // If the expression creates a new object/function identity, it is not stable for React hooks,
+        // even if it captures no variables.
+        if !matches!(
+            expression.syntax().kind(),
+            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+                | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                | JsSyntaxKind::JS_OBJECT_EXPRESSION
+                | JsSyntaxKind::JS_ARRAY_EXPRESSION
+                | JsSyntaxKind::JS_CLASS_EXPRESSION
+                | JsSyntaxKind::JS_REGEX_LITERAL
+        ) {
+            return true;
+        }
     }
     let Some(expression) = expression.inner_expression() else {
         return false;
