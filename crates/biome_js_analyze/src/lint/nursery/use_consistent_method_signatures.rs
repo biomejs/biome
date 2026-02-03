@@ -177,7 +177,7 @@ declare_lint_rule! {
     ///
     /// [^2]: Chosen to allow stricter type checks under the aforementioned `strictFunctionTypes`.
     pub UseConsistentMethodSignatures {
-        version: "next",
+        version: "2.3.14",
         name: "useConsistentMethodSignatures",
         language: "ts",
         recommended: false,
