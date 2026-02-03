@@ -880,7 +880,7 @@ impl JsSyntaxKind {
             OUT_KW => "out",
             USING_KW => "using",
             META_KW => "meta",
-            EOF => "EOF",
+            EOF => "",
             JS_STRING_LITERAL => "string literal",
             _ => return None,
         };
