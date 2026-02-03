@@ -34,7 +34,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoRedundantDefaultExport {
-        version: "next",
+        version: "2.3.14",
         name: "noRedundantDefaultExport",
         language: "js",
         recommended: false,
