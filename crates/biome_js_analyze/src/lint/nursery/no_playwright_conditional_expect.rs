@@ -2,9 +2,11 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsSyntaxKind};
+use biome_js_syntax::{JsCallExpression, JsSyntaxKind};
 use biome_rowan::AstNode;
 use biome_rule_options::no_playwright_conditional_expect::NoPlaywrightConditionalExpectOptions;
+
+use crate::frameworks::playwright::is_expect_call;
 
 declare_lint_rule! {
     /// Disallow conditional `expect()` calls inside tests.
@@ -70,8 +72,8 @@ impl Rule for NoPlaywrightConditionalExpect {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expr = ctx.query();
 
-        // Check if this is an expect() call
-        if !is_expect_call(call_expr) {
+        // Check if this is a top-level expect() call (to avoid double-reporting)
+        if !is_top_level_expect_call(call_expr) {
             return None;
         }
 
@@ -105,9 +107,9 @@ impl Rule for NoPlaywrightConditionalExpect {
 
 /// Checks if a call expression is a top-level expect() call.
 /// Returns true only for the outermost call in an expect chain, not inner calls.
-fn is_expect_call(call: &JsCallExpression) -> bool {
+fn is_top_level_expect_call(call: &JsCallExpression) -> bool {
     // First check if this call is part of an expect chain
-    if !is_part_of_expect_chain(call) {
+    if !is_expect_call(call) {
         return false;
     }
 
@@ -126,45 +128,6 @@ fn is_expect_call(call: &JsCallExpression) -> bool {
     }
 
     true
-}
-
-/// Checks if a call expression is part of an expect chain (either expect() itself or a method on expect).
-fn is_part_of_expect_chain(call: &JsCallExpression) -> bool {
-    let Ok(callee) = call.callee() else {
-        return false;
-    };
-
-    match &callee {
-        AnyJsExpression::JsIdentifierExpression(id) => {
-            if let Ok(name) = id.name()
-                && let Ok(token) = name.value_token()
-            {
-                return token.text_trimmed() == "expect";
-            }
-            false
-        }
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            // expect.soft(), expect.poll(), etc., or expect(...).method()
-            if let Ok(object) = member.object() {
-                match object {
-                    AnyJsExpression::JsIdentifierExpression(id) => {
-                        if let Ok(name) = id.name()
-                            && let Ok(token) = name.value_token()
-                        {
-                            return token.text_trimmed() == "expect";
-                        }
-                    }
-                    AnyJsExpression::JsCallExpression(inner_call) => {
-                        return is_part_of_expect_chain(&inner_call);
-                    }
-                    _ => {}
-                }
-            }
-            false
-        }
-        AnyJsExpression::JsCallExpression(inner_call) => is_part_of_expect_chain(inner_call),
-        _ => false,
-    }
 }
 
 /// Checks if the expect call is inside a conditional context.

@@ -1,4 +1,4 @@
-use biome_js_syntax::{AnyJsExpression, JsCallArguments};
+use biome_js_syntax::{AnyJsExpression, JsCallArguments, JsCallExpression};
 use biome_rowan::{AstNode, AstSeparatedList, TokenText};
 
 /// Extracts the object name from an expression.
@@ -161,6 +161,50 @@ pub(crate) fn get_test_callback(args: &JsCallArguments) -> Option<AnyJsExpressio
     }
 
     callback
+}
+
+/// Checks if a call expression is an expect() call or part of an expect chain.
+/// Matches: expect(), expect.soft(), expect.poll(), expect(x).toBe(), etc.
+pub(crate) fn is_expect_call(call: &JsCallExpression) -> bool {
+    let Ok(callee) = call.callee() else {
+        return false;
+    };
+
+    match &callee {
+        AnyJsExpression::JsIdentifierExpression(id) => {
+            if let Ok(name) = id.name()
+                && let Ok(token) = name.value_token()
+            {
+                return token.text_trimmed() == "expect";
+            }
+            false
+        }
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            // expect.soft(), expect.poll(), or expect(...).method()
+            if let Ok(object) = member.object() {
+                match object {
+                    AnyJsExpression::JsIdentifierExpression(id) => {
+                        if let Ok(name) = id.name()
+                            && let Ok(token) = name.value_token()
+                        {
+                            return token.text_trimmed() == "expect";
+                        }
+                    }
+                    AnyJsExpression::JsCallExpression(inner_call) => {
+                        // expect(page).toHaveTitle() - recurse into the call
+                        return is_expect_call(&inner_call);
+                    }
+                    _ => {}
+                }
+            }
+            false
+        }
+        AnyJsExpression::JsCallExpression(inner_call) => {
+            // Handle chained expectations
+            is_expect_call(inner_call)
+        }
+        _ => false,
+    }
 }
 
 /// Checks if an expression is part of a Playwright call chain.

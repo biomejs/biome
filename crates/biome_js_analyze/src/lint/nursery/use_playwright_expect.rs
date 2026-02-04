@@ -6,7 +6,7 @@ use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsSyntaxKind};
 use biome_rowan::AstNode;
 use biome_rule_options::use_playwright_expect::UsePlaywrightExpectOptions;
 
-use crate::frameworks::playwright::{get_test_callback, is_test_call};
+use crate::frameworks::playwright::{get_test_callback, is_expect_call, is_test_call};
 
 declare_lint_rule! {
     /// Ensure that Playwright test functions contain at least one `expect()` assertion.
@@ -105,45 +105,10 @@ fn contains_expect_call(callback: &AnyJsExpression) -> bool {
     for descendant in callback.syntax().descendants() {
         if descendant.kind() == JsSyntaxKind::JS_CALL_EXPRESSION
             && let Some(call) = JsCallExpression::cast(descendant)
-                && is_expect_call(&call) {
-                    return true;
-                }
+            && is_expect_call(&call)
+        {
+            return true;
+        }
     }
     false
-}
-
-/// Checks if a call expression is an expect() call.
-/// Matches: expect(), expect.soft(), expect.poll(), etc.
-fn is_expect_call(call: &JsCallExpression) -> bool {
-    let Ok(callee) = call.callee() else {
-        return false;
-    };
-
-    match &callee {
-        AnyJsExpression::JsIdentifierExpression(id) => {
-            if let Ok(name) = id.name()
-                && let Ok(token) = name.value_token()
-            {
-                return token.text_trimmed() == "expect";
-            }
-            false
-        }
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            // expect.soft(), expect.poll(), etc.
-            if let Ok(object) = member.object()
-                && let AnyJsExpression::JsIdentifierExpression(id) = object
-                    && let Ok(name) = id.name()
-                    && let Ok(token) = name.value_token()
-                {
-                    return token.text_trimmed() == "expect";
-                }
-            false
-        }
-        AnyJsExpression::JsCallExpression(inner_call) => {
-            // Handle chained expectations like expect(...).toBeVisible()
-            // We need to trace back to find if expect is at the root
-            is_expect_call(inner_call)
-        }
-        _ => false,
-    }
 }
