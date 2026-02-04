@@ -1,0 +1,15 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"correctness": {
+				"useHookAtTopLevel": {
+					"level": "error",
+					"options": {
+						"ignore": ["useIgnoredHook", "useIgnored1", "useIgnored2"]
+					}
+				}
+			}
+		}
+	}
+}
