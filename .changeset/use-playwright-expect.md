@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added the rule [`expectPlaywrightExpect`](https://biomejs.dev/linter/rules/expect-playwright-expect/). This rule ensures that Playwright test functions contain at least one `expect()` assertion.
+Added the rule [`usePlaywrightExpect`](https://biomejs.dev/linter/rules/use-playwright-expect/). This rule ensures that Playwright test functions contain at least one `expect()` assertion.
 
 ```js
 // Invalid - test without assertion

@@ -101,11 +101,14 @@ impl Rule for NoPlaywrightForceOption {
         let args = call_expr.arguments().ok()?;
 
         for arg in args.args().into_iter().flatten() {
-            if let Some(expr) = arg.as_any_js_expression()
-                && let AnyJsExpression::JsObjectExpression(obj_expr) = expr
-                && has_force_true(obj_expr)
-            {
-                return Some(());
+            if let Some(expr) = arg.as_any_js_expression() {
+                // Unwrap parenthesized expressions to handle ({ force: true })
+                let unwrapped = unwrap_parenthesized(expr.clone());
+                if let AnyJsExpression::JsObjectExpression(obj_expr) = unwrapped
+                    && has_force_true(&obj_expr)
+                {
+                    return Some(());
+                }
             }
         }
 
@@ -129,6 +132,19 @@ impl Rule for NoPlaywrightForceOption {
                 "Fix the underlying issue instead of forcing the action."
             }),
         )
+    }
+}
+
+/// Unwraps parenthesized expressions recursively
+fn unwrap_parenthesized(expr: AnyJsExpression) -> AnyJsExpression {
+    match expr {
+        AnyJsExpression::JsParenthesizedExpression(paren) => {
+            if let Ok(inner) = paren.expression() {
+                return unwrap_parenthesized(inner);
+            }
+            AnyJsExpression::JsParenthesizedExpression(paren)
+        }
+        other => other,
     }
 }
 

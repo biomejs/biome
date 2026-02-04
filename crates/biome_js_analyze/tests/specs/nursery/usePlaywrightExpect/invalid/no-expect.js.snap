@@ -22,7 +22,7 @@ it("it function without assertion", async ({ page }) => {
 
 # Diagnostics
 ```
-no-expect.js:3:1 lint/nursery/expectPlaywrightExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+no-expect.js:3:1 lint/nursery/usePlaywrightExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Test callback is missing an expect() assertion.
   
@@ -46,7 +46,7 @@ no-expect.js:3:1 lint/nursery/expectPlaywrightExpect ━━━━━━━━━
 ```
 
 ```
-no-expect.js:7:1 lint/nursery/expectPlaywrightExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+no-expect.js:7:1 lint/nursery/usePlaywrightExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Test callback is missing an expect() assertion.
   
@@ -70,7 +70,7 @@ no-expect.js:7:1 lint/nursery/expectPlaywrightExpect ━━━━━━━━━
 ```
 
 ```
-no-expect.js:11:1 lint/nursery/expectPlaywrightExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+no-expect.js:11:1 lint/nursery/usePlaywrightExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Test callback is missing an expect() assertion.
   

@@ -1860,11 +1860,6 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
-	* Ensure that Playwright test functions contain at least one expect() assertion.
-See https://biomejs.dev/linter/rules/expect-playwright-expect 
-	 */
-	expectPlaywrightExpect?: ExpectPlaywrightExpectConfiguration;
-	/**
 	* Disallow ambiguous anchor descriptions.
 See https://biomejs.dev/linter/rules/no-ambiguous-anchor-text 
 	 */
@@ -2039,6 +2034,11 @@ See https://biomejs.dev/linter/rules/no-next-async-client-component
 See https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion 
 	 */
 	noParametersOnlyUsedInRecursion?: NoParametersOnlyUsedInRecursionConfiguration;
+	/**
+	* Disallow conditional expect() calls inside tests.
+See https://biomejs.dev/linter/rules/no-playwright-conditional-expect 
+	 */
+	noPlaywrightConditionalExpect?: NoPlaywrightConditionalExpectConfiguration;
 	/**
 	* Disallow usage of element handles (page.$() and page.$$()).
 See https://biomejs.dev/linter/rules/no-playwright-element-handle 
@@ -2313,6 +2313,11 @@ See https://biomejs.dev/linter/rules/use-lone-executable-definition
 See https://biomejs.dev/linter/rules/use-max-params 
 	 */
 	useMaxParams?: UseMaxParamsConfiguration;
+	/**
+	* Ensure that Playwright test functions contain at least one expect() assertion.
+See https://biomejs.dev/linter/rules/use-playwright-expect 
+	 */
+	usePlaywrightExpect?: UsePlaywrightExpectConfiguration;
 	/**
 	* Enforce valid describe() callback.
 See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
@@ -3867,9 +3872,6 @@ export type UseValidTypeofConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
-export type ExpectPlaywrightExpectConfiguration =
-	| RulePlainConfiguration
-	| RuleWithExpectPlaywrightExpectOptions;
 export type NoAmbiguousAnchorTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAmbiguousAnchorTextOptions;
@@ -3975,6 +3977,9 @@ export type NoNextAsyncClientComponentConfiguration =
 export type NoParametersOnlyUsedInRecursionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoParametersOnlyUsedInRecursionOptions;
+export type NoPlaywrightConditionalExpectConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightConditionalExpectOptions;
 export type NoPlaywrightElementHandleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightElementHandleOptions;
@@ -4137,6 +4142,9 @@ export type UseLoneExecutableDefinitionConfiguration =
 export type UseMaxParamsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMaxParamsOptions;
+export type UsePlaywrightExpectConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUsePlaywrightExpectOptions;
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
@@ -5442,10 +5450,6 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
-export interface RuleWithExpectPlaywrightExpectOptions {
-	level: RulePlainConfiguration;
-	options?: ExpectPlaywrightExpectOptions;
-}
 export interface RuleWithNoAmbiguousAnchorTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoAmbiguousAnchorTextOptions;
@@ -5590,6 +5594,10 @@ export interface RuleWithNoParametersOnlyUsedInRecursionOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoParametersOnlyUsedInRecursionOptions;
+}
+export interface RuleWithNoPlaywrightConditionalExpectOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightConditionalExpectOptions;
 }
 export interface RuleWithNoPlaywrightElementHandleOptions {
 	fix?: FixKind;
@@ -5819,6 +5827,10 @@ export interface RuleWithUseLoneExecutableDefinitionOptions {
 export interface RuleWithUseMaxParamsOptions {
 	level: RulePlainConfiguration;
 	options?: UseMaxParamsOptions;
+}
+export interface RuleWithUsePlaywrightExpectOptions {
+	level: RulePlainConfiguration;
+	options?: UsePlaywrightExpectOptions;
 }
 export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
@@ -7030,7 +7042,6 @@ to a DOM element id.
 export type UseValidForDirectionOptions = {};
 export type UseValidTypeofOptions = {};
 export type UseYieldOptions = {};
-export type ExpectPlaywrightExpectOptions = {};
 export interface NoAmbiguousAnchorTextOptions {
 	/**
 	 * It allows users to modify the strings that can be checked for in the anchor text. Useful for specifying other words in other languages
@@ -7121,6 +7132,7 @@ export type NoMultiStrOptions = {};
 export type NoNestedPromisesOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
+export type NoPlaywrightConditionalExpectOptions = {};
 export type NoPlaywrightElementHandleOptions = {};
 export type NoPlaywrightEvalOptions = {};
 export type NoPlaywrightForceOptionOptions = {};
@@ -7250,6 +7262,7 @@ export interface UseMaxParamsOptions {
 	 */
 	max?: number;
 }
+export type UsePlaywrightExpectOptions = {};
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikMethodUsageOptions = {};
 export type UseQwikValidLexicalScopeOptions = {};
@@ -8044,7 +8057,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
-	| "lint/nursery/expectPlaywrightExpect"
+	| "lint/nursery/usePlaywrightExpect"
 	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
@@ -8083,6 +8096,7 @@ export type Category =
 	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
+	| "lint/nursery/noPlaywrightConditionalExpect"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"

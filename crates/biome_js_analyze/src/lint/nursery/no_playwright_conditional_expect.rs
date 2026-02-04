@@ -103,8 +103,33 @@ impl Rule for NoPlaywrightConditionalExpect {
     }
 }
 
-/// Checks if a call expression is an expect() call.
+/// Checks if a call expression is a top-level expect() call.
+/// Returns true only for the outermost call in an expect chain, not inner calls.
 fn is_expect_call(call: &JsCallExpression) -> bool {
+    // First check if this call is part of an expect chain
+    if !is_part_of_expect_chain(call) {
+        return false;
+    }
+
+    // Now check if this is the outermost call (not nested inside another expect call)
+    // To avoid double-reporting, only match when the call's parent is NOT a member expression
+    // that would make this an inner expect() call
+    if let Some(parent) = call.syntax().parent()
+        && parent.kind() == JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
+        && let Some(member) = biome_js_syntax::JsStaticMemberExpression::cast(parent)
+        && let Ok(object) = member.object()
+        && object.syntax() == call.syntax()
+    {
+        // If the parent is a member expression with this call as its object,
+        // then this is an inner call and we should report on the outer matcher call instead
+        return false;
+    }
+
+    true
+}
+
+/// Checks if a call expression is part of an expect chain (either expect() itself or a method on expect).
+fn is_part_of_expect_chain(call: &JsCallExpression) -> bool {
     let Ok(callee) = call.callee() else {
         return false;
     };
@@ -130,14 +155,14 @@ fn is_expect_call(call: &JsCallExpression) -> bool {
                         }
                     }
                     AnyJsExpression::JsCallExpression(inner_call) => {
-                        return is_expect_call(&inner_call);
+                        return is_part_of_expect_chain(&inner_call);
                     }
                     _ => {}
                 }
             }
             false
         }
-        AnyJsExpression::JsCallExpression(inner_call) => is_expect_call(inner_call),
+        AnyJsExpression::JsCallExpression(inner_call) => is_part_of_expect_chain(inner_call),
         _ => false,
     }
 }

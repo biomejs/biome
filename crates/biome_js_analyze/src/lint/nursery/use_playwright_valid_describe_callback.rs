@@ -6,6 +6,8 @@ use biome_js_syntax::{AnyJsExpression, JsCallExpression};
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::use_playwright_valid_describe_callback::UsePlaywrightValidDescribeCallbackOptions;
 
+use crate::frameworks::playwright::collect_member_names;
+
 declare_lint_rule! {
     /// Enforce valid `describe()` callback.
     ///
@@ -54,6 +56,7 @@ declare_lint_rule! {
 }
 
 /// Reasons why a describe callback is invalid.
+#[derive(Debug)]
 pub enum InvalidReason {
     /// The callback is async, which is not allowed for describe blocks.
     Async,
@@ -69,55 +72,43 @@ pub enum InvalidReason {
 /// Matches: describe, test.describe, test.describe.only, test.describe.skip,
 /// test.describe.parallel, test.describe.serial, test.describe.parallel.only, etc.
 fn is_playwright_describe_call(callee: &AnyJsExpression) -> Option<bool> {
-    // Collect member names in "outside-in" order
     let names = collect_member_names(callee)?;
 
-    // Convert to &str slice for pattern matching
-    let names_ref: Vec<&str> = names.iter().map(String::as_str).collect();
-
-    match names_ref.as_slice() {
-        // describe()
-        ["describe"] => Some(true),
-        // test.describe()
-        ["test", "describe"] => Some(true),
-        // test.describe.only() / test.describe.skip()
-        ["test", "describe", modifier] if is_describe_modifier(modifier) => Some(true),
-        // test.describe.parallel() / test.describe.serial()
-        ["test", "describe", mode] if is_describe_mode(mode) => Some(true),
-        // test.describe.parallel.only() / test.describe.serial.only()
-        ["test", "describe", mode, modifier]
-            if is_describe_mode(mode) && is_describe_modifier(modifier) =>
-        {
-            Some(true)
+    match names.len() {
+        1 => {
+            // describe()
+            Some(names[0].text() == "describe")
+        }
+        2 => {
+            // test.describe()
+            Some(names[0].text() == "test" && names[1].text() == "describe")
+        }
+        3 => {
+            let first = names[0].text();
+            let second = names[1].text();
+            let third = names[2].text();
+            // test.describe.only() / test.describe.skip()
+            // test.describe.parallel() / test.describe.serial()
+            Some(
+                first == "test"
+                    && second == "describe"
+                    && (is_describe_modifier(third) || is_describe_mode(third)),
+            )
+        }
+        4 => {
+            let first = names[0].text();
+            let second = names[1].text();
+            let third = names[2].text();
+            let fourth = names[3].text();
+            // test.describe.parallel.only() / test.describe.serial.only()
+            Some(
+                first == "test"
+                    && second == "describe"
+                    && is_describe_mode(third)
+                    && is_describe_modifier(fourth),
+            )
         }
         _ => Some(false),
-    }
-}
-
-fn collect_member_names(expr: &AnyJsExpression) -> Option<Vec<String>> {
-    let mut names = Vec::new();
-    collect_member_names_rec(expr, &mut names)?;
-    Some(names)
-}
-
-fn collect_member_names_rec(expr: &AnyJsExpression, names: &mut Vec<String>) -> Option<()> {
-    match expr {
-        AnyJsExpression::JsIdentifierExpression(id) => {
-            let name = id.name().ok()?;
-            let token = name.value_token().ok()?;
-            names.push(token.text_trimmed().to_string());
-            Some(())
-        }
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            let obj = member.object().ok()?;
-            collect_member_names_rec(&obj, names)?;
-            let m = member.member().ok()?;
-            let n = m.as_js_name()?;
-            let t = n.value_token().ok()?;
-            names.push(t.text_trimmed().to_string());
-            Some(())
-        }
-        _ => None,
     }
 }
 

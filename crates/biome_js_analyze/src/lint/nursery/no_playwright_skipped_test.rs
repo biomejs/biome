@@ -4,9 +4,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsSyntaxKind};
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
 
 use crate::JsRuleAction;
+use crate::frameworks::playwright::collect_member_names;
 
 use biome_rule_options::no_playwright_skipped_test::NoPlaywrightSkippedTestOptions;
 
@@ -60,6 +61,7 @@ declare_lint_rule! {
 }
 
 /// The type of skipped annotation detected
+#[derive(Debug)]
 pub enum SkippedType {
     Skip,
     Fixme,
@@ -74,75 +76,67 @@ impl SkippedType {
     }
 }
 
-/// Collects member names from an expression in "outside-in" order.
-/// For example, `test.describe.skip` returns `["test", "describe", "skip"]`.
-fn collect_member_names(expr: &AnyJsExpression) -> Option<Vec<String>> {
-    let mut names = Vec::new();
-    collect_member_names_rec(expr, &mut names)?;
-    Some(names)
-}
-
-fn collect_member_names_rec(expr: &AnyJsExpression, names: &mut Vec<String>) -> Option<()> {
-    match expr {
-        AnyJsExpression::JsIdentifierExpression(id) => {
-            let name = id.name().ok()?;
-            let token = name.value_token().ok()?;
-            names.push(token.text_trimmed().to_string());
-            Some(())
-        }
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            let obj = member.object().ok()?;
-            collect_member_names_rec(&obj, names)?;
-            let m = member.member().ok()?;
-            let n = m.as_js_name()?;
-            let t = n.value_token().ok()?;
-            names.push(t.text_trimmed().to_string());
-            Some(())
-        }
-        AnyJsExpression::JsComputedMemberExpression(member) => {
-            let obj = member.object().ok()?;
-            collect_member_names_rec(&obj, names)?;
-            // Handle bracket notation like test["skip"]
-            let member_expr = member.member().ok()?;
-            if let AnyJsExpression::AnyJsLiteralExpression(lit) = member_expr
-                && let Some(string_lit) = lit.as_js_string_literal_expression()
-            {
-                let token = string_lit.value_token().ok()?;
-                let text = token.text_trimmed();
-                // Remove quotes from string literal
-                let unquoted = text.trim_matches(|c| c == '"' || c == '\'');
-                names.push(unquoted.to_string());
-                return Some(());
-            }
-            None
-        }
-        _ => None,
-    }
-}
-
 /// Checks if this is a skipped test/describe/step call.
 /// Returns the SkippedType if it matches.
 fn is_playwright_skipped_call(callee: &AnyJsExpression) -> Option<SkippedType> {
     let names = collect_member_names(callee)?;
-    let names_ref: Vec<&str> = names.iter().map(String::as_str).collect();
 
-    match names_ref.as_slice() {
-        // test.skip(...) / it.skip(...)
-        ["test" | "it", "skip"] => Some(SkippedType::Skip),
-        // test.describe.skip(...) / describe.skip(...)
-        ["test", "describe", "skip"] | ["describe", "skip"] => Some(SkippedType::Skip),
-        // test.step.skip(...)
-        ["test", "step", "skip"] => Some(SkippedType::Skip),
-        // test.fixme(...) / it.fixme(...)
-        ["test" | "it", "fixme"] => Some(SkippedType::Fixme),
-        // test.describe.fixme(...)
-        ["test", "describe", "fixme"] => Some(SkippedType::Fixme),
-        // test.describe.parallel.skip(...) / test.describe.serial.skip(...)
-        ["test", "describe", mode, "skip"] if is_describe_mode(mode) => Some(SkippedType::Skip),
-        // test.describe.parallel.fixme(...) / test.describe.serial.fixme(...)
-        ["test", "describe", mode, "fixme"] if is_describe_mode(mode) => Some(SkippedType::Fixme),
-        _ => None,
+    // Match patterns for skipped calls
+    match names.len() {
+        2 => {
+            let first = names[0].text();
+            let second = names[1].text();
+            // test.skip(...) / it.skip(...)
+            if (first == "test" || first == "it") && second == "skip" {
+                return Some(SkippedType::Skip);
+            }
+            // test.fixme(...) / it.fixme(...)
+            if (first == "test" || first == "it") && second == "fixme" {
+                return Some(SkippedType::Fixme);
+            }
+            // describe.skip(...)
+            if first == "describe" && second == "skip" {
+                return Some(SkippedType::Skip);
+            }
+        }
+        3 => {
+            let first = names[0].text();
+            let second = names[1].text();
+            let third = names[2].text();
+            // test.describe.skip(...) / test.step.skip(...)
+            if first == "test" && (second == "describe" || second == "step") && third == "skip" {
+                return Some(SkippedType::Skip);
+            }
+            // test.describe.fixme(...)
+            if first == "test" && second == "describe" && third == "fixme" {
+                return Some(SkippedType::Fixme);
+            }
+        }
+        4 => {
+            let first = names[0].text();
+            let second = names[1].text();
+            let third = names[2].text();
+            let fourth = names[3].text();
+            // test.describe.parallel.skip(...) / test.describe.serial.skip(...)
+            if first == "test"
+                && second == "describe"
+                && is_describe_mode(third)
+                && fourth == "skip"
+            {
+                return Some(SkippedType::Skip);
+            }
+            // test.describe.parallel.fixme(...) / test.describe.serial.fixme(...)
+            if first == "test"
+                && second == "describe"
+                && is_describe_mode(third)
+                && fourth == "fixme"
+            {
+                return Some(SkippedType::Fixme);
+            }
+        }
+        _ => {}
     }
+    None
 }
 
 fn is_describe_mode(s: &str) -> bool {
@@ -150,11 +144,14 @@ fn is_describe_mode(s: &str) -> bool {
 }
 
 /// Checks if this is a conditional skip call (test.skip() inside test body with args or in if block).
-fn is_conditional_skip(call_expr: &JsCallExpression, names: &[String]) -> bool {
-    let names_ref: Vec<&str> = names.iter().map(String::as_str).collect();
-
+fn is_conditional_skip(call_expr: &JsCallExpression, names: &[TokenText]) -> bool {
     // Only test.skip(...) and it.skip(...) can be conditional
-    if !matches!(names_ref.as_slice(), ["test" | "it", "skip"]) {
+    if names.len() != 2 {
+        return false;
+    }
+    let first = names[0].text();
+    let second = names[1].text();
+    if !((first == "test" || first == "it") && second == "skip") {
         return false;
     }
 
@@ -307,20 +304,16 @@ fn find_and_remove_skip_member(
             let member_expr = member.member().ok()?;
             if let AnyJsExpression::AnyJsLiteralExpression(lit) = &member_expr
                 && let Some(string_lit) = lit.as_js_string_literal_expression()
+                && let Ok(inner) = string_lit.inner_string_text()
+                && inner.text() == target
             {
-                let token = string_lit.value_token().ok()?;
-                let text = token.text_trimmed();
-                let unquoted = text.trim_matches(|c| c == '"' || c == '\'');
-
-                if unquoted == target {
-                    // This is ["skip"] or ["fixme"] - replace with object
-                    let object = member.object().ok()?;
-                    mutation.replace_node(
-                        AnyJsExpression::JsComputedMemberExpression(member.clone()),
-                        object,
-                    );
-                    return Some(());
-                }
+                // This is ["skip"] or ["fixme"] - replace with object
+                let object = member.object().ok()?;
+                mutation.replace_node(
+                    AnyJsExpression::JsComputedMemberExpression(member.clone()),
+                    object,
+                );
+                return Some(());
             }
 
             // Check nested expression

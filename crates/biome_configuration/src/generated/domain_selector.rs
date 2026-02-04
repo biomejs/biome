@@ -21,7 +21,7 @@ static NEXT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 });
 static PLAYWRIGHT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
-        RuleFilter::Rule("nursery", "expectPlaywrightExpect"),
+        RuleFilter::Rule("nursery", "noPlaywrightConditionalExpect"),
         RuleFilter::Rule("nursery", "noPlaywrightElementHandle"),
         RuleFilter::Rule("nursery", "noPlaywrightEval"),
         RuleFilter::Rule("nursery", "noPlaywrightForceOption"),
@@ -33,6 +33,7 @@ static PLAYWRIGHT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(||
         RuleFilter::Rule("nursery", "noPlaywrightWaitForNavigation"),
         RuleFilter::Rule("nursery", "noPlaywrightWaitForSelector"),
         RuleFilter::Rule("nursery", "noPlaywrightWaitForTimeout"),
+        RuleFilter::Rule("nursery", "usePlaywrightExpect"),
         RuleFilter::Rule("nursery", "usePlaywrightValidDescribeCallback"),
     ]
 });

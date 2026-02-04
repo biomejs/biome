@@ -89,7 +89,6 @@ impl std::fmt::Display for RuleGroup {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum RuleName {
-    ExpectPlaywrightExpect,
     NoAccessKey,
     NoAccumulatingSpread,
     NoAdjacentSpacesInRegex,
@@ -480,6 +479,7 @@ pub enum RuleName {
     UseObjectSpread,
     UseOptionalChain,
     UseParseIntRadix,
+    UsePlaywrightExpect,
     UsePlaywrightValidDescribeCallback,
     UseQwikClasslist,
     UseQwikMethodUsage,
@@ -543,7 +543,6 @@ pub enum RuleName {
 impl RuleName {
     pub const fn as_str(self) -> &'static str {
         match self {
-            Self::ExpectPlaywrightExpect => "expectPlaywrightExpect",
             Self::NoAccessKey => "noAccessKey",
             Self::NoAccumulatingSpread => "noAccumulatingSpread",
             Self::NoAdjacentSpacesInRegex => "noAdjacentSpacesInRegex",
@@ -940,6 +939,7 @@ impl RuleName {
             Self::UseObjectSpread => "useObjectSpread",
             Self::UseOptionalChain => "useOptionalChain",
             Self::UseParseIntRadix => "useParseIntRadix",
+            Self::UsePlaywrightExpect => "usePlaywrightExpect",
             Self::UsePlaywrightValidDescribeCallback => "usePlaywrightValidDescribeCallback",
             Self::UseQwikClasslist => "useQwikClasslist",
             Self::UseQwikMethodUsage => "useQwikMethodUsage",
@@ -1005,7 +1005,6 @@ impl RuleName {
     }
     pub const fn group(self) -> RuleGroup {
         match self {
-            Self::ExpectPlaywrightExpect => RuleGroup::Nursery,
             Self::NoAccessKey => RuleGroup::A11y,
             Self::NoAccumulatingSpread => RuleGroup::Performance,
             Self::NoAdjacentSpacesInRegex => RuleGroup::Complexity,
@@ -1396,6 +1395,7 @@ impl RuleName {
             Self::UseObjectSpread => RuleGroup::Style,
             Self::UseOptionalChain => RuleGroup::Complexity,
             Self::UseParseIntRadix => RuleGroup::Correctness,
+            Self::UsePlaywrightExpect => RuleGroup::Nursery,
             Self::UsePlaywrightValidDescribeCallback => RuleGroup::Nursery,
             Self::UseQwikClasslist => RuleGroup::Correctness,
             Self::UseQwikMethodUsage => RuleGroup::Nursery,
@@ -1462,7 +1462,6 @@ impl std::str::FromStr for RuleName {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "expectPlaywrightExpect" => Ok(Self::ExpectPlaywrightExpect),
             "noAccessKey" => Ok(Self::NoAccessKey),
             "noAccumulatingSpread" => Ok(Self::NoAccumulatingSpread),
             "noAdjacentSpacesInRegex" => Ok(Self::NoAdjacentSpacesInRegex),
@@ -1861,6 +1860,7 @@ impl std::str::FromStr for RuleName {
             "useObjectSpread" => Ok(Self::UseObjectSpread),
             "useOptionalChain" => Ok(Self::UseOptionalChain),
             "useParseIntRadix" => Ok(Self::UseParseIntRadix),
+            "usePlaywrightExpect" => Ok(Self::UsePlaywrightExpect),
             "usePlaywrightValidDescribeCallback" => Ok(Self::UsePlaywrightValidDescribeCallback),
             "useQwikClasslist" => Ok(Self::UseQwikClasslist),
             "useQwikMethodUsage" => Ok(Self::UseQwikMethodUsage),

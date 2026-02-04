@@ -1447,16 +1447,6 @@
 				}
 			]
 		},
-		"ExpectPlaywrightExpectConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithExpectPlaywrightExpectOptions" }
-			]
-		},
-		"ExpectPlaywrightExpectOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"Extends": {
 			"anyOf": [
 				{ "type": "array", "items": { "type": "string" } },
@@ -5593,13 +5583,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"expectPlaywrightExpect": {
-					"description": "Ensure that Playwright test functions contain at least one expect() assertion.\nSee https://biomejs.dev/linter/rules/expect-playwright-expect",
-					"anyOf": [
-						{ "$ref": "#/$defs/ExpectPlaywrightExpectConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noAmbiguousAnchorText": {
 					"description": "Disallow ambiguous anchor descriptions.\nSee https://biomejs.dev/linter/rules/no-ambiguous-anchor-text",
 					"anyOf": [
@@ -5848,7 +5831,7 @@
 					]
 				},
 				"noPlaywrightConditionalExpect": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-playwright-conditional-expect",
+					"description": "Disallow conditional expect() calls inside tests.\nSee https://biomejs.dev/linter/rules/no-playwright-conditional-expect",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoPlaywrightConditionalExpectConfiguration" },
 						{ "type": "null" }
@@ -6233,6 +6216,13 @@
 					"description": "Enforce a maximum number of parameters in function definitions.\nSee https://biomejs.dev/linter/rules/use-max-params",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseMaxParamsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"usePlaywrightExpect": {
+					"description": "Ensure that Playwright test functions contain at least one expect() assertion.\nSee https://biomejs.dev/linter/rules/use-playwright-expect",
+					"anyOf": [
+						{ "$ref": "#/$defs/UsePlaywrightExpectConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6942,15 +6932,6 @@
 					"const": "error"
 				}
 			]
-		},
-		"RuleWithExpectPlaywrightExpectOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/ExpectPlaywrightExpectOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
 		},
 		"RuleWithNoAccessKeyOptions": {
 			"type": "object",
@@ -10629,6 +10610,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUsePlaywrightExpectOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UsePlaywrightExpectOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUsePlaywrightValidDescribeCallbackOptions": {
 			"type": "object",
 			"properties": {
@@ -13757,6 +13747,16 @@
 			]
 		},
 		"UseParseIntRadixOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UsePlaywrightExpectConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUsePlaywrightExpectOptions" }
+			]
+		},
+		"UsePlaywrightExpectOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

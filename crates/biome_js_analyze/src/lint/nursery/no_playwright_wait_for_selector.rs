@@ -159,7 +159,7 @@ impl Rule for NoPlaywrightWaitForSelector {
         )
         .build();
 
-        mutation.replace_node(call_expr.clone(), wait_for_call);
+        mutation.replace_node_transfer_trivia(call_expr.clone(), wait_for_call)?;
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),

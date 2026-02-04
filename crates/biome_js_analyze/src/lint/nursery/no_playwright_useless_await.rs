@@ -223,37 +223,72 @@ fn is_sync_expect_call(call_expr: &JsCallExpression) -> bool {
         return false;
     }
 
-    // Check if the object is an expect() call
+    // Check if the object is an expect() call or .not modifier
     let object = member_expr.object().ok();
-    if let Some(AnyJsExpression::JsCallExpression(expect_call)) = object {
-        let expect_callee = expect_call.callee().ok();
 
-        // Check if it's expect (not expect.poll or expect with resolves/rejects)
-        match expect_callee {
-            Some(AnyJsExpression::JsIdentifierExpression(id)) => {
-                if let Ok(name) = id.name()
-                    && let Ok(token) = name.value_token()
-                    && token.text_trimmed() == "expect"
-                {
-                    // Make sure there's no "poll", "resolves", or "rejects" in the chain
-                    return !has_async_modifier(&expect_call, call_expr);
-                }
-            }
-            Some(AnyJsExpression::JsStaticMemberExpression(expect_member)) => {
-                // Check for expect.soft, but not expect.poll
-                if let Ok(member) = expect_member.member()
-                    && let Some(name) = member.as_js_name()
-                    && let Ok(token) = name.value_token()
-                {
-                    let member_text = token.text_trimmed();
-                    // soft is OK, poll makes it async
-                    if member_text == "soft" {
+    match object {
+        Some(AnyJsExpression::JsCallExpression(expect_call)) => {
+            let expect_callee = expect_call.callee().ok();
+
+            // Check if it's expect (not expect.poll or expect with resolves/rejects)
+            match expect_callee {
+                Some(AnyJsExpression::JsIdentifierExpression(id)) => {
+                    if let Ok(name) = id.name()
+                        && let Ok(token) = name.value_token()
+                        && token.text_trimmed() == "expect"
+                    {
+                        // Make sure there's no "poll", "resolves", or "rejects" in the chain
                         return !has_async_modifier(&expect_call, call_expr);
                     }
                 }
+                Some(AnyJsExpression::JsStaticMemberExpression(expect_member)) => {
+                    // Check for expect.soft, but not expect.poll
+                    if let Ok(member) = expect_member.member()
+                        && let Some(name) = member.as_js_name()
+                        && let Ok(token) = name.value_token()
+                    {
+                        let member_text = token.text_trimmed();
+                        // soft is OK, poll makes it async
+                        if member_text == "soft" {
+                            return !has_async_modifier(&expect_call, call_expr);
+                        }
+                    }
+                }
+                _ => {}
             }
-            _ => {}
         }
+        Some(AnyJsExpression::JsStaticMemberExpression(not_member)) => {
+            // Handle .not modifier: expect(x).not.toBe(1)
+            if let Ok(member_name) = not_member.member()
+                && let Some(name) = member_name.as_js_name()
+                && let Ok(token) = name.value_token()
+                && token.text_trimmed() == "not"
+                && let Ok(AnyJsExpression::JsCallExpression(expect_call)) = not_member.object()
+            {
+                let expect_callee = expect_call.callee().ok();
+                match expect_callee {
+                    Some(AnyJsExpression::JsIdentifierExpression(id)) => {
+                        if let Ok(name) = id.name()
+                            && let Ok(token) = name.value_token()
+                            && token.text_trimmed() == "expect"
+                        {
+                            return !has_async_modifier(&expect_call, call_expr);
+                        }
+                    }
+                    Some(AnyJsExpression::JsStaticMemberExpression(expect_member)) => {
+                        if let Ok(member) = expect_member.member()
+                            && let Some(name) = member.as_js_name()
+                            && let Ok(token) = name.value_token()
+                            && token.text_trimmed() == "soft"
+                        {
+                            return !has_async_modifier(&expect_call, call_expr);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        _ => {}
     }
 
     false

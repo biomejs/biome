@@ -103,6 +103,7 @@ const ASYNC_PLAYWRIGHT_MATCHERS: &[&str] = &[
     "toPass",
 ];
 
+#[derive(Debug)]
 pub enum MissingAwaitType {
     ExpectMatcher(TokenText),
     ExpectPoll,
@@ -284,7 +285,8 @@ fn get_async_expect_matcher(call_expr: &JsCallExpression) -> Option<MissingAwait
 
     // Check for expect.poll FIRST - it's always async regardless of matcher
     // expect.poll() converts any synchronous expect to an asynchronous polling one
-    if has_poll_in_chain(&object) {
+    // IMPORTANT: Only trigger for expect.poll(), not arbitrary obj.poll() chains
+    if has_poll_in_chain(&object) && has_expect_in_chain(&object) {
         return Some(MissingAwaitType::ExpectPoll);
     }
 

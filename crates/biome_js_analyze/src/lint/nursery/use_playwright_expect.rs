@@ -3,8 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsSyntaxKind};
-use biome_rowan::{AstNode, AstSeparatedList};
-use biome_rule_options::expect_playwright_expect::ExpectPlaywrightExpectOptions;
+use biome_rowan::AstNode;
+use biome_rule_options::use_playwright_expect::UsePlaywrightExpectOptions;
+
+use crate::frameworks::playwright::{get_test_callback, is_test_call};
 
 declare_lint_rule! {
     /// Ensure that Playwright test functions contain at least one `expect()` assertion.
@@ -40,9 +42,9 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    pub ExpectPlaywrightExpect {
+    pub UsePlaywrightExpect {
         version: "next",
-        name: "expectPlaywrightExpect",
+        name: "usePlaywrightExpect",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("expect-expect").same()],
         recommended: false,
@@ -50,11 +52,11 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for ExpectPlaywrightExpect {
+impl Rule for UsePlaywrightExpect {
     type Query = Ast<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ExpectPlaywrightExpectOptions;
+    type Options = UsePlaywrightExpectOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expr = ctx.query();
@@ -65,7 +67,7 @@ impl Rule for ExpectPlaywrightExpect {
             return None;
         }
 
-        // Get the test callback (usually the second argument)
+        // Get the test callback (the LAST function argument)
         let args = call_expr.arguments().ok()?;
         let callback = get_test_callback(&args)?;
 
@@ -95,52 +97,6 @@ impl Rule for ExpectPlaywrightExpect {
             }),
         )
     }
-}
-
-/// Checks if the callee is a test() or it() call.
-/// Matches patterns like: test(), it(), test.skip(), test.only(), etc.
-fn is_test_call(callee: &AnyJsExpression) -> bool {
-    match callee {
-        AnyJsExpression::JsIdentifierExpression(id) => {
-            if let Ok(name) = id.name()
-                && let Ok(token) = name.value_token()
-            {
-                let text = token.text_trimmed();
-                return text == "test" || text == "it";
-            }
-            false
-        }
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            // Check for test.skip, test.only, test.describe, etc.
-            if let Ok(object) = member.object() {
-                return is_test_call(&object);
-            }
-            false
-        }
-        _ => false,
-    }
-}
-
-/// Gets the callback function from test arguments.
-/// The callback is typically the last argument that is a function.
-fn get_test_callback(args: &biome_js_syntax::JsCallArguments) -> Option<AnyJsExpression> {
-    let arg_list = args.args();
-
-    // Iterate through arguments to find the callback (function expression or arrow function)
-    for arg in arg_list.iter() {
-        let arg = arg.ok()?;
-        if let Some(expr) = arg.as_any_js_expression() {
-            match expr {
-                AnyJsExpression::JsArrowFunctionExpression(_)
-                | AnyJsExpression::JsFunctionExpression(_) => {
-                    return Some(expr.clone());
-                }
-                _ => {}
-            }
-        }
-    }
-
-    None
 }
 
 /// Checks if an expression (function body) contains an expect() call.

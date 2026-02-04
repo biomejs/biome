@@ -2689,7 +2689,7 @@ pub(crate) fn migrate_eslint_any_rule(
             let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
-                .expect_playwright_expect
+                .use_playwright_expect
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
@@ -2702,6 +2702,18 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_playwright_missing_await
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "playwright/no-conditional-expect" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_playwright_conditional_expect
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }

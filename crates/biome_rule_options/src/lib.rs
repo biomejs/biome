@@ -2,7 +2,6 @@
 
 mod shared;
 pub use shared::*;
-pub mod expect_playwright_expect;
 pub mod no_access_key;
 pub mod no_accumulating_spread;
 pub mod no_adjacent_spaces_in_regex;
@@ -394,6 +393,7 @@ pub mod use_numeric_separators;
 pub mod use_object_spread;
 pub mod use_optional_chain;
 pub mod use_parse_int_radix;
+pub mod use_playwright_expect;
 pub mod use_playwright_valid_describe_callback;
 pub mod use_qwik_classlist;
 pub mod use_qwik_method_usage;

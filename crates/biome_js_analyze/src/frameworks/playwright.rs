@@ -1,5 +1,5 @@
-use biome_js_syntax::AnyJsExpression;
-use biome_rowan::{AstNode, TokenText};
+use biome_js_syntax::{AnyJsExpression, JsCallArguments};
+use biome_rowan::{AstNode, AstSeparatedList, TokenText};
 
 /// Extracts the object name from an expression.
 ///
@@ -65,6 +65,102 @@ pub(crate) const LOCATOR_METHODS: &[&str] = &[
 /// Checks if a method name is a Playwright locator method.
 fn is_locator_method(name: &str) -> bool {
     LOCATOR_METHODS.binary_search(&name).is_ok()
+}
+
+/// Collects member names from an expression chain in "outside-in" order.
+/// For example, `test.describe.skip` returns `["test", "describe", "skip"]`.
+///
+/// Uses `TokenText` to avoid string allocations where possible.
+pub(crate) fn collect_member_names(expr: &AnyJsExpression) -> Option<Vec<TokenText>> {
+    let mut names = Vec::new();
+    collect_member_names_rec(expr, &mut names)?;
+    Some(names)
+}
+
+fn collect_member_names_rec(expr: &AnyJsExpression, names: &mut Vec<TokenText>) -> Option<()> {
+    match expr {
+        AnyJsExpression::JsIdentifierExpression(id) => {
+            let name = id.name().ok()?;
+            let token = name.value_token().ok()?;
+            names.push(token.token_text_trimmed());
+            Some(())
+        }
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            // First recurse on object to get outer names
+            if let Ok(object) = member.object() {
+                collect_member_names_rec(&object, names)?;
+            }
+            // Then add this member name
+            let m = member.member().ok()?;
+            let n = m.as_js_name()?;
+            let t = n.value_token().ok()?;
+            names.push(t.token_text_trimmed());
+            Some(())
+        }
+        AnyJsExpression::JsComputedMemberExpression(member) => {
+            // First recurse on object
+            if let Ok(object) = member.object() {
+                collect_member_names_rec(&object, names)?;
+            }
+            // For computed members, extract string literal value using inner_string_text
+            if let Ok(expr) = member.member()
+                && let Some(literal) = expr.as_any_js_literal_expression()
+                && let Some(string_lit) = literal.as_js_string_literal_expression()
+                && let Ok(inner) = string_lit.inner_string_text()
+            {
+                names.push(inner);
+                return Some(());
+            }
+            None
+        }
+        _ => None,
+    }
+}
+
+/// Checks if the callee is a test() or it() call.
+/// Matches patterns like: test(), it(), test.skip(), test.only(), etc.
+pub(crate) fn is_test_call(callee: &AnyJsExpression) -> bool {
+    match callee {
+        AnyJsExpression::JsIdentifierExpression(id) => {
+            if let Ok(name) = id.name()
+                && let Ok(token) = name.value_token()
+            {
+                let text = token.text_trimmed();
+                return text == "test" || text == "it";
+            }
+            false
+        }
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            if let Ok(object) = member.object() {
+                return is_test_call(&object);
+            }
+            false
+        }
+        _ => false,
+    }
+}
+
+/// Gets the callback function from test arguments.
+/// Returns the LAST function argument (not the first) to handle:
+/// `test("name", { retry: () => 2 }, async () => { ... })`
+pub(crate) fn get_test_callback(args: &JsCallArguments) -> Option<AnyJsExpression> {
+    let arg_list = args.args();
+    let mut callback = None;
+
+    for arg in arg_list.iter() {
+        let arg = arg.ok()?;
+        if let Some(expr) = arg.as_any_js_expression() {
+            match expr {
+                AnyJsExpression::JsArrowFunctionExpression(_)
+                | AnyJsExpression::JsFunctionExpression(_) => {
+                    callback = Some(expr.clone());
+                }
+                _ => {}
+            }
+        }
+    }
+
+    callback
 }
 
 /// Checks if an expression is part of a Playwright call chain.
