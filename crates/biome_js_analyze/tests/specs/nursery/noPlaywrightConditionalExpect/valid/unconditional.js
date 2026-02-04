@@ -20,3 +20,46 @@ test("loop with expect", async ({ page }) => {
         await expect(page.locator(item)).toBeVisible();
     }
 });
+
+test("unconditional with .not modifier", async ({ page }) => {
+    await expect(page).not.toHaveTitle("Title");
+});
+
+test("unconditional .not with locator", async ({ page }) => {
+    await expect(page.locator("h1")).not.toBeVisible();
+});
+
+// .resolves modifier
+test("unconditional with .resolves", async ({ page }) => {
+    await expect(fetchData()).resolves.toBeTruthy();
+});
+
+// .rejects modifier
+test("unconditional with .rejects", async ({ page }) => {
+    await expect(badRequest()).rejects.toThrow();
+});
+
+// .poll() modifier
+test("unconditional with expect.poll", async ({ page }) => {
+    await expect.poll(() => getValue()).toBe(true);
+});
+
+// .soft() modifier
+test("unconditional with expect.soft", async ({ page }) => {
+    await expect.soft(page.locator("h1")).toBeVisible();
+});
+
+// Chained: .resolves.not
+test("unconditional .resolves.not", async ({ page }) => {
+    await expect(fetchData()).resolves.not.toBeNull();
+});
+
+// Chained: .rejects.not
+test("unconditional .rejects.not", async ({ page }) => {
+    await expect(badRequest()).rejects.not.toBeUndefined();
+});
+
+// Chained: .soft().not
+test("unconditional expect.soft with .not", async ({ page }) => {
+    await expect.soft(element).not.toBeHidden();
+});

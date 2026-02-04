@@ -159,3 +159,169 @@ fn is_in_conditional_context(call: &JsCallExpression) -> Option<&'static str> {
 
     None
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_js_parser::{JsParserOptions, parse};
+    use biome_js_syntax::JsFileSource;
+
+    fn get_call_expressions(source: &str) -> Vec<JsCallExpression> {
+        let parsed = parse(source, JsFileSource::js_module(), JsParserOptions::default());
+        parsed
+            .tree()
+            .syntax()
+            .descendants()
+            .filter_map(JsCallExpression::cast)
+            .collect()
+    }
+
+    #[test]
+    fn test_is_expect_call_with_not_modifier() {
+        let source = r#"expect(page).not.toHaveTitle("Title")"#;
+        let calls = get_call_expressions(source);
+
+        // The outer call should be an expect call
+        assert_eq!(calls.len(), 2);
+        // expect(page).not.toHaveTitle("Title") should be recognized as expect call
+        assert!(
+            is_expect_call(&calls[0]),
+            "expect(page).not.toHaveTitle should be recognized as expect call"
+        );
+        // expect(page) should also be recognized as expect call
+        assert!(
+            is_expect_call(&calls[1]),
+            "expect(page) should be recognized as expect call"
+        );
+    }
+
+    #[test]
+    fn test_is_top_level_expect_call_with_not_modifier() {
+        let source = r#"expect(page).not.toHaveTitle("Title")"#;
+        let calls = get_call_expressions(source);
+
+        assert_eq!(calls.len(), 2);
+        // Only the outer call should be top-level
+        assert!(
+            is_top_level_expect_call(&calls[0]),
+            "expect(page).not.toHaveTitle should be top-level"
+        );
+        assert!(
+            !is_top_level_expect_call(&calls[1]),
+            "expect(page) should NOT be top-level (it's nested)"
+        );
+    }
+
+    #[test]
+    fn test_is_expect_call_with_resolves() {
+        let source = r#"expect(fetchData()).resolves.toBeTruthy()"#;
+        let calls = get_call_expressions(source);
+
+        assert_eq!(calls.len(), 3); // toBeTruthy(), expect(), fetchData()
+        assert!(
+            is_expect_call(&calls[0]),
+            "expect(fetchData()).resolves.toBeTruthy should be recognized as expect call"
+        );
+        assert!(
+            is_expect_call(&calls[1]),
+            "expect(fetchData()) should be recognized as expect call"
+        );
+    }
+
+    #[test]
+    fn test_is_expect_call_with_rejects() {
+        let source = r#"expect(badRequest()).rejects.toThrow()"#;
+        let calls = get_call_expressions(source);
+
+        assert_eq!(calls.len(), 3); // toThrow(), expect(), badRequest()
+        assert!(
+            is_expect_call(&calls[0]),
+            "expect(badRequest()).rejects.toThrow should be recognized as expect call"
+        );
+    }
+
+    #[test]
+    fn test_is_expect_call_with_poll() {
+        let source = r#"expect.poll(() => getValue()).toBe(true)"#;
+        let calls = get_call_expressions(source);
+
+        // toBe(), expect.poll(), getValue()
+        assert!(calls.len() >= 2);
+        assert!(
+            is_expect_call(&calls[0]),
+            "expect.poll(() => getValue()).toBe should be recognized as expect call"
+        );
+    }
+
+    #[test]
+    fn test_is_expect_call_with_soft() {
+        let source = r#"expect.soft(element).toBeVisible()"#;
+        let calls = get_call_expressions(source);
+
+        assert_eq!(calls.len(), 2); // toBeVisible(), expect.soft()
+        assert!(
+            is_expect_call(&calls[0]),
+            "expect.soft(element).toBeVisible should be recognized as expect call"
+        );
+        assert!(
+            is_expect_call(&calls[1]),
+            "expect.soft(element) should be recognized as expect call"
+        );
+    }
+
+    #[test]
+    fn test_is_expect_call_with_chained_resolves_not() {
+        let source = r#"expect(fetchData()).resolves.not.toBeNull()"#;
+        let calls = get_call_expressions(source);
+
+        assert!(calls.len() >= 2);
+        assert!(
+            is_expect_call(&calls[0]),
+            "expect(fetchData()).resolves.not.toBeNull should be recognized as expect call"
+        );
+    }
+
+    #[test]
+    fn test_is_expect_call_with_chained_soft_not() {
+        let source = r#"expect.soft(element).not.toBeHidden()"#;
+        let calls = get_call_expressions(source);
+
+        assert!(calls.len() >= 2);
+        assert!(
+            is_expect_call(&calls[0]),
+            "expect.soft(element).not.toBeHidden should be recognized as expect call"
+        );
+    }
+
+    #[test]
+    fn test_is_top_level_expect_call_with_resolves() {
+        let source = r#"expect(fetchData()).resolves.toBeTruthy()"#;
+        let calls = get_call_expressions(source);
+
+        assert_eq!(calls.len(), 3);
+        assert!(
+            is_top_level_expect_call(&calls[0]),
+            "expect(fetchData()).resolves.toBeTruthy should be top-level"
+        );
+        assert!(
+            !is_top_level_expect_call(&calls[1]),
+            "expect(fetchData()) should NOT be top-level (it's nested)"
+        );
+    }
+
+    #[test]
+    fn test_is_top_level_expect_call_with_soft() {
+        let source = r#"expect.soft(element).toBeVisible()"#;
+        let calls = get_call_expressions(source);
+
+        assert_eq!(calls.len(), 2);
+        assert!(
+            is_top_level_expect_call(&calls[0]),
+            "expect.soft(element).toBeVisible should be top-level"
+        );
+        assert!(
+            !is_top_level_expect_call(&calls[1]),
+            "expect.soft(element) should NOT be top-level (it's nested)"
+        );
+    }
+}
