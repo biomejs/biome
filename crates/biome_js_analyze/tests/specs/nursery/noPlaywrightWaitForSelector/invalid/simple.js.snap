@@ -12,7 +12,7 @@ await page.waitForSelector('.submit-button');
 
 # Diagnostics
 ```
-simple.js:2:7 lint/nursery/noPlaywrightWaitForSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+simple.js:2:7 lint/nursery/noPlaywrightWaitForSelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of page.waitForSelector().
   
@@ -26,6 +26,14 @@ simple.js:2:7 lint/nursery/noPlaywrightWaitForSelector ━━━━━━━━�
   i Locators automatically wait for elements to be ready, making explicit waits unnecessary.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with locator(selector).waitFor().
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - await·page.waitForSelector('.submit-button');
+      2 │ + await·page.locator('.submit-button').waitFor();
+    3 3 │   
+    4 4 │   
   
 
 ```
