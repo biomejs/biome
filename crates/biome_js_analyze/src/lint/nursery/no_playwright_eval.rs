@@ -94,7 +94,7 @@ impl Rule for NoPlaywrightEval {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Unexpected use of "<Emphasis>{receiver}"."{{method}}"()"</Emphasis>"."
+                    "Unexpected use of "<Emphasis>{receiver}"."{method}"()"</Emphasis>"."
                 },
             )
             .note(markup! {
