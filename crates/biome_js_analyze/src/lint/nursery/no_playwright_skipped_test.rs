@@ -84,52 +84,46 @@ fn is_playwright_skipped_call(callee: &AnyJsExpression) -> Option<SkippedType> {
     // Match patterns for skipped calls
     match names.len() {
         2 => {
-            let first = names[0].text();
-            let second = names[1].text();
             // test.skip(...) / it.skip(...)
-            if (first == "test" || first == "it") && second == "skip" {
+            if (names[0] == "test" || names[0] == "it") && names[1] == "skip" {
                 return Some(SkippedType::Skip);
             }
             // test.fixme(...) / it.fixme(...)
-            if (first == "test" || first == "it") && second == "fixme" {
+            if (names[0] == "test" || names[0] == "it") && names[1] == "fixme" {
                 return Some(SkippedType::Fixme);
             }
             // describe.skip(...)
-            if first == "describe" && second == "skip" {
+            if names[0] == "describe" && names[1] == "skip" {
                 return Some(SkippedType::Skip);
             }
         }
         3 => {
-            let first = names[0].text();
-            let second = names[1].text();
-            let third = names[2].text();
             // test.describe.skip(...) / test.step.skip(...)
-            if first == "test" && (second == "describe" || second == "step") && third == "skip" {
+            if names[0] == "test"
+                && (names[1] == "describe" || names[1] == "step")
+                && names[2] == "skip"
+            {
                 return Some(SkippedType::Skip);
             }
             // test.describe.fixme(...)
-            if first == "test" && second == "describe" && third == "fixme" {
+            if names[0] == "test" && names[1] == "describe" && names[2] == "fixme" {
                 return Some(SkippedType::Fixme);
             }
         }
         4 => {
-            let first = names[0].text();
-            let second = names[1].text();
-            let third = names[2].text();
-            let fourth = names[3].text();
             // test.describe.parallel.skip(...) / test.describe.serial.skip(...)
-            if first == "test"
-                && second == "describe"
-                && is_describe_mode(third)
-                && fourth == "skip"
+            if names[0] == "test"
+                && names[1] == "describe"
+                && is_describe_mode(&names[2])
+                && names[3] == "skip"
             {
                 return Some(SkippedType::Skip);
             }
             // test.describe.parallel.fixme(...) / test.describe.serial.fixme(...)
-            if first == "test"
-                && second == "describe"
-                && is_describe_mode(third)
-                && fourth == "fixme"
+            if names[0] == "test"
+                && names[1] == "describe"
+                && is_describe_mode(&names[2])
+                && names[3] == "fixme"
             {
                 return Some(SkippedType::Fixme);
             }
@@ -139,8 +133,8 @@ fn is_playwright_skipped_call(callee: &AnyJsExpression) -> Option<SkippedType> {
     None
 }
 
-fn is_describe_mode(s: &str) -> bool {
-    matches!(s, "parallel" | "serial")
+fn is_describe_mode(s: &TokenText) -> bool {
+    *s == "parallel" || *s == "serial"
 }
 
 /// Checks if this is a conditional skip call (test.skip() inside test body with args or in if block).
@@ -149,9 +143,7 @@ fn is_conditional_skip(call_expr: &JsCallExpression, names: &[TokenText]) -> boo
     if names.len() != 2 {
         return false;
     }
-    let first = names[0].text();
-    let second = names[1].text();
-    if !((first == "test" || first == "it") && second == "skip") {
+    if !((names[0] == "test" || names[0] == "it") && names[1] == "skip") {
         return false;
     }
 
@@ -305,7 +297,7 @@ fn find_and_remove_skip_member(
             if let AnyJsExpression::AnyJsLiteralExpression(lit) = &member_expr
                 && let Some(string_lit) = lit.as_js_string_literal_expression()
                 && let Ok(inner) = string_lit.inner_string_text()
-                && inner.text() == target
+                && inner == target
             {
                 // This is ["skip"] or ["fixme"] - replace with object
                 let object = member.object().ok()?;

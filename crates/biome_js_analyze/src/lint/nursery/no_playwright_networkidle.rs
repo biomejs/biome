@@ -88,7 +88,7 @@ impl Rule for NoPlaywrightNetworkidle {
                 && let Some(string_lit) = literal.as_js_string_literal_expression()
             {
                 let value = string_lit.inner_string_text().ok()?;
-                if value.text() == "networkidle" {
+                if value == "networkidle" {
                     return Some(());
                 }
             }
@@ -147,7 +147,7 @@ fn has_networkidle_option(obj_expr: &JsObjectExpression) -> bool {
                     && let Some(literal_expr) = value.as_any_js_literal_expression()
                     && let Some(string_lit) = literal_expr.as_js_string_literal_expression()
                     && let Ok(inner) = string_lit.inner_string_text()
-                    && inner.text() == "networkidle"
+                    && inner == "networkidle"
                 {
                     return true;
                 }

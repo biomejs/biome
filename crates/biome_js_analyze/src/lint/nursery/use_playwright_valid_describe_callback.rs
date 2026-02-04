@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression};
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, TokenText};
 use biome_rule_options::use_playwright_valid_describe_callback::UsePlaywrightValidDescribeCallbackOptions;
 
 use crate::frameworks::playwright::collect_member_names;
@@ -77,47 +77,40 @@ fn is_playwright_describe_call(callee: &AnyJsExpression) -> Option<bool> {
     match names.len() {
         1 => {
             // describe()
-            Some(names[0].text() == "describe")
+            Some(names[0] == "describe")
         }
         2 => {
             // test.describe()
-            Some(names[0].text() == "test" && names[1].text() == "describe")
+            Some(names[0] == "test" && names[1] == "describe")
         }
         3 => {
-            let first = names[0].text();
-            let second = names[1].text();
-            let third = names[2].text();
             // test.describe.only() / test.describe.skip()
             // test.describe.parallel() / test.describe.serial()
             Some(
-                first == "test"
-                    && second == "describe"
-                    && (is_describe_modifier(third) || is_describe_mode(third)),
+                names[0] == "test"
+                    && names[1] == "describe"
+                    && (is_describe_modifier(&names[2]) || is_describe_mode(&names[2])),
             )
         }
         4 => {
-            let first = names[0].text();
-            let second = names[1].text();
-            let third = names[2].text();
-            let fourth = names[3].text();
             // test.describe.parallel.only() / test.describe.serial.only()
             Some(
-                first == "test"
-                    && second == "describe"
-                    && is_describe_mode(third)
-                    && is_describe_modifier(fourth),
+                names[0] == "test"
+                    && names[1] == "describe"
+                    && is_describe_mode(&names[2])
+                    && is_describe_modifier(&names[3]),
             )
         }
         _ => Some(false),
     }
 }
 
-fn is_describe_modifier(s: &str) -> bool {
-    matches!(s, "only" | "skip")
+fn is_describe_modifier(s: &TokenText) -> bool {
+    *s == "only" || *s == "skip"
 }
 
-fn is_describe_mode(s: &str) -> bool {
-    matches!(s, "parallel" | "serial")
+fn is_describe_mode(s: &TokenText) -> bool {
+    *s == "parallel" || *s == "serial"
 }
 
 impl Rule for UsePlaywrightValidDescribeCallback {

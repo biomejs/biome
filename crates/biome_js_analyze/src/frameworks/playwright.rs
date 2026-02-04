@@ -164,13 +164,19 @@ pub(crate) fn get_test_callback(args: &JsCallArguments) -> Option<AnyJsExpressio
 }
 
 /// Checks if a call expression is an expect() call or part of an expect chain.
-/// Matches: expect(), expect.soft(), expect.poll(), expect(x).toBe(), etc.
+/// Matches: expect(), expect.soft(), expect.poll(), expect(x).toBe(), expect(x).not.toBe(), etc.
 pub(crate) fn is_expect_call(call: &JsCallExpression) -> bool {
     let Ok(callee) = call.callee() else {
         return false;
     };
 
-    match &callee {
+    is_expect_expression(&callee)
+}
+
+/// Helper function to check if an expression is part of an expect chain.
+/// This handles nested member expressions like expect(page).not.toHaveTitle
+fn is_expect_expression(expr: &AnyJsExpression) -> bool {
+    match expr {
         AnyJsExpression::JsIdentifierExpression(id) => {
             if let Ok(name) = id.name()
                 && let Ok(token) = name.value_token()
@@ -180,27 +186,16 @@ pub(crate) fn is_expect_call(call: &JsCallExpression) -> bool {
             false
         }
         AnyJsExpression::JsStaticMemberExpression(member) => {
-            // expect.soft(), expect.poll(), or expect(...).method()
+            // expect.soft(), expect.poll(), expect(...).method(), expect(...).not.method()
             if let Ok(object) = member.object() {
-                match object {
-                    AnyJsExpression::JsIdentifierExpression(id) => {
-                        if let Ok(name) = id.name()
-                            && let Ok(token) = name.value_token()
-                        {
-                            return token.text_trimmed() == "expect";
-                        }
-                    }
-                    AnyJsExpression::JsCallExpression(inner_call) => {
-                        // expect(page).toHaveTitle() - recurse into the call
-                        return is_expect_call(&inner_call);
-                    }
-                    _ => {}
-                }
+                // Recursively check the object - this handles chained member expressions
+                // like expect(page).not where the object is itself a member expression
+                return is_expect_expression(&object);
             }
             false
         }
         AnyJsExpression::JsCallExpression(inner_call) => {
-            // Handle chained expectations
+            // Handle chained expectations - check if the inner call is an expect call
             is_expect_call(inner_call)
         }
         _ => false,
