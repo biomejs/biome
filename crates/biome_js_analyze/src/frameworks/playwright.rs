@@ -1,4 +1,4 @@
-use biome_js_syntax::{AnyJsExpression, JsCallArguments, JsCallExpression};
+use biome_js_syntax::{AnyJsExpression, JsCallArguments, JsCallExpression, JsSyntaxKind};
 use biome_rowan::{AstNode, AstSeparatedList, TokenText};
 
 /// Extracts the object name from an expression.
@@ -218,6 +218,20 @@ fn is_expect_expression(expr: &AnyJsExpression) -> bool {
         }
         _ => false,
     }
+}
+
+/// Checks if an expression (function body) contains an expect() call.
+pub(crate) fn contains_expect_call(callback: &AnyJsExpression) -> bool {
+    // Walk through all descendants looking for expect() calls
+    for descendant in callback.syntax().descendants() {
+        if descendant.kind() == JsSyntaxKind::JS_CALL_EXPRESSION
+            && let Some(call) = JsCallExpression::cast(descendant)
+            && is_expect_call(&call)
+        {
+            return true;
+        }
+    }
+    false
 }
 
 /// Checks if an expression is part of a Playwright call chain.

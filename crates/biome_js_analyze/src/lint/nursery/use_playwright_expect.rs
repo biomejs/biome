@@ -2,11 +2,11 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsSyntaxKind};
+use biome_js_syntax::JsCallExpression;
 use biome_rowan::AstNode;
 use biome_rule_options::use_playwright_expect::UsePlaywrightExpectOptions;
 
-use crate::frameworks::playwright::{get_test_callback, is_expect_call, is_test_call};
+use crate::frameworks::playwright::{contains_expect_call, get_test_callback, is_test_call};
 
 declare_lint_rule! {
     /// Ensure that Playwright test functions contain at least one `expect()` assertion.
@@ -99,16 +99,3 @@ impl Rule for UsePlaywrightExpect {
     }
 }
 
-/// Checks if an expression (function body) contains an expect() call.
-fn contains_expect_call(callback: &AnyJsExpression) -> bool {
-    // Walk through all descendants looking for expect() calls
-    for descendant in callback.syntax().descendants() {
-        if descendant.kind() == JsSyntaxKind::JS_CALL_EXPRESSION
-            && let Some(call) = JsCallExpression::cast(descendant)
-            && is_expect_call(&call)
-        {
-            return true;
-        }
-    }
-    false
-}
