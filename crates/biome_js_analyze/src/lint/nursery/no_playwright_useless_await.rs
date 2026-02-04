@@ -9,7 +9,7 @@ use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 use biome_rule_options::no_playwright_useless_await::NoPlaywrightUselessAwaitOptions;
 
 use crate::JsRuleAction;
-use crate::frameworks::playwright::{LOCATOR_METHODS, is_page_or_frame_name};
+use crate::frameworks::playwright::{LOCATOR_METHODS, get_page_or_frame_name};
 
 declare_lint_rule! {
     /// Disallow unnecessary `await` for Playwright methods that don't return promises.
@@ -141,7 +141,7 @@ impl Rule for NoPlaywrightUselessAwait {
             if SYNC_PAGE_METHODS.binary_search(&method_name).is_ok() {
                 // Verify it's called on page/frame
                 let object = member_expr.object().ok()?;
-                if is_page_or_frame(&object) {
+                if get_page_or_frame_name(&object).is_some() {
                     return Some(());
                 }
             }
@@ -188,29 +188,6 @@ impl Rule for NoPlaywrightUselessAwait {
             markup! { "Remove unnecessary await" }.to_owned(),
             mutation,
         ))
-    }
-}
-
-fn is_page_or_frame(expr: &AnyJsExpression) -> bool {
-    match expr {
-        AnyJsExpression::JsIdentifierExpression(id) => {
-            if let Ok(name) = id.name()
-                && let Ok(token) = name.value_token()
-            {
-                return is_page_or_frame_name(token.text_trimmed());
-            }
-            false
-        }
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            if let Ok(member_name) = member.member()
-                && let Some(name) = member_name.as_js_name()
-                && let Ok(token) = name.value_token()
-            {
-                return is_page_or_frame_name(token.text_trimmed());
-            }
-            false
-        }
-        _ => false,
     }
 }
 

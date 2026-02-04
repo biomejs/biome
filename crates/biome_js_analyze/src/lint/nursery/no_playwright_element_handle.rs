@@ -62,8 +62,8 @@ declare_lint_rule! {
 }
 
 pub struct ElementHandleCall {
-    pub receiver: TokenText,
-    pub method: TokenText,
+    receiver: TokenText,
+    method: TokenText,
 }
 
 impl Rule for NoPlaywrightElementHandle {

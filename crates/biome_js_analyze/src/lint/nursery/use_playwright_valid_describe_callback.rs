@@ -53,10 +53,15 @@ declare_lint_rule! {
     }
 }
 
+/// Reasons why a describe callback is invalid.
 pub enum InvalidReason {
+    /// The callback is async, which is not allowed for describe blocks.
     Async,
+    /// The callback has parameters, which describe callbacks should not have.
     HasParameters,
+    /// No callback function was provided.
     MissingCallback,
+    /// The provided argument is not a function.
     NotFunction,
 }
 
