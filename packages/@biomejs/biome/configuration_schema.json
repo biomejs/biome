@@ -1447,6 +1447,16 @@
 				}
 			]
 		},
+		"ExpectPlaywrightExpectConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithExpectPlaywrightExpectOptions" }
+			]
+		},
+		"ExpectPlaywrightExpectOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"Extends": {
 			"anyOf": [
 				{ "type": "array", "items": { "type": "string" } },
@@ -4216,6 +4226,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoPlaywrightConditionalExpectConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoPlaywrightConditionalExpectOptions" }
+			]
+		},
+		"NoPlaywrightConditionalExpectOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoPlaywrightElementHandleConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5573,6 +5593,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"expectPlaywrightExpect": {
+					"description": "Ensure that Playwright test functions contain at least one expect() assertion.\nSee https://biomejs.dev/linter/rules/expect-playwright-expect",
+					"anyOf": [
+						{ "$ref": "#/$defs/ExpectPlaywrightExpectConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAmbiguousAnchorText": {
 					"description": "Disallow ambiguous anchor descriptions.\nSee https://biomejs.dev/linter/rules/no-ambiguous-anchor-text",
 					"anyOf": [
@@ -5817,6 +5844,13 @@
 					"description": "Disallow function parameters that are only used in recursive calls.\nSee https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoParametersOnlyUsedInRecursionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightConditionalExpect": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-playwright-conditional-expect",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPlaywrightConditionalExpectConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6908,6 +6942,15 @@
 					"const": "error"
 				}
 			]
+		},
+		"RuleWithExpectPlaywrightExpectOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/ExpectPlaywrightExpectOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
 		},
 		"RuleWithNoAccessKeyOptions": {
 			"type": "object",
@@ -8456,9 +8499,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoPlaywrightConditionalExpectOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoPlaywrightConditionalExpectOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoPlaywrightElementHandleOptions": {
 			"type": "object",
 			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoPlaywrightElementHandleOptions" }
 			},
@@ -8514,6 +8567,7 @@
 		"RuleWithNoPlaywrightSkippedTestOptions": {
 			"type": "object",
 			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoPlaywrightSkippedTestOptions" }
 			},
@@ -8542,6 +8596,7 @@
 		"RuleWithNoPlaywrightWaitForSelectorOptions": {
 			"type": "object",
 			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoPlaywrightWaitForSelectorOptions" }
 			},

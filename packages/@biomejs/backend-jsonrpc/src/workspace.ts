@@ -1860,6 +1860,11 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
+	* Ensure that Playwright test functions contain at least one expect() assertion.
+See https://biomejs.dev/linter/rules/expect-playwright-expect 
+	 */
+	expectPlaywrightExpect?: ExpectPlaywrightExpectConfiguration;
+	/**
 	* Disallow ambiguous anchor descriptions.
 See https://biomejs.dev/linter/rules/no-ambiguous-anchor-text 
 	 */
@@ -3862,6 +3867,9 @@ export type UseValidTypeofConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type ExpectPlaywrightExpectConfiguration =
+	| RulePlainConfiguration
+	| RuleWithExpectPlaywrightExpectOptions;
 export type NoAmbiguousAnchorTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAmbiguousAnchorTextOptions;
@@ -5434,6 +5442,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithExpectPlaywrightExpectOptions {
+	level: RulePlainConfiguration;
+	options?: ExpectPlaywrightExpectOptions;
+}
 export interface RuleWithNoAmbiguousAnchorTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoAmbiguousAnchorTextOptions;
@@ -5580,6 +5592,7 @@ export interface RuleWithNoParametersOnlyUsedInRecursionOptions {
 	options?: NoParametersOnlyUsedInRecursionOptions;
 }
 export interface RuleWithNoPlaywrightElementHandleOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoPlaywrightElementHandleOptions;
 }
@@ -5605,6 +5618,7 @@ export interface RuleWithNoPlaywrightPagePauseOptions {
 	options?: NoPlaywrightPagePauseOptions;
 }
 export interface RuleWithNoPlaywrightSkippedTestOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoPlaywrightSkippedTestOptions;
 }
@@ -5618,6 +5632,7 @@ export interface RuleWithNoPlaywrightWaitForNavigationOptions {
 	options?: NoPlaywrightWaitForNavigationOptions;
 }
 export interface RuleWithNoPlaywrightWaitForSelectorOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoPlaywrightWaitForSelectorOptions;
 }
@@ -7015,6 +7030,7 @@ to a DOM element id.
 export type UseValidForDirectionOptions = {};
 export type UseValidTypeofOptions = {};
 export type UseYieldOptions = {};
+export type ExpectPlaywrightExpectOptions = {};
 export interface NoAmbiguousAnchorTextOptions {
 	/**
 	 * It allows users to modify the strings that can be checked for in the anchor text. Useful for specifying other words in other languages
@@ -8028,6 +8044,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
+	| "lint/nursery/expectPlaywrightExpect"
 	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
