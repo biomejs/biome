@@ -89,6 +89,7 @@ impl std::fmt::Display for RuleGroup {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum RuleName {
+    ExpectPlaywrightExpect,
     NoAccessKey,
     NoAccumulatingSpread,
     NoAdjacentSpacesInRegex,
@@ -254,6 +255,7 @@ pub enum RuleName {
     NoParameterAssign,
     NoParameterProperties,
     NoParametersOnlyUsedInRecursion,
+    NoPlaywrightConditionalExpect,
     NoPlaywrightElementHandle,
     NoPlaywrightEval,
     NoPlaywrightForceOption,
@@ -541,6 +543,7 @@ pub enum RuleName {
 impl RuleName {
     pub const fn as_str(self) -> &'static str {
         match self {
+            Self::ExpectPlaywrightExpect => "expectPlaywrightExpect",
             Self::NoAccessKey => "noAccessKey",
             Self::NoAccumulatingSpread => "noAccumulatingSpread",
             Self::NoAdjacentSpacesInRegex => "noAdjacentSpacesInRegex",
@@ -712,6 +715,7 @@ impl RuleName {
             Self::NoParameterAssign => "noParameterAssign",
             Self::NoParameterProperties => "noParameterProperties",
             Self::NoParametersOnlyUsedInRecursion => "noParametersOnlyUsedInRecursion",
+            Self::NoPlaywrightConditionalExpect => "noPlaywrightConditionalExpect",
             Self::NoPlaywrightElementHandle => "noPlaywrightElementHandle",
             Self::NoPlaywrightEval => "noPlaywrightEval",
             Self::NoPlaywrightForceOption => "noPlaywrightForceOption",
@@ -1001,6 +1005,7 @@ impl RuleName {
     }
     pub const fn group(self) -> RuleGroup {
         match self {
+            Self::ExpectPlaywrightExpect => RuleGroup::Nursery,
             Self::NoAccessKey => RuleGroup::A11y,
             Self::NoAccumulatingSpread => RuleGroup::Performance,
             Self::NoAdjacentSpacesInRegex => RuleGroup::Complexity,
@@ -1166,6 +1171,7 @@ impl RuleName {
             Self::NoParameterAssign => RuleGroup::Style,
             Self::NoParameterProperties => RuleGroup::Style,
             Self::NoParametersOnlyUsedInRecursion => RuleGroup::Nursery,
+            Self::NoPlaywrightConditionalExpect => RuleGroup::Nursery,
             Self::NoPlaywrightElementHandle => RuleGroup::Nursery,
             Self::NoPlaywrightEval => RuleGroup::Nursery,
             Self::NoPlaywrightForceOption => RuleGroup::Nursery,
@@ -1456,6 +1462,7 @@ impl std::str::FromStr for RuleName {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "expectPlaywrightExpect" => Ok(Self::ExpectPlaywrightExpect),
             "noAccessKey" => Ok(Self::NoAccessKey),
             "noAccumulatingSpread" => Ok(Self::NoAccumulatingSpread),
             "noAdjacentSpacesInRegex" => Ok(Self::NoAdjacentSpacesInRegex),
@@ -1629,6 +1636,7 @@ impl std::str::FromStr for RuleName {
             "noParameterAssign" => Ok(Self::NoParameterAssign),
             "noParameterProperties" => Ok(Self::NoParameterProperties),
             "noParametersOnlyUsedInRecursion" => Ok(Self::NoParametersOnlyUsedInRecursion),
+            "noPlaywrightConditionalExpect" => Ok(Self::NoPlaywrightConditionalExpect),
             "noPlaywrightElementHandle" => Ok(Self::NoPlaywrightElementHandle),
             "noPlaywrightEval" => Ok(Self::NoPlaywrightEval),
             "noPlaywrightForceOption" => Ok(Self::NoPlaywrightForceOption),
