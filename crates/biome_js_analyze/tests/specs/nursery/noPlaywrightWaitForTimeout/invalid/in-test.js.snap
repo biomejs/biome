@@ -30,6 +30,8 @@ in-test.js:4:11 lint/nursery/noPlaywrightWaitForTimeout ━━━━━━━━
   
   i Hardcoded timeouts are flaky and make tests slower. Use conditions that wait for specific events.
   
+  i Consider using web-first assertions like expect(locator).toBeVisible() which auto-wait for conditions.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 

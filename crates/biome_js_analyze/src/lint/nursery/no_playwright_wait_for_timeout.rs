@@ -90,6 +90,9 @@ impl Rule for NoPlaywrightWaitForTimeout {
             })
             .note(markup! {
                 "Hardcoded timeouts are flaky and make tests slower. Use conditions that wait for specific events."
+            })
+            .note(markup! {
+                "Consider using web-first assertions like "<Emphasis>"expect(locator).toBeVisible()"</Emphasis>" which auto-wait for conditions."
             }),
         )
     }
