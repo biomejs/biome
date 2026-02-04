@@ -475,6 +475,34 @@ impl Rule for UseHookAtTopLevel {
             return None;
         }
 
+        // Check if the hook is in the ignore list
+        if let Some(ignore) = ctx.options().ignore.as_ref()
+            && let Ok(callee) = call.callee()
+        {
+            // Extract the hook name (handles both `useHook` and `obj.useHook`)
+            let hook_name = if let Some(identifier) = callee.as_js_identifier_expression() {
+                identifier
+                    .name()
+                    .ok()
+                    .and_then(|name| name.value_token().ok())
+                    .map(|token| token.token_text_trimmed())
+            } else if let Some(member_expression) = callee.as_js_static_member_expression() {
+                member_expression
+                    .member()
+                    .ok()
+                    .and_then(|member| member.value_token().ok())
+                    .map(|token| token.token_text_trimmed())
+            } else {
+                None
+            };
+
+            if let Some(name) = hook_name
+                && ignore.contains(name.text())
+            {
+                return None;
+            }
+        }
+
         if is_top_level_call(call) {
             return Some(Suggestion {
                 hook_name_range: get_hook_name_range()?,

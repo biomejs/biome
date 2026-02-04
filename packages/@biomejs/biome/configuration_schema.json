@@ -12955,6 +12955,14 @@
 		},
 		"UseHookAtTopLevelOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "List of function names that should not be treated as hooks.\nFunctions in this list will be ignored by the rule even if they follow the `use*` naming convention.",
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseHtmlLangConfiguration": {

@@ -6916,7 +6916,13 @@ export interface UseExhaustiveDependenciesOptions {
 	reportUnnecessaryDependencies?: boolean;
 }
 export type UseGraphqlNamedOperationsOptions = {};
-export type UseHookAtTopLevelOptions = {};
+export interface UseHookAtTopLevelOptions {
+	/**
+	* List of function names that should not be treated as hooks.
+Functions in this list will be ignored by the rule even if they follow the `use*` naming convention. 
+	 */
+	ignore?: string[];
+}
 export type UseImageSizeOptions = null;
 export interface UseImportExtensionsOptions {
 	/**
