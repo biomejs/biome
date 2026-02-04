@@ -25,7 +25,7 @@ test["skip"]("bracket notation skip", async ({ page }) => {
 
 # Diagnostics
 ```
-test-skip.js:4:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test-skip.js:4:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of .skip() annotation.
   
@@ -44,11 +44,20 @@ test-skip.js:4:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Remove the .skip() annotation.
+  
+     2  2 │   
+     3  3 │   // Basic test.skip
+     4    │ - test.skip("skipped·test",·async·({·page·})·=>·{
+        4 │ + test("skipped·test",·async·({·page·})·=>·{
+     5  5 │       await page.click("button");
+     6  6 │   });
+  
 
 ```
 
 ```
-test-skip.js:9:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test-skip.js:9:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of .skip() annotation.
   
@@ -67,11 +76,20 @@ test-skip.js:9:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Remove the .skip() annotation.
+  
+     7  7 │   
+     8  8 │   // it.skip variant
+     9    │ - it.skip("skipped·it",·async·({·page·})·=>·{
+        9 │ + it("skipped·it",·async·({·page·})·=>·{
+    10 10 │       await page.click("button");
+    11 11 │   });
+  
 
 ```
 
 ```
-test-skip.js:14:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test-skip.js:14:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of .skip() annotation.
   
@@ -89,5 +107,9 @@ test-skip.js:14:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Remove the .skip() annotation.
+  
+    14 │ test["skip"]("bracket·notation·skip",·async·({·page·})·=>·{
+       │     --------                                               
 
 ```

@@ -1,9 +1,12 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsSyntaxKind};
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+
+use crate::JsRuleAction;
 
 use biome_rule_options::no_playwright_skipped_test::NoPlaywrightSkippedTestOptions;
 
@@ -52,6 +55,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintPlaywright("no-skipped-test").same()],
         recommended: false,
         domains: &[RuleDomain::Playwright],
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -249,5 +253,80 @@ impl Rule for NoPlaywrightSkippedTest {
                 "Remove the "<Emphasis>"."{annotation}"()"</Emphasis>" annotation or address the underlying issue causing the test to be skipped."
             }),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let call_expr = ctx.query();
+        let callee = call_expr.callee().ok()?;
+        let mut mutation = ctx.root().begin();
+
+        let annotation = state.as_str();
+
+        // Find the outermost member expression that contains .skip or .fixme
+        // We need to remove just that segment from the chain
+        find_and_remove_skip_member(&callee, annotation, &mut mutation)?;
+
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Remove the ."<Emphasis>{annotation}</Emphasis>"() annotation." }.to_owned(),
+            mutation,
+        ))
+    }
+}
+
+/// Recursively find and remove the .skip or .fixme member from the expression chain
+fn find_and_remove_skip_member(
+    expr: &AnyJsExpression,
+    target: &str,
+    mutation: &mut biome_rowan::BatchMutation<biome_js_syntax::JsLanguage>,
+) -> Option<()> {
+    match expr {
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            let member_name = member.member().ok()?;
+            let name_node = member_name.as_js_name()?;
+            let name_text = name_node.value_token().ok()?;
+
+            if name_text.text_trimmed() == target {
+                // This is the .skip or .fixme member - replace the entire expression with object
+                let object = member.object().ok()?;
+
+                // Replace the entire static member expression with just the object
+                mutation.replace_node(
+                    AnyJsExpression::JsStaticMemberExpression(member.clone()),
+                    object,
+                );
+                return Some(());
+            }
+
+            // Check nested expression
+            let obj = member.object().ok()?;
+            find_and_remove_skip_member(&obj, target, mutation)
+        }
+        AnyJsExpression::JsComputedMemberExpression(member) => {
+            let member_expr = member.member().ok()?;
+            if let AnyJsExpression::AnyJsLiteralExpression(lit) = &member_expr
+                && let Some(string_lit) = lit.as_js_string_literal_expression()
+            {
+                let token = string_lit.value_token().ok()?;
+                let text = token.text_trimmed();
+                let unquoted = text.trim_matches(|c| c == '"' || c == '\'');
+
+                if unquoted == target {
+                    // This is ["skip"] or ["fixme"] - replace with object
+                    let object = member.object().ok()?;
+                    mutation.replace_node(
+                        AnyJsExpression::JsComputedMemberExpression(member.clone()),
+                        object,
+                    );
+                    return Some(());
+                }
+            }
+
+            // Check nested expression
+            let obj = member.object().ok()?;
+            find_and_remove_skip_member(&obj, target, mutation)
+        }
+        _ => None,
     }
 }

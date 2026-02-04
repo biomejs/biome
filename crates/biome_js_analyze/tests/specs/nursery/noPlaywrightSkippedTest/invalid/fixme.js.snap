@@ -30,7 +30,7 @@ test.describe.parallel.fixme("parallel fixme", () => {
 
 # Diagnostics
 ```
-fixme.js:4:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fixme.js:4:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of .fixme() annotation.
   
@@ -49,11 +49,20 @@ fixme.js:4:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Remove the .fixme() annotation.
+  
+     2  2 │   
+     3  3 │   // test.fixme
+     4    │ - test.fixme("needs·fixing",·async·({·page·})·=>·{
+        4 │ + test("needs·fixing",·async·({·page·})·=>·{
+     5  5 │       await page.click("button");
+     6  6 │   });
+  
 
 ```
 
 ```
-fixme.js:9:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fixme.js:9:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of .fixme() annotation.
   
@@ -72,11 +81,20 @@ fixme.js:9:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Remove the .fixme() annotation.
+  
+     7  7 │   
+     8  8 │   // it.fixme
+     9    │ - it.fixme("it·needs·fixing",·async·({·page·})·=>·{
+        9 │ + it("it·needs·fixing",·async·({·page·})·=>·{
+    10 10 │       await page.click("button");
+    11 11 │   });
+  
 
 ```
 
 ```
-fixme.js:14:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fixme.js:14:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of .fixme() annotation.
   
@@ -95,11 +113,20 @@ fixme.js:14:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Remove the .fixme() annotation.
+  
+    12 12 │   
+    13 13 │   // test.describe.fixme
+    14    │ - test.describe.fixme("suite·needs·fixing",·()·=>·{
+       14 │ + test.describe("suite·needs·fixing",·()·=>·{
+    15 15 │       test("test", async ({ page }) => {});
+    16 16 │   });
+  
 
 ```
 
 ```
-fixme.js:19:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fixme.js:19:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of .fixme() annotation.
   
@@ -116,6 +143,15 @@ fixme.js:19:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━�
   i Remove the .fixme() annotation or address the underlying issue causing the test to be skipped.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .fixme() annotation.
+  
+    17 17 │   
+    18 18 │   // test.describe.parallel.fixme
+    19    │ - test.describe.parallel.fixme("parallel·fixme",·()·=>·{
+       19 │ + test.describe.parallel("parallel·fixme",·()·=>·{
+    20 20 │       test("test", async ({ page }) => {});
+    21 21 │   });
   
 
 ```

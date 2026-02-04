@@ -34,7 +34,7 @@ test.describe.serial.skip("serial skipped", () => {
 
 # Diagnostics
 ```
-describe-skip.js:4:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+describe-skip.js:4:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of .skip() annotation.
   
@@ -55,11 +55,20 @@ describe-skip.js:4:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Remove the .skip() annotation.
+  
+     2  2 │   
+     3  3 │   // test.describe.skip
+     4    │ - test.describe.skip("skipped·suite",·()·=>·{
+        4 │ + test.describe("skipped·suite",·()·=>·{
+     5  5 │       test("test", async ({ page }) => {
+     6  6 │           await page.click("button");
+  
 
 ```
 
 ```
-describe-skip.js:11:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+describe-skip.js:11:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of .skip() annotation.
   
@@ -80,11 +89,20 @@ describe-skip.js:11:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Remove the .skip() annotation.
+  
+     9  9 │   
+    10 10 │   // describe.skip
+    11    │ - describe.skip("skipped·describe",·()·=>·{
+       11 │ + describe("skipped·describe",·()·=>·{
+    12 12 │       test("test", async ({ page }) => {
+    13 13 │           await page.click("button");
+  
 
 ```
 
 ```
-describe-skip.js:18:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+describe-skip.js:18:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of .skip() annotation.
   
@@ -103,11 +121,20 @@ describe-skip.js:18:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Remove the .skip() annotation.
+  
+    16 16 │   
+    17 17 │   // test.describe.parallel.skip
+    18    │ - test.describe.parallel.skip("parallel·skipped",·()·=>·{
+       18 │ + test.describe.parallel("parallel·skipped",·()·=>·{
+    19 19 │       test("test", async ({ page }) => {});
+    20 20 │   });
+  
 
 ```
 
 ```
-describe-skip.js:23:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+describe-skip.js:23:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of .skip() annotation.
   
@@ -124,6 +151,15 @@ describe-skip.js:23:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━
   i Remove the .skip() annotation or address the underlying issue causing the test to be skipped.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .skip() annotation.
+  
+    21 21 │   
+    22 22 │   // test.describe.serial.skip
+    23    │ - test.describe.serial.skip("serial·skipped",·()·=>·{
+       23 │ + test.describe.serial("serial·skipped",·()·=>·{
+    24 24 │       test("test", async ({ page }) => {});
+    25 25 │   });
   
 
 ```
