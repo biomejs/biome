@@ -1,5 +1,153 @@
 # @biomejs/biome
 
+## 2.3.14
+
+### Patch Changes
+
+- [#8921](https://github.com/biomejs/biome/pull/8921) [`29e2435`](https://github.com/biomejs/biome/commit/29e24355f0537e34504a14625ef34fa11561435d) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#8759](https://github.com/biomejs/biome/issues/8759): The [`useConsistentTypeDefinitions`](https://biomejs.dev/linter/rules/use-consistent-type-definitions/) rule no longer converts empty object type declarations into interfaces, as it will conflict with the [`noEmptyInterface`](https://biomejs.dev/linter/rules/no-empty-interface/) rule and can cause an infinite loop when both rules are enabled.
+
+- [#8928](https://github.com/biomejs/biome/pull/8928) [`ccaeac4`](https://github.com/biomejs/biome/commit/ccaeac43f8d4e4e44400b15c8ae4a00dde127729) Thanks [@taga3s](https://github.com/taga3s)! - Added the nursery rule [`useGlobalThis`](https://biomejs.dev/linter/rules/use-global-this/). This rule enforces using `globalThis` over `window`, `self` and `global`.
+
+- [#8602](https://github.com/biomejs/biome/pull/8602) [`9a18daa`](https://github.com/biomejs/biome/commit/9a18daada12f5ef841d4fcd1efd7826a3aa26684) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`noVueArrowFuncInWatch`](https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch/). This rule forbids using arrow functions in watchers in Vue components, because arrow functions do not give access to the component instance (via `this`), while regular functions do.
+
+- [#8905](https://github.com/biomejs/biome/pull/8905) [`9b1eea8`](https://github.com/biomejs/biome/commit/9b1eea88b9d04d6589dbf4d71b12bc4d46438597) Thanks [@ryan-m-walker](https://github.com/ryan-m-walker)! - Fixed [#8428](https://github.com/biomejs/biome/issues/8428): Improved parsing recovery when encountering qualified rules inside CSS `@page` at-rule blocks.
+
+- [#8900](https://github.com/biomejs/biome/pull/8900) [`f788cff`](https://github.com/biomejs/biome/commit/f788cff2d303261007203124e69fa3836ce9bda2) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#8802](https://github.com/biomejs/biome/issues/8802): `useExhaustiveDependencies` now correctly suggests dependencies without including callback-scoped variables or method names.
+
+  When accessing object properties with a callback-scoped variable, only the object path is suggested:
+
+  ```js
+  // Now correctly suggests `props.value` instead of `props.value[day]`
+  useMemo(() => {
+    return WeekdayValues.filter((day) => props.value[day]);
+  }, [props.value]);
+  ```
+
+  When calling methods on objects, only the object is suggested as a dependency:
+
+  ```js
+  // Now correctly suggests `props.data` instead of `props.data.forEach`
+  useMemo(() => {
+    props.data.forEach((item) => console.log(item));
+  }, [props.data]);
+  ```
+
+- [#8913](https://github.com/biomejs/biome/pull/8913) [`e1e20ea`](https://github.com/biomejs/biome/commit/e1e20ea2a8fa7f13365feb8ddc5e995d9db8bd02) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8363](https://github.com/biomejs/biome/issues/8363): HTML parser no longer crashes when encountering a `<` character followed by a digit in text content (e.g., `<12 months`). The parser now correctly emits an "Unescaped `<` bracket character" error instead of treating `<12` as a tag name and crashing.
+
+- [#8910](https://github.com/biomejs/biome/pull/8910) [`2fb63a4`](https://github.com/biomejs/biome/commit/2fb63a47dafc8b05c4b7dc0c526fd1e6bcedd2cd) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8774](https://github.com/biomejs/biome/issues/8774): Type aliases with generic parameters that have `extends` constraints now properly indent comments after the equals sign.
+
+  Previously, comments after the `=` in type aliases with `extends` constraints were not indented:
+
+  ```diff
+  -type A<B, C extends D> = // Some comment
+  -undefined;
+  +type A<B, C extends D> =
+  +    // Some comment
+  +    undefined;
+  ```
+
+- [#8916](https://github.com/biomejs/biome/pull/8916) [`ea4bd04`](https://github.com/biomejs/biome/commit/ea4bd048c2188f3b5f6a7abb9b1e1462f37895c4) Thanks [@ryan-m-walker](https://github.com/ryan-m-walker)! - Fixed [#4013](https://github.com/biomejs/biome/issues/4013), where comments in member chains caused unnecessary line breaks.
+
+  ```js
+  // Before
+  aFunction.b().c.d();
+
+  // After
+  aFunction.b().c.d();
+  ```
+
+- [#8945](https://github.com/biomejs/biome/pull/8945) [`fa66fe3`](https://github.com/biomejs/biome/commit/fa66fe36a608e1d07d4fa191a89c6cad12747669) Thanks [@fireairforce](https://github.com/fireairforce)! - Fixed [#8354](https://github.com/biomejs/biome/issues/8354): Don't remove quotes when type memeber is new.
+
+  ```ts
+  // Input:
+  type X = {
+    "new"(): string;
+    "foo"(): string;
+  };
+
+  // Format Output:
+  type X = {
+    "new()": string;
+    foo(): string;
+  };
+  ```
+
+- [#8927](https://github.com/biomejs/biome/pull/8927) [`0ef3da5`](https://github.com/biomejs/biome/commit/0ef3da5570c242611456841a2e356432119cbde5) Thanks [@littleKitchen](https://github.com/littleKitchen)! - Fixed #8907: `useExhaustiveDependencies` now correctly recognizes stable hook results (like `useState` setters and `useRef` values) when declared with `let`.
+
+- [#8931](https://github.com/biomejs/biome/pull/8931) [`4561751`](https://github.com/biomejs/biome/commit/4561751f1856e2678bcd3d37fe01f23168ce7fff) Thanks [@koshin01](https://github.com/koshin01)! - Added the new nursery rule [`noRedundantDefaultExport`](https://biomejs.dev/linter/rules/no-redundant-default-export/), which flags redundant default exports where the default export references the same identifier as a named export.
+
+- [#8900](https://github.com/biomejs/biome/pull/8900) [`f788cff`](https://github.com/biomejs/biome/commit/f788cff2d303261007203124e69fa3836ce9bda2) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#8883](https://github.com/biomejs/biome/issues/8883): `useExhaustiveDependencies` no longer produces false positives when props are destructured in the function body of arrow function components without parentheses around the parameter.
+
+  ```tsx
+  type Props = { msg: string };
+
+  // Arrow function without parentheses around `props`
+  const Component: React.FC<Props> = (props) => {
+    const { msg } = props;
+    // Previously, this incorrectly reported `msg` as unnecessary
+    useEffect(() => console.log(msg), [msg]);
+  };
+  ```
+
+- [#8861](https://github.com/biomejs/biome/pull/8861) [`3531687`](https://github.com/biomejs/biome/commit/35316874d588ec7f202a97e9f7049578793a2b26) Thanks [@dyc3](https://github.com/dyc3)! - Added the `noDeprecatedMediaType` CSS rule to flag deprecated media types like `tv` and `handheld`.
+
+- [#8775](https://github.com/biomejs/biome/pull/8775) [`7ea71cd`](https://github.com/biomejs/biome/commit/7ea71cdf595aae1f7a76460f794941e4b9b6fba3) Thanks [@igas](https://github.com/igas)! - Fixed the `noUnnecessararyConditions` rule to prevent trigger for optional fallback patterns.
+
+- [#8860](https://github.com/biomejs/biome/pull/8860) [`95f1eea`](https://github.com/biomejs/biome/commit/95f1eea852d0e2ab248c8d8dcf7fb89da9d583d4) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noHexColors`](https://biomejs.dev/linter/rules/no-hex-colors/), which flags the use of hexadecimal color codes in CSS and suggests using named colors or RGB/RGBA/HSL/HSLA formats instead.
+
+- [#8786](https://github.com/biomejs/biome/pull/8786) [`d876a38`](https://github.com/biomejs/biome/commit/d876a385ca4270dd3a24d826a0ae266048619bbe) Thanks [@Bertie690](https://github.com/Bertie690)! - Added the nursery rule [`useConsistentMethodSignatures`](https://biomejs.dev/linter/rules/use-consistent-method-signatures/). \
+  Inspired by the similarly named version from [`typescript-eslint`](https://typescript-eslint.io/rules/method-signature-style/), this rule aims to enforce a consistent style for methods used inside object types and interfaces.
+
+  ### Examples
+
+  Invalid code with `style` set to `"property"` (the default):
+
+  ```ts,expect_diagnostic
+  interface Foo {
+    method(a: string): void;
+  }
+  ```
+
+  Invalid code with `style` set to `"method"`:
+
+  ```ts,expect_diagnostic
+  type Bar = {
+    prop: (a: string) => void;
+  }
+  ```
+
+- [#8864](https://github.com/biomejs/biome/pull/8864) [`5e97119`](https://github.com/biomejs/biome/commit/5e97119467f77d2d551fc5dac0d46c318691440a) Thanks [@dyc3](https://github.com/dyc3)! - Improved the summary provided by `biome migrate eslint` to be clearer on why rules were not migrated. Biome now specifies a reason when a rule is not migrated, such as being incompatible with the formatter or not implemented yet. This helps users make more informed decisions when migrating their ESLint configurations to Biome.
+
+- [#8924](https://github.com/biomejs/biome/pull/8924) [`99b4cd1`](https://github.com/biomejs/biome/commit/99b4cd11f93be2e203e89ee002154d080ebd8f2f) Thanks [@tmohammad78](https://github.com/tmohammad78)! - Fixed [#8920](https://github.com/biomejs/biome/issues/8920): `noUnknownFunction` now knows about `sibling-count`, and `sibling-index` css functions
+
+- [#8900](https://github.com/biomejs/biome/pull/8900) [`f788cff`](https://github.com/biomejs/biome/commit/f788cff2d303261007203124e69fa3836ce9bda2) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#8885](https://github.com/biomejs/biome/issues/8885): `useExhaustiveDependencies` no longer incorrectly reports variables as unnecessary dependencies when they are derived from expressions containing post/pre-increment operators (`++`/`--`) or compound assignment operators (`+=`, `-=`, etc.).
+
+  ```js
+  let renderCount = 0;
+
+  export const MyComponent = () => {
+    // `count` is now correctly recognized as a required dependency
+    // because `renderCount++` can produce different values between renders
+    const count = renderCount++;
+
+    useEffect(() => {
+      console.log(count);
+    }, [count]); // no longer reports `count` as unnecessary
+  };
+  ```
+
+- [#8619](https://github.com/biomejs/biome/pull/8619) [`d78e01d`](https://github.com/biomejs/biome/commit/d78e01dbb60c06208e7abb697ae4e700aa3dd3bd) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`useInputName`](https://biomejs.dev/linter/rules/use-input-name/). Require mutation arguments to be called “input”, and the input type to be called Mutation name + “Input”.
+
+  **Invalid:**
+
+  ```graphql
+  type Mutation {
+    SetMessage(message: String): String
+  }
+  ```
+
+- [#8922](https://github.com/biomejs/biome/pull/8922) [`871b45e`](https://github.com/biomejs/biome/commit/871b45e66824dea905579d5270911cfed0254433) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#8829](https://github.com/biomejs/biome/issues/8829): Revamped the [`noGlobalDirnameFilename`](https://biomejs.dev/linter/rules/no-global-dirname-filename/) rule to catch many false negatives that have not been reported.
+
 ## 2.3.13
 
 ### Patch Changes

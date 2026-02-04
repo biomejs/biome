@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseGlobalThis {
-        version: "next",
+        version: "2.3.14",
         name: "useGlobalThis",
         language: "js",
         severity: Severity::Warning,
