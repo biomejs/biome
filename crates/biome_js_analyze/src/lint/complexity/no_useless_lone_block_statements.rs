@@ -144,12 +144,10 @@ fn statement_has_block_level_declaration(
     statement: &AnyJsStatement,
     file_source: &JsFileSource,
 ) -> bool {
-    dbg!(&statement);
     match statement {
         AnyJsStatement::JsVariableStatement(variable) => is_not_var_declaration(variable),
         AnyJsStatement::JsFunctionDeclaration(_) => file_source.is_module(),
         AnyJsStatement::JsClassDeclaration(_) => true,
-        AnyJsStatement::JsExpressionStatement(_) => !file_source.is_embedded_source(),
         _ => false,
     }
 }

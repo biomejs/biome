@@ -551,7 +551,10 @@ pub(crate) fn parse_embedded_script(
             }
             file_source
         } else if html_file_source.is_astro() {
-            JsFileSource::ts().with_embedding_kind(EmbeddingKind::Astro { frontmatter: false })
+            // Astro script tags are parsed as regular TypeScript/JavaScript modules
+            // They should not use EmbeddingKind::Astro because they are source code,
+            // not template expressions
+            JsFileSource::ts()
         } else {
             let is_module = element.is_javascript_module().unwrap_or_default();
             if is_module {
