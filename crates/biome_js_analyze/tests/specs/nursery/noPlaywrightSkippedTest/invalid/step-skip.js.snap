@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: step-skip.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// test.step.skip
+test("test with skipped step", async ({ page }) => {
+    await test.step.skip("skipped step", async () => {
+        await page.click("button");
+    });
+});
+
+```
+
+# Diagnostics
+```
+step-skip.js:5:11 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of .skip() annotation.
+  
+    3 │ // test.step.skip
+    4 │ test("test with skipped step", async ({ page }) => {
+  > 5 │     await test.step.skip("skipped step", async () => {
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 6 │         await page.click("button");
+  > 7 │     });
+      │     ^^
+    8 │ });
+    9 │ 
+  
+  i Skipped tests are discouraged because they might be forgotten and remain disabled permanently.
+  
+  i Remove the .skip() annotation or address the underlying issue causing the test to be skipped.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

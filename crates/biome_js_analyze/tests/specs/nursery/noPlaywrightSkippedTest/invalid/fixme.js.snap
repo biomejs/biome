@@ -1,0 +1,121 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: fixme.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// test.fixme
+test.fixme("needs fixing", async ({ page }) => {
+    await page.click("button");
+});
+
+// it.fixme
+it.fixme("it needs fixing", async ({ page }) => {
+    await page.click("button");
+});
+
+// test.describe.fixme
+test.describe.fixme("suite needs fixing", () => {
+    test("test", async ({ page }) => {});
+});
+
+// test.describe.parallel.fixme
+test.describe.parallel.fixme("parallel fixme", () => {
+    test("test", async ({ page }) => {});
+});
+
+```
+
+# Diagnostics
+```
+fixme.js:4:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of .fixme() annotation.
+  
+    3 │ // test.fixme
+  > 4 │ test.fixme("needs fixing", async ({ page }) => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 5 │     await page.click("button");
+  > 6 │ });
+      │ ^^
+    7 │ 
+    8 │ // it.fixme
+  
+  i Skipped tests are discouraged because they might be forgotten and remain disabled permanently.
+  
+  i Remove the .fixme() annotation or address the underlying issue causing the test to be skipped.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+fixme.js:9:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of .fixme() annotation.
+  
+     8 │ // it.fixme
+   > 9 │ it.fixme("it needs fixing", async ({ page }) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 10 │     await page.click("button");
+  > 11 │ });
+       │ ^^
+    12 │ 
+    13 │ // test.describe.fixme
+  
+  i Skipped tests are discouraged because they might be forgotten and remain disabled permanently.
+  
+  i Remove the .fixme() annotation or address the underlying issue causing the test to be skipped.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+fixme.js:14:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of .fixme() annotation.
+  
+    13 │ // test.describe.fixme
+  > 14 │ test.describe.fixme("suite needs fixing", () => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 15 │     test("test", async ({ page }) => {});
+  > 16 │ });
+       │ ^^
+    17 │ 
+    18 │ // test.describe.parallel.fixme
+  
+  i Skipped tests are discouraged because they might be forgotten and remain disabled permanently.
+  
+  i Remove the .fixme() annotation or address the underlying issue causing the test to be skipped.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+fixme.js:19:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of .fixme() annotation.
+  
+    18 │ // test.describe.parallel.fixme
+  > 19 │ test.describe.parallel.fixme("parallel fixme", () => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 20 │     test("test", async ({ page }) => {});
+  > 21 │ });
+       │ ^^
+    22 │ 
+  
+  i Skipped tests are discouraged because they might be forgotten and remain disabled permanently.
+  
+  i Remove the .fixme() annotation or address the underlying issue causing the test to be skipped.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

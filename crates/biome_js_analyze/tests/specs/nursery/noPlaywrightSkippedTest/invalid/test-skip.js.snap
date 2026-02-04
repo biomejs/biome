@@ -1,0 +1,93 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: test-skip.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Basic test.skip
+test.skip("skipped test", async ({ page }) => {
+    await page.click("button");
+});
+
+// it.skip variant
+it.skip("skipped it", async ({ page }) => {
+    await page.click("button");
+});
+
+// Bracket notation
+test["skip"]("bracket notation skip", async ({ page }) => {
+    await page.click("button");
+});
+
+```
+
+# Diagnostics
+```
+test-skip.js:4:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of .skip() annotation.
+  
+    3 │ // Basic test.skip
+  > 4 │ test.skip("skipped test", async ({ page }) => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 5 │     await page.click("button");
+  > 6 │ });
+      │ ^^
+    7 │ 
+    8 │ // it.skip variant
+  
+  i Skipped tests are discouraged because they might be forgotten and remain disabled permanently.
+  
+  i Remove the .skip() annotation or address the underlying issue causing the test to be skipped.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+test-skip.js:9:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of .skip() annotation.
+  
+     8 │ // it.skip variant
+   > 9 │ it.skip("skipped it", async ({ page }) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 10 │     await page.click("button");
+  > 11 │ });
+       │ ^^
+    12 │ 
+    13 │ // Bracket notation
+  
+  i Skipped tests are discouraged because they might be forgotten and remain disabled permanently.
+  
+  i Remove the .skip() annotation or address the underlying issue causing the test to be skipped.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+test-skip.js:14:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of .skip() annotation.
+  
+    13 │ // Bracket notation
+  > 14 │ test["skip"]("bracket notation skip", async ({ page }) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 15 │     await page.click("button");
+  > 16 │ });
+       │ ^^
+    17 │ 
+  
+  i Skipped tests are discouraged because they might be forgotten and remain disabled permanently.
+  
+  i Remove the .skip() annotation or address the underlying issue causing the test to be skipped.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

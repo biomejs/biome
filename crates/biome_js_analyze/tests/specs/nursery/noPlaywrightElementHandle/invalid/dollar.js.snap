@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: dollar.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const button = await page.$('button');
+
+
+```
+
+# Diagnostics
+```
+dollar.js:2:22 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of element handles.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const button = await page.$('button');
+      │                      ^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Element handles like page.$() are discouraged.
+  
+  i Use page.locator() or other locator methods like getByRole() instead.
+  
+  i Locators auto-wait and are more reliable than element handles.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

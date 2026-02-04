@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: conditional.js
+---
+# Input
+```js
+/* should not generate diagnostics with allowConditional: true */
+
+// Conditional skip with browser check
+test("conditional skip", async ({ page, browserName }) => {
+    test.skip(browserName === "webkit");
+    await page.click("button");
+});
+
+// Conditional skip with reason
+test("conditional skip with reason", async ({ page, browserName }) => {
+    test.skip(browserName === "webkit", "WebKit has issues");
+    await page.click("button");
+});
+
+// Skip inside if statement
+test("skip in if", async ({ page, browserName }) => {
+    if (browserName === "webkit") {
+        test.skip();
+    }
+    await page.click("button");
+});
+
+```
