@@ -1,11 +1,14 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
+use biome_js_factory::make;
 use biome_js_syntax::{JsCallExpression, JsStaticMemberExpression};
-use biome_rowan::{AstNode, TokenText};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 use biome_rule_options::no_playwright_element_handle::NoPlaywrightElementHandleOptions;
 
+use crate::JsRuleAction;
 use crate::frameworks::playwright::get_page_or_frame_name;
 
 declare_lint_rule! {
@@ -54,6 +57,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintPlaywright("no-element-handle").same()],
         recommended: false,
         domains: &[RuleDomain::Playwright],
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -116,5 +120,29 @@ impl Rule for NoPlaywrightElementHandle {
                 "Locators auto-wait and are more reliable than element handles."
             }),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let call_expr = ctx.query();
+        let callee = call_expr.callee().ok()?;
+        let member_expr = JsStaticMemberExpression::cast_ref(callee.syntax())?;
+        let mut mutation = ctx.root().begin();
+
+        let method = state.method.text();
+
+        // Create the new member name "locator"
+        let new_member = make::js_name(make::ident("locator"));
+
+        // Replace the member ($ or $$) with "locator"
+        let old_member = member_expr.member().ok()?;
+        mutation.replace_element(old_member.into(), new_member.into());
+
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Replace "<Emphasis>{method}"()"</Emphasis>" with "<Emphasis>"locator()"</Emphasis>"." }
+                .to_owned(),
+            mutation,
+        ))
     }
 }

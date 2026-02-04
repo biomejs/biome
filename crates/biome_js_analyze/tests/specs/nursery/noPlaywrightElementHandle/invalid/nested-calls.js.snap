@@ -19,7 +19,7 @@ handle = await page.$("input");
 
 # Diagnostics
 ```
-nested-calls.js:3:30 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+nested-calls.js:3:30 lint/nursery/noPlaywrightElementHandle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of element handles.
   
@@ -38,11 +38,20 @@ nested-calls.js:3:30 lint/nursery/noPlaywrightElementHandle ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Replace $() with locator().
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   // Test nested element handle calls
+     3    │ - const·button1·=·await·(await·page.$("button"));
+        3 │ + const·button1·=·await·(await·page.locator("button"));
+     4  4 │   
+     5  5 │   const button2 = await page.$("#foo");
+  
 
 ```
 
 ```
-nested-calls.js:5:23 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+nested-calls.js:5:23 lint/nursery/noPlaywrightElementHandle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of element handles.
   
@@ -61,11 +70,20 @@ nested-calls.js:5:23 lint/nursery/noPlaywrightElementHandle ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Replace $() with locator().
+  
+     3  3 │   const button1 = await (await page.$("button"));
+     4  4 │   
+     5    │ - const·button2·=·await·page.$("#foo");
+        5 │ + const·button2·=·await·page.locator("#foo");
+     6  6 │   
+     7  7 │   await (await page.$$("div"));
+  
 
 ```
 
 ```
-nested-calls.js:7:14 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+nested-calls.js:7:14 lint/nursery/noPlaywrightElementHandle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of element handles.
   
@@ -84,11 +102,20 @@ nested-calls.js:7:14 lint/nursery/noPlaywrightElementHandle ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Replace $$() with locator().
+  
+     5  5 │   const button2 = await page.$("#foo");
+     6  6 │   
+     7    │ - await·(await·page.$$("div"));
+        7 │ + await·(await·page.locator("div"));
+     8  8 │   
+     9  9 │   let handle;
+  
 
 ```
 
 ```
-nested-calls.js:10:16 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+nested-calls.js:10:16 lint/nursery/noPlaywrightElementHandle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of element handles.
   
@@ -104,6 +131,14 @@ nested-calls.js:10:16 lint/nursery/noPlaywrightElementHandle ━━━━━━�
   i Locators auto-wait and are more reliable than element handles.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace $() with locator().
+  
+     8  8 │   
+     9  9 │   let handle;
+    10    │ - handle·=·await·page.$("input");
+       10 │ + handle·=·await·page.locator("input");
+    11 11 │   
   
 
 ```
