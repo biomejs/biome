@@ -81,6 +81,7 @@ biome_lsp                    = { path = "./crates/biome_lsp" }
 biome_lsp_converters         = { path = "./crates/biome_lsp_converters", version = "0.1.0" }
 biome_markdown_factory       = { path = "./crates/biome_markdown_factory", version = "0.0.1" }
 biome_markdown_parser        = { path = "./crates/biome_markdown_parser", version = "0.0.1" }
+biome_markdown_formatter     = { path = "./crates/biome_markdown_formatter", version = "0.0.1" }
 biome_markdown_syntax        = { path = "./crates/biome_markdown_syntax", version = "0.0.1" }
 biome_markup                 = { path = "./crates/biome_markup", version = "0.5.7" }
 biome_migrate                = { path = "./crates/biome_migrate" }

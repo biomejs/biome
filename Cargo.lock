@@ -1311,6 +1311,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_markdown_formatter"
+version = "0.0.1"
+dependencies = [
+ "biome_formatter",
+ "biome_markdown_factory",
+ "biome_markdown_parser",
+ "biome_markdown_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_service",
+ "countme",
+ "iai",
+ "quickcheck",
+ "quickcheck_macros",
+ "tests_macros",
+]
+
+[[package]]
 name = "biome_markdown_parser"
 version = "0.0.1"
 dependencies = [
