@@ -2,6 +2,7 @@
 
 mod shared;
 pub use shared::*;
+pub mod expect_playwright_expect;
 pub mod no_access_key;
 pub mod no_accumulating_spread;
 pub mod no_adjacent_spaces_in_regex;
@@ -167,6 +168,7 @@ pub mod no_octal_escape;
 pub mod no_parameter_assign;
 pub mod no_parameter_properties;
 pub mod no_parameters_only_used_in_recursion;
+pub mod no_playwright_conditional_expect;
 pub mod no_playwright_element_handle;
 pub mod no_playwright_eval;
 pub mod no_playwright_force_option;

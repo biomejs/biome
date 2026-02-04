@@ -147,13 +147,11 @@ fn get_test_callback(args: &biome_js_syntax::JsCallArguments) -> Option<AnyJsExp
 fn contains_expect_call(callback: &AnyJsExpression) -> bool {
     // Walk through all descendants looking for expect() calls
     for descendant in callback.syntax().descendants() {
-        if descendant.kind() == JsSyntaxKind::JS_CALL_EXPRESSION {
-            if let Some(call) = JsCallExpression::cast(descendant) {
-                if is_expect_call(&call) {
+        if descendant.kind() == JsSyntaxKind::JS_CALL_EXPRESSION
+            && let Some(call) = JsCallExpression::cast(descendant)
+                && is_expect_call(&call) {
                     return true;
                 }
-            }
-        }
     }
     false
 }
@@ -176,14 +174,13 @@ fn is_expect_call(call: &JsCallExpression) -> bool {
         }
         AnyJsExpression::JsStaticMemberExpression(member) => {
             // expect.soft(), expect.poll(), etc.
-            if let Ok(object) = member.object() {
-                if let AnyJsExpression::JsIdentifierExpression(id) = object
+            if let Ok(object) = member.object()
+                && let AnyJsExpression::JsIdentifierExpression(id) = object
                     && let Ok(name) = id.name()
                     && let Ok(token) = name.value_token()
                 {
                     return token.text_trimmed() == "expect";
                 }
-            }
             false
         }
         AnyJsExpression::JsCallExpression(inner_call) => {
