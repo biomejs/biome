@@ -35,7 +35,7 @@ declare_lint_rule! {
     /// ```js
     /// test('example', async ({ page }) => {
     ///     await page.click('button');
-    ///     await page.waitForSelector('.result');
+    ///     await expect(page.locator('.result')).toBeVisible();
     /// });
     /// ```
     ///
