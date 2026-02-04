@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unconditional.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+test("unconditional expect", async ({ page }) => {
+    await expect(page).toHaveTitle("Title");
+});
+
+test("multiple unconditional expects", async ({ page }) => {
+    await expect(page).toHaveTitle("Title");
+    await expect(page.locator("h1")).toBeVisible();
+});
+
+test("conditional skip is fine", async ({ page }) => {
+    test.skip(someCondition, "Reason");
+    await expect(page).toHaveTitle("Title");
+});
+
+// For loop with expect is fine (not conditional)
+test("loop with expect", async ({ page }) => {
+    for (const item of items) {
+        await expect(page.locator(item)).toBeVisible();
+    }
+});
+
+```
