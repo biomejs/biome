@@ -1,6 +1,5 @@
 //! Top level functions for parsing a script or module, also includes module specific items.
 
-use super::expr::{ExpressionContext, parse_expression};
 use super::module::parse_module_body;
 use super::stmt::parse_statements;
 use crate::JsParser;
@@ -57,12 +56,17 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
 /// This fixes issues where `{ duration }` was incorrectly parsed as a block statement
 /// instead of as an object literal expression.
 fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    use crate::syntax::expr::{ExpressionContext, parse_expression};
+
     // Parse as a single expression with default context
     // This allows { } to be parsed as object literals, not block statements
     let expr_marker = p.start();
     let expr_result = parse_expression(p, ExpressionContext::default());
 
-    if expr_result.is_absent() {
+    // Check if we got a valid expression
+    let has_expression = !expr_result.is_absent();
+
+    if !has_expression {
         p.error(js_parse_error::template_expression_expected_expression(
             p,
             p.cur_range(),
@@ -78,23 +82,21 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
         ));
 
         // Consume remaining tokens to ensure we reach EOF
-        // These will be part of the bogus expression
         while !p.at(EOF) {
             p.bump_any();
         }
 
-        // If we had trailing code, wrap everything in a bogus expression
-        if !expr_result.is_absent() {
-            expr_marker.complete(p, JS_BOGUS_EXPRESSION);
-        } else {
-            expr_marker.abandon(p);
-        }
+        // Wrap everything in a bogus expression if we had parse errors
+        expr_marker.complete(p, JS_BOGUS_EXPRESSION);
+    } else if !has_expression {
+        // No expression and at EOF, create an empty bogus expression
+        expr_marker.complete(p, JS_BOGUS_EXPRESSION);
     } else {
-        // Clean expression, no extra wrapping needed
+        // Valid expression, no wrapping needed
         expr_marker.abandon(p);
     }
 
-    // Use JS_EXPRESSION_TEMPLATE_ROOT as the root node type
-    // This is a specialized root for template expressions that only contains an expression and EOF
+    // Always complete as JS_EXPRESSION_TEMPLATE_ROOT
+    // The expression child might be bogus, but the root should always be this type
     m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT)
 }

@@ -14,7 +14,9 @@ expression: snapshot
 
 ```
 JsExpressionTemplateRoot {
-    expression: missing (required),
+    expression: JsBogusExpression {
+        items: [],
+    },
     eof_token: EOF@0..1 "" [Newline("\n")] [],
 }
 ```
@@ -23,7 +25,7 @@ JsExpressionTemplateRoot {
 
 ```
 0: JS_EXPRESSION_TEMPLATE_ROOT@0..1
-  0: (empty)
+  0: JS_BOGUS_EXPRESSION@0..0
   1: EOF@0..1 "" [Newline("\n")] []
 
 ```

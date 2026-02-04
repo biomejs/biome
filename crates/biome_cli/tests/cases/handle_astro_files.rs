@@ -42,6 +42,11 @@ if (foo) {
 const ASTRO_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED: &str =
     "---\r\n  const a    = \"b\";\r\n---\r\n<div></div>";
 
+const ASTRO_RETURN_IN_TEMPLATE: &str = r#"---
+const x = 5;
+---
+<div>{ return x }</div>"#;
+
 const ASTRO_FILE_CHECK_BEFORE: &str = r#"---
 import {a as a} from 'mod';
 import {    something } from "file.astro";
@@ -1055,6 +1060,42 @@ fn no_useless_lone_block_statements_is_not_triggered() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "no_useless_lone_block_statements_is_not_triggered",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn return_in_template_expression_should_error() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(astro_file_path.into(), ASTRO_RETURN_IN_TEMPLATE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", astro_file_path.as_str()].as_slice()),
+    );
+
+    // The result should have errors because return is not allowed in template expressions
+    // We expect the check to fail with errors
+    assert!(
+        result.is_err(),
+        "Expected errors but run_cli returned {result:?}"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "return_in_template_expression_should_error",
         fs,
         console,
         result,
