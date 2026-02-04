@@ -375,11 +375,18 @@ fn has_expect_in_chain(expr: &AnyJsExpression) -> bool {
 fn is_call_awaited_or_returned(call_expr: &JsCallExpression) -> bool {
     let parent = call_expr.syntax().parent();
 
-    // Check if it's awaited
-    if let Some(parent) = &parent
-        && parent.kind() == biome_js_syntax::JsSyntaxKind::JS_AWAIT_EXPRESSION
-    {
-        return true;
+    // Check if it's awaited (traversing through parenthesized expressions)
+    let mut await_parent = parent.clone();
+    while let Some(node) = await_parent.as_ref() {
+        match node.kind() {
+            biome_js_syntax::JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
+                await_parent = node.parent();
+            }
+            biome_js_syntax::JsSyntaxKind::JS_AWAIT_EXPRESSION => {
+                return true;
+            }
+            _ => break,
+        }
     }
 
     // Check if it's in a return statement
