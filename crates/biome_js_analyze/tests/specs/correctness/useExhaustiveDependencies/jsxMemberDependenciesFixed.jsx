@@ -10,3 +10,4 @@ export function Component() {
   const render = useCallback(() => <MyNS.MyComponent />, []);
   return render();
 }
+
