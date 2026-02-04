@@ -7,6 +7,6 @@ const MyNS = {
 };
 
 export function Component() {
-  const render = useCallback(() => <MyNS.MyComponent />, [MyNS]);
+  const render = useCallback(() => <MyNS.MyComponent />, []);
   return render();
 }
