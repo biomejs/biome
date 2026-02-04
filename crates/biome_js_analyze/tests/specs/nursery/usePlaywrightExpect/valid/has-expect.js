@@ -23,3 +23,30 @@ test.describe("suite", () => {
         await expect(page).toHaveURL("/home");
     });
 });
+
+// describe blocks without direct expects are valid
+test.describe("empty suite", () => {});
+
+test.describe("suite with setup only", () => {
+    // no tests inside, just setup code
+});
+
+test.describe.only("describe.only is not a test", () => {});
+test.describe.skip("describe.skip is not a test", () => {});
+
+// hooks are not test calls
+test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+});
+
+test.afterEach(async ({ page }) => {
+    await page.close();
+});
+
+test.beforeAll(async () => {
+    // setup
+});
+
+test.afterAll(async () => {
+    // teardown
+});

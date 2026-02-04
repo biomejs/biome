@@ -131,6 +131,24 @@ pub(crate) fn is_test_call(callee: &AnyJsExpression) -> bool {
             false
         }
         AnyJsExpression::JsStaticMemberExpression(member) => {
+            // Exclude describe blocks, hooks, and steps - these are not test calls
+            if let Ok(member_name) = member.member()
+                && let Some(name) = member_name.as_js_name()
+                && let Ok(token) = name.value_token()
+            {
+                let text = token.text_trimmed();
+                if matches!(
+                    text,
+                    "describe"
+                        | "step"
+                        | "beforeEach"
+                        | "afterEach"
+                        | "beforeAll"
+                        | "afterAll"
+                ) {
+                    return false;
+                }
+            }
             if let Ok(object) = member.object() {
                 return is_test_call(&object);
             }
