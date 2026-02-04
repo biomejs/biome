@@ -1,3 +1,8 @@
+// Allow large_stack_arrays in generated test code from the gen_tests! macro.
+// The macro generates 1300+ test functions, and clippy sometimes flags internal
+// compiler representations from macro expansion as large arrays.
+#![allow(clippy::large_stack_arrays)]
+
 use biome_analyze::{
     AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, Queryable,
     RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
