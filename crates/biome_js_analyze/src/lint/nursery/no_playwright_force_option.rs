@@ -57,6 +57,7 @@ declare_lint_rule! {
 // IMPORTANT: Keep this array sorted for binary search
 const METHODS_WITH_FORCE: &[&str] = &[
     "check",
+    "clear",
     "click",
     "dblclick",
     "dragTo",
