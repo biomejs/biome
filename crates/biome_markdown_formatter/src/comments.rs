@@ -1,12 +1,12 @@
 use biome_formatter::{
     FormatResult, FormatRule,
-    comments::{CommentKind, CommentPlacement, CommentStyle, SourceComment},
+    comments::{CommentKind, CommentStyle, SourceComment},
     prelude::Formatter,
 };
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_rowan::SyntaxTriviaPieceComments;
 
-use crate::MarkdownFormatterContext;
+use crate::MarkdownFormatContext;
 
 #[derive(Eq, PartialEq, Copy, Clone, Debug, Default)]
 pub struct MarkdownCommentStyle;
@@ -34,12 +34,12 @@ impl CommentStyle for MarkdownCommentStyle {
 pub struct FormatMarkdownLeadingComment;
 
 impl FormatRule<SourceComment<MarkdownLanguage>> for FormatMarkdownLeadingComment {
-    type Context = MarkdownFormatterContext;
+    type Context = MarkdownFormatContext;
 
     fn fmt(
         &self,
         _: &SourceComment<MarkdownLanguage>,
-        __: &mut Formatter<Self::Context>,
+        _: &mut Formatter<Self::Context>,
     ) -> FormatResult<()> {
         todo!();
     }

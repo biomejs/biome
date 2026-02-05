@@ -1001,6 +1001,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             MD_INLINE_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyMdInline::can_cast)
             }
+            MD_ORDER_LIST => Self::make_node_list_syntax(kind, children, AnyMdCodeBlock::can_cast),
             _ => unreachable!("Is {:?} a token?", kind),
         }
     }

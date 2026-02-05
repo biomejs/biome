@@ -8,10 +8,9 @@ use biome_markdown_syntax::MarkdownLanguage;
 
 use crate::comments::{FormatMarkdownLeadingComment, MarkdownCommentStyle};
 
-// TODO(tidefield) - Markdown doesn't have comments. Remove this later
 pub type MarkdownComments = Comments<MarkdownLanguage>;
 
-pub struct MarkdownFormatterContext {
+pub struct MarkdownFormatContext {
     source_map: Option<TransformSourceMap>,
     options: MarkdownFormatOptions,
     comments: Rc<MarkdownComments>,
@@ -25,7 +24,7 @@ pub struct MarkdownFormatOptions {
     line_width: LineWidth,
 }
 
-impl CstFormatContext for MarkdownFormatterContext {
+impl CstFormatContext for MarkdownFormatContext {
     type Language = MarkdownLanguage;
     type Style = MarkdownCommentStyle;
     type CommentRule = FormatMarkdownLeadingComment;
@@ -64,7 +63,7 @@ impl MarkdownFormatOptions {
     }
 }
 
-impl MarkdownFormatterContext {
+impl MarkdownFormatContext {
     pub fn new(options: MarkdownFormatOptions) -> Self {
         Self {
             options,
@@ -79,7 +78,7 @@ impl MarkdownFormatterContext {
     }
 }
 
-impl FormatContext for MarkdownFormatterContext {
+impl FormatContext for MarkdownFormatContext {
     type Options = MarkdownFormatOptions;
 
     fn options(&self) -> &Self::Options {

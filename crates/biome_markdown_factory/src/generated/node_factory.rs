@@ -607,6 +607,18 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn md_order_list<I>(items: I) -> MdOrderList
+where
+    I: IntoIterator<Item = AnyMdCodeBlock>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdOrderList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_ORDER_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn md_bogus<I>(slots: I) -> MdBogus
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,

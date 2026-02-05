@@ -939,7 +939,7 @@ impl LanguageKind {
             Self::Grit => "GritFormatContext",
             Self::Html => "HtmlFormatContext",
             Self::Yaml => "YamlFormatContext",
-            Self::Markdown => "MarkdownFormatterContext",
+            Self::Markdown => "MarkdownFormatContext",
             Self::Tailwind => "TailwindFormatContext",
         };
 

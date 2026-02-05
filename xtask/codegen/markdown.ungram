@@ -48,21 +48,21 @@ MdDocument =
 MdBlockList = AnyMdBlock*
 
 AnyMdBlock =
-	AnyLeafBlock
-	| AnyContainerBlock
+	AnyMdLeafBlock
+	| AnyMdContainerBlock
 
-AnyLeafBlock =
+AnyMdLeafBlock =
 	MdThematicBreakBlock
 	| MdHeader
 	| MdSetextHeader
-	| AnyCodeBlock
+	| AnyMdCodeBlock
 	| MdHtmlBlock
 	| MdLinkReferenceDefinition
 	| MdLinkBlock
 	| MdParagraph
 	| MdNewline
 
-AnyContainerBlock =
+AnyMdContainerBlock =
 	MdQuote
 	| MdBulletListItem
 	| MdOrderedListItem
@@ -93,7 +93,7 @@ MdSetextHeader =
 	underline: 'md_setext_underline_literal'
 
 // indented code blocks & fenced code blocks
-AnyCodeBlock =
+AnyMdCodeBlock =
 	MdIndentCodeBlock
 	| MdFencedCodeBlock
 
@@ -168,8 +168,11 @@ MdBulletList = MdBullet*
 // 1. Hey!
 // ^^^^^^^
 MdBullet =
-	bullet: ('-' | '*' | '+' | 'md_ordered_list_marker')
-	content: MdBlockList
+	bullet: ('-' | '*')
+	space: 'md_textual_literal'
+	content: MdInlineItemList
+
+MdOrderList = AnyMdCodeBlock*
 
 // Any block paragraph
 //
@@ -305,5 +308,3 @@ MdHardLine = value: 'md_hard_line_literal'
 MdSoftBreak = value: 'md_soft_break_literal'
 MdTextual = value: 'md_textual_literal'
 MdIndent = value: 'md_indent_chunk_literal'
-
-

@@ -6,21 +6,22 @@ mod comments;
 pub mod context;
 mod cst;
 pub mod generated;
-pub mod js;
 pub mod markdown;
 pub mod verbatim;
 
-use biome_formatter::{FormatContext, FormatLanguage, Formatted, TransformSourceMap, prelude::*};
-use biome_rowan::{AstNode, AstNodeList, SyntaxNode};
+use biome_formatter::{
+    FormatContext, FormatLanguage, FormatResult, Formatted, TransformSourceMap, prelude::*, write,
+};
+use biome_rowan::AstNode;
 
-pub(crate) use crate::context::MarkdownFormatterContext;
+pub(crate) use crate::context::MarkdownFormatContext;
 use crate::{
     context::MarkdownFormatOptions,
     cst::FormatMarkdownSyntaxNode,
-    verbatim::{FormatMarkdownVerbatimNode, format_bogus_node},
+    verbatim::{format_bogus_node, format_suppressed_node},
 };
 
-pub(crate) type MarkdownFormatter<'buf> = Formatter<'buf, MarkdownFormatterContext>;
+pub(crate) type MarkdownFormatter<'buf> = Formatter<'buf, MarkdownFormatContext>;
 
 #[derive(Debug, Clone, Default)]
 pub struct MarkdownFormatLanguage {
@@ -35,7 +36,7 @@ impl MarkdownFormatLanguage {
 
 impl FormatLanguage for MarkdownFormatLanguage {
     type SyntaxLanguage = MarkdownLanguage;
-    type Context = MarkdownFormatterContext;
+    type Context = MarkdownFormatContext;
     type FormatRule = FormatMarkdownSyntaxNode;
 
     fn create_context(
@@ -43,8 +44,8 @@ impl FormatLanguage for MarkdownFormatLanguage {
         _root: &MarkdownSyntaxNode,
         source_map: Option<TransformSourceMap>,
         _delegate_fmt_embedded_nodes: bool,
-    ) -> MarkdownFormatterContext {
-        MarkdownFormatterContext::new(self.options.clone()).with_source_map(source_map)
+    ) -> MarkdownFormatContext {
+        MarkdownFormatContext::new(self.options.clone()).with_source_map(source_map)
     }
 
     fn options(&self) -> &<Self::Context as FormatContext>::Options {
@@ -215,8 +216,8 @@ where
     N: AstNode<Language = MarkdownLanguage>,
 {
     // this is the method that actually start the formatting
-    fn fmt(&self, _: &N, __: &mut MarkdownFormatter) -> FormatResult<()> {
-        todo!();
+    fn fmt(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        return write!(f, [format_suppressed_node(node.syntax())]);
     }
 
     fn fmt_fields(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()>;
@@ -226,6 +227,6 @@ where
 pub fn format_node(
     options: MarkdownFormatOptions,
     root: &MarkdownSyntaxNode,
-) -> FormatResult<Formatted<MarkdownFormatterContext>> {
+) -> FormatResult<Formatted<MarkdownFormatContext>> {
     biome_formatter::format_node(root, MarkdownFormatLanguage::new(options), false)
 }

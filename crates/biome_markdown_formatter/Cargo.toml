@@ -10,22 +10,21 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-biome_rowan       = { workspace = true }
-biome_formatter = { workspace = true }
-biome_markdown_factory = { workspace = true }
-biome_markdown_syntax = { workspace = true}
-biome_markdown_parser      = { workspace = true }
-biome_parser         = { workspace = true }
-biome_service        = { workspace = true }
-countme              = { workspace = true, features = ["enable"] }
-iai                  = "0.1.1"
-quickcheck           = { workspace = true }
-quickcheck_macros    = { workspace = true }
+biome_rowan              = { workspace = true }
+biome_formatter          = { workspace = true }
+biome_markdown_factory   = { workspace = true }
+biome_markdown_syntax    = { workspace = true }
 
 [dev-dependencies]
-
-tests_macros         = { path = "../tests_macros" }
-
+biome_formatter_test     = { workspace = true }
+biome_markdown_parser    = { workspace = true }
+biome_parser             = { workspace = true }
+biome_service            = { workspace = true }
+countme                  = { workspace = true, features = ["enable"] }
+iai                      = "0.1.1"
+quickcheck               = { workspace = true }
+quickcheck_macros        = { workspace = true }
+tests_macros             = { workspace = true }
 
 [lints]
 workspace = true

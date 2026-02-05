@@ -1315,6 +1315,7 @@ name = "biome_markdown_formatter"
 version = "0.0.1"
 dependencies = [
  "biome_formatter",
+ "biome_formatter_test",
  "biome_markdown_factory",
  "biome_markdown_parser",
  "biome_markdown_syntax",

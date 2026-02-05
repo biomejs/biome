@@ -1,4 +1,4 @@
-use crate::MarkdownFormatterContext;
+use crate::MarkdownFormatContext;
 use biome_formatter::FormatContext;
 use biome_formatter::{
     Format, FormatResult, LINE_TERMINATORS, normalize_newlines,
@@ -13,6 +13,15 @@ pub fn format_verbatim_node(node: &MarkdownSyntaxNode) -> FormatMarkdownVerbatim
         kind: VerbatimKind::Verbatim {
             length: node.text_range_with_trivia().len(),
         },
+        format_comments: true,
+    }
+}
+
+pub fn format_suppressed_node(node: &MarkdownSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
+    FormatMarkdownVerbatimNode {
+        node,
+        kind: VerbatimKind::Suppressed,
+        format_comments: true,
     }
 }
 
@@ -20,6 +29,7 @@ pub fn format_verbatim_node(node: &MarkdownSyntaxNode) -> FormatMarkdownVerbatim
 pub struct FormatMarkdownVerbatimNode<'node> {
     node: &'node MarkdownSyntaxNode,
     kind: VerbatimKind,
+    format_comments: bool,
 }
 
 impl Format<MarkdownFormatterContext> for FormatMarkdownVerbatimNode<'_> {
@@ -66,9 +76,10 @@ impl Format<MarkdownFormatterContext> for FormatMarkdownVerbatimNode<'_> {
     }
 }
 
-pub fn format_bogus_node(node: &SyntaxNode<MarkdownLanguage>) -> FormatMarkdownVerbatimNode {
+pub fn format_bogus_node(node: &SyntaxNode<MarkdownLanguage>) -> FormatMarkdownVerbatimNode<'_> {
     FormatMarkdownVerbatimNode {
         node,
         kind: VerbatimKind::Bogus,
+        format_comments: true,
     }
 }
