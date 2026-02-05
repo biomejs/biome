@@ -171,6 +171,7 @@ fn is_in_font_face_at_rule(node: &CssGenericProperty) -> bool {
 fn is_in_supports_feature_declaration(node: &CssGenericProperty) -> bool {
     node.syntax()
         .ancestors()
+        .skip(1)
         .any(|n| n.kind() == CssSyntaxKind::CSS_SUPPORTS_FEATURE_DECLARATION)
 }
 
