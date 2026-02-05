@@ -330,7 +330,7 @@ To use non-default options, create `tests/specs/html/options.json`:
 
 ### "Undefined node" errors during codegen
 
-If you get an error like `Undefined node: AnyHtmlBlock`, it's likely that there's a bug in the grammar. Please refer to [the parser contributing guide](../crates/biome_parser/CONTRIBUTING.md) to troubleshoot.
+If you get an error like `Undefined node: AnyHtmlBlock`, it's likely that there's a bug in the grammar. Please refer to [the parser contributing guide](../biome_parser/CONTRIBUTING.md) to troubleshoot.
 
 ### Generated code references wrong paths
 
