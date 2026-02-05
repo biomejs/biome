@@ -68,7 +68,7 @@ pub fn deserialize_from_json_ast<Output: Deserializable>(
     parse: &JsonRoot,
     id: &str,
 ) -> Deserialized<Output> {
-    let mut ctx = DefaultDeserializationContext::new(id);
+    let mut ctx = DefaultDeserializationContext::new(parse, id);
     let deserialized = parse
         .value()
         .ok()

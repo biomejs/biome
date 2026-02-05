@@ -60,7 +60,7 @@ impl FieldQuery {
     }
 
     /// Check if this query starts with another query (for prefix matching during capture)
-    pub fn starts_with(&self, prefix: &FieldQuery) -> bool {
+    pub fn starts_with(&self, prefix: &Self) -> bool {
         if prefix.segments.len() > self.segments.len() {
             return false;
         }

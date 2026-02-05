@@ -1,7 +1,7 @@
 use camino::{Utf8Path, Utf8PathBuf};
 
 /// Identifies which source set a configuration value
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub enum ProvenanceSource {
     /// The base/root configuration file being loaded
     BaseConfig {
@@ -15,7 +15,7 @@ pub enum ProvenanceSource {
         path: Utf8PathBuf,
 
         /// How we got here (for nested extends)
-        /// Example: ["main.json", "react.json", "react-base.json"]
+        /// Example: `["main.json", "react.json", "react-base.json"]`
         /// The last entry is the file that actually set the value
         resolution_path: Vec<Utf8PathBuf>,
     },
@@ -29,7 +29,7 @@ pub enum ProvenanceSource {
     /// An override pattern from the 'overrides' array
     Override {
         /// Which configuration file contained this override
-        config_source: Box<ProvenanceSource>,
+        config_source: Box<Self>,
 
         /// The index of this override in the overrides array
         index: usize,
@@ -45,6 +45,7 @@ pub enum ProvenanceSource {
     },
 
     /// Default/fallback value (not explicitly configured)
+    #[default]
     Default,
 }
 
@@ -80,11 +81,7 @@ impl ProvenanceSource {
     }
 
     /// Create an Override source
-    pub fn override_source(
-        config_source: ProvenanceSource,
-        index: usize,
-        includes: Vec<String>,
-    ) -> Self {
+    pub fn override_source(config_source: Self, index: usize, includes: Vec<String>) -> Self {
         Self::Override {
             config_source: Box::new(config_source),
             index,
@@ -95,11 +92,6 @@ impl ProvenanceSource {
     /// Create a CliArgument source
     pub fn cli_argument(argument: String) -> Self {
         Self::CliArgument { argument }
-    }
-
-    /// Create a Default source
-    pub fn default() -> Self {
-        Self::Default
     }
 }
 

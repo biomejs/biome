@@ -1,6 +1,8 @@
 use super::ProvenanceSource;
 use biome_glob::Glob;
 use camino::Utf8Path;
+
+#[cfg(test)]
 use std::str::FromStr;
 
 /// Metadata about an override pattern for lazy evaluation
