@@ -24,21 +24,19 @@ just new-crate biome_html_formatter
 
 This creates `crates/biome_html_formatter/` with the basic Cargo.toml and lib.rs. You'll fill in the implementation details after codegen runs.
 
-### Step 2: Generate AST and boilerplate
+### Step 2: Generate boilerplate
 
-First, ensure your language is registered in the codegen script. The codegen runs through all defined languages, so your language must be included in the `ALL_LANGUAGE_KIND` list in `xtask/codegen/src/language_kind.rs`.
-
-Then run the codegen script to generate formatter boilerplate:
+Run the codegen script to generate formatter boilerplate:
 
 ```shell
 just gen-formatter
 ```
 
-This process:
+which will
 
 1. Generates boilerplate formatter code in `crates/biome_<language>_formatter/src/`
 2. Creates the module structure (`mod.rs` files) automatically
-3. Generates default `FormatRule` implementations (initially using `format_verbatim_node`)
+3. Generates default `FormatNodeRule<N>` implementations (initially using `format_verbatim_node`)
 
 ### Step 3: Set up the formatter crate structure
 
@@ -83,14 +81,15 @@ In `context.rs`, define the formatting context that carries state during formatt
 
 ```rust
 pub struct HtmlFormatContext {
-    /// The comments of the nodes and tokens in the program.
+    options: HtmlFormatOptions,
     comments: Rc<HtmlComments>,
     source_map: Option<TransformSourceMap>,
 }
 
 impl HtmlFormatContext {
-    pub fn new(comments: HtmlComments) -> Self {
+    pub fn new(options: HtmlFormatOptions, comments: HtmlComments) -> Self {
         Self {
+            options,
             comments: Rc::new(comments),
             source_map: None,
         }
@@ -100,6 +99,10 @@ impl HtmlFormatContext {
         self.source_map = source_map;
         self
     }
+}
+
+impl FormatOptions for HtmlFormatOptions {
+    // ... implement required methods
 }
 
 impl FormatContext for HtmlFormatContext {
@@ -154,7 +157,7 @@ In `lib.rs`, implement the `FormatLanguage` trait that ties everything together:
 
 ```rust
 pub struct HtmlFormatLanguage {
-    // Configuration options
+    options: HtmlFormatOptions,
 }
 
 impl FormatLanguage for HtmlFormatLanguage {
@@ -179,9 +182,7 @@ pub fn format_node(
 
 ### Step 5: Implement node-specific formatters
 
-The generated code initially uses `format_verbatim_node`, which outputs nodes as-is without applying formatting rules. You'll replace these with proper implementations.
-
-For example, to format an `HtmlElement` node, create `crates/biome_html_formatter/src/html/element.rs`:
+The generated code initially uses `format_verbatim_node`, which outputs nodes as-is without applying formatting rules. You'll replace it with proper implementation.
 
 ```rust
 use crate::prelude::*;
@@ -191,9 +192,7 @@ pub struct FormatHtmlElement;
 
 impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
     fn fmt_fields(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
-        // Write your formatting logic here
-        // Use the formatter utilities to control spacing, indentation, etc.
-        todo!()
+      format_verbatim_node(node.syntax()).fmt(f)
     }
 }
 ```
@@ -202,36 +201,22 @@ Each node type gets its own formatter that implements `FormatNodeRule<NodeType>`
 
 ## How the codegen works
 
-Understanding the codegen pipeline helps when you need to regenerate or debug formatter code.
+The `.ungram` file is the **source of truth** for your language's syntax structure. When you run `cargo run -p xtask_codegen -- formatter`:
 
-### The ungram file
-
-The `.ungram` file is the **source of truth** for your language's syntax structure. It defines:
-
-- Node types (e.g., `HtmlElement`, `HtmlAttribute`)
-- Unions (e.g., `AnyHtmlNode = HtmlElement | HtmlText | HtmlComment`)
-- Fields and their types (e.g., `name: HtmlIdentifier`)
-- Lists (e.g., `HtmlAttributeList = HtmlAttribute*`)
-
-### The codegen pipeline
-
-When you run `cargo run -p xtask_codegen -- formatter`:
-
-1. **Parse `.ungram`**: The codegen reads your grammar file and builds an AST model
-2. **Determine paths**: For each node, it determines the output path using the node's name:
+1. **Determine paths**: For each CST node (already generated from `.ungram`), it determines the output path using the node's name:
    - Extracts the **dialect** (language prefix): `HtmlElement` → `Html`
    - Determines the **concept** (node category) by matching suffixes:
      - `HtmlElement` → `Element` concept → `elements/` directory
      - `HtmlAttribute` → `Attribute` concept → `attributes/` directory
      - Generic names → `auxiliary/` directory
    - Converts to snake_case: `HtmlElement` → `element.rs`
-3. **Generate files**: Creates formatter files at paths like:
+2. **Generate files**: Creates formatter files at paths like:
    ```
    crates/biome_html_formatter/src/html/elements/element.rs
    crates/biome_html_formatter/src/html/attributes/attribute.rs
    ```
-4. **Generate `mod.rs`**: Creates module files that export all child modules
-5. **Generate `generated.rs`**: Creates trait implementations (`AsFormat`, `IntoFormat`, `FormatRule`) for all nodes
+3. **Generate `mod.rs`**: Creates module files that export all child modules
+4. **Generate `generated.rs`**: Creates trait implementations (`AsFormat`, `IntoFormat`, `FormatRule`) for all nodes
 
 ### Key traits created by codegen
 
@@ -239,13 +224,9 @@ The generated code creates implementations for:
 
 - **`AsFormat<Context>`**: Allows formatting by reference (`node.format()`)
 - **`IntoFormat<Context>`**: Allows formatting by ownership (`node.into_format()`)
-- **`FormatRule<NodeType>`**: The actual formatting rule that implements `fmt` method
+- **`FormatNodeRule<N>`**: The trait that defines formatting logic for a specific node type
 
-These traits' implementations are automatically generated in `generated.rs`.
-
-### Default implementations
-
-All generated formatters initially use `format_verbatim_node`, which preserves the input exactly as-is. This is intentional as it gives you a working baseline that you can incrementally improve.
+You only need to implement `fmt_fields()` to define how to format a node's children. Override the other methods only if you need custom behavior.
 
 ## Testing
 
@@ -266,7 +247,7 @@ mod formatter {
 
 This will auto-generate a test function for each `.html` file in `tests/specs/html/`.
 
-### Define test languages
+### Define test language
 
 Create `tests/language.rs`:
 
@@ -326,7 +307,7 @@ Create test files in `tests/specs/html/`:
 Run tests:
 
 ```shell
-cargo t
+cargo t html::simple_element
 ```
 
 Accept snapshots after verifying they're correct:
@@ -349,16 +330,8 @@ To use non-default options, create `tests/specs/html/options.json`:
 
 ### "Undefined node" errors during codegen
 
-If you get an error like `Undefined node: AnyHtmlBlock`, check that:
-
-1. All node references in your `.ungram` file are defined (no typos)
-2. Union types are prefixed with `Any` and the language prefix: `AnyHtmlBlock` (not `AnyBlock`)
-3. Run `cargo run -p xtask_codegen -- all` before `cargo run -p xtask_codegen -- formatter`
+If you get an error like `Undefined node: AnyHtmlBlock`, it's likely that there's a bug in the grammar. Please refer to [the parser contributing guide](../crates/biome_parser/CONTRIBUTING.md) to troubleshoot.
 
 ### Generated code references wrong paths
 
 If generated code has incorrect module paths (e.g., `crate::js::any::` when it should be `crate::html::`), the node name in your `.ungram` file is probably missing the language prefix. Use `HtmlElement` instead of `Element`.
-
-### "FormatNodeRule not implemented" errors
-
-These are normal when you first generate the formatter. The boilerplate uses `format_verbatim_node` as a placeholder. Replace with proper implementations in the respective formatter files.
