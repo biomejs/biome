@@ -12,7 +12,7 @@ The formatter codegen depends on the generated AST types from the grammar, so yo
 
 ## Getting started
 
-The recommended way to add a formatter for a new language is to use provided codegen This automatically generates the boilerplate code based on the language's grammar. The following steps refer to html as an example but it should be mostly relevant for any language.
+The recommended way to add a formatter for a new language is to use the provided codegen. This automatically generates the boilerplate code based on the language's grammar. The following steps refer to html as an example but it should be mostly relevant for any language.
 
 ### Step 1: Create the formatter crate
 
