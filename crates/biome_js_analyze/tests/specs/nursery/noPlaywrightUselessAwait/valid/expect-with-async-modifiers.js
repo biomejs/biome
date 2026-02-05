@@ -16,4 +16,5 @@ await expect.poll(() => counter).toBeGreaterThan(5);
 // Valid: chained async modifiers
 await expect(promise).resolves.not.toBe(null);
 await expect(promise).rejects.not.toBeUndefined();
+await expect.poll(() => getValue()).not.toBe(null);
 
