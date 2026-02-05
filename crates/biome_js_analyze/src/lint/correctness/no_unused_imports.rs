@@ -17,14 +17,16 @@ use biome_js_factory::make;
 use biome_js_factory::make::{js_identifier_binding, js_module, js_module_item_list};
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsImportClause,
-    AnyJsNamedImportSpecifier, AnyJsObjectMember, AnyTsTypeMember, JsExport, JsLanguage,
-    JsNamedImportSpecifiers, JsStaticMemberAssignment, JsSyntaxNode, T, TsEnumMember,
+    AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration,
+    AnyJsExportClause, AnyJsExportNamedSpecifier, AnyJsImportClause, AnyJsModuleItem,
+    AnyJsNamedImportSpecifier, AnyJsObjectMember, AnyTsTypeMember, EmbeddingKind, JsExport,
+    JsFileSource, JsLanguage, JsNamedImportSpecifiers, JsStaticMemberAssignment, JsSyntaxNode, T,
+    TsEnumMember,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
-    AstNode, AstSeparatedElement, AstSeparatedList, BatchMutationExt, Language, NodeOrToken,
-    SyntaxNode, TextRange, TriviaPieceKind, WalkEvent, declare_node_union,
+    AstNode, AstNodeList, AstSeparatedElement, AstSeparatedList, BatchMutationExt, Language,
+    NodeOrToken, SyntaxNode, TextRange, TriviaPieceKind, WalkEvent, declare_node_union,
 };
 use regex::Regex;
 use rustc_hash::FxHashSet;
@@ -446,7 +448,57 @@ impl Rule for NoUnusedImports {
                         mutation.replace_node_discard_trivia(root.clone(), new_root);
                     }
                 }
-                mutation.remove_element(parent.into());
+
+                // In TypeScript, a file without any import or export statements is
+                // treated as an ambient module, making all declarations global.
+                // If removing this import leaves no other imports or exports,
+                // replace it with `export {}` to preserve the module boundary.
+                // This does not apply to embedded scripts (Vue, Svelte, Astro),
+                // which are already in a module context.
+                let source_type = ctx.source_type::<JsFileSource>();
+                let is_embedded = !matches!(
+                    source_type.as_embedding_kind(),
+                    EmbeddingKind::None
+                );
+                let needs_export_empty = !is_embedded
+                    && source_type.language().is_typescript()
+                    && root.as_js_module().is_some_and(|module| {
+                        !module.items().iter().any(|item: AnyJsModuleItem| {
+                            if item.syntax() == &parent {
+                                return false;
+                            }
+                            matches!(
+                                item,
+                                AnyJsModuleItem::JsExport(_) | AnyJsModuleItem::JsImport(_)
+                            )
+                        })
+                    });
+
+                if needs_export_empty {
+                    let export_token = make::token(T![export])
+                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    let export_empty = make::js_export(
+                        make::js_decorator_list([]),
+                        export_token,
+                        AnyJsExportClause::JsExportNamedClause(
+                            make::js_export_named_clause(
+                                make::token(T!['{']),
+                                make::js_export_named_specifier_list(
+                                    std::iter::empty::<AnyJsExportNamedSpecifier>(),
+                                    std::iter::empty(),
+                                ),
+                                make::token(T!['}']),
+                            )
+                            .build(),
+                        ),
+                    );
+                    mutation.replace_element(
+                        parent.into(),
+                        export_empty.syntax().clone().into(),
+                    );
+                } else {
+                    mutation.remove_element(parent.into());
+                }
             }
             Unused::DefaultImport(_) => {
                 let prev_clause = node.as_js_import_combined_clause()?.clone();
