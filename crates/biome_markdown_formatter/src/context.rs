@@ -76,6 +76,10 @@ impl MarkdownFormatContext {
         self.source_map = source_map;
         self
     }
+
+    pub fn comments(&self) -> &MarkdownComments {
+        &self.comments
+    }
 }
 
 impl FormatContext for MarkdownFormatContext {

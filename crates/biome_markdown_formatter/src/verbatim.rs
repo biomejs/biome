@@ -32,8 +32,8 @@ pub struct FormatMarkdownVerbatimNode<'node> {
     format_comments: bool,
 }
 
-impl Format<MarkdownFormatterContext> for FormatMarkdownVerbatimNode<'_> {
-    fn fmt(&self, f: &mut Formatter<MarkdownFormatterContext>) -> FormatResult<()> {
+impl Format<MarkdownFormatContext> for FormatMarkdownVerbatimNode<'_> {
+    fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         let trimmed_source_range = f.context().source_map().map_or_else(
             || self.node.text_trimmed_range(),
             |source_map| source_map.trimmed_source_range(self.node),
