@@ -1564,7 +1564,7 @@
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
 				"delimiterSpacing": {
-					"description": "Whether to insert spaces inside delimiters.\nAffects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`,\nand JSX curly braces `{}`.\nDefaults to false.",
+					"description": "Whether to insert spaces inside delimiters.  Affects parentheses `()`,\nsquare brackets `[]`, TypeScript angle brackets `<>`, and JSX curly\nbraces `{}`.  Defaults to false.",
 					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
@@ -6272,7 +6272,7 @@
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
 				"delimiterSpacing": {
-					"description": "Whether to insert spaces inside delimiters.\nAffects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`,\nand JSX curly braces `{}`.\nDefaults to false.",
+					"description": "Whether to insert spaces inside delimiters.  Affects parentheses `()`,\nsquare brackets `[]`, TypeScript angle brackets `<>`, and JSX curly\nbraces `{}`.  Defaults to false.",
 					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {

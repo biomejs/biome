@@ -177,10 +177,9 @@ export interface FormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
-	* Whether to insert spaces inside delimiters.
-Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`,
-and JSX curly braces `{}`.
-Defaults to false. 
+	* Whether to insert spaces inside delimiters.  Affects parentheses `()`,
+square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly
+braces `{}`.  Defaults to false. 
 	 */
 	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
@@ -1139,10 +1138,9 @@ export interface OverrideFormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
-	* Whether to insert spaces inside delimiters.
-Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`,
-and JSX curly braces `{}`.
-Defaults to false. 
+	* Whether to insert spaces inside delimiters.  Affects parentheses `()`,
+square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly
+braces `{}`.  Defaults to false. 
 	 */
 	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
