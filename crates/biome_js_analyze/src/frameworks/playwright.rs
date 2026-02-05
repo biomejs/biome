@@ -301,11 +301,15 @@ pub(crate) fn is_playwright_call_chain(expr: &AnyJsExpression) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use biome_js_parser::{parse, JsParserOptions};
+    use biome_js_parser::{JsParserOptions, parse};
     use biome_js_syntax::JsFileSource;
 
     fn get_callee(source: &str) -> AnyJsExpression {
-        let parsed = parse(source, JsFileSource::js_module(), JsParserOptions::default());
+        let parsed = parse(
+            source,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
         let call = parsed
             .tree()
             .syntax()
