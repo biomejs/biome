@@ -139,12 +139,7 @@ pub(crate) fn is_test_call(callee: &AnyJsExpression) -> bool {
                 let text = token.text_trimmed();
                 if matches!(
                     text,
-                    "describe"
-                        | "step"
-                        | "beforeEach"
-                        | "afterEach"
-                        | "beforeAll"
-                        | "afterAll"
+                    "describe" | "step" | "beforeEach" | "afterEach" | "beforeAll" | "afterAll"
                 ) {
                     return false;
                 }
