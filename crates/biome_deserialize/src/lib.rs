@@ -39,6 +39,7 @@ mod merge;
 mod validator;
 
 use biome_diagnostics::{Error, Severity};
+use biome_json_syntax::{AnyJsonValue, JsonMemberName, JsonRoot};
 pub use biome_rowan::{Text, TextRange};
 pub use diagnostics::{
     DeserializableType, DeserializableTypes, DeserializationAdvice, DeserializationDiagnostic,
@@ -88,6 +89,37 @@ pub trait Deserializable: Sized {
     ) -> Option<Self>;
 }
 
+/// Optional provenance tracking during deserialization.
+///
+/// This trait allows tracking which syntax nodes correspond to which configuration fields.
+/// Implementations can capture field paths and syntax node references during deserialization.
+///
+/// This is an opt-in feature - most code won't need to implement this.
+pub trait Provenance {
+    /// Push a field name onto the current path stack
+    ///
+    /// The `name` parameter is the actual JsonMemberName CST node from the parsed JSON.
+    /// This allows implementations to create AstPtr immediately without searching later.
+    fn push_field(&mut self, name: &JsonMemberName);
+
+    /// Push an array index onto the current path stack
+    fn push_index(&mut self, index: usize);
+
+    /// Pop the last segment from the current path stack
+    fn pop(&mut self);
+
+    /// Get the current field path as a string (for debugging/logging)
+    ///
+    /// The `root` parameter is needed to resolve AstPtr references to actual field names.
+    fn current_path(&self, root: &JsonRoot) -> String;
+
+    /// Capture a value at the current path with its JSON node
+    ///
+    /// This is called when deserializing a value, providing direct access to the syntax node.
+    /// Implementations can create AstPtr immediately rather than searching by range later.
+    fn capture_value(&mut self, value: &AnyJsonValue);
+}
+
 /// Context used during deserialization.
 ///
 /// We provide a default implementation [DefaultDeserializationContext].
@@ -95,21 +127,36 @@ pub trait Deserializable: Sized {
 pub trait DeserializationContext {
     fn id(&self) -> Option<&str>;
     fn report(&mut self, diagnostic: DeserializationDiagnostic);
+
+    /// Get the root of the JSON tree being deserialized.
+    ///
+    /// This is primarily used by provenance tracking to resolve AstPtr references.
+    fn root(&self) -> &JsonRoot;
+
+    /// Optional provenance tracking.
+    ///
+    /// Returns `None` by default (backward compatible).
+    /// Contexts that want to track provenance should override this method.
+    fn provenance(&mut self) -> Option<&mut dyn Provenance> {
+        None
+    }
 }
 
 /// Default implementation for [DeserializationContext].
 ///
 /// This implementation stores all reporetd diagnostics inside a vector.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct DefaultDeserializationContext<'a> {
     pub diagnostics: Vec<Error>,
     pub id: Option<&'a str>,
+    pub root: &'a JsonRoot,
 }
 impl<'a> DefaultDeserializationContext<'a> {
-    fn new(id: &'a str) -> Self {
+    pub fn new(root: &'a JsonRoot, id: &'a str) -> Self {
         Self {
             diagnostics: Default::default(),
             id: Some(id),
+            root,
         }
     }
 }
@@ -119,9 +166,13 @@ impl DeserializationContext for DefaultDeserializationContext<'_> {
         self.id
     }
 
-    /// Report `diagnostc` to the user.
-    fn report(&mut self, diagnostc: DeserializationDiagnostic) {
-        self.diagnostics.push(Error::from(diagnostc));
+    /// Report `diagnostic` to the user.
+    fn report(&mut self, diagnostic: DeserializationDiagnostic) {
+        self.diagnostics.push(Error::from(diagnostic));
+    }
+
+    fn root(&self) -> &JsonRoot {
+        self.root
     }
 }
 

@@ -1,6 +1,6 @@
 use super::{FieldQuery, ProvenanceSource};
 use biome_json_syntax::AnyJsonValue;
-use biome_rowan::AstPtr;
+use biome_rowan::{AstPtr, TextRange};
 
 /// A single record of a field being set
 #[derive(Debug, Clone)]
@@ -16,6 +16,9 @@ pub struct ProvenanceEntry {
     /// by calling workspace.get_parse() to retrieve the JsonRoot
     pub value_ptr: AstPtr<AnyJsonValue>,
 
+    /// Text range of the value in the source
+    pub range: TextRange,
+
     /// Merge order: lower = earlier, higher = later (wins)
     pub merge_order: u64,
 }
@@ -26,12 +29,14 @@ impl ProvenanceEntry {
         field_query: FieldQuery,
         source: ProvenanceSource,
         value_ptr: AstPtr<AnyJsonValue>,
+        range: TextRange,
         merge_order: u64,
     ) -> Self {
         Self {
             field_query,
             source,
             value_ptr,
+            range,
             merge_order,
         }
     }
@@ -56,9 +61,10 @@ mod tests {
             query: FieldQuery,
             source: ProvenanceSource,
             ptr: AstPtr<AnyJsonValue>,
+            range: TextRange,
             order: u64,
         ) -> ProvenanceEntry {
-            ProvenanceEntry::new(query, source, ptr, order)
+            ProvenanceEntry::new(query, source, ptr, range, order)
         }
     }
 }
