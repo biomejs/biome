@@ -27,6 +27,7 @@ declare_lint_rule! {
     /// - Property with a keyword value such as `inherit`, `initial`.
     /// - The last value being a CSS variable.
     /// - `font-family` property in an `@font-face` rule.
+    /// - Properties inside an `@supports` feature declaration (used for feature testing).
     ///
     /// ## Examples
     ///
@@ -85,6 +86,12 @@ impl Rule for UseGenericFontNames {
 
         // Ignore `@font-face`. See more detail: https://drafts.csswg.org/css-fonts/#font-face-rule
         if is_in_font_face_at_rule(node) {
+            return None;
+        }
+
+        // Ignore `@supports` feature declarations since they test for browser support,
+        // not actual font usage. e.g: @supports (font: -apple-system-body) { ... }
+        if is_in_supports_feature_declaration(node) {
             return None;
         }
 
@@ -156,6 +163,14 @@ fn is_in_font_face_at_rule(node: &CssGenericProperty) -> bool {
         .and_then(|n| n.cast::<CssAtRule>())
         .and_then(|n| n.rule().ok())
         .is_some_and(|n| matches!(n, AnyCssAtRule::CssFontFaceAtRule(_)))
+}
+
+/// Check if the property is inside an `@supports` feature declaration.
+/// Properties in @supports conditions test for browser support, not actual font usage.
+fn is_in_supports_feature_declaration(node: &CssGenericProperty) -> bool {
+    node.syntax()
+        .ancestors()
+        .any(|n| n.kind() == CssSyntaxKind::CSS_SUPPORTS_FEATURE_DECLARATION)
 }
 
 fn is_shorthand_font_property_with_keyword(properties: &CssGenericComponentValueList) -> bool {
