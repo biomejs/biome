@@ -301,6 +301,55 @@ pub(crate) fn is_playwright_call_chain(expr: &AnyJsExpression) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_js_parser::{parse, JsParserOptions};
+    use biome_js_syntax::JsFileSource;
+
+    fn get_callee(source: &str) -> AnyJsExpression {
+        let parsed = parse(source, JsFileSource::js_module(), JsParserOptions::default());
+        let call = parsed
+            .tree()
+            .syntax()
+            .descendants()
+            .find_map(JsCallExpression::cast)
+            .expect("Expected a call expression");
+        call.callee().expect("Expected a callee")
+    }
+
+    #[test]
+    fn test_is_test_call_valid() {
+        // Direct test/it calls
+        assert!(is_test_call(&get_callee("test('name', () => {})")));
+        assert!(is_test_call(&get_callee("it('name', () => {})")));
+
+        // Test modifiers
+        assert!(is_test_call(&get_callee("test.skip('name', () => {})")));
+        assert!(is_test_call(&get_callee("test.only('name', () => {})")));
+        assert!(is_test_call(&get_callee("it.skip('name', () => {})")));
+        assert!(is_test_call(&get_callee("it.only('name', () => {})")));
+    }
+
+    #[test]
+    fn test_is_test_call_excludes_non_test_patterns() {
+        // Describe blocks are not test calls
+        assert!(!is_test_call(&get_callee(
+            "test.describe('suite', () => {})"
+        )));
+        assert!(!is_test_call(&get_callee(
+            "test.describe.only('suite', () => {})"
+        )));
+        assert!(!is_test_call(&get_callee(
+            "test.describe.skip('suite', () => {})"
+        )));
+
+        // Hooks are not test calls
+        assert!(!is_test_call(&get_callee("test.beforeEach(() => {})")));
+        assert!(!is_test_call(&get_callee("test.afterEach(() => {})")));
+        assert!(!is_test_call(&get_callee("test.beforeAll(() => {})")));
+        assert!(!is_test_call(&get_callee("test.afterAll(() => {})")));
+
+        // Steps are not test calls
+        assert!(!is_test_call(&get_callee("test.step('step', () => {})")));
+    }
 
     #[test]
     fn test_is_page_or_frame_name_valid() {
