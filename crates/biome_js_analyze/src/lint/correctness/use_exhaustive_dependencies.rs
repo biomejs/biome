@@ -14,7 +14,7 @@ use biome_js_syntax::{
     AnyJsMemberExpression, AnyJsObjectBindingPatternMember, JsArrayBindingPattern,
     JsArrayBindingPatternElement, JsArrayBindingPatternElementList, JsArrayExpression,
     JsComputedMemberExpression, JsObjectBindingPattern, JsObjectBindingPatternPropertyList,
-    JsReferenceIdentifier, JsVariableDeclarator, T, TsTypeofType,
+    JsReferenceIdentifier, JsVariableDeclarator, JsxReferenceIdentifier, T, TsTypeofType,
     is_transparent_expression_wrapper,
 };
 use biome_js_syntax::{
@@ -180,6 +180,15 @@ declare_lint_rule! {
     ///   useEffect(() => {
     ///     console.log(b);
     ///   }, []);
+    /// }
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// import { useCallback } from "react";
+    ///
+    /// function component() {
+    ///   const Component = () => null;
+    ///   const render = useCallback(() => <Component />, []);
     /// }
     /// ```
     ///
@@ -527,7 +536,7 @@ pub enum UnstableDependencyKind {
 }
 
 declare_node_union! {
-    pub AnyExpressionCandidate = AnyJsExpression | JsReferenceIdentifier
+    pub AnyExpressionCandidate = AnyJsExpression | JsReferenceIdentifier | JsxReferenceIdentifier
 }
 
 /// Returns expression candidates for a given reference for further checking.
@@ -535,6 +544,14 @@ declare_node_union! {
 /// Example: if the expression is `a.b[c]` it will return 3 candidates: `a`, `a.b`, `a.b[c]`
 fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> {
     let mut result = Vec::new();
+
+    if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(&node) {
+        result.push(AnyExpressionCandidate::JsxReferenceIdentifier(
+            jsx_ref.clone(),
+        ));
+        return result;
+    }
+
     let mut prev_node = node;
     while let Some(parent) = prev_node.parent() {
         if matches!(
@@ -635,6 +652,20 @@ fn capture_needs_to_be_in_the_dependency_list(
                 0,
             ),
             AnyExpressionCandidate::JsReferenceIdentifier(reference_identifier) => {
+                if let Some(binding) = model.binding(reference_identifier) {
+                    is_stable_binding(
+                        &binding.tree(),
+                        None,
+                        component_function_range,
+                        model,
+                        options,
+                        0,
+                    )
+                } else {
+                    true
+                }
+            }
+            AnyExpressionCandidate::JsxReferenceIdentifier(reference_identifier) => {
                 if let Some(binding) = model.binding(reference_identifier) {
                     is_stable_binding(
                         &binding.tree(),
@@ -835,7 +866,19 @@ fn is_stable_expression(
     }
 
     if model.is_constant(expression) {
-        return true;
+        // If the expression creates a new object/function identity, it is not stable for React hooks,
+        // even if it captures no variables.
+        if !matches!(
+            expression.syntax().kind(),
+            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+                | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                | JsSyntaxKind::JS_OBJECT_EXPRESSION
+                | JsSyntaxKind::JS_ARRAY_EXPRESSION
+                | JsSyntaxKind::JS_CLASS_EXPRESSION
+                | JsSyntaxKind::JS_REGEX_LITERAL
+        ) {
+            return true;
+        }
     }
     let Some(expression) = expression.inner_expression() else {
         return false;
@@ -1582,6 +1625,14 @@ impl Rule for UseExhaustiveDependencies {
                 ..
             } => {
                 let new_elements = captures.first().into_iter().filter_map(|node| {
+                    if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(node) {
+                        return Some(AnyJsArrayElement::AnyJsExpression(
+                             make::js_identifier_expression(
+                                 make::js_reference_identifier(jsx_ref.value_token().ok()?)
+                             ).into()
+                        ));
+                    }
+                    
                     node.ancestors()
                         .find_map(|node| match JsReferenceIdentifier::cast_ref(&node) {
                             Some(node) => Some(make::js_identifier_expression(node).into()),
