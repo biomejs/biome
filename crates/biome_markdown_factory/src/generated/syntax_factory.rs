@@ -50,24 +50,20 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             }
             MD_BULLET => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && matches!(element.kind(), T ! [-] | T ! [*])
+                    && matches!(
+                        element.kind(),
+                        T ! [-] | T ! [*] | T ! [+] | MD_ORDERED_LIST_MARKER
+                    )
                 {
                     slots.mark_present();
                     current_element = elements.next();
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == MD_TEXTUAL_LITERAL
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && MdInlineItemList::can_cast(element.kind())
+                    && MdBlockList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -1005,7 +1001,6 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             MD_INLINE_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyMdInline::can_cast)
             }
-            MD_ORDER_LIST => Self::make_node_list_syntax(kind, children, AnyMdCodeBlock::can_cast),
             _ => unreachable!("Is {:?} a token?", kind),
         }
     }

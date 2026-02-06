@@ -168,11 +168,8 @@ MdBulletList = MdBullet*
 // 1. Hey!
 // ^^^^^^^
 MdBullet =
-	bullet: ('-' | '*')
-	space: 'md_textual_literal'
-	content: MdInlineItemList
-
-MdOrderList = AnyMdCodeBlock*
+	bullet: ('-' | '*' | '+' | 'md_ordered_list_marker')
+	content: MdBlockList
 
 // Any block paragraph
 //

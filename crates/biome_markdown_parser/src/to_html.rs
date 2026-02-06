@@ -1706,13 +1706,16 @@ fn decode_entity(entity: &str) -> Option<String> {
 fn is_paragraph_block(block: &AnyMdBlock) -> bool {
     matches!(
         block,
-        AnyMdBlock::AnyLeafBlock(AnyLeafBlock::MdParagraph(_))
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(_))
     )
 }
 
 /// Check if a block is a newline (produces no output).
 fn is_newline_block(block: &AnyMdBlock) -> bool {
-    matches!(block, AnyMdBlock::AnyLeafBlock(AnyLeafBlock::MdNewline(_)))
+    matches!(
+        block,
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_))
+    )
 }
 
 /// Check if blocks are effectively empty (empty or only newlines).

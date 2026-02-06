@@ -20,16 +20,11 @@ pub fn md_autolink(
         ],
     ))
 }
-pub fn md_bullet(
-    bullet_token: SyntaxToken,
-    space_token: SyntaxToken,
-    content: MdInlineItemList,
-) -> MdBullet {
+pub fn md_bullet(bullet_token: SyntaxToken, content: MdBlockList) -> MdBullet {
     MdBullet::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_BULLET,
         [
             Some(SyntaxElement::Token(bullet_token)),
-            Some(SyntaxElement::Token(space_token)),
             Some(SyntaxElement::Node(content.into_syntax())),
         ],
     ))
@@ -607,18 +602,6 @@ where
 {
     MdInlineItemList::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_INLINE_ITEM_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
-    ))
-}
-pub fn md_order_list<I>(items: I) -> MdOrderList
-where
-    I: IntoIterator<Item = AnyMdCodeBlock>,
-    I::IntoIter: ExactSizeIterator,
-{
-    MdOrderList::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_ORDER_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

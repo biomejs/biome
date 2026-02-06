@@ -82,18 +82,14 @@ impl MdBullet {
     pub fn as_fields(&self) -> MdBulletFields {
         MdBulletFields {
             bullet: self.bullet(),
-            space_token: self.space_token(),
             content: self.content(),
         }
     }
     pub fn bullet(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn space_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn content(&self) -> MdInlineItemList {
-        support::list(&self.syntax, 2usize)
+    pub fn content(&self) -> MdBlockList {
+        support::list(&self.syntax, 1usize)
     }
 }
 impl Serialize for MdBullet {
@@ -107,8 +103,7 @@ impl Serialize for MdBullet {
 #[derive(Serialize)]
 pub struct MdBulletFields {
     pub bullet: SyntaxResult<SyntaxToken>,
-    pub space_token: SyntaxResult<SyntaxToken>,
-    pub content: MdInlineItemList,
+    pub content: MdBlockList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdBulletListItem {
@@ -1774,10 +1769,6 @@ impl std::fmt::Debug for MdBullet {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdBullet")
                 .field("bullet", &support::DebugSyntaxResult(self.bullet()))
-                .field(
-                    "space_token",
-                    &support::DebugSyntaxResult(self.space_token()),
-                )
                 .field("content", &self.content())
                 .finish()
         } else {
@@ -4643,88 +4634,6 @@ impl IntoIterator for &MdInlineItemList {
 impl IntoIterator for MdInlineItemList {
     type Item = AnyMdInline;
     type IntoIter = AstNodeListIterator<Language, AnyMdInline>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
-pub struct MdOrderList {
-    syntax_list: SyntaxList,
-}
-impl MdOrderList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for MdOrderList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_ORDER_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_ORDER_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-impl Serialize for MdOrderList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstNodeList for MdOrderList {
-    type Language = Language;
-    type Node = AnyMdCodeBlock;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for MdOrderList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("MdOrderList ")?;
-        f.debug_list().entries(self.iter()).finish()
-    }
-}
-impl IntoIterator for &MdOrderList {
-    type Item = AnyMdCodeBlock;
-    type IntoIter = AstNodeListIterator<Language, AnyMdCodeBlock>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for MdOrderList {
-    type Item = AnyMdCodeBlock;
-    type IntoIter = AstNodeListIterator<Language, AnyMdCodeBlock>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

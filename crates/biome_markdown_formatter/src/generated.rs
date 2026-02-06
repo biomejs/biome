@@ -1416,31 +1416,6 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdInlineItemLi
         )
     }
 }
-impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdOrderList {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_markdown_syntax::MdOrderList,
-        crate::markdown::lists::order_list::FormatMdOrderList,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::markdown::lists::order_list::FormatMdOrderList::default(),
-        )
-    }
-}
-impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdOrderList {
-    type Format = FormatOwnedWithRule<
-        biome_markdown_syntax::MdOrderList,
-        crate::markdown::lists::order_list::FormatMdOrderList,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::markdown::lists::order_list::FormatMdOrderList::default(),
-        )
-    }
-}
 impl FormatRule<biome_markdown_syntax::MdBogus> for crate::markdown::bogus::bogus::FormatMdBogus {
     type Context = MarkdownFormatContext;
     #[inline(always)]

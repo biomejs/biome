@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, TransformSourceMap, comments::Comments, printer::PrinterOptions,
+    LineWidth, TrailingNewline, TransformSourceMap, comments::Comments, printer::PrinterOptions,
 };
 use biome_markdown_syntax::MarkdownLanguage;
 
@@ -22,6 +22,7 @@ pub struct MarkdownFormatOptions {
     indent_width: IndentWidth,
     line_ending: LineEnding,
     line_width: LineWidth,
+    trailing_newline: TrailingNewline,
 }
 
 impl CstFormatContext for MarkdownFormatContext {
@@ -53,6 +54,10 @@ impl FormatOptions for MarkdownFormatOptions {
 
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::from(self)
+    }
+
+    fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
     }
 }
 
