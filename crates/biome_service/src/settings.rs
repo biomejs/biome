@@ -74,6 +74,13 @@ pub struct Settings {
     /// The VCS settings of the project
     pub vcs_settings: VcsSettings,
 
+    /// Provenance tracking information for configuration values.
+    ///
+    /// This field stores the provenance index which tracks where each
+    /// configuration value came from (base config, extends, overrides, etc.).
+    /// Wrapped in Arc for cheap cloning across threads.
+    pub(crate) provenance: Option<Arc<crate::workspace::provenance::ProvenanceIndex>>,
+
     // TODO: remove once HTML full support is stable
     pub experimental_full_html_support: Option<ExperimentalFullSupportEnabled>,
 
@@ -104,6 +111,21 @@ impl Settings {
 
     pub fn full_source(&self) -> Option<Arc<ConfigurationSource>> {
         self.source.clone()
+    }
+
+    /// Returns a reference to the provenance index, if available.
+    ///
+    /// The provenance index tracks where each configuration value came from
+    /// (base config, extends, overrides, CLI args, etc.).
+    pub fn provenance(&self) -> Option<&Arc<crate::workspace::provenance::ProvenanceIndex>> {
+        self.provenance.as_ref()
+    }
+
+    /// Returns whether provenance tracking is enabled for these settings.
+    ///
+    /// Returns `true` if the settings have a provenance index attached.
+    pub fn has_provenance(&self) -> bool {
+        self.provenance.is_some()
     }
 
     /// Merges the [Configuration] into the settings.

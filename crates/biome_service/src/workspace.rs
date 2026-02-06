@@ -53,6 +53,8 @@
 
 mod client;
 pub(crate) mod document;
+pub mod provenance;
+pub mod provenance_query;
 mod server;
 
 use biome_analyze::{ActionCategory, RuleCategories};

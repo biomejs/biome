@@ -490,6 +490,7 @@ define_categories! {
     "deserialize",
     "plugin",
     "project",
+    "provenance/queryParse",
     "search",
     "internalError/io",
     "internalError/fs",
