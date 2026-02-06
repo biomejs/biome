@@ -5,7 +5,7 @@ expression: snapshot
 ## Input
 
 ```
-This has **unclosed bold
+This has ![unclosed image
 
 ```
 
@@ -22,44 +22,44 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@0..9 "This has " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@9..10 "*" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@9..10 "!" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@10..11 "*" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@10..11 "[" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@11..24 "unclosed bold" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@11..25 "unclosed image" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@24..25 "\n" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@25..26 "\n" [] [],
                 },
             ],
             hard_line: missing (optional),
         },
     ],
-    eof_token: EOF@25..25 "" [] [],
+    eof_token: EOF@26..26 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: MD_DOCUMENT@0..25
+0: MD_DOCUMENT@0..26
   0: (empty)
-  1: MD_BLOCK_LIST@0..25
-    0: MD_PARAGRAPH@0..25
-      0: MD_INLINE_ITEM_LIST@0..25
+  1: MD_BLOCK_LIST@0..26
+    0: MD_PARAGRAPH@0..26
+      0: MD_INLINE_ITEM_LIST@0..26
         0: MD_TEXTUAL@0..9
           0: MD_TEXTUAL_LITERAL@0..9 "This has " [] []
         1: MD_TEXTUAL@9..10
-          0: MD_TEXTUAL_LITERAL@9..10 "*" [] []
+          0: MD_TEXTUAL_LITERAL@9..10 "!" [] []
         2: MD_TEXTUAL@10..11
-          0: MD_TEXTUAL_LITERAL@10..11 "*" [] []
-        3: MD_TEXTUAL@11..24
-          0: MD_TEXTUAL_LITERAL@11..24 "unclosed bold" [] []
-        4: MD_TEXTUAL@24..25
-          0: MD_TEXTUAL_LITERAL@24..25 "\n" [] []
+          0: MD_TEXTUAL_LITERAL@10..11 "[" [] []
+        3: MD_TEXTUAL@11..25
+          0: MD_TEXTUAL_LITERAL@11..25 "unclosed image" [] []
+        4: MD_TEXTUAL@25..26
+          0: MD_TEXTUAL_LITERAL@25..26 "\n" [] []
       1: (empty)
-  2: EOF@25..25 "" [] []
+  2: EOF@26..26 "" [] []
 
 ```

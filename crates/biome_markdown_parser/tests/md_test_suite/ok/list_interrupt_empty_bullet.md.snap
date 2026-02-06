@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 131
 expression: snapshot
 ---
 ## Input
@@ -27,19 +26,14 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@40..41 "\n" [] [],
                 },
-            ],
-            hard_line: missing (optional),
-        },
-        MdBulletListItem {
-            md_bullet_list: MdBulletList [
-                MdBullet {
-                    bullet: PLUS@41..42 "+" [] [],
-                    content: MdBlockList [],
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@41..42 "+" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@42..43 "\n" [] [],
                 },
             ],
-        },
-        MdNewline {
-            value_token: NEWLINE@42..43 "\n" [] [],
+            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@43..44 "\n" [] [],
@@ -55,21 +49,18 @@ MdDocument {
 0: MD_DOCUMENT@0..44
   0: (empty)
   1: MD_BLOCK_LIST@0..44
-    0: MD_PARAGRAPH@0..41
-      0: MD_INLINE_ITEM_LIST@0..41
+    0: MD_PARAGRAPH@0..43
+      0: MD_INLINE_ITEM_LIST@0..43
         0: MD_TEXTUAL@0..40
           0: MD_TEXTUAL_LITERAL@0..40 "Paragraph followed by empty plus bullet." [] []
         1: MD_TEXTUAL@40..41
           0: MD_TEXTUAL_LITERAL@40..41 "\n" [] []
+        2: MD_TEXTUAL@41..42
+          0: MD_TEXTUAL_LITERAL@41..42 "+" [] []
+        3: MD_TEXTUAL@42..43
+          0: MD_TEXTUAL_LITERAL@42..43 "\n" [] []
       1: (empty)
-    1: MD_BULLET_LIST_ITEM@41..42
-      0: MD_BULLET_LIST@41..42
-        0: MD_BULLET@41..42
-          0: PLUS@41..42 "+" [] []
-          1: MD_BLOCK_LIST@42..42
-    2: MD_NEWLINE@42..43
-      0: NEWLINE@42..43 "\n" [] []
-    3: MD_NEWLINE@43..44
+    1: MD_NEWLINE@43..44
       0: NEWLINE@43..44 "\n" [] []
   2: EOF@44..44 "" [] []
 

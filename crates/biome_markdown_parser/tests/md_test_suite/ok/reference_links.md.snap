@@ -39,6 +39,10 @@ Case-insensitive: [case label]
 
 Whitespace normalized: [case   label]
 
+[label\]]: https://escaped.example
+
+Escaped bracket in label: [text][label\]]
+
 ```
 
 
@@ -580,17 +584,84 @@ MdDocument {
             ],
             hard_line: missing (optional),
         },
+        MdNewline {
+            value_token: NEWLINE@678..679 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@679..680 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@680..685 "label" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@685..687 "\\]" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@687..688 "]" [] [],
+            colon_token: COLON@688..689 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@689..690 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@690..713 "https://escaped.example" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@713..714 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@714..715 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@715..741 "Escaped bracket in label: " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@741..742 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@742..746 "text" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@746..747 "]" [] [],
+                    label: MdReferenceLinkLabel {
+                        l_brack_token: L_BRACK@747..748 "[" [] [],
+                        label: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@748..753 "label" [] [],
+                            },
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@753..755 "\\]" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@755..756 "]" [] [],
+                    },
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@756..757 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
     ],
-    eof_token: EOF@678..678 "" [] [],
+    eof_token: EOF@757..757 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: MD_DOCUMENT@0..678
+0: MD_DOCUMENT@0..757
   0: (empty)
-  1: MD_BLOCK_LIST@0..678
+  1: MD_BLOCK_LIST@0..757
     0: MD_LINK_REFERENCE_DEFINITION@0..46
       0: L_BRACK@0..1 "[" [] []
       1: MD_LINK_LABEL@1..8
@@ -944,6 +1015,50 @@ MdDocument {
         2: MD_TEXTUAL@677..678
           0: MD_TEXTUAL_LITERAL@677..678 "\n" [] []
       1: (empty)
-  2: EOF@678..678 "" [] []
+    37: MD_NEWLINE@678..679
+      0: NEWLINE@678..679 "\n" [] []
+    38: MD_LINK_REFERENCE_DEFINITION@679..713
+      0: L_BRACK@679..680 "[" [] []
+      1: MD_LINK_LABEL@680..687
+        0: MD_INLINE_ITEM_LIST@680..687
+          0: MD_TEXTUAL@680..685
+            0: MD_TEXTUAL_LITERAL@680..685 "label" [] []
+          1: MD_TEXTUAL@685..687
+            0: MD_TEXTUAL_LITERAL@685..687 "\\]" [] []
+      2: R_BRACK@687..688 "]" [] []
+      3: COLON@688..689 ":" [] []
+      4: MD_LINK_DESTINATION@689..713
+        0: MD_INLINE_ITEM_LIST@689..713
+          0: MD_TEXTUAL@689..690
+            0: MD_TEXTUAL_LITERAL@689..690 " " [] []
+          1: MD_TEXTUAL@690..713
+            0: MD_TEXTUAL_LITERAL@690..713 "https://escaped.example" [] []
+      5: (empty)
+    39: MD_NEWLINE@713..714
+      0: NEWLINE@713..714 "\n" [] []
+    40: MD_NEWLINE@714..715
+      0: NEWLINE@714..715 "\n" [] []
+    41: MD_PARAGRAPH@715..757
+      0: MD_INLINE_ITEM_LIST@715..757
+        0: MD_TEXTUAL@715..741
+          0: MD_TEXTUAL_LITERAL@715..741 "Escaped bracket in label: " [] []
+        1: MD_REFERENCE_LINK@741..756
+          0: L_BRACK@741..742 "[" [] []
+          1: MD_INLINE_ITEM_LIST@742..746
+            0: MD_TEXTUAL@742..746
+              0: MD_TEXTUAL_LITERAL@742..746 "text" [] []
+          2: R_BRACK@746..747 "]" [] []
+          3: MD_REFERENCE_LINK_LABEL@747..756
+            0: L_BRACK@747..748 "[" [] []
+            1: MD_INLINE_ITEM_LIST@748..755
+              0: MD_TEXTUAL@748..753
+                0: MD_TEXTUAL_LITERAL@748..753 "label" [] []
+              1: MD_TEXTUAL@753..755
+                0: MD_TEXTUAL_LITERAL@753..755 "\\]" [] []
+            2: R_BRACK@755..756 "]" [] []
+        2: MD_TEXTUAL@756..757
+          0: MD_TEXTUAL_LITERAL@756..757 "\n" [] []
+      1: (empty)
+  2: EOF@757..757 "" [] []
 
 ```
