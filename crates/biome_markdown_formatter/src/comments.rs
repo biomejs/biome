@@ -1,6 +1,6 @@
 use biome_formatter::{
     FormatResult, FormatRule,
-    comments::{CommentKind, CommentStyle, SourceComment},
+    comments::{CommentKind, CommentPlacement, CommentStyle, DecoratedComment, SourceComment},
     prelude::Formatter,
 };
 use biome_markdown_syntax::MarkdownLanguage;
@@ -24,9 +24,9 @@ impl CommentStyle for MarkdownCommentStyle {
 
     fn place_comment(
         &self,
-        _: biome_formatter::comments::DecoratedComment<Self::Language>,
-    ) -> biome_formatter::comments::CommentPlacement<Self::Language> {
-        todo!()
+        comment: DecoratedComment<Self::Language>,
+    ) -> CommentPlacement<Self::Language> {
+        CommentPlacement::Default(comment)
     }
 }
 
@@ -41,6 +41,6 @@ impl FormatRule<SourceComment<MarkdownLanguage>> for FormatMarkdownLeadingCommen
         _: &SourceComment<MarkdownLanguage>,
         _: &mut Formatter<Self::Context>,
     ) -> FormatResult<()> {
-        todo!();
+        Ok(())
     }
 }
