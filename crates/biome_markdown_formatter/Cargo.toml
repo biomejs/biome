@@ -16,15 +16,8 @@ biome_markdown_syntax  = { workspace = true }
 biome_rowan            = { workspace = true }
 
 [dev-dependencies]
-biome_formatter_test  = { workspace = true }
 biome_markdown_parser = { workspace = true }
 biome_parser          = { workspace = true }
-biome_service         = { workspace = true }
-countme               = { workspace = true, features = ["enable"] }
-iai                   = "0.1.1"
-quickcheck            = { workspace = true }
-quickcheck_macros     = { workspace = true }
-tests_macros          = { workspace = true }
 
 [lints]
 workspace = true
