@@ -31,7 +31,7 @@ impl Format<MarkdownFormatContext> for FormatMarkdownVerbatimNode<'_> {
                 }
                 SyntaxElement::Node(node) => {
                     // Mark that we've checked suppression comments for this node
-                    // to by pass `assert_checked_all_suppressions`
+                    // to bypass `assert_checked_all_suppressions`
                     // in https://github.com/biomejs/biome/blob/79d2e7b0f08b9f8ee4286ba15f9b4b8b1a5d1f52/crates/biome_formatter/src/comments.rs#L965-L975
                     let comments = f.context().comments();
                     comments.mark_suppression_checked(&node);
