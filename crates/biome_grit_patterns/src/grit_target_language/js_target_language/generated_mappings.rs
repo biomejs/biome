@@ -281,8 +281,9 @@ pub fn kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
             .iter()
             .next(),
         "JsExportNamedSpecifier" => lang::JsExportNamedSpecifier::KIND_SET.iter().next(),
-        "JsExpressionSnipped" => lang::JsExpressionSnipped::KIND_SET.iter().next(),
+        "JsExpressionSnippet" => lang::JsExpressionSnippet::KIND_SET.iter().next(),
         "JsExpressionStatement" => lang::JsExpressionStatement::KIND_SET.iter().next(),
+        "JsExpressionTemplateRoot" => lang::JsExpressionTemplateRoot::KIND_SET.iter().next(),
         "JsExtendsClause" => lang::JsExtendsClause::KIND_SET.iter().next(),
         "JsFinallyClause" => lang::JsFinallyClause::KIND_SET.iter().next(),
         "JsForInStatement" => lang::JsForInStatement::KIND_SET.iter().next(),
