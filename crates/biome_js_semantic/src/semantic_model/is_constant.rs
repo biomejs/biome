@@ -3,7 +3,20 @@ use biome_rowan::AstNode;
 
 pub fn is_constant(expr: &AnyJsExpression) -> bool {
     for node in expr.syntax().descendants() {
-        if matches!(node.kind(), JsSyntaxKind::JS_REFERENCE_IDENTIFIER) {
+        if matches!(
+            node.kind(),
+            JsSyntaxKind::JS_REFERENCE_IDENTIFIER
+                | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION
+                | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
+        ) {
+            return false;
+        }
+        if matches!(node.kind(), JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION)
+            && !node
+                .children_with_tokens()
+                .nth(1)
+                .is_some_and(|child| matches!(child.kind(), JsSyntaxKind::EQ))
+        {
             return false;
         }
     }
@@ -46,5 +59,33 @@ mod tests {
         assert_is_const("const a = 1 + f();", false);
         assert_is_const("const a = `${a}`;", false);
         assert_is_const("const a = b = 1 + f();", false);
+    }
+
+    #[test]
+    pub fn ok_semantic_model_is_constant_with_pre_post_updates() {
+        assert_is_const("const a = b++;", false);
+        assert_is_const("const a = b--;", false);
+        assert_is_const("const a = ++b;", false);
+        assert_is_const("const a = --b;", false);
+    }
+
+    #[test]
+    pub fn ok_semantic_model_is_constant_with_assignments() {
+        assert_is_const("const a = (b = 1);", true);
+        assert_is_const("const a = (b += 1);", false);
+        assert_is_const("const a = (b -= 1);", false);
+        assert_is_const("const a = (b *= 1);", false);
+        assert_is_const("const a = (b /= 1);", false);
+        assert_is_const("const a = (b %= 1);", false);
+        assert_is_const("const a = (b **= 1);", false);
+        assert_is_const("const a = (b &= 1);", false);
+        assert_is_const("const a = (b |= 1);", false);
+        assert_is_const("const a = (b ^= 1);", false);
+        assert_is_const("const a = (b <<= 1);", false);
+        assert_is_const("const a = (b >>= 1);", false);
+        assert_is_const("const a = (b >>>= 1);", false);
+        assert_is_const("const a = (b &&= 1);", false);
+        assert_is_const("const a = (b ||= 1);", false);
+        assert_is_const("const a = (b ??= 1);", false);
     }
 }

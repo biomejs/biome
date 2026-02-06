@@ -190,7 +190,7 @@ impl MarkdownSyntaxKind {
             COMMA => ",",
             COLON => ":",
             NULL_KW => "null",
-            EOF => "EOF",
+            EOF => "",
             _ => return None,
         };
         Some(tok)

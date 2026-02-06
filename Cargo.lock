@@ -146,6 +146,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_analyze_macros"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "biome_string_case",
+ "camino",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
 name = "biome_aria"
 version = "0.5.7"
 dependencies = [
@@ -195,6 +208,7 @@ dependencies = [
  "biome_js_formatter",
  "biome_js_syntax",
  "biome_json_analyze",
+ "biome_json_factory",
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
@@ -314,6 +328,7 @@ name = "biome_css_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_console",
  "biome_css_factory",
  "biome_css_parser",
@@ -331,6 +346,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "codspeed-criterion-compat",
+ "filetime",
  "insta",
  "mimalloc",
  "regex",
@@ -590,6 +606,7 @@ name = "biome_graphql_analyze"
 version = "0.0.1"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -603,6 +620,7 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "filetime",
  "insta",
  "jiff",
  "rustc-hash 2.1.1",
@@ -791,6 +809,7 @@ name = "biome_html_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_aria_metadata",
  "biome_console",
  "biome_deserialize",
@@ -806,6 +825,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "codspeed-criterion-compat",
+ "filetime",
  "insta",
  "mimalloc",
  "phf 0.13.1",
@@ -894,6 +914,7 @@ name = "biome_js_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_aria",
  "biome_aria_metadata",
  "biome_console",
@@ -925,6 +946,7 @@ dependencies = [
  "camino",
  "codspeed-criterion-compat",
  "enumflags2",
+ "filetime",
  "globset",
  "insta",
  "mimalloc",
@@ -1122,6 +1144,7 @@ name = "biome_json_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_analyze_macros",
  "biome_configuration",
  "biome_console",
  "biome_diagnostics",
@@ -1135,6 +1158,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "codspeed-criterion-compat",
+ "filetime",
  "insta",
  "mimalloc",
  "rustc-hash 2.1.1",
@@ -1297,10 +1321,12 @@ dependencies = [
  "biome_markdown_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_string_case",
  "biome_test_utils",
  "biome_unicode_table",
  "htmlize",
  "insta",
+ "percent-encoding",
  "quickcheck",
  "quickcheck_macros",
  "serde",
@@ -1628,6 +1654,7 @@ name = "biome_string_case"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
+ "caseless",
 ]
 
 [[package]]
@@ -2027,9 +2054,9 @@ dependencies = [
 
 [[package]]
 name = "bstr"
-version = "1.8.0"
+version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "542f33a8835a0884b006a0c3df3dadd99c0c3f296ed26c2fdc8028e01ad6230c"
+checksum = "63044e1ae8e69f3b5a92c736ca6269b8d12fa7efe39bf34ddb06d102cf0e2cab"
 dependencies = [
  "memchr",
  "regex-automata",
@@ -2088,6 +2115,15 @@ name = "case"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd6c0e7b807d60291f42f33f58480c0bfafe28ed08286446f45e463728cf9c1c"
+
+[[package]]
+name = "caseless"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b6fd507454086c8edfd769ca6ada439193cdb209c7681712ef6275cccbfe5d8"
+dependencies = [
+ "unicode-normalization",
+]
 
 [[package]]
 name = "cast"
@@ -2784,6 +2820,17 @@ name = "fastrand"
 version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
+
+[[package]]
+name = "filetime"
+version = "0.2.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f98844151eee8917efc50bd9e8318cb963ae8b297431495d3f758616ea5c57db"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "libredox",
+]
 
 [[package]]
 name = "fixedbitset"
@@ -3695,6 +3742,7 @@ checksum = "c0ff37bd590ca25063e35af745c343cb7a0271906fb7b37e4813e8f79f00268d"
 dependencies = [
  "bitflags 2.9.3",
  "libc",
+ "redox_syscall",
 ]
 
 [[package]]
@@ -5307,6 +5355,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "tinyvec"
+version = "1.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bfa5fdc3bce6191a1dbc8c02d5c8bffcf557bafa17c124c5264a458f1b0613fa"
+dependencies = [
+ "tinyvec_macros",
+]
+
+[[package]]
+name = "tinyvec_macros"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
+
+[[package]]
 name = "tokio"
 version = "1.49.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5584,6 +5647,15 @@ name = "unicode-ident"
 version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5464a87b239f13a63a501f2701565754bae92d243d4bb7eb12f6d57d2269bf4"
+
+[[package]]
+name = "unicode-normalization"
+version = "0.1.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5fd4f6878c9cb28d874b009da9e8d183b5abc80117c40bbd187a1fde336be6e8"
+dependencies = [
+ "tinyvec",
+]
 
 [[package]]
 name = "unicode-segmentation"

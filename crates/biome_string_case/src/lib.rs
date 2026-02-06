@@ -4,6 +4,8 @@
 
 use std::{borrow::Cow, cmp::Ordering, ffi::OsStr};
 
+use caseless::Caseless;
+
 #[cfg(feature = "biome_rowan")]
 pub mod comparable_token;
 
@@ -664,6 +666,8 @@ pub trait StrOnlyExtension: ToOwned {
     /// is that this functions returns ```Cow``` and does not allocate
     /// if the string is already in lowercase.
     fn to_lowercase_cow(&self) -> Cow<'_, Self>;
+    /// Returns Unicode case-folded text as a Cow, allocating only when needed.
+    fn to_casefold_cow(&self) -> Cow<'_, Self>;
 }
 
 impl StrLikeExtension for str {
@@ -692,6 +696,26 @@ impl StrOnlyExtension for str {
         if has_uppercase {
             #[expect(clippy::disallowed_methods)]
             Cow::Owned(self.to_lowercase())
+        } else {
+            Cow::Borrowed(self)
+        }
+    }
+
+    fn to_casefold_cow(&self) -> Cow<'_, Self> {
+        // Fast path: check if case folding changes anything without allocating
+        let mut original = self.chars();
+        let mut folded = self.chars().default_case_fold();
+
+        let differs = loop {
+            match (original.next(), folded.next()) {
+                (None, None) => break false,
+                (Some(o), Some(f)) if o == f => {}
+                _ => break true,
+            }
+        };
+
+        if differs {
+            Cow::Owned(caseless::default_case_fold_str(self))
         } else {
             Cow::Borrowed(self)
         }
@@ -1181,6 +1205,13 @@ mod tests {
         assert_eq!("te😀st", "te😀St".to_lowercase_cow());
 
         assert!(matches!("tešt".to_lowercase_cow(), Cow::Borrowed(_)));
+    }
+
+    #[test]
+    fn to_casefold_cow() {
+        assert_eq!("ss", "ẞ".to_casefold_cow());
+        assert_eq!("ss", "ß".to_casefold_cow());
+        assert!(matches!("test".to_casefold_cow(), Cow::Borrowed(_)));
     }
 
     #[test]

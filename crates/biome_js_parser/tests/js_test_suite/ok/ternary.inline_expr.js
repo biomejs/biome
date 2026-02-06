@@ -1,0 +1,1 @@
+isActive ? 'active' : 'inactive'

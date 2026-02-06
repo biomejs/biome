@@ -59,8 +59,11 @@ pub enum VueDeclarationCollectionFilter {
     Method = 1 << 5,
     /// Computed properties in a Vue component.
     Computed = 1 << 6,
+    /// Watchers in a Vue component.
+    Watcher = 1 << 7,
 }
 
+#[derive(Debug)]
 pub struct VueComponent<'a> {
     kind: AnyVueComponent,
     path: &'a Utf8Path,
@@ -106,6 +109,7 @@ impl<'a> VueComponent<'a> {
 
 /// An abstraction over multiple ways to define a vue component.
 /// Provides a list of declarations for a component.
+#[derive(Debug)]
 pub enum AnyVueComponent {
     /// Options API style Vue component.
     /// ```html
@@ -153,6 +157,22 @@ impl AnyVueComponent {
                 if !source.as_embedding_kind().is_vue() {
                     return None;
                 }
+                if let Some(call_expression) = default_expression_clause
+                    .expression()
+                    .ok()?
+                    .as_js_call_expression()
+                {
+                    // export default defineComponent({ ... });
+                    let callee = call_expression
+                        .callee()
+                        .ok()
+                        .and_then(|callee| callee.inner_expression())?;
+
+                    if is_vue_api_reference(&callee, model, "defineComponent") {
+                        // ignore defineComponent calls here, they get flagged separately
+                        return None;
+                    }
+                }
                 Some(Self::OptionsApi(VueOptionsApiComponent {
                     default_expression_clause: default_expression_clause.clone(),
                 }))
@@ -182,6 +202,7 @@ impl AnyVueComponent {
 /// ```html
 /// <script> export default { props: [ ... ], data: { ... }, ... }; </script>
 /// ```
+#[derive(Debug)]
 pub struct VueOptionsApiComponent {
     default_expression_clause: JsExportDefaultExpressionClause,
 }
@@ -190,6 +211,7 @@ pub struct VueOptionsApiComponent {
 /// ```js
 /// createApp({ props: [ ... ], ... });
 /// ```
+#[derive(Debug)]
 pub struct VueCreateApp {
     call_expression: JsCallExpression,
 }
@@ -199,6 +221,7 @@ pub struct VueCreateApp {
 /// defineComponent((...) => { ... }, { props: [ ... ], ... });
 /// defineComponent({ props: [ ... ], ... });
 /// ```
+#[derive(Debug)]
 pub struct VueDefineComponent {
     call_expression: JsCallExpression,
 }
@@ -207,6 +230,7 @@ pub struct VueDefineComponent {
 /// ```html
 /// <script setup> defineProps({ ... }); const someData = { ... }; </script>
 /// ```
+#[derive(Debug)]
 pub struct VueSetupComponent {
     model: SemanticModel,
     js_module: JsModule,
@@ -557,6 +581,15 @@ impl<T: VueOptionsApiBasedComponent> VueComponentDeclarations for T {
                             .map(VueDeclaration::Setup),
                     );
                 }
+                "watch" => {
+                    if !filter.contains(VueDeclarationCollectionFilter::Watcher) {
+                        continue;
+                    }
+                    result.extend(
+                        iter_declaration_group_properties(group_object_member)
+                            .map(VueDeclaration::Watcher),
+                    );
+                }
                 _ => {}
             }
         }
@@ -601,6 +634,18 @@ pub enum VueDeclaration {
     Method(AnyVueMethod),
     /// Computed properties in a Vue component.
     Computed(AnyVueMethod),
+    /// Watchers in a Vue component.
+    Watcher(JsPropertyObjectMember),
+}
+
+impl VueDeclaration {
+    pub fn as_watcher(&self) -> Option<&JsPropertyObjectMember> {
+        if let Self::Watcher(watcher) = self {
+            Some(watcher)
+        } else {
+            None
+        }
+    }
 }
 
 pub trait VueDeclarationName {
@@ -622,6 +667,7 @@ impl VueDeclarationName for VueDeclaration {
             Self::Method(method_or_property) | Self::Computed(method_or_property) => {
                 method_or_property.declaration_name()
             }
+            Self::Watcher(object_property) => object_property.declaration_name(),
         }
     }
 
@@ -636,6 +682,7 @@ impl VueDeclarationName for VueDeclaration {
             Self::Method(method_or_property) | Self::Computed(method_or_property) => {
                 method_or_property.declaration_name_range()
             }
+            Self::Watcher(object_property) => object_property.declaration_name_range(),
         }
     }
 }

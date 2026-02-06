@@ -322,6 +322,22 @@ impl JsFileSource {
         )
     }
 
+    /// Returns true if this is a template expression that should be parsed as an expression
+    /// rather than as a module/script. Template expressions in frameworks like Vue ({{ }}),
+    /// Svelte ({ }), and Astro ({ }) should parse `{ duration }` as an object literal,
+    /// not as a block statement.
+    pub const fn is_template_expression(&self) -> bool {
+        matches!(
+            self.embedding_kind,
+            EmbeddingKind::Svelte { is_source: false }
+                | EmbeddingKind::Vue {
+                    is_source: false,
+                    ..
+                }
+                | EmbeddingKind::Astro { frontmatter: false }
+        )
+    }
+
     pub const fn as_embedding_kind(&self) -> &EmbeddingKind {
         &self.embedding_kind
     }

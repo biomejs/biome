@@ -20,6 +20,8 @@ use biome_unicode_table::lookup_byte;
 /// - `FencedCodeBlock`: Inside fenced code block, no markdown parsing
 /// - `HtmlBlock`: Inside HTML block, minimal markdown parsing
 /// - `LinkDefinition`: Inside link reference definition, whitespace separates tokens
+/// - `CodeSpan`: Inside inline code span, backslashes are literal (no escapes)
+/// - `EmphasisInline`: Emit single STAR/UNDERSCORE tokens for partial delimiter consumption
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum MarkdownLexContext {
     /// Normal markdown parsing with full inline element detection.
@@ -39,6 +41,16 @@ pub enum MarkdownLexContext {
     /// In this context, whitespace is significant and separates destination from title.
     /// Text tokens stop at whitespace to allow proper parsing.
     LinkDefinition,
+    /// Inside an inline code span.
+    /// Per CommonMark §6.1, backslash escapes are not processed inside code spans.
+    /// Backslash is treated as a literal character, not an escape.
+    CodeSpan,
+    /// Inside emphasis delimiter processing.
+    /// In this context, `*` and `_` are always emitted as single-character tokens
+    /// (STAR, UNDERSCORE) rather than double tokens (DOUBLE_STAR, DOUBLE_UNDERSCORE).
+    /// This allows partial consumption of delimiter runs when the match algorithm
+    /// determines only 1 char should be used from a 2-char run.
+    EmphasisInline,
 }
 
 impl LexContext for MarkdownLexContext {
@@ -57,6 +69,10 @@ pub enum MarkdownReLexContext {
     Regular,
     /// Re-lex for link definition context where whitespace is significant.
     LinkDefinition,
+    /// Re-lex for emphasis inline context where `*` and `_` emit single tokens.
+    /// Used when the emphasis matching algorithm needs to partially consume
+    /// a DOUBLE_STAR or DOUBLE_UNDERSCORE token.
+    EmphasisInline,
 }
 
 /// An extremely fast, lookup table based, lossless Markdown lexer
@@ -135,6 +151,7 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
         // This ensures the *next* token (after NEWLINE) has PRECEDING_LINE_BREAK set.
         if !kind.is_trivia()
             && kind != NEWLINE
+            && kind != MD_HARD_LINE_LITERAL
             && !(kind == MD_TEXTUAL_LITERAL
                 && self.after_newline
                 && self.current_text_is_whitespace())
@@ -230,9 +247,14 @@ impl<'src> MarkdownLexer<'src> {
             // - In middle of line: whitespace is just text content, include in textual token
             // - Exception: 2+ spaces before newline is a hard line break
             // - In LinkDefinition context: whitespace is always significant (separates destination from title)
+            // - In CodeSpan context: whitespace is literal content, no hard-line-break detection
             WHS => {
                 if current == b'\n' || current == b'\r' {
                     self.consume_newline()
+                } else if matches!(context, MarkdownLexContext::CodeSpan) {
+                    // In code span context, whitespace is literal content.
+                    // No hard-line-break detection - the renderer normalizes line endings to spaces.
+                    self.consume_textual(context)
                 } else if matches!(context, MarkdownLexContext::LinkDefinition) {
                     // In link definition context, whitespace separates tokens.
                     // We consume it as textual literal so it's not treated as trivia by the parser.
@@ -267,7 +289,15 @@ impl<'src> MarkdownLexer<'src> {
             PNC => self.consume_byte(R_PAREN),
             COL => self.consume_byte(COLON),
             AMP => self.consume_entity_or_textual(context),
-            BSL => self.consume_escape(),
+            BSL => {
+                // Per CommonMark §6.1, backslash escapes are NOT processed inside code spans.
+                // Backslash is literal, so `\`` produces a literal backslash followed by backtick.
+                if matches!(context, MarkdownLexContext::CodeSpan) {
+                    self.consume_textual(context)
+                } else {
+                    self.consume_escape()
+                }
+            }
             // = at line start could be setext heading underline
             EQL if self.after_newline => self.consume_setext_underline_or_textual(),
             _ => {
@@ -677,8 +707,8 @@ impl<'src> MarkdownLexer<'src> {
     ///
     /// For `-` at line start:
     /// - 1-2 dashes followed by newline: setext underline (H2)
-    /// - 3+ dashes followed by newline: thematic break (not setext, since the parser
-    ///   will convert thematic breaks to setext headers when preceded by paragraph)
+    /// - 3+ dashes followed by newline: thematic break (not setext; the parser may
+    ///   convert dash-only thematic breaks to setext when preceded by a paragraph)
     fn consume_thematic_break_or_emphasis(
         &mut self,
         dispatched: Dispatch,
@@ -705,7 +735,7 @@ impl<'src> MarkdownLexer<'src> {
 
         // For `-` at line start with 1-2 dashes, emit setext underline.
         // 3+ dashes could be thematic break, so let that logic handle it.
-        // The parser will convert thematic breaks to setext when preceded by paragraph.
+        // The parser may convert dash-only thematic breaks to setext when preceded by paragraph.
         if start_char == b'-' && self.after_newline {
             let mut dash_count = 0;
             // Consume only `-` characters (no spaces between)
@@ -752,6 +782,19 @@ impl<'src> MarkdownLexer<'src> {
 
         // Not a thematic break - restore position and consume as emphasis marker
         self.position = start_position;
+
+        // In EmphasisInline context, always emit single tokens for * and _.
+        // This allows partial consumption of delimiter runs when the match algorithm
+        // determines only 1 char should be used from a 2-char run.
+        if matches!(context, MarkdownLexContext::EmphasisInline) {
+            self.advance(1);
+            return match start_char {
+                b'*' => STAR,
+                b'_' => UNDERSCORE,
+                b'-' => MINUS,
+                _ => unreachable!(),
+            };
+        }
 
         // Check for double emphasis markers (**, __)
         // Note: -- is not valid markdown emphasis, so we don't check for it
@@ -834,21 +877,18 @@ impl<'src> MarkdownLexer<'src> {
         let start_position = self.position;
         let mut eq_count = 0;
 
-        // Consume all `=` and spaces
-        loop {
-            match self.current_byte() {
-                Some(b'=') => {
-                    self.advance(1);
-                    eq_count += 1;
-                }
-                Some(b' ') => {
-                    self.advance(1);
-                }
-                _ => break,
-            }
+        // Consume only `=` characters — no spaces between (CommonMark §4.3)
+        while let Some(b'=') = self.current_byte() {
+            self.advance(1);
+            eq_count += 1;
         }
 
-        // Must have at least one `=` and be followed by newline or EOF
+        // Allow optional trailing whitespace only
+        while matches!(self.current_byte(), Some(b' ' | b'\t')) {
+            self.advance(1);
+        }
+
+        // Must have at least one `=` and nothing else before newline or EOF
         if eq_count >= 1 && matches!(self.current_byte(), Some(b'\n' | b'\r') | None) {
             return MD_SETEXT_UNDERLINE_LITERAL;
         }
@@ -1200,6 +1240,7 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
         let lex_context = match context {
             MarkdownReLexContext::Regular => MarkdownLexContext::Regular,
             MarkdownReLexContext::LinkDefinition => MarkdownLexContext::LinkDefinition,
+            MarkdownReLexContext::EmphasisInline => MarkdownLexContext::EmphasisInline,
         };
 
         let re_lexed_kind = match self.current_byte() {

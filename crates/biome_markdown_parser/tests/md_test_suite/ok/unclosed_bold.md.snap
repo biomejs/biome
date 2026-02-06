@@ -22,7 +22,10 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@0..9 "This has " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@9..11 "**" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@9..10 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@10..11 "*" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@11..24 "unclosed bold" [] [],
@@ -48,11 +51,13 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@0..25
         0: MD_TEXTUAL@0..9
           0: MD_TEXTUAL_LITERAL@0..9 "This has " [] []
-        1: MD_TEXTUAL@9..11
-          0: MD_TEXTUAL_LITERAL@9..11 "**" [] []
-        2: MD_TEXTUAL@11..24
+        1: MD_TEXTUAL@9..10
+          0: MD_TEXTUAL_LITERAL@9..10 "*" [] []
+        2: MD_TEXTUAL@10..11
+          0: MD_TEXTUAL_LITERAL@10..11 "*" [] []
+        3: MD_TEXTUAL@11..24
           0: MD_TEXTUAL_LITERAL@11..24 "unclosed bold" [] []
-        3: MD_TEXTUAL@24..25
+        4: MD_TEXTUAL@24..25
           0: MD_TEXTUAL_LITERAL@24..25 "\n" [] []
       1: (empty)
   2: EOF@25..25 "" [] []

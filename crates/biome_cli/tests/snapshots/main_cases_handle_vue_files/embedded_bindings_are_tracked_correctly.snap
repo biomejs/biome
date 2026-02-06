@@ -23,6 +23,9 @@ let hello = "Hello World";
 
 <script>
 let greeting = "Hello World";
+function reasonText() {
+	return "foo"
+}
 </script>
 
 
@@ -31,6 +34,7 @@ let greeting = "Hello World";
     <span>{notDefined}</span>
     <span>{greeting}</span>
     <Component />
+    <span class="dc-reason">{{ reasonText() }}</span>
 </template>
 
 ```

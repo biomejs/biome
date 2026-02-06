@@ -248,10 +248,8 @@ impl MemberChain {
     /// It tells if the groups should break on multiple lines
     fn groups_should_break(&self, f: &mut JsFormatter) -> FormatResult<bool> {
         let comments = f.comments();
-        let node_has_comments =
-            self.head.has_comments(comments) || self.tail.has_comments(comments);
 
-        if node_has_comments {
+        if self.has_comments(comments) {
             return Ok(true);
         }
 

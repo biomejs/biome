@@ -315,7 +315,6 @@ pub(crate) trait CommandRunner {
 
         Self::Finalizer::finalize(FinalizePayload {
             cli_options,
-            project_key,
             execution: execution.as_ref(),
             fs,
             console,
