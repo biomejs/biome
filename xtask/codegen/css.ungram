@@ -1359,6 +1359,7 @@ AnyCssPageAtRuleItem =
 	| CssEmptyDeclaration
 	| CssAtRule
 	| CssMarginAtRule
+	| CssBogus
 
 // @page :left { @left-middle {} background: red; }
 // 						   ^^^^^^^^^^^^^^^

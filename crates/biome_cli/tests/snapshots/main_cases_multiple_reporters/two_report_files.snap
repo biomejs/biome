@@ -1,0 +1,85 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.json`
+
+```json
+{
+  "source": {
+    "name": "Biome",
+    "url": "https://biomejs.dev"
+  },
+  "diagnostics": [
+    {
+      "code": {
+        "url": "https://biomejs.dev/linter/rules/no-debugger",
+        "value": "lint/suspicious/noDebugger"
+      },
+      "location": {
+        "path": "main.ts",
+        "range": {
+          "end": {
+            "column": 9,
+            "line": 1
+          },
+          "start": {
+            "column": 1,
+            "line": 1
+          }
+        }
+      },
+      "message": "This is an unexpected use of the debugger statement."
+    },
+    {
+      "code": {
+        "value": "format"
+      },
+      "message": "Formatter would have printed the following content:"
+    }
+  ]
+}
+```
+
+## `file.txt`
+
+```txt
+reporter/format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ℹ The following files need to be formatted:
+  
+  - main.ts
+  
+reporter/violations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ℹ Some lint rules or assist actions reported some violations.
+  
+  ℹ The following files have violations:
+  
+  - main.ts (1 error)
+  
+  ℹ The following lint rules have violations:
+  
+  Rule Name                                Diagnostics
+  
+  lint/suspicious/noDebugger               1 (1 error)
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```
+
+## `main.ts`
+
+```ts
+debugger
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```

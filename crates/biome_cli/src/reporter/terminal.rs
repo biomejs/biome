@@ -1,12 +1,12 @@
 use crate::reporter::{
     DiagnosticsPayload, EvaluatedPathsDiagnostic, FixedPathsDiagnostic, Reporter, ReporterVisitor,
-    TraversalSummary,
+    ReporterWriter, TraversalSummary,
 };
 use crate::runner::execution::Execution;
 use biome_analyze::profiling;
 use biome_analyze::profiling::DisplayProfiles;
 use biome_console::fmt::Formatter;
-use biome_console::{Console, ConsoleExt, fmt, markup};
+use biome_console::{fmt, markup};
 use biome_diagnostics::PrintDiagnostic;
 use biome_diagnostics::advice::ListAdvice;
 use biome_fs::BiomePath;
@@ -17,7 +17,7 @@ use std::time::Duration;
 
 pub(crate) struct ConsoleReporter<'a> {
     pub(crate) summary: TraversalSummary,
-    pub(crate) diagnostics_payload: DiagnosticsPayload,
+    pub(crate) diagnostics_payload: &'a DiagnosticsPayload,
     pub(crate) execution: &'a dyn Execution,
     pub(crate) evaluated_paths: BTreeSet<BiomePath>,
     pub(crate) working_directory: Option<Utf8PathBuf>,
@@ -25,51 +25,60 @@ pub(crate) struct ConsoleReporter<'a> {
 }
 
 impl<'a> Reporter for ConsoleReporter<'a> {
-    fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
+    fn write(
+        self,
+        writer: &mut dyn ReporterWriter,
+        visitor: &mut dyn ReporterVisitor,
+    ) -> io::Result<()> {
         visitor.report_diagnostics(
+            writer,
             self.execution,
             self.diagnostics_payload,
             self.verbose,
             self.working_directory.as_deref(),
         )?;
         if self.verbose {
-            visitor
-                .report_handled_paths(self.evaluated_paths, self.working_directory.as_deref())?;
+            visitor.report_handled_paths(
+                writer,
+                self.evaluated_paths,
+                self.working_directory.as_deref(),
+            )?;
         }
-        visitor.report_summary(self.execution, self.summary, self.verbose)?;
+        visitor.report_summary(writer, self.execution, self.summary, self.verbose)?;
         Ok(())
     }
 }
 
-pub(crate) struct ConsoleReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
+pub(crate) struct ConsoleReporterVisitor;
 
-impl ReporterVisitor for ConsoleReporterVisitor<'_> {
+impl ReporterVisitor for ConsoleReporterVisitor {
     fn report_summary(
         &mut self,
+        writer: &mut dyn ReporterWriter,
         execution: &dyn Execution,
         summary: TraversalSummary,
         verbose: bool,
     ) -> io::Result<()> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
-            self.0.log(markup! {
+            writer.log(markup! {
                 <Warn>"Skipped "{summary.suggested_fixes_skipped}" suggested fixes.\n"</Warn>
                 <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --write --unsafe\n"</Emphasis></Info>
             })
         }
 
         if !execution.is_ci() && summary.diagnostics_not_printed > 0 {
-            self.0.log(markup! {
+            writer.log(markup! {
                 <Warn>"The number of diagnostics exceeds the limit allowed. Use "<Emphasis>"--max-diagnostics"</Emphasis>" to increase it.\n"</Warn>
                 <Info>"Diagnostics not shown: "</Info><Emphasis>{summary.diagnostics_not_printed}</Emphasis><Info>"."</Info>
             })
         }
 
-        self.0.log(markup! {
+        writer.log(markup! {
             {ConsoleTraversalSummary(execution, &summary, verbose)}
         });
         let profiles = profiling::drain_sorted_by_total(false);
         if !profiles.is_empty() {
-            self.0.log(markup! {{ DisplayProfiles(profiles, None) }});
+            writer.log(markup! {{ DisplayProfiles(profiles, None) }});
         }
 
         Ok(())
@@ -77,6 +86,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
 
     fn report_handled_paths(
         &mut self,
+        writer: &mut dyn ReporterWriter,
         evaluated_paths: BTreeSet<BiomePath>,
         working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
@@ -117,10 +127,10 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
             },
         };
 
-        self.0.log(markup! {
+        writer.log(markup! {
             {PrintDiagnostic::verbose(&evaluated_paths_diagnostic)}
         });
-        self.0.log(markup! {
+        writer.log(markup! {
             {PrintDiagnostic::verbose(&fixed_paths_diagnostic)}
         });
 
@@ -129,24 +139,23 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
 
     fn report_diagnostics(
         &mut self,
+        writer: &mut dyn ReporterWriter,
         execution: &dyn Execution,
-        diagnostics_payload: DiagnosticsPayload,
+        diagnostics_payload: &DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
         for diagnostic in &diagnostics_payload.diagnostics {
             if execution.is_search() {
-                self.0.log(markup! {{PrintDiagnostic::search(diagnostic)}});
+                writer.log(markup! {{PrintDiagnostic::search(diagnostic)}});
                 continue;
             }
 
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() && verbose {
-                    self.0
-                        .error(markup! {{PrintDiagnostic::verbose(diagnostic)}});
+                    writer.error(markup! {{PrintDiagnostic::verbose(diagnostic)}});
                 } else {
-                    self.0
-                        .error(markup! {{PrintDiagnostic::simple(diagnostic)}});
+                    writer.error(markup! {{PrintDiagnostic::simple(diagnostic)}});
                 }
             }
         }

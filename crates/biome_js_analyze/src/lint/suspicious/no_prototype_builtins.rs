@@ -60,6 +60,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::Eslint("no-prototype-builtins").same(),
             RuleSource::Eslint("prefer-object-has-own").same(),
+            RuleSource::EslintE18e("prefer-object-has-own").same(),
         ],
         recommended: true,
         severity: Severity::Warning,

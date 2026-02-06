@@ -1,0 +1,61 @@
+@page {
+	.unexpected-qualified-rule {
+		color: green;
+	}
+	/* Should recover and parse correctly */
+	background: red;
+}
+
+@page {
+	div {
+		color: green;
+	}
+}
+
+@page {
+	div:hover {
+		color: green;
+	}
+}
+
+@page {
+	div {
+		color: green;
+	}
+
+	/* Should recover and parse correctly */
+	background: red;
+}
+
+@page {
+	.foo {
+		.bar {
+			color: red;
+		}
+	}
+}
+
+@page {
+	& {
+		color: red;
+	}
+}
+
+@page {
+	.foo {}
+	background: red;
+}
+
+/* Issue #8428 example */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 2.5cm 3cm 1cm 3cm;
+
+    .page-number:before {
+      content: 'Page ' counter(page) ' of ' counter(pages);
+    }
+  }
+}
+
+

@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-setup.vue
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import { ref, watch } from 'vue';
+
+const foo = ref(0);
+
+watch(foo, (new, old) => {
+	console.log('new: %s, old: %s', new, old);
+});
+
+```
+
+_Note: The parser emitted 3 diagnostics which are not shown here._

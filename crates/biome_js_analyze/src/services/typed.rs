@@ -70,9 +70,7 @@ impl FromServices for TypedService {
                 .iter()
                 .any(|d| d == &RuleDomain::Types);
             if !has_project_domain {
-                panic!(
-                    "The rule {rule_key} uses TypedService, but it is not in the TypeAware domain."
-                );
+                panic!("The rule {rule_key} uses TypedService, but it is not in the Types domain.");
             }
         }
 

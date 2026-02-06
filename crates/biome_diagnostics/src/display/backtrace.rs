@@ -20,7 +20,7 @@ impl Default for Backtrace {
     // backtrace is printed
     #[inline(never)]
     fn default() -> Self {
-        Self::capture(Self::default as usize)
+        Self::capture(Self::default as *const () as usize)
     }
 }
 

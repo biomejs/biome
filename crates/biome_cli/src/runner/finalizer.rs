@@ -28,7 +28,6 @@ pub trait Finalizer {
 }
 
 pub(crate) struct FinalizePayload<'a, I> {
-    pub(crate) project_key: ProjectKey,
     pub(crate) fs: &'a dyn FileSystem,
     pub(crate) workspace: &'a dyn Workspace,
     pub(crate) scan_duration: Option<Duration>,
