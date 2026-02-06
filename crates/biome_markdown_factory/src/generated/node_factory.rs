@@ -20,11 +20,16 @@ pub fn md_autolink(
         ],
     ))
 }
-pub fn md_bullet(bullet_token: SyntaxToken, content: MdBlockList) -> MdBullet {
+pub fn md_bullet(
+    bullet_token: SyntaxToken,
+    space_token: SyntaxToken,
+    content: MdInlineItemList,
+) -> MdBullet {
     MdBullet::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_BULLET,
         [
             Some(SyntaxElement::Token(bullet_token)),
+            Some(SyntaxElement::Token(space_token)),
             Some(SyntaxElement::Node(content.into_syntax())),
         ],
     ))

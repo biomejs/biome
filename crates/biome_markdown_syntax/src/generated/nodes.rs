@@ -82,14 +82,18 @@ impl MdBullet {
     pub fn as_fields(&self) -> MdBulletFields {
         MdBulletFields {
             bullet: self.bullet(),
+            space_token: self.space_token(),
             content: self.content(),
         }
     }
     pub fn bullet(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn content(&self) -> MdBlockList {
-        support::list(&self.syntax, 1usize)
+    pub fn space_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn content(&self) -> MdInlineItemList {
+        support::list(&self.syntax, 2usize)
     }
 }
 impl Serialize for MdBullet {
@@ -103,7 +107,8 @@ impl Serialize for MdBullet {
 #[derive(Serialize)]
 pub struct MdBulletFields {
     pub bullet: SyntaxResult<SyntaxToken>,
-    pub content: MdBlockList,
+    pub space_token: SyntaxResult<SyntaxToken>,
+    pub content: MdInlineItemList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdBulletListItem {
@@ -1623,6 +1628,8 @@ pub enum AnyMdLeafBlock {
     MdHeader(MdHeader),
     MdHtmlBlock(MdHtmlBlock),
     MdLinkBlock(MdLinkBlock),
+    MdLinkReferenceDefinition(MdLinkReferenceDefinition),
+    MdNewline(MdNewline),
     MdParagraph(MdParagraph),
     MdSetextHeader(MdSetextHeader),
     MdThematicBreakBlock(MdThematicBreakBlock),
@@ -1652,6 +1659,18 @@ impl AnyMdLeafBlock {
             _ => None,
         }
     }
+    pub fn as_md_link_reference_definition(&self) -> Option<&MdLinkReferenceDefinition> {
+        match &self {
+            Self::MdLinkReferenceDefinition(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_md_newline(&self) -> Option<&MdNewline> {
+        match &self {
+            Self::MdNewline(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_md_paragraph(&self) -> Option<&MdParagraph> {
         match &self {
             Self::MdParagraph(item) => Some(item),
@@ -1669,6 +1688,61 @@ impl AnyMdLeafBlock {
             Self::MdThematicBreakBlock(item) => Some(item),
             _ => None,
         }
+    }
+}
+impl AstNode for MdAutolink {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_AUTOLINK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_AUTOLINK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdAutolink {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdAutolink")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field("value", &self.value())
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdAutolink").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdAutolink> for SyntaxNode {
+    fn from(n: MdAutolink) -> Self {
+        n.syntax
+    }
+}
+impl From<MdAutolink> for SyntaxElement {
+    fn from(n: MdAutolink) -> Self {
+        n.syntax.into()
     }
 }
 impl AstNode for MdBullet {
@@ -1700,6 +1774,10 @@ impl std::fmt::Debug for MdBullet {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdBullet")
                 .field("bullet", &support::DebugSyntaxResult(self.bullet()))
+                .field(
+                    "space_token",
+                    &support::DebugSyntaxResult(self.space_token()),
+                )
                 .field("content", &self.content())
                 .finish()
         } else {
@@ -3484,15 +3562,9 @@ impl From<MdBulletListItem> for AnyMdContainerBlock {
         Self::MdBulletListItem(node)
     }
 }
-<<<<<<< HEAD
-impl From<MdOrderedListItem> for AnyContainerBlock {
+impl From<MdOrderedListItem> for AnyMdContainerBlock {
     fn from(node: MdOrderedListItem) -> Self {
         Self::MdOrderedListItem(node)
-=======
-impl From<MdOrderListItem> for AnyMdContainerBlock {
-    fn from(node: MdOrderListItem) -> Self {
-        Self::MdOrderListItem(node)
->>>>>>> 92b3fa4d80 (Fix markdown grammar)
     }
 }
 impl From<MdQuote> for AnyMdContainerBlock {
@@ -3544,232 +3616,14 @@ impl std::fmt::Debug for AnyMdContainerBlock {
 impl From<AnyMdContainerBlock> for SyntaxNode {
     fn from(n: AnyMdContainerBlock) -> Self {
         match n {
-<<<<<<< HEAD
-            AnyContainerBlock::MdBulletListItem(it) => it.into_syntax(),
-            AnyContainerBlock::MdOrderedListItem(it) => it.into_syntax(),
-            AnyContainerBlock::MdQuote(it) => it.into_syntax(),
-        }
-    }
-}
-impl From<AnyContainerBlock> for SyntaxElement {
-    fn from(n: AnyContainerBlock) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl From<MdHeader> for AnyLeafBlock {
-    fn from(node: MdHeader) -> Self {
-        Self::MdHeader(node)
-    }
-}
-impl From<MdHtmlBlock> for AnyLeafBlock {
-    fn from(node: MdHtmlBlock) -> Self {
-        Self::MdHtmlBlock(node)
-    }
-}
-impl From<MdLinkBlock> for AnyLeafBlock {
-    fn from(node: MdLinkBlock) -> Self {
-        Self::MdLinkBlock(node)
-    }
-}
-impl From<MdLinkReferenceDefinition> for AnyLeafBlock {
-    fn from(node: MdLinkReferenceDefinition) -> Self {
-        Self::MdLinkReferenceDefinition(node)
-    }
-}
-impl From<MdNewline> for AnyLeafBlock {
-    fn from(node: MdNewline) -> Self {
-        Self::MdNewline(node)
-    }
-}
-impl From<MdParagraph> for AnyLeafBlock {
-    fn from(node: MdParagraph) -> Self {
-        Self::MdParagraph(node)
-    }
-}
-impl From<MdSetextHeader> for AnyLeafBlock {
-    fn from(node: MdSetextHeader) -> Self {
-        Self::MdSetextHeader(node)
-    }
-}
-impl From<MdThematicBreakBlock> for AnyLeafBlock {
-    fn from(node: MdThematicBreakBlock) -> Self {
-        Self::MdThematicBreakBlock(node)
-    }
-}
-impl AstNode for AnyLeafBlock {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyCodeBlock::KIND_SET
-        .union(MdHeader::KIND_SET)
-        .union(MdHtmlBlock::KIND_SET)
-        .union(MdLinkBlock::KIND_SET)
-        .union(MdLinkReferenceDefinition::KIND_SET)
-        .union(MdNewline::KIND_SET)
-        .union(MdParagraph::KIND_SET)
-        .union(MdSetextHeader::KIND_SET)
-        .union(MdThematicBreakBlock::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        match kind {
-            MD_HEADER
-            | MD_HTML_BLOCK
-            | MD_LINK_BLOCK
-            | MD_LINK_REFERENCE_DEFINITION
-            | MD_NEWLINE
-            | MD_PARAGRAPH
-            | MD_SETEXT_HEADER
-            | MD_THEMATIC_BREAK_BLOCK => true,
-            k if AnyCodeBlock::can_cast(k) => true,
-            _ => false,
-        }
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            MD_HEADER => Self::MdHeader(MdHeader { syntax }),
-            MD_HTML_BLOCK => Self::MdHtmlBlock(MdHtmlBlock { syntax }),
-            MD_LINK_BLOCK => Self::MdLinkBlock(MdLinkBlock { syntax }),
-            MD_LINK_REFERENCE_DEFINITION => {
-                Self::MdLinkReferenceDefinition(MdLinkReferenceDefinition { syntax })
-            }
-            MD_NEWLINE => Self::MdNewline(MdNewline { syntax }),
-            MD_PARAGRAPH => Self::MdParagraph(MdParagraph { syntax }),
-            MD_SETEXT_HEADER => Self::MdSetextHeader(MdSetextHeader { syntax }),
-            MD_THEMATIC_BREAK_BLOCK => Self::MdThematicBreakBlock(MdThematicBreakBlock { syntax }),
-            _ => {
-                if let Some(any_code_block) = AnyCodeBlock::cast(syntax) {
-                    return Some(Self::AnyCodeBlock(any_code_block));
-                }
-                return None;
-            }
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::MdHeader(it) => it.syntax(),
-            Self::MdHtmlBlock(it) => it.syntax(),
-            Self::MdLinkBlock(it) => it.syntax(),
-            Self::MdLinkReferenceDefinition(it) => it.syntax(),
-            Self::MdNewline(it) => it.syntax(),
-            Self::MdParagraph(it) => it.syntax(),
-            Self::MdSetextHeader(it) => it.syntax(),
-            Self::MdThematicBreakBlock(it) => it.syntax(),
-            Self::AnyCodeBlock(it) => it.syntax(),
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::MdHeader(it) => it.into_syntax(),
-            Self::MdHtmlBlock(it) => it.into_syntax(),
-            Self::MdLinkBlock(it) => it.into_syntax(),
-            Self::MdLinkReferenceDefinition(it) => it.into_syntax(),
-            Self::MdNewline(it) => it.into_syntax(),
-            Self::MdParagraph(it) => it.into_syntax(),
-            Self::MdSetextHeader(it) => it.into_syntax(),
-            Self::MdThematicBreakBlock(it) => it.into_syntax(),
-            Self::AnyCodeBlock(it) => it.into_syntax(),
-        }
-    }
-}
-impl std::fmt::Debug for AnyLeafBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyCodeBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::MdHeader(it) => std::fmt::Debug::fmt(it, f),
-            Self::MdHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::MdLinkBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::MdLinkReferenceDefinition(it) => std::fmt::Debug::fmt(it, f),
-            Self::MdNewline(it) => std::fmt::Debug::fmt(it, f),
-            Self::MdParagraph(it) => std::fmt::Debug::fmt(it, f),
-            Self::MdSetextHeader(it) => std::fmt::Debug::fmt(it, f),
-            Self::MdThematicBreakBlock(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyLeafBlock> for SyntaxNode {
-    fn from(n: AnyLeafBlock) -> Self {
-        match n {
-            AnyLeafBlock::AnyCodeBlock(it) => it.into_syntax(),
-            AnyLeafBlock::MdHeader(it) => it.into_syntax(),
-            AnyLeafBlock::MdHtmlBlock(it) => it.into_syntax(),
-            AnyLeafBlock::MdLinkBlock(it) => it.into_syntax(),
-            AnyLeafBlock::MdLinkReferenceDefinition(it) => it.into_syntax(),
-            AnyLeafBlock::MdNewline(it) => it.into_syntax(),
-            AnyLeafBlock::MdParagraph(it) => it.into_syntax(),
-            AnyLeafBlock::MdSetextHeader(it) => it.into_syntax(),
-            AnyLeafBlock::MdThematicBreakBlock(it) => it.into_syntax(),
-        }
-    }
-}
-impl From<AnyLeafBlock> for SyntaxElement {
-    fn from(n: AnyLeafBlock) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl AstNode for AnyMdBlock {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyContainerBlock::KIND_SET.union(AnyLeafBlock::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        match kind {
-            k if AnyContainerBlock::can_cast(k) => true,
-            k if AnyLeafBlock::can_cast(k) => true,
-            _ => false,
-        }
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let syntax = match AnyContainerBlock::try_cast(syntax) {
-            Ok(any_container_block) => {
-                return Some(Self::AnyContainerBlock(any_container_block));
-            }
-            Err(syntax) => syntax,
-        };
-        if let Some(any_leaf_block) = AnyLeafBlock::cast(syntax) {
-            return Some(Self::AnyLeafBlock(any_leaf_block));
-        }
-        None
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::AnyContainerBlock(it) => it.syntax(),
-            Self::AnyLeafBlock(it) => it.syntax(),
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::AnyContainerBlock(it) => it.into_syntax(),
-            Self::AnyLeafBlock(it) => it.into_syntax(),
-        }
-    }
-}
-impl std::fmt::Debug for AnyMdBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyContainerBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::AnyLeafBlock(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyMdBlock> for SyntaxNode {
-    fn from(n: AnyMdBlock) -> Self {
-        match n {
-            AnyMdBlock::AnyContainerBlock(it) => it.into_syntax(),
-            AnyMdBlock::AnyLeafBlock(it) => it.into_syntax(),
-        }
-    }
-}
-impl From<AnyMdBlock> for SyntaxElement {
-    fn from(n: AnyMdBlock) -> Self {
-=======
             AnyMdContainerBlock::MdBulletListItem(it) => it.into_syntax(),
-            AnyMdContainerBlock::MdOrderListItem(it) => it.into_syntax(),
+            AnyMdContainerBlock::MdOrderedListItem(it) => it.into_syntax(),
             AnyMdContainerBlock::MdQuote(it) => it.into_syntax(),
         }
     }
 }
 impl From<AnyMdContainerBlock> for SyntaxElement {
     fn from(n: AnyMdContainerBlock) -> Self {
->>>>>>> 92b3fa4d80 (Fix markdown grammar)
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -3997,6 +3851,16 @@ impl From<MdLinkBlock> for AnyMdLeafBlock {
         Self::MdLinkBlock(node)
     }
 }
+impl From<MdLinkReferenceDefinition> for AnyMdLeafBlock {
+    fn from(node: MdLinkReferenceDefinition) -> Self {
+        Self::MdLinkReferenceDefinition(node)
+    }
+}
+impl From<MdNewline> for AnyMdLeafBlock {
+    fn from(node: MdNewline) -> Self {
+        Self::MdNewline(node)
+    }
+}
 impl From<MdParagraph> for AnyMdLeafBlock {
     fn from(node: MdParagraph) -> Self {
         Self::MdParagraph(node)
@@ -4018,6 +3882,8 @@ impl AstNode for AnyMdLeafBlock {
         .union(MdHeader::KIND_SET)
         .union(MdHtmlBlock::KIND_SET)
         .union(MdLinkBlock::KIND_SET)
+        .union(MdLinkReferenceDefinition::KIND_SET)
+        .union(MdNewline::KIND_SET)
         .union(MdParagraph::KIND_SET)
         .union(MdSetextHeader::KIND_SET)
         .union(MdThematicBreakBlock::KIND_SET);
@@ -4026,6 +3892,8 @@ impl AstNode for AnyMdLeafBlock {
             MD_HEADER
             | MD_HTML_BLOCK
             | MD_LINK_BLOCK
+            | MD_LINK_REFERENCE_DEFINITION
+            | MD_NEWLINE
             | MD_PARAGRAPH
             | MD_SETEXT_HEADER
             | MD_THEMATIC_BREAK_BLOCK => true,
@@ -4038,6 +3906,10 @@ impl AstNode for AnyMdLeafBlock {
             MD_HEADER => Self::MdHeader(MdHeader { syntax }),
             MD_HTML_BLOCK => Self::MdHtmlBlock(MdHtmlBlock { syntax }),
             MD_LINK_BLOCK => Self::MdLinkBlock(MdLinkBlock { syntax }),
+            MD_LINK_REFERENCE_DEFINITION => {
+                Self::MdLinkReferenceDefinition(MdLinkReferenceDefinition { syntax })
+            }
+            MD_NEWLINE => Self::MdNewline(MdNewline { syntax }),
             MD_PARAGRAPH => Self::MdParagraph(MdParagraph { syntax }),
             MD_SETEXT_HEADER => Self::MdSetextHeader(MdSetextHeader { syntax }),
             MD_THEMATIC_BREAK_BLOCK => Self::MdThematicBreakBlock(MdThematicBreakBlock { syntax }),
@@ -4055,6 +3927,8 @@ impl AstNode for AnyMdLeafBlock {
             Self::MdHeader(it) => it.syntax(),
             Self::MdHtmlBlock(it) => it.syntax(),
             Self::MdLinkBlock(it) => it.syntax(),
+            Self::MdLinkReferenceDefinition(it) => it.syntax(),
+            Self::MdNewline(it) => it.syntax(),
             Self::MdParagraph(it) => it.syntax(),
             Self::MdSetextHeader(it) => it.syntax(),
             Self::MdThematicBreakBlock(it) => it.syntax(),
@@ -4066,6 +3940,8 @@ impl AstNode for AnyMdLeafBlock {
             Self::MdHeader(it) => it.into_syntax(),
             Self::MdHtmlBlock(it) => it.into_syntax(),
             Self::MdLinkBlock(it) => it.into_syntax(),
+            Self::MdLinkReferenceDefinition(it) => it.into_syntax(),
+            Self::MdNewline(it) => it.into_syntax(),
             Self::MdParagraph(it) => it.into_syntax(),
             Self::MdSetextHeader(it) => it.into_syntax(),
             Self::MdThematicBreakBlock(it) => it.into_syntax(),
@@ -4080,6 +3956,8 @@ impl std::fmt::Debug for AnyMdLeafBlock {
             Self::MdHeader(it) => std::fmt::Debug::fmt(it, f),
             Self::MdHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::MdLinkBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdLinkReferenceDefinition(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdNewline(it) => std::fmt::Debug::fmt(it, f),
             Self::MdParagraph(it) => std::fmt::Debug::fmt(it, f),
             Self::MdSetextHeader(it) => std::fmt::Debug::fmt(it, f),
             Self::MdThematicBreakBlock(it) => std::fmt::Debug::fmt(it, f),
@@ -4093,6 +3971,8 @@ impl From<AnyMdLeafBlock> for SyntaxNode {
             AnyMdLeafBlock::MdHeader(it) => it.into_syntax(),
             AnyMdLeafBlock::MdHtmlBlock(it) => it.into_syntax(),
             AnyMdLeafBlock::MdLinkBlock(it) => it.into_syntax(),
+            AnyMdLeafBlock::MdLinkReferenceDefinition(it) => it.into_syntax(),
+            AnyMdLeafBlock::MdNewline(it) => it.into_syntax(),
             AnyMdLeafBlock::MdParagraph(it) => it.into_syntax(),
             AnyMdLeafBlock::MdSetextHeader(it) => it.into_syntax(),
             AnyMdLeafBlock::MdThematicBreakBlock(it) => it.into_syntax(),
@@ -4125,11 +4005,12 @@ impl std::fmt::Display for AnyMdInline {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-<<<<<<< HEAD
-impl std::fmt::Display for MdAutolink {
-=======
 impl std::fmt::Display for AnyMdLeafBlock {
->>>>>>> 92b3fa4d80 (Fix markdown grammar)
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdAutolink {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4766,8 +4647,6 @@ impl IntoIterator for MdInlineItemList {
         self.iter()
     }
 }
-<<<<<<< HEAD
-=======
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct MdOrderList {
     syntax_list: SyntaxList,
@@ -4850,7 +4729,6 @@ impl IntoIterator for MdOrderList {
         self.iter()
     }
 }
->>>>>>> 92b3fa4d80 (Fix markdown grammar)
 #[derive(Clone)]
 pub struct DebugSyntaxElementChildren(pub SyntaxElementChildren);
 impl Debug for DebugSyntaxElementChildren {

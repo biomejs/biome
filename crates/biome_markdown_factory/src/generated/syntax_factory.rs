@@ -50,20 +50,24 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             }
             MD_BULLET => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && matches!(
-                        element.kind(),
-                        T ! [-] | T ! [*] | T ! [+] | MD_ORDERED_LIST_MARKER
-                    )
+                    && matches!(element.kind(), T ! [-] | T ! [*])
                 {
                     slots.mark_present();
                     current_element = elements.next();
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && MdBlockList::can_cast(element.kind())
+                    && element.kind() == MD_TEXTUAL_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && MdInlineItemList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

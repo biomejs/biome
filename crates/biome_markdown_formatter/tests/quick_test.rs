@@ -7,7 +7,7 @@ use biome_rowan::TextSize;
 // without actually formatting the input.
 #[test]
 fn quick_test() {
-    let source = "---";
+    let source = "A simple paragraph";
     let parse = parse_markdown(source);
     let options = MarkdownFormatOptions::default();
 

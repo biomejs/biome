@@ -177,6 +177,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdInlineItemList::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_ORDER_LIST => {
+                    let $pattern = unsafe { $crate::MdOrderList::new_unchecked(node) };
+                    $body
+                }
                 _ => unreachable!(),
             },
         }

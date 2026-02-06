@@ -9,7 +9,7 @@ impl FormatRule<AnyMdContainerBlock> for FormatAnyMdContainerBlock {
     fn fmt(&self, node: &AnyMdContainerBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
         match node {
             AnyMdContainerBlock::MdBulletListItem(node) => node.format().fmt(f),
-            AnyMdContainerBlock::MdOrderListItem(node) => node.format().fmt(f),
+            AnyMdContainerBlock::MdOrderedListItem(node) => node.format().fmt(f),
             AnyMdContainerBlock::MdQuote(node) => node.format().fmt(f),
         }
     }
