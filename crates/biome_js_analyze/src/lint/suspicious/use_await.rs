@@ -5,7 +5,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyFunctionLike, JsAwaitExpression, JsForOfStatement, JsLanguage, TextRange, WalkEvent,
+    AnyFunctionLike, JsAwaitExpression, JsForOfStatement, JsLanguage, JsYieldExpression,
+    TextRange, WalkEvent,
 };
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
 use biome_rule_options::use_await::UseAwaitOptions;
@@ -46,6 +47,11 @@ declare_lint_rule! {
     ///
     /// // Nor does it warn about empty `async` functions
     /// async function noop() { }
+    ///
+    /// // Async generators that use `yield*` with an async iterable
+    /// async function* delegateToAsyncIterable() {
+    ///   yield* otherAsyncIterable();
+    /// }
     /// ```
     pub UseAwait {
         version: "1.4.0",
@@ -87,6 +93,11 @@ impl Visitor for MissingAwaitVisitor {
                         *has_await = true;
                     } else if let Some(for_of) = JsForOfStatement::cast_ref(node) {
                         *has_await = *has_await || for_of.await_token().is_some();
+                    } else if let Some(yield_expr) = JsYieldExpression::cast_ref(node) {
+                        *has_await = *has_await
+                            || yield_expr
+                                .argument()
+                                .is_some_and(|arg| arg.star_token().is_some());
                     }
                 }
             }
