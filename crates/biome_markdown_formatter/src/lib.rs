@@ -10,15 +10,13 @@ pub mod markdown;
 pub mod verbatim;
 
 use biome_formatter::{
-    FormatContext, FormatLanguage, FormatResult, Formatted, TransformSourceMap, prelude::*, write,
+    FormatContext, FormatLanguage, FormatResult, Formatted, TransformSourceMap, prelude::*,
 };
 use biome_rowan::AstNode;
 
 pub(crate) use crate::context::MarkdownFormatContext;
 use crate::{
-    context::MarkdownFormatOptions,
-    cst::FormatMarkdownSyntaxNode,
-    verbatim::{format_bogus_node, format_suppressed_node},
+    context::MarkdownFormatOptions, cst::FormatMarkdownSyntaxNode, verbatim::format_bogus_node,
 };
 
 pub(crate) type MarkdownFormatter<'buf> = Formatter<'buf, MarkdownFormatContext>;
@@ -217,39 +215,10 @@ where
 {
     // this is the method that actually start the formatting
     fn fmt(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        if self.is_suppressed(node, f) {
-            return write!(f, [format_suppressed_node(node.syntax())]);
-        }
-
-        self.fmt_leading_comments(node, f)?;
-        self.fmt_fields(node, f)?;
-        self.fmt_dangling_comments(node, f)?;
-        self.fmt_trailing_comments(node, f)
+        self.fmt_fields(node, f)
     }
 
     fn fmt_fields(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()>;
-
-    /// Returns `true` if the node has a suppression comment and should use the same formatting as in the source document.
-    fn is_suppressed(&self, node: &N, f: &MarkdownFormatter) -> bool {
-        f.context().comments().is_suppressed(node.syntax())
-    }
-
-    /// Formats the [leading comments](biome_formatter::comments#leading-comments) of the node.
-    fn fmt_leading_comments(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        format_leading_comments(node.syntax()).fmt(f)
-    }
-
-    /// Formats the [dangling comments](biome_formatter::comments#dangling-comments) of the node.
-    fn fmt_dangling_comments(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        format_dangling_comments(node.syntax())
-            .with_soft_block_indent()
-            .fmt(f)
-    }
-
-    /// Formats the [trailing comments](biome_formatter::comments#trailing-comments) of the node.
-    fn fmt_trailing_comments(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        format_trailing_comments(node.syntax()).fmt(f)
-    }
 }
 
 /// Main entry point for formatting a Markdown file

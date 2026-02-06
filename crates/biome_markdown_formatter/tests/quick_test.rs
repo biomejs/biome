@@ -1,29 +1,25 @@
+use biome_formatter::FormatElement;
 use biome_markdown_formatter::{MarkdownFormatLanguage, context::MarkdownFormatOptions};
 use biome_markdown_parser::parse_markdown;
+use biome_rowan::TextSize;
 
-// The test is currently ignored because the parser isn't fully implemented
-// causing an infinite loop in `parse_block_list` (syntax.rs) because it can't find EOF.
-//
-// Having test is still useful for making sure the type checker is happy.
-//
+// This test only verifies the formatter infrastructure works end-to-end
+// without actually formatting the input.
 #[test]
-#[ignore]
-fn format_simple_paragraph() {
-    let source = "This is a simple paragraph.";
-
+fn quick_test() {
+    let source = "---";
     let parse = parse_markdown(source);
     let options = MarkdownFormatOptions::default();
-    let formatted =
+
+    let result =
         biome_formatter::format_node(&parse.syntax(), MarkdownFormatLanguage::new(options), false);
 
-    match formatted {
-        Ok(result) => {
-            let printed = result.print().unwrap();
-            println!("Formatted output: {}", printed.as_code());
-            assert!(!printed.as_code().is_empty());
+    let boxed_text: Box<str> = source.into();
+    assert_eq!(
+        result.unwrap().document().as_elements().first().unwrap(),
+        &FormatElement::Text {
+            text: boxed_text,
+            source_position: TextSize::default(),
         }
-        Err(e) => {
-            panic!("Formatting failed: {:?}", e);
-        }
-    }
+    );
 }
