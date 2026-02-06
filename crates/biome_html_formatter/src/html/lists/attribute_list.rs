@@ -60,10 +60,10 @@ impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
                                             tag_name: self.tag_name.clone(),
                                         })
                                         .fmt(f),
-                                    AnyHtmlAttribute::HtmlDoubleTextExpression(attr) => {
+                                    AnyHtmlAttribute::HtmlAttributeDoubleTextExpression(attr) => {
                                         attr.format().fmt(f)
                                     }
-                                    AnyHtmlAttribute::HtmlSingleTextExpression(attr) => {
+                                    AnyHtmlAttribute::HtmlAttributeSingleTextExpression(attr) => {
                                         attr.format().fmt(f)
                                     }
                                     AnyHtmlAttribute::HtmlBogusAttribute(attr) => {

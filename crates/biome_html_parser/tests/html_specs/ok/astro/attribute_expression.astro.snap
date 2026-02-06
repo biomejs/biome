@@ -52,7 +52,7 @@ HtmlRoot {
                                 },
                                 initializer: HtmlAttributeInitializerClause {
                                     eq_token: EQ@51..52 "=" [] [],
-                                    value: HtmlSingleTextExpression {
+                                    value: HtmlAttributeSingleTextExpression {
                                         l_curly_token: L_CURLY@52..53 "{" [] [],
                                         expression: HtmlTextExpression {
                                             html_literal_token: HTML_LITERAL@53..56 "foo" [] [],
@@ -120,7 +120,7 @@ HtmlRoot {
                   0: HTML_LITERAL@49..51 "id" [] []
                 1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@51..57
                   0: EQ@51..52 "=" [] []
-                  1: HTML_SINGLE_TEXT_EXPRESSION@52..57
+                  1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@52..57
                     0: L_CURLY@52..53 "{" [] []
                     1: HTML_TEXT_EXPRESSION@53..56
                       0: HTML_LITERAL@53..56 "foo" [] []
