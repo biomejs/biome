@@ -38,6 +38,8 @@ biome_json_formatter       = { workspace = true, features = ["serde"] }
 biome_json_parser          = { workspace = true }
 biome_json_syntax          = { workspace = true }
 biome_plugin_loader        = { workspace = true }
+biome_provenance           = { workspace = true, features = ["json"], optional = true }
+biome_provenance_macros    = { workspace = true, optional = true }
 biome_resolver             = { workspace = true }
 biome_rowan                = { workspace = true, features = ["serde"] }
 biome_rule_options         = { workspace = true }
@@ -60,6 +62,8 @@ tikv-jemallocator = { workspace = true }
 mimalloc = { workspace = true }
 
 [features]
+default = []
+provenance = ["dep:biome_provenance", "dep:biome_provenance_macros"]
 schema = [
   "biome_analyze/schema",
   "biome_formatter/schema",

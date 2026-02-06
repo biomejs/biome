@@ -1,0 +1,27 @@
+[package]
+name = "biome_provenance"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+biome_rowan = { workspace = true }
+biome_diagnostics = { workspace = true }
+camino = { workspace = true }
+
+# Optional JSON support
+biome_json_syntax = { workspace = true, optional = true }
+
+[dev-dependencies]
+biome_json_parser = { workspace = true }
+biome_provenance_macros = { workspace = true }
+
+[features]
+default = []
+json = ["biome_json_syntax"]
+
+[lints]
+workspace = true

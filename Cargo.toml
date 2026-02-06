@@ -89,6 +89,8 @@ biome_package                = { path = "./crates/biome_package", version = "0.5
 biome_parser                 = { path = "./crates/biome_parser", version = "0.5.7" }
 biome_plugin_loader          = { path = "./crates/biome_plugin_loader", version = "0.0.1" }
 biome_project_layout         = { path = "./crates/biome_project_layout", version = "0.0.1" }
+biome_provenance             = { path = "./crates/biome_provenance", version = "0.1.0" }
+biome_provenance_macros      = { path = "./crates/biome_provenance_macros", version = "0.1.0" }
 biome_resolver               = { path = "./crates/biome_resolver", version = "0.1.0" }
 biome_rowan                  = { path = "./crates/biome_rowan", version = "0.5.7" }
 biome_rule_options           = { path = "./crates/biome_rule_options", version = "0.0.1" }

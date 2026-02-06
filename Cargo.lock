@@ -264,6 +264,8 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_plugin_loader",
+ "biome_provenance",
+ "biome_provenance_macros",
  "biome_resolver",
  "biome_rowan",
  "biome_rule_options",
@@ -1501,6 +1503,30 @@ dependencies = [
  "camino",
  "papaya",
  "rustc-hash 2.1.1",
+]
+
+[[package]]
+name = "biome_provenance"
+version = "0.1.0"
+dependencies = [
+ "biome_diagnostics",
+ "biome_json_parser",
+ "biome_json_syntax",
+ "biome_provenance_macros",
+ "biome_rowan",
+ "camino",
+]
+
+[[package]]
+name = "biome_provenance_macros"
+version = "0.1.0"
+dependencies = [
+ "biome_json_parser",
+ "biome_provenance",
+ "camino",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
