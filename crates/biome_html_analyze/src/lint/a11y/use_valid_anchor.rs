@@ -31,18 +31,17 @@ declare_lint_rule! {
     /// SEO ranking
     ///
     ///
+    /// :::note
+    /// At the moment, it is not possible to check whether or not a specified variable in the `href` attribute resolves
+    /// to `null` or `undefined`.
+    /// :::
+    ///
     /// For a detailed explanation, check out https://marcysutton.com/links-vs-buttons-in-modern-web-applications
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```html,expect_diagnostic
-    /// <a href={null}>navigate here</a>
-    /// ```
-    /// ```html,expect_diagnostic
-    /// <a href={undefined}>navigate here</a>
-    /// ```
     /// ```html,expect_diagnostic
     /// <a href>navigate here</a>
     /// ```
@@ -146,9 +145,9 @@ impl Rule for UseValidAnchor {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let name = node.name().ok()?;
+        let name = node.name().ok()?.token_text_trimmed();
 
-        if name.token_text_trimmed().unwrap() == "a" {
+        if name.is_some_and(|n| n == "a") {
             let anchor_attribute = node.find_attribute_by_name("href");
             let on_click_attribute = node.find_attribute_by_name("onclick");
 
@@ -162,8 +161,6 @@ impl Rule for UseValidAnchor {
                     if static_value.is_none_or(|const_str| {
                         const_str.is_empty()
                             || const_str == "#"
-                            || const_str == "null"
-                            || const_str == "undefined"
                             || const_str.contains("javascript:")
                     }) {
                         return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));

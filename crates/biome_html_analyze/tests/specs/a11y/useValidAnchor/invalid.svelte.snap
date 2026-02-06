@@ -5,10 +5,8 @@ expression: invalid.svelte
 # Input
 ```html
 <!-- should generate diagnostics -->
-<a href={null}>invalid</a>
 <a href="javascript:void(0)">invalid</a>
 <a href>invalid</a>
-<a href={undefined}>invalid</a>
 <a onclick={something}>invalid</a>
 
 ```
@@ -20,10 +18,10 @@ invalid.svelte:2:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━
   × Provide a valid value for the attribute href.
   
     1 │ <!-- should generate diagnostics -->
-  > 2 │ <a href={null}>invalid</a>
-      │    ^^^^^^^^^^^
-    3 │ <a href="javascript:void(0)">invalid</a>
-    4 │ <a href>invalid</a>
+  > 2 │ <a href="javascript:void(0)">invalid</a>
+      │    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <a href>invalid</a>
+    4 │ <a onclick={something}>invalid</a>
   
   i The href attribute should be a valid a URL
   
@@ -38,11 +36,11 @@ invalid.svelte:3:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━
   × Provide a valid value for the attribute href.
   
     1 │ <!-- should generate diagnostics -->
-    2 │ <a href={null}>invalid</a>
-  > 3 │ <a href="javascript:void(0)">invalid</a>
-      │    ^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ <a href>invalid</a>
-    5 │ <a href={undefined}>invalid</a>
+    2 │ <a href="javascript:void(0)">invalid</a>
+  > 3 │ <a href>invalid</a>
+      │    ^^^^
+    4 │ <a onclick={something}>invalid</a>
+    5 │ 
   
   i The href attribute should be a valid a URL
   
@@ -54,51 +52,13 @@ invalid.svelte:3:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━
 ```
 invalid.svelte:4:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Provide a valid value for the attribute href.
-  
-    2 │ <a href={null}>invalid</a>
-    3 │ <a href="javascript:void(0)">invalid</a>
-  > 4 │ <a href>invalid</a>
-      │    ^^^^
-    5 │ <a href={undefined}>invalid</a>
-    6 │ <a onclick={something}>invalid</a>
-  
-  i The href attribute should be a valid a URL
-  
-  i Check this thorough explanation to better understand the context.
-  
-
-```
-
-```
-invalid.svelte:5:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide a valid value for the attribute href.
-  
-    3 │ <a href="javascript:void(0)">invalid</a>
-    4 │ <a href>invalid</a>
-  > 5 │ <a href={undefined}>invalid</a>
-      │    ^^^^^^^^^^^^^^^^
-    6 │ <a onclick={something}>invalid</a>
-    7 │ 
-  
-  i The href attribute should be a valid a URL
-  
-  i Check this thorough explanation to better understand the context.
-  
-
-```
-
-```
-invalid.svelte:6:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
   × Use a button element instead of an a element.
   
-    4 │ <a href>invalid</a>
-    5 │ <a href={undefined}>invalid</a>
-  > 6 │ <a onclick={something}>invalid</a>
+    2 │ <a href="javascript:void(0)">invalid</a>
+    3 │ <a href>invalid</a>
+  > 4 │ <a onclick={something}>invalid</a>
       │    ^^^^^^^^^^^^^^^^^^^
-    7 │ 
+    5 │ 
   
   i Anchor elements should only be used for default sections or page navigation
   
