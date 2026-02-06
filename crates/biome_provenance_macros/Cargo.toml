@@ -1,0 +1,24 @@
+[package]
+name = "biome_provenance_macros"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = { workspace = true }
+syn = { workspace = true, features = ["full", "extra-traits"] }
+proc-macro2 = { workspace = true }
+
+[dev-dependencies]
+biome_provenance = { path = "../biome_provenance", features = ["json"] }
+biome_json_parser = { workspace = true }
+camino = { workspace = true }
+
+[lints]
+workspace = true

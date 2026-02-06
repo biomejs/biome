@@ -1,6 +1,7 @@
 use crate::WorkspaceError;
 use crate::settings::Settings;
 use crate::workspace::ScanKind;
+use crate::workspace::provenance::ProvenanceIndex;
 use biome_analyze::{
     AnalyzerRules, Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
@@ -9,6 +10,7 @@ use biome_configuration::diagnostics::{
     CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
 use biome_configuration::editorconfig::EditorConfig;
+use biome_configuration::provenance::ProvenanceSource;
 use biome_configuration::{BiomeDiagnostic, ConfigurationPathHint, push_to_analyzer_rules};
 use biome_configuration::{Configuration, VERSION, push_to_analyzer_assist};
 use biome_console::markup;
@@ -203,6 +205,75 @@ pub fn load_configuration(
 ) -> Result<LoadedConfiguration, WorkspaceError> {
     let config = read_config(fs, config_path, true)?;
     LoadedConfiguration::try_from_payload(config, fs)
+}
+
+/// Loads configuration with provenance tracking enabled.
+///
+/// This function loads the configuration and tracks where each value comes from
+/// (base config, extends, overrides, etc.). The provenance information is stored
+/// in a `ProvenanceIndex`, which can be used to query the origin of configuration values.
+///
+/// **Note**: Full provenance capture requires `Deserializable` implementations
+/// to call provenance methods during deserialization. Currently, this infrastructure
+/// is in place, but field-level capture requires updating the derive macro (future work).
+/// This function demonstrates that the infrastructure works end-to-end.
+#[instrument(level = "debug", skip(fs))]
+pub fn load_configuration_with_provenance(
+    fs: &dyn FsWithResolverProxy,
+    config_path: ConfigurationPathHint,
+) -> Result<LoadedConfigurationWithProvenance, WorkspaceError> {
+    // Load configuration normally
+    let loaded = load_configuration(fs, config_path)?;
+
+    // Create a provenance index (initially empty until the derive macro is implemented).
+    // In the future, this will contain entries captured during deserialization.
+    let provenance_source = loaded
+        .file_path
+        .as_ref()
+        .map(|path| ProvenanceSource::base_config(path.clone()));
+
+    let provenance_index = if provenance_source.is_some() {
+        // Build an empty index for now. It will be populated when Deserializable calls provenance methods.
+        Some(ProvenanceIndex::build(
+            vec![],
+            vec![],
+            loaded.file_path.clone(),
+        ))
+    } else {
+        None
+    };
+
+    Ok(LoadedConfigurationWithProvenance {
+        configuration: loaded.configuration,
+        diagnostics: loaded.diagnostics,
+        directory_path: loaded.directory_path,
+        file_path: loaded.file_path,
+        extended_configurations: loaded.extended_configurations,
+        loaded_location: loaded.loaded_location,
+        provenance_index,
+    })
+}
+
+/// Configuration loaded with provenance tracking.
+///
+/// This extends `LoadedConfiguration` with an optional `ProvenanceIndex` that tracks
+/// where each configuration value originated.
+#[derive(Debug)]
+pub struct LoadedConfigurationWithProvenance {
+    /// If present, the path of the directory where it was found
+    pub directory_path: Option<Utf8PathBuf>,
+    /// If present, the path of the file where it was found
+    pub file_path: Option<Utf8PathBuf>,
+    /// The deserialized configuration
+    pub configuration: Configuration,
+    /// All diagnostics that were emitted during parsing and deserialization
+    pub diagnostics: Vec<Error>,
+    /// The list of possible extended configuration files
+    pub extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
+    /// Where the configuration was loaded from
+    pub loaded_location: LoadedLocation,
+    /// Provenance index tracking where each configuration value came from
+    pub provenance_index: Option<ProvenanceIndex>,
 }
 
 #[derive(Debug)]
@@ -1144,5 +1215,94 @@ mod tests {
                 .compute(),
             ScanKind::NoScanner
         );
+    }
+}
+
+#[cfg(test)]
+mod provenance_tests {
+    use super::*;
+    use biome_fs::MemoryFileSystem;
+
+    #[test]
+    fn test_load_configuration_with_provenance_creates_index() {
+        // Create a simple configuration file
+        let fs = MemoryFileSystem::default();
+        let config_path = Utf8PathBuf::from("biome.json");
+        fs.insert(
+            config_path.clone(),
+            r#"{"formatter": {"indentWidth": 4}}"#.to_string(),
+        );
+
+        // Load configuration with provenance
+        let result =
+            load_configuration_with_provenance(&fs, ConfigurationPathHint::FromUser(config_path));
+
+        // Should succeed
+        assert!(result.is_ok(), "Configuration loading should succeed");
+
+        let loaded = result.unwrap();
+
+        // Should have configuration
+        assert!(loaded.configuration.formatter.is_some());
+
+        // Should have provenance index (even if empty for now)
+        assert!(
+            loaded.provenance_index.is_some(),
+            "Provenance index should be created"
+        );
+
+        // Should have file path
+        assert!(loaded.file_path.is_some());
+
+        let provenance_index = loaded.provenance_index.unwrap();
+
+        // Base config path should match loaded file
+        assert_eq!(
+            provenance_index.base_config_path(),
+            loaded.file_path.as_ref()
+        );
+
+        // Entries will be empty until Deserializable calls provenance methods
+        assert_eq!(
+            provenance_index.entries().len(),
+            0,
+            "Entries are empty until the derive macro is implemented"
+        );
+    }
+
+    #[test]
+    fn test_load_configuration_with_provenance_no_config_file() {
+        // Load without any config file
+        let fs = MemoryFileSystem::default();
+
+        let _result = load_configuration_with_provenance(&fs, ConfigurationPathHint::None);
+    }
+
+    #[test]
+    fn test_load_configuration_with_provenance_matches_regular_load() {
+        let fs = MemoryFileSystem::default();
+        let config_path = Utf8PathBuf::from("biome.json");
+        fs.insert(
+            config_path.clone(),
+            r#"{"linter": {"enabled": true}}"#.to_string(),
+        );
+
+        let hint = ConfigurationPathHint::FromUser(config_path);
+
+        // Load with both methods
+        let regular = load_configuration(&fs, hint.clone()).unwrap();
+        let with_provenance = load_configuration_with_provenance(&fs, hint).unwrap();
+
+        // Configuration should be identical
+        assert_eq!(
+            regular.configuration, with_provenance.configuration,
+            "Configuration should match between regular and provenance loading"
+        );
+
+        // Diagnostics should match
+        assert_eq!(regular.diagnostics.len(), with_provenance.diagnostics.len());
+
+        // File paths should match
+        assert_eq!(regular.file_path, with_provenance.file_path);
     }
 }
