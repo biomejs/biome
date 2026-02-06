@@ -164,10 +164,17 @@ fn is_in_font_face_at_rule(node: &CssGenericProperty) -> bool {
         .is_some_and(|n| matches!(n, AnyCssAtRule::CssFontFaceAtRule(_)))
 }
 
-/// Check if the node is inside a `@supports` feature declaration (the condition part),
+/// Check if the node is inside a `@supports` feature declaration (the condition),
 /// not inside the declaration block of `@supports`.
-/// e.g. `@supports (font: -apple-system-body)` - the `font: -apple-system-body` is inside
-/// the condition and should be ignored, but styles inside `@supports { ... }` block should not.
+///
+/// ```css
+/// @supports (font: -apple-system-body) {
+///     a { font-family: Arial; }
+/// }
+/// ```
+///
+/// The `font: -apple-system-body` is inside the condition and should be ignored, but styles
+/// inside the `@supports { ... }` block should not.
 fn is_in_supports_feature_declaration(node: &CssGenericProperty) -> bool {
     node.syntax()
         .ancestors()
