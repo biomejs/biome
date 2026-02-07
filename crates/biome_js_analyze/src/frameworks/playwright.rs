@@ -1,4 +1,6 @@
-use biome_js_syntax::{AnyJsExpression, JsCallArguments, JsCallExpression, JsSyntaxKind};
+use biome_js_syntax::{
+    AnyJsExpression, JsCallArguments, JsCallExpression, JsObjectExpression, JsSyntaxKind,
+};
 use biome_rowan::{AstNode, AstSeparatedList, TokenText};
 
 /// Extracts the object name from an expression.
@@ -61,6 +63,16 @@ pub(crate) const LOCATOR_METHODS: &[&str] = &[
     "nth",
     "or",
 ];
+
+/// Checks if a name is a Playwright describe mode (`parallel` or `serial`).
+pub(crate) fn is_describe_mode(s: &str) -> bool {
+    s == "parallel" || s == "serial"
+}
+
+/// Checks if a name is a Playwright describe modifier (`only`, `skip`, or `fixme`).
+pub(crate) fn is_describe_modifier(s: &str) -> bool {
+    s == "only" || s == "skip" || s == "fixme"
+}
 
 /// Checks if a method name is a Playwright locator method.
 fn is_locator_method(name: &str) -> bool {
@@ -229,6 +241,43 @@ pub(crate) fn contains_expect_call(callback: &AnyJsExpression) -> bool {
     false
 }
 
+/// Searches an expression chain for a static member name matching the predicate.
+///
+/// Walks through `JsStaticMemberExpression` and `JsCallExpression` chains,
+/// testing each member name. Returns `true` if any member name satisfies `predicate`.
+///
+/// For example, given `expect.poll(() => x).toBe(1)`:
+/// - `find_member_in_chain(expr, |n| n == "poll")` returns `true`
+/// - `find_member_in_chain(expr, |n| n == "soft")` returns `false`
+pub(crate) fn find_member_in_chain(
+    expr: &AnyJsExpression,
+    predicate: impl Fn(&str) -> bool + Copy,
+) -> bool {
+    match expr {
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            if let Ok(member_name) = member.member()
+                && let Some(name) = member_name.as_js_name()
+                && let Ok(token) = name.value_token()
+                && predicate(token.text_trimmed())
+            {
+                return true;
+            }
+            if let Ok(object) = member.object() {
+                return find_member_in_chain(&object, predicate);
+            }
+            false
+        }
+        AnyJsExpression::JsCallExpression(call) => {
+            if let Ok(callee) = call.callee() {
+                find_member_in_chain(&callee, predicate)
+            } else {
+                false
+            }
+        }
+        _ => false,
+    }
+}
+
 /// Checks if an expression is part of a Playwright call chain.
 ///
 /// A Playwright call chain originates from a page/frame object or passes through
@@ -296,6 +345,50 @@ pub(crate) fn is_playwright_call_chain(expr: &AnyJsExpression) -> bool {
 
         _ => false,
     }
+}
+
+/// Checks if an object expression has a boolean property with the given key and value.
+///
+/// For example, `has_bool_property(obj, "force", true)` returns `true` for `{ force: true }`.
+pub(crate) fn has_bool_property(obj_expr: &JsObjectExpression, key: &str, value: bool) -> bool {
+    let expected_text = if value { "true" } else { "false" };
+    for member in obj_expr.members().into_iter().flatten() {
+        if let Some(prop) = member.as_js_property_object_member()
+            && let Ok(prop_name) = prop.name()
+            && let Some(name_text) = prop_name.name()
+            && name_text.text() == key
+            && let Ok(prop_value) = prop.value()
+            && let Some(literal) = prop_value.as_any_js_literal_expression()
+            && let Some(bool_lit) = literal.as_js_boolean_literal_expression()
+            && let Ok(value_token) = bool_lit.value_token()
+            && value_token.text_trimmed() == expected_text
+        {
+            return true;
+        }
+    }
+    false
+}
+
+/// Checks if an object expression has a string property with the given key and value.
+///
+/// For example, `has_string_property(obj, "waitUntil", "networkidle")` returns `true`
+/// for `{ waitUntil: 'networkidle' }`.
+pub(crate) fn has_string_property(obj_expr: &JsObjectExpression, key: &str, value: &str) -> bool {
+    for member in obj_expr.members().into_iter().flatten() {
+        if let Some(prop) = member.as_js_property_object_member()
+            && let Ok(prop_name) = prop.name()
+            && let Some(name_text) = prop_name.name()
+            && name_text.text() == key
+            && let Ok(prop_value) = prop.value()
+            && let Some(literal) = prop_value.as_any_js_literal_expression()
+            && let Some(string_lit) = literal.as_js_string_literal_expression()
+            && let Ok(inner) = string_lit.inner_string_text()
+            && inner == value
+        {
+            return true;
+        }
+    }
+    false
 }
 
 #[cfg(test)]

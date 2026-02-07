@@ -7,7 +7,7 @@ use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsSyntaxKind};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
 
 use crate::JsRuleAction;
-use crate::frameworks::playwright::collect_member_names;
+use crate::frameworks::playwright::{collect_member_names, is_describe_mode};
 
 use biome_rule_options::no_playwright_skipped_test::NoPlaywrightSkippedTestOptions;
 
@@ -201,10 +201,6 @@ fn is_playwright_skipped_call(callee: &AnyJsExpression) -> Option<SkippedType> {
         _ => {}
     }
     None
-}
-
-fn is_describe_mode(s: &str) -> bool {
-    s == "parallel" || s == "serial"
 }
 
 /// Checks if this is a conditional skip call (test.skip() inside test body with args or in if block).

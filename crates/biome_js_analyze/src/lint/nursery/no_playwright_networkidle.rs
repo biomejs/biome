@@ -2,13 +2,11 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{
-    AnyJsExpression, JsCallExpression, JsObjectExpression, JsStaticMemberExpression,
-};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsStaticMemberExpression};
 use biome_rowan::AstNode;
 use biome_rule_options::no_playwright_networkidle::NoPlaywrightNetworkidleOptions;
 
-use crate::frameworks::playwright::is_playwright_call_chain;
+use crate::frameworks::playwright::{has_string_property, is_playwright_call_chain};
 
 declare_lint_rule! {
     /// Disallow usage of the `networkidle` option.
@@ -103,7 +101,7 @@ impl Rule for NoPlaywrightNetworkidle {
             for arg in args.args().into_iter().flatten() {
                 if let Some(expr) = arg.as_any_js_expression()
                     && let AnyJsExpression::JsObjectExpression(obj_expr) = expr
-                    && has_networkidle_option(obj_expr)
+                    && has_string_property(obj_expr, "waitUntil", "networkidle")
                 {
                     return Some(());
                 }
@@ -133,27 +131,3 @@ impl Rule for NoPlaywrightNetworkidle {
     }
 }
 
-fn has_networkidle_option(obj_expr: &JsObjectExpression) -> bool {
-    for member in obj_expr.members().into_iter().flatten() {
-        if let Some(prop) = member.as_js_property_object_member() {
-            // Check if property name is 'waitUntil'
-            if let Ok(name) = prop.name()
-                && let Some(name_node) = name.as_js_literal_member_name()
-                && let Ok(name_token) = name_node.value()
-                && name_token.text_trimmed() == "waitUntil"
-            {
-                // Check if value is 'networkidle'
-                if let Ok(value) = prop.value()
-                    && let Some(literal_expr) = value.as_any_js_literal_expression()
-                    && let Some(string_lit) = literal_expr.as_js_string_literal_expression()
-                    && let Ok(inner) = string_lit.inner_string_text()
-                    && inner == "networkidle"
-                {
-                    return true;
-                }
-            }
-        }
-    }
-
-    false
-}

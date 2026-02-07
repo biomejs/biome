@@ -6,13 +6,14 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsModule, JsSyntaxKind,
+    AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsSyntaxKind,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText, TriviaPieceKind};
 
 use biome_rule_options::no_playwright_missing_await::NoPlaywrightMissingAwaitOptions;
 
-use crate::{JsRuleAction, ast_utils::is_in_async_function};
+use crate::frameworks::playwright::find_member_in_chain;
+use crate::{JsRuleAction, ast_utils::is_in_async_context};
 
 declare_lint_rule! {
     /// Enforce Playwright async APIs to be awaited or returned.
@@ -151,7 +152,7 @@ impl Rule for NoPlaywrightMissingAwait {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let call_expr = ctx.query();
 
-        // Check if we're in an async context
+        // Check if we're in an async context (async function or module-level TLA)
         if !is_in_async_context(call_expr.syntax()) {
             return None;
         }
@@ -298,7 +299,7 @@ fn get_async_expect_matcher(call_expr: &JsCallExpression) -> Option<MissingAwait
     // Check for expect.poll FIRST - it's always async regardless of matcher
     // expect.poll() converts any synchronous expect to an asynchronous polling one
     // IMPORTANT: Only trigger for expect.poll(), not arbitrary obj.poll() chains
-    if has_poll_in_chain(&object) && has_expect_in_chain(&object) {
+    if find_member_in_chain(&object, |n| n == "poll") && has_expect_in_chain(&object) {
         return Some(MissingAwaitType::ExpectPoll);
     }
 
@@ -316,32 +317,6 @@ fn get_async_expect_matcher(call_expr: &JsCallExpression) -> Option<MissingAwait
     }
 
     None
-}
-
-fn has_poll_in_chain(expr: &AnyJsExpression) -> bool {
-    match expr {
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            if let Ok(member_name) = member.member()
-                && let Some(name) = member_name.as_js_name()
-                && let Ok(token) = name.value_token()
-                && token.text_trimmed() == "poll"
-            {
-                return true;
-            }
-            if let Ok(object) = member.object() {
-                return has_poll_in_chain(&object);
-            }
-            false
-        }
-        AnyJsExpression::JsCallExpression(call) => {
-            if let Ok(callee) = call.callee() {
-                has_poll_in_chain(&callee)
-            } else {
-                false
-            }
-        }
-        _ => false,
-    }
 }
 
 fn has_expect_in_chain(expr: &AnyJsExpression) -> bool {
@@ -452,9 +427,6 @@ fn is_properly_handled(call_expr: &JsCallExpression) -> bool {
         return is_call_awaited_or_returned(&promise_all_call);
     }
 
-    // Check if it's assigned to a variable that's later awaited
-    // This is complex and would require flow analysis, skipping for now
-
     false
 }
 
@@ -497,41 +469,6 @@ fn is_promise_combinator(call: &JsCallExpression) -> bool {
         || is_member_call_pattern(call, "Promise", "allSettled")
         || is_member_call_pattern(call, "Promise", "race")
         || is_member_call_pattern(call, "Promise", "any")
-}
-
-/// Checks if a node is within an async context (async function or module with TLA support).
-///
-/// This checks for:
-/// - Async functions (arrow, function declaration, method)
-/// - Module context (for top-level await support)
-fn is_in_async_context(node: &biome_js_syntax::JsSyntaxNode) -> bool {
-    // First check if we're in an async function
-    if is_in_async_function(node) {
-        return true;
-    }
-
-    // Check if we're at module level (for top-level await)
-    for ancestor in node.ancestors() {
-        if JsModule::can_cast(ancestor.kind()) {
-            return true;
-        }
-
-        // Stop at function boundaries (if we're in a non-async function,
-        // being in a module doesn't help)
-        if matches!(
-            ancestor.kind(),
-            biome_js_syntax::JsSyntaxKind::JS_FUNCTION_DECLARATION
-                | biome_js_syntax::JsSyntaxKind::JS_FUNCTION_EXPRESSION
-                | biome_js_syntax::JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-                | biome_js_syntax::JsSyntaxKind::JS_METHOD_CLASS_MEMBER
-                | biome_js_syntax::JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
-        ) {
-            // We're in a non-async function, stop searching
-            break;
-        }
-    }
-
-    false
 }
 
 #[cfg(test)]

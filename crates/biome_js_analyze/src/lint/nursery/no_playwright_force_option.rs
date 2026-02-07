@@ -2,11 +2,11 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsObjectExpression};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression};
 use biome_rowan::AstNode;
 use biome_rule_options::no_playwright_force_option::NoPlaywrightForceOptionOptions;
 
-use crate::frameworks::playwright::is_playwright_call_chain;
+use crate::frameworks::playwright::{has_bool_property, is_playwright_call_chain};
 
 declare_lint_rule! {
     /// Disallow usage of the `{ force: true }` option.
@@ -87,9 +87,9 @@ impl Rule for NoPlaywrightForceOption {
         for arg in args.args().into_iter().flatten() {
             if let Some(expr) = arg.as_any_js_expression() {
                 // Unwrap parenthesized expressions to handle ({ force: true })
-                let unwrapped = unwrap_parenthesized(expr.clone());
+                let unwrapped = expr.clone().omit_parentheses();
                 if let AnyJsExpression::JsObjectExpression(obj_expr) = unwrapped
-                    && has_force_true(&obj_expr)
+                    && has_bool_property(&obj_expr, "force", true)
                 {
                     return Some(());
                 }
@@ -134,43 +134,6 @@ const METHODS_WITH_FORCE: &[&str] = &[
     "tap",
     "uncheck",
 ];
-
-/// Unwraps parenthesized expressions recursively
-fn unwrap_parenthesized(expr: AnyJsExpression) -> AnyJsExpression {
-    match expr {
-        AnyJsExpression::JsParenthesizedExpression(paren) => {
-            if let Ok(inner) = paren.expression() {
-                return unwrap_parenthesized(inner);
-            }
-            AnyJsExpression::JsParenthesizedExpression(paren)
-        }
-        other => other,
-    }
-}
-
-fn has_force_true(obj_expr: &JsObjectExpression) -> bool {
-    for member in obj_expr.members().into_iter().flatten() {
-        if let Some(prop) = member.as_js_property_object_member() {
-            // Check if property name is 'force' - .name() handles both identifier and string literal
-            if let Ok(prop_name) = prop.name()
-                && let Some(name_text) = prop_name.name()
-                && name_text.text() == "force"
-            {
-                // Check if value is true
-                if let Ok(value) = prop.value()
-                    && let Some(literal) = value.as_any_js_literal_expression()
-                    && let Some(bool_lit) = literal.as_js_boolean_literal_expression()
-                    && let Ok(value_token) = bool_lit.value_token()
-                    && value_token.text_trimmed() == "true"
-                {
-                    return true;
-                }
-            }
-        }
-    }
-
-    false
-}
 
 #[cfg(test)]
 mod tests {

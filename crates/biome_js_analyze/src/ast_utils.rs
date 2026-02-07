@@ -2,8 +2,8 @@ use biome_js_semantic::{BindingExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement,
     JsArrowFunctionExpression, JsAssignmentOperator, JsFunctionDeclaration, JsLanguage,
-    JsLogicalOperator, JsMethodClassMember, JsMethodObjectMember, JsSyntaxNode, JsSyntaxToken,
-    JsUnaryOperator,
+    JsLogicalOperator, JsMethodClassMember, JsMethodObjectMember, JsModule, JsSyntaxKind,
+    JsSyntaxNode, JsSyntaxToken, JsUnaryOperator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TriviaPiece};
 
@@ -343,6 +343,40 @@ pub fn is_in_async_function(node: &JsSyntaxNode) -> bool {
             return method.async_token().is_some();
         } else if let Some(method) = JsMethodObjectMember::cast_ref(&ancestor) {
             return method.async_token().is_some();
+        }
+    }
+
+    false
+}
+
+/// Checks if a node is within an async context (async function or module with top-level await).
+///
+/// Like [`is_in_async_function`], but also considers module-level context where
+/// top-level await is supported (ES2022+).
+///
+/// Returns `true` if the node is in an async function or at module level (not inside
+/// a non-async function).
+pub fn is_in_async_context(node: &JsSyntaxNode) -> bool {
+    if is_in_async_function(node) {
+        return true;
+    }
+
+    // Check if we're at module level (for top-level await).
+    // Stop at function boundaries — being inside a non-async function
+    // means module-level TLA doesn't apply.
+    for ancestor in node.ancestors() {
+        if JsModule::can_cast(ancestor.kind()) {
+            return true;
+        }
+        if matches!(
+            ancestor.kind(),
+            JsSyntaxKind::JS_FUNCTION_DECLARATION
+                | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+                | JsSyntaxKind::JS_METHOD_CLASS_MEMBER
+                | JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
+        ) {
+            break;
         }
     }
 

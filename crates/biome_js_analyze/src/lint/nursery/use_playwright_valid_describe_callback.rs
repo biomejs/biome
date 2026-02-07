@@ -6,7 +6,7 @@ use biome_js_syntax::{AnyJsExpression, JsCallExpression};
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::use_playwright_valid_describe_callback::UsePlaywrightValidDescribeCallbackOptions;
 
-use crate::frameworks::playwright::collect_member_names;
+use crate::frameworks::playwright::{collect_member_names, is_describe_mode, is_describe_modifier};
 
 declare_lint_rule! {
     /// Enforce valid `describe()` callback.
@@ -208,10 +208,3 @@ fn is_playwright_describe_call(callee: &AnyJsExpression) -> Option<bool> {
     }
 }
 
-fn is_describe_modifier(s: &str) -> bool {
-    s == "only" || s == "skip" || s == "fixme"
-}
-
-fn is_describe_mode(s: &str) -> bool {
-    s == "parallel" || s == "serial"
-}
