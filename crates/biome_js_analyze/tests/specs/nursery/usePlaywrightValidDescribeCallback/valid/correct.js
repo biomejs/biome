@@ -7,6 +7,7 @@ test.describe('suite', () => {});
 // Playwright modifiers
 test.describe.only('suite', () => {});
 test.describe.skip('suite', () => {});
+test.describe.fixme('suite', () => {});
 
 // Playwright execution modes
 test.describe.parallel('suite', () => {});

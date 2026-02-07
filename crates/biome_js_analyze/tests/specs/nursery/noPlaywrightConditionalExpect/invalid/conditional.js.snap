@@ -85,6 +85,15 @@ test("switch with expect.soft and .not", async ({ page }) => {
     }
 });
 
+// Catch clause
+test("catch clause", async ({ page }) => {
+    try {
+        await page.click("button");
+    } catch (e) {
+        await expect(page).toHaveTitle("Title");
+    }
+});
+
 ```
 
 # Diagnostics
@@ -350,6 +359,27 @@ conditional.js:77:19 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
     79 │     }
   
   i This expect() is inside a switch case, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:87:15 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    85 │         await page.click("button");
+    86 │     } catch (e) {
+  > 87 │         await expect(page).toHaveTitle("Title");
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    88 │     }
+    89 │ });
+  
+  i This expect() is inside a catch clause, which means it may not always run.
   
   i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
   

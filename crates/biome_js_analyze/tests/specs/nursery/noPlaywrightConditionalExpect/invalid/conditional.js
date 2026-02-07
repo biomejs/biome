@@ -78,3 +78,12 @@ test("switch with expect.soft and .not", async ({ page }) => {
             break;
     }
 });
+
+// Catch clause
+test("catch clause", async ({ page }) => {
+    try {
+        await page.click("button");
+    } catch (e) {
+        await expect(page).toHaveTitle("Title");
+    }
+});

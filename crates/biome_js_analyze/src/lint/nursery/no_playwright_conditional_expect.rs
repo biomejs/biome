@@ -38,6 +38,16 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// test("catch expect", async ({ page }) => {
+    ///     try {
+    ///         await page.click("button");
+    ///     } catch (e) {
+    ///         await expect(page).toHaveTitle("Title");
+    ///     }
+    /// });
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
@@ -145,6 +155,9 @@ fn is_in_conditional_context(call: &JsCallExpression) -> Option<&'static str> {
 
             // Logical expressions that short-circuit
             JsSyntaxKind::JS_LOGICAL_EXPRESSION => return Some("logical expression"),
+
+            // Catch clauses — expect() won't run if the error isn't thrown
+            JsSyntaxKind::JS_CATCH_CLAUSE => return Some("catch clause"),
 
             // Stop at function boundaries (the test callback)
             JsSyntaxKind::JS_FUNCTION_EXPRESSION

@@ -14,3 +14,9 @@ it.skip("skipped it", async ({ page }) => {
 test["skip"]("bracket notation skip", async ({ page }) => {
     await page.click("button");
 });
+
+// Bare test.skip() with no arguments (inside test body)
+test("bare skip", async ({ page }) => {
+    test.skip();
+    await page.click("button");
+});
