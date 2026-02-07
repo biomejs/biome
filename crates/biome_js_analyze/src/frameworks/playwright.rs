@@ -155,7 +155,9 @@ pub(crate) fn is_test_call(callee: &AnyJsExpression) -> bool {
 
 /// Gets the callback function from test arguments.
 /// Returns the LAST function argument (not the first) to handle:
-/// `test("name", { retry: () => 2 }, async () => { ... })`
+/// ```javascript
+/// test("name", { retry: () => 2 }, async () => { /* ... */ })
+/// ```
 pub(crate) fn get_test_callback(args: &JsCallArguments) -> Option<AnyJsExpression> {
     let arg_list = args.args();
     let mut callback = None;
