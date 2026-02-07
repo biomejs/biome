@@ -800,3 +800,51 @@ fn no_useless_lone_block_statements_is_not_triggered() {
         result,
     ));
 }
+
+#[test]
+fn supports_ts_in_embedded_expressions() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+// this makes it typescript
+</script>
+
+<div
+	onclick={(e) => {
+		if ((e.target as HTMLElement).closest("button")) {
+			return;
+		}
+		e.currentTarget.parentElement?.querySelector("input")?.focus();
+	}}
+>
+</div>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUselessLoneBlockStatements", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "supports_ts_in_embedded_expressions",
+        fs,
+        console,
+        result,
+    ));
+}
