@@ -52,6 +52,11 @@ pub fn reformat_with_command(text: impl Display, command: impl Display) -> Resul
 
 pub const PREAMBLE: &str = "Generated file, do not edit by hand, see `xtask/codegen`";
 pub fn prepend_generated_preamble(content: impl Display) -> String {
+    let content = content.to_string();
+    assert!(
+        !content.contains(PREAMBLE),
+        "content already contains the generated preamble — was reformat() called twice?"
+    );
     format!("//! {PREAMBLE}\n\n{content}")
 }
 
