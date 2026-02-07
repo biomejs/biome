@@ -249,6 +249,15 @@ fn generate_html_analyzer() -> Result<()> {
         }
     }
 
+    // Check if assist directory exists
+    let assist_path = base_path.join("assist");
+    if assist_path.exists() {
+        let assist_groups = generate_category("assist", &mut analyzers, &base_path)?;
+        if !assist_groups.is_empty() {
+            categories_and_groups.insert("assist", assist_groups);
+        }
+    }
+
     // Generate and write build.rs
     let build_script = generate_build_script(&categories_and_groups)?;
     let build_rs_path = project_root().join("crates/biome_html_analyze/build.rs");
