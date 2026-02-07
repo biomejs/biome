@@ -985,6 +985,11 @@ export type VcsClientKind = "git";
  */
 export interface Source {
 	/**
+	* Remove duplicate CSS classes.
+See https://biomejs.dev/assist/actions/no-duplicate-classes 
+	 */
+	noDuplicateClasses?: NoDuplicateClassesConfiguration;
+	/**
 	* Provides a code action to sort the imports and exports in the file using a built-in or custom order.
 See https://biomejs.dev/assist/actions/organize-imports 
 	 */
@@ -1179,6 +1184,9 @@ export interface OverrideLinterConfiguration {
 	 */
 	rules?: Rules;
 }
+export type NoDuplicateClassesConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithNoDuplicateClassesOptions;
 export type OrganizeImportsConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithOrganizeImportsOptions;
@@ -3424,6 +3432,10 @@ See https://biomejs.dev/linter/rules/use-strict-mode
 }
 export type Glob = string;
 export type RuleAssistPlainConfiguration = "off" | "on";
+export interface RuleAssistWithNoDuplicateClassesOptions {
+	level: RuleAssistPlainConfiguration;
+	options: NoDuplicateClassesOptions;
+}
 export interface RuleAssistWithOrganizeImportsOptions {
 	level: RuleAssistPlainConfiguration;
 	options: OrganizeImportsOptions;
@@ -4735,6 +4747,16 @@ export type UseStaticResponseMethodsConfiguration =
 export type UseStrictModeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStrictModeOptions;
+export interface NoDuplicateClassesOptions {
+	/**
+	 * Additional attributes that will be sorted.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be sorted.
+	 */
+	functions?: string[];
+}
 export interface OrganizeImportsOptions {
 	groups?: ImportGroups;
 	identifierOrder?: SortOrder;
@@ -8270,6 +8292,7 @@ export type Category =
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
+	| "assist/source/noDuplicateClasses"
 	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"

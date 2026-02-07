@@ -3084,6 +3084,28 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithNoDuplicateClassesOptions" }
+			]
+		},
+		"NoDuplicateClassesOptions": {
+			"type": "object",
+			"properties": {
+				"attributes": {
+					"description": "Additional attributes that will be sorted.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"functions": {
+					"description": "Names of the functions or tagged templates that will be sorted.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoDuplicateCustomPropertiesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6560,6 +6582,14 @@
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
 		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["off", "on"] },
+		"RuleAssistWithNoDuplicateClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateClassesOptions" }
+			},
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithOrganizeImportsOptions": {
 			"type": "object",
 			"properties": {
@@ -10955,6 +10985,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noDuplicateClasses": {
+					"description": "Remove duplicate CSS classes.\nSee https://biomejs.dev/assist/actions/no-duplicate-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"organizeImports": {
 					"description": "Provides a code action to sort the imports and exports in the file using a built-in or custom order.\nSee https://biomejs.dev/assist/actions/organize-imports",
 					"anyOf": [
