@@ -160,9 +160,7 @@ fn is_in_conditional_context(call: &JsCallExpression) -> Option<&'static str> {
             JsSyntaxKind::JS_CATCH_CLAUSE => return Some("catch clause"),
 
             // Stop at function boundaries (the test callback)
-            JsSyntaxKind::JS_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_FUNCTION_DECLARATION => {
+            _ if crate::ast_utils::is_function_boundary(ancestor.kind()) => {
                 break;
             }
 

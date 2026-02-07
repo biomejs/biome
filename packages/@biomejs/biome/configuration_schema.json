@@ -4286,22 +4286,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoPlaywrightSkippedTestConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoPlaywrightSkippedTestOptions" }
-			]
-		},
-		"NoPlaywrightSkippedTestOptions": {
-			"type": "object",
-			"properties": {
-				"allowConditional": {
-					"description": "Allows conditional skipping inside test bodies.\nWhen enabled, `test.skip(condition)` and `test.skip()` inside if statements are allowed.",
-					"type": ["boolean", "null"]
-				}
-			},
-			"additionalProperties": false
-		},
 		"NoPlaywrightUselessAwaitConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4730,6 +4714,12 @@
 		},
 		"NoSkippedTestsOptions": {
 			"type": "object",
+			"properties": {
+				"allowConditional": {
+					"description": "Allows conditional skipping inside test bodies.\nWhen enabled, `test.skip(condition)` and `test.skip()` inside if statements are allowed.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoSolidDestructuredPropsConfiguration": {
@@ -5876,13 +5866,6 @@
 					"description": "Disallow using page.pause().\nSee https://biomejs.dev/linter/rules/no-playwright-page-pause",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoPlaywrightPagePauseConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noPlaywrightSkippedTest": {
-					"description": "Disallow usage of .skip and .fixme annotations.\nSee https://biomejs.dev/linter/rules/no-playwright-skipped-test",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoPlaywrightSkippedTestConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8541,16 +8524,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoPlaywrightPagePauseOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoPlaywrightSkippedTestOptions": {
-			"type": "object",
-			"properties": {
-				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoPlaywrightSkippedTestOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

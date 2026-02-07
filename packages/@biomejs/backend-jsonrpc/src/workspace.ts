@@ -2070,11 +2070,6 @@ See https://biomejs.dev/linter/rules/no-playwright-page-pause
 	 */
 	noPlaywrightPagePause?: NoPlaywrightPagePauseConfiguration;
 	/**
-	* Disallow usage of .skip and .fixme annotations.
-See https://biomejs.dev/linter/rules/no-playwright-skipped-test 
-	 */
-	noPlaywrightSkippedTest?: NoPlaywrightSkippedTestConfiguration;
-	/**
 	* Disallow unnecessary await for Playwright methods that don't return promises.
 See https://biomejs.dev/linter/rules/no-playwright-useless-await 
 	 */
@@ -3998,9 +3993,6 @@ export type NoPlaywrightNetworkidleConfiguration =
 export type NoPlaywrightPagePauseConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightPagePauseOptions;
-export type NoPlaywrightSkippedTestConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoPlaywrightSkippedTestOptions;
 export type NoPlaywrightUselessAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightUselessAwaitOptions;
@@ -5625,11 +5617,6 @@ export interface RuleWithNoPlaywrightPagePauseOptions {
 	level: RulePlainConfiguration;
 	options?: NoPlaywrightPagePauseOptions;
 }
-export interface RuleWithNoPlaywrightSkippedTestOptions {
-	fix?: FixKind;
-	level: RulePlainConfiguration;
-	options?: NoPlaywrightSkippedTestOptions;
-}
 export interface RuleWithNoPlaywrightUselessAwaitOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7139,13 +7126,6 @@ export type NoPlaywrightForceOptionOptions = {};
 export type NoPlaywrightMissingAwaitOptions = {};
 export type NoPlaywrightNetworkidleOptions = {};
 export type NoPlaywrightPagePauseOptions = {};
-export interface NoPlaywrightSkippedTestOptions {
-	/**
-	* Allows conditional skipping inside test bodies.
-When enabled, `test.skip(condition)` and `test.skip()` inside if statements are allowed. 
-	 */
-	allowConditional?: boolean;
-}
 export type NoPlaywrightUselessAwaitOptions = {};
 export type NoPlaywrightWaitForNavigationOptions = {};
 export type NoPlaywrightWaitForSelectorOptions = {};
@@ -7632,7 +7612,13 @@ export type NoRedundantUseStrictOptions = {};
 export type NoSelfCompareOptions = {};
 export type NoShadowRestrictedNamesOptions = {};
 export type NoShorthandPropertyOverridesOptions = {};
-export type NoSkippedTestsOptions = {};
+export interface NoSkippedTestsOptions {
+	/**
+	* Allows conditional skipping inside test bodies.
+When enabled, `test.skip(condition)` and `test.skip()` inside if statements are allowed. 
+	 */
+	allowConditional?: boolean;
+}
 export type NoSparseArrayOptions = {};
 export type NoSuspiciousSemicolonInJsxOptions = {};
 export type NoTemplateCurlyInStringOptions = {};
@@ -8103,7 +8089,6 @@ export type Category =
 	| "lint/nursery/noPlaywrightMissingAwait"
 	| "lint/nursery/noPlaywrightNetworkidle"
 	| "lint/nursery/noPlaywrightPagePause"
-	| "lint/nursery/noPlaywrightSkippedTest"
 	| "lint/nursery/noPlaywrightUselessAwait"
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"

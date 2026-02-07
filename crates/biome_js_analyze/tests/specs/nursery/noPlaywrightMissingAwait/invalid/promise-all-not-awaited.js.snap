@@ -12,6 +12,13 @@ test('example', async ({ page }) => {
     ]);
 });
 
+/* Promise.all with .then() chain — should diagnose */
+test('example', async ({ page }) => {
+    Promise.all([
+        expect(page.locator('body')).toBeVisible(),
+    ]).then(() => {});
+});
+
 
 ```
 
@@ -63,5 +70,30 @@ promise-all-not-awaited.js:5:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  �
   
     3 │ ····await·Promise.all([
       │     ++++++             
+
+```
+
+```
+promise-all-not-awaited.js:12:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    10 │ test('example', async ({ page }) => {
+    11 │     Promise.all([
+  > 12 │         expect(page.locator('body')).toBeVisible(),
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │     ]).then(() => {});
+    14 │ });
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the Promise combinator.
+  
+    11 │ ····await·Promise.all([
+       │     ++++++             
 
 ```

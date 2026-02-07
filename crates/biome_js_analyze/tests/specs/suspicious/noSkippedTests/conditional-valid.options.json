@@ -1,9 +1,9 @@
 {
-  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "$schema": "../../../../../packages/@biomejs/biome/configuration_schema.json",
   "linter": {
     "rules": {
-      "nursery": {
-        "noPlaywrightSkippedTest": {
+      "suspicious": {
+        "noSkippedTests": {
           "level": "error",
           "options": {
             "allowConditional": true

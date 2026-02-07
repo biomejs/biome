@@ -208,7 +208,6 @@ define_categories! {
     "lint/nursery/noPlaywrightMissingAwait": "https://biomejs.dev/linter/rules/no-playwright-missing-await",
     "lint/nursery/noPlaywrightNetworkidle": "https://biomejs.dev/linter/rules/no-playwright-networkidle",
     "lint/nursery/noPlaywrightPagePause": "https://biomejs.dev/linter/rules/no-playwright-page-pause",
-    "lint/nursery/noPlaywrightSkippedTest": "https://biomejs.dev/linter/rules/no-playwright-skipped-test",
     "lint/nursery/noPlaywrightUselessAwait": "https://biomejs.dev/linter/rules/no-playwright-useless-await",
     "lint/nursery/noPlaywrightWaitForNavigation": "https://biomejs.dev/linter/rules/no-playwright-wait-for-navigation",
     "lint/nursery/noPlaywrightWaitForSelector": "https://biomejs.dev/linter/rules/no-playwright-wait-for-selector",

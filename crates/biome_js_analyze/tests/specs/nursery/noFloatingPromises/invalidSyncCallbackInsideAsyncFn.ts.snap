@@ -24,6 +24,17 @@ async function doStuff2(db) {
     });
 }
 
+// Sync function expression inside async — should diagnose but NOT suggest await
+async function doStuff3(db) {
+    const txStatements: Array<(tx) => Promise<any>> = [];
+
+    db.transaction(function(tx: any) {
+        for (const stmt of txStatements) {
+            stmt(tx)
+        }
+    });
+}
+
 ```
 
 # Diagnostics
@@ -57,6 +68,25 @@ invalidSyncCallbackInsideAsyncFn.ts:16:13 lint/nursery/noFloatingPromises ━━
        │             ^^^^
     17 │         }
     18 │     });
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidSyncCallbackInsideAsyncFn.ts:27:13 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    25 │     db.transaction(function(tx: any) {
+    26 │         for (const stmt of txStatements) {
+  > 27 │             stmt(tx)
+       │             ^^^^^^^^
+    28 │         }
+    29 │     });
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

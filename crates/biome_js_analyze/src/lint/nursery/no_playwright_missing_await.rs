@@ -13,7 +13,7 @@ use biome_rowan::{AstNode, BatchMutationExt, TokenText, TriviaPieceKind};
 use biome_rule_options::no_playwright_missing_await::NoPlaywrightMissingAwaitOptions;
 
 use crate::frameworks::playwright::find_member_in_chain;
-use crate::{JsRuleAction, ast_utils::is_in_async_context};
+use crate::{JsRuleAction, ast_utils::is_await_allowed};
 
 declare_lint_rule! {
     /// Enforce Playwright async APIs to be awaited or returned.
@@ -153,7 +153,7 @@ impl Rule for NoPlaywrightMissingAwait {
         let call_expr = ctx.query();
 
         // Check if we're in an async context (async function or module-level TLA)
-        if !is_in_async_context(call_expr.syntax()) {
+        if !is_await_allowed(call_expr.syntax()) {
             return None;
         }
 
@@ -378,6 +378,25 @@ fn is_call_awaited_or_returned(call_expr: &JsCallExpression) -> bool {
         }
     }
 
+    // Check if it's part of a .then()/.catch()/.finally() chain that is ultimately awaited/returned
+    if let Some(ref p) = parent {
+        if let Some(member) = biome_js_syntax::JsStaticMemberExpression::cast_ref(p) {
+            if let Ok(member_name) = member.member()
+                && let Some(name) = member_name.as_js_name()
+                && let Ok(token) = name.value_token()
+            {
+                let text = token.text_trimmed();
+                if text == "then" || text == "catch" || text == "finally" {
+                    if let Some(call_parent) = p.parent()
+                        && let Some(outer_call) = JsCallExpression::cast_ref(&call_parent)
+                    {
+                        return is_call_awaited_or_returned(&outer_call);
+                    }
+                }
+            }
+        }
+    }
+
     // Check if it's in a return statement
     let mut current = parent;
     while let Some(node) = current {
@@ -393,18 +412,16 @@ fn is_call_awaited_or_returned(call_expr: &JsCallExpression) -> bool {
                 {
                     // Only return true if the call expression is exactly the arrow body
                     // (not just nested somewhere inside it)
+                    let unwrapped = body_expr.clone().omit_parentheses();
                     if call_expr.syntax().text_trimmed_range()
-                        == body_expr.syntax().text_trimmed_range()
+                        == unwrapped.syntax().text_trimmed_range()
                     {
                         return true;
                     }
                 }
                 break;
             }
-            biome_js_syntax::JsSyntaxKind::JS_FUNCTION_DECLARATION
-            | biome_js_syntax::JsSyntaxKind::JS_FUNCTION_EXPRESSION
-            | biome_js_syntax::JsSyntaxKind::JS_METHOD_CLASS_MEMBER
-            | biome_js_syntax::JsSyntaxKind::JS_METHOD_OBJECT_MEMBER => {
+            _ if crate::ast_utils::is_function_boundary(node.kind()) => {
                 break;
             }
             _ => {}
@@ -450,11 +467,7 @@ fn find_enclosing_promise_all(call_expr: &JsCallExpression) -> Option<JsCallExpr
         }
 
         // Stop at function boundaries
-        if matches!(
-            node.kind(),
-            biome_js_syntax::JsSyntaxKind::JS_FUNCTION_EXPRESSION
-                | biome_js_syntax::JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-        ) {
+        if crate::ast_utils::is_function_boundary(node.kind()) {
             break;
         }
 

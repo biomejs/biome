@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: conditional.js
+expression: conditional-valid.js
 ---
 # Input
 ```js
