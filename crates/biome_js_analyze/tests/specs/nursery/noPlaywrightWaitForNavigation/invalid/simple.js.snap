@@ -21,9 +21,9 @@ simple.js:2:7 lint/nursery/noPlaywrightWaitForNavigation ━━━━━━━�
       │       ^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ 
   
-  i waitForNavigation() is deprecated. Use page.waitForURL() or page.waitForLoadState() instead.
+  i waitForNavigation() is deprecated because it can be unreliable.
   
-  i These alternatives are more reliable and provide better control over navigation waiting.
+  i Use page.waitForURL() or page.waitForLoadState() instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

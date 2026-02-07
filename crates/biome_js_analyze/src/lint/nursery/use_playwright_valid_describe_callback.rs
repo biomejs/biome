@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression};
-use biome_rowan::{AstNode, AstSeparatedList, TokenText};
+use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::use_playwright_valid_describe_callback::UsePlaywrightValidDescribeCallbackOptions;
 
 use crate::frameworks::playwright::collect_member_names;
@@ -53,64 +53,6 @@ declare_lint_rule! {
         recommended: false,
         domains: &[RuleDomain::Playwright],
     }
-}
-
-/// Reasons why a describe callback is invalid.
-#[derive(Debug)]
-pub enum InvalidReason {
-    /// The callback is async, which is not allowed for describe blocks.
-    Async,
-    /// The callback has parameters, which describe callbacks should not have.
-    HasParameters,
-    /// No callback function was provided.
-    MissingCallback,
-    /// The provided argument is not a function.
-    NotFunction,
-}
-
-/// Checks if the callee is a Playwright describe call.
-/// Matches: describe, test.describe, test.describe.only, test.describe.skip,
-/// test.describe.parallel, test.describe.serial, test.describe.parallel.only, etc.
-fn is_playwright_describe_call(callee: &AnyJsExpression) -> Option<bool> {
-    let names = collect_member_names(callee)?;
-
-    match names.len() {
-        1 => {
-            // describe()
-            Some(names[0] == "describe")
-        }
-        2 => {
-            // test.describe()
-            Some(names[0] == "test" && names[1] == "describe")
-        }
-        3 => {
-            // test.describe.only() / test.describe.skip()
-            // test.describe.parallel() / test.describe.serial()
-            Some(
-                names[0] == "test"
-                    && names[1] == "describe"
-                    && (is_describe_modifier(&names[2]) || is_describe_mode(&names[2])),
-            )
-        }
-        4 => {
-            // test.describe.parallel.only() / test.describe.serial.only()
-            Some(
-                names[0] == "test"
-                    && names[1] == "describe"
-                    && is_describe_mode(&names[2])
-                    && is_describe_modifier(&names[3]),
-            )
-        }
-        _ => Some(false),
-    }
-}
-
-fn is_describe_modifier(s: &TokenText) -> bool {
-    *s == "only" || *s == "skip"
-}
-
-fn is_describe_mode(s: &TokenText) -> bool {
-    *s == "parallel" || *s == "serial"
 }
 
 impl Rule for UsePlaywrightValidDescribeCallback {
@@ -213,4 +155,63 @@ impl Rule for UsePlaywrightValidDescribeCallback {
                 .note(explanation),
         )
     }
+}
+
+/// Reasons why a describe callback is invalid.
+#[derive(Debug)]
+pub enum InvalidReason {
+    /// The callback is async, which is not allowed for describe blocks.
+    Async,
+    /// The callback has parameters, which describe callbacks should not have.
+    HasParameters,
+    /// No callback function was provided.
+    MissingCallback,
+    /// The provided argument is not a function.
+    NotFunction,
+}
+
+/// Checks if the callee is a Playwright describe call.
+/// Matches: describe, test.describe, test.describe.only, test.describe.skip,
+/// test.describe.parallel, test.describe.serial, test.describe.parallel.only, etc.
+fn is_playwright_describe_call(callee: &AnyJsExpression) -> Option<bool> {
+    let names = collect_member_names(callee)?;
+
+    match names.len() {
+        1 => {
+            // describe()
+            Some(names[0] == "describe")
+        }
+        2 => {
+            // test.describe()
+            Some(names[0] == "test" && names[1] == "describe")
+        }
+        3 => {
+            // test.describe.only() / test.describe.skip()
+            // test.describe.parallel() / test.describe.serial()
+            Some(
+                names[0] == "test"
+                    && names[1] == "describe"
+                    && (is_describe_modifier(names[2].text())
+                        || is_describe_mode(names[2].text())),
+            )
+        }
+        4 => {
+            // test.describe.parallel.only() / test.describe.serial.only()
+            Some(
+                names[0] == "test"
+                    && names[1] == "describe"
+                    && is_describe_mode(names[2].text())
+                    && is_describe_modifier(names[3].text()),
+            )
+        }
+        _ => Some(false),
+    }
+}
+
+fn is_describe_modifier(s: &str) -> bool {
+    s == "only" || s == "skip"
+}
+
+fn is_describe_mode(s: &str) -> bool {
+    s == "parallel" || s == "serial"
 }

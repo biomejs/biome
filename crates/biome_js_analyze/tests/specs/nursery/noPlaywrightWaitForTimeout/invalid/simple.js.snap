@@ -21,9 +21,9 @@ simple.js:2:7 lint/nursery/noPlaywrightWaitForTimeout ━━━━━━━━�
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ 
   
-  i Prefer using built-in wait methods like page.waitForLoadState(), page.waitForURL(), or page.waitForFunction() instead.
-  
   i Hardcoded timeouts are flaky and make tests slower. Use conditions that wait for specific events.
+  
+  i Prefer using built-in wait methods like page.waitForLoadState(), page.waitForURL(), or page.waitForFunction() instead.
   
   i Consider using web-first assertions like expect(locator).toBeVisible() which auto-wait for conditions.
   

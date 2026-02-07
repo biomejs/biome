@@ -30,11 +30,9 @@ nested-calls.js:3:30 lint/nursery/noPlaywrightElementHandle  FIXABLE  ━━━�
     4 │ 
     5 │ const button2 = await page.$("#foo");
   
-  i Element handles like page.$() are discouraged.
+  i Locators auto-wait and are more reliable than element handles, which can become stale.
   
-  i Use page.locator() or other locator methods like getByRole() instead.
-  
-  i Locators auto-wait and are more reliable than element handles.
+  i Use page.locator() or getByRole() instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -62,11 +60,9 @@ nested-calls.js:5:23 lint/nursery/noPlaywrightElementHandle  FIXABLE  ━━━�
     6 │ 
     7 │ await (await page.$$("div"));
   
-  i Element handles like page.$() are discouraged.
+  i Locators auto-wait and are more reliable than element handles, which can become stale.
   
-  i Use page.locator() or other locator methods like getByRole() instead.
-  
-  i Locators auto-wait and are more reliable than element handles.
+  i Use page.locator() or getByRole() instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -94,11 +90,9 @@ nested-calls.js:7:14 lint/nursery/noPlaywrightElementHandle  FIXABLE  ━━━�
     8 │ 
     9 │ let handle;
   
-  i Element handles like page.$$() are discouraged.
+  i Locators auto-wait and are more reliable than element handles, which can become stale.
   
-  i Use page.locator() or other locator methods like getByRole() instead.
-  
-  i Locators auto-wait and are more reliable than element handles.
+  i Use page.locator() or getByRole() instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -124,11 +118,9 @@ nested-calls.js:10:16 lint/nursery/noPlaywrightElementHandle  FIXABLE  ━━━
        │                ^^^^^^^^^^^^^^^
     11 │ 
   
-  i Element handles like page.$() are discouraged.
+  i Locators auto-wait and are more reliable than element handles, which can become stale.
   
-  i Use page.locator() or other locator methods like getByRole() instead.
-  
-  i Locators auto-wait and are more reliable than element handles.
+  i Use page.locator() or getByRole() instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

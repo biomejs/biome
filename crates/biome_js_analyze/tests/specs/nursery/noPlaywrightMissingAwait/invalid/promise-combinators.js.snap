@@ -41,6 +41,10 @@ promise-combinators.js:4:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
     5 │         expect(page.locator('.bar')).toHaveText('foo')
     6 │     ]);
   
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await before the Promise combinator.
@@ -61,6 +65,10 @@ promise-combinators.js:5:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │     ]);
     7 │ });
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -83,6 +91,10 @@ promise-combinators.js:11:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
     12 │         expect(page.locator('.bar')).toHaveText('foo')
     13 │     ]);
   
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await before the Promise combinator.
@@ -103,6 +115,10 @@ promise-combinators.js:12:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │     ]);
     14 │ });
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -125,6 +141,10 @@ promise-combinators.js:18:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
     19 │         expect(page.locator('.bar')).toHaveText('foo')
     20 │     ]);
   
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await before the Promise combinator.
@@ -145,6 +165,10 @@ promise-combinators.js:19:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     20 │     ]);
     21 │ });
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

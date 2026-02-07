@@ -60,144 +60,6 @@ declare_lint_rule! {
     }
 }
 
-/// The type of skipped annotation detected
-#[derive(Debug)]
-pub enum SkippedType {
-    Skip,
-    Fixme,
-}
-
-impl SkippedType {
-    fn as_str(&self) -> &'static str {
-        match self {
-            Self::Skip => "skip",
-            Self::Fixme => "fixme",
-        }
-    }
-}
-
-/// Checks if this is a skipped test/describe/step call.
-/// Returns the SkippedType if it matches.
-fn is_playwright_skipped_call(callee: &AnyJsExpression) -> Option<SkippedType> {
-    let names = collect_member_names(callee)?;
-
-    // Match patterns for skipped calls
-    match names.len() {
-        2 => {
-            // test.skip(...) / it.skip(...)
-            if (names[0] == "test" || names[0] == "it") && names[1] == "skip" {
-                return Some(SkippedType::Skip);
-            }
-            // test.fixme(...) / it.fixme(...)
-            if (names[0] == "test" || names[0] == "it") && names[1] == "fixme" {
-                return Some(SkippedType::Fixme);
-            }
-            // describe.skip(...)
-            if names[0] == "describe" && names[1] == "skip" {
-                return Some(SkippedType::Skip);
-            }
-        }
-        3 => {
-            // test.describe.skip(...) / test.step.skip(...)
-            if names[0] == "test"
-                && (names[1] == "describe" || names[1] == "step")
-                && names[2] == "skip"
-            {
-                return Some(SkippedType::Skip);
-            }
-            // test.describe.fixme(...)
-            if names[0] == "test" && names[1] == "describe" && names[2] == "fixme" {
-                return Some(SkippedType::Fixme);
-            }
-        }
-        4 => {
-            // test.describe.parallel.skip(...) / test.describe.serial.skip(...)
-            if names[0] == "test"
-                && names[1] == "describe"
-                && is_describe_mode(&names[2])
-                && names[3] == "skip"
-            {
-                return Some(SkippedType::Skip);
-            }
-            // test.describe.parallel.fixme(...) / test.describe.serial.fixme(...)
-            if names[0] == "test"
-                && names[1] == "describe"
-                && is_describe_mode(&names[2])
-                && names[3] == "fixme"
-            {
-                return Some(SkippedType::Fixme);
-            }
-        }
-        _ => {}
-    }
-    None
-}
-
-fn is_describe_mode(s: &TokenText) -> bool {
-    *s == "parallel" || *s == "serial"
-}
-
-/// Checks if this is a conditional skip call (test.skip() inside test body with args or in if block).
-fn is_conditional_skip(call_expr: &JsCallExpression, names: &[TokenText]) -> bool {
-    // Only test.skip(...) and it.skip(...) can be conditional
-    if names.len() != 2 {
-        return false;
-    }
-    if !((names[0] == "test" || names[0] == "it") && names[1] == "skip") {
-        return false;
-    }
-
-    // First check if inside an if statement (this is always conditional)
-    for ancestor in call_expr.syntax().ancestors() {
-        if ancestor.kind() == JsSyntaxKind::JS_IF_STATEMENT {
-            return true;
-        }
-        // Stop at function boundaries
-        if matches!(
-            ancestor.kind(),
-            JsSyntaxKind::JS_FUNCTION_EXPRESSION
-                | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-                | JsSyntaxKind::JS_FUNCTION_DECLARATION
-        ) {
-            break;
-        }
-    }
-
-    // Check if call has arguments (conditional skip like test.skip(condition))
-    if let Ok(args) = call_expr.arguments() {
-        let arg_count = args.args().iter().count();
-
-        // test.skip(condition) - one argument is a conditional skip
-        // test.skip(condition, "reason") - two arguments is also conditional
-        // test.skip("name", callback) - two arguments with string first is not conditional
-        if arg_count == 1 || arg_count == 2 {
-            // Check if first arg is NOT a string literal (would be test name)
-            if let Some(first_arg) = args.args().iter().next()
-                && let Ok(first_arg) = first_arg
-                && let Some(expr) = first_arg.as_any_js_expression()
-            {
-                // If first arg is a string literal, it's test.skip("name", fn)
-                // which is not conditional
-                if matches!(
-                    expr,
-                    AnyJsExpression::AnyJsLiteralExpression(lit)
-                        if lit.as_js_string_literal_expression().is_some()
-                ) {
-                    return false;
-                }
-                // If first arg is a template literal, also not conditional
-                if matches!(expr, AnyJsExpression::JsTemplateExpression(_)) {
-                    return false;
-                }
-                // Otherwise it's likely a conditional expression
-                return true;
-            }
-        }
-    }
-
-    false
-}
-
 impl Rule for NoPlaywrightSkippedTest {
     type Query = Ast<JsCallExpression>;
     type State = SkippedType;
@@ -262,6 +124,144 @@ impl Rule for NoPlaywrightSkippedTest {
             mutation,
         ))
     }
+}
+
+/// The type of skipped annotation detected
+#[derive(Debug)]
+pub enum SkippedType {
+    Skip,
+    Fixme,
+}
+
+impl SkippedType {
+    fn as_str(&self) -> &'static str {
+        match self {
+            Self::Skip => "skip",
+            Self::Fixme => "fixme",
+        }
+    }
+}
+
+/// Checks if this is a skipped test/describe/step call.
+/// Returns the SkippedType if it matches.
+fn is_playwright_skipped_call(callee: &AnyJsExpression) -> Option<SkippedType> {
+    let names = collect_member_names(callee)?;
+
+    // Match patterns for skipped calls
+    match names.len() {
+        2 => {
+            // test.skip(...) / it.skip(...)
+            if (names[0] == "test" || names[0] == "it") && names[1] == "skip" {
+                return Some(SkippedType::Skip);
+            }
+            // test.fixme(...) / it.fixme(...)
+            if (names[0] == "test" || names[0] == "it") && names[1] == "fixme" {
+                return Some(SkippedType::Fixme);
+            }
+            // describe.skip(...)
+            if names[0] == "describe" && names[1] == "skip" {
+                return Some(SkippedType::Skip);
+            }
+        }
+        3 => {
+            // test.describe.skip(...) / test.step.skip(...)
+            if names[0] == "test"
+                && (names[1] == "describe" || names[1] == "step")
+                && names[2] == "skip"
+            {
+                return Some(SkippedType::Skip);
+            }
+            // test.describe.fixme(...)
+            if names[0] == "test" && names[1] == "describe" && names[2] == "fixme" {
+                return Some(SkippedType::Fixme);
+            }
+        }
+        4 => {
+            // test.describe.parallel.skip(...) / test.describe.serial.skip(...)
+            if names[0] == "test"
+                && names[1] == "describe"
+                && is_describe_mode(names[2].text())
+                && names[3] == "skip"
+            {
+                return Some(SkippedType::Skip);
+            }
+            // test.describe.parallel.fixme(...) / test.describe.serial.fixme(...)
+            if names[0] == "test"
+                && names[1] == "describe"
+                && is_describe_mode(names[2].text())
+                && names[3] == "fixme"
+            {
+                return Some(SkippedType::Fixme);
+            }
+        }
+        _ => {}
+    }
+    None
+}
+
+fn is_describe_mode(s: &str) -> bool {
+    s == "parallel" || s == "serial"
+}
+
+/// Checks if this is a conditional skip call (test.skip() inside test body with args or in if block).
+fn is_conditional_skip(call_expr: &JsCallExpression, names: &[TokenText]) -> bool {
+    // Only test.skip(...) and it.skip(...) can be conditional
+    if names.len() != 2 {
+        return false;
+    }
+    if !((names[0] == "test" || names[0] == "it") && names[1] == "skip") {
+        return false;
+    }
+
+    // First check if inside an if statement (this is always conditional)
+    for ancestor in call_expr.syntax().ancestors() {
+        if ancestor.kind() == JsSyntaxKind::JS_IF_STATEMENT {
+            return true;
+        }
+        // Stop at function boundaries
+        if matches!(
+            ancestor.kind(),
+            JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+                | JsSyntaxKind::JS_FUNCTION_DECLARATION
+        ) {
+            break;
+        }
+    }
+
+    // Check if call has arguments (conditional skip like test.skip(condition))
+    if let Ok(args) = call_expr.arguments() {
+        let arg_count = args.args().iter().count();
+
+        // test.skip(condition) - one argument is a conditional skip
+        // test.skip(condition, "reason") - two arguments is also conditional
+        // test.skip("name", callback) - two arguments with string first is not conditional
+        if arg_count == 1 || arg_count == 2 {
+            // Check if first arg is NOT a string literal (would be test name)
+            if let Some(first_arg) = args.args().iter().next()
+                && let Ok(first_arg) = first_arg
+                && let Some(expr) = first_arg.as_any_js_expression()
+            {
+                // If first arg is a string literal, it's test.skip("name", fn)
+                // which is not conditional
+                if matches!(
+                    expr,
+                    AnyJsExpression::AnyJsLiteralExpression(lit)
+                        if lit.as_js_string_literal_expression().is_some()
+                ) {
+                    return false;
+                }
+                // If first arg is a template literal, also not conditional
+                if matches!(expr, AnyJsExpression::JsTemplateExpression(_)) {
+                    return false;
+                }
+                // Otherwise it's likely a conditional expression
+                return true;
+            }
+        }
+    }
+
+    false
 }
 
 /// Recursively find and remove the .skip or .fixme member from the expression chain

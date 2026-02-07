@@ -24,6 +24,10 @@ module-level.js:3:1 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
   
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Add await before the call.

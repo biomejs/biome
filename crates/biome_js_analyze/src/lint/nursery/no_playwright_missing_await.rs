@@ -68,48 +68,6 @@ declare_lint_rule! {
     }
 }
 
-// Playwright async matchers (web-first assertions)
-// IMPORTANT: Keep this array sorted for binary search
-const ASYNC_PLAYWRIGHT_MATCHERS: &[&str] = &[
-    "toBeAttached",
-    "toBeChecked",
-    "toBeDisabled",
-    "toBeEditable",
-    "toBeEmpty",
-    "toBeEnabled",
-    "toBeFocused",
-    "toBeHidden",
-    "toBeInViewport",
-    "toBeOK",
-    "toBeVisible",
-    "toContainClass",
-    "toContainText",
-    "toHaveAccessibleDescription",
-    "toHaveAccessibleErrorMessage",
-    "toHaveAccessibleName",
-    "toHaveAttribute",
-    "toHaveCSS",
-    "toHaveClass",
-    "toHaveCount",
-    "toHaveId",
-    "toHaveJSProperty",
-    "toHaveRole",
-    "toHaveScreenshot",
-    "toHaveText",
-    "toHaveTitle",
-    "toHaveURL",
-    "toHaveValue",
-    "toHaveValues",
-    "toPass",
-];
-
-#[derive(Debug)]
-pub enum MissingAwaitType {
-    ExpectMatcher(TokenText),
-    ExpectPoll,
-    TestStep,
-}
-
 impl Rule for NoPlaywrightMissingAwait {
     type Query = Ast<JsCallExpression>;
     type State = MissingAwaitType;
@@ -149,7 +107,13 @@ impl Rule for NoPlaywrightMissingAwait {
                     markup! {
                         "Async matcher "<Emphasis>{matcher_text}</Emphasis>" must be awaited or returned."
                     },
-                ))
+                )
+                .note(markup! {
+                    "Async matchers return a Promise that must be handled."
+                })
+                .note(markup! {
+                    "Add "<Emphasis>"await"</Emphasis>" before the expression or "<Emphasis>"return"</Emphasis>" it from the function."
+                }))
             }
             MissingAwaitType::ExpectPoll => Some(
                 RuleDiagnostic::new(
@@ -161,6 +125,9 @@ impl Rule for NoPlaywrightMissingAwait {
                 )
                 .note(markup! {
                     "The "<Emphasis>"expect.poll"</Emphasis>" method converts any synchronous expect to an asynchronous polling one."
+                })
+                .note(markup! {
+                    "Add "<Emphasis>"await"</Emphasis>" before the expression or "<Emphasis>"return"</Emphasis>" it from the function."
                 }),
             ),
             MissingAwaitType::TestStep => Some(
@@ -173,6 +140,9 @@ impl Rule for NoPlaywrightMissingAwait {
                 )
                 .note(markup! {
                     "Test steps are asynchronous."
+                })
+                .note(markup! {
+                    "Add "<Emphasis>"await"</Emphasis>" before the expression or "<Emphasis>"return"</Emphasis>" it from the function."
                 }),
             ),
         }
@@ -230,6 +200,48 @@ impl Rule for NoPlaywrightMissingAwait {
             mutation,
         ))
     }
+}
+
+// Playwright async matchers (web-first assertions)
+// IMPORTANT: Keep this array sorted for binary search
+const ASYNC_PLAYWRIGHT_MATCHERS: &[&str] = &[
+    "toBeAttached",
+    "toBeChecked",
+    "toBeDisabled",
+    "toBeEditable",
+    "toBeEmpty",
+    "toBeEnabled",
+    "toBeFocused",
+    "toBeHidden",
+    "toBeInViewport",
+    "toBeOK",
+    "toBeVisible",
+    "toContainClass",
+    "toContainText",
+    "toHaveAccessibleDescription",
+    "toHaveAccessibleErrorMessage",
+    "toHaveAccessibleName",
+    "toHaveAttribute",
+    "toHaveCSS",
+    "toHaveClass",
+    "toHaveCount",
+    "toHaveId",
+    "toHaveJSProperty",
+    "toHaveRole",
+    "toHaveScreenshot",
+    "toHaveText",
+    "toHaveTitle",
+    "toHaveURL",
+    "toHaveValue",
+    "toHaveValues",
+    "toPass",
+];
+
+#[derive(Debug)]
+pub enum MissingAwaitType {
+    ExpectMatcher(TokenText),
+    ExpectPoll,
+    TestStep,
 }
 
 /// Generic helper to check if a call expression matches a pattern like `object.member()`

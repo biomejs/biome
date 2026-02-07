@@ -61,11 +61,6 @@ declare_lint_rule! {
     }
 }
 
-pub struct ElementHandleCall {
-    receiver: TokenText,
-    method: TokenText,
-}
-
 impl Rule for NoPlaywrightElementHandle {
     type Query = Ast<JsCallExpression>;
     type State = ElementHandleCall;
@@ -101,7 +96,6 @@ impl Rule for NoPlaywrightElementHandle {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         let receiver = state.receiver.text();
-        let method = state.method.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -111,13 +105,10 @@ impl Rule for NoPlaywrightElementHandle {
                 },
             )
             .note(markup! {
-                "Element handles like "<Emphasis>{receiver}"."{{method}}"()"</Emphasis>" are discouraged."
+                "Locators auto-wait and are more reliable than element handles, which can become stale."
             })
             .note(markup! {
-                "Use "<Emphasis>{receiver}".locator()"</Emphasis>" or other locator methods like "<Emphasis>"getByRole()"</Emphasis>" instead."
-            })
-            .note(markup! {
-                "Locators auto-wait and are more reliable than element handles."
+                "Use "<Emphasis>{receiver}".locator()"</Emphasis>" or "<Emphasis>"getByRole()"</Emphasis>" instead."
             }),
         )
     }
@@ -145,4 +136,9 @@ impl Rule for NoPlaywrightElementHandle {
             mutation,
         ))
     }
+}
+
+pub struct ElementHandleCall {
+    receiver: TokenText,
+    method: TokenText,
 }

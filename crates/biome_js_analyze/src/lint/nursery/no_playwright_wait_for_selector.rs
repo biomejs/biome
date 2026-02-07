@@ -93,10 +93,10 @@ impl Rule for NoPlaywrightWaitForSelector {
                 },
             )
             .note(markup! {
-                "Use locator-based "<Emphasis>{receiver}".locator()"</Emphasis>" or "<Emphasis>{receiver}".getByRole()"</Emphasis>" APIs instead."
+                "Locators automatically wait for elements to be ready, making explicit waits unnecessary."
             })
             .note(markup! {
-                "Locators automatically wait for elements to be ready, making explicit waits unnecessary."
+                "Use locator-based "<Emphasis>{receiver}".locator()"</Emphasis>" or "<Emphasis>{receiver}".getByRole()"</Emphasis>" APIs instead."
             }),
         )
     }

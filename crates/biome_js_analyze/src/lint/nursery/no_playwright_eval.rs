@@ -46,11 +46,6 @@ declare_lint_rule! {
     }
 }
 
-pub struct EvalMethodCall {
-    receiver: TokenText,
-    method: TokenText,
-}
-
 impl Rule for NoPlaywrightEval {
     type Query = Ast<JsCallExpression>;
     type State = EvalMethodCall;
@@ -98,11 +93,16 @@ impl Rule for NoPlaywrightEval {
                 },
             )
             .note(markup! {
-                "Use "<Emphasis>{if is_eval { "locator.evaluate()" } else { "locator.evaluateAll()" }}</Emphasis>" instead."
+                "Locator-based evaluation is more reliable and follows Playwright's recommended patterns."
             })
             .note(markup! {
-                "Locator-based evaluation is more reliable and follows Playwright's recommended patterns."
+                "Use "<Emphasis>{if is_eval { "locator.evaluate()" } else { "locator.evaluateAll()" }}</Emphasis>" instead."
             }),
         )
     }
+}
+
+pub struct EvalMethodCall {
+    receiver: TokenText,
+    method: TokenText,
 }

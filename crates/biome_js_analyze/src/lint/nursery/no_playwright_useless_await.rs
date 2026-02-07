@@ -4,7 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsAwaitExpression, JsCallExpression};
-use biome_rowan::{AstNode, BatchMutationExt, TokenText};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 use biome_rule_options::no_playwright_useless_await::NoPlaywrightUselessAwaitOptions;
 
@@ -61,56 +61,6 @@ declare_lint_rule! {
         domains: &[RuleDomain::Playwright],
     }
 }
-
-// Page/Frame methods that are synchronous
-// IMPORTANT: Keep this array sorted for binary search
-const SYNC_PAGE_METHODS: &[&str] = &[
-    "childFrames",
-    "frame",
-    "frameLocator",
-    "frames",
-    "isClosed",
-    "isDetached",
-    "mainFrame",
-    "name",
-    "on",
-    "page",
-    "parentFrame",
-    "setDefaultNavigationTimeout",
-    "setDefaultTimeout",
-    "url",
-    "video",
-    "viewportSize",
-    "workers",
-];
-
-// Synchronous expect matchers (not Playwright-specific web-first assertions)
-// IMPORTANT: Keep this array sorted for binary search
-const SYNC_EXPECT_MATCHERS: &[&str] = &[
-    "toBe",
-    "toBeCloseTo",
-    "toBeDefined",
-    "toBeFalsy",
-    "toBeGreaterThan",
-    "toBeGreaterThanOrEqual",
-    "toBeInstanceOf",
-    "toBeLessThan",
-    "toBeLessThanOrEqual",
-    "toBeNaN",
-    "toBeNull",
-    "toBeTruthy",
-    "toBeUndefined",
-    "toContain",
-    "toContainEqual",
-    "toEqual",
-    "toHaveLength",
-    "toHaveProperty",
-    "toMatch",
-    "toMatchObject",
-    "toStrictEqual",
-    "toThrow",
-    "toThrowError",
-];
 
 impl Rule for NoPlaywrightUselessAwait {
     type Query = Ast<JsAwaitExpression>;
@@ -191,30 +141,73 @@ impl Rule for NoPlaywrightUselessAwait {
     }
 }
 
+// Page/Frame methods that are synchronous
+// IMPORTANT: Keep this array sorted for binary search
+const SYNC_PAGE_METHODS: &[&str] = &[
+    "childFrames",
+    "frame",
+    "frameLocator",
+    "frames",
+    "isClosed",
+    "isDetached",
+    "mainFrame",
+    "name",
+    "on",
+    "page",
+    "parentFrame",
+    "setDefaultNavigationTimeout",
+    "setDefaultTimeout",
+    "url",
+    "video",
+    "viewportSize",
+    "workers",
+];
+
+// Synchronous expect matchers (not Playwright-specific web-first assertions)
+// IMPORTANT: Keep this array sorted for binary search
+const SYNC_EXPECT_MATCHERS: &[&str] = &[
+    "toBe",
+    "toBeCloseTo",
+    "toBeDefined",
+    "toBeFalsy",
+    "toBeGreaterThan",
+    "toBeGreaterThanOrEqual",
+    "toBeInstanceOf",
+    "toBeLessThan",
+    "toBeLessThanOrEqual",
+    "toBeNaN",
+    "toBeNull",
+    "toBeTruthy",
+    "toBeUndefined",
+    "toContain",
+    "toContainEqual",
+    "toEqual",
+    "toHaveLength",
+    "toHaveProperty",
+    "toMatch",
+    "toMatchObject",
+    "toStrictEqual",
+    "toThrow",
+    "toThrowError",
+];
+
 fn is_sync_expect_call(call_expr: &JsCallExpression) -> bool {
-    let callee = call_expr.callee().ok();
-
-    // Check if this is an expect().matcher() pattern
-    // The call should be a member expression where the object is expect()
-    let member_expr = match callee {
-        Some(AnyJsExpression::JsStaticMemberExpression(member)) => member,
-        _ => return false,
+    let Ok(callee) = call_expr.callee() else {
+        return false;
     };
-
-    // Get the matcher name
-    let member = match member_expr.member().ok() {
-        Some(m) => m,
-        None => return false,
+    let Some(member_expr) = callee.as_js_static_member_expression() else {
+        return false;
     };
-    let name = match member.as_js_name() {
-        Some(n) => n,
-        None => return false,
+    let Ok(member) = member_expr.member() else {
+        return false;
     };
-    let token = match name.value_token().ok() {
-        Some(t) => t,
-        None => return false,
+    let Some(name) = member.as_js_name() else {
+        return false;
     };
-    let matcher_name: TokenText = token.token_text_trimmed();
+    let Ok(token) = name.value_token() else {
+        return false;
+    };
+    let matcher_name = token.token_text_trimmed();
 
     if SYNC_EXPECT_MATCHERS
         .binary_search(&matcher_name.text())
@@ -224,10 +217,12 @@ fn is_sync_expect_call(call_expr: &JsCallExpression) -> bool {
     }
 
     // Check if the object is an expect() call or .not modifier
-    let object = member_expr.object().ok();
+    let Ok(object) = member_expr.object() else {
+        return false;
+    };
 
     match object {
-        Some(AnyJsExpression::JsCallExpression(expect_call)) => {
+        AnyJsExpression::JsCallExpression(expect_call) => {
             let expect_callee = expect_call.callee().ok();
 
             // Check if it's expect (not expect.poll or expect with resolves/rejects)
@@ -257,7 +252,7 @@ fn is_sync_expect_call(call_expr: &JsCallExpression) -> bool {
                 _ => {}
             }
         }
-        Some(AnyJsExpression::JsStaticMemberExpression(not_member)) => {
+        AnyJsExpression::JsStaticMemberExpression(not_member) => {
             // Handle .not modifier: expect(x).not.toBe(1)
             if let Ok(member_name) = not_member.member()
                 && let Some(name) = member_name.as_js_name()

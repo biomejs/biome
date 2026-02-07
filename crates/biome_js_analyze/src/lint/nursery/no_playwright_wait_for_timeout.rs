@@ -86,10 +86,10 @@ impl Rule for NoPlaywrightWaitForTimeout {
                 },
             )
             .note(markup! {
-                "Prefer using built-in wait methods like "<Emphasis>{receiver}".waitForLoadState()"</Emphasis>", "<Emphasis>{receiver}".waitForURL()"</Emphasis>", or "<Emphasis>{receiver}".waitForFunction()"</Emphasis>" instead."
+                "Hardcoded timeouts are flaky and make tests slower. Use conditions that wait for specific events."
             })
             .note(markup! {
-                "Hardcoded timeouts are flaky and make tests slower. Use conditions that wait for specific events."
+                "Prefer using built-in wait methods like "<Emphasis>{receiver}".waitForLoadState()"</Emphasis>", "<Emphasis>{receiver}".waitForURL()"</Emphasis>", or "<Emphasis>{receiver}".waitForFunction()"</Emphasis>" instead."
             })
             .note(markup! {
                 "Consider using web-first assertions like "<Emphasis>"expect(locator).toBeVisible()"</Emphasis>" which auto-wait for conditions."

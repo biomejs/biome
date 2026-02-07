@@ -90,10 +90,10 @@ impl Rule for UsePlaywrightExpect {
                 },
             )
             .note(markup! {
-                "Add an assertion using "<Emphasis>"expect()"</Emphasis>" to verify the expected behavior."
+                "Tests without assertions may pass even when the behavior is broken."
             })
             .note(markup! {
-                "Tests without assertions may pass even when the behavior is broken."
+                "Add an assertion using "<Emphasis>"expect()"</Emphasis>" to verify the expected behavior."
             }),
         )
     }

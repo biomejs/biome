@@ -54,22 +54,6 @@ declare_lint_rule! {
     }
 }
 
-// IMPORTANT: Keep this array sorted for binary search
-const METHODS_WITH_FORCE: &[&str] = &[
-    "check",
-    "clear",
-    "click",
-    "dblclick",
-    "dragTo",
-    "fill",
-    "hover",
-    "selectOption",
-    "selectText",
-    "setChecked",
-    "tap",
-    "uncheck",
-];
-
 impl Rule for NoPlaywrightForceOption {
     type Query = Ast<JsCallExpression>;
     type State = ();
@@ -134,6 +118,22 @@ impl Rule for NoPlaywrightForceOption {
         )
     }
 }
+
+// IMPORTANT: Keep this array sorted for binary search
+const METHODS_WITH_FORCE: &[&str] = &[
+    "check",
+    "clear",
+    "click",
+    "dblclick",
+    "dragTo",
+    "fill",
+    "hover",
+    "selectOption",
+    "selectText",
+    "setChecked",
+    "tap",
+    "uncheck",
+];
 
 /// Unwraps parenthesized expressions recursively
 fn unwrap_parenthesized(expr: AnyJsExpression) -> AnyJsExpression {

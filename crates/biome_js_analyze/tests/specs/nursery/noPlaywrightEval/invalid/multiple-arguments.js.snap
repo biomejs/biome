@@ -29,9 +29,9 @@ multiple-arguments.js:3:7 lint/nursery/noPlaywrightEval ━━━━━━━━
     4 │ 
     5 │ await page.$$eval("div", (divs, min) => divs.length >= min, 10);
   
-  i Use locator.evaluate() instead.
-  
   i Locator-based evaluation is more reliable and follows Playwright's recommended patterns.
+  
+  i Use locator.evaluate() instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -50,9 +50,9 @@ multiple-arguments.js:5:7 lint/nursery/noPlaywrightEval ━━━━━━━━
     6 │ 
     7 │ await page.$eval("#search", (el, prop) => el[prop], "value");
   
-  i Use locator.evaluateAll() instead.
-  
   i Locator-based evaluation is more reliable and follows Playwright's recommended patterns.
+  
+  i Use locator.evaluateAll() instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -71,9 +71,9 @@ multiple-arguments.js:7:7 lint/nursery/noPlaywrightEval ━━━━━━━━
     8 │ 
     9 │ await this.page.$$eval("span", (els, className) => els.filter(e => e.className === className), "active");
   
-  i Use locator.evaluate() instead.
-  
   i Locator-based evaluation is more reliable and follows Playwright's recommended patterns.
+  
+  i Use locator.evaluate() instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -91,9 +91,9 @@ multiple-arguments.js:9:7 lint/nursery/noPlaywrightEval ━━━━━━━━
        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ 
   
-  i Use locator.evaluateAll() instead.
-  
   i Locator-based evaluation is more reliable and follows Playwright's recommended patterns.
+  
+  i Use locator.evaluateAll() instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

@@ -86,10 +86,10 @@ impl Rule for NoPlaywrightWaitForNavigation {
                 },
             )
             .note(markup! {
-                <Emphasis>"waitForNavigation()"</Emphasis>" is deprecated. Use "<Emphasis>{receiver}".waitForURL()"</Emphasis>" or "<Emphasis>{receiver}".waitForLoadState()"</Emphasis>" instead."
+                <Emphasis>"waitForNavigation()"</Emphasis>" is deprecated because it can be unreliable."
             })
             .note(markup! {
-                "These alternatives are more reliable and provide better control over navigation waiting."
+                "Use "<Emphasis>{receiver}".waitForURL()"</Emphasis>" or "<Emphasis>{receiver}".waitForLoadState()"</Emphasis>" instead."
             }),
         )
     }
