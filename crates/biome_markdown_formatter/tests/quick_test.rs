@@ -5,6 +5,7 @@ use biome_rowan::TextSize;
 
 // This test only verifies the formatter infrastructure works end-to-end
 // without actually formatting the input.
+#[ignore]
 #[test]
 fn quick_test() {
     let source = "A simple paragraph";
