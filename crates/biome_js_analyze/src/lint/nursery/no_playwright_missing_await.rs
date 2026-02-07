@@ -426,6 +426,12 @@ fn is_call_awaited_or_returned(call_expr: &JsCallExpression) -> bool {
                 }
                 break;
             }
+            biome_js_syntax::JsSyntaxKind::JS_FUNCTION_DECLARATION
+            | biome_js_syntax::JsSyntaxKind::JS_FUNCTION_EXPRESSION
+            | biome_js_syntax::JsSyntaxKind::JS_METHOD_CLASS_MEMBER
+            | biome_js_syntax::JsSyntaxKind::JS_METHOD_OBJECT_MEMBER => {
+                break;
+            }
             _ => {}
         }
         current = node.parent();

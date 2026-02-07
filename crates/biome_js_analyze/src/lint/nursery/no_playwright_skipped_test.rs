@@ -162,6 +162,10 @@ fn is_playwright_skipped_call(callee: &AnyJsExpression) -> Option<SkippedType> {
             if names[0] == "describe" && names[1] == "skip" {
                 return Some(SkippedType::Skip);
             }
+            // describe.fixme(...)
+            if names[0] == "describe" && names[1] == "fixme" {
+                return Some(SkippedType::Fixme);
+            }
         }
         3 => {
             // test.describe.skip(...) / test.step.skip(...)

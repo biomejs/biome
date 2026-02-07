@@ -30,6 +30,13 @@ test.describe.serial.skip("serial skipped", () => {
     test("test", async ({ page }) => {});
 });
 
+// describe.fixme
+describe.fixme("fixme describe", () => {
+    test("test", async ({ page }) => {
+        await page.click("button");
+    });
+});
+
 ```
 
 # Diagnostics
@@ -145,6 +152,7 @@ describe-skip.js:23:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━�
   > 25 │ });
        │ ^^
     26 │ 
+    27 │ // describe.fixme
   
   i Skipped tests are discouraged because they might be forgotten and remain disabled permanently.
   
@@ -160,6 +168,39 @@ describe-skip.js:23:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━�
        23 │ + test.describe.serial("serial·skipped",·()·=>·{
     24 24 │       test("test", async ({ page }) => {});
     25 25 │   });
+  
+
+```
+
+```
+describe-skip.js:28:1 lint/nursery/noPlaywrightSkippedTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of .fixme() annotation.
+  
+    27 │ // describe.fixme
+  > 28 │ describe.fixme("fixme describe", () => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 29 │     test("test", async ({ page }) => {
+  > 30 │         await page.click("button");
+  > 31 │     });
+  > 32 │ });
+       │ ^^
+    33 │ 
+  
+  i Skipped tests are discouraged because they might be forgotten and remain disabled permanently.
+  
+  i Remove the .fixme() annotation or address the underlying issue causing the test to be skipped.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .fixme() annotation.
+  
+    26 26 │   
+    27 27 │   // describe.fixme
+    28    │ - describe.fixme("fixme·describe",·()·=>·{
+       28 │ + describe("fixme·describe",·()·=>·{
+    29 29 │       test("test", async ({ page }) => {
+    30 30 │           await page.click("button");
   
 
 ```

@@ -15,6 +15,7 @@ test.describe.parallel.only('suite', async () => {});
 test.describe.serial.only('suite', async () => {});
 describe('suite', async function() {});
 test.describe('suite', async function() {});
+test.describe.fixme('suite', async () => {});
 
 ```
 
@@ -196,7 +197,7 @@ async.js:10:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━
   > 10 │ describe('suite', async function() {});
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │ test.describe('suite', async function() {});
-    12 │ 
+    12 │ test.describe.fixme('suite', async () => {});
   
   i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
   
@@ -216,7 +217,28 @@ async.js:11:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━
     10 │ describe('suite', async function() {});
   > 11 │ test.describe('suite', async function() {});
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ 
+    12 │ test.describe.fixme('suite', async () => {});
+    13 │ 
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+async.js:12:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+    10 │ describe('suite', async function() {});
+    11 │ test.describe('suite', async function() {});
+  > 12 │ test.describe.fixme('suite', async () => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
   
   i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
   

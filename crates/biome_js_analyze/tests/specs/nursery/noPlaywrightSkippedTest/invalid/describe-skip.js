@@ -23,3 +23,10 @@ test.describe.parallel.skip("parallel skipped", () => {
 test.describe.serial.skip("serial skipped", () => {
     test("test", async ({ page }) => {});
 });
+
+// describe.fixme
+describe.fixme("fixme describe", () => {
+    test("test", async ({ page }) => {
+        await page.click("button");
+    });
+});

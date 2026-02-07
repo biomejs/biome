@@ -209,7 +209,7 @@ fn is_playwright_describe_call(callee: &AnyJsExpression) -> Option<bool> {
 }
 
 fn is_describe_modifier(s: &str) -> bool {
-    s == "only" || s == "skip"
+    s == "only" || s == "skip" || s == "fixme"
 }
 
 fn is_describe_mode(s: &str) -> bool {

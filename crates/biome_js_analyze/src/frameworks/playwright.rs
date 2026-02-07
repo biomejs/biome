@@ -87,9 +87,8 @@ fn collect_member_names_rec(expr: &AnyJsExpression, names: &mut Vec<TokenText>) 
         }
         AnyJsExpression::JsStaticMemberExpression(member) => {
             // First recurse on object to get outer names
-            if let Ok(object) = member.object() {
-                collect_member_names_rec(&object, names)?;
-            }
+            let object = member.object().ok()?;
+            collect_member_names_rec(&object, names)?;
             // Then add this member name
             let m = member.member().ok()?;
             let n = m.as_js_name()?;
@@ -99,9 +98,8 @@ fn collect_member_names_rec(expr: &AnyJsExpression, names: &mut Vec<TokenText>) 
         }
         AnyJsExpression::JsComputedMemberExpression(member) => {
             // First recurse on object
-            if let Ok(object) = member.object() {
-                collect_member_names_rec(&object, names)?;
-            }
+            let object = member.object().ok()?;
+            collect_member_names_rec(&object, names)?;
             // For computed members, extract string literal value using inner_string_text
             if let Ok(expr) = member.member()
                 && let Some(literal) = expr.as_any_js_literal_expression()
@@ -163,7 +161,7 @@ pub(crate) fn get_test_callback(args: &JsCallArguments) -> Option<AnyJsExpressio
     let mut callback = None;
 
     for arg in arg_list.iter() {
-        let arg = arg.ok()?;
+        let Ok(arg) = arg else { continue };
         if let Some(expr) = arg.as_any_js_expression() {
             match expr {
                 AnyJsExpression::JsArrowFunctionExpression(_)

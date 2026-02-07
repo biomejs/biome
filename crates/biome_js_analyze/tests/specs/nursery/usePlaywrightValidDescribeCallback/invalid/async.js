@@ -9,3 +9,4 @@ test.describe.parallel.only('suite', async () => {});
 test.describe.serial.only('suite', async () => {});
 describe('suite', async function() {});
 test.describe('suite', async function() {});
+test.describe.fixme('suite', async () => {});
