@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-defineemits.vue
+---
+# Input
+```ts
+const emit = defineEmits(['test'])
+const [model, mod] = defineModel();
+
+function update() {
+  emit('test', model.value)
+}
+
+```

@@ -5558,6 +5558,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueRefAsOperandConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueRefAsOperandOptions" }
+			]
+		},
+		"NoVueRefAsOperandOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5923,6 +5933,13 @@
 					"description": "Disallow the use of Vue Options API.\nSee https://biomejs.dev/linter/rules/no-vue-options-api",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueOptionsApiConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueRefAsOperand": {
+					"description": "Disallow the use of value wrapped by ref()(Composition API) as operand.\nSee https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueRefAsOperandConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9336,6 +9353,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueOptionsApiOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueRefAsOperandOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueRefAsOperandOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
