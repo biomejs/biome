@@ -80,24 +80,20 @@ impl Rule for UseButtonType {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let span = ctx.query().range();
-
-        let message = if state.missing_prop {
-            (markup! {
-                "Provide an explicit "<Emphasis>"type"</Emphasis>" attribute for the "<Emphasis>"button"</Emphasis>" element."
-            }).to_owned()
-        } else {
-            (markup!{
-                "Provide a valid "<Emphasis>"type"</Emphasis>" attribute for the "<Emphasis>"button"</Emphasis>" element."
-            }).to_owned()
-        };
-
         Some(RuleDiagnostic::new(rule_category!(),
-            span,
-            message
+            ctx.query().range(),
+            if state.missing_prop {
+                markup! {
+                    "Provide an explicit "<Emphasis>"type"</Emphasis>" attribute for the "<Emphasis>"button"</Emphasis>" element."
+                }
+            } else {
+                markup!{
+                    "Provide a valid "<Emphasis>"type"</Emphasis>" attribute for the "<Emphasis>"button"</Emphasis>" element."
+                }
+            }
         )
             .note(markup! {
-                "The default "<Emphasis>"type"</Emphasis>" of a button is "<Emphasis>"submit"</Emphasis>", which causes the submission of a form when placed inside a `form` element. "
+                "The default "<Emphasis>"type"</Emphasis>" of a button is "<Emphasis>"submit"</Emphasis>", which causes the submission of a form when placed inside a `form` element."
             })
             .note(
             markup! {
