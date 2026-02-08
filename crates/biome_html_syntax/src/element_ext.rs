@@ -59,6 +59,9 @@ impl AnyHtmlElement {
         }
     }
 
+    /// Find an attribute by name (case-insensitive) within this element, if it has attributes.
+    ///
+    /// This will not detect attributes in Svelte attribute shorthand like `<div {foo}>`.
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
         match self {
             Self::HtmlElement(element) => element.find_attribute_by_name(name_to_lookup),
