@@ -105,3 +105,22 @@ pub fn ensure_rustfmt() -> Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn prepend_generated_preamble_adds_preamble() {
+        let result = prepend_generated_preamble("fn main() {}");
+        assert!(result.starts_with("//!"));
+        assert_eq!(result.matches(PREAMBLE).count(), 1);
+    }
+
+    #[test]
+    #[should_panic(expected = "content already contains the generated preamble")]
+    fn prepend_generated_preamble_rejects_duplicate() {
+        let once = prepend_generated_preamble("fn main() {}");
+        prepend_generated_preamble(once);
+    }
+}
