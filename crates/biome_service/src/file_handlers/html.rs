@@ -577,7 +577,7 @@ fn parse_embedded_nodes(
                             builder,
                         );
                         if let Some((content, file_source)) = result {
-                            embedded_file_source = file_source.clone();
+                            embedded_file_source = file_source;
                             nodes.push((content.into(), file_source.into()));
                         }
                     } else if script_type.is_json() {
@@ -607,7 +607,7 @@ fn parse_embedded_nodes(
                     cache,
                     biome_path,
                     settings,
-                    embedded_file_source.clone(),
+                    embedded_file_source,
                 );
 
                 if let Some((content, file_source)) = result {
@@ -641,7 +641,7 @@ fn parse_embedded_nodes(
                             builder,
                         );
                         if let Some((content, file_source)) = result {
-                            embedded_file_source = file_source.clone();
+                            embedded_file_source = file_source;
                             nodes.push((content.into(), file_source.into()));
                         }
                     } else if script_type.is_json() {
@@ -671,7 +671,7 @@ fn parse_embedded_nodes(
                     cache,
                     biome_path,
                     settings,
-                    embedded_file_source.clone(),
+                    embedded_file_source,
                 );
 
                 if let Some((content, file_source)) = result {
