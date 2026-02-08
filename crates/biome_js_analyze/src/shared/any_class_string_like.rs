@@ -1,3 +1,9 @@
+//! Shared utilities for working with CSS class strings in JSX/JS.
+//!
+//! This module provides the `AnyClassStringLike` union type that represents
+//! various AST nodes that can contain CSS class strings (string literals,
+//! JSX strings, template chunks, etc.).
+
 use biome_js_syntax::{
     AnyJsExpression, JsCallArguments, JsCallExpression, JsLiteralMemberName,
     JsStringLiteralExpression, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression,
@@ -69,7 +75,12 @@ fn inspect_string_literal(node: &JsSyntaxNode, options: &UseSortedClassesOptions
 }
 
 impl AnyClassStringLike {
-    pub(crate) fn should_visit(&self, options: &UseSortedClassesOptions) -> Option<bool> {
+    /// Check if this node should be visited based on the given options.
+    ///
+    /// Returns `Some(true)` if the node is in a context that should be checked
+    /// (e.g., a `class` or `className` attribute, or inside a utility function call).
+    /// Returns `None` if the node should be skipped.
+    pub fn should_visit(&self, options: &UseSortedClassesOptions) -> Option<bool> {
         match self {
             Self::JsStringLiteralExpression(string_literal) => {
                 inspect_string_literal(string_literal.syntax(), options)
@@ -120,6 +131,7 @@ impl AnyClassStringLike {
         }
     }
 
+    /// Get the text value of this class string node.
     pub fn value(&self) -> Option<TokenText> {
         match &self {
             Self::JsStringLiteralExpression(node) => node.inner_string_text().ok(),

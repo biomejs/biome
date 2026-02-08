@@ -34,6 +34,7 @@ mod nextjs;
 mod react;
 mod registry;
 mod services;
+pub mod shared;
 mod suppression_action;
 mod syntax;
 pub mod utils;
