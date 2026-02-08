@@ -282,6 +282,7 @@ where
                                 }
                             }
                         }
+                        prev_chunk_was_comment = false;
                     }
 
                     (relative_start, HtmlTextChunk::Word(word)) => {
@@ -291,6 +292,7 @@ where
                         let source_position = value_token.text_range().start() + relative_start;
 
                         builder.entry(HtmlChild::Word(HtmlWord::new(text, source_position)));
+                        prev_chunk_was_comment = false;
                     }
                     (relative_start, HtmlTextChunk::Comment(word)) => {
                         let text = value_token
@@ -301,12 +303,16 @@ where
                         // Skip suppression comments here - they will be formatted as part of the
                         // verbatim output for the next (suppressed) element. This prevents the
                         // comment from being printed twice.
-                        if !HtmlCommentStyle::is_suppression(text.text()) {
+                        let is_suppression = HtmlCommentStyle::is_suppression(text.text());
+
+                        if !is_suppression {
                             builder.entry(HtmlChild::Comment(HtmlWord::new(text, source_position)));
+                            prev_chunk_was_comment = true;
+                        } else {
+                            prev_chunk_was_comment = false;
                         }
                     }
                 }
-                prev_chunk_was_comment = matches!(chunk, (_, HtmlTextChunk::Comment(_)));
             }
 
             // There may be trailing comments that we attached to the content if this is the last child of an Element. They won't show up in the `value_token.text()` because they are actually attached to the leading token of the closing tag. This means we have to format them manually.
