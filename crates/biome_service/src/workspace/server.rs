@@ -707,10 +707,10 @@ impl WorkspaceServer {
             path,
             settings.as_ref().experimental_full_html_support_enabled(),
         );
-        let Some(parse_embedded) = capabilities.parser.parse_embedded_nodes else {
+        let Some(parse_embedded_nodes) = capabilities.parser.parse_embedded_nodes else {
             return Ok(Default::default());
         };
-        let result = parse_embedded(root, path, source, settings, cache, builder);
+        let result = parse_embedded_nodes(root, path, source, settings, cache, builder);
 
         for (mut content, file_source) in result.nodes {
             let index = self.insert_source(file_source);

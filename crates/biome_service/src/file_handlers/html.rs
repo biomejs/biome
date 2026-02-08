@@ -42,7 +42,8 @@ use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
     AstroEmbeddedContent, HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlLanguage,
-    HtmlRoot, HtmlSingleTextExpression, HtmlSyntaxNode,
+    HtmlRoot, HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression, HtmlTextExpressions,
+    HtmlVariant,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
@@ -410,82 +411,276 @@ fn parse_embedded_nodes(
         return ParseEmbedResult::default();
     };
 
-    // Walk through all HTML elements looking for script tags and style tags
-    for element in html_root.syntax().descendants() {
-        if let Some(astro_embedded_content) = AstroEmbeddedContent::cast_ref(&element) {
-            let result = parse_astro_embedded_script(
-                astro_embedded_content.clone(),
-                cache,
-                biome_path,
-                settings,
-                builder,
-            );
-            if let Some((content, file_source)) = result {
-                nodes.push((content.into(), file_source));
+    match file_source.variant() {
+        HtmlVariant::Standard(text_expression) => {
+            for element in html_root.syntax().descendants() {
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Some(script_type) = html_element.get_script_type() {
+                        if script_type.is_javascript() {
+                            let result = parse_embedded_script(
+                                html_element.clone(),
+                                cache,
+                                biome_path,
+                                &file_source,
+                                settings,
+                                builder,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source.into()));
+                            }
+                        } else if script_type.is_json() {
+                            let result = parse_embedded_json(
+                                html_element.clone(),
+                                cache,
+                                biome_path,
+                                settings,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source));
+                            }
+                        }
+                    } else if html_element.is_style_tag() {
+                        let result = parse_embedded_style(
+                            html_element.clone(),
+                            cache,
+                            biome_path,
+                            &file_source,
+                            settings,
+                        );
+                        if let Some((content, services, file_source)) = result {
+                            nodes.push(((content, services).into(), file_source));
+                        }
+                    }
+                }
+
+                match text_expression {
+                    HtmlTextExpressions::Single => {
+                        if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
+                        {
+                            let result = parse_single_text_expression(
+                                text_expression,
+                                cache,
+                                biome_path,
+                                settings,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source));
+                            }
+                        }
+                    }
+
+                    HtmlTextExpressions::Double => {
+                        if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
+                        {
+                            let result = parse_double_text_expression(
+                                text_expression,
+                                cache,
+                                biome_path,
+                                settings,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source));
+                            }
+                        }
+                    }
+                    HtmlTextExpressions::None => {}
+                }
             }
         }
 
-        if file_source.is_svelte()
-            && let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
-        {
-            let result = parse_svelte_text_expression(text_expression, cache, biome_path, settings);
-            if let Some((content, file_source)) = result {
-                nodes.push((content.into(), file_source));
-            }
-        }
-
-        if file_source.is_vue()
-            && let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
-        {
-            let result = parse_vue_text_expression(text_expression, cache, biome_path, settings);
-            if let Some((content, file_source)) = result {
-                nodes.push((content.into(), file_source));
-            }
-        }
-
-        if file_source.is_astro()
-            && let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
-        {
-            let result = parse_astro_text_expression(text_expression, cache, biome_path, settings);
-            if let Some((content, file_source)) = result {
-                nodes.push((content.into(), file_source));
-            }
-        }
-
-        if let Some(element) = HtmlElement::cast_ref(&element) {
-            if let Some(script_type) = element.get_script_type() {
-                if script_type.is_javascript() {
-                    let result = parse_embedded_script(
-                        element.clone(),
+        HtmlVariant::Astro => {
+            for element in html_root.syntax().descendants() {
+                if let Some(astro_embedded_content) = AstroEmbeddedContent::cast_ref(&element) {
+                    let result = parse_astro_embedded_script(
+                        astro_embedded_content.clone(),
                         cache,
                         biome_path,
-                        &file_source,
                         settings,
                         builder,
                     );
                     if let Some((content, file_source)) = result {
                         nodes.push((content.into(), file_source));
                     }
-                } else if script_type.is_json() {
-                    let result = parse_embedded_json(element.clone(), cache, biome_path, settings);
+                }
+
+                if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element) {
+                    let result =
+                        parse_astro_text_expression(text_expression, cache, biome_path, settings);
                     if let Some((content, file_source)) = result {
                         nodes.push((content.into(), file_source));
                     }
                 }
-            } else if element.is_style_tag() {
-                let result = parse_embedded_style(
-                    element.clone(),
+
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Some(script_type) = html_element.get_script_type() {
+                        if script_type.is_javascript() {
+                            let result = parse_embedded_script(
+                                html_element.clone(),
+                                cache,
+                                biome_path,
+                                &file_source,
+                                settings,
+                                builder,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source.into()));
+                            }
+                        } else if script_type.is_json() {
+                            let result = parse_embedded_json(
+                                html_element.clone(),
+                                cache,
+                                biome_path,
+                                settings,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source));
+                            }
+                        }
+                    } else if html_element.is_style_tag() {
+                        let result = parse_embedded_style(
+                            html_element.clone(),
+                            cache,
+                            biome_path,
+                            &file_source,
+                            settings,
+                        );
+                        if let Some((content, services, file_source)) = result {
+                            nodes.push(((content, services).into(), file_source));
+                        }
+                    }
+                }
+            }
+        }
+        HtmlVariant::Vue => {
+            let mut elements = vec![];
+            let mut snippet_expressions = vec![];
+            for element in html_root.syntax().descendants() {
+                if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element) {
+                    snippet_expressions.push(text_expression);
+                }
+
+                if let Some(element) = HtmlElement::cast_ref(&element) {
+                    elements.push(element);
+                }
+            }
+
+            let mut embedded_file_source = JsFileSource::js_module();
+            for element in elements {
+                if let Some(script_type) = element.get_script_type() {
+                    if script_type.is_javascript() {
+                        let result = parse_embedded_script(
+                            element.clone(),
+                            cache,
+                            biome_path,
+                            &file_source,
+                            settings,
+                            builder,
+                        );
+                        if let Some((content, file_source)) = result {
+                            embedded_file_source = file_source;
+                            nodes.push((content.into(), file_source.into()));
+                        }
+                    } else if script_type.is_json() {
+                        let result =
+                            parse_embedded_json(element.clone(), cache, biome_path, settings);
+                        if let Some((content, file_source)) = result {
+                            nodes.push((content.into(), file_source));
+                        }
+                    }
+                } else if element.is_style_tag() {
+                    let result = parse_embedded_style(
+                        element.clone(),
+                        cache,
+                        biome_path,
+                        &file_source,
+                        settings,
+                    );
+                    if let Some((content, services, file_source)) = result {
+                        nodes.push(((content, services).into(), file_source));
+                    }
+                }
+            }
+
+            for snippet in snippet_expressions {
+                let result = parse_vue_text_expression(
+                    snippet,
                     cache,
                     biome_path,
-                    &file_source,
                     settings,
+                    embedded_file_source,
                 );
-                if let Some((content, services, file_source)) = result {
-                    nodes.push(((content, services).into(), file_source));
+
+                if let Some((content, file_source)) = result {
+                    nodes.push((content.into(), file_source));
+                }
+            }
+        }
+        HtmlVariant::Svelte => {
+            let mut elements = vec![];
+            let mut snippet_expressions = vec![];
+            for element in html_root.syntax().descendants() {
+                if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element) {
+                    snippet_expressions.push(text_expression);
+                }
+
+                if let Some(element) = HtmlElement::cast_ref(&element) {
+                    elements.push(element);
+                }
+            }
+
+            let mut embedded_file_source = JsFileSource::js_module();
+            for element in elements {
+                if let Some(script_type) = element.get_script_type() {
+                    if script_type.is_javascript() {
+                        let result = parse_embedded_script(
+                            element.clone(),
+                            cache,
+                            biome_path,
+                            &file_source,
+                            settings,
+                            builder,
+                        );
+                        if let Some((content, file_source)) = result {
+                            embedded_file_source = file_source;
+                            nodes.push((content.into(), file_source.into()));
+                        }
+                    } else if script_type.is_json() {
+                        let result =
+                            parse_embedded_json(element.clone(), cache, biome_path, settings);
+                        if let Some((content, file_source)) = result {
+                            nodes.push((content.into(), file_source));
+                        }
+                    }
+                } else if element.is_style_tag() {
+                    let result = parse_embedded_style(
+                        element.clone(),
+                        cache,
+                        biome_path,
+                        &file_source,
+                        settings,
+                    );
+                    if let Some((content, services, file_source)) = result {
+                        nodes.push(((content, services).into(), file_source));
+                    }
+                }
+            }
+
+            for snippet in snippet_expressions {
+                let result = parse_svelte_text_expression(
+                    snippet,
+                    cache,
+                    biome_path,
+                    settings,
+                    embedded_file_source,
+                );
+
+                if let Some((content, file_source)) = result {
+                    nodes.push((content.into(), file_source));
                 }
             }
         }
     }
+
     ParseEmbedResult { nodes }
 }
 
@@ -528,7 +723,7 @@ pub(crate) fn parse_embedded_script(
     html_file_source: &HtmlFileSource,
     settings: &SettingsWithEditor,
     builder: &mut EmbeddedBuilder,
-) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+) -> Option<(EmbeddedSnippet<JsLanguage>, JsFileSource)> {
     if element.is_javascript_tag() {
         let file_source = if html_file_source.is_svelte() || html_file_source.is_vue() {
             let mut file_source = if element.is_typescript_lang() {
@@ -593,7 +788,7 @@ pub(crate) fn parse_embedded_script(
                 content.text_range().start(),
             ))
         })?;
-        Some((embedded_content, file_source.into()))
+        Some((embedded_content, file_source))
     } else {
         None
     }
@@ -700,17 +895,14 @@ pub(crate) fn parse_embedded_json(
     Some((script_children, file_source))
 }
 
-/// Parses Svelte single text expressions `{ expression }`
-pub(crate) fn parse_svelte_text_expression(
-    element: HtmlSingleTextExpression,
+pub(crate) fn parse_text_expression(
+    expression: HtmlTextExpression,
     cache: &mut NodeCache,
     biome_path: &BiomePath,
     settings: &SettingsWithEditor,
+    file_source: JsFileSource,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
-    let expression = element.expression().ok()?;
     let content = expression.html_literal_token().ok()?;
-    let file_source =
-        JsFileSource::js_module().with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
     let document_file_source = DocumentFileSource::Js(file_source);
     let options = settings.parse_options::<JsLanguage>(biome_path, &document_file_source);
     let parse = parse_js_with_offset_and_cache(
@@ -720,6 +912,7 @@ pub(crate) fn parse_svelte_text_expression(
         options,
         cache,
     );
+
     let snippet = EmbeddedSnippet::new(
         parse.into(),
         expression.range(),
@@ -727,6 +920,41 @@ pub(crate) fn parse_svelte_text_expression(
         content.text_range().start(),
     );
     Some((snippet, document_file_source))
+}
+
+/// Parses Svelte single text expressions `{ expression }`
+pub(crate) fn parse_svelte_text_expression(
+    element: HtmlSingleTextExpression,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+    file_source: JsFileSource,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    let expression = element.expression().ok()?;
+    let file_source = file_source.with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
+    parse_text_expression(expression, cache, biome_path, settings, file_source)
+}
+
+pub(crate) fn parse_double_text_expression(
+    element: HtmlDoubleTextExpression,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    let expression = element.expression().ok()?;
+    let file_source = JsFileSource::js_module();
+    parse_text_expression(expression, cache, biome_path, settings, file_source)
+}
+
+pub(crate) fn parse_single_text_expression(
+    element: HtmlSingleTextExpression,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    let expression = element.expression().ok()?;
+    let file_source = JsFileSource::js_module();
+    parse_text_expression(expression, cache, biome_path, settings, file_source)
 }
 
 /// Parses Astro single text expressions `{ expression }`
@@ -769,29 +997,14 @@ pub(crate) fn parse_vue_text_expression(
     cache: &mut NodeCache,
     biome_path: &BiomePath,
     settings: &SettingsWithEditor,
+    js_file_source: JsFileSource,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
     let expression = element.expression().ok()?;
-    let content = expression.html_literal_token().ok()?;
-    let file_source = JsFileSource::js_module().with_embedding_kind(EmbeddingKind::Vue {
+    let file_source = js_file_source.with_embedding_kind(EmbeddingKind::Vue {
         setup: false,
         is_source: false,
     });
-    let document_file_source = DocumentFileSource::Js(file_source);
-    let options = settings.parse_options::<JsLanguage>(biome_path, &document_file_source);
-    let parse = parse_js_with_offset_and_cache(
-        content.text(),
-        content.text_range().start(),
-        file_source,
-        options,
-        cache,
-    );
-    let snippet = EmbeddedSnippet::new(
-        parse.into(),
-        expression.range(),
-        content.text_range(),
-        content.text_range().start(),
-    );
-    Some((snippet, document_file_source))
+    parse_text_expression(expression, cache, biome_path, settings, file_source)
 }
 
 fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {

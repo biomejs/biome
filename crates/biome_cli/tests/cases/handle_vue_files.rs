@@ -1277,3 +1277,89 @@ fn no_useless_lone_block_statements_is_not_triggered() {
         result,
     ));
 }
+
+#[test]
+fn supports_ts_in_embedded_expressions() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script setup lang="ts">
+        const num = 1
+        </script>
+
+        <template>
+          <h1>{{ num as any }}</h1>
+        </template>
+
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUselessLoneBlockStatements", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "supports_ts_in_embedded_expressions",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn fails_for_ts_grammar_when_lang_is_not_ts() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script setup>
+        const num = 1
+        </script>
+
+        <template>
+          <h1>{{ num as any }}</h1>
+        </template>
+
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUselessLoneBlockStatements", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "fails_for_ts_grammar_when_lang_is_not_ts",
+        fs,
+        console,
+        result,
+    ));
+}

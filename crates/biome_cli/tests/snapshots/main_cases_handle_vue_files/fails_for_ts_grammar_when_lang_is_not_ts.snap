@@ -1,0 +1,62 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<script setup>
+        const num = 1
+        </script>
+
+        <template>
+          <h1>{{ num as any }}</h1>
+        </template>
+
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.vue:6:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'as' expression are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    5 │         <template>
+  > 6 │           <h1>{{ num as any }}</h1>
+      │                  ^^^^^^^^^^
+    7 │         </template>
+    8 │ 
+  
+  i TypeScript only syntax
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```
