@@ -412,42 +412,82 @@ fn parse_embedded_nodes(
     };
 
     match file_source.variant() {
-        HtmlVariant::Standard(text_expression) => match text_expression {
-            HtmlTextExpressions::None => {
-                return ParseEmbedResult::default();
-            }
-            HtmlTextExpressions::Single => {
-                for element in html_root.syntax().descendants() {
-                    if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element) {
-                        let result = parse_single_text_expression(
-                            text_expression,
+        HtmlVariant::Standard(text_expression) => {
+            for element in html_root.syntax().descendants() {
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Some(script_type) = html_element.get_script_type() {
+                        if script_type.is_javascript() {
+                            let result = parse_embedded_script(
+                                html_element.clone(),
+                                cache,
+                                biome_path,
+                                &file_source,
+                                settings,
+                                builder,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source.into()));
+                            }
+                        } else if script_type.is_json() {
+                            let result = parse_embedded_json(
+                                html_element.clone(),
+                                cache,
+                                biome_path,
+                                settings,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source));
+                            }
+                        }
+                    } else if html_element.is_style_tag() {
+                        let result = parse_embedded_style(
+                            html_element.clone(),
                             cache,
                             biome_path,
+                            &file_source,
                             settings,
                         );
-                        if let Some((content, file_source)) = result {
-                            nodes.push((content.into(), file_source));
+                        if let Some((content, services, file_source)) = result {
+                            nodes.push(((content, services).into(), file_source));
                         }
                     }
                 }
-            }
 
-            HtmlTextExpressions::Double => {
-                for element in html_root.syntax().descendants() {
-                    if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element) {
-                        let result = parse_double_text_expression(
-                            text_expression,
-                            cache,
-                            biome_path,
-                            settings,
-                        );
-                        if let Some((content, file_source)) = result {
-                            nodes.push((content.into(), file_source));
+                match text_expression {
+                    HtmlTextExpressions::Single => {
+                        if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
+                        {
+                            let result = parse_single_text_expression(
+                                text_expression,
+                                cache,
+                                biome_path,
+                                settings,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source));
+                            }
                         }
                     }
+
+                    HtmlTextExpressions::Double => {
+                        if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
+                        {
+                            let result = parse_double_text_expression(
+                                text_expression,
+                                cache,
+                                biome_path,
+                                settings,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source));
+                            }
+                        }
+                    }
+                    HtmlTextExpressions::None => {}
                 }
             }
-        },
+        }
+
         HtmlVariant::Astro => {
             for element in html_root.syntax().descendants() {
                 if let Some(astro_embedded_content) = AstroEmbeddedContent::cast_ref(&element) {
@@ -468,6 +508,45 @@ fn parse_embedded_nodes(
                         parse_astro_text_expression(text_expression, cache, biome_path, settings);
                     if let Some((content, file_source)) = result {
                         nodes.push((content.into(), file_source));
+                    }
+                }
+
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Some(script_type) = html_element.get_script_type() {
+                        if script_type.is_javascript() {
+                            let result = parse_embedded_script(
+                                html_element.clone(),
+                                cache,
+                                biome_path,
+                                &file_source,
+                                settings,
+                                builder,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source.into()));
+                            }
+                        } else if script_type.is_json() {
+                            let result = parse_embedded_json(
+                                html_element.clone(),
+                                cache,
+                                biome_path,
+                                settings,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source));
+                            }
+                        }
+                    } else if html_element.is_style_tag() {
+                        let result = parse_embedded_style(
+                            html_element.clone(),
+                            cache,
+                            biome_path,
+                            &file_source,
+                            settings,
+                        );
+                        if let Some((content, services, file_source)) = result {
+                            nodes.push(((content, services).into(), file_source));
+                        }
                     }
                 }
             }
