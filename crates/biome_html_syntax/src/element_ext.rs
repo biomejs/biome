@@ -113,6 +113,16 @@ impl AnyHtmlElement {
             None
         }
     }
+
+    /// Returns the list of attributes for this element, if it has any.
+    pub fn attributes(&self) -> Option<HtmlAttributeList> {
+        match self {
+            Self::HtmlElement(element) => Some(element.opening_element().ok()?.attributes()),
+            Self::HtmlSelfClosingElement(element) => Some(element.attributes()),
+            // Other variants don't have attributes
+            _ => None,
+        }
+    }
 }
 
 impl HtmlSelfClosingElement {

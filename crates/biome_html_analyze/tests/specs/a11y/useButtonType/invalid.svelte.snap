@@ -1,0 +1,129 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<button>Do something</button>
+<button />
+<button type="incorrectType">Do something</button>
+<button type="incorrectType" />
+<button type>Do something</button>
+<button type="" />
+
+```
+
+# Diagnostics
+```
+invalid.svelte:3:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide an explicit type attribute for the button element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <button>Do something</button>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <button />
+    5 │ <button type="incorrectType">Do something</button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.svelte:4:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide an explicit type attribute for the button element.
+  
+    3 │ <button>Do something</button>
+  > 4 │ <button />
+      │ ^^^^^^^^^^
+    5 │ <button type="incorrectType">Do something</button>
+    6 │ <button type="incorrectType" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.svelte:5:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type attribute for the button element.
+  
+    3 │ <button>Do something</button>
+    4 │ <button />
+  > 5 │ <button type="incorrectType">Do something</button>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <button type="incorrectType" />
+    7 │ <button type>Do something</button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.svelte:6:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type attribute for the button element.
+  
+    4 │ <button />
+    5 │ <button type="incorrectType">Do something</button>
+  > 6 │ <button type="incorrectType" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <button type>Do something</button>
+    8 │ <button type="" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.svelte:7:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type attribute for the button element.
+  
+    5 │ <button type="incorrectType">Do something</button>
+    6 │ <button type="incorrectType" />
+  > 7 │ <button type>Do something</button>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <button type="" />
+    9 │ 
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.svelte:8:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type attribute for the button element.
+  
+    6 │ <button type="incorrectType" />
+    7 │ <button type>Do something</button>
+  > 8 │ <button type="" />
+      │ ^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
