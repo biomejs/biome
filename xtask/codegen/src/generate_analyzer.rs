@@ -87,41 +87,24 @@ fn generate_build_script(categories_and_groups: &BTreeMap<&str, Vec<String>>) ->
     reformat(tokens)
 }
 
-/// Generate categories for a given analyzer crate, returning the analyzers map
-/// and a map of category names to their group names.
-///
-/// Only categories whose directories exist under `base_path` are processed.
-fn generate_categories(
-    categories: &[&'static str],
-    base_path: &Path,
-) -> Result<(
-    BTreeMap<&'static str, TokenStream>,
-    BTreeMap<&'static str, Vec<String>>,
-)> {
-    let mut analyzers = BTreeMap::new();
-    let mut categories_and_groups = BTreeMap::new();
-
-    for &category in categories {
-        if base_path.join(category).exists() {
-            let groups = generate_category(category, &mut analyzers, base_path)?;
-            if !groups.is_empty() {
-                categories_and_groups.insert(category, groups);
-            }
-        }
-    }
-
-    Ok((analyzers, categories_and_groups))
-}
-
-/// Generate an analyzer crate's category files and build script, then call the
-/// provided `update_registry` function to write the registry file.
+/// Generate an analyzer crate's category files, build script, and registry.
 fn generate_analyzer_crate(
     crate_name: &str,
     categories: &[&'static str],
     update_registry: fn(BTreeMap<&'static str, TokenStream>) -> Result<()>,
 ) -> Result<()> {
     let base_path = project_root().join(format!("crates/{crate_name}/src"));
-    let (analyzers, categories_and_groups) = generate_categories(categories, &base_path)?;
+    let mut analyzers = BTreeMap::new();
+    let mut categories_and_groups = BTreeMap::new();
+
+    for &category in categories {
+        if base_path.join(category).exists() {
+            let groups = generate_category(category, &mut analyzers, &base_path)?;
+            if !groups.is_empty() {
+                categories_and_groups.insert(category, groups);
+            }
+        }
+    }
 
     let build_script = generate_build_script(&categories_and_groups)?;
     let build_rs_path = project_root().join(format!("crates/{crate_name}/build.rs"));
