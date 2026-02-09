@@ -165,8 +165,7 @@ impl Rule for NoSkippedTests {
 #[derive(Debug)]
 pub struct SkipState {
     range: TextRange,
-    /// The type of annotation: "skip" or "fixme". Reserved for future diagnostic differentiation.
-    #[allow(dead_code)]
+    /// The type of annotation: "skip" or "fixme".
     annotation: &'static str,
 }
 

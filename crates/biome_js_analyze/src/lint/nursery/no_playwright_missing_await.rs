@@ -235,6 +235,7 @@ const ASYNC_PLAYWRIGHT_MATCHERS: &[&str] = &[
     "toHaveURL",
     "toHaveValue",
     "toHaveValues",
+    "toMatchAriaSnapshot",
     "toPass",
 ];
 
