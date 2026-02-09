@@ -1,0 +1,70 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<a href="javascript:void(0)">invalid</a>
+<a href>invalid</a>
+<a onclick={something}>invalid</a>
+
+```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.vue:2:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the attribute href.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <a href="javascript:void(0)">invalid</a>
+      │    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <a href>invalid</a>
+    4 │ <a onclick={something}>invalid</a>
+  
+  i The href attribute should be a valid a URL
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.vue:3:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the attribute href.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <a href="javascript:void(0)">invalid</a>
+  > 3 │ <a href>invalid</a>
+      │    ^^^^
+    4 │ <a onclick={something}>invalid</a>
+    5 │ 
+  
+  i The href attribute should be a valid a URL
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.vue:4:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a href attribute for the a element.
+  
+    2 │ <a href="javascript:void(0)">invalid</a>
+    3 │ <a href>invalid</a>
+  > 4 │ <a onclick={something}>invalid</a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i An anchor element should always have a href
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```

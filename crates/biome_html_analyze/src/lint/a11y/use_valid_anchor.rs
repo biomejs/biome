@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::Severity;
-use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_valid_anchor::UseValidAnchorOptions;
 
@@ -31,12 +31,7 @@ declare_lint_rule! {
     /// SEO ranking
     ///
     ///
-    /// :::note
-    /// At the moment, it is not possible to check whether or not a specified variable in the `href` attribute resolves
-    /// to `null` or `undefined`.
-    /// :::
-    ///
-    /// For a detailed explanation, check out https://marcysutton.com/links-vs-buttons-in-modern-web-applications
+    /// For a detailed explanation, check out <https://marcysutton.com/links-vs-buttons-in-modern-web-applications>
     ///
     /// ## Examples
     ///
@@ -90,6 +85,66 @@ pub enum UseValidAnchorState {
     CantBeAnchor(TextRange),
 }
 
+impl Rule for UseValidAnchor {
+    type Query = Ast<AnyHtmlTagElement>;
+    type State = UseValidAnchorState;
+    type Signals = Option<Self::State>;
+    type Options = UseValidAnchorOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+        let file_source = ctx.source_type::<HtmlFileSource>();
+
+        let name = node.name().ok()?.token_text_trimmed()?;
+
+        if (file_source.is_html() && name.eq_ignore_ascii_case("a"))
+            || (!file_source.is_html() && name == "a")
+        {
+            let anchor_attribute = node.find_attribute_by_name("href");
+            let on_click_attribute = node.find_attribute_by_name("onclick");
+
+            match (anchor_attribute, on_click_attribute) {
+                (Some(anchor_attribute), _) => {
+                    if anchor_attribute.initializer().is_none() {
+                        return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
+                    }
+
+                    let static_value = anchor_attribute.value();
+                    if static_value.is_none_or(|const_str| {
+                        const_str.is_empty()
+                            || const_str == "#"
+                            || const_str.starts_with("javascript:")
+                    }) {
+                        return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
+                    }
+                }
+                (None, Some(on_click_attribute)) => {
+                    return Some(UseValidAnchorState::CantBeAnchor(
+                        on_click_attribute.range(),
+                    ));
+                }
+                (None, None) => {
+                    return Some(UseValidAnchorState::MissingHrefAttribute(node.range()));
+                }
+            };
+        }
+
+        None
+    }
+
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let diagnostic = RuleDiagnostic::new(rule_category!(), state.range(), state.message())
+            .note(state.note())
+            .note(
+            markup! {
+                "Check "<Hyperlink href="https://marcysutton.com/links-vs-buttons-in-modern-web-applications">"this thorough explanation"</Hyperlink>" to better understand the context."
+            }
+        );
+
+        Some(diagnostic)
+    }
+}
+
 impl UseValidAnchorState {
     fn message(&self) -> MarkupBuf {
         match self {
@@ -134,61 +189,5 @@ impl UseValidAnchorState {
             | Self::CantBeAnchor(range)
             | Self::IncorrectHref(range) => range,
         }
-    }
-}
-
-impl Rule for UseValidAnchor {
-    type Query = Ast<AnyHtmlTagElement>;
-    type State = UseValidAnchorState;
-    type Signals = Option<Self::State>;
-    type Options = UseValidAnchorOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        let name = node.name().ok()?.token_text_trimmed();
-
-        if name.is_some_and(|n| n == "a") {
-            let anchor_attribute = node.find_attribute_by_name("href");
-            let on_click_attribute = node.find_attribute_by_name("onclick");
-
-            match (anchor_attribute, on_click_attribute) {
-                (Some(anchor_attribute), _) => {
-                    if anchor_attribute.initializer().is_none() {
-                        return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
-                    }
-
-                    let static_value = anchor_attribute.value();
-                    if static_value.is_none_or(|const_str| {
-                        const_str.is_empty()
-                            || const_str == "#"
-                            || const_str.contains("javascript:")
-                    }) {
-                        return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
-                    }
-                }
-                (None, Some(on_click_attribute)) => {
-                    return Some(UseValidAnchorState::CantBeAnchor(
-                        on_click_attribute.range(),
-                    ));
-                }
-                (None, None) => {
-                    return Some(UseValidAnchorState::MissingHrefAttribute(node.range()));
-                }
-            };
-        }
-
-        None
-    }
-
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let diagnostic = RuleDiagnostic::new(rule_category!(), state.range(), state.message())
-            .note(state.note())
-            .note(
-            markup! {
-                "Check "<Hyperlink href="https://marcysutton.com/links-vs-buttons-in-modern-web-applications">"this thorough explanation"</Hyperlink>" to better understand the context."
-            }
-        );
-
-        Some(diagnostic)
     }
 }
