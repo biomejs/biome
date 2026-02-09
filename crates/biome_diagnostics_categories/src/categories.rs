@@ -197,6 +197,7 @@ define_categories! {
     "lint/nursery/noMisusedPromises": "https://biomejs.dev/linter/rules/no-misused-promises",
     "lint/nursery/noMultiAssign": "https://biomejs.dev/linter/rules/no-multi-assign",
     "lint/nursery/noMultiStr": "https://biomejs.dev/linter/rules/no-multi-str",
+    "lint/nursery/noNestedPromises": "https://biomejs.dev/linter/rules/no-nested-promises",
     "lint/nursery/noNextAsyncClientComponent": "https://biomejs.dev/linter/rules/no-next-async-client-component",
     "lint/nursery/noParametersOnlyUsedInRecursion": "https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion",
     "lint/nursery/noProto": "https://biomejs.dev/linter/rules/no-proto",
