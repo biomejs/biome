@@ -1,0 +1,23 @@
+[package]
+name                 = "biome_markdown_formatter"
+version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+
+[dependencies]
+biome_formatter        = { workspace = true }
+biome_markdown_factory = { workspace = true }
+biome_markdown_syntax  = { workspace = true }
+biome_rowan            = { workspace = true }
+
+[dev-dependencies]
+biome_markdown_parser = { workspace = true }
+biome_parser          = { workspace = true }
+
+[lints]
+workspace = true
