@@ -531,6 +531,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessCatchBinding": {
+					"description": "Disallow unused catch bindings.\nSee https://biomejs.dev/linter/rules/no-useless-catch-binding",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessCatchBindingConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessConstructor": {
 					"description": "Disallow unnecessary constructors.\nSee https://biomejs.dev/linter/rules/no-useless-constructor",
 					"anyOf": [
@@ -629,6 +636,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessUndefined": {
+					"description": "Disallow the use of useless undefined.\nSee https://biomejs.dev/linter/rules/no-useless-undefined",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessUndefinedConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessUndefinedInitialization": {
 					"description": "Disallow initializing variables to undefined.\nSee https://biomejs.dev/linter/rules/no-useless-undefined-initialization",
 					"anyOf": [
@@ -679,6 +693,13 @@
 					"description": "Enforce the usage of a literal access to properties over computed property access.\nSee https://biomejs.dev/linter/rules/use-literal-keys",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseLiteralKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useMaxParams": {
+					"description": "Enforce a maximum number of parameters in function definitions.\nSee https://biomejs.dev/linter/rules/use-max-params",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseMaxParamsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -905,6 +926,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNextAsyncClientComponent": {
+					"description": "Prevent client components from being async functions.\nSee https://biomejs.dev/linter/rules/no-next-async-client-component",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNextAsyncClientComponentConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNodejsModules": {
 					"description": "Forbid the use of Node.js builtin modules.\nSee https://biomejs.dev/linter/rules/no-nodejs-modules",
 					"anyOf": [
@@ -1087,6 +1115,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnresolvedImports": {
+					"description": "Warn when importing non-existing exports.\nSee https://biomejs.dev/linter/rules/no-unresolved-imports",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnresolvedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnsafeFinally": {
 					"description": "Disallow control flow statements in finally blocks.\nSee https://biomejs.dev/linter/rules/no-unsafe-finally",
 					"anyOf": [
@@ -1147,6 +1182,41 @@
 					"description": "Disallow returning a value from a function with the return type 'void'.\nSee https://biomejs.dev/linter/rules/no-void-type-return",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVoidTypeReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDataObjectDeclaration": {
+					"description": "Enforce that Vue component data options are declared as functions.\nSee https://biomejs.dev/linter/rules/no-vue-data-object-declaration",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDataObjectDeclarationConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDuplicateKeys": {
+					"description": "Disallow duplicate keys in Vue component data, methods, computed properties, and other options.\nSee https://biomejs.dev/linter/rules/no-vue-duplicate-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDuplicateKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueReservedKeys": {
+					"description": "Disallow reserved keys in Vue component data and computed properties.\nSee https://biomejs.dev/linter/rules/no-vue-reserved-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueReservedKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueReservedProps": {
+					"description": "Disallow reserved names to be used as props.\nSee https://biomejs.dev/linter/rules/no-vue-reserved-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueReservedPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueSetupPropsReactivityLoss": {
+					"description": "Disallow destructuring of props passed to setup in Vue projects.\nSee https://biomejs.dev/linter/rules/no-vue-setup-props-reactivity-loss",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueSetupPropsReactivityLossConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1221,6 +1291,20 @@
 					"description": "Prefer using the class prop as a classlist over the classnames helper.\nSee https://biomejs.dev/linter/rules/use-qwik-classlist",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseQwikClasslistConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikMethodUsage": {
+					"description": "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.\nSee https://biomejs.dev/linter/rules/use-qwik-method-usage",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseQwikMethodUsageConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikValidLexicalScope": {
+					"description": "Disallow unserializable expressions in Qwik dollar ($) scopes.\nSee https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseQwikValidLexicalScopeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1592,7 +1676,7 @@
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				},
 				"useEditorconfig": {
-					"description": "Use any `.editorconfig` files to configure the formatter. Configuration\nin `biome.json` will override `.editorconfig` configuration.\n\nDefault: `false`.",
+					"description": "Use any `.editorconfig` files to configure the formatter. Configuration\nin `biome.json` will override `.editorconfig` configuration.\n\nDefault: `true`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
@@ -2481,20 +2565,6 @@
 			"additionalProperties": false
 		},
 		"MaxSize": { "type": "integer", "format": "uint64", "minimum": 1 },
-		"MethodSignatureStyle": {
-			"oneOf": [
-				{
-					"description": "Enforce use of property-style signatures (`methodName: (args) => returnType`).",
-					"type": "string",
-					"const": "property"
-				},
-				{
-					"description": "Enforce use of method-style signatures (`methodName(args): returnType`).",
-					"type": "string",
-					"const": "method"
-				}
-			]
-		},
 		"Modifiers": {
 			"type": "array",
 			"items": { "$ref": "#/$defs/RestrictedModifier" },
@@ -4122,16 +4192,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoNestedPromisesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoNestedPromisesOptions" }
-			]
-		},
-		"NoNestedPromisesOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoNestedTernaryConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4419,16 +4479,6 @@
 			]
 		},
 		"NoRedundantAltOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoRedundantDefaultExportConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoRedundantDefaultExportOptions" }
-			]
-		},
-		"NoRedundantDefaultExportOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5303,16 +5353,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoUselessReturnConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoUselessReturnOptions" }
-			]
-		},
-		"NoUselessReturnOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoUselessStringConcatConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5562,13 +5602,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noDeprecatedImports": {
-					"description": "Restrict imports of deprecated exports.\nSee https://biomejs.dev/linter/rules/no-deprecated-imports",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDeprecatedImportsConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDeprecatedMediaType": {
 					"description": "Disallow deprecated media types.\nSee https://biomejs.dev/linter/rules/no-deprecated-media-type",
 					"anyOf": [
@@ -5594,13 +5627,6 @@
 					"description": "Disallow duplication of attributes.\nSee https://biomejs.dev/linter/rules/no-duplicate-attributes",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateAttributesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateDependencies": {
-					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".\nSee https://biomejs.dev/linter/rules/no-duplicate-dependencies",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDuplicateDependenciesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5653,13 +5679,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noEmptySource": {
-					"description": "Disallow empty sources.\nSee https://biomejs.dev/linter/rules/no-empty-source",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoEmptySourceConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noEqualsToNull": {
 					"description": "Require the use of === or !== for comparison with null.\nSee https://biomejs.dev/linter/rules/no-equals-to-null",
 					"anyOf": [
@@ -5709,24 +5728,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noImportCycles": {
-					"description": "Prevent import cycles.\nSee https://biomejs.dev/linter/rules/no-import-cycles",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoImportCyclesConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noIncrementDecrement": {
 					"description": "Disallows the usage of the unary operators ++ and --.\nSee https://biomejs.dev/linter/rules/no-increment-decrement",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoIncrementDecrementConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noJsxLiterals": {
-					"description": "Disallow string literals inside JSX elements.\nSee https://biomejs.dev/linter/rules/no-jsx-literals",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoJsxLiteralsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5765,20 +5770,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noNestedPromises": {
-					"description": "Disallow nested .then() or .catch() promise calls.\nSee https://biomejs.dev/linter/rules/no-nested-promises",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoNestedPromisesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noNextAsyncClientComponent": {
-					"description": "Prevent client components from being async functions.\nSee https://biomejs.dev/linter/rules/no-next-async-client-component",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoNextAsyncClientComponentConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noParametersOnlyUsedInRecursion": {
 					"description": "Disallow function parameters that are only used in recursive calls.\nSee https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion",
 					"anyOf": [
@@ -5790,20 +5781,6 @@
 					"description": "Disallow the use of the deprecated __proto__ object property.\nSee https://biomejs.dev/linter/rules/no-proto",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoProtoConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noReactForwardRef": {
-					"description": "Replaces usages of forwardRef with passing ref as a prop.\nSee https://biomejs.dev/linter/rules/no-react-forward-ref",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoReactForwardRefConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noRedundantDefaultExport": {
-					"description": "Checks if a default export exports the same symbol as a named export.\nSee https://biomejs.dev/linter/rules/no-redundant-default-export",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoRedundantDefaultExportConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5825,13 +5802,6 @@
 					"description": "Disallow javascript: URLs in HTML.\nSee https://biomejs.dev/linter/rules/no-script-url",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoScriptUrlConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noShadow": {
-					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.\nSee https://biomejs.dev/linter/rules/no-shadow",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoShadowConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5870,41 +5840,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnresolvedImports": {
-					"description": "Warn when importing non-existing exports.\nSee https://biomejs.dev/linter/rules/no-unresolved-imports",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoUnresolvedImportsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnusedExpressions": {
-					"description": "Disallow expression statements that are neither a function call nor an assignment.\nSee https://biomejs.dev/linter/rules/no-unused-expressions",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoUnusedExpressionsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessCatchBinding": {
-					"description": "Disallow unused catch bindings.\nSee https://biomejs.dev/linter/rules/no-useless-catch-binding",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoUselessCatchBindingConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessReturn": {
-					"description": "Disallow redundant return statements.\nSee https://biomejs.dev/linter/rules/no-useless-return",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoUselessReturnConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessUndefined": {
-					"description": "Disallow the use of useless undefined.\nSee https://biomejs.dev/linter/rules/no-useless-undefined",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoUselessUndefinedConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noVueArrowFuncInWatch": {
 					"description": "Disallows using arrow functions when defining a watcher.\nSee https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch",
 					"anyOf": [
@@ -5912,45 +5847,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noVueDataObjectDeclaration": {
-					"description": "Enforce that Vue component data options are declared as functions.\nSee https://biomejs.dev/linter/rules/no-vue-data-object-declaration",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoVueDataObjectDeclarationConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noVueDuplicateKeys": {
-					"description": "Disallow duplicate keys in Vue component data, methods, computed properties, and other options.\nSee https://biomejs.dev/linter/rules/no-vue-duplicate-keys",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoVueDuplicateKeysConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noVueOptionsApi": {
 					"description": "Disallow the use of Vue Options API.\nSee https://biomejs.dev/linter/rules/no-vue-options-api",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueOptionsApiConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noVueReservedKeys": {
-					"description": "Disallow reserved keys in Vue component data and computed properties.\nSee https://biomejs.dev/linter/rules/no-vue-reserved-keys",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoVueReservedKeysConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noVueReservedProps": {
-					"description": "Disallow reserved names to be used as props.\nSee https://biomejs.dev/linter/rules/no-vue-reserved-props",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoVueReservedPropsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noVueSetupPropsReactivityLoss": {
-					"description": "Disallow destructuring of props passed to setup in Vue projects.\nSee https://biomejs.dev/linter/rules/no-vue-setup-props-reactivity-loss",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoVueSetupPropsReactivityLossConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5979,13 +5879,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useConsistentArrowReturn": {
-					"description": "Enforce consistent arrow function bodies.\nSee https://biomejs.dev/linter/rules/use-consistent-arrow-return",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseConsistentArrowReturnConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useConsistentEnumValueType": {
 					"description": "Disallow enums from having both number and string members.\nSee https://biomejs.dev/linter/rules/use-consistent-enum-value-type",
 					"anyOf": [
@@ -5997,20 +5890,6 @@
 					"description": "Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.\nSee https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentGraphqlDescriptionsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useConsistentMethodSignatures": {
-					"description": "Enforce consistent use of either method signatures or function properties within interfaces and type aliases.\nSee https://biomejs.dev/linter/rules/use-consistent-method-signatures",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseConsistentMethodSignaturesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useDeprecatedDate": {
-					"description": "Require the @deprecated directive to specify a deletion date.\nSee https://biomejs.dev/linter/rules/use-deprecated-date",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseDeprecatedDateConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6049,13 +5928,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useGlobalThis": {
-					"description": "Enforce the use of globalThis over window, self, and global.\nSee https://biomejs.dev/linter/rules/use-global-this",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseGlobalThisConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useInlineScriptId": {
 					"description": "Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.\nSee https://biomejs.dev/linter/rules/use-inline-script-id",
 					"anyOf": [
@@ -6081,27 +5953,6 @@
 					"description": "Require queries, mutations, subscriptions or fragments each to be located in separate files.\nSee https://biomejs.dev/linter/rules/use-lone-executable-definition",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseLoneExecutableDefinitionConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useMaxParams": {
-					"description": "Enforce a maximum number of parameters in function definitions.\nSee https://biomejs.dev/linter/rules/use-max-params",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseMaxParamsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useQwikMethodUsage": {
-					"description": "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.\nSee https://biomejs.dev/linter/rules/use-qwik-method-usage",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseQwikMethodUsageConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useQwikValidLexicalScope": {
-					"description": "Disallow unserializable expressions in Qwik dollar ($) scopes.\nSee https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseQwikValidLexicalScopeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8220,15 +8071,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithNoNestedPromisesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoNestedPromisesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithNoNestedTernaryOptions": {
 			"type": "object",
 			"properties": {
@@ -8493,15 +8335,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoRedundantAltOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoRedundantDefaultExportOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoRedundantDefaultExportOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9229,16 +9062,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithNoUselessReturnOptions": {
-			"type": "object",
-			"properties": {
-				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoUselessReturnOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithNoUselessStringConcatOptions": {
 			"type": "object",
 			"properties": {
@@ -9710,15 +9533,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithUseConsistentMethodSignaturesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseConsistentMethodSignaturesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithUseConsistentObjectDefinitionsOptions": {
 			"type": "object",
 			"properties": {
@@ -9980,15 +9794,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseGetterReturnOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithUseGlobalThisOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseGlobalThisOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11263,6 +11068,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noJsxLiterals": {
+					"description": "Disallow string literals inside JSX elements.\nSee https://biomejs.dev/linter/rules/no-jsx-literals",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoJsxLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMagicNumbers": {
 					"description": "Reports usage of \"magic numbers\" — numbers used directly instead of being assigned to named constants.\nSee https://biomejs.dev/linter/rules/no-magic-numbers",
 					"anyOf": [
@@ -11439,6 +11251,13 @@
 					"description": "Require consistently using either T\\[] or Array\\<T>.\nSee https://biomejs.dev/linter/rules/use-consistent-array-type",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentArrayTypeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentArrowReturn": {
+					"description": "Enforce consistent arrow function bodies.\nSee https://biomejs.dev/linter/rules/use-consistent-arrow-return",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentArrowReturnConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11850,6 +11669,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDeprecatedImports": {
+					"description": "Restrict imports of deprecated exports.\nSee https://biomejs.dev/linter/rules/no-deprecated-imports",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDeprecatedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDocumentCookie": {
 					"description": "Disallow direct assignments to document.cookie.\nSee https://biomejs.dev/linter/rules/no-document-cookie",
 					"anyOf": [
@@ -11896,6 +11722,13 @@
 					"description": "Disallow duplicate custom properties within declaration blocks.\nSee https://biomejs.dev/linter/rules/no-duplicate-custom-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateCustomPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateDependencies": {
+					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".\nSee https://biomejs.dev/linter/rules/no-duplicate-dependencies",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateDependenciesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11982,6 +11815,13 @@
 					"description": "Disallow the declaration of empty interfaces.\nSee https://biomejs.dev/linter/rules/no-empty-interface",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoEmptyInterfaceConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmptySource": {
+					"description": "Disallow empty sources.\nSee https://biomejs.dev/linter/rules/no-empty-source",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoEmptySourceConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12076,6 +11916,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noImportCycles": {
+					"description": "Prevent import cycles.\nSee https://biomejs.dev/linter/rules/no-import-cycles",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoImportCyclesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImportantInKeyframe": {
 					"description": "Disallow invalid !important within keyframe declarations.\nSee https://biomejs.dev/linter/rules/no-important-in-keyframe",
 					"anyOf": [
@@ -12153,6 +12000,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactForwardRef": {
+					"description": "Replaces usages of forwardRef with passing ref as a prop.\nSee https://biomejs.dev/linter/rules/no-react-forward-ref",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactForwardRefConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactSpecificProps": {
 					"description": "Prevents React-specific JSX properties from being used.\nSee https://biomejs.dev/linter/rules/no-react-specific-props",
 					"anyOf": [
@@ -12178,6 +12032,13 @@
 					"description": "Disallow comparisons where both sides are exactly the same.\nSee https://biomejs.dev/linter/rules/no-self-compare",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSelfCompareConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noShadow": {
+					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.\nSee https://biomejs.dev/linter/rules/no-shadow",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoShadowConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12265,6 +12126,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnusedExpressions": {
+					"description": "Disallow expression statements that are neither a function call nor an assignment.\nSee https://biomejs.dev/linter/rules/no-unused-expressions",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnusedExpressionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessEscapeInString": {
 					"description": "Disallow unnecessary escapes in string literals.\nSee https://biomejs.dev/linter/rules/no-useless-escape-in-string",
 					"anyOf": [
@@ -12322,6 +12190,13 @@
 					"description": "Enforce default clauses in switch statements to be last.\nSee https://biomejs.dev/linter/rules/use-default-switch-clause-last",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseDefaultSwitchClauseLastConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useDeprecatedDate": {
+					"description": "Require the @deprecated directive to specify a deletion date.\nSee https://biomejs.dev/linter/rules/use-deprecated-date",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseDeprecatedDateConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12721,26 +12596,6 @@
 			},
 			"additionalProperties": false
 		},
-		"UseConsistentMethodSignaturesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseConsistentMethodSignaturesOptions" }
-			]
-		},
-		"UseConsistentMethodSignaturesOptions": {
-			"description": "Options type for `useConsistentMethodSignatures`.",
-			"type": "object",
-			"properties": {
-				"style": {
-					"description": "The style of method signatures whose usage will be enforced.\n\nDefault: \"property\"",
-					"anyOf": [
-						{ "$ref": "#/$defs/MethodSignatureStyle" },
-						{ "type": "null" }
-					]
-				}
-			},
-			"additionalProperties": false
-		},
 		"UseConsistentObjectDefinitionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -13062,13 +12917,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseGlobalThisConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseGlobalThisOptions" }
-			]
-		},
-		"UseGlobalThisOptions": { "type": "object", "additionalProperties": false },
 		"UseGoogleFontDisplayConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
