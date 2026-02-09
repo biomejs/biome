@@ -2,4 +2,4 @@
 "@biomejs/biome": minor
 ---
 
-This PR ports the `useValidAnchor` rule to HTML. As it's not possible at the moment to detect, whether or not a given variable is `null` or `undefined`, those cases are not covered.
+Ports the [`useValidAnchor`](https://biomejs.dev/linter/rules/use-valid-anchor/) rule to HTML. This rule enforce that all anchors are valid and that they are navigable elements.
