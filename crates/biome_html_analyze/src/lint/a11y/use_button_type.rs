@@ -149,40 +149,41 @@ fn has_dynamic_attribute(element: &AnyHtmlElement, name: &str) -> bool {
         return false;
     };
 
-    attributes.iter().any(|attr| {
-        // Check if this is a HtmlSingleTextExpression (shorthand syntax)
-        if let Some(single_expr) = attr.as_html_single_text_expression() {
-            // Check if the expression text matches the attribute name we're looking for
-            if let Ok(expression) = single_expr.expression()
-                && let Ok(text) = expression.html_literal_token()
-            {
-                return text.text() == name;
-            }
-        } else if let Some(vue_directive) = attr.as_any_vue_directive() {
-            // Check for v-bind:type="foo" (longhand)
-            if let Some(dir) = vue_directive.as_vue_directive()
-                && let Ok(name_token) = dir.name_token()
-                && name_token.text_trimmed() == "v-bind"
-                && let Some(arg) = dir.arg()
-                && let Ok(arg) = arg.arg()
-                && let Some(static_arg) = arg.as_vue_static_argument()
-                && let Ok(name_token) = static_arg.name_token()
-                && name_token.text_trimmed() == name
-            {
-                return true;
-            }
+    attributes
+        .iter()
+        .find_map(|attr| {
+            // Check if this is a HtmlSingleTextExpression (Svelte shorthand syntax)
+            if let Some(single_expr) = attr.as_html_single_text_expression() {
+                // Check if the expression text matches the attribute name we're looking for
+                let expression = single_expr.expression().ok()?.html_literal_token().ok()?;
+                return if expression.text() == name {
+                    Some(())
+                } else {
+                    None
+                };
+            } else if let Some(vue_directive) = attr.as_any_vue_directive() {
+                // Check for v-bind:type="foo" (longhand)
+                let directive_arg = if let Some(dir) = vue_directive.as_vue_directive()
+                    && dir.name_token().ok()?.text_trimmed() == "v-bind"
+                {
+                    dir.arg()
+                } else if let Some(dir) = vue_directive.as_vue_v_bind_shorthand_directive() {
+                    dir.arg().ok()
+                } else {
+                    None
+                }?;
 
-            // Check for :type="foo" (shorthand)
-            if let Some(dir) = vue_directive.as_vue_v_bind_shorthand_directive()
-                && let Ok(arg) = dir.arg()
-                && let Ok(arg) = arg.arg()
-                && let Some(static_arg) = arg.as_vue_static_argument()
-                && let Ok(name_token) = static_arg.name_token()
-                && name_token.text_trimmed() == name
-            {
-                return true;
+                let name_token = directive_arg
+                    .arg()
+                    .ok()?
+                    .as_vue_static_argument()?
+                    .name_token()
+                    .ok()?;
+                if name_token.text_trimmed() == name {
+                    return Some(());
+                }
             }
-        }
-        false
-    })
+            None
+        })
+        .is_some()
 }
