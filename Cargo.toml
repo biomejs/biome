@@ -15,7 +15,7 @@ categories = ["development-tools", "web-programming"]
 
 [workspace.dependencies]
 # Crates needed in the workspace
-anyhow                       = "1.0.100"
+anyhow                       = "1.0.101"
 # publish
 biome_analyze                = { path = "./crates/biome_analyze", version = "0.5.7" }
 biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
@@ -108,7 +108,7 @@ biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = 
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
 boa_engine                   = "0.21.0"
 boxcar                       = "0.2.14"
-bpaf                         = { version = "0.9.22", features = ["derive"] }
+bpaf                         = { version = "0.9.23", features = ["derive"] }
 camino                       = "1.2.2"
 cfg-if                       = "1.0.4"
 countme                      = "3.0.1"
@@ -125,7 +125,7 @@ grit-util                    = "0.5.1"
 hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.13.0" }
-insta                        = "1.46.2"
+insta                        = "1.46.3"
 jiff                         = "0.2.18"
 libc                         = "0.2.180"
 mimalloc                     = "0.1.48"

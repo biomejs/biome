@@ -16,13 +16,13 @@ importers:
         version: 0.5.2
       '@changesets/cli':
         specifier: 2.29.8
-        version: 2.29.8(@types/node@24.10.9)
+        version: 2.29.8(@types/node@24.10.11)
       '@types/node':
-        specifier: 24.10.9
-        version: 24.10.9
+        specifier: 24.10.11
+        version: 24.10.11
       tombi:
-        specifier: 0.7.25
-        version: 0.7.25
+        specifier: 0.7.27
+        version: 0.7.27
 
   benchmark:
     devDependencies:
@@ -147,10 +147,10 @@ importers:
         version: 5.9.3
       vite:
         specifier: 7.3.1
-        version: 7.3.1(@types/node@24.10.9)(jiti@2.6.1)(yaml@2.8.2)
+        version: 7.3.1(@types/node@24.10.11)(jiti@2.6.1)(yaml@2.8.2)
       vitest:
         specifier: 4.0.18
-        version: 4.0.18(@types/node@24.10.9)(happy-dom@20.4.0)(jiti@2.6.1)(yaml@2.8.2)
+        version: 4.0.18(@types/node@24.10.11)(happy-dom@20.4.0)(jiti@2.6.1)(yaml@2.8.2)
 
   packages/@biomejs/plugin-api:
     dependencies:
@@ -909,54 +909,54 @@ packages:
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
 
-  '@tombi-toml/cli-darwin-arm64@0.7.25':
-    resolution: {integrity: sha512-HCWuqeS03n04s366YVq40QnulWgpBi1mOdi2hfHNzfo/4xxpqx8QVXtl8ITf4ffM3eTGAVYpckbsnPnNs3WzaA==}
+  '@tombi-toml/cli-darwin-arm64@0.7.27':
+    resolution: {integrity: sha512-ExSFmxFNM390pZaLBSJdUkCfl81uDWH5m21FMvqq2TMvG2ncVLYXNwaS5S3s7EcuIoYSHgHKzycXcKxgQbWrVg==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@tombi-toml/cli-darwin-x64@0.7.25':
-    resolution: {integrity: sha512-mGjJqMagGWYCiJMJUB83EKkYeYH7iwGHo/o11029Mk3qQfJzsZtcUalCADSnxaX2Y/NMOOosHQDTVxpFaOgw0A==}
+  '@tombi-toml/cli-darwin-x64@0.7.27':
+    resolution: {integrity: sha512-EWMkaxS1tvcf+2t/90V3QPEIWMzmIWagKvnkcdlAi+03OLOYVTx4QqHgVWuuJVyIp+cERcX+xLLP8i2C6Bgmzw==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@tombi-toml/cli-linux-arm64-musl@0.7.25':
-    resolution: {integrity: sha512-7nfsbovqko7Z2rj5G70iIuhjybUk9bmlwW63mQW8s8Qn5P2hg4mxUAvn9X1PI405SFgtENmJDtIGz9ELt6bBjQ==}
+  '@tombi-toml/cli-linux-arm64-musl@0.7.27':
+    resolution: {integrity: sha512-ndLkosw5Qg0tJN5AtOoSTVnZykuBhXKyJtGglPlmYAt8UWKZ8QsUe4CcNmRY+n/Do7p/GRl1HY1+qAxJk4QCyg==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@tombi-toml/cli-linux-arm64@0.7.25':
-    resolution: {integrity: sha512-3w9zGNoxFTuAQ2rcjTLWZ52CLJ/hP3JIacnoS+DcbyuSWD6E2x5e3qinUjfzEhcuH1ZgQ1Tdokxdan9ihj4kZg==}
+  '@tombi-toml/cli-linux-arm64@0.7.27':
+    resolution: {integrity: sha512-C7tVg+PlyP0ZtgC6QegCKVcQFagwYLRreg+Si7JsjmDkYImX5ZX7iCiNQ0ygZxdibwQnF6lOADr5tayqhUojNg==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-linux-x64-musl@0.7.25':
-    resolution: {integrity: sha512-yEUIuGaj0slTSYUePc1vR5qGaShkg+0f1MjEW+VQcDM8akm3Zk+/M37gUNN13yHrgbbPyjfNTQn/NfxkIGBV2A==}
+  '@tombi-toml/cli-linux-x64-musl@0.7.27':
+    resolution: {integrity: sha512-8tqg90a28ZdOLNNTysNp94frAWQ25qMppYU2QFmxQvzvRL/ZJo4lDN2gFywRyeoSd5BjY48Hjhdz2AH6PmxIug==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@tombi-toml/cli-linux-x64@0.7.25':
-    resolution: {integrity: sha512-LDHThu/MZgT9QdnpKGabpQhflOsR7sOJdbGP50nV6CW/4IGnAAYWOw3NRjGMZ9sqx5xEl8q4iTrVVngQs0k9QA==}
+  '@tombi-toml/cli-linux-x64@0.7.27':
+    resolution: {integrity: sha512-/e7yjzb0Vw/Q3DgtRYXBTulkHoUmcwxGEZBYE5t1BhuIuGxRwPIALEBJ7cCIQmIKrfkGxmzeh+p3HnnDeIMrJQ==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-win32-arm64@0.7.25':
-    resolution: {integrity: sha512-lW06URtG5NXPrplcVWN0nf1EK8mt4k9G5Kaa+TL7dKFaDV+RpQxaSZhhbO7o3X3kdj8PoY94Sl3DyzBhC+Lhfg==}
+  '@tombi-toml/cli-win32-arm64@0.7.27':
+    resolution: {integrity: sha512-8ylZ2ZUbxyIWWab9ciaxKaaSaYdNWPxoO9XaG5DywvDOMBDMSsEWK+anc8jhKAcfxJSJbOEk8JTYpL4qyL5Euw==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@tombi-toml/cli-win32-x64@0.7.25':
-    resolution: {integrity: sha512-nNkgVcliyMrCMC2G+bZVWrHPpJhlYi33UlW+hnSfZtieYd1g/TtkSebeaoF0FPDMzAWuBc8sbw0glfS23iW7IA==}
+  '@tombi-toml/cli-win32-x64@0.7.27':
+    resolution: {integrity: sha512-pE3jYL2htamP8iSEPPC/WerbyWbdr6hOBv6TdZW7tXe+BklAc1WxEZ+MfJpD6626QPrhvUh0uFx4yZui9pKppg==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [win32]
@@ -981,6 +981,9 @@ packages:
 
   '@types/node@22.19.7':
     resolution: {integrity: sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw==}
+
+  '@types/node@24.10.11':
+    resolution: {integrity: sha512-/Af7O8r1frCVgOz0I62jWUtMohJ0/ZQU/ZoketltOJPZpnb17yoNc9BSoVuV9qlaIXJiPNOpsfq4ByFajSArNQ==}
 
   '@types/node@24.10.9':
     resolution: {integrity: sha512-ne4A0IpG3+2ETuREInjPNhUGis1SFjv1d5asp8MzEAGtOZeTeHVDOYqOgqfhvseqg/iXty2hjBf1zAOb7RNiNw==}
@@ -2027,8 +2030,8 @@ packages:
     resolution: {integrity: sha512-6udB24Q737UD/SDsKAHI9FCRP7Bqc9D/MQUV02ORQg5iskjtLJlZJNdN4kKtcdtwCeWIwIHDGaUsTsCCAa8sFQ==}
     engines: {node: '>=10'}
 
-  tombi@0.7.25:
-    resolution: {integrity: sha512-DRVx1tN6nee82V+A6ldLGl7j+PlHAAnZcqqvbI/XICgOeQuWuuMEj+THb/brr2JvN3/15RjUa4dsNNyS/+Wwsg==}
+  tombi@0.7.27:
+    resolution: {integrity: sha512-mBu62WJViCmhddorjRwXz1p5HoZKoFY5Ub6G7XNNGmcZuAzk4Z+Bmy3LpIhS71gIaclav8oXhaaIR7BqdKsgpw==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -2296,7 +2299,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@changesets/cli@2.29.8(@types/node@24.10.9)':
+  '@changesets/cli@2.29.8(@types/node@24.10.11)':
     dependencies:
       '@changesets/apply-release-plan': 7.0.14
       '@changesets/assemble-release-plan': 6.0.9
@@ -2312,7 +2315,7 @@ snapshots:
       '@changesets/should-skip-package': 0.1.2
       '@changesets/types': 6.1.0
       '@changesets/write': 0.4.0
-      '@inquirer/external-editor': 1.0.3(@types/node@24.10.9)
+      '@inquirer/external-editor': 1.0.3(@types/node@24.10.11)
       '@manypkg/get-packages': 1.1.3
       ansi-colors: 4.1.3
       ci-info: 3.9.0
@@ -2598,12 +2601,12 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.2': {}
 
-  '@inquirer/external-editor@1.0.3(@types/node@24.10.9)':
+  '@inquirer/external-editor@1.0.3(@types/node@24.10.11)':
     dependencies:
       chardet: 2.1.1
       iconv-lite: 0.7.0
     optionalDependencies:
-      '@types/node': 24.10.9
+      '@types/node': 24.10.11
 
   '@jimp/core@1.6.0':
     dependencies:
@@ -2962,28 +2965,28 @@ snapshots:
 
   '@tokenizer/token@0.3.0': {}
 
-  '@tombi-toml/cli-darwin-arm64@0.7.25':
+  '@tombi-toml/cli-darwin-arm64@0.7.27':
     optional: true
 
-  '@tombi-toml/cli-darwin-x64@0.7.25':
+  '@tombi-toml/cli-darwin-x64@0.7.27':
     optional: true
 
-  '@tombi-toml/cli-linux-arm64-musl@0.7.25':
+  '@tombi-toml/cli-linux-arm64-musl@0.7.27':
     optional: true
 
-  '@tombi-toml/cli-linux-arm64@0.7.25':
+  '@tombi-toml/cli-linux-arm64@0.7.27':
     optional: true
 
-  '@tombi-toml/cli-linux-x64-musl@0.7.25':
+  '@tombi-toml/cli-linux-x64-musl@0.7.27':
     optional: true
 
-  '@tombi-toml/cli-linux-x64@0.7.25':
+  '@tombi-toml/cli-linux-x64@0.7.27':
     optional: true
 
-  '@tombi-toml/cli-win32-arm64@0.7.25':
+  '@tombi-toml/cli-win32-arm64@0.7.27':
     optional: true
 
-  '@tombi-toml/cli-win32-x64@0.7.25':
+  '@tombi-toml/cli-win32-x64@0.7.27':
     optional: true
 
   '@types/chai@5.2.2':
@@ -3004,6 +3007,10 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
+  '@types/node@24.10.11':
+    dependencies:
+      undici-types: 7.16.0
+
   '@types/node@24.10.9':
     dependencies:
       undici-types: 7.16.0
@@ -3018,7 +3025,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 24.10.11
 
   '@typescript-eslint/eslint-plugin@8.54.0(@typescript-eslint/parser@8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
@@ -3119,6 +3126,14 @@ snapshots:
       '@vitest/utils': 4.0.18
       chai: 6.2.1
       tinyrainbow: 3.0.3
+
+  '@vitest/mocker@4.0.18(vite@7.3.1(@types/node@24.10.11)(jiti@2.6.1)(yaml@2.8.2))':
+    dependencies:
+      '@vitest/spy': 4.0.18
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 7.3.1(@types/node@24.10.11)(jiti@2.6.1)(yaml@2.8.2)
 
   '@vitest/mocker@4.0.18(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(yaml@2.8.2))':
     dependencies:
@@ -3545,7 +3560,7 @@ snapshots:
 
   happy-dom@20.4.0:
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 24.10.11
       '@types/whatwg-mimetype': 3.0.2
       '@types/ws': 8.18.1
       entities: 4.5.0
@@ -4074,16 +4089,16 @@ snapshots:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
 
-  tombi@0.7.25:
+  tombi@0.7.27:
     optionalDependencies:
-      '@tombi-toml/cli-darwin-arm64': 0.7.25
-      '@tombi-toml/cli-darwin-x64': 0.7.25
-      '@tombi-toml/cli-linux-arm64': 0.7.25
-      '@tombi-toml/cli-linux-arm64-musl': 0.7.25
-      '@tombi-toml/cli-linux-x64': 0.7.25
-      '@tombi-toml/cli-linux-x64-musl': 0.7.25
-      '@tombi-toml/cli-win32-arm64': 0.7.25
-      '@tombi-toml/cli-win32-x64': 0.7.25
+      '@tombi-toml/cli-darwin-arm64': 0.7.27
+      '@tombi-toml/cli-darwin-x64': 0.7.27
+      '@tombi-toml/cli-linux-arm64': 0.7.27
+      '@tombi-toml/cli-linux-arm64-musl': 0.7.27
+      '@tombi-toml/cli-linux-x64': 0.7.27
+      '@tombi-toml/cli-linux-x64-musl': 0.7.27
+      '@tombi-toml/cli-win32-arm64': 0.7.27
+      '@tombi-toml/cli-win32-x64': 0.7.27
 
   tr46@0.0.3: {}
 
@@ -4124,6 +4139,20 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
+  vite@7.3.1(@types/node@24.10.11)(jiti@2.6.1)(yaml@2.8.2):
+    dependencies:
+      esbuild: 0.27.2
+      fdir: 6.5.0(picomatch@4.0.3)
+      picomatch: 4.0.3
+      postcss: 8.5.6
+      rollup: 4.46.2
+      tinyglobby: 0.2.15
+    optionalDependencies:
+      '@types/node': 24.10.11
+      fsevents: 2.3.3
+      jiti: 2.6.1
+      yaml: 2.8.2
+
   vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(yaml@2.8.2):
     dependencies:
       esbuild: 0.27.2
@@ -4137,6 +4166,44 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.6.1
       yaml: 2.8.2
+
+  vitest@4.0.18(@types/node@24.10.11)(happy-dom@20.4.0)(jiti@2.6.1)(yaml@2.8.2):
+    dependencies:
+      '@vitest/expect': 4.0.18
+      '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@24.10.11)(jiti@2.6.1)(yaml@2.8.2))
+      '@vitest/pretty-format': 4.0.18
+      '@vitest/runner': 4.0.18
+      '@vitest/snapshot': 4.0.18
+      '@vitest/spy': 4.0.18
+      '@vitest/utils': 4.0.18
+      es-module-lexer: 1.7.0
+      expect-type: 1.2.2
+      magic-string: 0.30.21
+      obug: 2.1.1
+      pathe: 2.0.3
+      picomatch: 4.0.3
+      std-env: 3.10.0
+      tinybench: 2.9.0
+      tinyexec: 1.0.2
+      tinyglobby: 0.2.15
+      tinyrainbow: 3.0.3
+      vite: 7.3.1(@types/node@24.10.11)(jiti@2.6.1)(yaml@2.8.2)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 24.10.11
+      happy-dom: 20.4.0
+    transitivePeerDependencies:
+      - jiti
+      - less
+      - lightningcss
+      - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - terser
+      - tsx
+      - yaml
 
   vitest@4.0.18(@types/node@24.10.9)(happy-dom@20.4.0)(jiti@2.6.1)(yaml@2.8.2):
     dependencies:

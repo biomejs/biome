@@ -62,7 +62,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@650c5ca14212efbbf3e580844b04bdccf68dac31 # v2.67.18
+        uses: taiki-e/install-action@509565405a8a987e73cf742e26b26dcc72c4b01a # v2.67.26
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -116,7 +116,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.93.0-bullseye@sha256:ba31d14ad0062a17302ab8b0b64422aa11c7ad1e8f14427210f626a8dbe14e9b
+      image: rust:1.93.0-bullseye@sha256:3ebcc2d6d71fb93a2967e35723902c51dd87dbb36f66f795a58d7921553fbcd4
 
     steps:
       - name: Checkout repository
