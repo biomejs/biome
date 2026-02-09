@@ -1870,6 +1870,11 @@ See https://biomejs.dev/linter/rules/no-before-interactive-script-outside-docume
 	 */
 	noBeforeInteractiveScriptOutsideDocument?: NoBeforeInteractiveScriptOutsideDocumentConfiguration;
 	/**
+	* Disallow conditional expect() calls inside tests.
+See https://biomejs.dev/linter/rules/no-conditional-expect 
+	 */
+	noConditionalExpect?: NoConditionalExpectConfiguration;
+	/**
 	* Disallow continue statements.
 See https://biomejs.dev/linter/rules/no-continue 
 	 */
@@ -2034,11 +2039,6 @@ See https://biomejs.dev/linter/rules/no-next-async-client-component
 See https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion 
 	 */
 	noParametersOnlyUsedInRecursion?: NoParametersOnlyUsedInRecursionConfiguration;
-	/**
-	* Disallow conditional expect() calls inside tests.
-See https://biomejs.dev/linter/rules/no-playwright-conditional-expect 
-	 */
-	noPlaywrightConditionalExpect?: NoPlaywrightConditionalExpectConfiguration;
 	/**
 	* Disallow usage of element handles (page.$() and page.$$()).
 See https://biomejs.dev/linter/rules/no-playwright-element-handle 
@@ -2269,6 +2269,11 @@ See https://biomejs.dev/linter/rules/use-exhaustive-switch-cases
 	 */
 	useExhaustiveSwitchCases?: UseExhaustiveSwitchCasesConfiguration;
 	/**
+	* Ensure that test functions contain at least one expect() assertion.
+See https://biomejs.dev/linter/rules/use-expect 
+	 */
+	useExpect?: UseExpectConfiguration;
+	/**
 	* Enforce types in functions, methods, variables, and parameters.
 See https://biomejs.dev/linter/rules/use-explicit-type 
 	 */
@@ -2308,11 +2313,6 @@ See https://biomejs.dev/linter/rules/use-lone-executable-definition
 See https://biomejs.dev/linter/rules/use-max-params 
 	 */
 	useMaxParams?: UseMaxParamsConfiguration;
-	/**
-	* Ensure that Playwright test functions contain at least one expect() assertion.
-See https://biomejs.dev/linter/rules/use-playwright-expect 
-	 */
-	usePlaywrightExpect?: UsePlaywrightExpectConfiguration;
 	/**
 	* Enforce valid describe() callback.
 See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
@@ -3873,6 +3873,9 @@ export type NoAmbiguousAnchorTextConfiguration =
 export type NoBeforeInteractiveScriptOutsideDocumentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions;
+export type NoConditionalExpectConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConditionalExpectOptions;
 export type NoContinueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoContinueOptions;
@@ -3972,9 +3975,6 @@ export type NoNextAsyncClientComponentConfiguration =
 export type NoParametersOnlyUsedInRecursionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoParametersOnlyUsedInRecursionOptions;
-export type NoPlaywrightConditionalExpectConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoPlaywrightConditionalExpectOptions;
 export type NoPlaywrightElementHandleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightElementHandleOptions;
@@ -4110,6 +4110,9 @@ export type UseErrorCauseConfiguration =
 export type UseExhaustiveSwitchCasesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExhaustiveSwitchCasesOptions;
+export type UseExpectConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExpectOptions;
 export type UseExplicitTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExplicitTypeOptions;
@@ -4134,9 +4137,6 @@ export type UseLoneExecutableDefinitionConfiguration =
 export type UseMaxParamsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMaxParamsOptions;
-export type UsePlaywrightExpectConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUsePlaywrightExpectOptions;
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
@@ -5450,6 +5450,10 @@ export interface RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions {
 	level: RulePlainConfiguration;
 	options?: NoBeforeInteractiveScriptOutsideDocumentOptions;
 }
+export interface RuleWithNoConditionalExpectOptions {
+	level: RulePlainConfiguration;
+	options?: NoConditionalExpectOptions;
+}
 export interface RuleWithNoContinueOptions {
 	level: RulePlainConfiguration;
 	options?: NoContinueOptions;
@@ -5586,10 +5590,6 @@ export interface RuleWithNoParametersOnlyUsedInRecursionOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoParametersOnlyUsedInRecursionOptions;
-}
-export interface RuleWithNoPlaywrightConditionalExpectOptions {
-	level: RulePlainConfiguration;
-	options?: NoPlaywrightConditionalExpectOptions;
 }
 export interface RuleWithNoPlaywrightElementHandleOptions {
 	fix?: FixKind;
@@ -5783,6 +5783,10 @@ export interface RuleWithUseExhaustiveSwitchCasesOptions {
 	level: RulePlainConfiguration;
 	options?: UseExhaustiveSwitchCasesOptions;
 }
+export interface RuleWithUseExpectOptions {
+	level: RulePlainConfiguration;
+	options?: UseExpectOptions;
+}
 export interface RuleWithUseExplicitTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseExplicitTypeOptions;
@@ -5814,10 +5818,6 @@ export interface RuleWithUseLoneExecutableDefinitionOptions {
 export interface RuleWithUseMaxParamsOptions {
 	level: RulePlainConfiguration;
 	options?: UseMaxParamsOptions;
-}
-export interface RuleWithUsePlaywrightExpectOptions {
-	level: RulePlainConfiguration;
-	options?: UsePlaywrightExpectOptions;
 }
 export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
@@ -7036,6 +7036,7 @@ export interface NoAmbiguousAnchorTextOptions {
 	words?: string[];
 }
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
+export type NoConditionalExpectOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
 export interface NoDeprecatedMediaTypeOptions {
@@ -7119,7 +7120,6 @@ export type NoMultiStrOptions = {};
 export type NoNestedPromisesOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
-export type NoPlaywrightConditionalExpectOptions = {};
 export type NoPlaywrightElementHandleOptions = {};
 export type NoPlaywrightEvalOptions = {};
 export type NoPlaywrightForceOptionOptions = {};
@@ -7224,6 +7224,7 @@ export interface UseErrorCauseOptions {
 	requireCatchParameter?: boolean;
 }
 export type UseExhaustiveSwitchCasesOptions = {};
+export type UseExpectOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
@@ -7242,7 +7243,6 @@ export interface UseMaxParamsOptions {
 	 */
 	max?: number;
 }
-export type UsePlaywrightExpectOptions = {};
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikMethodUsageOptions = {};
 export type UseQwikValidLexicalScopeOptions = {};
@@ -7612,13 +7612,7 @@ export type NoRedundantUseStrictOptions = {};
 export type NoSelfCompareOptions = {};
 export type NoShadowRestrictedNamesOptions = {};
 export type NoShorthandPropertyOverridesOptions = {};
-export interface NoSkippedTestsOptions {
-	/**
-	* Allows conditional skipping inside test bodies.
-When enabled, `test.skip(condition)` and `test.skip()` inside if statements are allowed. 
-	 */
-	allowConditional?: boolean;
-}
+export type NoSkippedTestsOptions = {};
 export type NoSparseArrayOptions = {};
 export type NoSuspiciousSemicolonInJsxOptions = {};
 export type NoTemplateCurlyInStringOptions = {};
@@ -8043,7 +8037,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
-	| "lint/nursery/usePlaywrightExpect"
+	| "lint/nursery/useExpect"
 	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
@@ -8082,7 +8076,7 @@ export type Category =
 	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
-	| "lint/nursery/noPlaywrightConditionalExpect"
+	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"

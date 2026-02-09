@@ -4,12 +4,12 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::JsCallExpression;
 use biome_rowan::AstNode;
-use biome_rule_options::use_playwright_expect::UsePlaywrightExpectOptions;
+use biome_rule_options::use_expect::UseExpectOptions;
 
 use crate::frameworks::playwright::{contains_expect_call, get_test_callback, is_test_call};
 
 declare_lint_rule! {
-    /// Ensure that Playwright test functions contain at least one `expect()` assertion.
+    /// Ensure that test functions contain at least one `expect()` assertion.
     ///
     /// Tests without assertions may pass even when behavior is broken, leading to
     /// false confidence in the test suite. This rule ensures that every test
@@ -42,21 +42,25 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    pub UsePlaywrightExpect {
+    pub UseExpect {
         version: "next",
-        name: "usePlaywrightExpect",
+        name: "useExpect",
         language: "js",
-        sources: &[RuleSource::EslintPlaywright("expect-expect").same()],
+        sources: &[
+            RuleSource::EslintPlaywright("expect-expect").same(),
+            RuleSource::EslintJest("expect-expect").same(),
+            RuleSource::EslintVitest("expect-expect").same(),
+        ],
         recommended: false,
-        domains: &[RuleDomain::Playwright],
+        domains: &[RuleDomain::Test],
     }
 }
 
-impl Rule for UsePlaywrightExpect {
+impl Rule for UseExpect {
     type Query = Ast<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = UsePlaywrightExpectOptions;
+    type Options = UseExpectOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expr = ctx.query();

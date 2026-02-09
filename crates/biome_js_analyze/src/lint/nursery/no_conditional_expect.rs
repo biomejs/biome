@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsSyntaxKind};
 use biome_rowan::AstNode;
-use biome_rule_options::no_playwright_conditional_expect::NoPlaywrightConditionalExpectOptions;
+use biome_rule_options::no_conditional_expect::NoConditionalExpectOptions;
 
 use crate::frameworks::playwright::is_expect_call;
 
@@ -63,21 +63,25 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    pub NoPlaywrightConditionalExpect {
+    pub NoConditionalExpect {
         version: "next",
-        name: "noPlaywrightConditionalExpect",
+        name: "noConditionalExpect",
         language: "js",
-        sources: &[RuleSource::EslintPlaywright("no-conditional-expect").same()],
+        sources: &[
+            RuleSource::EslintPlaywright("no-conditional-expect").same(),
+            RuleSource::EslintJest("no-conditional-expect").same(),
+            RuleSource::EslintVitest("no-conditional-expect").same(),
+        ],
         recommended: false,
-        domains: &[RuleDomain::Playwright],
+        domains: &[RuleDomain::Test],
     }
 }
 
-impl Rule for NoPlaywrightConditionalExpect {
+impl Rule for NoConditionalExpect {
     type Query = Ast<JsCallExpression>;
     type State = &'static str;
     type Signals = Option<Self::State>;
-    type Options = NoPlaywrightConditionalExpectOptions;
+    type Options = NoConditionalExpectOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expr = ctx.query();

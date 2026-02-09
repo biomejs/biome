@@ -98,7 +98,7 @@ test("catch clause", async ({ page }) => {
 
 # Diagnostics
 ```
-conditional.js:5:15 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:5:15 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -119,7 +119,7 @@ conditional.js:5:15 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:10:27 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:10:27 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -139,7 +139,7 @@ conditional.js:10:27 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:14:28 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:14:28 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -159,7 +159,7 @@ conditional.js:14:28 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:20:19 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:20:19 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -180,7 +180,7 @@ conditional.js:20:19 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:27:15 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:27:15 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -201,7 +201,7 @@ conditional.js:27:15 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:32:27 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:32:27 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -221,7 +221,7 @@ conditional.js:32:27 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:38:15 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:38:15 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -242,7 +242,7 @@ conditional.js:38:15 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:44:27 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:44:27 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -263,7 +263,7 @@ conditional.js:44:27 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:49:28 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:49:28 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -284,7 +284,7 @@ conditional.js:49:28 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:56:19 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:56:19 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -305,7 +305,7 @@ conditional.js:56:19 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:64:15 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:64:15 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -326,7 +326,7 @@ conditional.js:64:15 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:70:27 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:70:27 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -347,7 +347,7 @@ conditional.js:70:27 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:77:19 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:77:19 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
@@ -368,7 +368,7 @@ conditional.js:77:19 lint/nursery/noPlaywrightConditionalExpect ━━━━━�
 ```
 
 ```
-conditional.js:87:15 lint/nursery/noPlaywrightConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+conditional.js:87:15 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected conditional expect() call.
   
