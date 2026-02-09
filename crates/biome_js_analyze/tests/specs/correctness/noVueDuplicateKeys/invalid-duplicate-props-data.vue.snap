@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-duplicate-props-data.vue
+---
+# Input
+```ts
+export default {
+    props: {
+        bar: String
+    },
+    data () {
+        return {
+            bar: null
+        }
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid-duplicate-props-data.vue:3:9 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate key bar found in Vue component.
+  
+    1 │ export default {
+    2 │     props: {
+  > 3 │         bar: String
+      │         ^^^
+    4 │     },
+    5 │     data () {
+  
+  i Key bar is also defined here.
+  
+    5 │     data () {
+    6 │         return {
+  > 7 │             bar: null
+      │             ^^^
+    8 │         }
+    9 │     }
+  
+  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
+  
+
+```
