@@ -121,13 +121,18 @@ class Foo17 {
 	}
 }
 
-// Boundary test (fits): 78+2=80 chars with delimiter spacing
+// Setter with trailing comma
 class Foo18 {
+	set a(b,) {}
+}
+
+// Boundary test (fits): 78+2=80 chars with delimiter spacing
+class Foo19 {
 	set a({ a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, uv }) {}
 }
 
 // Boundary test (breaks): 79+2=81 chars with delimiter spacing
-class Foo19 {
+class Foo20 {
 	set a({ a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, uvw }) {}
 }
 
@@ -214,12 +219,17 @@ console.log({
 	set a(b) {},
 });
 
-// Boundary test (fits): 78+2=80 chars with delimiter spacing
+// Setter with trailing comma in object literal
 const foo11 = {
+	set a(b,) {},
+};
+
+// Boundary test (fits): 78+2=80 chars with delimiter spacing
+const foo12 = {
 	set a({ a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u }) {},
 };
 
 // Boundary test (breaks): 79+2=81 chars with delimiter spacing
-const foo12 = {
+const foo13 = {
 	set a({ a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, uv }) {},
 };
