@@ -28,7 +28,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: TwVariantAtRule {
@@ -174,7 +174,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..156
   0: (empty)
-  1: CSS_RULE_LIST@0..155
+  1: CSS_ROOT_ITEM_LIST@0..155
     0: CSS_AT_RULE@0..52
       0: AT@0..1 "@" [] []
       1: TW_VARIANT_AT_RULE@1..52

@@ -8556,6 +8556,7 @@ export interface CssFileSource {
 For example, if inside a styled`` literal, a top-level declaration is allowed. 
 	 */
 	embeddingKind: EmbeddingKind2;
+	language: CssFileLanguage;
 	variant: CssVariant;
 }
 export interface GraphqlFileSource {
@@ -8619,7 +8620,11 @@ export type LanguageVersion = "eS2022" | "eSNext";
 export type JsonFileVariant = "standard" | "jsonc";
 export type EmbeddingKind2 = "None" | "Styled" | { Html: EmbeddingHtmlKind };
 /**
-	* The style of CSS contained in the file.
+ * The language of the stylesheet.
+ */
+export type CssFileLanguage = "css" | "scss";
+/**
+	* Extra CSS features enabled for the file.
 
 Currently, Biome aims to be compatible with
 the latest Recommendation level standards.

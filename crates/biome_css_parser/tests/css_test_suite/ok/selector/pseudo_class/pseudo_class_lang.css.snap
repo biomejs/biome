@@ -22,7 +22,7 @@ html:lang(de, fr) {}
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
@@ -333,7 +333,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..155
   0: (empty)
-  1: CSS_RULE_LIST@0..154
+  1: CSS_ROOT_ITEM_LIST@0..154
     0: CSS_QUALIFIED_RULE@0..17
       0: CSS_SELECTOR_LIST@0..15
         0: CSS_COMPOUND_SELECTOR@0..15

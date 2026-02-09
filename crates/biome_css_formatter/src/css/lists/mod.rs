@@ -29,6 +29,7 @@ pub(crate) mod parameter_list;
 pub(crate) mod pseudo_element_function_parameter_list;
 pub(crate) mod pseudo_value_list;
 pub(crate) mod relative_selector_list;
+pub(crate) mod root_item_list;
 pub(crate) mod rule_list;
 pub(crate) mod selector_list;
 pub(crate) mod sub_selector_list;
