@@ -152,7 +152,6 @@ fn is_in_conditional_context(call: &JsCallExpression) -> Option<&'static str> {
             // Direct conditional statements
             JsSyntaxKind::JS_IF_STATEMENT => return Some("if statement"),
             JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => return Some("ternary expression"),
-            JsSyntaxKind::JS_SWITCH_STATEMENT => return Some("switch statement"),
             JsSyntaxKind::JS_CASE_CLAUSE | JsSyntaxKind::JS_DEFAULT_CLAUSE => {
                 return Some("switch case")
             }

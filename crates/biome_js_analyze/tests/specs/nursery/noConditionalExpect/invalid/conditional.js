@@ -14,6 +14,14 @@ test("logical and", async ({ page }) => {
     someCondition && await expect(page).toHaveTitle("Title");
 });
 
+test("logical or", async ({ page }) => {
+    someCondition || await expect(page).toHaveTitle("Title");
+});
+
+test("nullish coalescing", async ({ page }) => {
+    someValue ?? await expect(page).toHaveTitle("Title");
+});
+
 test("switch case", async ({ page }) => {
     switch (value) {
         case "a":

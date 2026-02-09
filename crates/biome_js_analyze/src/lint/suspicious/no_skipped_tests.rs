@@ -1,5 +1,6 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -61,6 +62,7 @@ declare_lint_rule! {
             RuleSource::EslintPlaywright("no-skipped-test").inspired(),
         ],
         fix_kind: FixKind::Unsafe,
+        domains: &[RuleDomain::Test],
     }
 }
 
@@ -190,12 +192,7 @@ fn detect_bare_skip_call(
             if matches!(_root.text(), "test" | "it" | "describe")
                 && (name.text() == "skip" || name.text() == "fixme") =>
         {
-            let annotation = if name.text() == "fixme" {
-                "fixme"
-            } else {
-                "skip"
-            };
-            (annotation, *range)
+            (annotation_for(name.text().as_ref()), *range)
         }
         // test.describe.skip() / test.describe.fixme() / test.step.skip() / test.step.fixme()
         [(_, root), (_, middle), (range, name)]
@@ -203,12 +200,7 @@ fn detect_bare_skip_call(
                 && (middle.text() == "describe" || middle.text() == "step")
                 && (name.text() == "skip" || name.text() == "fixme") =>
         {
-            let annotation = if name.text() == "fixme" {
-                "fixme"
-            } else {
-                "skip"
-            };
-            (annotation, *range)
+            (annotation_for(name.text().as_ref()), *range)
         }
         // test.describe.parallel.skip() / test.describe.serial.skip() / etc.
         [(_, root), (_, desc), (_, mode), (range, name)]
@@ -217,12 +209,7 @@ fn detect_bare_skip_call(
                 && (mode.text() == "parallel" || mode.text() == "serial")
                 && (name.text() == "skip" || name.text() == "fixme") =>
         {
-            let annotation = if name.text() == "fixme" {
-                "fixme"
-            } else {
-                "skip"
-            };
-            (annotation, *range)
+            (annotation_for(name.text().as_ref()), *range)
         }
         _ => return None,
     };
@@ -296,6 +283,10 @@ fn detect_bare_skip_call(
         range: name_range,
         annotation,
     })
+}
+
+fn annotation_for(name: &str) -> &'static str {
+    if name == "fixme" { "fixme" } else { "skip" }
 }
 
 /// Collects member names with their text ranges from a callee expression.
