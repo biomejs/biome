@@ -1093,6 +1093,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_return_assign::NoReturnAssignOptions>(),
     ));
     result.push((
+        "nursery",
+        "noReturnInFinally",
+        TypeId::of::<biome_rule_options::no_return_in_finally::NoReturnInFinallyOptions>(),
+    ));
+    result.push((
         "style",
         "noRootType",
         TypeId::of::<biome_rule_options::no_root_type::NoRootTypeOptions>(),
