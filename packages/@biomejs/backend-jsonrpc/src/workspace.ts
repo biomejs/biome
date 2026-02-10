@@ -2054,6 +2054,11 @@ See https://biomejs.dev/linter/rules/no-return-assign
 	 */
 	noReturnAssign?: NoReturnAssignConfiguration;
 	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/no-return-in-finally 
+	 */
+	noReturnInFinally?: NoReturnInFinallyConfiguration;
+	/**
 	* Disallow the usage of specified root types.
 See https://biomejs.dev/linter/rules/no-root-type 
 	 */
@@ -3913,6 +3918,9 @@ export type NoRedundantDefaultExportConfiguration =
 export type NoReturnAssignConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnAssignOptions;
+export type NoReturnInFinallyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReturnInFinallyOptions;
 export type NoRootTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRootTypeOptions;
@@ -5491,6 +5499,10 @@ export interface RuleWithNoReturnAssignOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnAssignOptions;
 }
+export interface RuleWithNoReturnInFinallyOptions {
+	level: RulePlainConfiguration;
+	options?: NoReturnInFinallyOptions;
+}
 export interface RuleWithNoRootTypeOptions {
 	level: RulePlainConfiguration;
 	options?: NoRootTypeOptions;
@@ -6949,6 +6961,7 @@ export type NoProtoOptions = {};
 export type NoReactForwardRefOptions = {};
 export type NoRedundantDefaultExportOptions = {};
 export type NoReturnAssignOptions = {};
+export type NoReturnInFinallyOptions = {};
 export interface NoRootTypeOptions {
 	/**
 	* A list of disallowed root types (e.g. "mutation" and/or "subscription").
@@ -7891,6 +7904,7 @@ export type Category =
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noRedundantDefaultExport"
 	| "lint/nursery/noReturnAssign"
+	| "lint/nursery/noReturnInFinally"
 	| "lint/nursery/noRootType"
 	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noShadow"
