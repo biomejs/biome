@@ -1584,7 +1584,7 @@
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
 				},
 				"useEditorconfig": {
-					"description": "Use any `.editorconfig` files to configure the formatter. Configuration\nin `biome.json` will override `.editorconfig` configuration.\n\nDefault: `true`.",
+					"description": "Use any `.editorconfig` files to configure the formatter. Configuration\nin `biome.json` will override `.editorconfig` configuration.\n\nDefault: `false`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},

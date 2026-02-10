@@ -227,7 +227,7 @@ match these patterns.
 	* Use any `.editorconfig` files to configure the formatter. Configuration
 in `biome.json` will override `.editorconfig` configuration.
 
-Default: `true`. 
+Default: `false`. 
 	 */
 	useEditorconfig?: Bool;
 }

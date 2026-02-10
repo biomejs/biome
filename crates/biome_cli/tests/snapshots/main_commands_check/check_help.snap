@@ -56,7 +56,7 @@ The configuration that is contained inside the file `biome.json`
         --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
                               Configuration in `biome.json` will override `.editorconfig`
                               configuration.
-                              Default: `true`.
+                              Default: `false`.
         --jsx-everywhere=<true|false>  When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX
                               syntax.
                               Defaults to `true`.

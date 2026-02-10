@@ -34,7 +34,7 @@ Generic options applied to all files
         --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
                               Configuration in `biome.json` will override `.editorconfig`
                               configuration.
-                              Default: `true`.
+                              Default: `false`.
 
 Formatting options specific to the JavaScript files
         --javascript-formatter-enabled=<true|false>  Control the formatter for JavaScript (and its

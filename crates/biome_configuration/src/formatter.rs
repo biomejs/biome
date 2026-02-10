@@ -77,7 +77,7 @@ pub struct FormatterConfiguration {
     /// Use any `.editorconfig` files to configure the formatter. Configuration
     /// in `biome.json` will override `.editorconfig` configuration.
     ///
-    /// Default: `true`.
+    /// Default: `false`.
     #[bpaf(long("use-editorconfig"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_editorconfig: Option<UseEditorconfigEnabled>,
