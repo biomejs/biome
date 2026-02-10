@@ -7,7 +7,9 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_semantic::{CanBeImportedExported, ClosureExtensions, ReferencesExtensions, SemanticModel, is_constant};
+use biome_js_semantic::{
+    CanBeImportedExported, ClosureExtensions, ReferencesExtensions, SemanticModel, is_constant,
+};
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression,
@@ -585,19 +587,6 @@ fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> 
             {
                 return result;
             }
-        }
-
-        // Follow eslint React plugin behavior:
-        // When calling a method of an object, only the object should be included in the dependency list.
-        if matches!(
-            parent.kind(),
-            JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION
-        ) && let Some(wrapper) = parent.parent()
-            && let Some(call_expression) = JsCallExpression::cast(wrapper)
-            && let Ok(callee) = call_expression.callee()
-            && callee.syntax().eq(&parent)
-        {
-            return result;
         }
 
         if matches!(
@@ -1627,12 +1616,13 @@ impl Rule for UseExhaustiveDependencies {
                 let new_elements = captures.first().into_iter().filter_map(|node| {
                     if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(node) {
                         return Some(AnyJsArrayElement::AnyJsExpression(
-                             make::js_identifier_expression(
-                                 make::js_reference_identifier(jsx_ref.value_token().ok()?)
-                             ).into()
+                            make::js_identifier_expression(make::js_reference_identifier(
+                                jsx_ref.value_token().ok()?,
+                            ))
+                            .into(),
                         ));
                     }
-                    
+
                     node.ancestors()
                         .find_map(|node| match JsReferenceIdentifier::cast_ref(&node) {
                             Some(node) => Some(make::js_identifier_expression(node).into()),
