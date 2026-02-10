@@ -90,7 +90,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// References:
-    /// - <https://vuejs.org/api/options-state.html#watch>
+    /// - https://vuejs.org/api/options-state.html#watch
     ///
     pub NoVueArrowFuncInWatch {
         version: "next",
