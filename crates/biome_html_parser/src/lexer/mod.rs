@@ -109,9 +109,9 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consume a token in the [HtmlLexContext::InsideTagVue] context.
+    /// Consume a token in the [HtmlLexContext::InsideTagWithDirectives] context.
     /// This context is used for Vue files with Vue-specific directives.
-    fn consume_token_inside_tag_vue(&mut self, current: u8) -> HtmlSyntaxKind {
+    fn consume_token_inside_tag_directives(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
@@ -135,9 +135,10 @@ impl<'src> HtmlLexer<'src> {
                     self.consume_byte(T!['}'])
                 }
             }
+            // Vue and Svelte directives
+            COL => self.consume_byte(T![:]),
 
             // these are used in Vue directives
-            COL => self.consume_byte(T![:]),
             AT_ => self.consume_byte(T![@]),
             PRD => self.consume_byte(T![.]),
             BTO => self.consume_byte(T!['[']),
@@ -1180,7 +1181,9 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                 Some(current) => match context {
                     HtmlLexContext::Regular => self.consume_token(current),
                     HtmlLexContext::InsideTag => self.consume_token_inside_tag(current),
-                    HtmlLexContext::InsideTagVue => self.consume_token_inside_tag_vue(current),
+                    HtmlLexContext::InsideTagWithDirectives => {
+                        self.consume_token_inside_tag_directives(current)
+                    }
                     HtmlLexContext::VueDirectiveArgument => {
                         self.consume_token_vue_directive_argument()
                     }
