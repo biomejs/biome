@@ -28,8 +28,8 @@ pub(crate) enum HtmlLexContext {
     /// When the lexer is inside a tag, special characters are lexed as tag tokens.
     InsideTag,
     /// Like [InsideTag], but with Vue-specific tokens enabled.
-    /// This enables parsing of Vue directives (v-bind, :, @, #, etc.)
-    InsideTagVue,
+    /// This enables parsing of Component directives (v-bind, :, @, #, etc.)
+    InsideTagWithDirectives,
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
