@@ -458,13 +458,12 @@ impl Session {
             let offset = if file_features.supports_full_html_support() {
                 None
             } else {
-                let get_start: Option<fn(&str) -> Option<u32>> =
-                    match biome_path.extension() {
-                        Some("vue") => Some(VueFileHandler::start),
-                        Some("astro") => Some(AstroFileHandler::start),
-                        Some("svelte") => Some(SvelteFileHandler::start),
-                        _ => None,
-                    };
+                let get_start: Option<fn(&str) -> Option<u32>> = match biome_path.extension() {
+                    Some("vue") => Some(VueFileHandler::start),
+                    Some("astro") => Some(AstroFileHandler::start),
+                    Some("svelte") => Some(SvelteFileHandler::start),
+                    _ => None,
+                };
                 get_start.and_then(|f| {
                     let content = self
                         .workspace
