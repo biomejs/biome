@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 432
 expression: redactor(content)
 ---
 ## `biome.json`
@@ -56,7 +57,7 @@ JsIdentifierBinding() as $name where {
 # Termination Message
 
 ```block
-check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Some errors were emitted while running checks.
   
@@ -103,22 +104,7 @@ file.vue:15:7 plugin ━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-file.vue format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-    13 13 │   
-    14 14 │   <script setup lang="ts">
-    15    │ - const·foo·=·'bad'
-       15 │ + const·foo·=·"bad";
-    16 16 │   </script>
-    17 17 │   
-  
-
-```
-
-```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 2 errors.
+Found 1 error.
 Found 1 warning.
 ```

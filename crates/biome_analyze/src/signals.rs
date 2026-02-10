@@ -109,7 +109,7 @@ where
 /// Unlike [DiagnosticSignal] which converts through [Error] into
 /// [DiagnosticKind::Raw](crate::diagnostics::DiagnosticKind::Raw), this type
 /// directly converts via `AnalyzerDiagnostic::from(RuleDiagnostic)`.
-pub struct PluginSignal<L: Language> {
+pub struct PluginSignal<L> {
     diagnostic: RuleDiagnostic,
     _phantom: PhantomData<L>,
 }

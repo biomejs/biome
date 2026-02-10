@@ -3191,7 +3191,7 @@ const foo = 'bad'
     let (fs, result) = run_cli_with_server_workspace(
         fs,
         &mut console,
-        Args::from(["check", file_path].as_slice()),
+        Args::from(["lint", file_path].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
