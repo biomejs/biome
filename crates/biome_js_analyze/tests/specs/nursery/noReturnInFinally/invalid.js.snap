@@ -1,0 +1,91 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+Promise.resolve(1).finally(() => { return 2 })
+
+Promise.reject(0).finally(() => { return 2 })
+
+myPromise.finally(() => { return 2 });
+
+Promise.resolve(1).finally(function () { return 2 })
+```
+
+# Diagnostics
+```
+invalid.js:3:36 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No return in finally
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ Promise.resolve(1).finally(() => { return 2 })
+      │                                    ^^^^^^^^
+    4 │ 
+    5 │ Promise.reject(0).finally(() => { return 2 })
+  
+  i The return value in a 'finally' callback is ignored, making any return statement potentially confusing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:35 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No return in finally
+  
+    3 │ Promise.resolve(1).finally(() => { return 2 })
+    4 │ 
+  > 5 │ Promise.reject(0).finally(() => { return 2 })
+      │                                   ^^^^^^^^
+    6 │ 
+    7 │ myPromise.finally(() => { return 2 });
+  
+  i The return value in a 'finally' callback is ignored, making any return statement potentially confusing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:27 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No return in finally
+  
+    5 │ Promise.reject(0).finally(() => { return 2 })
+    6 │ 
+  > 7 │ myPromise.finally(() => { return 2 });
+      │                           ^^^^^^^^
+    8 │ 
+    9 │ Promise.resolve(1).finally(function () { return 2 })
+  
+  i The return value in a 'finally' callback is ignored, making any return statement potentially confusing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:42 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No return in finally
+  
+    7 │ myPromise.finally(() => { return 2 });
+    8 │ 
+  > 9 │ Promise.resolve(1).finally(function () { return 2 })
+      │                                          ^^^^^^^^
+  
+  i The return value in a 'finally' callback is ignored, making any return statement potentially confusing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

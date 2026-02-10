@@ -4492,6 +4492,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoReturnInFinallyConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReturnInFinallyOptions" }
+			]
+		},
+		"NoReturnInFinallyOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoRootTypeConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5719,6 +5729,13 @@
 					"description": "Disallow assignments in return statements.\nSee https://biomejs.dev/linter/rules/no-return-assign",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReturnAssignConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReturnInFinally": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-return-in-finally",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReturnInFinallyConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8453,6 +8470,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReturnAssignOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReturnInFinallyOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReturnInFinallyOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
