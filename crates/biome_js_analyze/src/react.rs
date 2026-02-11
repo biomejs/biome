@@ -309,28 +309,22 @@ pub(crate) fn is_global_react_import(binding: &JsIdentifierBinding, lib: ReactLi
     {
         return false;
     };
+
     let Some(decl) = binding.declaration() else {
         return false;
     };
+
     // This must be a default import or a namespace import
-    let syntax = match decl {
-        AnyJsBindingDeclaration::JsNamedImportSpecifier(specifier) => {
-            if !specifier.name().is_ok_and(|name| name.is_default()) {
-                return false;
-            }
-            specifier.into_syntax()
-        }
-        AnyJsBindingDeclaration::JsDefaultImportSpecifier(specifier) => specifier.into_syntax(),
-        AnyJsBindingDeclaration::JsNamespaceImportSpecifier(specifier) => specifier.into_syntax(),
-        _ => {
-            return false;
-        }
-    };
-    // Check import source
-    syntax
-        .ancestors()
-        .skip(1)
-        .find_map(JsImport::cast)
-        .and_then(|import| import.source_text().ok())
-        .is_some_and(|source| lib.import_names().contains(&source.text()))
+    matches!(
+        decl,
+        AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
+            | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
+    ) || matches!(
+        decl,
+        AnyJsBindingDeclaration::JsNamedImportSpecifier(spec)
+            if spec.name().is_ok_and(|name| name.is_default())
+    )
+
+    // We don't check the import source here because tsc doesn't require that `React` is imported
+    // from the `react` package either.
 }
