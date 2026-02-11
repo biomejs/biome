@@ -104,6 +104,7 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("suspicious", "noDuplicateTestHooks"),
         RuleFilter::Rule("suspicious", "noExportsInTest"),
         RuleFilter::Rule("suspicious", "noFocusedTests"),
+        RuleFilter::Rule("suspicious", "noSkippedTests"),
     ]
 });
 static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =

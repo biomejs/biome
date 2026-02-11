@@ -1428,11 +1428,11 @@ impl Iterator for CalleeNamesIterator {
             },
             JsComputedMemberExpression(member_expression) => {
                 let member = member_expression.member().ok()?;
-                if let AnyJsExpression::AnyJsLiteralExpression(lit) = &member {
-                    if let Some(string_lit) = lit.as_js_string_literal_expression() {
-                        self.next = member_expression.object().ok();
-                        return string_lit.inner_string_text().ok();
-                    }
+                if let AnyJsExpression::AnyJsLiteralExpression(lit) = &member
+                    && let Some(string_lit) = lit.as_js_string_literal_expression()
+                {
+                    self.next = member_expression.object().ok();
+                    return string_lit.inner_string_text().ok();
                 }
                 None
             }
