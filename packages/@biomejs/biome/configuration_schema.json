@@ -4068,6 +4068,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNestedPromisesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNestedPromisesOptions" }
+			]
+		},
+		"NoNestedPromisesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNestedTernaryConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5660,6 +5670,13 @@
 					"description": "Disallow creating multiline strings by escaping newlines.\nSee https://biomejs.dev/linter/rules/no-multi-str",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoMultiStrConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNestedPromises": {
+					"description": "Disallow nested .then() or .catch() promise calls.\nSee https://biomejs.dev/linter/rules/no-nested-promises",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNestedPromisesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8075,6 +8092,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoNestedComponentDefinitionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNestedPromisesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNestedPromisesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
