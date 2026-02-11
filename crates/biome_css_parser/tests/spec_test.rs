@@ -75,6 +75,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             options = options.allow_tailwind_directives();
         }
 
+        if settings.vue_scoped_css_enabled() {
+            options = options.allow_vue_scoped_css();
+        }
+
         if !diagnostics.is_empty() {
             for diagnostic in diagnostics {
                 println!("{:?}", print_diagnostic_to_string(&diagnostic));

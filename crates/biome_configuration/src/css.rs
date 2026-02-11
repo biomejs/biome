@@ -36,6 +36,7 @@ pub struct CssConfiguration {
 pub type CssAllowWrongLineCommentsEnabled = Bool<false>;
 pub type CssModulesEnabled = Bool<false>;
 pub type CssTailwindDirectivesEnabled = Bool<false>;
+pub type CssVueScopedCssEnabled = Bool<false>;
 
 /// Options that changes how the CSS parser behaves
 #[derive(
@@ -57,6 +58,11 @@ pub struct CssParserConfiguration {
     /// Enables parsing of Tailwind CSS 4.0 directives and functions.
     #[bpaf(long("css-parse-tailwind-directives"), argument("true|false"))]
     pub tailwind_directives: Option<CssTailwindDirectivesEnabled>,
+
+    /// Enables parsing of Vue SFC scoped CSS selectors (`:deep()`, `:slotted()`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("css-parse-vue-scoped-css"), argument("true|false"))]
+    pub vue_scoped_css: Option<CssVueScopedCssEnabled>,
 }
 
 pub type CssFormatterEnabled = Bool<true>;

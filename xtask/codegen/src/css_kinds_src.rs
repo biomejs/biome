@@ -132,6 +132,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "plugin",
         "slot",
         "inline",
+        // Vue SFC scoped CSS
+        "deep",
+        "slotted",
         // HERE: Add new regular keywords _above_ here. Be sure to also add them
         // to `consume_identifier` in `biome_css_parser/src/lexer/mod.rs` as well.
         // CSS-wide keywords

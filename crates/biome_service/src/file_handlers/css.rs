@@ -20,7 +20,7 @@ use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, Cont
 use biome_configuration::css::{
     CssAllowWrongLineCommentsEnabled, CssAssistConfiguration, CssAssistEnabled,
     CssFormatterConfiguration, CssFormatterEnabled, CssLinterConfiguration, CssLinterEnabled,
-    CssModulesEnabled, CssParserConfiguration, CssTailwindDirectivesEnabled,
+    CssModulesEnabled, CssParserConfiguration, CssTailwindDirectivesEnabled, CssVueScopedCssEnabled,
 };
 use biome_css_analyze::{CssAnalyzerServices, analyze};
 use biome_css_formatter::context::CssFormatOptions;
@@ -100,6 +100,7 @@ pub struct CssParserSettings {
     pub allow_wrong_line_comments: Option<CssAllowWrongLineCommentsEnabled>,
     pub css_modules_enabled: Option<CssModulesEnabled>,
     pub tailwind_directives: Option<CssTailwindDirectivesEnabled>,
+    pub vue_scoped_css: Option<CssVueScopedCssEnabled>,
 }
 
 impl From<CssParserConfiguration> for CssParserSettings {
@@ -108,6 +109,7 @@ impl From<CssParserConfiguration> for CssParserSettings {
             allow_wrong_line_comments: configuration.allow_wrong_line_comments,
             css_modules_enabled: configuration.css_modules,
             tailwind_directives: configuration.tailwind_directives,
+            vue_scoped_css: configuration.vue_scoped_css,
         }
     }
 }
@@ -129,6 +131,10 @@ impl CssParserSettings {
 
     pub fn tailwind_directives_enabled(&self) -> bool {
         self.tailwind_directives.unwrap_or_default().into()
+    }
+
+    pub fn vue_scoped_css_enabled(&self) -> bool {
+        self.vue_scoped_css.unwrap_or_default().into()
     }
 }
 
@@ -164,6 +170,7 @@ impl ServiceLanguage for CssLanguage {
             css_modules: language.css_modules_enabled.unwrap_or_default().into(),
             grit_metavariables: false,
             tailwind_directives: language.tailwind_directives_enabled(),
+            vue_scoped_css: language.vue_scoped_css_enabled(),
         };
 
         overrides.apply_override_css_parser_options(path, &mut options);
@@ -423,6 +430,13 @@ fn parse(
             .css
             .parser
             .tailwind_directives
+            .unwrap_or_default()
+            .into(),
+        vue_scoped_css: settings
+            .languages
+            .css
+            .parser
+            .vue_scoped_css
             .unwrap_or_default()
             .into(),
     };

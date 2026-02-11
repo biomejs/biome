@@ -1,0 +1,12 @@
+:deep( {}
+:deep() {}
+:deep(.div, .class) {}
+:deep(.div, .class {}
+:deep(.div .class {}
+:deep(.div .class
+:slotted( {}
+:slotted() {}
+:slotted(.div, .class) {}
+:slotted(.div, .class {}
+:slotted(.div .class {}
+:slotted(.div .class

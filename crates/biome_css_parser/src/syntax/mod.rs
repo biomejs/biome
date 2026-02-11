@@ -6,6 +6,7 @@ mod property;
 mod selector;
 mod util;
 mod value;
+mod vue_scoped_css;
 
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;

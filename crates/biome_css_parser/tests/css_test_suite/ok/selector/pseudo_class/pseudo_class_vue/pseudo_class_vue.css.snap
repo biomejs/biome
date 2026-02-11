@@ -1,0 +1,266 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.a :deep(.b) { color: red; }
+.a :slotted(.b) { color: red; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@0..1 "." [] [],
+                                name: CssCustomIdentifier {
+                                    value_token: IDENT@1..2 "a" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@2..3 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@3..4 ":" [] [],
+                                class: CssPseudoClassFunctionSelector {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@4..8 "deep" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@8..9 "(" [] [],
+                                    selector: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@9..10 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@10..11 "b" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    r_paren_token: R_PAREN@11..13 ")" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@13..15 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@15..20 "color" [] [],
+                                },
+                                colon_token: COLON@20..22 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@22..25 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@25..27 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@27..28 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@28..30 "." [Newline("\n")] [],
+                                name: CssCustomIdentifier {
+                                    value_token: IDENT@30..31 "a" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@31..32 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@32..33 ":" [] [],
+                                class: CssPseudoClassFunctionSelector {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@33..40 "slotted" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@40..41 "(" [] [],
+                                    selector: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@41..42 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@42..43 "b" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    r_paren_token: R_PAREN@43..45 ")" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@45..47 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@47..52 "color" [] [],
+                                },
+                                colon_token: COLON@52..54 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@54..57 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@57..59 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@59..60 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@60..61 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..61
+  0: (empty)
+  1: CSS_RULE_LIST@0..60
+    0: CSS_QUALIFIED_RULE@0..28
+      0: CSS_SELECTOR_LIST@0..13
+        0: CSS_COMPLEX_SELECTOR@0..13
+          0: CSS_COMPOUND_SELECTOR@0..2
+            0: CSS_NESTED_SELECTOR_LIST@0..0
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@0..2
+              0: CSS_CLASS_SELECTOR@0..2
+                0: DOT@0..1 "." [] []
+                1: CSS_CUSTOM_IDENTIFIER@1..2
+                  0: IDENT@1..2 "a" [] []
+          1: CSS_SPACE_LITERAL@2..3 " " [] []
+          2: CSS_COMPOUND_SELECTOR@3..13
+            0: CSS_NESTED_SELECTOR_LIST@3..3
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@3..13
+              0: CSS_PSEUDO_CLASS_SELECTOR@3..13
+                0: COLON@3..4 ":" [] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR@4..13
+                  0: CSS_IDENTIFIER@4..8
+                    0: IDENT@4..8 "deep" [] []
+                  1: L_PAREN@8..9 "(" [] []
+                  2: CSS_COMPOUND_SELECTOR@9..11
+                    0: CSS_NESTED_SELECTOR_LIST@9..9
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@9..11
+                      0: CSS_CLASS_SELECTOR@9..11
+                        0: DOT@9..10 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@10..11
+                          0: IDENT@10..11 "b" [] []
+                  3: R_PAREN@11..13 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@13..28
+        0: L_CURLY@13..15 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@15..27
+          0: CSS_DECLARATION_WITH_SEMICOLON@15..27
+            0: CSS_DECLARATION@15..25
+              0: CSS_GENERIC_PROPERTY@15..25
+                0: CSS_IDENTIFIER@15..20
+                  0: IDENT@15..20 "color" [] []
+                1: COLON@20..22 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@22..25
+                  0: CSS_IDENTIFIER@22..25
+                    0: IDENT@22..25 "red" [] []
+              1: (empty)
+            1: SEMICOLON@25..27 ";" [] [Whitespace(" ")]
+        2: R_CURLY@27..28 "}" [] []
+    1: CSS_QUALIFIED_RULE@28..60
+      0: CSS_SELECTOR_LIST@28..45
+        0: CSS_COMPLEX_SELECTOR@28..45
+          0: CSS_COMPOUND_SELECTOR@28..31
+            0: CSS_NESTED_SELECTOR_LIST@28..28
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@28..31
+              0: CSS_CLASS_SELECTOR@28..31
+                0: DOT@28..30 "." [Newline("\n")] []
+                1: CSS_CUSTOM_IDENTIFIER@30..31
+                  0: IDENT@30..31 "a" [] []
+          1: CSS_SPACE_LITERAL@31..32 " " [] []
+          2: CSS_COMPOUND_SELECTOR@32..45
+            0: CSS_NESTED_SELECTOR_LIST@32..32
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@32..45
+              0: CSS_PSEUDO_CLASS_SELECTOR@32..45
+                0: COLON@32..33 ":" [] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR@33..45
+                  0: CSS_IDENTIFIER@33..40
+                    0: IDENT@33..40 "slotted" [] []
+                  1: L_PAREN@40..41 "(" [] []
+                  2: CSS_COMPOUND_SELECTOR@41..43
+                    0: CSS_NESTED_SELECTOR_LIST@41..41
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@41..43
+                      0: CSS_CLASS_SELECTOR@41..43
+                        0: DOT@41..42 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@42..43
+                          0: IDENT@42..43 "b" [] []
+                  3: R_PAREN@43..45 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@45..60
+        0: L_CURLY@45..47 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@47..59
+          0: CSS_DECLARATION_WITH_SEMICOLON@47..59
+            0: CSS_DECLARATION@47..57
+              0: CSS_GENERIC_PROPERTY@47..57
+                0: CSS_IDENTIFIER@47..52
+                  0: IDENT@47..52 "color" [] []
+                1: COLON@52..54 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@54..57
+                  0: CSS_IDENTIFIER@54..57
+                    0: IDENT@54..57 "red" [] []
+              1: (empty)
+            1: SEMICOLON@57..59 ";" [] [Whitespace(" ")]
+        2: R_CURLY@59..60 "}" [] []
+  2: EOF@60..61 "" [Newline("\n")] []
+
+```

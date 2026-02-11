@@ -1732,6 +1732,9 @@ impl OverrideSettingPattern {
         if let Some(tailwind_directives) = css_parser.tailwind_directives {
             options.tailwind_directives = tailwind_directives.value();
         }
+        if let Some(vue_scoped_css) = css_parser.vue_scoped_css {
+            options.vue_scoped_css = vue_scoped_css.value();
+        }
     }
 
     #[expect(dead_code)]
@@ -1892,6 +1895,9 @@ fn to_css_language_settings(
     language_setting.parser.tailwind_directives = parser
         .tailwind_directives
         .or(parent_parser.tailwind_directives);
+    language_setting.parser.vue_scoped_css = parser
+        .vue_scoped_css
+        .or(parent_parser.vue_scoped_css);
 
     let linter = conf.linter.take().unwrap_or_default();
     language_setting.linter.enabled = linter.enabled;

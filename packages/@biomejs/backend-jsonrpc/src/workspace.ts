@@ -463,6 +463,10 @@ export interface CssParserConfiguration {
 	 * Enables parsing of Tailwind CSS 4.0 directives and functions.
 	 */
 	tailwindDirectives?: Bool;
+	/**
+	 * Enables parsing of Vue SFC scoped CSS selectors (`:deep()`, `:slotted()`).
+	 */
+	vueScopedCss?: Bool;
 }
 export type MaxSize = number;
 export type AttributePosition = "auto" | "multiline";

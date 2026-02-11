@@ -1376,6 +1376,10 @@
 					"description": "Enables parsing of Tailwind CSS 4.0 directives and functions.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }],
 					"default": null
+				},
+				"vueScopedCss": {
+					"description": "Enables parsing of Vue SFC scoped CSS selectors (`:deep()`, `:slotted()`).",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

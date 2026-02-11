@@ -37,6 +37,10 @@ pub struct CssParserOptions {
     /// Enables parsing of Tailwind CSS 4.0 directives and functions.
     /// Defaults to `false`.
     pub tailwind_directives: bool,
+
+    /// Enables parsing of Vue SFC scoped CSS selectors (`:deep()`, `:slotted()`).
+    /// Defaults to `false`.
+    pub vue_scoped_css: bool,
 }
 
 impl CssParserOptions {
@@ -64,6 +68,12 @@ impl CssParserOptions {
         self
     }
 
+    /// Enables parsing of Vue SFC scoped CSS selectors.
+    pub fn allow_vue_scoped_css(mut self) -> Self {
+        self.vue_scoped_css = true;
+        self
+    }
+
     /// Checks if parsing of CSS Modules features is disabled.
     pub fn is_css_modules_disabled(&self) -> bool {
         !self.css_modules
@@ -77,6 +87,11 @@ impl CssParserOptions {
     /// Checks if parsing of Tailwind CSS 4.0 directives is enabled.
     pub fn is_tailwind_directives_enabled(&self) -> bool {
         self.tailwind_directives
+    }
+
+    /// Checks if parsing of Vue SFC scoped CSS selectors is enabled.
+    pub fn is_vue_scoped_css_enabled(&self) -> bool {
+        self.vue_scoped_css
     }
 }
 

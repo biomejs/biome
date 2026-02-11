@@ -1,0 +1,2 @@
+.a :deep(.b) { color: red; }
+.a :slotted(.b) { color: red; }

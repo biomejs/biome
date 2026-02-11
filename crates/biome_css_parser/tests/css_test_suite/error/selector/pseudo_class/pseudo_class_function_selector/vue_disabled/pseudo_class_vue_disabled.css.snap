@@ -1,0 +1,203 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+:deep(.b) { color: red; }
+:slotted(.b) { color: red; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                COLON@0..1 ":" [] [],
+                                DEEP_KW@1..5 "deep" [] [],
+                                L_PAREN@5..6 "(" [] [],
+                                DOT@6..7 "." [] [],
+                                IDENT@7..8 "b" [] [],
+                                R_PAREN@8..10 ")" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@10..12 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@12..17 "color" [] [],
+                                },
+                                colon_token: COLON@17..19 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@19..22 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@22..24 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@24..25 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                COLON@25..27 ":" [Newline("\n")] [],
+                                SLOTTED_KW@27..34 "slotted" [] [],
+                                L_PAREN@34..35 "(" [] [],
+                                DOT@35..36 "." [] [],
+                                IDENT@36..37 "b" [] [],
+                                R_PAREN@37..39 ")" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@39..41 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@41..46 "color" [] [],
+                                },
+                                colon_token: COLON@46..48 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@48..51 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@51..53 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@53..54 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@54..55 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..55
+  0: (empty)
+  1: CSS_RULE_LIST@0..54
+    0: CSS_QUALIFIED_RULE@0..25
+      0: CSS_SELECTOR_LIST@0..10
+        0: CSS_COMPOUND_SELECTOR@0..10
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..10
+            0: CSS_BOGUS_SUB_SELECTOR@0..10
+              0: COLON@0..1 ":" [] []
+              1: DEEP_KW@1..5 "deep" [] []
+              2: L_PAREN@5..6 "(" [] []
+              3: DOT@6..7 "." [] []
+              4: IDENT@7..8 "b" [] []
+              5: R_PAREN@8..10 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@10..25
+        0: L_CURLY@10..12 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@12..24
+          0: CSS_DECLARATION_WITH_SEMICOLON@12..24
+            0: CSS_DECLARATION@12..22
+              0: CSS_GENERIC_PROPERTY@12..22
+                0: CSS_IDENTIFIER@12..17
+                  0: IDENT@12..17 "color" [] []
+                1: COLON@17..19 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@19..22
+                  0: CSS_IDENTIFIER@19..22
+                    0: IDENT@19..22 "red" [] []
+              1: (empty)
+            1: SEMICOLON@22..24 ";" [] [Whitespace(" ")]
+        2: R_CURLY@24..25 "}" [] []
+    1: CSS_QUALIFIED_RULE@25..54
+      0: CSS_SELECTOR_LIST@25..39
+        0: CSS_COMPOUND_SELECTOR@25..39
+          0: CSS_NESTED_SELECTOR_LIST@25..25
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@25..39
+            0: CSS_BOGUS_SUB_SELECTOR@25..39
+              0: COLON@25..27 ":" [Newline("\n")] []
+              1: SLOTTED_KW@27..34 "slotted" [] []
+              2: L_PAREN@34..35 "(" [] []
+              3: DOT@35..36 "." [] []
+              4: IDENT@36..37 "b" [] []
+              5: R_PAREN@37..39 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@39..54
+        0: L_CURLY@39..41 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@41..53
+          0: CSS_DECLARATION_WITH_SEMICOLON@41..53
+            0: CSS_DECLARATION@41..51
+              0: CSS_GENERIC_PROPERTY@41..51
+                0: CSS_IDENTIFIER@41..46
+                  0: IDENT@41..46 "color" [] []
+                1: COLON@46..48 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@48..51
+                  0: CSS_IDENTIFIER@48..51
+                    0: IDENT@48..51 "red" [] []
+              1: (empty)
+            1: SEMICOLON@51..53 ";" [] [Whitespace(" ")]
+        2: R_CURLY@53..54 "}" [] []
+  2: EOF@54..55 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+pseudo_class_vue_disabled.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `:deep` and `:slotted` are Vue SFC scoped CSS selectors, not standard CSS features.
+  
+  > 1 │ :deep(.b) { color: red; }
+      │  ^^^^
+    2 │ :slotted(.b) { color: red; }
+    3 │ 
+  
+  i You can enable Vue SFC scoped CSS parsing by setting the `css.parser.vueScopedCss` option to `true` in your configuration file.
+  
+pseudo_class_vue_disabled.css:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `:deep` and `:slotted` are Vue SFC scoped CSS selectors, not standard CSS features.
+  
+    1 │ :deep(.b) { color: red; }
+  > 2 │ :slotted(.b) { color: red; }
+      │  ^^^^^^^
+    3 │ 
+  
+  i You can enable Vue SFC scoped CSS parsing by setting the `css.parser.vueScopedCss` option to `true` in your configuration file.
+  
+```
