@@ -37,7 +37,7 @@ biome_service        = { workspace = true }
 biome_test_utils     = { path = "../biome_test_utils" }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
-criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion            = { package = "codspeed-criterion-compat", version = "*" }
 tests_macros         = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
