@@ -2019,6 +2019,11 @@ See https://biomejs.dev/linter/rules/no-multi-str
 	 */
 	noMultiStr?: NoMultiStrConfiguration;
 	/**
+	* Disallow nested .then() or .catch() promise calls.
+See https://biomejs.dev/linter/rules/no-nested-promises 
+	 */
+	noNestedPromises?: NoNestedPromisesConfiguration;
+	/**
 	* Prevent client components from being async functions.
 See https://biomejs.dev/linter/rules/no-next-async-client-component 
 	 */
@@ -3887,6 +3892,9 @@ export type NoMultiAssignConfiguration =
 export type NoMultiStrConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMultiStrOptions;
+export type NoNestedPromisesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNestedPromisesOptions;
 export type NoNextAsyncClientComponentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNextAsyncClientComponentOptions;
@@ -5453,6 +5461,10 @@ export interface RuleWithNoMultiStrOptions {
 	level: RulePlainConfiguration;
 	options?: NoMultiStrOptions;
 }
+export interface RuleWithNoNestedPromisesOptions {
+	level: RulePlainConfiguration;
+	options?: NoNestedPromisesOptions;
+}
 export interface RuleWithNoNextAsyncClientComponentOptions {
 	level: RulePlainConfiguration;
 	options?: NoNextAsyncClientComponentOptions;
@@ -6930,6 +6942,7 @@ export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoMultiAssignOptions = {};
 export type NoMultiStrOptions = {};
+export type NoNestedPromisesOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoProtoOptions = {};
@@ -7871,6 +7884,7 @@ export type Category =
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noMultiAssign"
 	| "lint/nursery/noMultiStr"
+	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noProto"
