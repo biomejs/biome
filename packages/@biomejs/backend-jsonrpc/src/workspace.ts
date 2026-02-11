@@ -2104,6 +2104,11 @@ See https://biomejs.dev/linter/rules/no-useless-catch-binding
 	 */
 	noUselessCatchBinding?: NoUselessCatchBindingConfiguration;
 	/**
+	* Disallow redundant return statements.
+See https://biomejs.dev/linter/rules/no-useless-return 
+	 */
+	noUselessReturn?: NoUselessReturnConfiguration;
+	/**
 	* Disallow the use of useless undefined.
 See https://biomejs.dev/linter/rules/no-useless-undefined 
 	 */
@@ -3938,6 +3943,9 @@ export type NoUnusedExpressionsConfiguration =
 export type NoUselessCatchBindingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessCatchBindingOptions;
+export type NoUselessReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessReturnOptions;
 export type NoUselessUndefinedConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessUndefinedOptions;
@@ -5524,6 +5532,11 @@ export interface RuleWithNoUselessCatchBindingOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessCatchBindingOptions;
 }
+export interface RuleWithNoUselessReturnOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessReturnOptions;
+}
 export interface RuleWithNoUselessUndefinedOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6967,6 +6980,7 @@ export type NoUnusedExpressionsOptions = {};
 Currently empty; reserved for future extensions (e.g. allowlist of names). 
 	 */
 export type NoUselessCatchBindingOptions = {};
+export type NoUselessReturnOptions = {};
 export type NoUselessUndefinedOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueDataObjectDeclarationOptions = {};
@@ -7890,6 +7904,7 @@ export type Category =
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCatchBinding"
+	| "lint/nursery/noUselessReturn"
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueArrowFuncInWatch"
 	| "lint/nursery/noVueDataObjectDeclaration"

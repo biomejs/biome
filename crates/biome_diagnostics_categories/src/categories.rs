@@ -216,6 +216,7 @@ define_categories! {
     "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
     "lint/nursery/noUselessCatchBinding": "https://biomejs.dev/linter/rules/no-useless-catch-binding",
+    "lint/nursery/noUselessReturn": "https://biomejs.dev/linter/rules/no-useless-return",
     "lint/nursery/noUselessUndefined": "https://biomejs.dev/linter/rules/no-useless-undefined",
     "lint/nursery/noVueArrowFuncInWatch": "https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch",
     "lint/nursery/noVueDataObjectDeclaration": "https://biomejs.dev/linter/rules/no-vue-data-object-declaration",

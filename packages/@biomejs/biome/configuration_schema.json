@@ -5211,6 +5211,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessReturnConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessReturnOptions" }
+			]
+		},
+		"NoUselessReturnOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessStringConcatConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5779,6 +5789,13 @@
 					"description": "Disallow unused catch bindings.\nSee https://biomejs.dev/linter/rules/no-useless-catch-binding",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessCatchBindingConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessReturn": {
+					"description": "Disallow redundant return statements.\nSee https://biomejs.dev/linter/rules/no-useless-return",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessReturnConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9075,6 +9092,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessRenameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessReturnOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessReturnOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
