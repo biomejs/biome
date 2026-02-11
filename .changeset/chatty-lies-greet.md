@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added the lint rule [`noUselessReturn`](https://biomejs.dev/linter/rules/no-useless-return/). The rule reports redundant `return;` statements that don't affect the function's control flow.
+Added the nursery rule [`noUselessReturn`](https://biomejs.dev/linter/rules/no-useless-return/). The rule reports redundant `return;` statements that don't affect the function's control flow.
 
 ```js
 // Invalid: return at end of function is redundant
