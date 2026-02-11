@@ -1,5 +1,6 @@
-use ansi_rgb::{Foreground, red};
 use camino::{Utf8Path, Utf8PathBuf};
+use owo_colors::OwoColorize;
+use owo_colors::colors::*;
 use std::env;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::path::PathBuf;
@@ -71,7 +72,7 @@ impl BenchCase {
             });
 
         content.map(|code| {
-            println!("[{}] - using [{}]", filename.clone().fg(red()), path);
+            println!("[{}] - using [{}]", filename.clone().fg::<Red>(), path);
             Self {
                 id: filename.clone(),
                 code,
