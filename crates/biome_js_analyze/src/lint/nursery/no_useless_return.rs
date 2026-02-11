@@ -72,7 +72,7 @@ declare_lint_rule! {
         version: "next",
         name: "noUselessReturn",
         language: "js",
-        sources: &[RuleSource::Eslint("no-useless-return").same()],
+        sources: &[RuleSource::Eslint("no-useless-return").inspired()],
         recommended: false,
         fix_kind: FixKind::Safe,
     }

@@ -116,8 +116,6 @@ invalid.js:5:5 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━�
   
   i Removing this statement does not change the control flow of the function.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the unnecessary return statement.
@@ -144,8 +142,6 @@ invalid.js:11:5 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━�
     13 │ 
   
   i Removing this statement does not change the control flow of the function.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -174,8 +170,6 @@ invalid.js:18:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━�
   
   i Removing this statement does not change the control flow of the function.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the unnecessary return statement.
@@ -202,8 +196,6 @@ invalid.js:28:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━�
     30 │ }
   
   i Removing this statement does not change the control flow of the function.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -232,8 +224,6 @@ invalid.js:35:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━�
   
   i Removing this statement does not change the control flow of the function.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the unnecessary return statement.
@@ -260,8 +250,6 @@ invalid.js:37:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━�
     39 │ }
   
   i Removing this statement does not change the control flow of the function.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -290,8 +278,6 @@ invalid.js:45:13 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━
   
   i Removing this statement does not change the control flow of the function.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the unnecessary return statement.
@@ -318,8 +304,6 @@ invalid.js:54:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━�
     56 │         handleError();
   
   i Removing this statement does not change the control flow of the function.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -348,8 +332,6 @@ invalid.js:66:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━�
   
   i Removing this statement does not change the control flow of the function.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the unnecessary return statement.
@@ -376,8 +358,6 @@ invalid.js:72:5 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━�
     74 │ 
   
   i Removing this statement does not change the control flow of the function.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -406,8 +386,6 @@ invalid.js:78:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━�
   
   i Removing this statement does not change the control flow of the function.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the unnecessary return statement.
@@ -435,8 +413,6 @@ invalid.js:85:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━�
   
   i Removing this statement does not change the control flow of the function.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the unnecessary return statement.
@@ -463,8 +439,6 @@ invalid.js:93:16 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━
     95 │ 
   
   i Removing this statement does not change the control flow of the function.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8205 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
