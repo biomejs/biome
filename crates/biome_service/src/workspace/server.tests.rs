@@ -486,7 +486,10 @@ fn extends_root_resolves_globs_from_project_root() {
     "#;
 
     let fs = MemoryFileSystem::default();
-    fs.insert(Utf8PathBuf::from("/project/packages/pkg-a/src/index.ts"), b"const a = 1;");
+    fs.insert(
+        Utf8PathBuf::from("/project/packages/pkg-a/src/index.ts"),
+        b"const a = 1;",
+    );
     fs.insert(
         Utf8PathBuf::from("/project/packages/pkg-a/tests/index.ts"),
         b"const a = 1;",
