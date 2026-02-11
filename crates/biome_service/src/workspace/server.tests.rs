@@ -510,6 +510,7 @@ fn extends_root_resolves_globs_from_project_root() {
             project_key,
             configuration,
             workspace_directory: Some(BiomePath::new("/project/packages/pkg-a")),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
