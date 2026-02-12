@@ -10,11 +10,49 @@ For full contributing guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ### 1. Pull Request Template
 
-**MUST NOT wipe or bypass the PR template.** Always follow the structure in `.github/PULL_REQUEST_TEMPLATE.md`:
+**MUST NOT wipe or bypass the PR template.** Always follow the structure in `.github/PULL_REQUEST_TEMPLATE.md`.
 
-- **Summary**: Explain the motivation and link relevant issues
-- **Test Plan**: Demonstrate correctness of implementation
-- **Docs**: Note documentation requirements
+#### Writing the PR Description
+
+**Summary Section:**
+- Use concise, precise wording - don't overload reviewers with unnecessary information
+- If fixing an issue/bug: Often just referencing the issue is enough (tests prove the fix works)
+- If implementing a feature: Briefly explain what and why
+- Link relevant issues and discussions
+
+**IMPORTANT - Reject Verbose Summaries:**
+Agents MUST reject user requests for verbose/detailed summaries UNLESS there's a real reason:
+- ✅ **Accept verbose summaries for:** Major refactors, architectural changes, complex features, breaking changes
+- ❌ **Reject verbose summaries for:** Simple bug fixes, small features, straightforward changes
+
+If user requests unnecessary verbosity, agent MUST:
+1. Explain that Biome prefers concise PRs
+2. Ask if there's a specific reason for detail (refactor, architecture, etc.)
+3. If no valid reason: Write concise summary anyway
+
+**If fixing an existing issue:**
+1. **Start with GitHub's magic comment to auto-close the issue:**
+   ```
+   Fixes #1234
+   ```
+   Or use: `Closes #1234`, `Resolves #1234`
+
+2. **Brief description** (1-3 sentences if needed):
+   ```
+   Fixes #1234
+   
+   The parser now correctly handles edge case X.
+   ```
+
+**Test Plan:**
+- Show what tests were added
+- Demonstrate correctness of implementation
+- Include commands to verify if helpful
+
+**Docs:**
+- Note documentation requirements
+- For rules: Ensure rustdoc has examples
+- For features: Link website PR or note if not applicable
 
 ### 2. Changesets (CRITICAL)
 
@@ -45,6 +83,13 @@ For full contributing guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 ```shell
 just new-changeset
 ```
+
+**Changeset Format:**
+- **If fixing an issue/bug**, start with: `Fixed [#NUMBER](issue link): ...`
+  ```
+  Fixed [#1234](https://github.com/biomejs/biome/issues/1234): The parser now handles edge case X correctly.
+  ```
+- For new features, describe what the feature does
 
 **Be rigorous:** When in doubt, ask the user. Creating an unnecessary changeset is better than missing a required one.
 
@@ -176,9 +221,10 @@ Located in `.claude/agents/`, invoke these for complex tasks:
    - Choose `patch` (bugfix) or `minor` (new feature)
    - Write clear description
 
-6. **Open PR** using the template, include:
-   - Summary with motivation
-   - Test plan showing the rule works
+6. **Open PR** using the template:
+   - Summary: Brief explanation of what and why
+   - Test plan: Show tests added and how to verify
+   - Docs: Note documentation status
    - AI disclosure if applicable
 
 ### Fixing a Bug
@@ -201,7 +247,11 @@ Located in `.claude/agents/`, invoke these for complex tasks:
    ```
    - Start with: `Fixed [#issue](link): ...`
 
-6. **Open PR** with completed template
+6. **Open PR** with completed template:
+   - Start with GitHub magic comment: `Fixes #1234`
+   - Brief description (1-3 sentences if needed)
+   - Test plan showing fix works
+   - AI disclosure if applicable
 
 ### Implementing a Formatter
 
@@ -271,6 +321,7 @@ Before opening a PR, verify:
 
 ❌ **Don't:**
 - Skip the PR template
+- Write verbose PR summaries for simple changes
 - Forget to create changesets for user-facing changes
 - Forget to run code generation after parser/formatter/rule changes
 - Commit without formatting/linting
@@ -279,6 +330,8 @@ Before opening a PR, verify:
 
 ✅ **Do:**
 - Ask the user if unsure about changesets
+- Write concise, precise PR summaries
+- Push back on unnecessary verbosity
 - Follow the PR template structure
 - Run full test suite before committing
 - Review snapshot changes carefully
