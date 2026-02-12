@@ -58,13 +58,13 @@ If user requests unnecessary verbosity, agent MUST:
 
 **Before opening a PR, you MUST verify if a changeset is needed:**
 
-#### Decision Tree:
+#### Decision Tree
 1. **Ask the user explicitly**: "Is this change user-facing?"
 2. **If YES** → Changeset is REQUIRED
 3. **If NO** → Changeset not needed
 4. **If UNSURE** → Assume YES and create changeset
 
-#### User-Facing Changes Include:
+#### User-Facing Changes Include
 - ✅ New lint rules or assists
 - ✅ Bug fixes that affect behavior
 - ✅ New features or options
@@ -72,14 +72,14 @@ If user requests unnecessary verbosity, agent MUST:
 - ✅ Parser improvements that handle new syntax
 - ✅ Changes to error messages or diagnostics
 
-#### NOT User-Facing:
+#### NOT User-Facing
 - ❌ Refactoring with no behavior change
 - ❌ Internal code reorganization
 - ❌ Test-only changes
 - ❌ CI/build system changes
 - ❌ Documentation-only changes (typos, clarifications)
 
-#### Create Changeset:
+#### Create Changeset
 
 Create a file in `.changeset/` directory with:
 1. **Unique filename**: Use lowercase words separated by hyphens (e.g., `fix-parser-edge-case.md`)
@@ -144,7 +144,7 @@ Or be more specific about your involvement:
 
 Code generation is required for certain changes, but **timing matters**:
 
-#### Required BEFORE Opening PR:
+#### Required BEFORE Opening PR
 
 | Changes to... | Run... | Why |
 | -------------- | --------- | ----- |
@@ -154,7 +154,7 @@ Code generation is required for certain changes, but **timing matters**:
 
 These MUST be run and committed before opening a PR.
 
-#### Handled Automatically by CI (Autofix Job):
+#### Handled Automatically by CI (Autofix Job)
 
 The following are automatically handled by the **Autofix** CI job when you open a PR:
 - TypeScript bindings (`just gen-bindings`)
@@ -163,7 +163,7 @@ The following are automatically handled by the **Autofix** CI job when you open 
 
 **These are optional to run locally** - the Autofix job will commit them automatically if you don't. You can run them if you want to verify locally, but it's not required.
 
-#### Always Required Before Committing:
+#### Always Required Before Committing
 
 ```shell
 just f  # Format code

@@ -417,4 +417,4 @@ fn run(ctx: &RuleContext<Self>) -> Self::Signals {
 - Analyzer guide: `crates/biome_analyze/CONTRIBUTING.md` § Rule Options
 - Options crate: `crates/biome_rule_options/`
 - Deserialize macros: `crates/biome_deserialize_macros/`
-- Example rules with options: Search for `type Options = ` in `biome_*_analyze` crates
+- Example rules with options: Search for `type Options =` in `biome_*_analyze` crates

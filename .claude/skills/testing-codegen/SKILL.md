@@ -299,7 +299,7 @@ fn quick_test() {
 ## Code Generation Dependencies
 
 | When you modify... | Run... |
-|-------------------|--------|
+| ------------------- | -------- |
 | `.ungram` grammar files | `just gen-grammar <lang>` |
 | Lint rules in `*_analyze` | `just gen-analyzer` |
 | Formatter in `*_formatter` | `just gen-formatter <lang>` |
