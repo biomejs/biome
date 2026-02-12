@@ -147,10 +147,10 @@ Code generation is required for certain changes, but **timing matters**:
 #### Required BEFORE Opening PR:
 
 | Changes to... | Run... | Why |
-|--------------|--------|-----|
+| -------------- | --------- | ----- |
 | Grammar `.ungram` files | `just gen-grammar <lang>` | Regenerates parser/syntax from grammar |
 | Formatter in `*_formatter` | `just gen-formatter <lang>` | Updates formatter boilerplate |
-| Lint rules in `*_analyze` (partial) | `just gen-analyzer` | Updates rule registrations and schemas |
+| Lint rules in `*_analyze` | `just gen-rules` and `just gen-configuration` | Updates rule registrations and configuration |
 
 These MUST be run and committed before opening a PR.
 
@@ -242,7 +242,8 @@ Located in `.claude/agents/`, invoke these for complex tasks:
 
 4. **Generate code:**
    ```shell
-   just gen-analyzer
+   just gen-rules
+   just gen-configuration
    just f && just l
    ```
 
@@ -342,8 +343,8 @@ Before opening a PR, verify:
 - [ ] Code generation run if needed:
   - [ ] Parser changes: `just gen-grammar <lang>`
   - [ ] Formatter changes: `just gen-formatter <lang>`
-  - [ ] Lint rule changes: `just gen-analyzer`
-  - [ ] Bindings: Optional (CI Autofix handles this)
+  - [ ] Lint rule changes: `just gen-rules` and `just gen-configuration`
+  - [ ] Analyzer/Bindings: Optional (CI Autofix handles this)
 - [ ] Code formatted (`just f`)
 - [ ] Code linted (`just l`)
 - [ ] Changeset created if user-facing (file in `.changeset/` with correct type)
