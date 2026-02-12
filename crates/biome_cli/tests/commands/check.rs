@@ -3131,6 +3131,76 @@ fn check_plugin_suppressions() {
 }
 
 #[test]
+fn check_plugin_diagnostic_offset_in_vue_file() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "overrides": [
+        {
+            "includes": ["**/*.vue"],
+            "plugins": ["noFoo.grit"]
+        }
+    ]
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("noFoo.grit"),
+        br#"language js;
+
+JsIdentifierBinding() as $name where {
+    $name <: r"^foo$",
+    register_diagnostic(
+        span = $name,
+        message = "Avoid using 'foo' as a variable name.",
+        severity = "error"
+    )
+}
+"#,
+    );
+
+    // The template is intentionally multi-line so that if the diagnostic offset
+    // is not applied, the reported span would point into the template instead of
+    // the script section.
+    let file_path = "file.vue";
+    fs.insert(
+        file_path.into(),
+        br#"<template>
+<p>line 1</p>
+<p>line 2</p>
+<p>line 3</p>
+<p>line 4</p>
+<p>line 5</p>
+<p>line 6</p>
+<p>line 7</p>
+<p>line 8</p>
+<p>line 9</p>
+<p>line 10</p>
+</template>
+
+<script setup lang="ts">
+const foo = 'bad'
+</script>
+"#,
+    );
+
+    let (fs, result) =
+        run_cli_with_server_workspace(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_diagnostic_offset_in_vue_file",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn doesnt_check_file_when_assist_is_disabled() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

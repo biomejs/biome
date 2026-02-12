@@ -4216,6 +4216,104 @@ async fn should_not_return_error_on_code_actions_for_grit_files() -> Result<()> 
     Ok(())
 }
 
+#[tokio::test]
+async fn pull_plugin_diagnostics_for_vue_files() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    let config = r#"{
+        "plugins": ["./noFoo.grit"]
+    }"#;
+
+    let plugin = br#"language js;
+
+JsIdentifierBinding() as $name where {
+    $name <: r"^foo$",
+    register_diagnostic(
+        span = $name,
+        message = "Avoid using 'foo' as a variable name.",
+        severity = "error"
+    )
+}
+"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+    fs.insert(to_utf8_file_path_buf(uri!("noFoo.grit")), plugin.as_slice());
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    // The template is intentionally multi-line so that if the diagnostic offset
+    // is not applied, the reported span would point into the template instead of
+    // the script section.
+    let vue_file = r#"<template>
+<p>line 1</p>
+<p>line 2</p>
+<p>line 3</p>
+<p>line 4</p>
+<p>line 5</p>
+<p>line 6</p>
+<p>line 7</p>
+<p>line 8</p>
+<p>line 9</p>
+<p>line 10</p>
+</template>
+
+<script setup lang="ts">
+const foo = 'bad'
+</script>
+"#;
+
+    server
+        .open_named_document(vue_file, uri!("file.vue"), "vue")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    // The plugin diagnostic for `foo` should point to line 14 (0-indexed),
+    // character 6-9 in the full Vue file, not within the extracted script block.
+    match &notification {
+        Some(ServerNotification::PublishDiagnostics(params)) => {
+            assert_eq!(params.uri, uri!("file.vue"));
+            let plugin_diag = params
+                .diagnostics
+                .iter()
+                .find(|d| d.message.contains("Avoid using 'foo'"))
+                .expect("expected a plugin diagnostic for 'foo'");
+            assert_eq!(
+                plugin_diag.range,
+                Range {
+                    start: Position {
+                        line: 14,
+                        character: 6,
+                    },
+                    end: Position {
+                        line: 14,
+                        character: 9,
+                    },
+                },
+                "plugin diagnostic should point to 'foo' on line 14 of the full Vue file"
+            );
+        }
+        other => panic!("expected PublishDiagnostics, got {other:?}"),
+    }
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
 // #endregion
 
 // #region TEST UTILS
