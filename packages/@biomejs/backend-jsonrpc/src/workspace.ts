@@ -2099,6 +2099,11 @@ See https://biomejs.dev/linter/rules/no-unresolved-imports
 	 */
 	noUnresolvedImports?: NoUnresolvedImportsConfiguration;
 	/**
+	* Disallow assigning a value typed as any to a variable.
+See https://biomejs.dev/linter/rules/no-unsafe-assignment 
+	 */
+	noUnsafeAssignment?: NoUnsafeAssignmentConfiguration;
+	/**
 	* Disallow expression statements that are neither a function call nor an assignment.
 See https://biomejs.dev/linter/rules/no-unused-expressions 
 	 */
@@ -3945,6 +3950,9 @@ export type NoUnnecessaryConditionsConfiguration =
 export type NoUnresolvedImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnresolvedImportsOptions;
+export type NoUnsafeAssignmentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeAssignmentOptions;
 export type NoUnusedExpressionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnusedExpressionsOptions;
@@ -5535,6 +5543,10 @@ export interface RuleWithNoUnresolvedImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnresolvedImportsOptions;
 }
+export interface RuleWithNoUnsafeAssignmentOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeAssignmentOptions;
+}
 export interface RuleWithNoUnusedExpressionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnusedExpressionsOptions;
@@ -6987,6 +6999,7 @@ export interface NoUnknownAttributeOptions {
 }
 export type NoUnnecessaryConditionsOptions = {};
 export type NoUnresolvedImportsOptions = {};
+export type NoUnsafeAssignmentOptions = {};
 export type NoUnusedExpressionsOptions = {};
 /**
 	* Options for the `noUselessCatchBinding` rule.
@@ -7914,6 +7927,7 @@ export type Category =
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
+	| "lint/nursery/noUnsafeAssignment"
 	| "lint/nursery/noUnusedExpressions"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"

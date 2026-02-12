@@ -4961,6 +4961,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnsafeAssignmentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeAssignmentOptions" }
+			]
+		},
+		"NoUnsafeAssignmentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnsafeDeclarationMergingConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5792,6 +5802,13 @@
 					"description": "Warn when importing non-existing exports.\nSee https://biomejs.dev/linter/rules/no-unresolved-imports",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnresolvedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnsafeAssignment": {
+					"description": "Disallow assigning a value typed as any to a variable.\nSee https://biomejs.dev/linter/rules/no-unsafe-assignment",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeAssignmentConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8874,6 +8891,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnresolvedImportsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnsafeAssignmentOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeAssignmentOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
