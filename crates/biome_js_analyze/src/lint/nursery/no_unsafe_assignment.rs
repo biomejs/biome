@@ -105,10 +105,11 @@ impl Rule for NoUnsafeAssignment {
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let declarator = ctx.query();
         let initializer = declarator.initializer()?;
+        let expression = initializer.expression().ok()?;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                initializer.range(),
+                expression.range(),
                 markup! {
                     "The assigned expression has the type "<Emphasis>"any"</Emphasis>", which undermines type safety."
                 },

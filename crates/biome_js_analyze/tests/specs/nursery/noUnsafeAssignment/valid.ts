@@ -20,7 +20,7 @@ let g: string;
 // Cross-module calls whose return type can't be resolved should not
 // produce false positives. Biome doesn't parse .d.ts from node_modules,
 // so these remain as unresolved TypeofExpression types.
-import fs from "node:fs/promises";
+import fs from "node:fs";
 const h = fs.readFileSync("test.txt", "utf-8");
 
 import { someFunction } from "some-external-package";

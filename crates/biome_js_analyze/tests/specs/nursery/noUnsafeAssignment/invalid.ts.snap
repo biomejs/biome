@@ -21,13 +21,13 @@ let mutable = getPayload();
 
 # Diagnostics
 ```
-invalid.ts:6:15 lint/nursery/noUnsafeAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:6:17 lint/nursery/noUnsafeAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The assigned expression has the type any, which undermines type safety.
   
     5 │ // Assigning return value of imported function returning `any`
   > 6 │ const payload = getPayload();
-      │               ^^^^^^^^^^^^^^
+      │                 ^^^^^^^^^^^^
     7 │ 
     8 │ // Assigning to a variable with non-any annotation
   
@@ -39,13 +39,13 @@ invalid.ts:6:15 lint/nursery/noUnsafeAssignment ━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:9:21 lint/nursery/noUnsafeAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:9:23 lint/nursery/noUnsafeAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The assigned expression has the type any, which undermines type safety.
   
      8 │ // Assigning to a variable with non-any annotation
    > 9 │ const typed: string = getPayload();
-       │                     ^^^^^^^^^^^^^^
+       │                       ^^^^^^^^^^^^
     10 │ 
     11 │ // Let declaration
   
@@ -57,13 +57,13 @@ invalid.ts:9:21 lint/nursery/noUnsafeAssignment ━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:12:13 lint/nursery/noUnsafeAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:12:15 lint/nursery/noUnsafeAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The assigned expression has the type any, which undermines type safety.
   
     11 │ // Let declaration
   > 12 │ let mutable = getPayload();
-       │             ^^^^^^^^^^^^^^
+       │               ^^^^^^^^^^^^
     13 │ 
   
   i This often happens when using untyped third-party libraries or APIs. Consider annotating the variable with a more specific type or using unknown instead.
