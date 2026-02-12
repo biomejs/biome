@@ -110,7 +110,7 @@ impl Rule for NoSkippedTests {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                &state.range,
+                state.range,
                 markup! {
                     "Don't disable tests."
                 },
@@ -192,7 +192,7 @@ fn detect_bare_skip_call(
             if matches!(_root.text(), "test" | "it" | "describe")
                 && (name.text() == "skip" || name.text() == "fixme") =>
         {
-            (annotation_for(name.text().as_ref()), *range)
+            (annotation_for(name.text()), *range)
         }
         // test.describe.skip() / test.describe.fixme() / test.step.skip() / test.step.fixme()
         [(_, root), (_, middle), (range, name)]
@@ -200,7 +200,7 @@ fn detect_bare_skip_call(
                 && (middle.text() == "describe" || middle.text() == "step")
                 && (name.text() == "skip" || name.text() == "fixme") =>
         {
-            (annotation_for(name.text().as_ref()), *range)
+            (annotation_for(name.text()), *range)
         }
         // test.describe.parallel.skip() / test.describe.serial.skip() / etc.
         [(_, root), (_, desc), (_, mode), (range, name)]
@@ -209,7 +209,7 @@ fn detect_bare_skip_call(
                 && (mode.text() == "parallel" || mode.text() == "serial")
                 && (name.text() == "skip" || name.text() == "fixme") =>
         {
-            (annotation_for(name.text().as_ref()), *range)
+            (annotation_for(name.text()), *range)
         }
         _ => return None,
     };
@@ -223,8 +223,7 @@ fn detect_bare_skip_call(
     let arg_count = call_expr
         .arguments()
         .ok()
-        .map(|a| a.args().iter().count())
-        .unwrap_or(0);
+        .map_or(0, |a| a.args().iter().count());
 
     // For 2-name chains (test.skip / it.skip / describe.skip):
     // - Standard test calls (2+ args with string first) are caught by Path 1,

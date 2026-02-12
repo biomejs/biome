@@ -380,21 +380,18 @@ fn is_call_awaited_or_returned(call_expr: &JsCallExpression) -> bool {
     }
 
     // Check if it's part of a .then()/.catch()/.finally() chain that is ultimately awaited/returned
-    if let Some(ref p) = parent {
-        if let Some(member) = biome_js_syntax::JsStaticMemberExpression::cast_ref(p) {
-            if let Ok(member_name) = member.member()
-                && let Some(name) = member_name.as_js_name()
-                && let Ok(token) = name.value_token()
-            {
-                let text = token.text_trimmed();
-                if text == "then" || text == "catch" || text == "finally" {
-                    if let Some(call_parent) = p.parent()
-                        && let Some(outer_call) = JsCallExpression::cast_ref(&call_parent)
-                    {
-                        return is_call_awaited_or_returned(&outer_call);
-                    }
-                }
-            }
+    if let Some(ref p) = parent
+        && let Some(member) = biome_js_syntax::JsStaticMemberExpression::cast_ref(p)
+        && let Ok(member_name) = member.member()
+        && let Some(name) = member_name.as_js_name()
+        && let Ok(token) = name.value_token()
+    {
+        let text = token.text_trimmed();
+        if (text == "then" || text == "catch" || text == "finally")
+            && let Some(call_parent) = p.parent()
+            && let Some(outer_call) = JsCallExpression::cast_ref(&call_parent)
+        {
+            return is_call_awaited_or_returned(&outer_call);
         }
     }
 
