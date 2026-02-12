@@ -80,16 +80,49 @@ If user requests unnecessary verbosity, agent MUST:
 - ❌ Documentation-only changes (typos, clarifications)
 
 #### Create Changeset:
-```shell
-just new-changeset
+
+Create a file in `.changeset/` directory with:
+1. **Unique filename**: Use lowercase words separated by hyphens (e.g., `fix-parser-edge-case.md`)
+2. **Front matter**: Specify package and change type
+3. **Description**: Write for end users (what changed and why they care)
+
+**File structure:**
+```markdown
+---
+"@biomejs/biome": patch
+---
+
+Fixed [#1234](https://github.com/biomejs/biome/issues/1234): The parser now correctly handles edge case X.
 ```
 
-**Changeset Format:**
+**Change types:**
+- `patch` - Bug fixes, non-breaking changes (targets `main` branch)
+- `minor` - New features, non-breaking additions (targets `next` branch)
+- `major` - Breaking changes (targets `next` branch)
+
+**Content guidelines:**
 - **If fixing an issue/bug**, start with: `Fixed [#NUMBER](issue link): ...`
-  ```
-  Fixed [#1234](https://github.com/biomejs/biome/issues/1234): The parser now handles edge case X correctly.
-  ```
-- For new features, describe what the feature does
+- **For new features**, describe what the feature does and why users care
+- **Target end users**, not developers (explain impact, not implementation)
+- **Be concise** - 1-3 sentences explaining the change
+
+**Example for bug fix:**
+```markdown
+---
+"@biomejs/biome": patch
+---
+
+Fixed [#1234](https://github.com/biomejs/biome/issues/1234): The parser now correctly handles TypeScript's satisfies operator in complex expressions.
+```
+
+**Example for new feature:**
+```markdown
+---
+"@biomejs/biome": minor
+---
+
+Added support for parsing TypeScript 5.2 `using` declarations. Biome can now parse and format code using the new resource management syntax.
+```
 
 **Be rigorous:** When in doubt, ask the user. Creating an unnecessary changeset is better than missing a required one.
 
@@ -214,12 +247,9 @@ Located in `.claude/agents/`, invoke these for complex tasks:
    ```
 
 5. **Create changeset:**
-   ```shell
-   just new-changeset
-   ```
-   - Select `@biomejs/biome`
-   - Choose `patch` (bugfix) or `minor` (new feature)
-   - Write clear description
+   - Create file in `.changeset/` (e.g., `add-my-rule.md`)
+   - Add front matter: `"@biomejs/biome": minor`
+   - Write description for end users
 
 6. **Open PR** using the template:
    - Summary: Brief explanation of what and why
@@ -242,9 +272,8 @@ Located in `.claude/agents/`, invoke these for complex tasks:
 4. **Ask user**: "Is this bug fix user-facing?" (Usually YES)
 
 5. **If user-facing, create changeset:**
-   ```shell
-   just new-changeset
-   ```
+   - Create file in `.changeset/` (e.g., `fix-bug-1234.md`)
+   - Add front matter: `"@biomejs/biome": patch`
    - Start with: `Fixed [#issue](link): ...`
 
 6. **Open PR** with completed template:
@@ -277,17 +306,21 @@ Located in `.claude/agents/`, invoke these for complex tasks:
 
 5. **Ask user**: "Is this formatter change user-facing?" (Usually YES)
 
-6. **Create changeset** with diff example
+6. **Create changeset:**
+   - Create file in `.changeset/` (e.g., `improve-formatting.md`)
+   - Add front matter: `"@biomejs/biome": patch`
+   - Include diff example if helpful
 
 7. **Open PR** following template
 
 ## Branch Targeting
 
-- **Bug fixes** → `main` branch
-- **New nursery rules** → `main` branch
-- **Rule promotions from nursery** → `next` branch
-- **New features affecting users** → `next` branch
-- **Internal changes** → `main` branch
+- **Bug fixes (`patch`)** → `main` branch
+- **New nursery rules (`patch`)** → `main` branch
+- **Rule promotions from nursery (`minor`)** → `next` branch
+- **New features (`minor`)** → `next` branch
+- **Breaking changes (`major`)** → `next` branch
+- **Internal changes (no changeset)** → `main` branch
 
 ## Commit Messages
 
@@ -313,7 +346,7 @@ Before opening a PR, verify:
   - [ ] Bindings: Optional (CI Autofix handles this)
 - [ ] Code formatted (`just f`)
 - [ ] Code linted (`just l`)
-- [ ] Changeset created if user-facing (`just new-changeset`)
+- [ ] Changeset created if user-facing (file in `.changeset/` with correct type)
 - [ ] PR template filled out completely
 - [ ] AI assistance disclosed if applicable
 
