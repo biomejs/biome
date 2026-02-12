@@ -18,7 +18,7 @@ Skills complement the specialized **agents** in `.claude/agents/` - agents are p
 ### Core Development Skills
 
 | Skill | Purpose | Best Used With | Lines |
-|-------|---------|----------------|-------|
+| ------- | --------- | ---------------- | ------- |
 | **[lint-rule-development](./lint-rule-development/SKILL.md)** | Create and implement lint rules with semantic analysis | `biome-lint-engineer` | ~250 |
 | **[formatter-development](./formatter-development/SKILL.md)** | Implement formatting rules using IR-based formatter | `ir-formatter-engineer` | ~180 |
 | **[parser-development](./parser-development/SKILL.md)** | Write parsers with error recovery and grammar authoring | `cst-parser-engineer` | ~220 |
@@ -27,7 +27,7 @@ Skills complement the specialized **agents** in `.claude/agents/` - agents are p
 ### Supporting Skills
 
 | Skill | Purpose | Best Used With | Lines |
-|-------|---------|----------------|-------|
+| ------- | --------- | ---------------- | ------- |
 | **[testing-codegen](./testing-codegen/SKILL.md)** | Run tests, manage snapshots, create changesets, generate code | Any agent | ~200 |
 | **[type-inference](./type-inference/SKILL.md)** | Work with module graph and type inference system | `biome-lint-engineer` | ~180 |
 | **[diagnostics-development](./diagnostics-development/SKILL.md)** | Create user-friendly error messages and diagnostics | Any agent | ~170 |
