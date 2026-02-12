@@ -22,7 +22,6 @@ Skills complement the specialized **agents** in `.claude/agents/` - agents are p
 | **[lint-rule-development](./lint-rule-development/SKILL.md)** | Create and implement lint rules with semantic analysis | `biome-lint-engineer` | ~250 |
 | **[formatter-development](./formatter-development/SKILL.md)** | Implement formatting rules using IR-based formatter | `ir-formatter-engineer` | ~180 |
 | **[parser-development](./parser-development/SKILL.md)** | Write parsers with error recovery and grammar authoring | `cst-parser-engineer` | ~220 |
-| **[prettier-compare](./prettier-compare/SKILL.md)** | Compare Biome vs Prettier formatting output | `ir-formatter-engineer` | ~50 |
 
 ### Supporting Skills
 
@@ -57,7 +56,7 @@ just gen-analyzer
 
 1. Load the `formatter-development` skill
 2. Implement `FormatNodeRule` for your node
-3. Use `prettier-compare` skill to validate changes
+3. Compare with Prettier using `packages/prettier-compare/` tool
 4. Run snapshot tests
 5. Optionally invoke `ir-formatter-engineer` agent
 
@@ -115,7 +114,7 @@ cargo test
 
 ### Formatter Development
 **Agent:** `ir-formatter-engineer`  
-**Skills:** `formatter-development` + `prettier-compare` + `testing-codegen`  
+**Skills:** `formatter-development` + `testing-codegen`  
 **Use for:** Implementing formatting rules, handling comments, comparing with Prettier
 
 ### Parser Development
@@ -172,8 +171,6 @@ Skills are designed to be **quick reference cards** - scan in 30 seconds and kno
 ├── formatter-development/
 │   └── SKILL.md
 ├── parser-development/
-│   └── SKILL.md
-├── prettier-compare/
 │   └── SKILL.md
 ├── testing-codegen/
 │   └── SKILL.md

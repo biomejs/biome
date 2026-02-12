@@ -273,5 +273,5 @@ if_group_fits_on_line(&content) // Only if fits
 
 - Full guide: `crates/biome_formatter/CONTRIBUTING.md`
 - JS-specific: `crates/biome_js_formatter/CONTRIBUTING.md`
-- Prettier comparison: `.claude/skills/prettier-compare/SKILL.md`
+- Prettier comparison tool: `packages/prettier-compare/`
 - Examples: `crates/biome_js_formatter/src/js/` for real implementations
