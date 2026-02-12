@@ -209,6 +209,8 @@
 <h5 role="button" />;
 <h6 role="button" />;
 <hr role="button" />;
+<hr role="presentation" />;
+<hr role="none" />;
 <img role="button" />;
 <li role="button" />;
 <li role="presentation" />;

@@ -160,13 +160,19 @@ impl AriaRole {
             .find_map(|value| value.parse().ok())
     }
 
-    /// Returns `true` if the given role inherits of `AriaAbstractRole::Widget` and is not `Self::Progressbar`.
+    /// Returns `true` if the given role inherits of `AriaAbstractRole::Widget` and is not `Self::Progressbar` or `Self::Separator`.
     ///
     /// This corresponds to a role that defines a user interface widget (slider, tree control, ...)
     pub fn is_interactive(self) -> bool {
         // `progressbar` inherits of `widget`, but its value is always `readonly`.
         // So we treat it as a non-interactive role.
+        //
+        // `separator` inherits of both `structure` and `widget`, but it is only interactive
+        // when it is focusable (e.g. has `tabindex` and `aria-valuenow`).
+        // A non-focusable `separator` (such as `<hr>`) is a static structural element.
+        // See: https://www.w3.org/TR/wai-aria-1.2/#separator
         self != Self::Progressbar
+            && self != Self::Separator
             && self
                 .inherited_abstract_roles()
                 .contains(&AriaAbstractRole::Widget)
