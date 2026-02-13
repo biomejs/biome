@@ -145,26 +145,18 @@ url.css:3:24 parse ━━━━━━━━━━━━━━━━━━━━�
   
   i Remove images
   
-url.css:3:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+url.css:3:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected value or character.
+  × SCSS qualified names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     1 │ div {
     2 │   background: url(/images/bg.png);
   > 3 │   background: -fb-url(/images/bg.png);
-      │                                 ^^^^
+      │                               ^^^^^^
     4 │ }
     5 │ 
   
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
+  i SCSS only syntax
   
 
 ```

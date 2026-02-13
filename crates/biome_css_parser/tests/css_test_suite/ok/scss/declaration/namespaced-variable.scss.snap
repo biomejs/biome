@@ -1,0 +1,71 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+mod.$var: 1;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssNamespacedIdentifier {
+                namespace: CssIdentifier {
+                    value_token: IDENT@0..3 "mod" [] [],
+                },
+                dot_token: DOT@3..4 "." [] [],
+                name: ScssIdentifier {
+                    dollar_token: DOLLAR@4..5 "$" [] [],
+                    name: CssIdentifier {
+                        value_token: IDENT@5..8 "var" [] [],
+                    },
+                },
+            },
+            colon_token: COLON@8..10 ":" [] [Whitespace(" ")],
+            value: CssGenericComponentValueList [
+                CssNumber {
+                    value_token: CSS_NUMBER_LITERAL@10..11 "1" [] [],
+                },
+            ],
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@11..12 ";" [] [],
+        },
+    ],
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..13
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..12
+    0: SCSS_DECLARATION@0..12
+      0: SCSS_NAMESPACED_IDENTIFIER@0..8
+        0: CSS_IDENTIFIER@0..3
+          0: IDENT@0..3 "mod" [] []
+        1: DOT@3..4 "." [] []
+        2: SCSS_IDENTIFIER@4..8
+          0: DOLLAR@4..5 "$" [] []
+          1: CSS_IDENTIFIER@5..8
+            0: IDENT@5..8 "var" [] []
+      1: COLON@8..10 ":" [] [Whitespace(" ")]
+      2: CSS_GENERIC_COMPONENT_VALUE_LIST@10..11
+        0: CSS_NUMBER@10..11
+          0: CSS_NUMBER_LITERAL@10..11 "1" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@11..11
+      4: SEMICOLON@11..12 ";" [] []
+  2: EOF@12..13 "" [Newline("\n")] []
+
+```

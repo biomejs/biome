@@ -8753,6 +8753,41 @@ pub struct CssViewTransitionAtRuleDeclaratorFields {
     pub view_transition_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssColonValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssColonValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssColonValueFields {
+        ScssColonValueFields {
+            colon_token: self.colon_token(),
+        }
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssColonValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssColonValueFields {
+    pub colon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssDeclaration {
     pub(crate) syntax: SyntaxNode,
 }
@@ -8941,6 +8976,41 @@ pub struct ScssNestingDeclarationFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub value: CssGenericComponentValueList,
     pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssParentSelectorValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssParentSelectorValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssParentSelectorValueFields {
+        ScssParentSelectorValueFields {
+            amp_token: self.amp_token(),
+        }
+    }
+    pub fn amp_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssParentSelectorValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssParentSelectorValueFields {
+    pub amp_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssQualifiedName {
@@ -12518,7 +12588,9 @@ pub enum AnyCssValue {
     CssRatio(CssRatio),
     CssString(CssString),
     CssUnicodeRange(CssUnicodeRange),
+    ScssColonValue(ScssColonValue),
     ScssIdentifier(ScssIdentifier),
+    ScssParentSelectorValue(ScssParentSelectorValue),
     ScssQualifiedName(ScssQualifiedName),
     TwValueThemeReference(TwValueThemeReference),
 }
@@ -12595,9 +12667,21 @@ impl AnyCssValue {
             _ => None,
         }
     }
+    pub fn as_scss_colon_value(&self) -> Option<&ScssColonValue> {
+        match &self {
+            Self::ScssColonValue(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_scss_identifier(&self) -> Option<&ScssIdentifier> {
         match &self {
             Self::ScssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_parent_selector_value(&self) -> Option<&ScssParentSelectorValue> {
+        match &self {
+            Self::ScssParentSelectorValue(item) => Some(item),
             _ => None,
         }
     }
@@ -23441,6 +23525,56 @@ impl From<CssViewTransitionAtRuleDeclarator> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssColonValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_COLON_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_COLON_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssColonValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssColonValue")
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssColonValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssColonValue> for SyntaxNode {
+    fn from(n: ScssColonValue) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssColonValue> for SyntaxElement {
+    fn from(n: ScssColonValue) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23648,6 +23782,53 @@ impl From<ScssNestingDeclaration> for SyntaxNode {
 }
 impl From<ScssNestingDeclaration> for SyntaxElement {
     fn from(n: ScssNestingDeclaration) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssParentSelectorValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_PARENT_SELECTOR_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_PARENT_SELECTOR_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssParentSelectorValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssParentSelectorValue")
+                .field("amp_token", &support::DebugSyntaxResult(self.amp_token()))
+                .finish()
+        } else {
+            f.debug_struct("ScssParentSelectorValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssParentSelectorValue> for SyntaxNode {
+    fn from(n: ScssParentSelectorValue) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssParentSelectorValue> for SyntaxElement {
+    fn from(n: ScssParentSelectorValue) -> Self {
         n.syntax.into()
     }
 }
@@ -32475,9 +32656,19 @@ impl From<CssUnicodeRange> for AnyCssValue {
         Self::CssUnicodeRange(node)
     }
 }
+impl From<ScssColonValue> for AnyCssValue {
+    fn from(node: ScssColonValue) -> Self {
+        Self::ScssColonValue(node)
+    }
+}
 impl From<ScssIdentifier> for AnyCssValue {
     fn from(node: ScssIdentifier) -> Self {
         Self::ScssIdentifier(node)
+    }
+}
+impl From<ScssParentSelectorValue> for AnyCssValue {
+    fn from(node: ScssParentSelectorValue) -> Self {
+        Self::ScssParentSelectorValue(node)
     }
 }
 impl From<ScssQualifiedName> for AnyCssValue {
@@ -32504,7 +32695,9 @@ impl AstNode for AnyCssValue {
         .union(CssRatio::KIND_SET)
         .union(CssString::KIND_SET)
         .union(CssUnicodeRange::KIND_SET)
+        .union(ScssColonValue::KIND_SET)
         .union(ScssIdentifier::KIND_SET)
+        .union(ScssParentSelectorValue::KIND_SET)
         .union(ScssQualifiedName::KIND_SET)
         .union(TwValueThemeReference::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -32519,7 +32712,9 @@ impl AstNode for AnyCssValue {
             | CSS_RATIO
             | CSS_STRING
             | CSS_UNICODE_RANGE
+            | SCSS_COLON_VALUE
             | SCSS_IDENTIFIER
+            | SCSS_PARENT_SELECTOR_VALUE
             | SCSS_QUALIFIED_NAME
             | TW_VALUE_THEME_REFERENCE => true,
             k if AnyCssDimension::can_cast(k) => true,
@@ -32539,7 +32734,11 @@ impl AstNode for AnyCssValue {
             CSS_RATIO => Self::CssRatio(CssRatio { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_UNICODE_RANGE => Self::CssUnicodeRange(CssUnicodeRange { syntax }),
+            SCSS_COLON_VALUE => Self::ScssColonValue(ScssColonValue { syntax }),
             SCSS_IDENTIFIER => Self::ScssIdentifier(ScssIdentifier { syntax }),
+            SCSS_PARENT_SELECTOR_VALUE => {
+                Self::ScssParentSelectorValue(ScssParentSelectorValue { syntax })
+            }
             SCSS_QUALIFIED_NAME => Self::ScssQualifiedName(ScssQualifiedName { syntax }),
             TW_VALUE_THEME_REFERENCE => {
                 Self::TwValueThemeReference(TwValueThemeReference { syntax })
@@ -32571,7 +32770,9 @@ impl AstNode for AnyCssValue {
             Self::CssRatio(it) => it.syntax(),
             Self::CssString(it) => it.syntax(),
             Self::CssUnicodeRange(it) => it.syntax(),
+            Self::ScssColonValue(it) => it.syntax(),
             Self::ScssIdentifier(it) => it.syntax(),
+            Self::ScssParentSelectorValue(it) => it.syntax(),
             Self::ScssQualifiedName(it) => it.syntax(),
             Self::TwValueThemeReference(it) => it.syntax(),
             Self::AnyCssDimension(it) => it.syntax(),
@@ -32590,7 +32791,9 @@ impl AstNode for AnyCssValue {
             Self::CssRatio(it) => it.into_syntax(),
             Self::CssString(it) => it.into_syntax(),
             Self::CssUnicodeRange(it) => it.into_syntax(),
+            Self::ScssColonValue(it) => it.into_syntax(),
             Self::ScssIdentifier(it) => it.into_syntax(),
+            Self::ScssParentSelectorValue(it) => it.into_syntax(),
             Self::ScssQualifiedName(it) => it.into_syntax(),
             Self::TwValueThemeReference(it) => it.into_syntax(),
             Self::AnyCssDimension(it) => it.into_syntax(),
@@ -32613,7 +32816,9 @@ impl std::fmt::Debug for AnyCssValue {
             Self::CssRatio(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUnicodeRange(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssColonValue(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssParentSelectorValue(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssQualifiedName(it) => std::fmt::Debug::fmt(it, f),
             Self::TwValueThemeReference(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -32634,7 +32839,9 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::CssRatio(it) => it.into_syntax(),
             AnyCssValue::CssString(it) => it.into_syntax(),
             AnyCssValue::CssUnicodeRange(it) => it.into_syntax(),
+            AnyCssValue::ScssColonValue(it) => it.into_syntax(),
             AnyCssValue::ScssIdentifier(it) => it.into_syntax(),
+            AnyCssValue::ScssParentSelectorValue(it) => it.into_syntax(),
             AnyCssValue::ScssQualifiedName(it) => it.into_syntax(),
             AnyCssValue::TwValueThemeReference(it) => it.into_syntax(),
         }
@@ -34851,6 +35058,11 @@ impl std::fmt::Display for CssViewTransitionAtRuleDeclarator {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for ScssColonValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for ScssDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -34867,6 +35079,11 @@ impl std::fmt::Display for ScssNamespacedIdentifier {
     }
 }
 impl std::fmt::Display for ScssNestingDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssParentSelectorValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -5,10 +5,11 @@ use crate::parser::CssParser;
 use crate::syntax::css_modules::v_bind_not_allowed;
 use crate::syntax::parse_error::{
     expected_component_value, expected_declaration_item, expected_identifier,
+    scss_only_syntax_error,
 };
 use crate::syntax::property::parse_generic_component_value;
 use crate::syntax::scss::{
-    is_at_scss_qualified_name, is_at_scss_qualified_name_function, parse_scss_function_name,
+    is_at_scss_qualified_name, is_nth_at_scss_qualified_name, parse_scss_function_name,
 };
 use crate::syntax::value::attr::{is_at_attr_function, parse_attr_function};
 use crate::syntax::value::r#if::parse_if_function;
@@ -71,16 +72,13 @@ pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
 /// excluding URL functions (since URL functions are also considered simple functions but are handled separately).
 #[inline]
 pub(crate) fn is_at_function(p: &mut CssParser) -> bool {
-    if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_qualified_name(p) {
-        return is_at_scss_qualified_name_function(p);
-    }
-
     is_nth_at_function(p, 0) && !is_at_url_function(p)
 }
 
 #[inline]
 pub(crate) fn is_nth_at_function(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_identifier(p, n) && p.nth_at(n + 1, T!['('])
+    (is_nth_at_identifier(p, n) && p.nth_at(n + 1, T!['(']))
+        || (is_nth_at_scss_qualified_name(p, n) && p.nth_at(n + 3, T!['(']))
 }
 
 #[inline]
@@ -113,8 +111,12 @@ pub(crate) fn parse_function(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_scss_function_name(p).or_add_diagnostic(p, expected_identifier);
+    if is_at_scss_qualified_name(p) {
+        CssSyntaxFeatures::Scss
+            .parse_exclusive_syntax(p, parse_scss_function_name, |p, marker| {
+                scss_only_syntax_error(p, "SCSS qualified function names", marker.range(p))
+            })
+            .or_add_diagnostic(p, expected_identifier);
     } else {
         parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
     }
