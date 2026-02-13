@@ -13,3 +13,4 @@ new RegExp("(foo)");
 // Valid: named capture group
 /(?<id>foo)/;
 new RegExp("(?<id>foo)");
+```
