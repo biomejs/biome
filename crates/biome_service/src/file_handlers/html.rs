@@ -1333,7 +1333,7 @@ pub(crate) fn update_snippets(
             let new_token = ident(&format!(
                 "{}{}{}",
                 leading_trivia,
-                snippet.new_code.as_str(),
+                snippet.new_code.trim(), // trim to avoid duplicating trivia
                 trailing_trivia
             ));
             mutation.replace_token(value_token, new_token);
