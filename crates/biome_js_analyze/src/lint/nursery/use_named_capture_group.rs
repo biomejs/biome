@@ -127,10 +127,6 @@ fn find_unnamed_capture_groups(pattern: &[u8]) -> Vec<u32> {
     result
 }
 
-fn has_unnamed_capture_groups(pattern: &[u8]) -> bool {
-    !find_unnamed_capture_groups(pattern).is_empty()
-}
-
 fn is_regexp_object(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
     match global_identifier(&expr.clone().omit_parentheses()) {
         Some((reference, name)) => match model.binding(&reference) {
@@ -158,18 +154,46 @@ fn parse_regexp_node(
     }
 }
 
-fn extract_pattern_from_args(
-    arguments: &JsCallArguments,
-) -> Option<String> {
-    let args = arguments.args();
-    let mut iter = args.iter();
-    let first_arg = iter.next()?;
+fn get_first_arg_expr(arguments: &JsCallArguments) -> Option<AnyJsExpression> {
+    let first_arg = arguments.args().iter().next()?;
     let Ok(AnyJsCallArgument::AnyJsExpression(expr)) = first_arg else {
         return None;
     };
-    let static_val = expr.omit_parentheses().as_static_value()?;
-    let text = static_val.as_string_constant()?;
-    Some(text.to_string())
+    Some(expr)
+}
+
+/// Try to compute precise TextRange for each unnamed group in a string literal.
+/// Returns `Some` if the argument is a simple string literal without escape sequences
+/// (so byte offsets map 1:1 to source positions). Returns `None` otherwise.
+fn try_precise_string_ranges(arg_expr: &AnyJsExpression) -> Option<Box<[TextRange]>> {
+    let AnyJsExpression::AnyJsLiteralExpression(
+        biome_js_syntax::AnyJsLiteralExpression::JsStringLiteralExpression(string_lit),
+    ) = arg_expr
+    else {
+        return None;
+    };
+    let token = string_lit.value_token().ok()?;
+    let token_text = token.text_trimmed();
+    let raw_inner = &token_text[1..token_text.len() - 1];
+    let inner_text = string_lit.inner_string_text().ok()?;
+    // If raw source and interpreted text differ, escapes are present
+    if raw_inner != inner_text.text() {
+        return None;
+    }
+    let offsets = find_unnamed_capture_groups(raw_inner.as_bytes());
+    if offsets.is_empty() {
+        return Some(Default::default());
+    }
+    let content_start = token.text_trimmed_range().start() + TextSize::from(1);
+    Some(
+        offsets
+            .into_iter()
+            .map(|offset| {
+                let start = content_start + TextSize::from(offset);
+                TextRange::new(start, start + TextSize::from(1))
+            })
+            .collect(),
+    )
 }
 
 impl Rule for UseNamedCaptureGroup {
@@ -238,13 +262,23 @@ fn run_regexp_constructor(node: &AnyJsExpression, model: &SemanticModel) -> Box<
     if !is_regexp_object(&callee, model) {
         return Default::default();
     }
-    let Some(pattern_text) = extract_pattern_from_args(&arguments) else {
+    let Some(arg_expr) = get_first_arg_expr(&arguments) else {
         return Default::default();
     };
-    if !has_unnamed_capture_groups(pattern_text.as_bytes()) {
+    // Try precise per-group diagnostics for simple string literals (no escapes)
+    if let Some(ranges) = try_precise_string_ranges(&arg_expr) {
+        return ranges;
+    }
+    // Fallback: use interpreted value, single diagnostic on the whole expression
+    let Some(static_val) = arg_expr.omit_parentheses().as_static_value() else {
+        return Default::default();
+    };
+    let Some(pattern) = static_val.as_string_constant() else {
+        return Default::default();
+    };
+    if find_unnamed_capture_groups(pattern.as_bytes()).is_empty() {
         return Default::default();
     }
-    // For constructor calls, emit a single diagnostic on the entire expression
     Box::new([node.range()])
 }
 
