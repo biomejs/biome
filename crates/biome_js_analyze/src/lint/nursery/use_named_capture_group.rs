@@ -67,46 +67,33 @@ declare_lint_rule! {
 ///
 /// Returns a list of byte offsets (relative to pattern start) for each
 /// unnamed capture group `(` found.
-fn find_unnamed_capture_groups(pattern: &[u8]) -> Vec<u32> {
+fn find_unnamed_capture_groups(pattern: &str) -> Vec<u32> {
     let mut result = Vec::new();
-    let mut i = 0;
-    while i < pattern.len() {
-        match pattern[i] {
+    let mut bytes = pattern.as_bytes().iter().enumerate().peekable();
+    while let Some((i, &byte)) = bytes.next() {
+        match byte {
             b'\\' => {
-                // Skip escaped character
-                i += 2;
+                bytes.next();
             }
             b'[' => {
-                // Skip character class
-                i += 1;
-                while i < pattern.len() {
-                    match pattern[i] {
+                while let Some((_, &b)) = bytes.next() {
+                    match b {
                         b'\\' => {
-                            i += 2;
+                            bytes.next();
                         }
-                        b']' => {
-                            i += 1;
-                            break;
-                        }
-                        _ => {
-                            i += 1;
-                        }
+                        b']' => break,
+                        _ => {}
                     }
                 }
             }
             b'(' => {
-                if pattern.get(i + 1) == Some(&b'?') {
+                if bytes.peek().is_some_and(|&(_, &b)| b == b'?') {
                     // `(?:`, `(?=`, `(?!`, `(?<=`, `(?<!`, `(?<name>` — skip
-                    i += 1;
                 } else {
-                    // Unnamed capture group
                     result.push(i as u32);
-                    i += 1;
                 }
             }
-            _ => {
-                i += 1;
-            }
+            _ => {}
         }
     }
     result
@@ -165,7 +152,7 @@ fn try_precise_string_ranges(arg_expr: &AnyJsExpression) -> Option<Box<[TextRang
     if raw_inner != inner_text.text() {
         return None;
     }
-    let offsets = find_unnamed_capture_groups(raw_inner.as_bytes());
+    let offsets = find_unnamed_capture_groups(raw_inner);
     if offsets.is_empty() {
         return Some(Default::default());
     }
@@ -221,7 +208,7 @@ fn run_regex_literal(node: &JsRegexLiteralExpression) -> Box<[TextRange]> {
         return Default::default();
     };
     let pattern_text = pattern.text();
-    let offsets = find_unnamed_capture_groups(pattern_text.as_bytes());
+    let offsets = find_unnamed_capture_groups(pattern_text);
     if offsets.is_empty() {
         return Default::default();
     }
@@ -261,7 +248,7 @@ fn run_regexp_constructor(node: &AnyJsExpression, model: &SemanticModel) -> Box<
     let Some(pattern) = static_val.as_string_constant() else {
         return Default::default();
     };
-    if find_unnamed_capture_groups(pattern.as_bytes()).is_empty() {
+    if find_unnamed_capture_groups(pattern).is_empty() {
         return Default::default();
     }
     Box::new([node.range()])
@@ -273,17 +260,17 @@ mod tests {
 
     #[test]
     fn test_unnamed_capture_groups() {
-        assert_eq!(find_unnamed_capture_groups(b"(foo)"), vec![0]);
-        assert_eq!(find_unnamed_capture_groups(b"(?:foo)"), Vec::<u32>::new());
-        assert_eq!(find_unnamed_capture_groups(b"(?<name>foo)"), Vec::<u32>::new());
-        assert_eq!(find_unnamed_capture_groups(b"(?=foo)"), Vec::<u32>::new());
-        assert_eq!(find_unnamed_capture_groups(b"(?!foo)"), Vec::<u32>::new());
-        assert_eq!(find_unnamed_capture_groups(b"(?<=foo)"), Vec::<u32>::new());
-        assert_eq!(find_unnamed_capture_groups(b"(?<!foo)"), Vec::<u32>::new());
-        assert_eq!(find_unnamed_capture_groups(b"(foo)(bar)"), vec![0, 5]);
-        assert_eq!(find_unnamed_capture_groups(b"\\(foo)"), Vec::<u32>::new());
-        assert_eq!(find_unnamed_capture_groups(b"\\\\(foo)"), vec![2]);
-        assert_eq!(find_unnamed_capture_groups(b"[(]foo"), Vec::<u32>::new());
-        assert_eq!(find_unnamed_capture_groups(b"[\\]]foo"), Vec::<u32>::new());
+        assert_eq!(find_unnamed_capture_groups("(foo)"), vec![0]);
+        assert_eq!(find_unnamed_capture_groups("(?:foo)"), Vec::<u32>::new());
+        assert_eq!(find_unnamed_capture_groups("(?<name>foo)"), Vec::<u32>::new());
+        assert_eq!(find_unnamed_capture_groups("(?=foo)"), Vec::<u32>::new());
+        assert_eq!(find_unnamed_capture_groups("(?!foo)"), Vec::<u32>::new());
+        assert_eq!(find_unnamed_capture_groups("(?<=foo)"), Vec::<u32>::new());
+        assert_eq!(find_unnamed_capture_groups("(?<!foo)"), Vec::<u32>::new());
+        assert_eq!(find_unnamed_capture_groups("(foo)(bar)"), vec![0, 5]);
+        assert_eq!(find_unnamed_capture_groups("\\(foo)"), Vec::<u32>::new());
+        assert_eq!(find_unnamed_capture_groups("\\\\(foo)"), vec![2]);
+        assert_eq!(find_unnamed_capture_groups("[(]foo"), Vec::<u32>::new());
+        assert_eq!(find_unnamed_capture_groups("[\\]]foo"), Vec::<u32>::new());
     }
 }
