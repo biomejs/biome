@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -46,7 +47,7 @@ HtmlRoot {
                         modifiers: SvelteDirectiveModifierList [],
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@29..30 "=" [] [],
-                            value: HtmlSingleTextExpression {
+                            value: HtmlAttributeSingleTextExpression {
                                 l_curly_token: L_CURLY@30..31 "{" [] [],
                                 expression: HtmlTextExpression {
                                     html_literal_token: HTML_LITERAL@31..39 "fileList" [] [],
@@ -93,7 +94,7 @@ HtmlRoot {
                         modifiers: SvelteDirectiveModifierList [],
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@82..83 "=" [] [],
-                            value: HtmlSingleTextExpression {
+                            value: HtmlAttributeSingleTextExpression {
                                 l_curly_token: L_CURLY@83..84 "{" [] [],
                                 expression: HtmlTextExpression {
                                     html_literal_token: HTML_LITERAL@84..89 "files" [] [],
@@ -141,7 +142,7 @@ HtmlRoot {
             2: SVELTE_DIRECTIVE_MODIFIER_LIST@29..29
             3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@29..41
               0: EQ@29..30 "=" [] []
-              1: HTML_SINGLE_TEXT_EXPRESSION@30..41
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@30..41
                 0: L_CURLY@30..31 "{" [] []
                 1: HTML_TEXT_EXPRESSION@31..39
                   0: HTML_LITERAL@31..39 "fileList" [] []
@@ -173,7 +174,7 @@ HtmlRoot {
             2: SVELTE_DIRECTIVE_MODIFIER_LIST@82..82
             3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@82..91
               0: EQ@82..83 "=" [] []
-              1: HTML_SINGLE_TEXT_EXPRESSION@83..91
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@83..91
                 0: L_CURLY@83..84 "{" [] []
                 1: HTML_TEXT_EXPRESSION@84..89
                   0: HTML_LITERAL@84..89 "files" [] []

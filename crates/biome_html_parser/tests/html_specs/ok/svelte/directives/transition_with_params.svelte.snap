@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -36,7 +37,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@20..21 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@21..22 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@22..39 "{ duration: 200 }" [] [],
@@ -80,7 +81,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@74..75 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@75..76 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@76..102 "{ y: 200, duration: 2000 }" [] [],
@@ -135,7 +136,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@20..20
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@20..40
                 0: EQ@20..21 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@21..40
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@21..40
                   0: L_CURLY@21..22 "{" [] []
                   1: HTML_TEXT_EXPRESSION@22..39
                     0: HTML_LITERAL@22..39 "{ duration: 200 }" [] []
@@ -165,7 +166,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@74..74
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@74..103
                 0: EQ@74..75 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@75..103
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@75..103
                   0: L_CURLY@75..76 "{" [] []
                   1: HTML_TEXT_EXPRESSION@76..102
                     0: HTML_LITERAL@76..102 "{ y: 200, duration: 2000 }" [] []

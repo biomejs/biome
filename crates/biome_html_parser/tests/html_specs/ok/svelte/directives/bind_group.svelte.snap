@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -47,7 +48,7 @@ HtmlRoot {
                         modifiers: SvelteDirectiveModifierList [],
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@30..31 "=" [] [],
-                            value: HtmlSingleTextExpression {
+                            value: HtmlAttributeSingleTextExpression {
                                 l_curly_token: L_CURLY@31..32 "{" [] [],
                                 expression: HtmlTextExpression {
                                     html_literal_token: HTML_LITERAL@32..40 "selected" [] [],
@@ -99,7 +100,7 @@ HtmlRoot {
                         modifiers: SvelteDirectiveModifierList [],
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@85..86 "=" [] [],
-                            value: HtmlSingleTextExpression {
+                            value: HtmlAttributeSingleTextExpression {
                                 l_curly_token: L_CURLY@86..87 "{" [] [],
                                 expression: HtmlTextExpression {
                                     html_literal_token: HTML_LITERAL@87..95 "selected" [] [],
@@ -151,7 +152,7 @@ HtmlRoot {
                         modifiers: SvelteDirectiveModifierList [],
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@143..144 "=" [] [],
-                            value: HtmlSingleTextExpression {
+                            value: HtmlAttributeSingleTextExpression {
                                 l_curly_token: L_CURLY@144..145 "{" [] [],
                                 expression: HtmlTextExpression {
                                     html_literal_token: HTML_LITERAL@145..153 "flavours" [] [],
@@ -210,7 +211,7 @@ HtmlRoot {
             2: SVELTE_DIRECTIVE_MODIFIER_LIST@30..30
             3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@30..42
               0: EQ@30..31 "=" [] []
-              1: HTML_SINGLE_TEXT_EXPRESSION@31..42
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@31..42
                 0: L_CURLY@31..32 "{" [] []
                 1: HTML_TEXT_EXPRESSION@32..40
                   0: HTML_LITERAL@32..40 "selected" [] []
@@ -245,7 +246,7 @@ HtmlRoot {
             2: SVELTE_DIRECTIVE_MODIFIER_LIST@85..85
             3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@85..97
               0: EQ@85..86 "=" [] []
-              1: HTML_SINGLE_TEXT_EXPRESSION@86..97
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@86..97
                 0: L_CURLY@86..87 "{" [] []
                 1: HTML_TEXT_EXPRESSION@87..95
                   0: HTML_LITERAL@87..95 "selected" [] []
@@ -280,7 +281,7 @@ HtmlRoot {
             2: SVELTE_DIRECTIVE_MODIFIER_LIST@143..143
             3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@143..155
               0: EQ@143..144 "=" [] []
-              1: HTML_SINGLE_TEXT_EXPRESSION@144..155
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@144..155
                 0: L_CURLY@144..145 "{" [] []
                 1: HTML_TEXT_EXPRESSION@145..153
                   0: HTML_LITERAL@145..153 "flavours" [] []

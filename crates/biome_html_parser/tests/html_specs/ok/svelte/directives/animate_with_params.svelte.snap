@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -64,7 +65,7 @@ HtmlRoot {
                                     modifiers: SvelteDirectiveModifierList [],
                                     initializer: HtmlAttributeInitializerClause {
                                         eq_token: EQ@46..47 "=" [] [],
-                                        value: HtmlSingleTextExpression {
+                                        value: HtmlAttributeSingleTextExpression {
                                             l_curly_token: L_CURLY@47..48 "{" [] [],
                                             expression: HtmlTextExpression {
                                                 html_literal_token: HTML_LITERAL@48..62 "{ delay: 500 }" [] [],
@@ -144,7 +145,7 @@ HtmlRoot {
                                     modifiers: SvelteDirectiveModifierList [],
                                     initializer: HtmlAttributeInitializerClause {
                                         eq_token: EQ@135..136 "=" [] [],
-                                        value: HtmlSingleTextExpression {
+                                        value: HtmlAttributeSingleTextExpression {
                                             l_curly_token: L_CURLY@136..137 "{" [] [],
                                             expression: HtmlTextExpression {
                                                 html_literal_token: HTML_LITERAL@137..172 "{ duration: 300, easing: cubicOut }" [] [],
@@ -229,7 +230,7 @@ HtmlRoot {
                   2: SVELTE_DIRECTIVE_MODIFIER_LIST@46..46
                   3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@46..63
                     0: EQ@46..47 "=" [] []
-                    1: HTML_SINGLE_TEXT_EXPRESSION@47..63
+                    1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@47..63
                       0: L_CURLY@47..48 "{" [] []
                       1: HTML_TEXT_EXPRESSION@48..62
                         0: HTML_LITERAL@48..62 "{ delay: 500 }" [] []
@@ -285,7 +286,7 @@ HtmlRoot {
                   2: SVELTE_DIRECTIVE_MODIFIER_LIST@135..135
                   3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@135..173
                     0: EQ@135..136 "=" [] []
-                    1: HTML_SINGLE_TEXT_EXPRESSION@136..173
+                    1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@136..173
                       0: L_CURLY@136..137 "{" [] []
                       1: HTML_TEXT_EXPRESSION@137..172
                         0: HTML_LITERAL@137..172 "{ duration: 300, easing: cubicOut }" [] []

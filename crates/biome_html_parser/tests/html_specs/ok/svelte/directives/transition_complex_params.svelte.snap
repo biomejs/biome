@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -37,7 +38,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@22..23 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@23..24 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@24..85 "{ delay: 100, duration: 400, easing: cubicOut, opacity: 0.5 }" [] [],
@@ -92,7 +93,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@22..22
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@22..86
                 0: EQ@22..23 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@23..86
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@23..86
                   0: L_CURLY@23..24 "{" [] []
                   1: HTML_TEXT_EXPRESSION@24..85
                     0: HTML_LITERAL@24..85 "{ delay: 100, duration: 400, easing: cubicOut, opacity: 0.5 }" [] []

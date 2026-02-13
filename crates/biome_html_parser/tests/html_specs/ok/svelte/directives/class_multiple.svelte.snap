@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -48,7 +49,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@24..25 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@25..26 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@26..31 "isBaz" [] [],
@@ -68,7 +69,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@42..43 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@43..44 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@44..49 "isBaz" [] [],
@@ -131,7 +132,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@24..24
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@24..33
                 0: EQ@24..25 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@25..33
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@25..33
                   0: L_CURLY@25..26 "{" [] []
                   1: HTML_TEXT_EXPRESSION@26..31
                     0: HTML_LITERAL@26..31 "isBaz" [] []
@@ -145,7 +146,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@42..42
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@42..50
                 0: EQ@42..43 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@43..50
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@43..50
                   0: L_CURLY@43..44 "{" [] []
                   1: HTML_TEXT_EXPRESSION@44..49
                     0: HTML_LITERAL@44..49 "isBaz" [] []
