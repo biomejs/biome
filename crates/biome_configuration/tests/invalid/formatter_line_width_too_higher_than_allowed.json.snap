@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: formatter_line_width_too_higher_than_allowed.json
 ---
 formatter_line_width_too_higher_than_allowed.json:3:16 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -12,6 +12,3 @@ formatter_line_width_too_higher_than_allowed.json:3:16 deserialize ━━━━�
       │ 		             ^^^
     4 │ 	}
     5 │ }
-  
-
-

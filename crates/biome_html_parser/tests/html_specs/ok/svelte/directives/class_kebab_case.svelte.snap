@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -36,7 +37,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@20..21 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@21..22 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@22..28 "active" [] [],
@@ -80,7 +81,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@67..68 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@68..69 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@69..74 "error" [] [],
@@ -100,7 +101,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@92..93 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@93..94 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@94..101 "loading" [] [],
@@ -155,7 +156,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@20..20
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@20..29
                 0: EQ@20..21 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@21..29
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@21..29
                   0: L_CURLY@21..22 "{" [] []
                   1: HTML_TEXT_EXPRESSION@22..28
                     0: HTML_LITERAL@22..28 "active" [] []
@@ -185,7 +186,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@67..67
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@67..76
                 0: EQ@67..68 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@68..76
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@68..76
                   0: L_CURLY@68..69 "{" [] []
                   1: HTML_TEXT_EXPRESSION@69..74
                     0: HTML_LITERAL@69..74 "error" [] []
@@ -199,7 +200,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@92..92
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@92..102
                 0: EQ@92..93 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@93..102
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@93..102
                   0: L_CURLY@93..94 "{" [] []
                   1: HTML_TEXT_EXPRESSION@94..101
                     0: HTML_LITERAL@94..101 "loading" [] []

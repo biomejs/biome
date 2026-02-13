@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: html/attributes/iframe-allow-attribute/small-print-width/allow-attribute.html
 ---
+
 # Input
 
 ```html

@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: javascript_formatter_trailing_commas.json
 ---
 javascript_formatter_trailing_commas.json:4:22 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

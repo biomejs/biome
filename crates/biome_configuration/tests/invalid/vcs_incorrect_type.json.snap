@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: vcs_incorrect_type.json
 ---
 vcs_incorrect_type.json:5:20 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -12,6 +12,3 @@ vcs_incorrect_type.json:5:20 deserialize ━━━━━━━━━━━━━
       │ 		                 ^^^^^^^
     6 │ 	}
     7 │ }
-  
-
-

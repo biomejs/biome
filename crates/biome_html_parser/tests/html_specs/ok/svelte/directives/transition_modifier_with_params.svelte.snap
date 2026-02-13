@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -43,7 +44,7 @@ HtmlRoot {
                             ],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@27..28 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@28..29 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@29..46 "{ duration: 200 }" [] [],
@@ -94,7 +95,7 @@ HtmlRoot {
                             ],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@96..97 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@97..98 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@98..108 "{ y: 200 }" [] [],
@@ -153,7 +154,7 @@ HtmlRoot {
                     0: IDENT@21..27 "global" [] []
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@27..47
                 0: EQ@27..28 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@28..47
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@28..47
                   0: L_CURLY@28..29 "{" [] []
                   1: HTML_TEXT_EXPRESSION@29..46
                     0: HTML_LITERAL@29..46 "{ duration: 200 }" [] []
@@ -187,7 +188,7 @@ HtmlRoot {
                     0: IDENT@91..96 "local" [] []
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@96..109
                 0: EQ@96..97 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@97..109
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@97..109
                   0: L_CURLY@97..98 "{" [] []
                   1: HTML_TEXT_EXPRESSION@98..108
                     0: HTML_LITERAL@98..108 "{ y: 200 }" [] []

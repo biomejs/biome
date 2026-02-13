@@ -2,6 +2,7 @@
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
+
 # `/src/bar.ts` (Module 1)
 
 ## Source

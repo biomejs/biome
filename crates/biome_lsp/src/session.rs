@@ -16,10 +16,10 @@ use biome_service::WorkspaceError;
 use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
 };
+use biome_service::diagnostics::ConfigurationOutsideProject;
 use biome_service::file_handlers::astro::AstroFileHandler;
 use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
-use biome_service::diagnostics::ConfigurationOutsideProject;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::workspace::{
