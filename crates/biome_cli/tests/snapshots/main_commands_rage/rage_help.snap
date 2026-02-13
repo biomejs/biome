@@ -7,7 +7,7 @@ expression: redactor(content)
 ```block
 Prints information for debugging.
 
-Usage: rage [--daemon-logs] [--formatter] [--linter]
+Usage: rage [--daemon-logs] [--formatter] [--linter] [--files]
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain
@@ -50,6 +50,7 @@ Available options:
         --daemon-logs         Prints the Biome daemon server logs
         --formatter           Prints the formatter options applied
         --linter              Prints the linter options applied
+        --files               Prints the files options applied
     -h, --help                Prints help information
 
 ```
