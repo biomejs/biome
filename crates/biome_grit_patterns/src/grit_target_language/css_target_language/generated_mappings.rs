@@ -274,10 +274,12 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssViewTransitionAtRuleDeclarator" => lang::CssViewTransitionAtRuleDeclarator::KIND_SET
             .iter()
             .next(),
+        "ScssArbitraryArgument" => lang::ScssArbitraryArgument::KIND_SET.iter().next(),
         "ScssBinaryExpression" => lang::ScssBinaryExpression::KIND_SET.iter().next(),
         "ScssDeclaration" => lang::ScssDeclaration::KIND_SET.iter().next(),
         "ScssExpression" => lang::ScssExpression::KIND_SET.iter().next(),
         "ScssIdentifier" => lang::ScssIdentifier::KIND_SET.iter().next(),
+        "ScssKeywordArgument" => lang::ScssKeywordArgument::KIND_SET.iter().next(),
         "ScssMapExpression" => lang::ScssMapExpression::KIND_SET.iter().next(),
         "ScssMapExpressionPair" => lang::ScssMapExpressionPair::KIND_SET.iter().next(),
         "ScssNamespacedIdentifier" => lang::ScssNamespacedIdentifier::KIND_SET.iter().next(),

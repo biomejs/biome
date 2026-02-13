@@ -2976,6 +2976,18 @@ pub fn css_view_transition_at_rule_declarator(
         [Some(SyntaxElement::Token(view_transition_token))],
     ))
 }
+pub fn scss_arbitrary_argument(
+    value: AnyScssExpression,
+    dotdotdot_token: SyntaxToken,
+) -> ScssArbitraryArgument {
+    ScssArbitraryArgument::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_ARBITRARY_ARGUMENT,
+        [
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(dotdotdot_token)),
+        ],
+    ))
+}
 pub fn scss_binary_expression(
     left: AnyScssExpression,
     operator_token: SyntaxToken,
@@ -3042,6 +3054,20 @@ pub fn scss_identifier(dollar_token: SyntaxToken, name: CssIdentifier) -> ScssId
         [
             Some(SyntaxElement::Token(dollar_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_keyword_argument(
+    name: ScssIdentifier,
+    colon_token: SyntaxToken,
+    value: AnyScssExpression,
+) -> ScssKeywordArgument {
+    ScssKeywordArgument::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_KEYWORD_ARGUMENT,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
         ],
     ))
 }

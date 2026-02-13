@@ -10,7 +10,9 @@ impl FormatRule<AnyScssExpressionItem> for FormatAnyScssExpressionItem {
         match node {
             AnyScssExpressionItem::AnyCssValue(node) => node.format().fmt(f),
             AnyScssExpressionItem::CssGenericDelimiter(node) => node.format().fmt(f),
+            AnyScssExpressionItem::ScssArbitraryArgument(node) => node.format().fmt(f),
             AnyScssExpressionItem::ScssBinaryExpression(node) => node.format().fmt(f),
+            AnyScssExpressionItem::ScssKeywordArgument(node) => node.format().fmt(f),
             AnyScssExpressionItem::ScssListExpression(node) => node.format().fmt(f),
             AnyScssExpressionItem::ScssMapExpression(node) => node.format().fmt(f),
             AnyScssExpressionItem::ScssParenthesizedExpression(node) => node.format().fmt(f),

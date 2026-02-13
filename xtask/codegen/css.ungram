@@ -2526,11 +2526,26 @@ ScssExpressionItemList = AnyScssExpressionItem*
 AnyScssExpressionItem =
 	AnyCssValue
 	| CssGenericDelimiter
+	| ScssKeywordArgument
+	| ScssArbitraryArgument
 	| ScssBinaryExpression
 	| ScssUnaryExpression
 	| ScssParenthesizedExpression
 	| ScssListExpression
 	| ScssMapExpression
+
+// @include fn($name: 1);
+//             ^^^^^^^^
+ScssKeywordArgument =
+	name: ScssIdentifier
+	':'
+	value: AnyScssExpression
+
+// @include fn($args...);
+//             ^^^^^^^^
+ScssArbitraryArgument =
+	value: AnyScssExpression
+	'...'
 
 // width: $a + $b;
 //        ^^^^^^
@@ -2596,6 +2611,8 @@ ScssMapExpressionPair =
 //        ^^
 AnyScssExpression =
 	ScssExpression
+	| ScssKeywordArgument
+	| ScssArbitraryArgument
 	| ScssBinaryExpression
 	| ScssUnaryExpression
 	| ScssParenthesizedExpression

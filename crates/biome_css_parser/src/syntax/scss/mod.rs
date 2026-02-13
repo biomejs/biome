@@ -17,7 +17,8 @@ pub(crate) use declaration::{
     parse_scss_nesting_declaration,
 };
 pub(crate) use expression::{
-    SCSS_UNARY_OPERATOR_TOKEN_SET, parse_scss_expression, parse_scss_expression_until,
+    SCSS_UNARY_OPERATOR_TOKEN_SET, parse_scss_expression, parse_scss_expression_in_args_until,
+    parse_scss_expression_until,
 };
 
 #[inline]
