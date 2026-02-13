@@ -2410,8 +2410,13 @@ See https://biomejs.dev/linter/rules/use-nullish-coalescing
 	 */
 	useNullishCoalescing?: UseNullishCoalescingConfiguration;
 	/**
+	* Enforce using named capture groups in regular expression.
+See https://biomejs.dev/linter/rules/use-named-capture-group
+	 */
+	useNamedCaptureGroup?: UseNamedCaptureGroupConfiguration;
+	/**
 	* Enforce valid describe() callback.
-See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
+See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback
 	 */
 	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
 	/**
@@ -4264,6 +4269,9 @@ export type UseLoneExecutableDefinitionConfiguration =
 export type UseNullishCoalescingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNullishCoalescingOptions;
+export type UseNamedCaptureGroupConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNamedCaptureGroupOptions;
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
@@ -5968,6 +5976,10 @@ export interface RuleWithUseNullishCoalescingOptions {
 	level: RulePlainConfiguration;
 	options?: UseNullishCoalescingOptions;
 }
+export interface RuleWithUseNamedCaptureGroupOptions {
+	level: RulePlainConfiguration;
+	options?: UseNamedCaptureGroupOptions;
+}
 export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
 	options?: UsePlaywrightValidDescribeCallbackOptions;
@@ -7418,6 +7430,7 @@ Default: `true`
 	 */
 	ignoreConditionalTests?: boolean;
 }
+export type UseNamedCaptureGroupOptions = {};
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseRegexpExecOptions = {};
 export interface UseRequiredScriptsOptions {
@@ -8390,6 +8403,7 @@ export type Category =
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useNullishCoalescing"
+	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
