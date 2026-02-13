@@ -913,6 +913,10 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssViewTransitionAtRuleDeclarator::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_BINARY_EXPRESSION => {
+                    let $pattern = unsafe { $crate::ScssBinaryExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_DECLARATION => {
                     let $pattern = unsafe { $crate::ScssDeclaration::new_unchecked(node) };
                     $body
@@ -961,6 +965,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::SCSS_QUALIFIED_NAME => {
                     let $pattern = unsafe { $crate::ScssQualifiedName::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_UNARY_EXPRESSION => {
+                    let $pattern = unsafe { $crate::ScssUnaryExpression::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_VARIABLE_MODIFIER => {

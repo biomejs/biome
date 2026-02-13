@@ -274,6 +274,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssViewTransitionAtRuleDeclarator" => lang::CssViewTransitionAtRuleDeclarator::KIND_SET
             .iter()
             .next(),
+        "ScssBinaryExpression" => lang::ScssBinaryExpression::KIND_SET.iter().next(),
         "ScssDeclaration" => lang::ScssDeclaration::KIND_SET.iter().next(),
         "ScssExpression" => lang::ScssExpression::KIND_SET.iter().next(),
         "ScssIdentifier" => lang::ScssIdentifier::KIND_SET.iter().next(),
@@ -284,6 +285,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssParentSelectorValue" => lang::ScssParentSelectorValue::KIND_SET.iter().next(),
         "ScssParenthesizedExpression" => lang::ScssParenthesizedExpression::KIND_SET.iter().next(),
         "ScssQualifiedName" => lang::ScssQualifiedName::KIND_SET.iter().next(),
+        "ScssUnaryExpression" => lang::ScssUnaryExpression::KIND_SET.iter().next(),
         "ScssVariableModifier" => lang::ScssVariableModifier::KIND_SET.iter().next(),
         "TwApplyAtRule" => lang::TwApplyAtRule::KIND_SET.iter().next(),
         "TwConfigAtRule" => lang::TwConfigAtRule::KIND_SET.iter().next(),

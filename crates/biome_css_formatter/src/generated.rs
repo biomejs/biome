@@ -6996,6 +6996,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssViewTransitionAtRuleD
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: view_transition_at_rule_declarator :: FormatCssViewTransitionAtRuleDeclarator :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::ScssBinaryExpression>
+    for crate::scss::auxiliary::binary_expression::FormatScssBinaryExpression
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssBinaryExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssBinaryExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssBinaryExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssBinaryExpression,
+        crate::scss::auxiliary::binary_expression::FormatScssBinaryExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::binary_expression::FormatScssBinaryExpression::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssBinaryExpression {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssBinaryExpression,
+        crate::scss::auxiliary::binary_expression::FormatScssBinaryExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::binary_expression::FormatScssBinaryExpression::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssDeclaration>
     for crate::scss::auxiliary::declaration::FormatScssDeclaration
 {
@@ -7437,6 +7475,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssQualifiedName {
         FormatOwnedWithRule::new(
             self,
             crate::scss::auxiliary::qualified_name::FormatScssQualifiedName::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssUnaryExpression>
+    for crate::scss::auxiliary::unary_expression::FormatScssUnaryExpression
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssUnaryExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssUnaryExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssUnaryExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssUnaryExpression,
+        crate::scss::auxiliary::unary_expression::FormatScssUnaryExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::unary_expression::FormatScssUnaryExpression::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssUnaryExpression {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssUnaryExpression,
+        crate::scss::auxiliary::unary_expression::FormatScssUnaryExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::unary_expression::FormatScssUnaryExpression::default(),
         )
     }
 }

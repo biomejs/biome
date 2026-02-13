@@ -343,7 +343,7 @@ impl<'src> CssLexer<'src> {
 
             LSS => self.consume_lss(),
 
-            IDT | DOL if self.peek_byte() == Some(b'=') => {
+            DOL if self.peek_byte() == Some(b'=') => {
                 self.advance(1);
                 self.consume_byte(T!["$="])
             }
@@ -369,8 +369,8 @@ impl<'src> CssLexer<'src> {
             MOR => self.consume_mor(),
             TLD => self.consume_tilde(),
             PIP => self.consume_pipe(),
-            EQL => self.consume_byte(T![=]),
-            EXL => self.consume_byte(T![!]),
+            EQL => self.consume_eql(),
+            EXL => self.consume_exl(),
             PRC => self.consume_byte(T![%]),
             Dispatch::AMP => self.consume_byte(T![&]),
 
@@ -1192,6 +1192,26 @@ impl<'src> CssLexer<'src> {
             Some(b'|') => self.consume_byte(T![||]),
             Some(b'=') => self.consume_byte(T![|=]),
             _ => T![|],
+        }
+    }
+
+    #[inline]
+    fn consume_eql(&mut self) -> CssSyntaxKind {
+        self.assert_byte(b'=');
+
+        match self.next_byte() {
+            Some(b'=') if self.source_type.is_scss() => self.consume_byte(T![==]),
+            _ => T![=],
+        }
+    }
+
+    #[inline]
+    fn consume_exl(&mut self) -> CssSyntaxKind {
+        self.assert_byte(b'!');
+
+        match self.next_byte() {
+            Some(b'=') if self.source_type.is_scss() => self.consume_byte(T![!=]),
+            _ => T![!],
         }
     }
 

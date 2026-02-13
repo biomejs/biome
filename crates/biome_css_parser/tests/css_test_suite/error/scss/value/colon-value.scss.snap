@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -29,9 +28,13 @@ CssRoot {
                 COLON@4..6 ":" [] [Whitespace(" ")],
                 CssBogus {
                     items: [
-                        CssBogusPropertyValue {
+                        CssBogus {
                             items: [
-                                COLON@6..7 ":" [] [],
+                                CssBogusPropertyValue {
+                                    items: [
+                                        COLON@6..7 ":" [] [],
+                                    ],
+                                },
                             ],
                         },
                     ],
@@ -58,8 +61,9 @@ CssRoot {
           0: IDENT@1..4 "sep" [] []
       1: COLON@4..6 ":" [] [Whitespace(" ")]
       2: CSS_BOGUS@6..7
-        0: CSS_BOGUS_PROPERTY_VALUE@6..7
-          0: COLON@6..7 ":" [] []
+        0: CSS_BOGUS@6..7
+          0: CSS_BOGUS_PROPERTY_VALUE@6..7
+            0: COLON@6..7 ":" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@7..7
       4: SEMICOLON@7..8 ";" [] []
   2: EOF@8..9 "" [Newline("\n")] []
@@ -71,20 +75,16 @@ CssRoot {
 ```
 colon-value.scss:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected value or character.
+  × Expected a SCSS expression but instead found ':'.
   
   > 1 │ $sep: :;
       │       ^
     2 │ 
   
-  i Expected one of:
+  i Expected a SCSS expression here.
   
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
+  > 1 │ $sep: :;
+      │       ^
+    2 │ 
   
 ```

@@ -2487,7 +2487,7 @@ TwSlotAtRule =
 ScssDeclaration =
 	name: AnyScssDeclarationName
 	':'
-	value: CssGenericComponentValueList
+	value: ScssExpression
 	modifiers: ScssVariableModifierList
 	';'?
 
@@ -2526,9 +2526,32 @@ ScssExpressionItemList = AnyScssExpressionItem*
 AnyScssExpressionItem =
 	AnyCssValue
 	| CssGenericDelimiter
+	| ScssBinaryExpression
+	| ScssUnaryExpression
 	| ScssParenthesizedExpression
 	| ScssListExpression
 	| ScssMapExpression
+
+// width: $a + $b;
+//        ^^^^^^
+ScssBinaryExpression =
+	left: AnyScssExpression
+	operator: (
+		'*' | '/' | '%'
+		| '+' | '-'
+		| '>' | '>=' | '<' | '<='
+		| '==' | '!='
+		| 'and' | 'or'
+	)
+	right: AnyScssExpression
+
+// width: -$a;
+//        ^^^
+// @if not $condition {}
+//     ^^^^^^^^^^^^^^
+ScssUnaryExpression =
+	operator: ('+' | '-' | 'not')
+	expression: AnyScssExpression
 
 // width: ($a);
 //        ^^^^
@@ -2573,6 +2596,8 @@ ScssMapExpressionPair =
 //        ^^
 AnyScssExpression =
 	ScssExpression
+	| ScssBinaryExpression
+	| ScssUnaryExpression
 	| ScssParenthesizedExpression
 	| ScssListExpression
 	| ScssMapExpression

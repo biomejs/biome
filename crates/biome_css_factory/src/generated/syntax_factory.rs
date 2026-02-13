@@ -6120,6 +6120,54 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR, children)
             }
+            SCSS_BINARY_EXPRESSION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyScssExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && matches!(
+                        element.kind(),
+                        T ! [*]
+                            | T ! [/]
+                            | T ! [%]
+                            | T ! [+]
+                            | T ! [-]
+                            | T ! [>]
+                            | T ! [>=]
+                            | T ! [<]
+                            | T ! [<=]
+                            | T ! [==]
+                            | T ! [!=]
+                            | T![and]
+                            | T![or]
+                    )
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyScssExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_BINARY_EXPRESSION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_BINARY_EXPRESSION, children)
+            }
             SCSS_DECLARATION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
@@ -6139,7 +6187,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssGenericComponentValueList::can_cast(element.kind())
+                    && ScssExpression::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -6473,6 +6521,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(SCSS_QUALIFIED_NAME, children)
+            }
+            SCSS_UNARY_EXPRESSION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T ! [+] | T ! [-] | T![not])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyScssExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_UNARY_EXPRESSION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_UNARY_EXPRESSION, children)
             }
             SCSS_VARIABLE_MODIFIER => {
                 let mut elements = (&children).into_iter();

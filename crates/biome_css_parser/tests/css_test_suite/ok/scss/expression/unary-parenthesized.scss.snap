@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -54,11 +53,11 @@ CssRoot {
                                         l_paren_token: L_PAREN@18..19 "(" [] [],
                                         items: CssParameterList [
                                             CssParameter {
-                                                any_css_expression: CssUnaryExpression {
-                                                    operator: MINUS@19..20 "-" [] [],
-                                                    expression: ScssExpression {
-                                                        items: ScssExpressionItemList [
-                                                            ScssParenthesizedExpression {
+                                                any_css_expression: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssUnaryExpression {
+                                                            operator: MINUS@19..20 "-" [] [],
+                                                            expression: ScssParenthesizedExpression {
                                                                 l_paren_token: L_PAREN@20..21 "(" [] [],
                                                                 expression: ScssExpression {
                                                                     items: ScssExpressionItemList [
@@ -72,8 +71,8 @@ CssRoot {
                                                                 },
                                                                 r_paren_token: R_PAREN@24..25 ")" [] [],
                                                             },
-                                                        ],
-                                                    },
+                                                        },
+                                                    ],
                                                 },
                                             },
                                         ],
@@ -100,11 +99,11 @@ CssRoot {
                                         l_paren_token: L_PAREN@37..38 "(" [] [],
                                         items: CssParameterList [
                                             CssParameter {
-                                                any_css_expression: CssUnaryExpression {
-                                                    operator: MINUS@38..39 "-" [] [],
-                                                    expression: ScssExpression {
-                                                        items: ScssExpressionItemList [
-                                                            ScssMapExpression {
+                                                any_css_expression: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssUnaryExpression {
+                                                            operator: MINUS@38..39 "-" [] [],
+                                                            expression: ScssMapExpression {
                                                                 l_paren_token: L_PAREN@39..40 "(" [] [],
                                                                 pairs: ScssMapExpressionPairList [
                                                                     ScssMapExpressionPair {
@@ -127,8 +126,8 @@ CssRoot {
                                                                 ],
                                                                 r_paren_token: R_PAREN@52..53 ")" [] [],
                                                             },
-                                                        ],
-                                                    },
+                                                        },
+                                                    ],
                                                 },
                                             },
                                         ],
@@ -181,11 +180,11 @@ CssRoot {
                     1: L_PAREN@18..19 "(" [] []
                     2: CSS_PARAMETER_LIST@19..25
                       0: CSS_PARAMETER@19..25
-                        0: CSS_UNARY_EXPRESSION@19..25
-                          0: MINUS@19..20 "-" [] []
-                          1: SCSS_EXPRESSION@20..25
-                            0: SCSS_EXPRESSION_ITEM_LIST@20..25
-                              0: SCSS_PARENTHESIZED_EXPRESSION@20..25
+                        0: SCSS_EXPRESSION@19..25
+                          0: SCSS_EXPRESSION_ITEM_LIST@19..25
+                            0: SCSS_UNARY_EXPRESSION@19..25
+                              0: MINUS@19..20 "-" [] []
+                              1: SCSS_PARENTHESIZED_EXPRESSION@20..25
                                 0: L_PAREN@20..21 "(" [] []
                                 1: SCSS_EXPRESSION@21..24
                                   0: SCSS_EXPRESSION_ITEM_LIST@21..24
@@ -210,11 +209,11 @@ CssRoot {
                     1: L_PAREN@37..38 "(" [] []
                     2: CSS_PARAMETER_LIST@38..53
                       0: CSS_PARAMETER@38..53
-                        0: CSS_UNARY_EXPRESSION@38..53
-                          0: MINUS@38..39 "-" [] []
-                          1: SCSS_EXPRESSION@39..53
-                            0: SCSS_EXPRESSION_ITEM_LIST@39..53
-                              0: SCSS_MAP_EXPRESSION@39..53
+                        0: SCSS_EXPRESSION@38..53
+                          0: SCSS_EXPRESSION_ITEM_LIST@38..53
+                            0: SCSS_UNARY_EXPRESSION@38..53
+                              0: MINUS@38..39 "-" [] []
+                              1: SCSS_MAP_EXPRESSION@39..53
                                 0: L_PAREN@39..40 "(" [] []
                                 1: SCSS_MAP_EXPRESSION_PAIR_LIST@40..52
                                   0: SCSS_MAP_EXPRESSION_PAIR@40..52

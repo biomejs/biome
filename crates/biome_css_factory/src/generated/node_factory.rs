@@ -2976,10 +2976,24 @@ pub fn css_view_transition_at_rule_declarator(
         [Some(SyntaxElement::Token(view_transition_token))],
     ))
 }
+pub fn scss_binary_expression(
+    left: AnyScssExpression,
+    operator_token: SyntaxToken,
+    right: AnyScssExpression,
+) -> ScssBinaryExpression {
+    ScssBinaryExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_BINARY_EXPRESSION,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
 pub fn scss_declaration(
     name: AnyScssDeclarationName,
     colon_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: ScssExpression,
     modifiers: ScssVariableModifierList,
 ) -> ScssDeclarationBuilder {
     ScssDeclarationBuilder {
@@ -2993,7 +3007,7 @@ pub fn scss_declaration(
 pub struct ScssDeclarationBuilder {
     name: AnyScssDeclarationName,
     colon_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: ScssExpression,
     modifiers: ScssVariableModifierList,
     semicolon_token: Option<SyntaxToken>,
 }
@@ -3132,6 +3146,18 @@ pub fn scss_qualified_name(
             Some(SyntaxElement::Node(module.into_syntax())),
             Some(SyntaxElement::Token(dot_token)),
             Some(SyntaxElement::Node(member.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_unary_expression(
+    operator_token: SyntaxToken,
+    expression: AnyScssExpression,
+) -> ScssUnaryExpression {
+    ScssUnaryExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_UNARY_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
         ],
     ))
 }

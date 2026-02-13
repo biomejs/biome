@@ -30,29 +30,31 @@ CssRoot {
                 },
             },
             colon_token: COLON@9..11 ":" [] [Whitespace(" ")],
-            value: CssGenericComponentValueList [
-                CssBracketedValue {
-                    l_brack_token: L_BRACK@11..12 "[" [] [],
-                    items: CssBracketedValueList [
-                        CssCustomIdentifier {
-                            value_token: IDENT@12..13 "a" [] [],
-                        },
-                        CssGenericDelimiter {
-                            value: COMMA@13..15 "," [] [Whitespace(" ")],
-                        },
-                        CssCustomIdentifier {
-                            value_token: IDENT@15..16 "b" [] [],
-                        },
-                        CssGenericDelimiter {
-                            value: COMMA@16..18 "," [] [Whitespace(" ")],
-                        },
-                        CssCustomIdentifier {
-                            value_token: IDENT@18..19 "c" [] [],
-                        },
-                    ],
-                    r_brack_token: R_BRACK@19..20 "]" [] [],
-                },
-            ],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssBracketedValue {
+                        l_brack_token: L_BRACK@11..12 "[" [] [],
+                        items: CssBracketedValueList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@12..13 "a" [] [],
+                            },
+                            CssGenericDelimiter {
+                                value: COMMA@13..15 "," [] [Whitespace(" ")],
+                            },
+                            CssCustomIdentifier {
+                                value_token: IDENT@15..16 "b" [] [],
+                            },
+                            CssGenericDelimiter {
+                                value: COMMA@16..18 "," [] [Whitespace(" ")],
+                            },
+                            CssCustomIdentifier {
+                                value_token: IDENT@18..19 "c" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@19..20 "]" [] [],
+                    },
+                ],
+            },
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@20..21 ";" [] [],
         },
@@ -64,35 +66,37 @@ CssRoot {
                 },
             },
             colon_token: COLON@28..30 ":" [] [Whitespace(" ")],
-            value: CssGenericComponentValueList [
-                CssBracketedValue {
-                    l_brack_token: L_BRACK@30..31 "[" [] [],
-                    items: CssBracketedValueList [
-                        CssCustomIdentifier {
-                            value_token: IDENT@31..41 "full-start" [] [],
-                        },
-                        CssGenericDelimiter {
-                            value: COMMA@41..43 "," [] [Whitespace(" ")],
-                        },
-                        CssCustomIdentifier {
-                            value_token: IDENT@43..53 "main-start" [] [],
-                        },
-                        CssGenericDelimiter {
-                            value: COMMA@53..55 "," [] [Whitespace(" ")],
-                        },
-                        CssCustomIdentifier {
-                            value_token: IDENT@55..63 "main-end" [] [],
-                        },
-                        CssGenericDelimiter {
-                            value: COMMA@63..65 "," [] [Whitespace(" ")],
-                        },
-                        CssCustomIdentifier {
-                            value_token: IDENT@65..73 "full-end" [] [],
-                        },
-                    ],
-                    r_brack_token: R_BRACK@73..74 "]" [] [],
-                },
-            ],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssBracketedValue {
+                        l_brack_token: L_BRACK@30..31 "[" [] [],
+                        items: CssBracketedValueList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@31..41 "full-start" [] [],
+                            },
+                            CssGenericDelimiter {
+                                value: COMMA@41..43 "," [] [Whitespace(" ")],
+                            },
+                            CssCustomIdentifier {
+                                value_token: IDENT@43..53 "main-start" [] [],
+                            },
+                            CssGenericDelimiter {
+                                value: COMMA@53..55 "," [] [Whitespace(" ")],
+                            },
+                            CssCustomIdentifier {
+                                value_token: IDENT@55..63 "main-end" [] [],
+                            },
+                            CssGenericDelimiter {
+                                value: COMMA@63..65 "," [] [Whitespace(" ")],
+                            },
+                            CssCustomIdentifier {
+                                value_token: IDENT@65..73 "full-end" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@73..74 "]" [] [],
+                    },
+                ],
+            },
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@74..75 ";" [] [],
         },
@@ -170,21 +174,22 @@ CssRoot {
         1: CSS_IDENTIFIER@1..9
           0: IDENT@1..9 "brackets" [] []
       1: COLON@9..11 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@11..20
-        0: CSS_BRACKETED_VALUE@11..20
-          0: L_BRACK@11..12 "[" [] []
-          1: CSS_BRACKETED_VALUE_LIST@12..19
-            0: CSS_CUSTOM_IDENTIFIER@12..13
-              0: IDENT@12..13 "a" [] []
-            1: CSS_GENERIC_DELIMITER@13..15
-              0: COMMA@13..15 "," [] [Whitespace(" ")]
-            2: CSS_CUSTOM_IDENTIFIER@15..16
-              0: IDENT@15..16 "b" [] []
-            3: CSS_GENERIC_DELIMITER@16..18
-              0: COMMA@16..18 "," [] [Whitespace(" ")]
-            4: CSS_CUSTOM_IDENTIFIER@18..19
-              0: IDENT@18..19 "c" [] []
-          2: R_BRACK@19..20 "]" [] []
+      2: SCSS_EXPRESSION@11..20
+        0: SCSS_EXPRESSION_ITEM_LIST@11..20
+          0: CSS_BRACKETED_VALUE@11..20
+            0: L_BRACK@11..12 "[" [] []
+            1: CSS_BRACKETED_VALUE_LIST@12..19
+              0: CSS_CUSTOM_IDENTIFIER@12..13
+                0: IDENT@12..13 "a" [] []
+              1: CSS_GENERIC_DELIMITER@13..15
+                0: COMMA@13..15 "," [] [Whitespace(" ")]
+              2: CSS_CUSTOM_IDENTIFIER@15..16
+                0: IDENT@15..16 "b" [] []
+              3: CSS_GENERIC_DELIMITER@16..18
+                0: COMMA@16..18 "," [] [Whitespace(" ")]
+              4: CSS_CUSTOM_IDENTIFIER@18..19
+                0: IDENT@18..19 "c" [] []
+            2: R_BRACK@19..20 "]" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@20..20
       4: SEMICOLON@20..21 ";" [] []
     1: SCSS_DECLARATION@21..75
@@ -193,25 +198,26 @@ CssRoot {
         1: CSS_IDENTIFIER@23..28
           0: IDENT@23..28 "lines" [] []
       1: COLON@28..30 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@30..74
-        0: CSS_BRACKETED_VALUE@30..74
-          0: L_BRACK@30..31 "[" [] []
-          1: CSS_BRACKETED_VALUE_LIST@31..73
-            0: CSS_CUSTOM_IDENTIFIER@31..41
-              0: IDENT@31..41 "full-start" [] []
-            1: CSS_GENERIC_DELIMITER@41..43
-              0: COMMA@41..43 "," [] [Whitespace(" ")]
-            2: CSS_CUSTOM_IDENTIFIER@43..53
-              0: IDENT@43..53 "main-start" [] []
-            3: CSS_GENERIC_DELIMITER@53..55
-              0: COMMA@53..55 "," [] [Whitespace(" ")]
-            4: CSS_CUSTOM_IDENTIFIER@55..63
-              0: IDENT@55..63 "main-end" [] []
-            5: CSS_GENERIC_DELIMITER@63..65
-              0: COMMA@63..65 "," [] [Whitespace(" ")]
-            6: CSS_CUSTOM_IDENTIFIER@65..73
-              0: IDENT@65..73 "full-end" [] []
-          2: R_BRACK@73..74 "]" [] []
+      2: SCSS_EXPRESSION@30..74
+        0: SCSS_EXPRESSION_ITEM_LIST@30..74
+          0: CSS_BRACKETED_VALUE@30..74
+            0: L_BRACK@30..31 "[" [] []
+            1: CSS_BRACKETED_VALUE_LIST@31..73
+              0: CSS_CUSTOM_IDENTIFIER@31..41
+                0: IDENT@31..41 "full-start" [] []
+              1: CSS_GENERIC_DELIMITER@41..43
+                0: COMMA@41..43 "," [] [Whitespace(" ")]
+              2: CSS_CUSTOM_IDENTIFIER@43..53
+                0: IDENT@43..53 "main-start" [] []
+              3: CSS_GENERIC_DELIMITER@53..55
+                0: COMMA@53..55 "," [] [Whitespace(" ")]
+              4: CSS_CUSTOM_IDENTIFIER@55..63
+                0: IDENT@55..63 "main-end" [] []
+              5: CSS_GENERIC_DELIMITER@63..65
+                0: COMMA@63..65 "," [] [Whitespace(" ")]
+              6: CSS_CUSTOM_IDENTIFIER@65..73
+                0: IDENT@65..73 "full-end" [] []
+            2: R_BRACK@73..74 "]" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@74..74
       4: SEMICOLON@74..75 ";" [] []
     2: CSS_QUALIFIED_RULE@75..126

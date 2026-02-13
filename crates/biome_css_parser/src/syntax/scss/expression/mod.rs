@@ -1,11 +1,11 @@
 use crate::parser::CssParser;
-use crate::syntax::parse_error::expected_scss_expression;
+use crate::syntax::parse_error::{expected_component_value, expected_scss_expression};
 use crate::syntax::property::parse_generic_component_value;
 use biome_css_syntax::CssSyntaxKind::{
-    CSS_BOGUS_PROPERTY_VALUE, EOF, SCSS_EXPRESSION, SCSS_EXPRESSION_ITEM_LIST,
-    SCSS_LIST_EXPRESSION, SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST,
-    SCSS_MAP_EXPRESSION, SCSS_MAP_EXPRESSION_PAIR, SCSS_MAP_EXPRESSION_PAIR_LIST,
-    SCSS_PARENTHESIZED_EXPRESSION,
+    CSS_BOGUS_PROPERTY_VALUE, EOF, SCSS_BINARY_EXPRESSION, SCSS_EXPRESSION,
+    SCSS_EXPRESSION_ITEM_LIST, SCSS_LIST_EXPRESSION, SCSS_LIST_EXPRESSION_ELEMENT,
+    SCSS_LIST_EXPRESSION_ELEMENT_LIST, SCSS_MAP_EXPRESSION, SCSS_MAP_EXPRESSION_PAIR,
+    SCSS_MAP_EXPRESSION_PAIR_LIST, SCSS_PARENTHESIZED_EXPRESSION, SCSS_UNARY_EXPRESSION,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
@@ -13,8 +13,22 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{CompletedMarker, Parser, ParserProgress, TokenSet, token_set};
 
-const SCSS_BINARY_OPERATOR_TOKEN_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![+], T![-], T![*], T![/]];
+const SCSS_BINARY_OPERATOR_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set![
+    T![*],
+    T![/],
+    T![%],
+    T![+],
+    T![-],
+    T![>],
+    T![>=],
+    T![<],
+    T![<=],
+    T![==],
+    T![!=],
+    T![and],
+    T![or],
+];
+const SCSS_UNARY_OPERATOR_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set![T![+], T![-], T![not]];
 
 const SCSS_MAP_EXPRESSION_KEY_END_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![:], T![')']];
@@ -23,7 +37,7 @@ const SCSS_LIST_EXPRESSION_ELEMENT_END_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![')']];
 
 pub(crate) const END_OF_SCSS_EXPRESSION_TOKEN_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![,], T![')'], T![;], T!['}']].union(SCSS_BINARY_OPERATOR_TOKEN_SET);
+    token_set![T![,], T![')'], T![;], T!['}']];
 
 #[inline]
 pub(crate) fn parse_scss_expression(p: &mut CssParser) -> ParsedSyntax {
@@ -31,8 +45,11 @@ pub(crate) fn parse_scss_expression(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_scss_expression_until(p: &mut CssParser, end_ts: TokenSet<CssSyntaxKind>) -> ParsedSyntax {
-    parse_scss_expression_with_options(p, end_ts.union(SCSS_BINARY_OPERATOR_TOKEN_SET), false)
+pub(crate) fn parse_scss_expression_until(
+    p: &mut CssParser,
+    end_ts: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
+    parse_scss_expression_with_options(p, end_ts, false)
 }
 
 #[inline]
@@ -79,11 +96,77 @@ fn parse_scss_expression_with_options(
 
 #[inline]
 fn parse_scss_expression_item(p: &mut CssParser) -> ParsedSyntax {
+    parse_scss_binary_expression(p, 0)
+}
+
+#[inline]
+fn parse_scss_binary_expression(p: &mut CssParser, min_prec: u8) -> ParsedSyntax {
+    let mut left = match parse_scss_unary_expression(p) {
+        Present(left) => left,
+        Absent => return Absent,
+    };
+
+    loop {
+        let Some(prec) = scss_binary_precedence(p) else {
+            break;
+        };
+
+        if prec < min_prec {
+            break;
+        }
+
+        let m = left.precede(p);
+        p.bump_ts(SCSS_BINARY_OPERATOR_TOKEN_SET);
+
+        parse_scss_binary_expression(p, prec + 1).or_add_diagnostic(p, expected_component_value);
+
+        left = m.complete(p, SCSS_BINARY_EXPRESSION);
+    }
+
+    Present(left)
+}
+
+#[inline]
+fn parse_scss_unary_expression(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_unary_operator(p) {
+        let m = p.start();
+        p.bump_ts(SCSS_UNARY_OPERATOR_TOKEN_SET);
+        parse_scss_unary_expression(p).or_add_diagnostic(p, expected_component_value);
+        return Present(m.complete(p, SCSS_UNARY_EXPRESSION));
+    }
+
+    parse_scss_primary_expression(p)
+}
+
+#[inline]
+fn parse_scss_primary_expression(p: &mut CssParser) -> ParsedSyntax {
     if p.at(T!['(']) {
         parse_scss_parenthesized_or_map_expression(p)
     } else {
         parse_generic_component_value(p)
     }
+}
+
+#[inline]
+fn scss_binary_precedence(p: &mut CssParser) -> Option<u8> {
+    if !p.at_ts(SCSS_BINARY_OPERATOR_TOKEN_SET) {
+        return None;
+    }
+
+    Some(match p.cur() {
+        T![or] => 1,
+        T![and] => 2,
+        T![==] | T![!=] => 3,
+        T![<] | T![<=] | T![>] | T![>=] => 4,
+        T![+] | T![-] => 5,
+        T![*] | T![/] | T![%] => 6,
+        _ => return None,
+    })
+}
+
+#[inline]
+fn is_at_scss_unary_operator(p: &mut CssParser) -> bool {
+    p.at_ts(SCSS_UNARY_OPERATOR_TOKEN_SET)
 }
 
 #[inline]

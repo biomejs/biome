@@ -127,11 +127,13 @@ CssRoot {
                 },
             },
             colon_token: COLON@237..239 ":" [] [Whitespace(" ")],
-            value: CssGenericComponentValueList [
-                CssIdentifier {
-                    value_token: IDENT@239..244 "value" [] [],
-                },
-            ],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssIdentifier {
+                        value_token: IDENT@239..244 "value" [] [],
+                    },
+                ],
+            },
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@244..245 ";" [] [],
         },
@@ -241,9 +243,10 @@ CssRoot {
         1: CSS_IDENTIFIER@234..237
           0: IDENT@234..237 "var" [] []
       1: COLON@237..239 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@239..244
-        0: CSS_IDENTIFIER@239..244
-          0: IDENT@239..244 "value" [] []
+      2: SCSS_EXPRESSION@239..244
+        0: SCSS_EXPRESSION_ITEM_LIST@239..244
+          0: CSS_IDENTIFIER@239..244
+            0: IDENT@239..244 "value" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@244..244
       4: SEMICOLON@244..245 ";" [] []
     3: CSS_QUALIFIED_RULE@245..327

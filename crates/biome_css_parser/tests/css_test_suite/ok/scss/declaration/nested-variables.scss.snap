@@ -46,12 +46,14 @@ CssRoot {
                             },
                         },
                         colon_token: COLON@20..22 ":" [] [Whitespace(" ")],
-                        value: CssGenericComponentValueList [
-                            CssRegularDimension {
-                                value_token: CSS_NUMBER_LITERAL@22..24 "12" [] [],
-                                unit_token: IDENT@24..26 "px" [] [],
-                            },
-                        ],
+                        value: ScssExpression {
+                            items: ScssExpressionItemList [
+                                CssRegularDimension {
+                                    value_token: CSS_NUMBER_LITERAL@22..24 "12" [] [],
+                                    unit_token: IDENT@24..26 "px" [] [],
+                                },
+                            ],
+                        },
                         modifiers: ScssVariableModifierList [],
                         semicolon_token: SEMICOLON@26..27 ";" [] [],
                     },
@@ -109,10 +111,11 @@ CssRoot {
               1: CSS_IDENTIFIER@13..20
                 0: IDENT@13..20 "padding" [] []
             1: COLON@20..22 ":" [] [Whitespace(" ")]
-            2: CSS_GENERIC_COMPONENT_VALUE_LIST@22..26
-              0: CSS_REGULAR_DIMENSION@22..26
-                0: CSS_NUMBER_LITERAL@22..24 "12" [] []
-                1: IDENT@24..26 "px" [] []
+            2: SCSS_EXPRESSION@22..26
+              0: SCSS_EXPRESSION_ITEM_LIST@22..26
+                0: CSS_REGULAR_DIMENSION@22..26
+                  0: CSS_NUMBER_LITERAL@22..24 "12" [] []
+                  1: IDENT@24..26 "px" [] []
             3: SCSS_VARIABLE_MODIFIER_LIST@26..26
             4: SEMICOLON@26..27 ";" [] []
           1: CSS_DECLARATION_WITH_SEMICOLON@27..48

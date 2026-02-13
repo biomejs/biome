@@ -77,29 +77,11 @@ empty-lines.css:1:1 parse ━━━━━━━━━━━━━━━━━━
         ...
   > 10 │     "background-secondary": $dark-200,
   > 11 │     "background-tertiary": $dark-100
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ );
+  > 12 │ );
+       │ ^^
     13 │ 
   
   i SCSS only syntax
-  
-empty-lines.css:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found ');'.
-  
-    10 │     "background-secondary": $dark-200,
-    11 │     "background-tertiary": $dark-100
-  > 12 │ );
-       │ ^^
-    13 │ 
-  
-  i Expected a qualified rule, or an at rule here.
-  
-    10 │     "background-secondary": $dark-200,
-    11 │     "background-tertiary": $dark-100
-  > 12 │ );
-       │ ^^
-    13 │ 
   
 
 ```

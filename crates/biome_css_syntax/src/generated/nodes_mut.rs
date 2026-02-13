@@ -3459,6 +3459,26 @@ impl CssViewTransitionAtRuleDeclarator {
         )
     }
 }
+impl ScssBinaryExpression {
+    pub fn with_left(self, element: AnyScssExpression) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_operator_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_right(self, element: AnyScssExpression) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssDeclaration {
     pub fn with_name(self, element: AnyScssDeclarationName) -> Self {
         Self::unwrap_cast(
@@ -3472,7 +3492,7 @@ impl ScssDeclaration {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: CssGenericComponentValueList) -> Self {
+    pub fn with_value(self, element: ScssExpression) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -3660,6 +3680,20 @@ impl ScssQualifiedName {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssUnaryExpression {
+    pub fn with_operator_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_expression(self, element: AnyScssExpression) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
 }

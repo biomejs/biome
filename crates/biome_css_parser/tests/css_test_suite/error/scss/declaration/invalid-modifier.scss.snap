@@ -39,11 +39,13 @@ CssRoot {
                     },
                 },
                 COLON@84..86 ":" [] [Whitespace(" ")],
-                CssGenericComponentValueList [
-                    CssIdentifier {
-                        value_token: IDENT@86..90 "red" [] [Whitespace(" ")],
-                    },
-                ],
+                ScssExpression {
+                    items: ScssExpressionItemList [
+                        CssIdentifier {
+                            value_token: IDENT@86..90 "red" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
                 CssBogus {
                     items: [
                         CssBogus {
@@ -66,12 +68,14 @@ CssRoot {
                     },
                 },
                 COLON@150..152 ":" [] [Whitespace(" ")],
-                CssGenericComponentValueList [
-                    CssRegularDimension {
-                        value_token: CSS_NUMBER_LITERAL@152..155 "100" [] [],
-                        unit_token: IDENT@155..158 "px" [] [Whitespace(" ")],
-                    },
-                ],
+                ScssExpression {
+                    items: ScssExpressionItemList [
+                        CssRegularDimension {
+                            value_token: CSS_NUMBER_LITERAL@152..155 "100" [] [],
+                            unit_token: IDENT@155..158 "px" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
                 CssBogus {
                     items: [
                         CssBogus {
@@ -94,12 +98,14 @@ CssRoot {
                     },
                 },
                 COLON@213..215 ":" [] [Whitespace(" ")],
-                CssGenericComponentValueList [
-                    CssRegularDimension {
-                        value_token: CSS_NUMBER_LITERAL@215..217 "50" [] [],
-                        unit_token: IDENT@217..220 "vh" [] [Whitespace(" ")],
-                    },
-                ],
+                ScssExpression {
+                    items: ScssExpressionItemList [
+                        CssRegularDimension {
+                            value_token: CSS_NUMBER_LITERAL@215..217 "50" [] [],
+                            unit_token: IDENT@217..220 "vh" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
                 CssBogus {
                     items: [
                         CssBogus {
@@ -122,12 +128,14 @@ CssRoot {
                     },
                 },
                 COLON@277..279 ":" [] [Whitespace(" ")],
-                CssGenericComponentValueList [
-                    CssRegularDimension {
-                        value_token: CSS_NUMBER_LITERAL@279..281 "16" [] [],
-                        unit_token: IDENT@281..284 "px" [] [Whitespace(" ")],
-                    },
-                ],
+                ScssExpression {
+                    items: ScssExpressionItemList [
+                        CssRegularDimension {
+                            value_token: CSS_NUMBER_LITERAL@279..281 "16" [] [],
+                            unit_token: IDENT@281..284 "px" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
                 CssBogus {
                     items: [
                         CssBogus {
@@ -150,12 +158,14 @@ CssRoot {
                     },
                 },
                 COLON@330..332 ":" [] [Whitespace(" ")],
-                CssGenericComponentValueList [
-                    CssRegularDimension {
-                        value_token: CSS_NUMBER_LITERAL@332..334 "10" [] [],
-                        unit_token: IDENT@334..337 "px" [] [Whitespace(" ")],
-                    },
-                ],
+                ScssExpression {
+                    items: ScssExpressionItemList [
+                        CssRegularDimension {
+                            value_token: CSS_NUMBER_LITERAL@332..334 "10" [] [],
+                            unit_token: IDENT@334..337 "px" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
                 CssBogus {
                     items: [
                         CssBogus {
@@ -192,9 +202,10 @@ CssRoot {
         1: CSS_IDENTIFIER@79..84
           0: IDENT@79..84 "color" [] []
       1: COLON@84..86 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@86..90
-        0: CSS_IDENTIFIER@86..90
-          0: IDENT@86..90 "red" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@86..90
+        0: SCSS_EXPRESSION_ITEM_LIST@86..90
+          0: CSS_IDENTIFIER@86..90
+            0: IDENT@86..90 "red" [] [Whitespace(" ")]
       3: CSS_BOGUS@90..100
         0: CSS_BOGUS@90..100
           0: BANG@90..91 "!" [] []
@@ -206,10 +217,11 @@ CssRoot {
         1: CSS_IDENTIFIER@145..150
           0: IDENT@145..150 "width" [] []
       1: COLON@150..152 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@152..158
-        0: CSS_REGULAR_DIMENSION@152..158
-          0: CSS_NUMBER_LITERAL@152..155 "100" [] []
-          1: IDENT@155..158 "px" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@152..158
+        0: SCSS_EXPRESSION_ITEM_LIST@152..158
+          0: CSS_REGULAR_DIMENSION@152..158
+            0: CSS_NUMBER_LITERAL@152..155 "100" [] []
+            1: IDENT@155..158 "px" [] [Whitespace(" ")]
       3: CSS_BOGUS@158..165
         0: CSS_BOGUS@158..165
           0: BANG@158..159 "!" [] []
@@ -221,10 +233,11 @@ CssRoot {
         1: CSS_IDENTIFIER@207..213
           0: IDENT@207..213 "height" [] []
       1: COLON@213..215 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@215..220
-        0: CSS_REGULAR_DIMENSION@215..220
-          0: CSS_NUMBER_LITERAL@215..217 "50" [] []
-          1: IDENT@217..220 "vh" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@215..220
+        0: SCSS_EXPRESSION_ITEM_LIST@215..220
+          0: CSS_REGULAR_DIMENSION@215..220
+            0: CSS_NUMBER_LITERAL@215..217 "50" [] []
+            1: IDENT@217..220 "vh" [] [Whitespace(" ")]
       3: CSS_BOGUS@220..227
         0: CSS_BOGUS@220..227
           0: BANG@220..221 "!" [] []
@@ -236,10 +249,11 @@ CssRoot {
         1: CSS_IDENTIFIER@268..277
           0: IDENT@268..277 "font-size" [] []
       1: COLON@277..279 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@279..284
-        0: CSS_REGULAR_DIMENSION@279..284
-          0: CSS_NUMBER_LITERAL@279..281 "16" [] []
-          1: IDENT@281..284 "px" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@279..284
+        0: SCSS_EXPRESSION_ITEM_LIST@279..284
+          0: CSS_REGULAR_DIMENSION@279..284
+            0: CSS_NUMBER_LITERAL@279..281 "16" [] []
+            1: IDENT@281..284 "px" [] [Whitespace(" ")]
       3: CSS_BOGUS@284..290
         0: CSS_BOGUS@284..290
           0: BANG@284..285 "!" [] []
@@ -251,10 +265,11 @@ CssRoot {
         1: CSS_IDENTIFIER@324..330
           0: IDENT@324..330 "margin" [] []
       1: COLON@330..332 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@332..337
-        0: CSS_REGULAR_DIMENSION@332..337
-          0: CSS_NUMBER_LITERAL@332..334 "10" [] []
-          1: IDENT@334..337 "px" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@332..337
+        0: SCSS_EXPRESSION_ITEM_LIST@332..337
+          0: CSS_REGULAR_DIMENSION@332..337
+            0: CSS_NUMBER_LITERAL@332..334 "10" [] []
+            1: IDENT@334..337 "px" [] [Whitespace(" ")]
       3: CSS_BOGUS@337..352
         0: CSS_BOGUS@337..344
           0: BANG@337..338 "!" [] []

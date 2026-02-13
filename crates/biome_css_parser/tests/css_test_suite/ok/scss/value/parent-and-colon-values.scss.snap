@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -49,11 +48,13 @@ CssRoot {
                             },
                         },
                         colon_token: COLON@17..19 ":" [] [Whitespace(" ")],
-                        value: CssGenericComponentValueList [
-                            ScssParentSelectorValue {
-                                amp_token: AMP@19..20 "&" [] [],
-                            },
-                        ],
+                        value: ScssExpression {
+                            items: ScssExpressionItemList [
+                                ScssParentSelectorValue {
+                                    amp_token: AMP@19..20 "&" [] [],
+                                },
+                            ],
+                        },
                         modifiers: ScssVariableModifierList [],
                         semicolon_token: SEMICOLON@20..21 ";" [] [],
                     },
@@ -135,9 +136,10 @@ CssRoot {
               1: CSS_IDENTIFIER@13..17
                 0: IDENT@13..17 "self" [] []
             1: COLON@17..19 ":" [] [Whitespace(" ")]
-            2: CSS_GENERIC_COMPONENT_VALUE_LIST@19..20
-              0: SCSS_PARENT_SELECTOR_VALUE@19..20
-                0: AMP@19..20 "&" [] []
+            2: SCSS_EXPRESSION@19..20
+              0: SCSS_EXPRESSION_ITEM_LIST@19..20
+                0: SCSS_PARENT_SELECTOR_VALUE@19..20
+                  0: AMP@19..20 "&" [] []
             3: SCSS_VARIABLE_MODIFIER_LIST@20..20
             4: SEMICOLON@20..21 ";" [] []
           1: CSS_NESTED_QUALIFIED_RULE@21..56
