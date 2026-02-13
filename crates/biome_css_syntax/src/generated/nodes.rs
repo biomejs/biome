@@ -11505,6 +11505,8 @@ pub enum AnyCssPageAtRuleItem {
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
     CssEmptyDeclaration(CssEmptyDeclaration),
     CssMarginAtRule(CssMarginAtRule),
+    ScssDeclaration(ScssDeclaration),
+    ScssNestingDeclaration(ScssNestingDeclaration),
 }
 impl AnyCssPageAtRuleItem {
     pub fn as_css_at_rule(&self) -> Option<&CssAtRule> {
@@ -11534,6 +11536,18 @@ impl AnyCssPageAtRuleItem {
     pub fn as_css_margin_at_rule(&self) -> Option<&CssMarginAtRule> {
         match &self {
             Self::CssMarginAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_declaration(&self) -> Option<&ScssDeclaration> {
+        match &self {
+            Self::ScssDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_nesting_declaration(&self) -> Option<&ScssNestingDeclaration> {
+        match &self {
+            Self::ScssNestingDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -29647,13 +29661,25 @@ impl From<CssMarginAtRule> for AnyCssPageAtRuleItem {
         Self::CssMarginAtRule(node)
     }
 }
+impl From<ScssDeclaration> for AnyCssPageAtRuleItem {
+    fn from(node: ScssDeclaration) -> Self {
+        Self::ScssDeclaration(node)
+    }
+}
+impl From<ScssNestingDeclaration> for AnyCssPageAtRuleItem {
+    fn from(node: ScssNestingDeclaration) -> Self {
+        Self::ScssNestingDeclaration(node)
+    }
+}
 impl AstNode for AnyCssPageAtRuleItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssAtRule::KIND_SET
         .union(CssBogus::KIND_SET)
         .union(CssDeclarationWithSemicolon::KIND_SET)
         .union(CssEmptyDeclaration::KIND_SET)
-        .union(CssMarginAtRule::KIND_SET);
+        .union(CssMarginAtRule::KIND_SET)
+        .union(ScssDeclaration::KIND_SET)
+        .union(ScssNestingDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -29662,6 +29688,8 @@ impl AstNode for AnyCssPageAtRuleItem {
                 | CSS_DECLARATION_WITH_SEMICOLON
                 | CSS_EMPTY_DECLARATION
                 | CSS_MARGIN_AT_RULE
+                | SCSS_DECLARATION
+                | SCSS_NESTING_DECLARATION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -29673,6 +29701,10 @@ impl AstNode for AnyCssPageAtRuleItem {
             }
             CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
             CSS_MARGIN_AT_RULE => Self::CssMarginAtRule(CssMarginAtRule { syntax }),
+            SCSS_DECLARATION => Self::ScssDeclaration(ScssDeclaration { syntax }),
+            SCSS_NESTING_DECLARATION => {
+                Self::ScssNestingDeclaration(ScssNestingDeclaration { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -29684,6 +29716,8 @@ impl AstNode for AnyCssPageAtRuleItem {
             Self::CssDeclarationWithSemicolon(it) => it.syntax(),
             Self::CssEmptyDeclaration(it) => it.syntax(),
             Self::CssMarginAtRule(it) => it.syntax(),
+            Self::ScssDeclaration(it) => it.syntax(),
+            Self::ScssNestingDeclaration(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -29693,6 +29727,8 @@ impl AstNode for AnyCssPageAtRuleItem {
             Self::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             Self::CssEmptyDeclaration(it) => it.into_syntax(),
             Self::CssMarginAtRule(it) => it.into_syntax(),
+            Self::ScssDeclaration(it) => it.into_syntax(),
+            Self::ScssNestingDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -29704,6 +29740,8 @@ impl std::fmt::Debug for AnyCssPageAtRuleItem {
             Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
             Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMarginAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssNestingDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -29715,6 +29753,8 @@ impl From<AnyCssPageAtRuleItem> for SyntaxNode {
             AnyCssPageAtRuleItem::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             AnyCssPageAtRuleItem::CssEmptyDeclaration(it) => it.into_syntax(),
             AnyCssPageAtRuleItem::CssMarginAtRule(it) => it.into_syntax(),
+            AnyCssPageAtRuleItem::ScssDeclaration(it) => it.into_syntax(),
+            AnyCssPageAtRuleItem::ScssNestingDeclaration(it) => it.into_syntax(),
         }
     }
 }
