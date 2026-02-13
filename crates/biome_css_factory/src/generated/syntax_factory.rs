@@ -6816,7 +6816,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 false,
             ),
             CSS_BRACKETED_VALUE_LIST => {
-                Self::make_node_list_syntax(kind, children, AnyCssCustomIdentifier::can_cast)
+                Self::make_node_list_syntax(kind, children, AnyCssBracketedValueItem::can_cast)
             }
             CSS_COMPONENT_VALUE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssValue::can_cast)

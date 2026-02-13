@@ -617,6 +617,22 @@ impl ParseNodeList for BracketedValueList {
             );
         }
 
+        if p.at(T![,]) || p.at(T![/]) {
+            // Preserve explicit separators inside bracketed values so Sass list
+            // separators survive parsing (e.g. `[a, b / c]`).
+            // Example: `$list: [a, b / c];`
+            // Docs: https://sass-lang.com/documentation/values/lists
+            return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                |p| {
+                    let m = p.start();
+                    p.bump_any();
+                    Present(m.complete(p, CSS_GENERIC_DELIMITER))
+                },
+                |p, m| scss_only_syntax_error(p, "Sass list separators", m.range(p)),
+            );
+        }
+
         parse_custom_identifier(p, CssLexContext::Regular)
     }
 
