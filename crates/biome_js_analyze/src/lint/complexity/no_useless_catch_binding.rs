@@ -1,13 +1,15 @@
-use crate::JsRuleAction;
-use crate::lint::correctness::no_unused_variables::is_unused;
-use crate::services::semantic::Semantic;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     JsCatchClause, JsCatchClauseFields, JsCatchDeclaration, binding_ext::AnyJsIdentifierBinding,
 };
 use biome_rowan::{AstNode, BatchMutationExt, trim_leading_trivia_pieces};
 use biome_rule_options::no_useless_catch_binding::NoUselessCatchBindingOptions;
+
+use crate::JsRuleAction;
+use crate::lint::correctness::no_unused_variables::is_unused;
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Disallow unused catch bindings.
@@ -74,6 +76,7 @@ declare_lint_rule! {
         name: "noUselessCatchBinding",
         language: "js",
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }

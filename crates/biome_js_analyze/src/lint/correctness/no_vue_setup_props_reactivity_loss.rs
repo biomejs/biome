@@ -3,6 +3,7 @@ use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsExpression, AnyJsFunction,
     AnyJsObjectMember, AnyJsObjectMemberName, JsCallExpression, JsMethodObjectMember,
@@ -43,6 +44,7 @@ declare_lint_rule! {
         version: "2.2.6",
         name: "noVueSetupPropsReactivityLoss",
         language: "js",
+        severity: Severity::Error,
         domains: &[RuleDomain::Vue],
         recommended: false,
         sources: &[RuleSource::EslintVueJs("no-setup-props-reactivity-loss").inspired()],

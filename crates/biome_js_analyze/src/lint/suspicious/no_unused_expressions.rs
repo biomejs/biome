@@ -4,6 +4,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsLiteralExpression, AnyJsRoot, JsBlockStatement,
     JsExpressionStatement, JsSyntaxNode, JsUnaryOperator, TsModuleBlock,
@@ -163,6 +164,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-unused-expressions").same()],
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 

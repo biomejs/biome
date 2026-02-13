@@ -2,6 +2,7 @@ use biome_analyze::{
     QueryMatch, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     JsClassExpression, JsFunctionExpression, JsIdentifierBinding, JsParameterList,
@@ -63,6 +64,7 @@ declare_lint_rule! {
         name: "noShadow",
         language: "js",
         recommended: false,
+        severity: Severity::Warning,
         sources: &[
             RuleSource::Eslint("no-shadow").same(),
             // uncomment when we can handle the test cases from typescript-eslint

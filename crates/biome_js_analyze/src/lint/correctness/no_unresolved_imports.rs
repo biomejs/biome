@@ -2,6 +2,7 @@ use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
 use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
 use biome_resolver::ResolveError;
@@ -54,6 +55,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintImport("named").inspired()],
         domains: &[RuleDomain::Project],
+        severity: Severity::Error,
     }
 }
 

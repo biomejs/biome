@@ -1,5 +1,6 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_graphql_syntax::GraphqlRoot;
 use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::no_empty_source::NoEmptySourceOptions;
@@ -68,6 +69,7 @@ declare_lint_rule! {
         name: "noEmptySource",
         language: "graphql",
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 

@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, JsArrayBindingPatternElement, JsFormalParameter,
     JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsVariableStatement,
@@ -72,6 +73,7 @@ declare_lint_rule! {
         fix_kind: FixKind::Safe,
         sources: &[RuleSource::EslintUnicorn("no-useless-undefined").same()],
         recommended: false,
+        severity: Severity::Information,
     }
 }
 

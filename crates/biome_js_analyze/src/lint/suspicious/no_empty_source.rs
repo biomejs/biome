@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsStatement, JsModule};
 use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::no_empty_source::NoEmptySourceOptions;
@@ -107,6 +108,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-empty-file").same()],
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 

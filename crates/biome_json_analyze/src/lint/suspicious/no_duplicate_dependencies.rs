@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_json_syntax::{JsonRoot, JsonSyntaxKind, JsonSyntaxToken};
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::no_duplicate_dependencies::NoDuplicateDependenciesOptions;
@@ -87,6 +88,7 @@ declare_lint_rule! {
         name: "noDuplicateDependencies",
         language: "json",
         recommended: false,
+        severity: Severity::Warning,
         sources: &[RuleSource::EslintPackageJson("unique-dependencies").same(), RuleSource::EslintPackageJsonDependencies("duplicate-dependencies").same()],
     }
 }

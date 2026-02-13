@@ -3,6 +3,7 @@ use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, AnyJsStatement, JsFileSource, JsObjectExpression, T};
 use biome_rowan::{AstNode, TextRange, TriviaPieceKind};
@@ -102,6 +103,7 @@ declare_lint_rule! {
             RuleSource::EslintVueJs("no-deprecated-data-object-declaration").inspired(),
             RuleSource::EslintVueJs("no-shared-component-data").inspired(),
         ],
+        severity: Severity::Warning,
     }
 }
 

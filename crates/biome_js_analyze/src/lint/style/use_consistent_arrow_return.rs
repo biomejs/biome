@@ -55,7 +55,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("arrow-body-style").same()],
         recommended: false,
-        severity: Severity::Warning,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }
