@@ -241,6 +241,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssSyntaxType" => lang::CssSyntaxType::KIND_SET.iter().next(),
         "CssTypeFunction" => lang::CssTypeFunction::KIND_SET.iter().next(),
         "CssTypeSelector" => lang::CssTypeSelector::KIND_SET.iter().next(),
+        "CssUnaryExpression" => lang::CssUnaryExpression::KIND_SET.iter().next(),
         "CssUnicodeCodepoint" => lang::CssUnicodeCodepoint::KIND_SET.iter().next(),
         "CssUnicodeRange" => lang::CssUnicodeRange::KIND_SET.iter().next(),
         "CssUnicodeRangeInterval" => lang::CssUnicodeRangeInterval::KIND_SET.iter().next(),

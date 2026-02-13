@@ -6225,6 +6225,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssTypeSelector {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssUnaryExpression>
+    for crate::css::auxiliary::unary_expression::FormatCssUnaryExpression
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssUnaryExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssUnaryExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssUnaryExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssUnaryExpression,
+        crate::css::auxiliary::unary_expression::FormatCssUnaryExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::unary_expression::FormatCssUnaryExpression::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssUnaryExpression {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssUnaryExpression,
+        crate::css::auxiliary::unary_expression::FormatCssUnaryExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::unary_expression::FormatCssUnaryExpression::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssUnicodeCodepoint>
     for crate::css::auxiliary::unicode_codepoint::FormatCssUnicodeCodepoint
 {

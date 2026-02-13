@@ -220,7 +220,10 @@ pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
 /// to decide if parsing should proceed for a general CSS expression.
 #[inline]
 pub(crate) fn is_at_any_expression(p: &mut CssParser) -> bool {
-    is_at_parenthesized(p) || is_at_any_value(p) || is_at_comma_separated_value(p)
+    is_at_unary_operator(p)
+        || is_at_parenthesized(p)
+        || is_at_any_value(p)
+        || is_at_comma_separated_value(p)
 }
 
 /// Parses any CSS expression from the current position in the CSS parser.
@@ -234,7 +237,9 @@ pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let param = if is_at_parenthesized(p) {
+    let param = if is_at_unary_operator(p) {
+        parse_unary_expression(p)
+    } else if is_at_parenthesized(p) {
         parse_parenthesized_expression(p)
     } else if is_at_comma_separated_value(p) {
         parse_comma_separated_value(p)
@@ -256,6 +261,7 @@ pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
 
 pub(crate) const BINARY_OPERATION_TOKEN: TokenSet<CssSyntaxKind> =
     token_set![T![+], T![-], T![*], T![/]];
+const UNARY_OPERATION_TOKEN: TokenSet<CssSyntaxKind> = token_set![T![+], T![-], T![*]];
 
 /// Checks if the current position in the CSS parser is at a binary operator.
 ///
@@ -265,6 +271,36 @@ pub(crate) const BINARY_OPERATION_TOKEN: TokenSet<CssSyntaxKind> =
 #[inline]
 pub(crate) fn is_at_binary_operator(p: &mut CssParser) -> bool {
     p.at_ts(BINARY_OPERATION_TOKEN)
+}
+
+#[inline]
+pub(crate) fn is_at_unary_operator(p: &mut CssParser) -> bool {
+    p.at_ts(UNARY_OPERATION_TOKEN)
+}
+
+#[inline]
+pub(crate) fn parse_unary_expression(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_unary_operator(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_ts(UNARY_OPERATION_TOKEN);
+    parse_unary_expression_operand(p).or_add_diagnostic(p, expected_expression);
+    Present(m.complete(p, CSS_UNARY_EXPRESSION))
+}
+
+#[inline]
+fn parse_unary_expression_operand(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_unary_operator(p) {
+        parse_unary_expression(p)
+    } else if is_at_parenthesized(p) {
+        parse_parenthesized_expression(p)
+    } else if is_at_comma_separated_value(p) {
+        parse_comma_separated_value(p)
+    } else {
+        parse_list_of_component_values_expression(p)
+    }
 }
 
 /// Determines if the current position in the CSS parser is at the start of a parenthesized expression.

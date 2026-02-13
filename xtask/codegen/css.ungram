@@ -2080,6 +2080,7 @@ AnyCssIfTest =
 
 AnyCssExpression =
 	CssBinaryExpression
+	| CssUnaryExpression
 	| CssParenthesizedExpression
 	| CssListOfComponentValuesExpression
 	| CssCommaSeparatedValue
@@ -2097,6 +2098,10 @@ CssBinaryExpression =
 		'+' | '-' | '*' | '/'
 	)
 	right: AnyCssExpression
+
+CssUnaryExpression =
+	operator: ('+' | '-' | '*')
+	expression: AnyCssExpression
 
 CssParenthesizedExpression =
 	'(' expression: AnyCssExpression? ')'
