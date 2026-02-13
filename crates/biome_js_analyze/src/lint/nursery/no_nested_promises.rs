@@ -65,7 +65,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoNestedPromises {
-        version: "next",
+        version: "2.3.15",
         name: "noNestedPromises",
         language: "js",
         recommended: true,

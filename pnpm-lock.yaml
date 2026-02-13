@@ -64,55 +64,55 @@ importers:
         version: 4.0.18(@types/node@24.10.9)(happy-dom@20.4.0)(jiti@2.6.1)(yaml@2.8.2)
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-win32-x64
 
   packages/@biomejs/biome:
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.3.14
+        specifier: 2.3.15
         version: link:../cli-win32-x64
 
   packages/@biomejs/cli-darwin-arm64: {}

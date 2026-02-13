@@ -53,7 +53,7 @@ pub use crate::services::{
     ExtendedConfigurationProvider, FromServices, ServiceBag, ServicesDiagnostic,
 };
 pub use crate::signals::{
-    AnalyzerAction, AnalyzerSignal, AnalyzerTransformation, DiagnosticSignal,
+    AnalyzerAction, AnalyzerSignal, AnalyzerTransformation, DiagnosticSignal, PluginSignal,
 };
 use crate::suppressions::Suppressions;
 pub use crate::syntax::{Ast, SyntaxVisitor};
