@@ -6,7 +6,7 @@ use std::{fmt::Debug, sync::Arc};
 use biome_rowan::{AnySyntaxNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode, WalkEvent};
 
 use crate::matcher::SignalRuleKey;
-use crate::{DiagnosticSignal, RuleCategory, RuleDiagnostic, SignalEntry, Visitor, VisitorContext};
+use crate::{PluginSignal, RuleCategory, RuleDiagnostic, SignalEntry, Visitor, VisitorContext};
 
 /// Slice of analyzer plugins that can be cheaply cloned.
 pub type AnalyzerPluginSlice<'a> = &'a [Arc<Box<dyn AnalyzerPlugin>>];
@@ -111,7 +111,7 @@ where
 
                 SignalEntry {
                     text_range: diagnostic.span().unwrap_or_default(),
-                    signal: Box::new(DiagnosticSignal::new(move || diagnostic.clone())),
+                    signal: Box::new(PluginSignal::<L>::new(diagnostic)),
                     rule: SignalRuleKey::Plugin(name.into()),
                     category: RuleCategory::Lint,
                     instances: Default::default(),

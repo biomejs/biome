@@ -69,7 +69,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessReturn {
-        version: "next",
+        version: "2.3.15",
         name: "noUselessReturn",
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-return").inspired()],
