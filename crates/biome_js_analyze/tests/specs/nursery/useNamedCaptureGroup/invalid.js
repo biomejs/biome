@@ -6,3 +6,4 @@
 new RegExp("(foo)");
 RegExp("(foo)");
 new RegExp("(foo)(bar)");
+new RegExp("\\d+(foo)");
