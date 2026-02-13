@@ -32,6 +32,9 @@ new RegExp(pattern);
 // RegExp constructor — no groups at all
 RegExp("foo");
 
+// RegExp constructor — escaped parenthesis (not a capture group)
+new RegExp("\\(foo)");
+
 // Shadowed RegExp — should not trigger
 const RegExp = () => {};
 new RegExp("(foo)");
