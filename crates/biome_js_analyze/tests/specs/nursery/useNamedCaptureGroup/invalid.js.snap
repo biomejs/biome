@@ -128,14 +128,14 @@ invalid.js:5:2 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:6:1 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:13 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Capture group is not named.
   
     4 │ /(?:ab)(cd)/;
     5 │ /([a-z])\1/;
   > 6 │ new RegExp("(foo)");
-      │ ^^^^^^^^^^^^^^^^^^^
+      │             ^
     7 │ RegExp("(foo)");
     8 │ new RegExp("(foo)(bar)");
   
@@ -147,14 +147,14 @@ invalid.js:6:1 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:7:1 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:9 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Capture group is not named.
   
     5 │ /([a-z])\1/;
     6 │ new RegExp("(foo)");
   > 7 │ RegExp("(foo)");
-      │ ^^^^^^^^^^^^^^^
+      │         ^
     8 │ new RegExp("(foo)(bar)");
     9 │ 
   
@@ -166,14 +166,32 @@ invalid.js:7:1 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:8:1 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:13 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Capture group is not named.
   
     6 │ new RegExp("(foo)");
     7 │ RegExp("(foo)");
   > 8 │ new RegExp("(foo)(bar)");
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+      │             ^
+    9 │ 
+  
+  i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:18 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Capture group is not named.
+  
+    6 │ new RegExp("(foo)");
+    7 │ RegExp("(foo)");
+  > 8 │ new RegExp("(foo)(bar)");
+      │                  ^
     9 │ 
   
   i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
