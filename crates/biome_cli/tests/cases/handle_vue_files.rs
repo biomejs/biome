@@ -1400,3 +1400,51 @@ import { computed } from "vue";
         result,
     ));
 }
+
+#[test]
+fn unused_suppression_has_correct_span_in_vue_file() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<template>
+  <div>Hello</div>
+</template>
+
+<script lang="ts" setup>
+console.log("foo");
+// biome-ignore lint/correctness/noUnusedImports: migrating to biome
+import { mdiSquareOutline } from "@mdi/js";
+</script>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+
+    // Note: result is Ok because warnings don't cause the CLI to fail
+    assert!(
+        result.is_ok(),
+        "run_cli returned {result:?}, output: {:?}",
+        console.out_buffer
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "unused_suppression_has_correct_span_in_vue_file",
+        fs,
+        console,
+        result,
+    ));
+}
