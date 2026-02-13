@@ -5,6 +5,3 @@ expression: content
 example.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Formatting range 7..10 is larger than syntax tree 0..5
-  
-
-

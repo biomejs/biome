@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 # Emitted Messages
 
@@ -14,5 +14,3 @@ Available options:
     -h, --help   Prints help information
 
 ```
-
-
