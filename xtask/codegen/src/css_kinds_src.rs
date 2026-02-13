@@ -567,6 +567,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_RETURNS_STATEMENT",
         // SCSS
         "SCSS_DECLARATION",
+        "SCSS_PARENT_SELECTOR_VALUE",
         "SCSS_NESTING_DECLARATION",
         "SCSS_NAMESPACED_IDENTIFIER",
         "SCSS_QUALIFIED_NAME",

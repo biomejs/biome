@@ -278,6 +278,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssIdentifier" => lang::ScssIdentifier::KIND_SET.iter().next(),
         "ScssNamespacedIdentifier" => lang::ScssNamespacedIdentifier::KIND_SET.iter().next(),
         "ScssNestingDeclaration" => lang::ScssNestingDeclaration::KIND_SET.iter().next(),
+        "ScssParentSelectorValue" => lang::ScssParentSelectorValue::KIND_SET.iter().next(),
         "ScssQualifiedName" => lang::ScssQualifiedName::KIND_SET.iter().next(),
         "ScssVariableModifier" => lang::ScssVariableModifier::KIND_SET.iter().next(),
         "TwApplyAtRule" => lang::TwApplyAtRule::KIND_SET.iter().next(),

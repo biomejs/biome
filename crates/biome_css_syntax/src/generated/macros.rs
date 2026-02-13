@@ -929,6 +929,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssNestingDeclaration::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_PARENT_SELECTOR_VALUE => {
+                    let $pattern = unsafe { $crate::ScssParentSelectorValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_QUALIFIED_NAME => {
                     let $pattern = unsafe { $crate::ScssQualifiedName::new_unchecked(node) };
                     $body

@@ -7148,6 +7148,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssNestingDeclaration {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssParentSelectorValue>
+    for crate::scss::auxiliary::parent_selector_value::FormatScssParentSelectorValue
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssParentSelectorValue,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssParentSelectorValue>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssParentSelectorValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssParentSelectorValue,
+        crate::scss::auxiliary::parent_selector_value::FormatScssParentSelectorValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::parent_selector_value::FormatScssParentSelectorValue::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssParentSelectorValue {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssParentSelectorValue,
+        crate::scss::auxiliary::parent_selector_value::FormatScssParentSelectorValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::parent_selector_value::FormatScssParentSelectorValue::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssQualifiedName>
     for crate::scss::auxiliary::qualified_name::FormatScssQualifiedName
 {
