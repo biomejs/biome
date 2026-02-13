@@ -1071,11 +1071,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     );
 
     loop {
-        let services = JsAnalyzerServices::from((
+        let mut services = JsAnalyzerServices::from((
             params.module_graph.clone(),
             params.project_layout.clone(),
             file_source,
         ));
+
+        if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
+            services.set_embedded_bindings(embedded_bindings.bindings)
+        }
+
+        if let Some(value_refs) = params.document_services.embedded_value_references() {
+            services.set_embedded_value_references(value_refs.references)
+        }
 
         let (action, _) = analyze(
             &tree,

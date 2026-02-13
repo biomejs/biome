@@ -18,6 +18,7 @@ expression: redactor(content)
 
 ```vue
 <script lang="jsx">
+import s from "src/utils";
 import { sure } from "sure.js";
 import z from "zod";
 

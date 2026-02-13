@@ -1,7 +1,7 @@
 use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{FileSystemExt, MemoryFileSystem};
 use bpaf::Args;
 use camino::Utf8Path;
 
@@ -1448,3 +1448,57 @@ import { mdiSquareOutline } from "@mdi/js";
         result,
     ));
 }
+
+#[test]
+fn suppress_does_not_add_comments_for_imports_used_in_templates() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script>
+import { mdiSquareOutline } from "@mdi/js";
+</script>
+
+<template>
+  <v-icon :icon="mdiSquareOutline" />
+</template>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--suppress", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file).unwrap().read_to_string(&mut buffer).unwrap();
+
+    // Verify no suppression comment was added - the import should not be flagged
+    // as unused since it's used in the template
+    assert!(
+        !buffer.contains("biome-ignore"),
+        "Suppress should not add comments for imports used in templates. File content:\n{}",
+        buffer
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "suppress_does_not_add_comments_for_imports_used_in_templates",
+        fs,
+        console,
+        result,
+    ));
+}
+
