@@ -245,17 +245,67 @@ pub(crate) fn is_at_nested_qualified_rule(p: &mut CssParser) -> bool {
 /// the success of parsing the block.
 #[inline]
 pub(crate) fn parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
+    parse_nested_qualified_rule_with_selector_recovery(p, false).map_or(Absent, |(rule, _)| rule)
+}
+
+/// Speculatively parses a nested qualified rule without selector recovery.
+///
+/// This is used to disambiguate SCSS nesting declarations from nested qualified rules.
+/// The parse is considered successful only when the selector is strict and the parsed
+/// block is complete.
+#[inline]
+pub(crate) fn try_parse_nested_qualified_rule_without_selector_recovery(
+    p: &mut CssParser,
+    end_kind: CssSyntaxKind,
+) -> Result<ParsedSyntax, ()> {
+    try_parse(p, |p| {
+        let Some((rule, block_kind)) = parse_nested_qualified_rule_with_selector_recovery(p, true)
+        else {
+            return Err(());
+        };
+
+        if block_kind != CSS_DECLARATION_OR_RULE_BLOCK
+            || !p.last().is_some_and(|kind| kind == end_kind)
+        {
+            return Err(());
+        }
+
+        Ok(rule)
+    })
+}
+
+#[inline]
+fn parse_nested_qualified_rule_with_selector_recovery(
+    p: &mut CssParser,
+    disable_selector_recovery: bool,
+) -> Option<(ParsedSyntax, CssSyntaxKind)> {
     if !is_at_nested_qualified_rule(p) {
-        return Absent;
+        return None;
     }
 
     let m = p.start();
 
-    RelativeSelectorList::new(T!['{']).parse_list(p);
+    if disable_selector_recovery {
+        RelativeSelectorList::new(T!['{'])
+            .disable_recovery()
+            .parse_list(p);
 
-    parse_declaration_or_rule_list_block(p);
+        // In strict mode, reject selectors that don't reach the opening brace.
+        if !p.at(T!['{']) {
+            m.abandon(p);
+            return None;
+        }
+    } else {
+        RelativeSelectorList::new(T!['{']).parse_list(p);
+    }
 
-    Present(m.complete(p, CSS_NESTED_QUALIFIED_RULE))
+    let block = parse_declaration_or_rule_list_block(p);
+    let block_kind = block.kind(p);
+
+    Some((
+        Present(m.complete(p, CSS_NESTED_QUALIFIED_RULE)),
+        block_kind,
+    ))
 }
 
 #[inline]

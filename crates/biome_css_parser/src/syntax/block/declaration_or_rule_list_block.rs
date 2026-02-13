@@ -1,11 +1,16 @@
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
-use crate::syntax::parse_error::expected_any_declaration_or_at_rule;
+use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, scss_only_syntax_error};
+use crate::syntax::scss::{
+    is_at_scss_declaration, is_at_scss_nesting_declaration, parse_scss_declaration,
+    parse_scss_nesting_declaration,
+};
 use crate::syntax::{
-    is_at_any_declaration_with_semicolon, is_at_metavariable, is_at_nested_qualified_rule,
-    parse_any_declaration_with_semicolon, parse_metavariable, parse_nested_qualified_rule,
-    try_parse,
+    CssSyntaxFeatures, is_at_any_declaration_with_semicolon, is_at_metavariable,
+    is_at_nested_qualified_rule, is_nth_at_identifier, parse_any_declaration_with_semicolon,
+    parse_metavariable, parse_nested_qualified_rule, try_parse,
+    try_parse_nested_qualified_rule_without_selector_recovery,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -13,7 +18,8 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::Absent;
-use biome_parser::{CompletedMarker, Parser};
+use biome_parser::token_source::TokenSourceWithBufferedLexer;
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature};
 
 #[inline]
 pub(crate) fn parse_declaration_or_rule_list_block(p: &mut CssParser) -> CompletedMarker {
@@ -38,8 +44,30 @@ impl ParseBlockBody for DeclarationOrRuleListBlock {
 fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
     is_at_at_rule(p)
         || is_at_nested_qualified_rule(p)
+        || is_at_scss_nesting_declaration(p)
+        || is_at_scss_declaration(p)
         || is_at_any_declaration_with_semicolon(p)
         || is_at_metavariable(p)
+}
+
+#[inline]
+fn has_whitespace_after_scss_property_colon(p: &mut CssParser) -> bool {
+    // We enter this helper at `ident` in `ident:...`.
+    // `nth_non_trivia(1)` is the `:` token, so `nth_non_trivia(2)` is the first token
+    // after `:`. Its preceding flags tell us whether there was spacing after the colon.
+    let Some(after_colon) = p.source_mut().lexer().nth_non_trivia(2) else {
+        return false;
+    };
+
+    after_colon.has_preceding_whitespace() || after_colon.has_preceding_line_break()
+}
+
+#[inline]
+fn is_at_ambiguous_scss_nesting_item(p: &mut CssParser) -> bool {
+    // Match Sass's ambiguity gate: only no-spacing `name:ident` and `name::...`
+    // forms can be nested selectors.
+    !has_whitespace_after_scss_property_colon(p)
+        && (is_nth_at_identifier(p, 2) || p.nth_at(2, T![:]))
 }
 
 struct DeclarationOrRuleListParseRecovery {
@@ -80,6 +108,47 @@ impl ParseNodeList for DeclarationOrRuleList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
+        } else if is_at_scss_nesting_declaration(p) {
+            let is_ambiguous = is_at_ambiguous_scss_nesting_item(p);
+
+            if is_ambiguous {
+                // Match Sass's declaration-first strategy for ambiguous `name:ident` and
+                // `name::...` forms. Parse as declaration first, then backtrack to selector
+                // parsing when the result is declaration-like but selector-ambiguous.
+                let declaration = try_parse(p, |p| {
+                    let declaration = parse_scss_nesting_declaration(p);
+
+                    match declaration.kind(p) {
+                        Some(SCSS_NESTING_DECLARATION) => Err(()),
+                        Some(CSS_DECLARATION_WITH_SEMICOLON)
+                            if matches!(p.last(), Some(T![;])) || p.at(self.end_kind) =>
+                        {
+                            Ok(declaration)
+                        }
+                        _ => Err(()),
+                    }
+                });
+
+                if let Ok(declaration) = declaration {
+                    return declaration;
+                }
+
+                if let Ok(rule) =
+                    try_parse_nested_qualified_rule_without_selector_recovery(p, self.end_kind)
+                {
+                    return rule;
+                }
+            }
+
+            parse_scss_nesting_declaration(p)
+        } else if is_at_scss_declaration(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_declaration,
+                |p, marker| {
+                    scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+                },
+            )
         } else if is_at_any_declaration_with_semicolon(p) {
             // if we are at a declaration,
             // we still can have a nested qualified rule or a declaration
@@ -119,11 +188,8 @@ impl ParseNodeList for DeclarationOrRuleList {
                 // } <---
                 // The closing brace indicates the end of the declaration block.
                 // If either condition is true, the declaration is considered valid.
-                if matches!(p.last(), Some(T![;])) || p.at(self.end_kind) {
-                    Ok(declaration)
-                } else {
-                    Err(())
-                }
+                let valid = matches!(p.last(), Some(T![;])) || p.at(self.end_kind);
+                if valid { Ok(declaration) } else { Err(()) }
             });
 
             // If parsing as a declaration was successful, return the parsed declaration.

@@ -8893,6 +8893,56 @@ pub struct ScssNamespacedIdentifierFields {
     pub name: SyntaxResult<ScssIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssNestingDeclaration {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssNestingDeclaration {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssNestingDeclarationFields {
+        ScssNestingDeclarationFields {
+            name: self.name(),
+            colon_token: self.colon_token(),
+            value: self.value(),
+            block: self.block(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> CssGenericComponentValueList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrRuleBlock> {
+        support::required_node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for ScssNestingDeclaration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssNestingDeclarationFields {
+    pub name: SyntaxResult<CssIdentifier>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub value: CssGenericComponentValueList,
+    pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssQualifiedName {
     pub(crate) syntax: SyntaxNode,
 }
@@ -10356,6 +10406,7 @@ pub enum AnyCssDeclaration {
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
     CssEmptyDeclaration(CssEmptyDeclaration),
     ScssDeclaration(ScssDeclaration),
+    ScssNestingDeclaration(ScssNestingDeclaration),
 }
 impl AnyCssDeclaration {
     pub fn as_css_declaration_with_semicolon(&self) -> Option<&CssDeclarationWithSemicolon> {
@@ -10373,6 +10424,12 @@ impl AnyCssDeclaration {
     pub fn as_scss_declaration(&self) -> Option<&ScssDeclaration> {
         match &self {
             Self::ScssDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_nesting_declaration(&self) -> Option<&ScssNestingDeclaration> {
+        match &self {
+            Self::ScssNestingDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -10428,6 +10485,7 @@ pub enum AnyCssDeclarationOrAtRule {
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
     CssEmptyDeclaration(CssEmptyDeclaration),
     ScssDeclaration(ScssDeclaration),
+    ScssNestingDeclaration(ScssNestingDeclaration),
 }
 impl AnyCssDeclarationOrAtRule {
     pub fn as_css_at_rule(&self) -> Option<&CssAtRule> {
@@ -10451,6 +10509,12 @@ impl AnyCssDeclarationOrAtRule {
     pub fn as_scss_declaration(&self) -> Option<&ScssDeclaration> {
         match &self {
             Self::ScssDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_nesting_declaration(&self) -> Option<&ScssNestingDeclaration> {
+        match &self {
+            Self::ScssNestingDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -10482,6 +10546,7 @@ pub enum AnyCssDeclarationOrRule {
     CssEmptyDeclaration(CssEmptyDeclaration),
     CssMetavariable(CssMetavariable),
     ScssDeclaration(ScssDeclaration),
+    ScssNestingDeclaration(ScssNestingDeclaration),
 }
 impl AnyCssDeclarationOrRule {
     pub fn as_any_css_rule(&self) -> Option<&AnyCssRule> {
@@ -10517,6 +10582,12 @@ impl AnyCssDeclarationOrRule {
     pub fn as_scss_declaration(&self) -> Option<&ScssDeclaration> {
         match &self {
             Self::ScssDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_nesting_declaration(&self) -> Option<&ScssNestingDeclaration> {
+        match &self {
+            Self::ScssNestingDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -23487,6 +23558,59 @@ impl From<ScssNamespacedIdentifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssNestingDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_NESTING_DECLARATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_NESTING_DECLARATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssNestingDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssNestingDeclaration")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &self.value())
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("ScssNestingDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssNestingDeclaration> for SyntaxNode {
+    fn from(n: ScssNestingDeclaration) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssNestingDeclaration> for SyntaxElement {
+    fn from(n: ScssNestingDeclaration) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssQualifiedName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26206,15 +26330,24 @@ impl From<ScssDeclaration> for AnyCssDeclaration {
         Self::ScssDeclaration(node)
     }
 }
+impl From<ScssNestingDeclaration> for AnyCssDeclaration {
+    fn from(node: ScssNestingDeclaration) -> Self {
+        Self::ScssNestingDeclaration(node)
+    }
+}
 impl AstNode for AnyCssDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssDeclarationWithSemicolon::KIND_SET
         .union(CssEmptyDeclaration::KIND_SET)
-        .union(ScssDeclaration::KIND_SET);
+        .union(ScssDeclaration::KIND_SET)
+        .union(ScssNestingDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_DECLARATION_WITH_SEMICOLON | CSS_EMPTY_DECLARATION | SCSS_DECLARATION
+            CSS_DECLARATION_WITH_SEMICOLON
+                | CSS_EMPTY_DECLARATION
+                | SCSS_DECLARATION
+                | SCSS_NESTING_DECLARATION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -26224,6 +26357,9 @@ impl AstNode for AnyCssDeclaration {
             }
             CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
             SCSS_DECLARATION => Self::ScssDeclaration(ScssDeclaration { syntax }),
+            SCSS_NESTING_DECLARATION => {
+                Self::ScssNestingDeclaration(ScssNestingDeclaration { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -26233,6 +26369,7 @@ impl AstNode for AnyCssDeclaration {
             Self::CssDeclarationWithSemicolon(it) => it.syntax(),
             Self::CssEmptyDeclaration(it) => it.syntax(),
             Self::ScssDeclaration(it) => it.syntax(),
+            Self::ScssNestingDeclaration(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -26240,6 +26377,7 @@ impl AstNode for AnyCssDeclaration {
             Self::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             Self::CssEmptyDeclaration(it) => it.into_syntax(),
             Self::ScssDeclaration(it) => it.into_syntax(),
+            Self::ScssNestingDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -26249,6 +26387,7 @@ impl std::fmt::Debug for AnyCssDeclaration {
             Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
             Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssNestingDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -26258,6 +26397,7 @@ impl From<AnyCssDeclaration> for SyntaxNode {
             AnyCssDeclaration::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             AnyCssDeclaration::CssEmptyDeclaration(it) => it.into_syntax(),
             AnyCssDeclaration::ScssDeclaration(it) => it.into_syntax(),
+            AnyCssDeclaration::ScssNestingDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -26423,16 +26563,26 @@ impl From<ScssDeclaration> for AnyCssDeclarationOrAtRule {
         Self::ScssDeclaration(node)
     }
 }
+impl From<ScssNestingDeclaration> for AnyCssDeclarationOrAtRule {
+    fn from(node: ScssNestingDeclaration) -> Self {
+        Self::ScssNestingDeclaration(node)
+    }
+}
 impl AstNode for AnyCssDeclarationOrAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssAtRule::KIND_SET
         .union(CssDeclarationWithSemicolon::KIND_SET)
         .union(CssEmptyDeclaration::KIND_SET)
-        .union(ScssDeclaration::KIND_SET);
+        .union(ScssDeclaration::KIND_SET)
+        .union(ScssNestingDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_AT_RULE | CSS_DECLARATION_WITH_SEMICOLON | CSS_EMPTY_DECLARATION | SCSS_DECLARATION
+            CSS_AT_RULE
+                | CSS_DECLARATION_WITH_SEMICOLON
+                | CSS_EMPTY_DECLARATION
+                | SCSS_DECLARATION
+                | SCSS_NESTING_DECLARATION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -26443,6 +26593,9 @@ impl AstNode for AnyCssDeclarationOrAtRule {
             }
             CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
             SCSS_DECLARATION => Self::ScssDeclaration(ScssDeclaration { syntax }),
+            SCSS_NESTING_DECLARATION => {
+                Self::ScssNestingDeclaration(ScssNestingDeclaration { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -26453,6 +26606,7 @@ impl AstNode for AnyCssDeclarationOrAtRule {
             Self::CssDeclarationWithSemicolon(it) => it.syntax(),
             Self::CssEmptyDeclaration(it) => it.syntax(),
             Self::ScssDeclaration(it) => it.syntax(),
+            Self::ScssNestingDeclaration(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -26461,6 +26615,7 @@ impl AstNode for AnyCssDeclarationOrAtRule {
             Self::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             Self::CssEmptyDeclaration(it) => it.into_syntax(),
             Self::ScssDeclaration(it) => it.into_syntax(),
+            Self::ScssNestingDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -26471,6 +26626,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrAtRule {
             Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
             Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssNestingDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -26481,6 +26637,7 @@ impl From<AnyCssDeclarationOrAtRule> for SyntaxNode {
             AnyCssDeclarationOrAtRule::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             AnyCssDeclarationOrAtRule::CssEmptyDeclaration(it) => it.into_syntax(),
             AnyCssDeclarationOrAtRule::ScssDeclaration(it) => it.into_syntax(),
+            AnyCssDeclarationOrAtRule::ScssNestingDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -26577,6 +26734,11 @@ impl From<ScssDeclaration> for AnyCssDeclarationOrRule {
         Self::ScssDeclaration(node)
     }
 }
+impl From<ScssNestingDeclaration> for AnyCssDeclarationOrRule {
+    fn from(node: ScssNestingDeclaration) -> Self {
+        Self::ScssNestingDeclaration(node)
+    }
+}
 impl AstNode for AnyCssDeclarationOrRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssRule::KIND_SET
@@ -26584,14 +26746,16 @@ impl AstNode for AnyCssDeclarationOrRule {
         .union(CssDeclarationWithSemicolon::KIND_SET)
         .union(CssEmptyDeclaration::KIND_SET)
         .union(CssMetavariable::KIND_SET)
-        .union(ScssDeclaration::KIND_SET);
+        .union(ScssDeclaration::KIND_SET)
+        .union(ScssNestingDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_BOGUS
             | CSS_DECLARATION_WITH_SEMICOLON
             | CSS_EMPTY_DECLARATION
             | CSS_METAVARIABLE
-            | SCSS_DECLARATION => true,
+            | SCSS_DECLARATION
+            | SCSS_NESTING_DECLARATION => true,
             k if AnyCssRule::can_cast(k) => true,
             _ => false,
         }
@@ -26605,6 +26769,9 @@ impl AstNode for AnyCssDeclarationOrRule {
             CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
             CSS_METAVARIABLE => Self::CssMetavariable(CssMetavariable { syntax }),
             SCSS_DECLARATION => Self::ScssDeclaration(ScssDeclaration { syntax }),
+            SCSS_NESTING_DECLARATION => {
+                Self::ScssNestingDeclaration(ScssNestingDeclaration { syntax })
+            }
             _ => {
                 if let Some(any_css_rule) = AnyCssRule::cast(syntax) {
                     return Some(Self::AnyCssRule(any_css_rule));
@@ -26621,6 +26788,7 @@ impl AstNode for AnyCssDeclarationOrRule {
             Self::CssEmptyDeclaration(it) => it.syntax(),
             Self::CssMetavariable(it) => it.syntax(),
             Self::ScssDeclaration(it) => it.syntax(),
+            Self::ScssNestingDeclaration(it) => it.syntax(),
             Self::AnyCssRule(it) => it.syntax(),
         }
     }
@@ -26631,6 +26799,7 @@ impl AstNode for AnyCssDeclarationOrRule {
             Self::CssEmptyDeclaration(it) => it.into_syntax(),
             Self::CssMetavariable(it) => it.into_syntax(),
             Self::ScssDeclaration(it) => it.into_syntax(),
+            Self::ScssNestingDeclaration(it) => it.into_syntax(),
             Self::AnyCssRule(it) => it.into_syntax(),
         }
     }
@@ -26644,6 +26813,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrRule {
             Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssNestingDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -26656,6 +26826,7 @@ impl From<AnyCssDeclarationOrRule> for SyntaxNode {
             AnyCssDeclarationOrRule::CssEmptyDeclaration(it) => it.into_syntax(),
             AnyCssDeclarationOrRule::CssMetavariable(it) => it.into_syntax(),
             AnyCssDeclarationOrRule::ScssDeclaration(it) => it.into_syntax(),
+            AnyCssDeclarationOrRule::ScssNestingDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -34546,6 +34717,11 @@ impl std::fmt::Display for ScssIdentifier {
     }
 }
 impl std::fmt::Display for ScssNamespacedIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssNestingDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
