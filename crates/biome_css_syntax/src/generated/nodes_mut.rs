@@ -3459,6 +3459,14 @@ impl CssViewTransitionAtRuleDeclarator {
         )
     }
 }
+impl ScssColonValue {
+    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl ScssDeclaration {
     pub fn with_name(self, element: AnyScssDeclarationName) -> Self {
         Self::unwrap_cast(
@@ -3548,6 +3556,14 @@ impl ScssNestingDeclaration {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssParentSelectorValue {
+    pub fn with_amp_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }
