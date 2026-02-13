@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 179
 expression: snapshot
 ---
 
@@ -302,39 +303,28 @@ CssRoot {
                                         r_paren_token: R_PAREN@557..559 ")" [] [Whitespace(" ")],
                                     },
                                     AND_KW@559..563 "and" [] [Whitespace(" ")],
-                                    CssBogusSupportsCondition {
+                                    CssBogus {
                                         items: [
-                                            CssIdentifier {
-                                                value_token: IDENT@563..567 "and" [] [Whitespace(" ")],
-                                            },
-                                            L_PAREN@567..568 "(" [] [],
                                             CssBogus {
-                                                items: [
-                                                    CssBogus {
-                                                        items: [
-                                                            CssBogus {
-                                                                items: [
-                                                                    CssBogus {
-                                                                        items: [
-                                                                            CssIdentifier {
-                                                                                value_token: IDENT@568..575 "height" [] [Whitespace(" ")],
-                                                                            },
-                                                                            CssBogus {
-                                                                                items: [
-                                                                                    R_ANGLE@575..577 ">" [] [Whitespace(" ")],
-                                                                                    CSS_DIMENSION_VALUE@577..580 "200" [] [],
-                                                                                    PX_KW@580..582 "px" [] [],
-                                                                                ],
-                                                                            },
-                                                                        ],
-                                                                    },
-                                                                ],
-                                                            },
-                                                        ],
-                                                    },
-                                                ],
+                                                items: [],
                                             },
-                                            R_PAREN@582..584 ")" [] [Whitespace(" ")],
+                                            AND_KW@563..567 "and" [] [Whitespace(" ")],
+                                            CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@567..568 "(" [] [],
+                                                feature: CssQueryFeatureRange {
+                                                    left: CssIdentifier {
+                                                        value_token: IDENT@568..575 "height" [] [Whitespace(" ")],
+                                                    },
+                                                    comparison: CssQueryFeatureRangeComparison {
+                                                        operator: R_ANGLE@575..577 ">" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@577..580 "200" [] [],
+                                                        unit_token: IDENT@580..582 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@582..584 ")" [] [Whitespace(" ")],
+                                            },
                                         ],
                                     },
                                 ],
@@ -591,21 +581,20 @@ CssRoot {
                   1: IDENT@555..557 "px" [] []
               2: R_PAREN@557..559 ")" [] [Whitespace(" ")]
             1: AND_KW@559..563 "and" [] [Whitespace(" ")]
-            2: CSS_BOGUS_SUPPORTS_CONDITION@563..584
-              0: CSS_IDENTIFIER@563..567
-                0: IDENT@563..567 "and" [] [Whitespace(" ")]
-              1: L_PAREN@567..568 "(" [] []
-              2: CSS_BOGUS@568..582
-                0: CSS_BOGUS@568..582
-                  0: CSS_BOGUS@568..582
-                    0: CSS_BOGUS@568..582
-                      0: CSS_IDENTIFIER@568..575
-                        0: IDENT@568..575 "height" [] [Whitespace(" ")]
-                      1: CSS_BOGUS@575..582
-                        0: R_ANGLE@575..577 ">" [] [Whitespace(" ")]
-                        1: CSS_DIMENSION_VALUE@577..580 "200" [] []
-                        2: PX_KW@580..582 "px" [] []
-              3: R_PAREN@582..584 ")" [] [Whitespace(" ")]
+            2: CSS_BOGUS@563..584
+              0: CSS_BOGUS@563..563
+              1: AND_KW@563..567 "and" [] [Whitespace(" ")]
+              2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@567..584
+                0: L_PAREN@567..568 "(" [] []
+                1: CSS_QUERY_FEATURE_RANGE@568..582
+                  0: CSS_IDENTIFIER@568..575
+                    0: IDENT@568..575 "height" [] [Whitespace(" ")]
+                  1: CSS_QUERY_FEATURE_RANGE_COMPARISON@575..577
+                    0: R_ANGLE@575..577 ">" [] [Whitespace(" ")]
+                  2: CSS_REGULAR_DIMENSION@577..582
+                    0: CSS_NUMBER_LITERAL@577..580 "200" [] []
+                    1: IDENT@580..582 "px" [] []
+                2: R_PAREN@582..584 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@584..587
           0: L_CURLY@584..585 "{" [] []
           1: CSS_RULE_LIST@585..585
@@ -735,25 +724,21 @@ at_rule_container_and_query_error.css:18:32 parse ━━━━━━━━━━
   - ( <size-feature> )
   - style( <style-query> )
   
-at_rule_container_and_query_error.css:22:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+at_rule_container_and_query_error.css:22:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
   
     21 │ /* There's an extra `and` that has no query immediately following it. */
   > 22 │ @container (width > 300px) and and (height > 200px) {
-       │                                            ^^^^^^^
+       │                                ^^^
     23 │ }
     24 │ 
   
   i Expected one of:
   
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
+  - ( <container-query> )
+  - ( <size-feature> )
+  - style( <style-query> )
   
 at_rule_container_and_query_error.css:26:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
