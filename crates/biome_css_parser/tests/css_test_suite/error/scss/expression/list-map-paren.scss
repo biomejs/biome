@@ -1,0 +1,6 @@
+.test {
+  missing-close: fn((1, 2);
+  missing-map-value: fn((primary:, secondary: blue));
+  missing-map-key: fn((primary: red, : blue));
+  double-comma: fn((1,, 2));
+}

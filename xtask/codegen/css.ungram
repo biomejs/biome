@@ -2514,18 +2514,68 @@ ScssNestingDeclaration =
 
 // border: 1px solid $color;
 //         ^^^^^^^^^^^^^^^^
-ScssExpression = AnyScssExpressionItem*
+ScssExpression =
+	items: ScssExpressionItemList
+
+// border: 1px solid $color;
+//         ^^^^^^^^^^^^^^^^
+ScssExpressionItemList = AnyScssExpressionItem*
 
 // border: 1px solid $color;
 //         ^^^^^^^^^^^^^^^^
 AnyScssExpressionItem =
 	AnyCssValue
 	| CssGenericDelimiter
+	| ScssParenthesizedExpression
+	| ScssListExpression
+	| ScssMapExpression
+
+// width: ($a);
+//        ^^^^
+ScssParenthesizedExpression =
+	'('
+	expression: AnyScssExpression
+	')'
+
+// box-shadow: 1px, 2px, 3px;
+//             ^^^^^^^^^^^^^
+ScssListExpression =
+	elements: ScssListExpressionElementList
+
+// list: 1px, 2px, 3px;
+//       ^^^^^^^^^^^^^
+ScssListExpressionElementList = (ScssListExpressionElement (',' ScssListExpressionElement)* ','?)
+
+// list: 1px, 2px, 3px;
+//       ^^^  ^^^  ^^^
+ScssListExpressionElement =
+	value: AnyScssExpression
+
+// $map: (key1: value1, key2: value2);
+//       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssMapExpression =
+	'('
+	pairs: ScssMapExpressionPairList
+	')'
+
+// $map: (key1: value1, key2: value2);
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssMapExpressionPairList = (ScssMapExpressionPair (',' ScssMapExpressionPair)* ','?)
+
+// $map: (key: value);
+//        ^^^^^^^^^^
+ScssMapExpressionPair =
+	key: AnyScssExpression
+	':'
+	value: AnyScssExpression
 
 // width: $a;
 //        ^^
 AnyScssExpression =
 	ScssExpression
+	| ScssParenthesizedExpression
+	| ScssListExpression
+	| ScssMapExpression
 	| AnyCssValue
 
 // $a: &;

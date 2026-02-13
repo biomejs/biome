@@ -3016,12 +3016,58 @@ impl ScssDeclarationBuilder {
         ))
     }
 }
+pub fn scss_expression(items: ScssExpressionItemList) -> ScssExpression {
+    ScssExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EXPRESSION,
+        [Some(SyntaxElement::Node(items.into_syntax()))],
+    ))
+}
 pub fn scss_identifier(dollar_token: SyntaxToken, name: CssIdentifier) -> ScssIdentifier {
     ScssIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_IDENTIFIER,
         [
             Some(SyntaxElement::Token(dollar_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_list_expression(elements: ScssListExpressionElementList) -> ScssListExpression {
+    ScssListExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_LIST_EXPRESSION,
+        [Some(SyntaxElement::Node(elements.into_syntax()))],
+    ))
+}
+pub fn scss_list_expression_element(value: AnyScssExpression) -> ScssListExpressionElement {
+    ScssListExpressionElement::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_LIST_EXPRESSION_ELEMENT,
+        [Some(SyntaxElement::Node(value.into_syntax()))],
+    ))
+}
+pub fn scss_map_expression(
+    l_paren_token: SyntaxToken,
+    pairs: ScssMapExpressionPairList,
+    r_paren_token: SyntaxToken,
+) -> ScssMapExpression {
+    ScssMapExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_MAP_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(pairs.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn scss_map_expression_pair(
+    key: AnyScssExpression,
+    colon_token: SyntaxToken,
+    value: AnyScssExpression,
+) -> ScssMapExpressionPair {
+    ScssMapExpressionPair::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_MAP_EXPRESSION_PAIR,
+        [
+            Some(SyntaxElement::Node(key.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
         ],
     ))
 }
@@ -3059,6 +3105,20 @@ pub fn scss_parent_selector_value(amp_token: SyntaxToken) -> ScssParentSelectorV
     ScssParentSelectorValue::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_PARENT_SELECTOR_VALUE,
         [Some(SyntaxElement::Token(amp_token))],
+    ))
+}
+pub fn scss_parenthesized_expression(
+    l_paren_token: SyntaxToken,
+    expression: AnyScssExpression,
+    r_paren_token: SyntaxToken,
+) -> ScssParenthesizedExpression {
+    ScssParenthesizedExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PARENTHESIZED_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
     ))
 }
 pub fn scss_qualified_name(
@@ -3986,16 +4046,61 @@ where
         }),
     ))
 }
-pub fn scss_expression<I>(items: I) -> ScssExpression
+pub fn scss_expression_item_list<I>(items: I) -> ScssExpressionItemList
 where
     I: IntoIterator<Item = AnyScssExpressionItem>,
     I::IntoIter: ExactSizeIterator,
 {
-    ScssExpression::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_EXPRESSION,
+    ScssExpressionItemList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EXPRESSION_ITEM_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn scss_list_expression_element_list<I, S>(
+    items: I,
+    separators: S,
+) -> ScssListExpressionElementList
+where
+    I: IntoIterator<Item = ScssListExpressionElement>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    ScssListExpressionElementList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_LIST_EXPRESSION_ELEMENT_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn scss_map_expression_pair_list<I, S>(items: I, separators: S) -> ScssMapExpressionPairList
+where
+    I: IntoIterator<Item = ScssMapExpressionPair>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    ScssMapExpressionPairList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_MAP_EXPRESSION_PAIR_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn scss_variable_modifier_list<I>(items: I) -> ScssVariableModifierList
