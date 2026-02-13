@@ -1,4 +1,4 @@
-#[expect(clippy::large_stack_arrays)]
+#![expect(clippy::large_stack_arrays)]
 use biome_analyze::{
     AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, Queryable,
     RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
