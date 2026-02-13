@@ -234,7 +234,7 @@ impl FeaturesSupported {
             self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
         }
 
-        debug!("The file has the following feature sets: {:?}", &self);
+        debug!("The file has the following feature sets: {}", &self);
 
         self
     }
