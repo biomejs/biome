@@ -20,20 +20,9 @@ const WeekdayValues: (keyof Days)[] = ["mon", "tue", "wed", "thu", "fri"];
 // "day" doesn't exist outside the memoized function.
 // Biome should report "props.value" as a missing dependency,
 // NOT "props.value[day]" since "day" is a callback-scoped variable.
-function Component1(props: { value: Days }) {
+function Component(props: { value: Days }) {
     useMemo(() => {
         return WeekdayValues.filter((day) => props.value[day]);
-    }, []);
-}
-
-// Example with forEach and index
-// Biome should report "props.data" as missing dependency,
-// NOT "props.data.forEach" to follow eslint React plugin behavior.
-function Component2(props: { data: number[] }) {
-    useMemo(() => {
-        props.data.forEach((value, index) => {
-            console.log(value, index);
-        });
     }, []);
 }
 
@@ -46,7 +35,7 @@ issue8802.ts:17:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
   × This hook does not specify its dependency on props.value.
   
     15 │ // NOT "props.value[day]" since "day" is a callback-scoped variable.
-    16 │ function Component1(props: { value: Days }) {
+    16 │ function Component(props: { value: Days }) {
   > 17 │     useMemo(() => {
        │     ^^^^^^^
     18 │         return WeekdayValues.filter((day) => props.value[day]);
@@ -54,7 +43,7 @@ issue8802.ts:17:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
   
   i This dependency is being used here, but is not specified in the hook dependency list.
   
-    16 │ function Component1(props: { value: Days }) {
+    16 │ function Component(props: { value: Days }) {
     17 │     useMemo(() => {
   > 18 │         return WeekdayValues.filter((day) => props.value[day]);
        │                                              ^^^^^^^^^^^
@@ -71,39 +60,5 @@ issue8802.ts:17:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
   
     19 │ ····},·[props.value]);
        │         +++++++++++   
-
-```
-
-```
-issue8802.ts:26:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This hook does not specify its dependency on props.data.
-  
-    24 │ // NOT "props.data.forEach" to follow eslint React plugin behavior.
-    25 │ function Component2(props: { data: number[] }) {
-  > 26 │     useMemo(() => {
-       │     ^^^^^^^
-    27 │         props.data.forEach((value, index) => {
-    28 │             console.log(value, index);
-  
-  i This dependency is being used here, but is not specified in the hook dependency list.
-  
-    25 │ function Component2(props: { data: number[] }) {
-    26 │     useMemo(() => {
-  > 27 │         props.data.forEach((value, index) => {
-       │         ^^^^^^^^^^
-    28 │             console.log(value, index);
-    29 │         });
-  
-  i React relies on hook dependencies to determine when to re-compute Effects.
-    Failing to specify dependencies can result in Effects not updating correctly when state changes.
-    These "stale closures" are a common source of surprising bugs.
-  
-  i Either include it or remove the dependency array.
-  
-  i Unsafe fix: Add the missing dependency to the list.
-  
-    30 │ ····},·[props.data]);
-       │         ++++++++++   
 
 ```

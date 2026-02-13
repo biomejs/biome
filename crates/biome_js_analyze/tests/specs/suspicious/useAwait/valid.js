@@ -67,3 +67,12 @@ async function awaitExpressionWithForOf () {
 	return sum;
 };
 
+async function* yieldStarAsyncIterable() {
+	yield* otherAsyncGenerator();
+}
+
+async function* yieldStarWithAwait() {
+	const data = await fetch('/data');
+	yield* processData(data);
+}
+

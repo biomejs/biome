@@ -1,7 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-//! Generated file, do not edit by hand, see `xtask/codegen`
-
 use crate::assist;
 use crate::lint;
 pub type NoAccessKey = <lint::a11y::no_access_key::NoAccessKey as biome_analyze::Rule>::Options;

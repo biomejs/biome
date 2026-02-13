@@ -54,7 +54,7 @@ HtmlRoot {
                         },
                     },
                     attributes: HtmlAttributeList [
-                        HtmlSingleTextExpression {
+                        HtmlAttributeSingleTextExpression {
                             l_curly_token: L_CURLY@67..68 "{" [] [],
                             expression: HtmlTextExpression {
                                 html_literal_token: HTML_LITERAL@68..72 "cell" [] [],
@@ -114,7 +114,7 @@ HtmlRoot {
                         },
                     },
                     attributes: HtmlAttributeList [
-                        HtmlSingleTextExpression {
+                        HtmlAttributeSingleTextExpression {
                             l_curly_token: L_CURLY@143..144 "{" [] [],
                             expression: HtmlTextExpression {
                                 html_literal_token: HTML_LITERAL@144..148 "cell" [] [],
@@ -168,7 +168,7 @@ HtmlRoot {
             2: HTML_TAG_NAME@62..67
               0: HTML_LITERAL@62..67 "Slot" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@67..74
-            0: HTML_SINGLE_TEXT_EXPRESSION@67..74
+            0: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@67..74
               0: L_CURLY@67..68 "{" [] []
               1: HTML_TEXT_EXPRESSION@68..72
                 0: HTML_LITERAL@68..72 "cell" [] []
@@ -210,7 +210,7 @@ HtmlRoot {
             2: HTML_TAG_NAME@138..143
               0: HTML_LITERAL@138..143 "Slot" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@143..150
-            0: HTML_SINGLE_TEXT_EXPRESSION@143..150
+            0: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@143..150
               0: L_CURLY@143..144 "{" [] []
               1: HTML_TEXT_EXPRESSION@144..148
                 0: HTML_LITERAL@144..148 "cell" [] []

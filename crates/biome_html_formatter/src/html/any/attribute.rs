@@ -11,6 +11,8 @@ impl FormatRule<AnyHtmlAttribute> for FormatAnyHtmlAttribute {
             AnyHtmlAttribute::AnySvelteDirective(node) => node.format().fmt(f),
             AnyHtmlAttribute::AnyVueDirective(node) => node.format().fmt(f),
             AnyHtmlAttribute::HtmlAttribute(node) => node.format().fmt(f),
+            AnyHtmlAttribute::HtmlAttributeDoubleTextExpression(node) => node.format().fmt(f),
+            AnyHtmlAttribute::HtmlAttributeSingleTextExpression(node) => node.format().fmt(f),
             AnyHtmlAttribute::HtmlBogusAttribute(node) => node.format().fmt(f),
             AnyHtmlAttribute::HtmlDoubleTextExpression(node) => node.format().fmt(f),
             AnyHtmlAttribute::HtmlSingleTextExpression(node) => node.format().fmt(f),

@@ -1,7 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-//! Generated file, do not edit by hand, see `xtask/codegen`
-
 pub mod a11y;
 pub mod complexity;
 pub mod correctness;

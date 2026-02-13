@@ -562,23 +562,6 @@ invalid.js:81:2 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 
 ```
-invalid.js:83:32 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The assignment should not be in an expression.
-  
-    81 │ ((3496.29/*1*/)/*2*/.bkufyydt/*3*/ = /*4*/2e308/*5*/)/*6*/ ? foo : bar;
-    82 │ 
-  > 83 │ res.onAborted(() => /*0*/(/*1*/(/*2*/a/*3*/./*4*/b/*5*/)/*6*/ /*7*/ = /*8*/ /*9*/true/*10*/));
-       │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    84 │ 
-  
-  i The use of assignments in expressions is confusing.
-    Expressions are often considered as side-effect free.
-  
-
-```
-
-```
 invalid.js:86:7 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The assignment should not be in an expression.
