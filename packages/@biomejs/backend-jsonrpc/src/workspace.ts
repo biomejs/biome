@@ -2395,8 +2395,13 @@ See https://biomejs.dev/linter/rules/use-lone-executable-definition
 	 */
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
 	/**
+	* Enforce using named capture groups in regular expression.
+See https://biomejs.dev/linter/rules/use-named-capture-group
+	 */
+	useNamedCaptureGroup?: UseNamedCaptureGroupConfiguration;
+	/**
 	* Enforce valid describe() callback.
-See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
+See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback
 	 */
 	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
 	/**
@@ -4240,6 +4245,9 @@ export type UseLoneAnonymousOperationConfiguration =
 export type UseLoneExecutableDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneExecutableDefinitionOptions;
+export type UseNamedCaptureGroupConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNamedCaptureGroupOptions;
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
@@ -5930,6 +5938,10 @@ export interface RuleWithUseLoneExecutableDefinitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneExecutableDefinitionOptions;
 }
+export interface RuleWithUseNamedCaptureGroupOptions {
+	level: RulePlainConfiguration;
+	options?: UseNamedCaptureGroupOptions;
+}
 export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
 	options?: UsePlaywrightValidDescribeCallbackOptions;
@@ -7366,6 +7378,7 @@ export interface UseInputNameOptions {
 }
 export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
+export type UseNamedCaptureGroupOptions = {};
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseRegexpExecOptions = {};
 export interface UseRequiredScriptsOptions {
@@ -8335,6 +8348,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
+	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"

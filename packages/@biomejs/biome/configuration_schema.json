@@ -6236,6 +6236,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNamedCaptureGroup": {
+					"description": "Enforce using named capture groups in regular expression.\nSee https://biomejs.dev/linter/rules/use-named-capture-group",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNamedCaptureGroupConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"usePlaywrightValidDescribeCallback": {
 					"description": "Enforce valid describe() callback.\nSee https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback",
 					"anyOf": [
@@ -10520,6 +10527,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseNamedCaptureGroupOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseNamedCaptureGroupOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseNamespaceKeywordOptions": {
 			"type": "object",
 			"properties": {
@@ -13736,6 +13752,16 @@
 			]
 		},
 		"UseMediaCaptionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseNamedCaptureGroupConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseNamedCaptureGroupOptions" }
+			]
+		},
+		"UseNamedCaptureGroupOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
