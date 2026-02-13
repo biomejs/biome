@@ -7,7 +7,7 @@ use biome_formatter::write;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssListOfComponentValuesExpression;
 impl FormatNodeRule<CssListOfComponentValuesExpression>
-    for FormatCssListOfComponentValuesExpression
+for FormatCssListOfComponentValuesExpression
 {
     fn fmt_fields(
         &self,

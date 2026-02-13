@@ -1306,6 +1306,10 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssValueAtRulePropertyList::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_EXPRESSION => {
+                    let $pattern = unsafe { $crate::ScssExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_VARIABLE_MODIFIER_LIST => {
                     let $pattern = unsafe { $crate::ScssVariableModifierList::new_unchecked(node) };
                     $body

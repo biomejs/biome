@@ -2090,9 +2090,11 @@ AnyCssExpression =
 	| CssUnaryExpression
 	| CssParenthesizedExpression
 	| CssListOfComponentValuesExpression
+	| ScssExpression
 	| CssCommaSeparatedValue
 
-CssListOfComponentValuesExpression = CssComponentValueList
+CssListOfComponentValuesExpression =
+	CssComponentValueList
 
 CssCommaSeparatedValue =
 	'{'
@@ -2509,6 +2511,22 @@ ScssNestingDeclaration =
 	':'
 	value: CssGenericComponentValueList
 	block: AnyCssDeclarationOrRuleBlock
+
+// border: 1px solid $color;
+//         ^^^^^^^^^^^^^^^^
+ScssExpression = AnyScssExpressionItem*
+
+// border: 1px solid $color;
+//         ^^^^^^^^^^^^^^^^
+AnyScssExpressionItem =
+	AnyCssValue
+	| CssGenericDelimiter
+
+// width: $a;
+//        ^^
+AnyScssExpression =
+	ScssExpression
+	| AnyCssValue
 
 // $a: &;
 //     ^

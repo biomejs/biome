@@ -7012,6 +7012,9 @@ impl SyntaxFactory for CssSyntaxFactory {
                 T ! [,],
                 false,
             ),
+            SCSS_EXPRESSION => {
+                Self::make_node_list_syntax(kind, children, AnyScssExpressionItem::can_cast)
+            }
             SCSS_VARIABLE_MODIFIER_LIST => {
                 Self::make_node_list_syntax(kind, children, ScssVariableModifier::can_cast)
             }

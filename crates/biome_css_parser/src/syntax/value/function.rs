@@ -9,7 +9,8 @@ use crate::syntax::parse_error::{
 };
 use crate::syntax::property::parse_generic_component_value;
 use crate::syntax::scss::{
-    is_at_scss_qualified_name, is_nth_at_scss_qualified_name, parse_scss_function_name,
+    is_at_scss_qualified_name, is_nth_at_scss_qualified_name, parse_scss_expression,
+    parse_scss_function_name,
 };
 use crate::syntax::value::attr::{is_at_attr_function, parse_attr_function};
 use crate::syntax::value::r#if::parse_if_function;
@@ -325,9 +326,13 @@ pub(crate) fn parse_list_of_component_values_expression(p: &mut CssParser) -> Pa
         return Absent;
     }
 
-    let m = p.start();
-    CssComponentValueList.parse_list(p);
-    Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION))
+    if CssSyntaxFeatures::Scss.is_supported(p) {
+        parse_scss_expression(p)
+    } else {
+        let m = p.start();
+        CssComponentValueList.parse_list(p);
+        Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION))
+    }
 }
 
 /// Parses theme references: --tab-size-*

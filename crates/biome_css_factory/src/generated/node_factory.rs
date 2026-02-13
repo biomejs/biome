@@ -3986,6 +3986,18 @@ where
         }),
     ))
 }
+pub fn scss_expression<I>(items: I) -> ScssExpression
+where
+    I: IntoIterator<Item = AnyScssExpressionItem>,
+    I::IntoIter: ExactSizeIterator,
+{
+    ScssExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EXPRESSION,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn scss_variable_modifier_list<I>(items: I) -> ScssVariableModifierList
 where
     I: IntoIterator<Item = ScssVariableModifier>,

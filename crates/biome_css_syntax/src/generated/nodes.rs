@@ -10731,6 +10731,7 @@ pub enum AnyCssExpression {
     CssListOfComponentValuesExpression(CssListOfComponentValuesExpression),
     CssParenthesizedExpression(CssParenthesizedExpression),
     CssUnaryExpression(CssUnaryExpression),
+    ScssExpression(ScssExpression),
 }
 impl AnyCssExpression {
     pub fn as_css_binary_expression(&self) -> Option<&CssBinaryExpression> {
@@ -10762,6 +10763,12 @@ impl AnyCssExpression {
     pub fn as_css_unary_expression(&self) -> Option<&CssUnaryExpression> {
         match &self {
             Self::CssUnaryExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -12751,6 +12758,44 @@ impl AnyScssDeclarationName {
     pub fn as_scss_namespaced_identifier(&self) -> Option<&ScssNamespacedIdentifier> {
         match &self {
             Self::ScssNamespacedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssExpression {
+    AnyCssValue(AnyCssValue),
+    ScssExpression(ScssExpression),
+}
+impl AnyScssExpression {
+    pub fn as_any_css_value(&self) -> Option<&AnyCssValue> {
+        match &self {
+            Self::AnyCssValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssExpressionItem {
+    AnyCssValue(AnyCssValue),
+    CssGenericDelimiter(CssGenericDelimiter),
+}
+impl AnyScssExpressionItem {
+    pub fn as_any_css_value(&self) -> Option<&AnyCssValue> {
+        match &self {
+            Self::AnyCssValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_generic_delimiter(&self) -> Option<&CssGenericDelimiter> {
+        match &self {
+            Self::CssGenericDelimiter(item) => Some(item),
             _ => None,
         }
     }
@@ -27278,13 +27323,19 @@ impl From<CssUnaryExpression> for AnyCssExpression {
         Self::CssUnaryExpression(node)
     }
 }
+impl From<ScssExpression> for AnyCssExpression {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
 impl AstNode for AnyCssExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBinaryExpression::KIND_SET
         .union(CssCommaSeparatedValue::KIND_SET)
         .union(CssListOfComponentValuesExpression::KIND_SET)
         .union(CssParenthesizedExpression::KIND_SET)
-        .union(CssUnaryExpression::KIND_SET);
+        .union(CssUnaryExpression::KIND_SET)
+        .union(ScssExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -27293,6 +27344,7 @@ impl AstNode for AnyCssExpression {
                 | CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION
                 | CSS_PARENTHESIZED_EXPRESSION
                 | CSS_UNARY_EXPRESSION
+                | SCSS_EXPRESSION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -27310,6 +27362,7 @@ impl AstNode for AnyCssExpression {
                 Self::CssParenthesizedExpression(CssParenthesizedExpression { syntax })
             }
             CSS_UNARY_EXPRESSION => Self::CssUnaryExpression(CssUnaryExpression { syntax }),
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression::cast(syntax)?),
             _ => return None,
         };
         Some(res)
@@ -27321,6 +27374,7 @@ impl AstNode for AnyCssExpression {
             Self::CssListOfComponentValuesExpression(it) => it.syntax(),
             Self::CssParenthesizedExpression(it) => it.syntax(),
             Self::CssUnaryExpression(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -27330,6 +27384,7 @@ impl AstNode for AnyCssExpression {
             Self::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             Self::CssParenthesizedExpression(it) => it.into_syntax(),
             Self::CssUnaryExpression(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
         }
     }
 }
@@ -27341,6 +27396,7 @@ impl std::fmt::Debug for AnyCssExpression {
             Self::CssListOfComponentValuesExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUnaryExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -27352,6 +27408,7 @@ impl From<AnyCssExpression> for SyntaxNode {
             AnyCssExpression::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             AnyCssExpression::CssParenthesizedExpression(it) => it.into_syntax(),
             AnyCssExpression::CssUnaryExpression(it) => it.into_syntax(),
+            AnyCssExpression::ScssExpression(it) => it.into_syntax(),
         }
     }
 }
@@ -33073,6 +33130,131 @@ impl From<AnyScssDeclarationName> for SyntaxElement {
         node.into()
     }
 }
+impl From<ScssExpression> for AnyScssExpression {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
+impl AstNode for AnyScssExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssValue::KIND_SET.union(ScssExpression::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            SCSS_EXPRESSION => true,
+            k if AnyCssValue::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression::cast(syntax)?),
+            _ => {
+                if let Some(any_css_value) = AnyCssValue::cast(syntax) {
+                    return Some(Self::AnyCssValue(any_css_value));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::ScssExpression(it) => it.syntax(),
+            Self::AnyCssValue(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::ScssExpression(it) => it.into_syntax(),
+            Self::AnyCssValue(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssExpression> for SyntaxNode {
+    fn from(n: AnyScssExpression) -> Self {
+        match n {
+            AnyScssExpression::AnyCssValue(it) => it.into_syntax(),
+            AnyScssExpression::ScssExpression(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyScssExpression> for SyntaxElement {
+    fn from(n: AnyScssExpression) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssGenericDelimiter> for AnyScssExpressionItem {
+    fn from(node: CssGenericDelimiter) -> Self {
+        Self::CssGenericDelimiter(node)
+    }
+}
+impl AstNode for AnyScssExpressionItem {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssValue::KIND_SET.union(CssGenericDelimiter::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_GENERIC_DELIMITER => true,
+            k if AnyCssValue::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_GENERIC_DELIMITER => Self::CssGenericDelimiter(CssGenericDelimiter { syntax }),
+            _ => {
+                if let Some(any_css_value) = AnyCssValue::cast(syntax) {
+                    return Some(Self::AnyCssValue(any_css_value));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssGenericDelimiter(it) => it.syntax(),
+            Self::AnyCssValue(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssGenericDelimiter(it) => it.into_syntax(),
+            Self::AnyCssValue(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssExpressionItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssGenericDelimiter(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssExpressionItem> for SyntaxNode {
+    fn from(n: AnyScssExpressionItem) -> Self {
+        match n {
+            AnyScssExpressionItem::AnyCssValue(it) => it.into_syntax(),
+            AnyScssExpressionItem::CssGenericDelimiter(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyScssExpressionItem> for SyntaxElement {
+    fn from(n: AnyScssExpressionItem) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssIdentifier> for AnyScssModuleMember {
     fn from(node: CssIdentifier) -> Self {
         Self::CssIdentifier(node)
@@ -33890,6 +34072,16 @@ impl std::fmt::Display for AnyCssValueAtRuleProperty {
     }
 }
 impl std::fmt::Display for AnyScssDeclarationName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyScssExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyScssExpressionItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -40054,6 +40246,88 @@ impl IntoIterator for CssValueAtRulePropertyList {
 impl IntoIterator for &CssValueAtRulePropertyList {
     type Item = SyntaxResult<AnyCssValueAtRuleProperty>;
     type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssValueAtRuleProperty>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct ScssExpression {
+    syntax_list: SyntaxList,
+}
+impl ScssExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for ScssExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for ScssExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for ScssExpression {
+    type Language = Language;
+    type Node = AnyScssExpressionItem;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for ScssExpression {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("ScssExpression ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &ScssExpression {
+    type Item = AnyScssExpressionItem;
+    type IntoIter = AstNodeListIterator<Language, AnyScssExpressionItem>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for ScssExpression {
+    type Item = AnyScssExpressionItem;
+    type IntoIter = AstNodeListIterator<Language, AnyScssExpressionItem>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

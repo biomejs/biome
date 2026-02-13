@@ -1,4 +1,5 @@
 mod declaration;
+mod expression;
 
 use crate::parser::CssParser;
 use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier, parse_regular_identifier};
@@ -15,6 +16,7 @@ pub(crate) use declaration::{
     is_at_scss_declaration, is_at_scss_nesting_declaration, parse_scss_declaration,
     parse_scss_nesting_declaration,
 };
+pub(crate) use expression::parse_scss_expression;
 
 #[inline]
 pub(crate) fn is_at_scss_identifier(p: &mut CssParser) -> bool {
