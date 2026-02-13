@@ -14,7 +14,7 @@ import { other } from "./nonExisting";
 ```
 invalid.js:1:8 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The path ./foo.js has no default export.
+  × The path ./foo.js has no default export.
   
   > 1 │ import foo from "./foo.js";
       │        ^^^
@@ -29,7 +29,7 @@ invalid.js:1:8 lint/correctness/noUnresolvedImports ━━━━━━━━━�
 ```
 invalid.js:2:10 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The path ./bar has no export named bar.
+  × The path ./bar has no export named bar.
   
     1 │ import foo from "./foo.js";
   > 2 │ import { bar } from "./bar";
@@ -45,7 +45,7 @@ invalid.js:2:10 lint/correctness/noUnresolvedImports ━━━━━━━━━
 ```
 invalid.js:3:23 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The path ./nonExisting cannot be resolved: module not found
+  × The path ./nonExisting cannot be resolved: module not found
   
     1 │ import foo from "./foo.js";
     2 │ import { bar } from "./bar";

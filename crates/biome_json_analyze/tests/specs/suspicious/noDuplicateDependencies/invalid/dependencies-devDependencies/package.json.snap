@@ -22,7 +22,7 @@ expression: package.json
 ```
 package.json:8:5 lint/suspicious/noDuplicateDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The dependency "foo" is also listed under devDependencies.
+  ! The dependency "foo" is also listed under devDependencies.
   
      6 │   },
      7 │   "devDependencies": {

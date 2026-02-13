@@ -32,7 +32,7 @@ var bar = function() { function bar() {} };
 ```
 invalid.js:3:11 lint/suspicious/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
     1 │ const a = 3;
     2 │ function b() {
@@ -56,7 +56,7 @@ invalid.js:3:11 lint/suspicious/noShadow ━━━━━━━━━━━━━
 ```
 invalid.js:7:11 lint/suspicious/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
     6 │ const c = function () {
   > 7 │     const a = 10;
@@ -79,7 +79,7 @@ invalid.js:7:11 lint/suspicious/noShadow ━━━━━━━━━━━━━
 ```
 invalid.js:10:12 lint/suspicious/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
      8 │ }
      9 │ 
@@ -103,7 +103,7 @@ invalid.js:10:12 lint/suspicious/noShadow ━━━━━━━━━━━━�
 ```
 invalid.js:16:11 lint/suspicious/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
     15 │ if (true) {
   > 16 │     const a = 5;
@@ -126,7 +126,7 @@ invalid.js:16:11 lint/suspicious/noShadow ━━━━━━━━━━━━�
 ```
 invalid.js:19:20 lint/suspicious/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
     17 │ }
     18 │ 
@@ -152,7 +152,7 @@ invalid.js:19:20 lint/suspicious/noShadow ━━━━━━━━━━━━�
 ```
 invalid.js:21:33 lint/suspicious/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
     19 │ var foo = function(foo) {};
     20 │ 

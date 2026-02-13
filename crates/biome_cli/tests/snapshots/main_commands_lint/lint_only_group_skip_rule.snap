@@ -24,7 +24,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 check.js:1:28 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
   > 1 │ debugger; delete obj.prop; a === -0;
       │                            ^^^^^^^^^
@@ -52,5 +52,5 @@ check.js:1:28 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━�
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
-Found 1 info.
+Found 1 warning.
 ```

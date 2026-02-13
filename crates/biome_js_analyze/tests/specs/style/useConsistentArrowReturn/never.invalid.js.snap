@@ -23,7 +23,7 @@ const d = () => {
 ```
 never.invalid.js:1:11 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The body of this arrow function contains a single return statement.
+  i The body of this arrow function contains a single return statement.
   
   > 1 │ const a = () => {
       │           ^^^^^^^
@@ -48,7 +48,7 @@ never.invalid.js:1:11 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━
 ```
 never.invalid.js:5:11 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The body of this arrow function contains a single return statement.
+  i The body of this arrow function contains a single return statement.
   
     3 │ };
     4 │ 
@@ -77,7 +77,7 @@ never.invalid.js:5:11 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━
 ```
 never.invalid.js:9:11 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The body of this arrow function contains a single return statement.
+  i The body of this arrow function contains a single return statement.
   
      7 │ }
      8 │ 

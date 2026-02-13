@@ -15,7 +15,7 @@ const returnsAwaitArrow = async () => await fetchData()
 ```
 always.invalid.js:1:30 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This arrow function body should be a block statement.
+  i This arrow function body should be a block statement.
   
   > 1 │ const returnsSequenceArrow = () => (a, b)
       │                              ^^^^^^^^^^^^
@@ -37,7 +37,7 @@ always.invalid.js:1:30 lint/style/useConsistentArrowReturn  FIXABLE  ━━━�
 ```
 always.invalid.js:3:27 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This arrow function body should be a block statement.
+  i This arrow function body should be a block statement.
   
     1 │ const returnsSequenceArrow = () => (a, b)
     2 │ 

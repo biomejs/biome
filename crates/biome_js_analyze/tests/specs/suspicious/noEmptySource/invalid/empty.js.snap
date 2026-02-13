@@ -11,7 +11,7 @@ expression: empty.js
 ```
 empty.js:1:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i An empty source is not allowed.
+  ! An empty source is not allowed.
   
   > 1 │ 
       │ 

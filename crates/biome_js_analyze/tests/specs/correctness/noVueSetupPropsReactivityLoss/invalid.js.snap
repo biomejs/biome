@@ -17,7 +17,7 @@ export default {
 ```
 invalid.js:3:9 lint/correctness/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Destructuring `props` in the `setup` function parameters loses reactivity.
+  × Destructuring `props` in the `setup` function parameters loses reactivity.
   
     1 │ // Invalid: basic parameter destructuring
     2 │ export default {

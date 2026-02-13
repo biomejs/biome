@@ -19,7 +19,7 @@ createApp({
 ```
 invalid-createapp-object-data.vue:5:2 lint/correctness/noVueDataObjectDeclaration  FIXABLE  ━━━━━━━━━━
 
-  i Found an object declaration for `data` in this component.
+  ! Found an object declaration for `data` in this component.
   
     4 │ createApp({
   > 5 │ 	data: {

@@ -13,7 +13,7 @@ expression: empty-block-statement.js
 ```
 empty-block-statement.js:1:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i An empty source is not allowed.
+  ! An empty source is not allowed.
   
   > 1 │ {
       │ ^

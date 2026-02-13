@@ -5,7 +5,7 @@ use crate::settings::{
 };
 use crate::workspace::DocumentFileSource;
 use biome_analyze::RuleFilter;
-use biome_configuration::analyzer::{GroupPlainConfiguration, Nursery, SeverityOrGroup, Style};
+use biome_configuration::analyzer::{GroupPlainConfiguration, SeverityOrGroup, Style};
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::json::{JsonAssistConfiguration, JsonLinterConfiguration};
 use biome_configuration::max_size::MaxSize;
@@ -106,7 +106,7 @@ fn merge_override_linter_group_rule() {
             linter: Some(OverrideLinterConfiguration {
                 rules: Some(Rules {
                     style: Some(SeverityOrGroup::Group(Style {
-                        use_explicit_type: Some(RuleConfiguration::Plain(
+                        no_default_export: Some(RuleConfiguration::Plain(
                             RulePlainConfiguration::Off,
                         )),
                         ..Style::default()

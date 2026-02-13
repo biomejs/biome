@@ -14,7 +14,7 @@ expression: jsdoc.js
 ```
 jsdoc.js:4:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i An empty source is not allowed.
+  ! An empty source is not allowed.
   
     2 │  * test
     3 │  */

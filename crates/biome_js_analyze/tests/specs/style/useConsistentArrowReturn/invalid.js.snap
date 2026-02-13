@@ -23,7 +23,7 @@ const returnsAwaitArrow = async () => {
 ```
 invalid.js:1:28 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The body of this arrow function contains a single return statement.
+  i The body of this arrow function contains a single return statement.
   
   > 1 │ const returnsObjectArrow = () => {
       │                            ^^^^^^^
@@ -48,7 +48,7 @@ invalid.js:1:28 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━
 ```
 invalid.js:5:30 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The body of this arrow function contains a single return statement.
+  i The body of this arrow function contains a single return statement.
   
     3 │ }
     4 │ 
@@ -76,7 +76,7 @@ invalid.js:5:30 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━
 ```
 invalid.js:10:27 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The body of this arrow function contains a single return statement.
+  i The body of this arrow function contains a single return statement.
   
   > 10 │ const returnsAwaitArrow = async () => {
        │                           ^^^^^^^^^^^^^

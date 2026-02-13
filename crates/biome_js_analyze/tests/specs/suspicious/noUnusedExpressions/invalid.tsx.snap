@@ -73,7 +73,7 @@ class C {
 ```
 invalid.tsx:5:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     3 │ // Copyright OpenJS Foundation and other contributors, MIT license
     4 │ 
@@ -90,7 +90,7 @@ invalid.tsx:5:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━�
 ```
 invalid.tsx:7:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     5 │ 0;
     6 │ 
@@ -107,7 +107,7 @@ invalid.tsx:7:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━�
 ```
 invalid.tsx:9:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
      7 │ a;
      8 │ 
@@ -124,7 +124,7 @@ invalid.tsx:9:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━�
 ```
 invalid.tsx:11:2 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
      9 │ f(), 0;
     10 │ 
@@ -141,7 +141,7 @@ invalid.tsx:11:2 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:13:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     11 │ {0};
     12 │ 
@@ -158,7 +158,7 @@ invalid.tsx:13:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:15:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     13 │ [];
     14 │ 
@@ -175,7 +175,7 @@ invalid.tsx:15:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:17:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     15 │ a && b();
     16 │ 
@@ -192,7 +192,7 @@ invalid.tsx:17:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:19:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     17 │ a() || false;
     18 │ 
@@ -209,7 +209,7 @@ invalid.tsx:19:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:21:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     19 │ a || (b = c);
     20 │ 
@@ -226,7 +226,7 @@ invalid.tsx:21:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:23:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     21 │ a ? b() || (c = d) : e;
     22 │ 
@@ -243,7 +243,7 @@ invalid.tsx:23:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:25:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     23 │ `untagged template literal`
     24 │ 
@@ -260,7 +260,7 @@ invalid.tsx:25:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:27:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     25 │ tag`tagged template literal`
     26 │ 
@@ -277,7 +277,7 @@ invalid.tsx:27:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:29:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     27 │ a ? b() : c();
     28 │ 
@@ -294,7 +294,7 @@ invalid.tsx:29:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:31:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     29 │ foo.bar;
     30 │ 
@@ -311,7 +311,7 @@ invalid.tsx:31:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:33:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     31 │ !a;
     32 │ 
@@ -328,7 +328,7 @@ invalid.tsx:33:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:35:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     33 │ +a;
     34 │ 
@@ -345,7 +345,7 @@ invalid.tsx:35:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:37:39 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     35 │ "not a directive";
     36 │ 
@@ -362,7 +362,7 @@ invalid.tsx:37:39 lint/suspicious/noUnusedExpressions ━━━━━━━━�
 ```
 invalid.tsx:39:10 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     37 │ function foo() {"directive one"; f(); "directive two"; }
     38 │ 
@@ -379,7 +379,7 @@ invalid.tsx:39:10 lint/suspicious/noUnusedExpressions ━━━━━━━━�
 ```
 invalid.tsx:41:34 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     39 │ if (0) { "not a directive"; f(); }
     40 │ 
@@ -396,7 +396,7 @@ invalid.tsx:41:34 lint/suspicious/noUnusedExpressions ━━━━━━━━�
 ```
 invalid.tsx:43:35 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     41 │ function foo() { var foo = true; "use strict"; }
     42 │ 
@@ -413,7 +413,7 @@ invalid.tsx:43:35 lint/suspicious/noUnusedExpressions ━━━━━━━━�
 ```
 invalid.tsx:45:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     43 │ var foo = () => { var foo = true; "use strict"; }
     44 │ 
@@ -430,7 +430,7 @@ invalid.tsx:45:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:47:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     45 │ obj?.foo;
     46 │ 
@@ -447,7 +447,7 @@ invalid.tsx:47:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:49:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     47 │ obj?.foo.bar;
     48 │ 
@@ -464,7 +464,7 @@ invalid.tsx:49:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:51:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     49 │ obj?.foo().bar;
     50 │ 
@@ -481,7 +481,7 @@ invalid.tsx:51:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:53:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     51 │ <div />;
     52 │ 
@@ -498,7 +498,7 @@ invalid.tsx:53:1 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:55:20 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     53 │ <></>;
     54 │ 
@@ -515,7 +515,7 @@ invalid.tsx:55:20 lint/suspicious/noUnusedExpressions ━━━━━━━━�
 ```
 invalid.tsx:59:9 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     57 │ class C {
     58 │     static {
@@ -532,7 +532,7 @@ invalid.tsx:59:9 lint/suspicious/noUnusedExpressions ━━━━━━━━━
 ```
 invalid.tsx:60:9 lint/suspicious/noUnusedExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected an assignment or function call but found an expression instead.
+  ! Expected an assignment or function call but found an expression instead.
   
     58 │     static {
     59 │         'foo'

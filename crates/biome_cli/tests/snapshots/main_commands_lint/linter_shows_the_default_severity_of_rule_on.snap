@@ -97,7 +97,6 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useDeprecatedReason
   - useEnumInitializers
   - useExplicitLengthCheck
-  - useExplicitType
   - useExponentiationOperator
   - useExportType
   - useExportsLast

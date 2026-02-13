@@ -19,7 +19,7 @@ expression: package.json
 ```
 package.json:6:5 lint/suspicious/noDuplicateDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The dependency "foo" is listed twice under dependencies.
+  ! The dependency "foo" is listed twice under dependencies.
   
     4 │     "foo": "",
     5 │     "bar": "",

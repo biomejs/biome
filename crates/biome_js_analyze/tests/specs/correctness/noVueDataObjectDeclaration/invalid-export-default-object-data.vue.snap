@@ -17,7 +17,7 @@ export default {
 ```
 invalid-export-default-object-data.vue:3:2 lint/correctness/noVueDataObjectDeclaration  FIXABLE  ━━━━━━━━━━
 
-  i Found an object declaration for `data` in this component.
+  ! Found an object declaration for `data` in this component.
   
     1 │ // export default with object `data`
     2 │ export default {

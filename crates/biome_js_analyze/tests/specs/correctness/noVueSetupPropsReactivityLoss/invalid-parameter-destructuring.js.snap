@@ -55,7 +55,7 @@ _Note: The parser emitted 4 diagnostics which are not shown here._
 ```
 invalid-parameter-destructuring.js:5:9 lint/correctness/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━
 
-  i Destructuring `props` in the `setup` function parameters loses reactivity.
+  × Destructuring `props` in the `setup` function parameters loses reactivity.
   
     3 │ // Basic parameter destructuring
     4 │ export default {
@@ -72,7 +72,7 @@ invalid-parameter-destructuring.js:5:9 lint/correctness/noVueSetupPropsReactivit
 ```
 invalid-parameter-destructuring.js:33:9 lint/correctness/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━
 
-  i Destructuring `props` in the `setup` function parameters loses reactivity.
+  × Destructuring `props` in the `setup` function parameters loses reactivity.
   
     31 │ // defineComponent with parameter destructuring
     32 │ export default defineComponent({
