@@ -27,6 +27,7 @@ Skills complement the specialized **agents** in `.claude/agents/` - agents are p
 
 | Skill | Purpose | Best Used With | Lines |
 | ------- | --------- | ---------------- | ------- |
+| **[biome-developer](./biome-developer/SKILL.md)** | General development best practices, common gotchas, Biome-specific patterns | Any agent | ~320 |
 | **[testing-codegen](./testing-codegen/SKILL.md)** | Run tests, manage snapshots, create changesets, generate code | Any agent | ~200 |
 | **[type-inference](./type-inference/SKILL.md)** | Work with module graph and type inference system | `biome-lint-engineer` | ~180 |
 | **[diagnostics-development](./diagnostics-development/SKILL.md)** | Create user-friendly error messages and diagnostics | Any agent | ~170 |
@@ -166,6 +167,8 @@ Skills are designed to be **quick reference cards** - scan in 30 seconds and kno
 ```
 .claude/skills/
 ├── README.md (this file)
+├── biome-developer/
+│   └── SKILL.md
 ├── lint-rule-development/
 │   └── SKILL.md
 ├── formatter-development/

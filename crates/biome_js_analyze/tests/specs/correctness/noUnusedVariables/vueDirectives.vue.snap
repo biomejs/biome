@@ -1,0 +1,148 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: vueDirectives.vue
+---
+# Input
+```ts
+const supported = ref(true);
+const enabled = ref(false);
+const count = ref(0);
+const items = ref([1, 2, 3]);
+const isActive = ref(false);
+
+function toggleCaptions() {
+	enabled.value = !enabled.value;
+}
+
+function handleClick() {
+	count.value++;
+}
+
+```
+
+# Diagnostics
+```
+vueDirectives.vue:1:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable supported is unused.
+  
+  > 1 │ const supported = ref(true);
+      │       ^^^^^^^^^
+    2 │ const enabled = ref(false);
+    3 │ const count = ref(0);
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend supported with an underscore.
+  
+     1    │ - const·supported·=·ref(true);
+        1 │ + const·_supported·=·ref(true);
+     2  2 │   const enabled = ref(false);
+     3  3 │   const count = ref(0);
+  
+
+```
+
+```
+vueDirectives.vue:4:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable items is unused.
+  
+    2 │ const enabled = ref(false);
+    3 │ const count = ref(0);
+  > 4 │ const items = ref([1, 2, 3]);
+      │       ^^^^^
+    5 │ const isActive = ref(false);
+    6 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend items with an underscore.
+  
+     2  2 │   const enabled = ref(false);
+     3  3 │   const count = ref(0);
+     4    │ - const·items·=·ref([1,·2,·3]);
+        4 │ + const·_items·=·ref([1,·2,·3]);
+     5  5 │   const isActive = ref(false);
+     6  6 │   
+  
+
+```
+
+```
+vueDirectives.vue:5:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable isActive is unused.
+  
+    3 │ const count = ref(0);
+    4 │ const items = ref([1, 2, 3]);
+  > 5 │ const isActive = ref(false);
+      │       ^^^^^^^^
+    6 │ 
+    7 │ function toggleCaptions() {
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend isActive with an underscore.
+  
+     3  3 │   const count = ref(0);
+     4  4 │   const items = ref([1, 2, 3]);
+     5    │ - const·isActive·=·ref(false);
+        5 │ + const·_isActive·=·ref(false);
+     6  6 │   
+     7  7 │   function toggleCaptions() {
+  
+
+```
+
+```
+vueDirectives.vue:7:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function toggleCaptions is unused.
+  
+    5 │ const isActive = ref(false);
+    6 │ 
+  > 7 │ function toggleCaptions() {
+      │          ^^^^^^^^^^^^^^
+    8 │ 	enabled.value = !enabled.value;
+    9 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend toggleCaptions with an underscore.
+  
+     5  5 │   const isActive = ref(false);
+     6  6 │   
+     7    │ - function·toggleCaptions()·{
+        7 │ + function·_toggleCaptions()·{
+     8  8 │   	enabled.value = !enabled.value;
+     9  9 │   }
+  
+
+```
+
+```
+vueDirectives.vue:11:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function handleClick is unused.
+  
+     9 │ }
+    10 │ 
+  > 11 │ function handleClick() {
+       │          ^^^^^^^^^^^
+    12 │ 	count.value++;
+    13 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend handleClick with an underscore.
+  
+     9  9 │   }
+    10 10 │   
+    11    │ - function·handleClick()·{
+       11 │ + function·_handleClick()·{
+    12 12 │   	count.value++;
+    13 13 │   }
+  
+
+```

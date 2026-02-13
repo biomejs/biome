@@ -848,3 +848,62 @@ fn supports_ts_in_embedded_expressions() {
         result,
     ));
 }
+
+#[test]
+fn no_unused_variables_in_svelte_directives() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script>
+const isActive = false;
+const color = "red";
+let inputValue = "";
+let isChecked = false;
+</script>
+
+<main>
+  <!-- bind: directive -->
+  <input bind:value={inputValue} />
+  
+  <!-- bind: directive with checkbox -->
+  <input type="checkbox" bind:checked={isChecked} />
+  
+  <!-- class: directive -->
+  <div class:active={isActive}>Active</div>
+  
+  <!-- style: directive -->
+  <div style:color={color}>Styled</div>
+  
+  <!-- Using variables in text expressions -->
+  <p>{inputValue}</p>
+  <p>{isChecked}</p>
+</main>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_variables_in_svelte_directives",
+        fs,
+        console,
+        result,
+    ));
+}

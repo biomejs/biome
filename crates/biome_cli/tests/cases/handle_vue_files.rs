@@ -1061,6 +1061,75 @@ function reasonText() {
 }
 
 #[test]
+fn no_unused_variables_in_vue_directives() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script setup>
+const supported = ref(true);
+const enabled = ref(false);
+const count = ref(0);
+const isActive = ref(false);
+
+function toggleCaptions() {
+	enabled.value = !enabled.value;
+}
+
+function handleClick() {
+	count.value++;
+}
+</script>
+
+<template>
+  <!-- v-on shorthand with function call -->
+  <button @click="toggleCaptions()">Toggle</button>
+  
+  <!-- v-on shorthand with function reference -->
+  <button @click="handleClick">Click</button>
+  
+  <!-- v-bind shorthand with expression -->
+  <button :disabled="!supported">Disabled</button>
+  
+  <!-- v-if directive -->
+  <div v-if="count > 0">Count: {{ count }}</div>
+  
+  <!-- v-show directive -->
+  <div v-show="isActive">Active</div>
+  
+  <!-- v-for directive - skip for now as it has special syntax -->
+  <!-- <li v-for="item in items" :key="item">{{ item }}</li> -->
+</template>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_variables_in_vue_directives",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn use_const_not_triggered_in_snippet_sources() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

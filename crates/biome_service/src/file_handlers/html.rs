@@ -41,16 +41,17 @@ use biome_html_formatter::{
 use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
-    AstroEmbeddedContent, HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlLanguage,
-    HtmlRoot, HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression, HtmlTextExpressions,
-    HtmlVariant,
+    AnySvelteDirective, AstroEmbeddedContent, HtmlAttributeInitializerClause,
+    HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlLanguage, HtmlRoot,
+    HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression, HtmlTextExpressions, HtmlVariant,
+    VueDirective, VueVBindShorthandDirective, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
 use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, AstNodeList, BatchMutation, NodeCache, SendNode};
+use biome_rowan::{AstNode, AstNodeList, BatchMutation, NodeCache, SendNode, TextSize};
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
@@ -614,6 +615,89 @@ fn parse_embedded_nodes(
                     nodes.push((content.into(), file_source));
                 }
             }
+
+            // Parse Vue directive attributes (v-on, v-bind, v-if, etc.)
+            for element in html_root.syntax().descendants() {
+                // Handle @click shorthand (VueVOnShorthandDirective)
+                if let Some(directive) = VueVOnShorthandDirective::cast_ref(&element)
+                    && let Some(initializer) = directive.initializer()
+                {
+                    let file_source =
+                        embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
+                            setup: false,
+                            is_source: false,
+                        });
+                    if let Some((content, doc_source)) = parse_directive_string_value(
+                        &initializer,
+                        cache,
+                        biome_path,
+                        settings,
+                        file_source,
+                    ) {
+                        nodes.push((content.into(), doc_source));
+                    }
+                }
+
+                // Handle :prop shorthand (VueVBindShorthandDirective)
+                if let Some(directive) = VueVBindShorthandDirective::cast_ref(&element)
+                    && let Some(initializer) = directive.initializer()
+                {
+                    let file_source =
+                        embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
+                            setup: false,
+                            is_source: false,
+                        });
+                    if let Some((content, doc_source)) = parse_directive_string_value(
+                        &initializer,
+                        cache,
+                        biome_path,
+                        settings,
+                        file_source,
+                    ) {
+                        nodes.push((content.into(), doc_source));
+                    }
+                }
+
+                // Handle #slot shorthand (VueVSlotShorthandDirective)
+                if let Some(directive) = VueVSlotShorthandDirective::cast_ref(&element)
+                    && let Some(initializer) = directive.initializer()
+                {
+                    let file_source =
+                        embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
+                            setup: false,
+                            is_source: false,
+                        });
+                    if let Some((content, doc_source)) = parse_directive_string_value(
+                        &initializer,
+                        cache,
+                        biome_path,
+                        settings,
+                        file_source,
+                    ) {
+                        nodes.push((content.into(), doc_source));
+                    }
+                }
+
+                // Handle full directives (v-on:, v-bind:, v-if, v-show, etc.)
+                if let Some(directive) = VueDirective::cast_ref(&element)
+                    && let Some(initializer) = directive.initializer()
+                {
+                    let file_source =
+                        embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
+                            setup: false,
+                            is_source: false,
+                        });
+                    if let Some((content, doc_source)) = parse_directive_string_value(
+                        &initializer,
+                        cache,
+                        biome_path,
+                        settings,
+                        file_source,
+                    ) {
+                        nodes.push((content.into(), doc_source));
+                    }
+                }
+            }
         }
         HtmlVariant::Svelte => {
             let mut elements = vec![];
@@ -676,6 +760,28 @@ fn parse_embedded_nodes(
 
                 if let Some((content, file_source)) = result {
                     nodes.push((content.into(), file_source));
+                }
+            }
+
+            // Parse Svelte directive attributes (bind:, class:, use:, etc.)
+            // Note: on: event handlers are legacy Svelte 3/4 syntax and not supported.
+            // Svelte 5 runes mode uses regular attributes for event handlers.
+            for element in html_root.syntax().descendants() {
+                // Handle special Svelte directives (bind:, class:, etc.)
+                if let Some(directive) = AnySvelteDirective::cast_ref(&element)
+                    && let Some(initializer) = directive.initializer()
+                {
+                    let file_source = embedded_file_source
+                        .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
+                    if let Some((content, doc_source)) = parse_directive_text_expression(
+                        &initializer,
+                        cache,
+                        biome_path,
+                        settings,
+                        file_source,
+                    ) {
+                        nodes.push((content.into(), doc_source));
+                    }
                 }
             }
         }
@@ -1005,6 +1111,79 @@ pub(crate) fn parse_vue_text_expression(
         is_source: false,
     });
     parse_text_expression(expression, cache, biome_path, settings, file_source)
+}
+
+/// Parses a directive attribute's string value as JavaScript
+///
+/// Extracts the JavaScript expression from a Vue/Svelte directive attribute value
+/// (e.g., `@click="handler()"` -> `handler()`) and parses it as an embedded JavaScript snippet.
+///
+/// The function:
+/// 1. Extracts the attribute initializer clause (`="value"`)
+/// 2. Gets the HTML string node from the initializer
+/// 3. Uses `inner_string_text()` to extract the content without quotes
+/// 4. Parses the content as JavaScript with the correct offset
+/// 5. Returns an `EmbeddedSnippet` with proper range information
+fn parse_directive_string_value(
+    value: &HtmlAttributeInitializerClause,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+    file_source: JsFileSource,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    // Get the HTML string from the initializer (e.g., `"handler()"`)
+    let value_node = value.value().ok()?;
+    let html_string = value_node.as_html_string()?;
+
+    // Get the token and extract inner text (without quotes)
+    let content_token = html_string.value_token().ok()?;
+    let inner_text = html_string.inner_string_text().ok()?;
+    let text = inner_text.text();
+
+    // Calculate offset: start of token + 1 (for opening quote)
+    let token_range = content_token.text_trimmed_range();
+    let inner_offset = token_range.start() + TextSize::from(1);
+
+    // Parse as JavaScript
+    let document_file_source = DocumentFileSource::Js(file_source);
+    let options = settings.parse_options::<JsLanguage>(biome_path, &document_file_source);
+    let parse = parse_js_with_offset_and_cache(text, inner_offset, file_source, options, cache);
+
+    // Create snippet with proper ranges
+    let snippet = EmbeddedSnippet::new(
+        parse.into(),
+        value.range(), // Full attribute range
+        token_range,   // Token range (string with quotes)
+        inner_offset,  // Offset where JS starts (after opening quote)
+    );
+
+    Some((snippet, document_file_source))
+}
+
+/// Parses a Svelte directive attribute's text expression value as JavaScript
+///
+/// Extracts the JavaScript expression from a Svelte directive attribute value
+/// (e.g., `on:click={handler}` -> `handler`) and parses it as an embedded JavaScript snippet.
+///
+/// Unlike Vue which uses quoted strings, Svelte uses curly braces with text expressions.
+fn parse_directive_text_expression(
+    value: &HtmlAttributeInitializerClause,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+    file_source: JsFileSource,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    // Get the text expression from the initializer (e.g., `{handler}`)
+    let value_node = value.value().ok()?;
+    let text_expression = value_node.as_html_attribute_single_text_expression()?;
+
+    // Extract the expression inside the curly braces
+    let expression = text_expression.expression().ok()?;
+
+    // Parse as JavaScript using the same logic as Svelte text expressions
+    let document_file_source = DocumentFileSource::Js(file_source);
+    parse_text_expression(expression, cache, biome_path, settings, file_source)
+        .map(|(snippet, _)| (snippet, document_file_source))
 }
 
 fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
