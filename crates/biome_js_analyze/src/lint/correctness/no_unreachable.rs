@@ -1,5 +1,6 @@
 use std::{cmp::Ordering, collections::VecDeque, num::NonZeroU32, vec::IntoIter};
 
+use crate::services::control_flow::{ControlFlowGraph, JsControlFlowGraph};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_control_flow::{
     ExceptionHandler, ExceptionHandlerKind, Instruction, InstructionKind,
@@ -16,8 +17,6 @@ use biome_rowan::{AstNode, NodeOrToken, declare_node_union};
 use biome_rule_options::no_unreachable::NoUnreachableOptions;
 use roaring::bitmap::RoaringBitmap;
 use rustc_hash::FxHashMap;
-
-use crate::services::control_flow::{ControlFlowGraph, JsControlFlowGraph};
 
 declare_lint_rule! {
     /// Disallow unreachable code
