@@ -567,6 +567,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         // SCSS
         "SCSS_DECLARATION",
         "SCSS_NAMESPACED_IDENTIFIER",
+        "SCSS_QUALIFIED_NAME",
         "SCSS_VARIABLE_MODIFIER_LIST",
         "SCSS_VARIABLE_MODIFIER",
         "SCSS_IDENTIFIER",
