@@ -1844,6 +1844,7 @@ AnyCssValue =
 	| CssMetavariable
 	| TwValueThemeReference
 	| ScssIdentifier
+	| ScssQualifiedName
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1896,10 +1897,14 @@ AnyCssFunction =
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
 CssFunction =
-	name: CssIdentifier
+	name: AnyCssFunctionName
 	'('
 	items: CssParameterList
 	')'
+
+AnyCssFunctionName =
+	CssIdentifier
+	| ScssQualifiedName
 
 // https://drafts.csswg.org/css-values-4/#url-value
 // <url> = <url()> | <src()>
@@ -2480,6 +2485,17 @@ ScssNamespacedIdentifier =
 	namespace: CssIdentifier
 	'.'
 	name: ScssIdentifier
+
+// module.$var
+// ^^^^^^^^^^^
+ScssQualifiedName =
+	module: CssIdentifier
+	'.'
+	member: AnyScssModuleMember
+
+AnyScssModuleMember =
+	CssIdentifier
+	| ScssIdentifier
 
 // $var: 1 !default !global;
 //         ^^^^^^^^^^^^^^^^

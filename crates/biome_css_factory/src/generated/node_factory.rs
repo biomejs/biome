@@ -865,7 +865,7 @@ pub fn css_font_palette_values_at_rule_declarator(
     ))
 }
 pub fn css_function(
-    name: CssIdentifier,
+    name: AnyCssFunctionName,
     l_paren_token: SyntaxToken,
     items: CssParameterList,
     r_paren_token: SyntaxToken,
@@ -3024,6 +3024,20 @@ pub fn scss_namespaced_identifier(
             Some(SyntaxElement::Node(namespace.into_syntax())),
             Some(SyntaxElement::Token(dot_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_qualified_name(
+    module: CssIdentifier,
+    dot_token: SyntaxToken,
+    member: AnyScssModuleMember,
+) -> ScssQualifiedName {
+    ScssQualifiedName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_QUALIFIED_NAME,
+        [
+            Some(SyntaxElement::Node(module.into_syntax())),
+            Some(SyntaxElement::Token(dot_token)),
+            Some(SyntaxElement::Node(member.into_syntax())),
         ],
     ))
 }
