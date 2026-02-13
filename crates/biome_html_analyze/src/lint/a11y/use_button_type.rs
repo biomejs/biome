@@ -153,7 +153,7 @@ fn has_dynamic_attribute(element: &AnyHtmlElement, name: &str) -> bool {
         .iter()
         .find_map(|attr| {
             // Check if this is a HtmlSingleTextExpression (Svelte shorthand syntax)
-            if let Some(single_expr) = attr.as_html_single_text_expression() {
+            if let Some(single_expr) = attr.as_html_attribute_single_text_expression() {
                 // Check if the expression text matches the attribute name we're looking for
                 let expression = single_expr.expression().ok()?.html_literal_token().ok()?;
                 return if expression.text() == name {

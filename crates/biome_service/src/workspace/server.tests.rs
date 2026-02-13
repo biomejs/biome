@@ -1,5 +1,7 @@
+use super::*;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
+use crate::workspace::FeatureName;
 use biome_configuration::{
     FormatterConfiguration, JsConfiguration,
     javascript::{JsFormatterConfiguration, JsParserConfiguration},
@@ -9,8 +11,6 @@ use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
 use biome_json_parser::JsonParserOptions;
 use biome_rowan::TextSize;
-
-use super::*;
 
 #[test]
 fn commonjs_file_rejects_import_statement() {
@@ -671,6 +671,7 @@ fn extends_root_resolves_globs_from_project_root() {
             configuration,
             workspace_directory: Some(BiomePath::new("/project/packages/pkg-a")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: Default::default(),
         })
         .unwrap();
 

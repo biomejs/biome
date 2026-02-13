@@ -133,7 +133,7 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
 fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
     // Only Vue files use InsideTagVue context, which has Vue-specific directive parsing (v-bind, :, @, etc.)
     // Svelte and Astro use regular InsideTag context as they have different directive syntax
-    if HtmlSyntaxFeatures::Vue.is_supported(p) {
+    if Vue.is_supported(p) {
         HtmlLexContext::InsideTagWithDirectives
     } else {
         HtmlLexContext::InsideTag
@@ -638,7 +638,9 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
 
     if p.at(T!["}}"]) {
         p.expect_with_context(T!["}}"], context);
-        if context == HtmlLexContext::InsideTag || context == HtmlLexContext::InsideTagVue {
+        if context == HtmlLexContext::InsideTag
+            || context == HtmlLexContext::InsideTagWithDirectives
+        {
             Present(m.complete(p, HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION))
         } else {
             Present(m.complete(p, HTML_DOUBLE_TEXT_EXPRESSION))
@@ -689,7 +691,9 @@ pub(crate) fn parse_single_text_expression(
 
     if p.at(T!['}']) {
         p.bump_remap_with_context(T!['}'], context);
-        if context == HtmlLexContext::InsideTag || context == HtmlLexContext::InsideTagVue {
+        if context == HtmlLexContext::InsideTag
+            || context == HtmlLexContext::InsideTagWithDirectives
+        {
             Present(m.complete(p, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION))
         } else {
             Present(m.complete(p, HTML_SINGLE_TEXT_EXPRESSION))
