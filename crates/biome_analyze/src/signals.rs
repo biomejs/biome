@@ -11,7 +11,9 @@ use crate::{
 };
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::{Applicability, CodeSuggestion, Error, advice::CodeSuggestionAdvice};
-use biome_rowan::{BatchMutation, Language};
+use biome_rowan::{BatchMutation, Language, SyntaxNode, TextRange};
+use biome_text_edit::TextEdit;
+use std::borrow::Cow;
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
 use std::vec::IntoIter;
@@ -109,17 +111,29 @@ where
 /// Unlike [DiagnosticSignal] which converts through [Error] into
 /// [DiagnosticKind::Raw](crate::diagnostics::DiagnosticKind::Raw), this type
 /// directly converts via `AnalyzerDiagnostic::from(RuleDiagnostic)`.
-pub struct PluginSignal<L> {
+pub struct PluginSignal<L: Language> {
     diagnostic: RuleDiagnostic,
-    _phantom: PhantomData<L>,
+    plugin_actions: Vec<crate::PluginActionData>,
+    root: Option<SyntaxNode<L>>,
 }
 
 impl<L: Language> PluginSignal<L> {
     pub fn new(diagnostic: RuleDiagnostic) -> Self {
         Self {
             diagnostic,
-            _phantom: PhantomData,
+            plugin_actions: Vec::new(),
+            root: None,
         }
+    }
+
+    pub fn with_actions(mut self, actions: Vec<crate::PluginActionData>) -> Self {
+        self.plugin_actions = actions;
+        self
+    }
+
+    pub fn with_root(mut self, root: SyntaxNode<L>) -> Self {
+        self.root = Some(root);
+        self
     }
 }
 
@@ -129,7 +143,35 @@ impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
     }
 
     fn actions(&self) -> AnalyzerActionIter<L> {
-        AnalyzerActionIter::new(vec![])
+        if self.plugin_actions.is_empty() {
+            return AnalyzerActionIter::new(vec![]);
+        }
+
+        let Some(root) = &self.root else {
+            return AnalyzerActionIter::new(vec![]);
+        };
+
+        let actions: Vec<_> = self
+            .plugin_actions
+            .iter()
+            .map(|action_data| {
+                let text_edit = TextEdit::from_unicode_words(
+                    &action_data.original_text,
+                    &action_data.rewritten_text,
+                );
+
+                AnalyzerAction {
+                    rule_name: None,
+                    category: ActionCategory::QuickFix(Cow::Borrowed("plugin.fix")),
+                    applicability: Applicability::MaybeIncorrect,
+                    message: markup!({ action_data.message }).to_owned(),
+                    mutation: BatchMutation::new(root.clone()),
+                    text_edit: Some((action_data.source_range, text_edit)),
+                }
+            })
+            .collect();
+
+        AnalyzerActionIter::new(actions)
     }
 
     fn transformations(&self) -> AnalyzerTransformationIter<L> {
@@ -149,6 +191,8 @@ pub struct AnalyzerAction<L: Language> {
     pub applicability: Applicability,
     pub message: MarkupBuf,
     pub mutation: BatchMutation<L>,
+    /// Pre-computed text edit for plugin rewrites. Takes precedence over mutation.
+    pub text_edit: Option<(TextRange, TextEdit)>,
 }
 
 impl<L: Language> AnalyzerAction<L> {
@@ -179,7 +223,10 @@ impl<L: Language> Default for AnalyzerActionIter<L> {
 
 impl<L: Language> From<AnalyzerAction<L>> for CodeSuggestionAdvice<MarkupBuf> {
     fn from(action: AnalyzerAction<L>) -> Self {
-        let (_, suggestion) = action.mutation.to_text_range_and_edit().unwrap_or_default();
+        let (_, suggestion) = action
+            .text_edit
+            .or_else(|| action.mutation.to_text_range_and_edit())
+            .unwrap_or_default();
         Self {
             applicability: action.applicability,
             msg: action.message,
@@ -190,7 +237,10 @@ impl<L: Language> From<AnalyzerAction<L>> for CodeSuggestionAdvice<MarkupBuf> {
 
 impl<L: Language> From<AnalyzerAction<L>> for CodeSuggestionItem {
     fn from(action: AnalyzerAction<L>) -> Self {
-        let (range, suggestion) = action.mutation.to_text_range_and_edit().unwrap_or_default();
+        let (range, suggestion) = action
+            .text_edit
+            .or_else(|| action.mutation.to_text_range_and_edit())
+            .unwrap_or_default();
 
         Self {
             rule_name: action.rule_name,
@@ -469,6 +519,7 @@ where
                     category: action.category,
                     mutation: action.mutation,
                     message: action.message,
+                    text_edit: None,
                 });
             };
             if let Some(text_range) = R::text_range(&ctx, &self.state)
@@ -485,6 +536,7 @@ where
                     applicability: Applicability::Always,
                     mutation: suppression_action.mutation,
                     message: suppression_action.message,
+                    text_edit: None,
                 };
                 actions.push(action);
             }
@@ -498,6 +550,7 @@ where
                     applicability: Applicability::Always,
                     mutation: suppression_action.mutation,
                     message: suppression_action.message,
+                    text_edit: None,
                 };
                 actions.push(action);
             }

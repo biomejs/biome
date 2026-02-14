@@ -1,13 +1,13 @@
 use crate::{AnalyzerPlugin, PluginDiagnostic};
-use biome_analyze::{PluginTargetLanguage, RuleDiagnostic};
+use biome_analyze::{PluginActionData, PluginEvalResult, PluginTargetLanguage, RuleDiagnostic};
 use biome_console::markup;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_diagnostics::{Severity, category};
 use biome_fs::FileSystem;
 use biome_grit_patterns::{
     BuiltInFunction, CompilePatternOptions, GritBinding, GritExecContext, GritPattern, GritQuery,
-    GritQueryContext, GritQueryState, GritResolvedPattern, GritTargetFile, GritTargetLanguage,
-    compile_pattern_with_options,
+    GritQueryContext, GritQueryEffect, GritQueryState, GritResolvedPattern, GritTargetFile,
+    GritTargetLanguage, compile_pattern_with_options,
 };
 use biome_js_syntax::{AnyJsRoot, JsSyntaxNode};
 use biome_json_syntax::{JsonRoot, JsonSyntaxNode};
@@ -68,19 +68,34 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
         }
     }
 
-    fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
+    fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> PluginEvalResult {
         let name: &str = self.grit_query.name.as_deref().unwrap_or("anonymous");
 
-        let root = match self.language() {
+        let (root, source_range, original_text) = match self.language() {
             PluginTargetLanguage::JavaScript => node
                 .downcast_ref::<JsSyntaxNode>()
-                .and_then(|node| node.as_send()),
+                .map(|node| {
+                    let range = node.text_range_with_trivia();
+                    let text = node.text_with_trivia().to_string();
+                    (node.as_send(), range, text)
+                })
+                .unwrap(),
             PluginTargetLanguage::Css => node
                 .downcast_ref::<CssSyntaxNode>()
-                .and_then(|node| node.as_send()),
+                .map(|node| {
+                    let range = node.text_range_with_trivia();
+                    let text = node.text_with_trivia().to_string();
+                    (node.as_send(), range, text)
+                })
+                .unwrap(),
             PluginTargetLanguage::Json => node
                 .downcast_ref::<JsonSyntaxNode>()
-                .and_then(|node| node.as_send()),
+                .map(|node| {
+                    let range = node.text_range_with_trivia();
+                    let text = node.text_with_trivia().to_string();
+                    (node.as_send(), range, text)
+                })
+                .unwrap(),
         };
 
         let parse = AnyParse::Node(NodeParse::new(root.unwrap(), vec![]));
@@ -118,13 +133,32 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                     ));
                 }
 
-                diagnostics
+                // Convert rewrite effects to plugin actions.
+                let mut actions = Vec::new();
+                for effect in &result.effects {
+                    if let GritQueryEffect::Rewrite(rewrite) = effect {
+                        actions.push(PluginActionData {
+                            source_range,
+                            original_text: original_text.clone(),
+                            rewritten_text: rewrite.rewritten.content.clone(),
+                            message: format!("Rewrite suggested by plugin `{name}`"),
+                        });
+                    }
+                }
+
+                PluginEvalResult {
+                    diagnostics,
+                    actions,
+                }
             }
-            Err(error) => vec![RuleDiagnostic::new(
-                category!("plugin"),
-                None::<TextRange>,
-                markup!(<Emphasis>{name}</Emphasis>" errored: "<Error>{error.to_string()}</Error>),
-            )],
+            Err(error) => PluginEvalResult {
+                diagnostics: vec![RuleDiagnostic::new(
+                    category!("plugin"),
+                    None::<TextRange>,
+                    markup!(<Emphasis>{name}</Emphasis>" errored: "<Error>{error.to_string()}</Error>),
+                )],
+                actions: Vec::new(),
+            },
         }
     }
 }

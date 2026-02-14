@@ -1,9 +1,10 @@
+use biome_rowan::{
+    AnySyntaxNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode, TextRange, WalkEvent,
+};
 use camino::Utf8PathBuf;
 use rustc_hash::FxHashSet;
 use std::hash::Hash;
 use std::{fmt::Debug, sync::Arc};
-
-use biome_rowan::{AnySyntaxNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode, WalkEvent};
 
 use crate::matcher::SignalRuleKey;
 use crate::{
@@ -16,13 +17,33 @@ pub type AnalyzerPluginSlice<'a> = &'a [Arc<Box<dyn AnalyzerPlugin>>];
 /// Vector of analyzer plugins that can be cheaply cloned.
 pub type AnalyzerPluginVec = Vec<Arc<Box<dyn AnalyzerPlugin>>>;
 
+/// Data for a code action produced by a plugin.
+#[derive(Debug, Clone)]
+pub struct PluginActionData {
+    /// The source range this action applies to.
+    pub source_range: TextRange,
+    /// The original source text that was matched.
+    pub original_text: String,
+    /// The rewritten text to replace the original.
+    pub rewritten_text: String,
+    /// A message describing the action.
+    pub message: String,
+}
+
+/// Result of evaluating a plugin, containing diagnostics and optional code actions.
+#[derive(Debug, Default)]
+pub struct PluginEvalResult {
+    pub diagnostics: Vec<RuleDiagnostic>,
+    pub actions: Vec<PluginActionData>,
+}
+
 /// Definition of an analyzer plugin.
 pub trait AnalyzerPlugin: Debug + Send + Sync {
     fn language(&self) -> PluginTargetLanguage;
 
     fn query(&self) -> Vec<RawSyntaxKind>;
 
-    fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic>;
+    fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> PluginEvalResult;
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
@@ -103,20 +124,26 @@ where
         }
 
         let rule_timer = profiling::start_plugin_rule("plugin");
-        let diagnostics = self
+        let eval_result = self
             .plugin
             .evaluate(node.clone().into(), ctx.options.file_path.clone());
         rule_timer.stop();
 
-        let signals = diagnostics.into_iter().map(|diagnostic| {
+        let actions = eval_result.actions;
+        let signals = eval_result.diagnostics.into_iter().map(|diagnostic| {
             let name = diagnostic
                 .subcategory
                 .clone()
                 .unwrap_or_else(|| "anonymous".into());
+            let text_range = diagnostic.span().unwrap_or_default();
+
+            let signal = PluginSignal::<L>::new(diagnostic)
+                .with_actions(actions.clone())
+                .with_root(node.clone());
 
             SignalEntry {
-                text_range: diagnostic.span().unwrap_or_default(),
-                signal: Box::new(PluginSignal::<L>::new(diagnostic)),
+                text_range,
+                signal: Box::new(signal),
                 rule: SignalRuleKey::Plugin(name.into()),
                 category: RuleCategory::Lint,
                 instances: Default::default(),
