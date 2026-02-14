@@ -7,6 +7,7 @@ use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_target_node::GritTargetNode;
 use crate::grit_tree::GritTargetTree;
+use crate::linearization::apply_effects;
 use biome_analyze::RuleDiagnostic;
 use biome_parser::AnyParse;
 use camino::Utf8PathBuf;
@@ -176,15 +177,36 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
             variables,
             suppressed,
         };
-        for file_ptr in files {
-            let file = state.files.get_file_owner(file_ptr);
+        for file_ptr in &files {
+            let file = state.files.get_file_owner(*file_ptr);
             let mut match_log = file.matches.borrow_mut();
 
             if match_log.input_matches.is_none() {
                 match_log.input_matches = Some(input_ranges.clone());
             }
+        }
 
-            // TODO: Implement effect application
+        // Apply effects: if there are accumulated effects, linearize
+        // them to produce rewritten source and push a new file version.
+        if !state.effects.is_empty() {
+            for file_ptr in &files {
+                let file_owner = state.files.get_file_owner(*file_ptr);
+                let source = file_owner.tree.text();
+
+                let new_src =
+                    apply_effects(source, &state.effects, &state.files, &self.lang, logs)?;
+
+                if new_src != source {
+                    let file_name = file_owner.name.clone();
+                    if let Some(new_owner) = new_file_owner(file_name, &new_src, &self.lang, logs)?
+                    {
+                        self.files().push(new_owner);
+                        state
+                            .files
+                            .push_revision(file_ptr, self.files().last().unwrap());
+                    }
+                }
+            }
         }
 
         let new_files_binding = &mut state.bindings[GLOBAL_VARS_SCOPE_INDEX as usize]

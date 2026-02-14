@@ -1,5 +1,6 @@
 ---
 source: crates/biome_grit_patterns/tests/spec_tests.rs
+assertion_line: 94
 expression: patternDefinition
 ---
 SnapshotResult {
@@ -7,6 +8,14 @@ SnapshotResult {
     matched_ranges: [
         "1:1-1:29",
     ],
-    rewritten_files: [],
+    rewritten_files: [
+        OutputFile {
+            messages: [],
+            variables: [],
+            source_file: "tests/specs/ts/patternDefinition.ts",
+            content: "console.info('Hello, world!');\nconsole.warn('Can you hear me?');\n",
+            byte_ranges: None,
+        },
+    ],
     created_files: [],
 }

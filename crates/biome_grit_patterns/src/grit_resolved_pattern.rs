@@ -345,11 +345,75 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
 
     fn extend(
         &mut self,
-        _with: Self,
-        _effects: &mut Vec<Effect<'a, GritQueryContext>>,
-        _language: &<GritQueryContext as QueryContext>::Language<'a>,
+        mut with: Self,
+        effects: &mut Vec<Effect<'a, GritQueryContext>>,
+        language: &<GritQueryContext as QueryContext>::Language<'a>,
     ) -> GritResult<()> {
-        Err(GritPatternError::new("Not implemented")) // TODO: Implement rewriting
+        match self {
+            Self::Binding(bindings) => {
+                let new_effects: GritResult<Vec<Effect<GritQueryContext>>> = bindings
+                    .iter()
+                    .map(|b| {
+                        let is_first = !effects.iter().any(|e| e.binding == *b);
+                        with.normalize_insert(b, is_first, language)?;
+                        Ok(Effect {
+                            binding: b.clone(),
+                            pattern: with.clone(),
+                            kind: grit_util::EffectKind::Insert,
+                        })
+                    })
+                    .collect();
+                effects.extend(new_effects?);
+                Ok(())
+            }
+            Self::Snippets(snippets) => {
+                match with {
+                    Self::Snippets(with_snippets) => snippets.extend(with_snippets),
+                    Self::Binding(binding) => {
+                        let binding = binding.last().ok_or_else(|| {
+                            GritPatternError::new("cannot extend with empty binding")
+                        })?;
+                        snippets.push(ResolvedSnippet::Binding(binding.clone()));
+                    }
+                    Self::Constant(c) => {
+                        snippets.push(ResolvedSnippet::Text(c.to_string().into()));
+                    }
+                    Self::List(_) | Self::File(_) | Self::Files(_) | Self::Map(_) => {
+                        return Err(GritPatternError::new(
+                            "cannot extend ResolvedPattern::Snippet with this type",
+                        ));
+                    }
+                }
+                Ok(())
+            }
+            Self::List(lst) => {
+                lst.push(with);
+                Ok(())
+            }
+            Self::Constant(Constant::Integer(i)) => {
+                if let Self::Constant(Constant::Integer(j)) = with {
+                    *i += j;
+                    Ok(())
+                } else {
+                    Err(GritPatternError::new(
+                        "can only extend Constant::Integer with another Constant::Integer",
+                    ))
+                }
+            }
+            Self::Constant(Constant::Float(x)) => {
+                if let Self::Constant(Constant::Float(y)) = with {
+                    *x += y;
+                    Ok(())
+                } else {
+                    Err(GritPatternError::new(
+                        "can only extend Constant::Float with another Constant::Float",
+                    ))
+                }
+            }
+            Self::File(_) | Self::Files(_) | Self::Map(_) | Self::Constant(_) => {
+                Err(GritPatternError::new("cannot extend this resolved pattern"))
+            }
+        }
     }
 
     fn float(
@@ -528,14 +592,83 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
 
     fn linearized_text(
         &self,
-        _language: &GritTargetLanguage,
-        _effects: &[Effect<'a, GritQueryContext>],
-        _files: &FileRegistry<'a, GritQueryContext>,
-        _memo: &mut HashMap<CodeRange, Option<String>>,
-        _should_pad_snippet: bool,
-        _logs: &mut AnalysisLogs,
+        language: &GritTargetLanguage,
+        effects: &[Effect<'a, GritQueryContext>],
+        files: &FileRegistry<'a, GritQueryContext>,
+        memo: &mut HashMap<CodeRange, Option<String>>,
+        should_pad_snippet: bool,
+        logs: &mut AnalysisLogs,
     ) -> GritResult<Cow<'a, str>> {
-        Err(GritPatternError::new("Not implemented")) // TODO: Implement rewriting
+        match self {
+            Self::Snippets(snippets) => Ok(snippets
+                .iter()
+                .map(|snippet| snippet.linearized_text(language, effects, files, memo, None, logs))
+                .collect::<GritResult<Vec<_>>>()?
+                .join("")
+                .into()),
+            Self::Binding(bindings) => Ok(bindings
+                .last()
+                .ok_or_else(|| {
+                    GritPatternError::new("cannot grab text of resolved_pattern with no binding")
+                })?
+                .linearized_text(
+                    language,
+                    effects,
+                    files,
+                    memo,
+                    should_pad_snippet.then_some(0),
+                    logs,
+                )?),
+            Self::Constant(c) => Ok(c.to_string().into()),
+            Self::List(list) => Ok(list
+                .iter()
+                .map(|pattern| {
+                    pattern.linearized_text(
+                        language,
+                        effects,
+                        files,
+                        memo,
+                        should_pad_snippet,
+                        logs,
+                    )
+                })
+                .collect::<GritResult<Vec<_>>>()?
+                .join(",")
+                .into()),
+            Self::Map(map) => Ok(("{".to_string()
+                + &map
+                    .iter()
+                    .map(|(key, value)| {
+                        let linearized = value.linearized_text(
+                            language,
+                            effects,
+                            files,
+                            memo,
+                            should_pad_snippet,
+                            logs,
+                        )?;
+                        Ok(format!("\"{key}\": {linearized}"))
+                    })
+                    .collect::<GritResult<Vec<_>>>()?
+                    .join(", ")
+                + "}")
+                .into()),
+            Self::File(file) => Ok(format!(
+                "{}:\n{}",
+                file.name(files)
+                    .linearized_text(language, effects, files, memo, false, logs)?,
+                file.body(files).linearized_text(
+                    language,
+                    effects,
+                    files,
+                    memo,
+                    should_pad_snippet,
+                    logs,
+                )?
+            )
+            .into()),
+            Self::Files(_) => self.text(files, language),
+        }
     }
 
     fn matches_undefined(&self) -> bool {
@@ -561,11 +694,22 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
 
     fn normalize_insert(
         &mut self,
-        _binding: &GritBinding,
-        _is_first: bool,
-        _language: &GritTargetLanguage,
+        binding: &GritBinding,
+        is_first: bool,
+        language: &GritTargetLanguage,
     ) -> GritResult<()> {
-        Err(GritPatternError::new("Not implemented")) // TODO: Implement insertion padding
+        let Self::Snippets(snippets) = self else {
+            return Ok(());
+        };
+        let Some(ResolvedSnippet::Text(text)) = snippets.first() else {
+            return Ok(());
+        };
+        if let Some(padding) = binding.get_insertion_padding(text, is_first, language)
+            && padding.chars().next() != binding.text(language)?.chars().last()
+        {
+            snippets.insert(0, ResolvedSnippet::Text(padding.into()));
+        }
+        Ok(())
     }
 
     fn position(&self, language: &GritTargetLanguage) -> Option<Range> {

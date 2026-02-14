@@ -19,6 +19,7 @@ mod grit_resolved_pattern;
 mod grit_target_language;
 mod grit_target_node;
 mod grit_tree;
+mod linearization;
 mod pattern_compiler;
 mod source_location_ext;
 mod util;
