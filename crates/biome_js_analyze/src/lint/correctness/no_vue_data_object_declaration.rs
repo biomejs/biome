@@ -103,7 +103,7 @@ declare_lint_rule! {
             RuleSource::EslintVueJs("no-deprecated-data-object-declaration").inspired(),
             RuleSource::EslintVueJs("no-shared-component-data").inspired(),
         ],
-        severity: Severity::Warning,
+        severity: Severity::Error,
     }
 }
 
