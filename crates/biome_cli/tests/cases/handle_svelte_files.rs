@@ -907,3 +907,53 @@ let isChecked = false;
         result,
     ));
 }
+
+#[test]
+fn no_comma_operator_triggered_in_svelte_template_expression() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script>
+  let x = 1;
+</script>
+
+<!-- Comma operator in template expression - should be flagged -->
+<p>{(console.log("side effect"), x)}</p>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noCommaOperator", file.as_str()].as_slice()),
+    );
+
+    // The comma operator SHOULD be flagged in Svelte (hack only applies to Vue)
+    // Result is Ok because it's a warning, but console should contain the diagnostic
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let has_comma_operator = console.out_buffer.iter().any(|m| {
+        let content = format!("{:?}", m.content);
+        content.contains("noCommaOperator")
+    });
+    assert!(
+        has_comma_operator,
+        "Expected noCommaOperator diagnostic in console output"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_comma_operator_triggered_in_svelte_template_expression",
+        fs,
+        console,
+        result,
+    ));
+}
