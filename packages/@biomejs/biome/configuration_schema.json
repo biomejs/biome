@@ -5863,6 +5863,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noShadow": {
+					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.\nSee https://biomejs.dev/linter/rules/no-shadow",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoShadowConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSyncScripts": {
 					"description": "Prevent the usage of synchronous scripts.\nSee https://biomejs.dev/linter/rules/no-sync-scripts",
 					"anyOf": [
@@ -12157,13 +12164,6 @@
 					"description": "Disallow comparisons where both sides are exactly the same.\nSee https://biomejs.dev/linter/rules/no-self-compare",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSelfCompareConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noShadow": {
-					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.\nSee https://biomejs.dev/linter/rules/no-shadow",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoShadowConfiguration" },
 						{ "type": "null" }
 					]
 				},

@@ -2205,6 +2205,11 @@ See https://biomejs.dev/linter/rules/no-script-url
 	 */
 	noScriptUrl?: NoScriptUrlConfiguration;
 	/**
+	* Disallow variable declarations from shadowing variables declared in the outer scope.
+See https://biomejs.dev/linter/rules/no-shadow 
+	 */
+	noShadow?: NoShadowConfiguration;
+	/**
 	* Prevent the usage of synchronous scripts.
 See https://biomejs.dev/linter/rules/no-sync-scripts 
 	 */
@@ -3286,11 +3291,6 @@ See https://biomejs.dev/linter/rules/no-self-compare
 	 */
 	noSelfCompare?: NoSelfCompareConfiguration;
 	/**
-	* Disallow variable declarations from shadowing variables declared in the outer scope.
-See https://biomejs.dev/linter/rules/no-shadow 
-	 */
-	noShadow?: NoShadowConfiguration;
-	/**
 	* Disallow identifiers from shadowing restricted names.
 See https://biomejs.dev/linter/rules/no-shadow-restricted-names 
 	 */
@@ -4063,6 +4063,9 @@ export type NoRootTypeConfiguration =
 export type NoScriptUrlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoScriptUrlOptions;
+export type NoShadowConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoShadowOptions;
 export type NoSyncScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSyncScriptsOptions;
@@ -4690,9 +4693,6 @@ export type NoRedundantUseStrictConfiguration =
 export type NoSelfCompareConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSelfCompareOptions;
-export type NoShadowConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoShadowOptions;
 export type NoShadowRestrictedNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShadowRestrictedNamesOptions;
@@ -5670,6 +5670,10 @@ export interface RuleWithNoScriptUrlOptions {
 	level: RulePlainConfiguration;
 	options?: NoScriptUrlOptions;
 }
+export interface RuleWithNoShadowOptions {
+	level: RulePlainConfiguration;
+	options?: NoShadowOptions;
+}
 export interface RuleWithNoSyncScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSyncScriptsOptions;
@@ -6590,10 +6594,6 @@ export interface RuleWithNoSelfCompareOptions {
 	level: RulePlainConfiguration;
 	options?: NoSelfCompareOptions;
 }
-export interface RuleWithNoShadowOptions {
-	level: RulePlainConfiguration;
-	options?: NoShadowOptions;
-}
 export interface RuleWithNoShadowRestrictedNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoShadowRestrictedNamesOptions;
@@ -7130,6 +7130,7 @@ The values of the list are case-insensitive.
 	disallow?: string[];
 }
 export type NoScriptUrlOptions = {};
+export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
 export interface NoUndeclaredEnvVarsOptions {
@@ -7612,7 +7613,6 @@ export type NoReactSpecificPropsOptions = {};
 export type NoRedeclareOptions = {};
 export type NoRedundantUseStrictOptions = {};
 export type NoSelfCompareOptions = {};
-export type NoShadowOptions = {};
 export type NoShadowRestrictedNamesOptions = {};
 export type NoShorthandPropertyOverridesOptions = {};
 export type NoSkippedTestsOptions = {};
@@ -8117,6 +8117,7 @@ export type Category =
 	| "lint/nursery/noReturnAssign"
 	| "lint/nursery/noRootType"
 	| "lint/nursery/noScriptUrl"
+	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noUndeclaredEnvVars"
@@ -8341,7 +8342,6 @@ export type Category =
 	| "lint/suspicious/noRedeclare"
 	| "lint/suspicious/noRedundantUseStrict"
 	| "lint/suspicious/noSelfCompare"
-	| "lint/suspicious/noShadow"
 	| "lint/suspicious/noShadowRestrictedNames"
 	| "lint/suspicious/noShorthandPropertyOverrides"
 	| "lint/suspicious/noSkippedTests"
