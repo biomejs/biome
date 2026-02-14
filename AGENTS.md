@@ -361,6 +361,9 @@ Before opening a PR, verify:
 - Commit without formatting/linting
 - Open PRs without tests
 - Blindly accept all snapshot changes
+- Claim patterns are "widely used" or "common" without evidence
+- Implement legacy/deprecated syntax without checking with the user first
+- Make assumptions about API design - inspect actual code structure first
 
 ✅ **Do:**
 - Ask the user if unsure about changesets
@@ -371,6 +374,10 @@ Before opening a PR, verify:
 - Review snapshot changes carefully
 - Disclose AI assistance
 - Link to related issues
+- Inspect AST structure before implementing (use parser crate's `quick_test`)
+- Ask users about legacy/deprecated syntax support - wait for demand before implementing
+- Verify your solution works for all relevant cases, not just the first one you find
+- Reference the skills in `.claude/skills/` for technical implementation details
 
 ## Getting Help
 
