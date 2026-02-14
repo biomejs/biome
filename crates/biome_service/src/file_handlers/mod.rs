@@ -848,9 +848,10 @@ impl<'a> ProcessFixAll<'a> {
         &mut self,
         range: TextRange,
         new_text_len: u32,
+        rule_name: Option<(&'static str, &'static str)>,
     ) -> Result<(), WorkspaceError> {
         self.actions.push(FixAction {
-            rule_name: None,
+            rule_name: rule_name.map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
             range,
         });
         if !self.growth_guard.check(new_text_len) {
