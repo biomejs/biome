@@ -1,7 +1,7 @@
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
-use biome_console::{MarkupBuf, markup};
+use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, TextRange};
@@ -133,8 +133,43 @@ impl Rule for UseValidAnchor {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let diagnostic = RuleDiagnostic::new(rule_category!(), state.range(), state.message())
-            .note(state.note())
+        let diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            state.range(),
+            match state {
+                Self::State::MissingHrefAttribute(_) => {
+                    (markup! {
+                        "Provide a "<Emphasis>"href"</Emphasis>" attribute for the "<Emphasis>"a"</Emphasis>" element."
+                    }).to_owned()
+                },
+                Self::State::IncorrectHref(_) => {
+                    (markup! {
+                        "Provide a valid value for the attribute "<Emphasis>"href"</Emphasis>"."
+                    }).to_owned()
+                }
+                Self::State::CantBeAnchor(_) => {
+                    (markup! {
+                        "Use a "<Emphasis>"button"</Emphasis>" element instead of an "<Emphasis>"a"</Emphasis>" element."
+                    }).to_owned()
+                }
+            }
+            )
+            .note(
+                match state {
+                    Self::State::MissingHrefAttribute(_) => (markup! {
+                        "An anchor element should always have a "<Emphasis>"href"</Emphasis>""
+                    })
+                    .to_owned(),
+                    Self::State::IncorrectHref(_) => (markup! {
+                        "The href attribute should be a valid a URL"
+                    })
+                    .to_owned(),
+                    Self::State::CantBeAnchor(_) => (markup! {
+                        "Anchor elements should only be used for default sections or page navigation"
+                    })
+                    .to_owned(),
+                }
+            )
             .note(
             markup! {
                 "Check "<Hyperlink href="https://marcysutton.com/links-vs-buttons-in-modern-web-applications">"this thorough explanation"</Hyperlink>" to better understand the context."
@@ -146,43 +181,6 @@ impl Rule for UseValidAnchor {
 }
 
 impl UseValidAnchorState {
-    fn message(&self) -> MarkupBuf {
-        match self {
-            Self::MissingHrefAttribute(_) => {
-                (markup! {
-                    "Provide a "<Emphasis>"href"</Emphasis>" attribute for the "<Emphasis>"a"</Emphasis>" element."
-                }).to_owned()
-            },
-            Self::IncorrectHref(_) => {
-                (markup! {
-                    "Provide a valid value for the attribute "<Emphasis>"href"</Emphasis>"."
-                }).to_owned()
-            }
-            Self::CantBeAnchor(_) => {
-                (markup! {
-                    "Use a "<Emphasis>"button"</Emphasis>" element instead of an "<Emphasis>"a"</Emphasis>" element."
-                }).to_owned()
-            }
-        }
-    }
-
-    fn note(&self) -> MarkupBuf {
-        match self {
-            Self::MissingHrefAttribute(_) => (markup! {
-                "An anchor element should always have a "<Emphasis>"href"</Emphasis>""
-            })
-            .to_owned(),
-            Self::IncorrectHref(_) => (markup! {
-                "The href attribute should be a valid a URL"
-            })
-            .to_owned(),
-            Self::CantBeAnchor(_) => (markup! {
-                "Anchor elements should only be used for default sections or page navigation"
-            })
-            .to_owned(),
-        }
-    }
-
     fn range(&self) -> &TextRange {
         match self {
             Self::MissingHrefAttribute(range)
