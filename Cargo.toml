@@ -15,7 +15,7 @@ categories = ["development-tools", "web-programming"]
 
 [workspace.dependencies]
 # Crates needed in the workspace
-anyhow                       = "1.0.100"
+anyhow                       = "1.0.101"
 # publish
 biome_analyze                = { path = "./crates/biome_analyze", version = "0.5.7" }
 biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
@@ -80,6 +80,7 @@ biome_line_index             = { path = "./crates/biome_line_index", version = "
 biome_lsp                    = { path = "./crates/biome_lsp" }
 biome_lsp_converters         = { path = "./crates/biome_lsp_converters", version = "0.1.0" }
 biome_markdown_factory       = { path = "./crates/biome_markdown_factory", version = "0.0.1" }
+biome_markdown_formatter     = { path = "./crates/biome_markdown_formatter", version = "0.0.1" }
 biome_markdown_parser        = { path = "./crates/biome_markdown_parser", version = "0.0.1" }
 biome_markdown_syntax        = { path = "./crates/biome_markdown_syntax", version = "0.0.1" }
 biome_markup                 = { path = "./crates/biome_markup", version = "0.5.7" }
@@ -109,7 +110,7 @@ biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = 
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
 boa_engine                   = "0.21.0"
 boxcar                       = "0.2.14"
-bpaf                         = { version = "0.9.22", features = ["derive"] }
+bpaf                         = { version = "0.9.23", features = ["derive"] }
 camino                       = "1.2.2"
 cfg-if                       = "1.0.4"
 countme                      = "3.0.1"
@@ -118,7 +119,7 @@ dashmap                      = "6.1.0"
 directories                  = "6.0.0"
 either                       = "1.15.0"
 enumflags2                   = "0.7.12"
-filetime                     = "0.2"
+filetime                     = "0.2.27"
 getrandom                    = "0.2.15"
 globset                      = "0.4.18"
 grit-pattern-matcher         = "0.5.1"
@@ -126,14 +127,14 @@ grit-util                    = "0.5.1"
 hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.13.0" }
-insta                        = "1.43.2"
+insta                        = "1.46.3"
 jiff                         = "0.2.18"
 libc                         = "0.2.180"
 mimalloc                     = "0.1.48"
 papaya                       = "0.2.3"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 phf                          = { version = "0.13.1", features = ["macros"] }
-prettyplease                 = "0.2.28"
+prettyplease                 = "0.2.37"
 proc-macro-error2            = { version = "2.0.1", default-features = false }
 proc-macro2                  = "1.0.106"
 quickcheck                   = "1.0.3"
@@ -143,7 +144,7 @@ rayon                        = "1.11.0"
 regex                        = "1.12.2"
 rust-lapper                  = "1.2.0"
 rustc-hash                   = "2.1.1"
-schemars                     = { version = "1.2.0", features = ["indexmap2", "smallvec1"] }
+schemars                     = { version = "1.2.1", features = ["indexmap2", "smallvec1"] }
 serde                        = { version = "1.0.228", features = ["derive"] }
 serde_json                   = "1.0.149"
 similar                      = "2.7.0"

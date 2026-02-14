@@ -13,6 +13,7 @@ use std::io;
 use std::path::PathBuf;
 use std::time::SystemTime;
 fn main() -> io::Result<()> {
+    watch_group("assist", "source")?;
     watch_group("lint", "a11y")?;
     watch_group("lint", "nursery")?;
     Ok(())

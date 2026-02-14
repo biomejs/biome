@@ -1,0 +1,19 @@
+/* should not generate diagnostics */
+
+interface Prop {
+  propFunc: (arg: string) => number;
+}
+
+type Thing = {
+  genericProp: <T, U>(arg: T) => U;
+}
+
+type Callback = () => void;
+
+interface Example {
+  notAFunc: number;
+}
+
+declare class Foo {
+  methodFunc(arg: string): number;
+}

@@ -131,6 +131,10 @@ export default component$(() => {
   );
 });
 
+new Map([
+    ["None", [<TriangleDownIcon sx={{ fontSize: "1.25rem", color: "error.main" }} />]],
+]);
+
 ```
 
 _Note: The parser emitted 1 diagnostics which are not shown here._
@@ -1017,6 +1021,24 @@ invalid.jsx:123:29 lint/correctness/useJsxKeyInIterable ━━━━━━━━
         │                             ^^^
     124 │     </div>
     125 │   );
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:129:15 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    128 │ new Map([
+  > 129 │     ["None", [<TriangleDownIcon sx={{ fontSize: "1.25rem", color: "error.main" }} />]],
+        │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    130 │ ]);
+    131 │ 
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   

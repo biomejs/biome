@@ -2,6 +2,7 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -33,7 +34,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssMediaAtRule {
@@ -54,7 +55,7 @@ CssRoot {
                         missing separator,
                         CssBogusMediaQuery {
                             items: [
-                                ERROR_TOKEN@27..28 "$" [] [],
+                                DOLLAR@27..28 "$" [] [],
                                 IDENT@28..39 "-breakpoint" [] [],
                                 R_PAREN@39..41 ")" [] [Whitespace(" ")],
                             ],
@@ -336,7 +337,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..267
   0: (empty)
-  1: CSS_RULE_LIST@0..266
+  1: CSS_ROOT_ITEM_LIST@0..266
     0: CSS_AT_RULE@0..43
       0: AT@0..1 "@" [] []
       1: CSS_MEDIA_AT_RULE@1..43
@@ -352,7 +353,7 @@ CssRoot {
                 2: (empty)
             1: (empty)
             2: CSS_BOGUS_MEDIA_QUERY@27..41
-              0: ERROR_TOKEN@27..28 "$" [] []
+              0: DOLLAR@27..28 "$" [] []
               1: IDENT@28..39 "-breakpoint" [] []
               2: R_PAREN@39..41 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@41..43
@@ -535,12 +536,14 @@ CssRoot {
 ```
 at_rule_media_error.css:1:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × expected `)` but instead found `$`
   
   > 1 │ @media (--umrel-breakpoints$-breakpoint) {}
       │                            ^
     2 │ 
     3 │ @media only screen and width <= 500px {
+  
+  i Remove $
   
 at_rule_media_error.css:3:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

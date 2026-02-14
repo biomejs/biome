@@ -4,7 +4,7 @@ mod svelte;
 mod vue;
 
 use crate::parser::HtmlParser;
-use crate::syntax::HtmlSyntaxFeatures::{Astro, DoubleTextExpressions, SingleTextExpressions, Vue};
+use crate::syntax::HtmlSyntaxFeatures::{Astro, DoubleTextExpressions, Svelte, Vue};
 use crate::syntax::astro::{parse_astro_fence, parse_astro_spread_or_expression};
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
@@ -34,7 +34,7 @@ pub(crate) enum HtmlSyntaxFeatures {
     /// Exclusive to those documents that support text expressions with {{ }}
     DoubleTextExpressions,
     /// Exclusive to those documents that support text expressions with { }
-    SingleTextExpressions,
+    Svelte,
     /// Exclusive to those documents that support Vue
     Vue,
 }
@@ -44,14 +44,12 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
 
     fn is_supported(&self, p: &HtmlParser) -> bool {
         match self {
-            Self::Astro => p.options().frontmatter,
-            Self::DoubleTextExpressions => {
+            Astro => p.options().frontmatter,
+            DoubleTextExpressions => {
                 p.options().text_expression == Some(TextExpressionKind::Double)
             }
-            Self::SingleTextExpressions => {
-                p.options().text_expression == Some(TextExpressionKind::Single)
-            }
-            Self::Vue => p.options().vue,
+            Svelte => p.options().text_expression == Some(TextExpressionKind::Single),
+            Vue => p.options().vue,
         }
     }
 }
@@ -135,8 +133,8 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
 fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
     // Only Vue files use InsideTagVue context, which has Vue-specific directive parsing (v-bind, :, @, etc.)
     // Svelte and Astro use regular InsideTag context as they have different directive syntax
-    if HtmlSyntaxFeatures::Vue.is_supported(p) {
-        HtmlLexContext::InsideTagVue
+    if Vue.is_supported(p) {
+        HtmlLexContext::InsideTagWithDirectives
     } else {
         HtmlLexContext::InsideTag
     }
@@ -152,15 +150,15 @@ fn is_possible_component(p: &HtmlParser, tag_name: &str) -> bool {
 
 /// Returns the lexer context to use when parsing component names and member expressions.
 /// This allows `.` to be lexed as a token for member expressions like Component.Member
-/// We reuse InsideTagVue context because it supports `.` lexing, but this is ONLY used
+/// We reuse [HtmlLexContext::InsideTagWithDirectives] context because it supports `.` lexing, but this is ONLY used
 /// for parsing component names, not for parsing attributes.
 #[inline(always)]
 fn component_name_context(p: &HtmlParser) -> HtmlLexContext {
-    if Vue.is_supported(p) || Astro.is_supported(p) || SingleTextExpressions.is_supported(p) {
-        // Use InsideTagVue for all component-supporting files when parsing component names
+    if Vue.is_supported(p) || Svelte.is_supported(p) {
+        // Use HtmlLexContext::InsideTagWithDirectives for all component-supporting files when parsing component names
         // This allows `.` to be lexed properly for member expressions
         // Note: This is safe because we only use this context for tag names, not attributes
-        HtmlLexContext::InsideTagVue
+        HtmlLexContext::InsideTagWithDirectives
     } else {
         HtmlLexContext::InsideTag
     }
@@ -462,15 +460,15 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             parse_vue_v_slot_shorthand_directive,
             |p, m| disabled_vue(p, m.range(p)),
         ),
-        T!['{'] if SingleTextExpressions.is_supported(p) => parse_svelte_spread_or_expression(p),
+        T!['{'] if Svelte.is_supported(p) => parse_svelte_spread_or_expression(p),
         T!['{'] if Astro.is_supported(p) => parse_astro_spread_or_expression(p),
         // Keep previous behaviour so that invalid documents are still parsed.
-        T!['{'] => SingleTextExpressions.parse_exclusive_syntax(
+        T!['{'] => Svelte.parse_exclusive_syntax(
             p,
             |p| parse_svelte_spread_or_expression(p),
             |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte(p, m.range(p)),
         ),
-        T!["{@"] => SingleTextExpressions.parse_exclusive_syntax(
+        T!["{@"] => Svelte.parse_exclusive_syntax(
             p,
             |p| parse_attach_attribute(p),
             |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte(p, m.range(p)),
@@ -479,7 +477,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             Vue.parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
         }
         _ if is_at_svelte_directive_start(p) => {
-            SingleTextExpressions.parse_exclusive_syntax(p, parse_svelte_directive, |p, m| {
+            Svelte.parse_exclusive_syntax(p, parse_svelte_directive, |p, m| {
                 disabled_svelte(p, m.range(p))
             })
         }
@@ -503,7 +501,7 @@ fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
         T![:],
         T![@],
         T![#],
-    ]) || (SingleTextExpressions.is_supported(p) && p.at(T!["{@"]))
+    ]) || (Svelte.is_supported(p) && p.at(T!["{@"]))
 }
 
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
@@ -572,7 +570,7 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
     if p.at(T!['{']) {
-        HtmlSyntaxFeatures::SingleTextExpressions
+        HtmlSyntaxFeatures::Svelte
             .parse_exclusive_syntax(
                 p,
                 |p| parse_single_text_expression(p, inside_tag_context(p)),
@@ -640,7 +638,13 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
 
     if p.at(T!["}}"]) {
         p.expect_with_context(T!["}}"], context);
-        Present(m.complete(p, HTML_DOUBLE_TEXT_EXPRESSION))
+        if context == HtmlLexContext::InsideTag
+            || context == HtmlLexContext::InsideTagWithDirectives
+        {
+            Present(m.complete(p, HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION))
+        } else {
+            Present(m.complete(p, HTML_DOUBLE_TEXT_EXPRESSION))
+        }
     } else if p.at(T![<]) {
         let diagnostic = expected_closing_text_expression(p, p.cur_range(), opening_range);
         p.error(diagnostic);
@@ -670,7 +674,7 @@ pub(crate) fn parse_single_text_expression(
     p: &mut HtmlParser,
     context: HtmlLexContext,
 ) -> ParsedSyntax {
-    if !SingleTextExpressions.is_supported(p) {
+    if !Svelte.is_supported(p) {
         return Absent;
     }
 
@@ -687,7 +691,13 @@ pub(crate) fn parse_single_text_expression(
 
     if p.at(T!['}']) {
         p.bump_remap_with_context(T!['}'], context);
-        Present(m.complete(p, HTML_SINGLE_TEXT_EXPRESSION))
+        if context == HtmlLexContext::InsideTag
+            || context == HtmlLexContext::InsideTagWithDirectives
+        {
+            Present(m.complete(p, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION))
+        } else {
+            Present(m.complete(p, HTML_SINGLE_TEXT_EXPRESSION))
+        }
     } else if p.at(T![<]) {
         let diagnostic = expected_closing_text_expression(p, p.cur_range(), opening_range);
         p.error(diagnostic);

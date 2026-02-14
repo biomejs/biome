@@ -66,6 +66,20 @@ impl HtmlAttributeBuilder {
         ))
     }
 }
+pub fn html_attribute_double_text_expression(
+    l_double_curly_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_double_curly_token: SyntaxToken,
+) -> HtmlAttributeDoubleTextExpression {
+    HtmlAttributeDoubleTextExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_double_curly_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_double_curly_token)),
+        ],
+    ))
+}
 pub fn html_attribute_initializer_clause(
     eq_token: SyntaxToken,
     value: AnyHtmlAttributeInitializer,
@@ -82,6 +96,20 @@ pub fn html_attribute_name(value_token: SyntaxToken) -> HtmlAttributeName {
     HtmlAttributeName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_ATTRIBUTE_NAME,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn html_attribute_single_text_expression(
+    l_curly_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+) -> HtmlAttributeSingleTextExpression {
+    HtmlAttributeSingleTextExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
     ))
 }
 pub fn html_cdata_section(

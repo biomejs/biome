@@ -13,6 +13,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         ("<", "L_ANGLE"),
         (">", "R_ANGLE"),
         ("~", "TILDE"),
+        ("$", "DOLLAR"),
         ("#", "HASH"),
         ("&", "AMP"),
         ("|", "PIPE"),
@@ -301,6 +302,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
     ],
     nodes: &[
         "CSS_ROOT",
+        "CSS_ROOT_ITEM_LIST",
         "CSS_SNIPPET_ROOT",
         "CSS_RULE_LIST",
         "CSS_QUALIFIED_RULE",
@@ -562,6 +564,12 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_FUNCTION_PARAMETER_DEFAULT_VALUE",
         "CSS_FUNCTION_PARAMETER_LIST",
         "CSS_RETURNS_STATEMENT",
+        // SCSS
+        "SCSS_DECLARATION",
+        "SCSS_NAMESPACED_IDENTIFIER",
+        "SCSS_VARIABLE_MODIFIER_LIST",
+        "SCSS_VARIABLE_MODIFIER",
+        "SCSS_IDENTIFIER",
         // Tailwind CSS 4.0 nodes
         "TW_THEME_AT_RULE",
         "TW_UTILITY_AT_RULE",

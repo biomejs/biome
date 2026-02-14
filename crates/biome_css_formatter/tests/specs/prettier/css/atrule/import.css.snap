@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/import.css
 ---
+
 # Input
 
 ```css
@@ -105,85 +106,42 @@ $dir: 'fonts';
  #main {
    @import "example";
  }
-@@ -32,49 +26,44 @@
+@@ -32,17 +26,10 @@
  }
  #main {
    @import "example";
 -}
 -
 -@import "test.less" {
- }
+-}
 -@import "test.less" {
 -  a: b;
 -  c: d;
--}
+ }
  
  @import url("foo");
 -$dir: "fonts";
-+$
-+dir: 'fonts';
++$dir: 'fonts';
  
--@import url("foo.css");
--@import url("foo.css");
  @import url("foo.css");
--@import url("foo.css");
--@import url("fineprint.css") print;
--@import url("fineprint.css") print;
--@import url("fineprint.css") print;
-+@import url('foo.css');
-+@import  url("foo.css");
-+@import   url("foo.css");
-+@import url("fineprint.css")print;
- @import url("fineprint.css") print;
--@import url("bluish.css") projection, tv;
--@import url("bluish.css") projection, tv;
--@import url("bluish.css") projection, tv;
--@import url("bluish.css") projection, tv;
--@import url("bluish.css") projection, tv;
-+@import url("fineprint.css")  print;
-+@import url("fineprint.css")
-+  print;
-+@import url("bluish.css") projection,tv;
+ @import url("foo.css");
+@@ -59,14 +46,9 @@
  @import url("bluish.css") projection, tv;
--@import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
-+@import url("bluish.css") projection ,tv;
-+@import url("bluish.css") projection , tv;
-+@import url("bluish.css") projection  ,  tv;
-+@import url("bluish.css")
-   projection,
-   tv;
+ @import url("bluish.css") projection, tv;
+ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
+-  projection,
+-  tv;
 -@import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
 -  projection tv;
--@import url("landscape.css") screen and (orientation: landscape);
++  projection, tv;
++@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+ @import url("landscape.css") screen and (orientation: landscape);
 -@import "rounded-corners", "text-shadow";
 -@import "rounded-corners", "text-shadow";
 -$family: unquote("Droid+Sans");
-+@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
-+@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
-+@import url('landscape.css') screen and (orientation:landscape);
  @import url("http://fonts.googleapis.com/css?family=#{$family}");
--@import url("foo.css");
--@import url("foo.css");
--@import url("foo.css");
--@import url("foo.css");
--@import url("foo bar baz.css");
-+@import url( "foo.css");
-+@import url("foo.css" );
-+@import url( "foo.css" );
-+@import url(  "foo.css"  );
- @import url("foo bar baz.css");
-+@import url(  "foo bar baz.css"  );
- @import url("foo  bar  baz.css");
--@import url("foo.css");
--@import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600";
--@import url("foo.css,800");
-+@import url(
-+"foo.css"
-+);
-+@import 'https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600';
-+@import url(
-+"foo.css,800"
-+);
+ @import url("foo.css");
+ @import url("foo.css");
 ```
 
 # Output
@@ -220,44 +178,37 @@ $dir: 'fonts';
 }
 
 @import url("foo");
-$
-dir: 'fonts';
+$dir: 'fonts';
 
 @import url("foo.css");
-@import url('foo.css');
-@import  url("foo.css");
-@import   url("foo.css");
-@import url("fineprint.css")print;
+@import url("foo.css");
+@import url("foo.css");
+@import url("foo.css");
 @import url("fineprint.css") print;
-@import url("fineprint.css")  print;
-@import url("fineprint.css")
-  print;
-@import url("bluish.css") projection,tv;
+@import url("fineprint.css") print;
+@import url("fineprint.css") print;
+@import url("fineprint.css") print;
 @import url("bluish.css") projection, tv;
-@import url("bluish.css") projection ,tv;
-@import url("bluish.css") projection , tv;
-@import url("bluish.css") projection  ,  tv;
-@import url("bluish.css")
-  projection,
-  tv;
-@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
+@import url("bluish.css") projection, tv;
+@import url("bluish.css") projection, tv;
+@import url("bluish.css") projection, tv;
+@import url("bluish.css") projection, tv;
+@import url("bluish.css") projection, tv;
+@import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
+  projection, tv;
 @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
-@import url('landscape.css') screen and (orientation:landscape);
+@import url("landscape.css") screen and (orientation: landscape);
 @import url("http://fonts.googleapis.com/css?family=#{$family}");
-@import url( "foo.css");
-@import url("foo.css" );
-@import url( "foo.css" );
-@import url(  "foo.css"  );
+@import url("foo.css");
+@import url("foo.css");
+@import url("foo.css");
+@import url("foo.css");
 @import url("foo bar baz.css");
-@import url(  "foo bar baz.css"  );
+@import url("foo bar baz.css");
 @import url("foo  bar  baz.css");
-@import url(
-"foo.css"
-);
-@import 'https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600';
-@import url(
-"foo.css,800"
-);
+@import url("foo.css");
+@import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600";
+@import url("foo.css,800");
 ```
 
 # Errors
@@ -277,84 +228,15 @@ import.css:6:29 parse ━━━━━━━━━━━━━━━━━━━�
   
 import.css:42:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × SCSS variable declarations are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     41 │ @import url('foo');
   > 42 │ $dir: 'fonts';
-       │ ^
+       │ ^^^^^^^^^^^^^^
     43 │ 
     44 │ @import url("foo.css");
   
-import.css:42:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    41 │ @import url('foo');
-  > 42 │ $dir: 'fonts';
-       │       ^^^^^^^
-    43 │ 
-    44 │ @import url("foo.css");
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - state
-  - current
-  - past
-  - future
-  
-import.css:42:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    41 │ @import url('foo');
-  > 42 │ $dir: 'fonts';
-       │              ^
-    43 │ 
-    44 │ @import url("foo.css");
-  
-  i Remove ;
+  i SCSS only syntax
   
 import.css:62:91 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -369,27 +251,10 @@ import.css:62:91 parse ━━━━━━━━━━━━━━━━━━━
   
   i Remove tv
   
-import.css:79:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `}` but instead the file ends
-  
-    77 │ "foo.css,800"
-    78 │ );
-  > 79 │ 
-       │ 
-  
-  i the file ends here
-  
-    77 │ "foo.css,800"
-    78 │ );
-  > 79 │ 
-       │ 
-  
 
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-   52: @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
-   53: @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+   50: @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
 ```

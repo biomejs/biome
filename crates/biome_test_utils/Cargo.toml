@@ -14,7 +14,6 @@ publish              = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ansi_rgb             = "0.2.0"
 biome_analyze        = { workspace = true }
 biome_configuration  = { workspace = true }
 biome_console        = { workspace = true }
@@ -37,6 +36,7 @@ biome_string_case    = { workspace = true }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
 json_comments        = "0.2.2"
+owo-colors           = { version = "4.2.3" }
 serde_json           = { workspace = true }
 similar              = { workspace = true }
 ureq                 = { workspace = true }

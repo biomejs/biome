@@ -1,0 +1,50 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/declaration/mixed.scss
+---
+
+# Input
+
+```scss
+.example {
+  $local-var:   10px;
+  ns.$namespaced-var:    20px;
+  $default-var:   red   !default;
+  $global-var:blue!global;
+  $combined:green!global!default!global;
+
+  padding:   $local-var;
+  margin:  ns.$namespaced-var;
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Trailing newline: true
+-----
+
+```scss
+.example {
+	$local-var: 10px;
+	ns.$namespaced-var: 20px;
+	$default-var: red !default;
+	$global-var: blue !global;
+	$combined: green !default !global !global;
+
+	padding: $local-var;
+	margin:  ns.$namespaced-var;
+}
+
+```

@@ -9,27 +9,12 @@ use xtask_glue::{glue::fs2, project_root, reformat};
 fn generate_build_script(categories_and_groups: &BTreeMap<&str, Vec<String>>) -> Result<String> {
     let mut watch_calls = Vec::new();
 
-    // Generate watch_group calls for each category and group
     for (category, groups) in categories_and_groups {
         if groups.is_empty() {
             continue;
         }
         let mut groups = groups.clone();
         groups.sort();
-
-        // Add category comment
-        let _category_comment = match *category {
-            "lint" => "Lint groups",
-            "assist" => "Assist groups",
-            "syntax" => "Syntax groups",
-            _ => {
-                let mut title = category.to_string();
-                if let Some(first_char) = title.get_mut(0..1) {
-                    first_char.make_ascii_uppercase();
-                }
-                &format!("{} groups", title)
-            }
-        };
 
         for group in groups {
             watch_calls.push(quote! {
@@ -102,159 +87,59 @@ fn generate_build_script(categories_and_groups: &BTreeMap<&str, Vec<String>>) ->
     reformat(tokens)
 }
 
+/// Generate an analyzer crate's category files, build script, and registry.
+fn generate_analyzer_crate(
+    crate_name: &str,
+    categories: &[&'static str],
+    update_registry: fn(BTreeMap<&'static str, TokenStream>) -> Result<()>,
+) -> Result<()> {
+    let base_path = project_root().join(format!("crates/{crate_name}/src"));
+    let mut analyzers = BTreeMap::new();
+    let mut categories_and_groups = BTreeMap::new();
+
+    for &category in categories {
+        if base_path.join(category).exists() {
+            let groups = generate_category(category, &mut analyzers, &base_path)?;
+            if !groups.is_empty() {
+                categories_and_groups.insert(category, groups);
+            }
+        }
+    }
+
+    let build_script = generate_build_script(&categories_and_groups)?;
+    let build_rs_path = project_root().join(format!("crates/{crate_name}/build.rs"));
+    fs2::write(build_rs_path, build_script)?;
+
+    update_registry(analyzers)
+}
+
 pub fn generate_analyzer() -> Result<()> {
-    generate_js_analyzer()?;
-    generate_json_analyzer()?;
-    generate_css_analyzer()?;
-    generate_graphql_analyzer()?;
-    generate_html_analyzer()?;
+    generate_analyzer_crate(
+        "biome_js_analyze",
+        &["lint", "assist", "syntax"],
+        update_js_registry_builder,
+    )?;
+    generate_analyzer_crate(
+        "biome_json_analyze",
+        &["lint", "assist"],
+        update_json_registry_builder,
+    )?;
+    generate_analyzer_crate(
+        "biome_css_analyze",
+        &["lint", "assist"],
+        update_css_registry_builder,
+    )?;
+    generate_analyzer_crate(
+        "biome_graphql_analyze",
+        &["lint"],
+        update_graphql_registry_builder,
+    )?;
+    generate_analyzer_crate(
+        "biome_html_analyze",
+        &["lint", "assist"],
+        update_html_registry_builder,
+    )?;
     Ok(())
-}
-
-fn generate_js_analyzer() -> Result<()> {
-    let base_path = project_root().join("crates/biome_js_analyze/src");
-    let mut analyzers = BTreeMap::new();
-    let mut categories_and_groups = BTreeMap::new();
-
-    // Check if lint directory exists
-    let lint_path = base_path.join("lint");
-    if lint_path.exists() {
-        let lint_groups = generate_category("lint", &mut analyzers, &base_path)?;
-        if !lint_groups.is_empty() {
-            categories_and_groups.insert("lint", lint_groups);
-        }
-    }
-
-    // Check if assist directory exists
-    let assist_path = base_path.join("assist");
-    if assist_path.exists() {
-        let assist_groups = generate_category("assist", &mut analyzers, &base_path)?;
-        if !assist_groups.is_empty() {
-            categories_and_groups.insert("assist", assist_groups);
-        }
-    }
-
-    // Check if syntax directory exists
-    let syntax_path = base_path.join("syntax");
-    if syntax_path.exists() {
-        let syntax_groups = generate_category("syntax", &mut analyzers, &base_path)?;
-        if !syntax_groups.is_empty() {
-            categories_and_groups.insert("syntax", syntax_groups);
-        }
-    }
-
-    // Generate and write build.rs
-    let build_script = generate_build_script(&categories_and_groups)?;
-    let build_rs_path = project_root().join("crates/biome_js_analyze/build.rs");
-    fs2::write(build_rs_path, build_script)?;
-
-    update_js_registry_builder(analyzers)
-}
-
-fn generate_json_analyzer() -> Result<()> {
-    let base_path = project_root().join("crates/biome_json_analyze/src");
-    let mut analyzers = BTreeMap::new();
-    let mut categories_and_groups = BTreeMap::new();
-
-    // Check if lint directory exists
-    let lint_path = base_path.join("lint");
-    if lint_path.exists() {
-        let lint_groups = generate_category("lint", &mut analyzers, &base_path)?;
-        if !lint_groups.is_empty() {
-            categories_and_groups.insert("lint", lint_groups);
-        }
-    }
-
-    // Check if assist directory exists
-    let assist_path = base_path.join("assist");
-    if assist_path.exists() {
-        let assist_groups = generate_category("assist", &mut analyzers, &base_path)?;
-        if !assist_groups.is_empty() {
-            categories_and_groups.insert("assist", assist_groups);
-        }
-    }
-
-    // Generate and write build.rs
-    let build_script = generate_build_script(&categories_and_groups)?;
-    let build_rs_path = project_root().join("crates/biome_json_analyze/build.rs");
-    fs2::write(build_rs_path, build_script)?;
-
-    update_json_registry_builder(analyzers)
-}
-
-fn generate_css_analyzer() -> Result<()> {
-    let base_path = project_root().join("crates/biome_css_analyze/src");
-    let mut analyzers = BTreeMap::new();
-    let mut categories_and_groups = BTreeMap::new();
-
-    // Check if lint directory exists
-    let lint_path = base_path.join("lint");
-    if lint_path.exists() {
-        let lint_groups = generate_category("lint", &mut analyzers, &base_path)?;
-        if !lint_groups.is_empty() {
-            categories_and_groups.insert("lint", lint_groups);
-        }
-    }
-
-    // Check if assist directory exists
-    let assist_path = base_path.join("assist");
-    if assist_path.exists() {
-        let assist_groups = generate_category("assist", &mut analyzers, &base_path)?;
-        if !assist_groups.is_empty() {
-            categories_and_groups.insert("assist", assist_groups);
-        }
-    }
-
-    // Generate and write build.rs
-    let build_script = generate_build_script(&categories_and_groups)?;
-    let build_rs_path = project_root().join("crates/biome_css_analyze/build.rs");
-    fs2::write(build_rs_path, build_script)?;
-
-    update_css_registry_builder(analyzers)
-}
-
-fn generate_graphql_analyzer() -> Result<()> {
-    let base_path = project_root().join("crates/biome_graphql_analyze/src");
-    let mut analyzers = BTreeMap::new();
-    let mut categories_and_groups = BTreeMap::new();
-
-    // Check if lint directory exists
-    let lint_path = base_path.join("lint");
-    if lint_path.exists() {
-        let lint_groups = generate_category("lint", &mut analyzers, &base_path)?;
-        if !lint_groups.is_empty() {
-            categories_and_groups.insert("lint", lint_groups);
-        }
-    }
-
-    // Generate and write build.rs
-    let build_script = generate_build_script(&categories_and_groups)?;
-    let build_rs_path = project_root().join("crates/biome_graphql_analyze/build.rs");
-    fs2::write(build_rs_path, build_script)?;
-
-    update_graphql_registry_builder(analyzers)
-}
-
-fn generate_html_analyzer() -> Result<()> {
-    let base_path = project_root().join("crates/biome_html_analyze/src");
-    let mut analyzers = BTreeMap::new();
-    let mut categories_and_groups = BTreeMap::new();
-
-    // Check if lint directory exists
-    let lint_path = base_path.join("lint");
-    if lint_path.exists() {
-        let lint_groups = generate_category("lint", &mut analyzers, &base_path)?;
-        if !lint_groups.is_empty() {
-            categories_and_groups.insert("lint", lint_groups);
-        }
-    }
-
-    // Generate and write build.rs
-    let build_script = generate_build_script(&categories_and_groups)?;
-    let build_rs_path = project_root().join("crates/biome_html_analyze/build.rs");
-    fs2::write(build_rs_path, build_script)?;
-
-    update_html_registry_builder(analyzers)
 }
 
 fn generate_category(
@@ -299,7 +184,6 @@ fn generate_category(
         );
     }
 
-    let key = name;
     let module_name = format_ident!("{name}");
 
     let category_name = Case::Pascal.convert(name);
@@ -313,14 +197,14 @@ fn generate_category(
     };
 
     entries.insert(
-        key,
+        name,
         quote! {
             registry.record_category::<crate::#module_name::#category_name>();
         },
     );
 
     let (modules, paths): (Vec<_>, Vec<_>) = groups.into_values().unzip();
-    let tokens = xtask_glue::reformat(quote! {
+    let tokens = reformat(quote! {
         #( #modules )*
         ::biome_analyze::declare_category! {
             pub #category_name {
@@ -332,7 +216,6 @@ fn generate_category(
         }
     })?;
 
-    let tokens = reformat(tokens)?;
     fs2::write(base_path.join(format!("{name}.rs")), tokens)?;
 
     Ok(group_names)
@@ -340,7 +223,7 @@ fn generate_category(
 
 fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Result<()> {
     // Generate simple proc macro invocation instead of full code
-    let tokens = xtask_glue::reformat(quote! {
+    let tokens = reformat(quote! {
         //! Group description generated by proc macro at compile time.
         //!
         //! To add a new rule, create a `.rs` file in the group subdirectory
@@ -355,7 +238,6 @@ fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Resu
         }
     })?;
 
-    let tokens = reformat(tokens)?;
     fs2::write(base_path.join(category).join(format!("{group}.rs")), tokens)?;
 
     Ok(())
@@ -366,7 +248,7 @@ fn update_js_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) ->
 
     let categories = analyzers.into_values();
 
-    let tokens = xtask_glue::reformat(quote! {
+    let tokens = reformat(quote! {
         use biome_analyze::RegistryVisitor;
         use biome_js_syntax::JsLanguage;
 
@@ -385,7 +267,7 @@ fn update_json_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) 
 
     let categories = analyzers.into_values();
 
-    let tokens = xtask_glue::reformat(quote! {
+    let tokens = reformat(quote! {
         use biome_analyze::RegistryVisitor;
         use biome_json_syntax::JsonLanguage;
 
@@ -394,7 +276,6 @@ fn update_json_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) 
         }
     })?;
 
-    let tokens = reformat(tokens)?;
     fs2::write(path, tokens)?;
 
     Ok(())
@@ -405,7 +286,7 @@ fn update_css_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -
 
     let categories = analyzers.into_values();
 
-    let tokens = xtask_glue::reformat(quote! {
+    let tokens = reformat(quote! {
         use biome_analyze::RegistryVisitor;
         use biome_css_syntax::CssLanguage;
 
@@ -414,7 +295,6 @@ fn update_css_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -
         }
     })?;
 
-    let tokens = reformat(tokens)?;
     fs2::write(path, tokens)?;
 
     Ok(())
@@ -425,7 +305,7 @@ fn update_graphql_registry_builder(analyzers: BTreeMap<&'static str, TokenStream
 
     let categories = analyzers.into_values();
 
-    let tokens = xtask_glue::reformat(quote! {
+    let tokens = reformat(quote! {
         use biome_analyze::RegistryVisitor;
         use biome_graphql_syntax::GraphqlLanguage;
 
@@ -444,7 +324,7 @@ fn update_html_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) 
 
     let categories = analyzers.into_values();
 
-    let tokens = xtask_glue::reformat(quote! {
+    let tokens = reformat(quote! {
         use biome_analyze::RegistryVisitor;
         use biome_html_syntax::HtmlLanguage;
 

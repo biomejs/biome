@@ -75,7 +75,7 @@ impl Rule for NoRedundantAlt {
             .ok()?;
 
         match alt {
-            AnyHtmlAttributeInitializer::HtmlSingleTextExpression(ref expression) => {
+            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(ref expression) => {
                 let value = expression.expression().ok()?.html_literal_token().ok()?;
 
                 is_redundant_alt(value.text_trimmed()).then_some(alt)

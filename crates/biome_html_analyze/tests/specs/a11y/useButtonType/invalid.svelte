@@ -1,0 +1,8 @@
+<!-- should generate diagnostics -->
+
+<button>Do something</button>
+<button />
+<button type="incorrectType">Do something</button>
+<button type="incorrectType" />
+<button type>Do something</button>
+<button type="" />

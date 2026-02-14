@@ -7,14 +7,16 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_semantic::{CanBeImportedExported, ClosureExtensions, SemanticModel, is_constant};
+use biome_js_semantic::{
+    CanBeImportedExported, ClosureExtensions, ReferencesExtensions, SemanticModel, is_constant,
+};
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression,
     AnyJsMemberExpression, AnyJsObjectBindingPatternMember, JsArrayBindingPattern,
     JsArrayBindingPatternElement, JsArrayBindingPatternElementList, JsArrayExpression,
     JsComputedMemberExpression, JsObjectBindingPattern, JsObjectBindingPatternPropertyList,
-    JsReferenceIdentifier, JsVariableDeclarator, T, TsTypeofType,
+    JsReferenceIdentifier, JsVariableDeclarator, JsxReferenceIdentifier, T, TsTypeofType,
     is_transparent_expression_wrapper,
 };
 use biome_js_syntax::{
@@ -180,6 +182,15 @@ declare_lint_rule! {
     ///   useEffect(() => {
     ///     console.log(b);
     ///   }, []);
+    /// }
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// import { useCallback } from "react";
+    ///
+    /// function component() {
+    ///   const Component = () => null;
+    ///   const render = useCallback(() => <Component />, []);
     /// }
     /// ```
     ///
@@ -527,7 +538,7 @@ pub enum UnstableDependencyKind {
 }
 
 declare_node_union! {
-    pub AnyExpressionCandidate = AnyJsExpression | JsReferenceIdentifier
+    pub AnyExpressionCandidate = AnyJsExpression | JsReferenceIdentifier | JsxReferenceIdentifier
 }
 
 /// Returns expression candidates for a given reference for further checking.
@@ -535,6 +546,14 @@ declare_node_union! {
 /// Example: if the expression is `a.b[c]` it will return 3 candidates: `a`, `a.b`, `a.b[c]`
 fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> {
     let mut result = Vec::new();
+
+    if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(&node) {
+        result.push(AnyExpressionCandidate::JsxReferenceIdentifier(
+            jsx_ref.clone(),
+        ));
+        return result;
+    }
+
     let mut prev_node = node;
     while let Some(parent) = prev_node.parent() {
         if matches!(
@@ -568,19 +587,6 @@ fn get_expression_candidates(node: JsSyntaxNode) -> Vec<AnyExpressionCandidate> 
             {
                 return result;
             }
-        }
-
-        // Follow eslint React plugin behavior:
-        // When calling a method of an object, only the object should be included in the dependency list.
-        if matches!(
-            parent.kind(),
-            JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION
-        ) && let Some(wrapper) = parent.parent()
-            && let Some(call_expression) = JsCallExpression::cast(wrapper)
-            && let Ok(callee) = call_expression.callee()
-            && callee.syntax().eq(&parent)
-        {
-            return result;
         }
 
         if matches!(
@@ -635,6 +641,20 @@ fn capture_needs_to_be_in_the_dependency_list(
                 0,
             ),
             AnyExpressionCandidate::JsReferenceIdentifier(reference_identifier) => {
+                if let Some(binding) = model.binding(reference_identifier) {
+                    is_stable_binding(
+                        &binding.tree(),
+                        None,
+                        component_function_range,
+                        model,
+                        options,
+                        0,
+                    )
+                } else {
+                    true
+                }
+            }
+            AnyExpressionCandidate::JsxReferenceIdentifier(reference_identifier) => {
                 if let Some(binding) = model.binding(reference_identifier) {
                     is_stable_binding(
                         &binding.tree(),
@@ -709,18 +729,52 @@ fn is_stable_binding(
                 return true;
             };
 
-            // Only `const` variables are considered stable
-            if !declaration.is_const() {
-                return false;
-            }
-
             let Some(initializer_expression) = declarator
                 .initializer()
                 .and_then(|initializer| initializer.expression().ok())
             else {
-                // This shouldn't happen because we check for `const` above
-                return true;
+                // No initializer - only `const` without initializer is stable
+                // (this shouldn't happen for valid code, but handle gracefully)
+                return declaration.is_const();
             };
+
+            // For non-const declarations, only stable hook results (like useState setters
+            // or useRef) are considered stable, AND only if the binding is never reassigned.
+            if !declaration.is_const() {
+                // First check if the binding was ever reassigned - if so, it's not stable
+                if binding.all_writes(model).next().is_some() {
+                    return false;
+                }
+
+                // Check if this is a stable hook result (e.g., setA from useState)
+                return match get_single_pattern_member(binding, &declarator) {
+                    GetSinglePatternMemberResult::Member(pattern_member) => {
+                        if member.is_some() {
+                            return false;
+                        }
+                        // Only check if initializer is a stable hook call
+                        if let AnyJsExpression::JsCallExpression(call) = &initializer_expression {
+                            is_react_hook_call_stable(
+                                call,
+                                Some(&pattern_member),
+                                model,
+                                &options.stable_config,
+                            )
+                        } else {
+                            false
+                        }
+                    }
+                    GetSinglePatternMemberResult::NoPattern => {
+                        // For non-destructured let bindings like `let ref = useRef()`
+                        if let AnyJsExpression::JsCallExpression(call) = &initializer_expression {
+                            is_react_hook_call_stable(call, member, model, &options.stable_config)
+                        } else {
+                            false
+                        }
+                    }
+                    _ => false,
+                };
+            }
 
             match get_single_pattern_member(binding, &declarator) {
                 GetSinglePatternMemberResult::Member(pattern_member) => {
@@ -801,7 +855,19 @@ fn is_stable_expression(
     }
 
     if model.is_constant(expression) {
-        return true;
+        // If the expression creates a new object/function identity, it is not stable for React hooks,
+        // even if it captures no variables.
+        if !matches!(
+            expression.syntax().kind(),
+            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+                | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                | JsSyntaxKind::JS_OBJECT_EXPRESSION
+                | JsSyntaxKind::JS_ARRAY_EXPRESSION
+                | JsSyntaxKind::JS_CLASS_EXPRESSION
+                | JsSyntaxKind::JS_REGEX_LITERAL
+        ) {
+            return true;
+        }
     }
     let Some(expression) = expression.inner_expression() else {
         return false;
@@ -937,13 +1003,14 @@ fn get_single_pattern_member(
                             .map(|member| {
                                 (
                                     array_pattern.syntax().clone(),
-                                    ReactHookResultMember::Index(member),
+                                    Some(ReactHookResultMember::Index(member)),
                                 )
                             })
                     })
             }),
         JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY
-        | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY => {
+        | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY
+        | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST => {
             let Some(object_pattern) = parent_syntax
                 .parent()
                 .and_then(JsObjectBindingPatternPropertyList::cast)
@@ -953,27 +1020,41 @@ fn get_single_pattern_member(
             else {
                 return GetSinglePatternMemberResult::Unknown;
             };
-            let Some(member) = (match AnyJsObjectBindingPatternMember::try_cast(parent_syntax) {
-                Ok(AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(property)) => {
-                    property
+            if matches!(
+                parent_syntax.kind(),
+                JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
+            ) {
+                Some((object_pattern.syntax().clone(), None))
+            } else if let Some(member) =
+                match AnyJsObjectBindingPatternMember::try_cast(parent_syntax) {
+                    Ok(AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
+                        property,
+                    )) => property
                         .member()
                         .ok()
                         .and_then(|member| member.name())
-                        .map(ReactHookResultMember::Key)
+                        .map(ReactHookResultMember::Key),
+                    Ok(
+                        AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                            shorthand_property,
+                        ),
+                    ) => shorthand_property
+                        .identifier()
+                        .ok()
+                        .and_then(|identifier| {
+                            identifier.as_js_identifier_binding()?.name_token().ok()
+                        })
+                        .map(|name_token| {
+                            ReactHookResultMember::Key(name_token.token_text_trimmed())
+                        }),
+                    // Shouldn't happen because of the previous check
+                    _ => None,
                 }
-                Ok(AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
-                    shorthand_property,
-                )) => shorthand_property
-                    .identifier()
-                    .ok()
-                    .and_then(|identifier| identifier.as_js_identifier_binding()?.name_token().ok())
-                    .map(|name_token| ReactHookResultMember::Key(name_token.token_text_trimmed())),
-                // Shouldn't happen because of the previous check
-                _ => None,
-            }) else {
+            {
+                Some((object_pattern.syntax().clone(), Some(member)))
+            } else {
                 return GetSinglePatternMemberResult::Unknown;
-            };
-            Some((object_pattern.syntax().clone(), member))
+            }
         }
         JsSyntaxKind::JS_VARIABLE_DECLARATOR => {
             return GetSinglePatternMemberResult::NoPattern;
@@ -988,7 +1069,10 @@ fn get_single_pattern_member(
     {
         return GetSinglePatternMemberResult::TooDeep;
     }
-    GetSinglePatternMemberResult::Member(member)
+    match member {
+        Some(member) => GetSinglePatternMemberResult::Member(member),
+        None => GetSinglePatternMemberResult::NoPattern,
+    }
 }
 
 enum GetSinglePatternMemberResult {
@@ -1548,6 +1632,15 @@ impl Rule for UseExhaustiveDependencies {
                 ..
             } => {
                 let new_elements = captures.first().into_iter().filter_map(|node| {
+                    if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(node) {
+                        return Some(AnyJsArrayElement::AnyJsExpression(
+                            make::js_identifier_expression(make::js_reference_identifier(
+                                jsx_ref.value_token().ok()?,
+                            ))
+                            .into(),
+                        ));
+                    }
+
                     node.ancestors()
                         .find_map(|node| match JsReferenceIdentifier::cast_ref(&node) {
                             Some(node) => Some(make::js_identifier_expression(node).into()),

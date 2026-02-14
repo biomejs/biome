@@ -1592,7 +1592,7 @@
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				},
 				"useEditorconfig": {
-					"description": "Use any `.editorconfig` files to configure the formatter. Configuration\nin `biome.json` will override `.editorconfig` configuration.\n\nDefault: `true`.",
+					"description": "Use any `.editorconfig` files to configure the formatter. Configuration\nin `biome.json` will override `.editorconfig` configuration.\n\nDefault: `false`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
@@ -2481,6 +2481,20 @@
 			"additionalProperties": false
 		},
 		"MaxSize": { "type": "integer", "format": "uint64", "minimum": 1 },
+		"MethodSignatureStyle": {
+			"oneOf": [
+				{
+					"description": "Enforce use of property-style signatures (`methodName: (args) => returnType`).",
+					"type": "string",
+					"const": "property"
+				},
+				{
+					"description": "Enforce use of method-style signatures (`methodName(args): returnType`).",
+					"type": "string",
+					"const": "method"
+				}
+			]
+		},
 		"Modifiers": {
 			"type": "array",
 			"items": { "$ref": "#/$defs/RestrictedModifier" },
@@ -3082,6 +3096,28 @@
 		},
 		"NoDuplicateClassMembersOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"NoDuplicateClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithNoDuplicateClassesOptions" }
+			]
+		},
+		"NoDuplicateClassesOptions": {
+			"type": "object",
+			"properties": {
+				"attributes": {
+					"description": "Additional attributes that will be sorted.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"functions": {
+					"description": "Names of the functions or tagged templates that will be sorted.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoDuplicateCustomPropertiesConfiguration": {
@@ -4086,6 +4122,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNestedPromisesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNestedPromisesOptions" }
+			]
+		},
+		"NoNestedPromisesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNestedTernaryConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4373,6 +4419,16 @@
 			]
 		},
 		"NoRedundantAltOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoRedundantDefaultExportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoRedundantDefaultExportOptions" }
+			]
+		},
+		"NoRedundantDefaultExportOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5247,6 +5303,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessReturnConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessReturnOptions" }
+			]
+		},
+		"NoUselessReturnOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessStringConcatConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5699,6 +5765,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNestedPromises": {
+					"description": "Disallow nested .then() or .catch() promise calls.\nSee https://biomejs.dev/linter/rules/no-nested-promises",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNestedPromisesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNextAsyncClientComponent": {
 					"description": "Prevent client components from being async functions.\nSee https://biomejs.dev/linter/rules/no-next-async-client-component",
 					"anyOf": [
@@ -5724,6 +5797,13 @@
 					"description": "Replaces usages of forwardRef with passing ref as a prop.\nSee https://biomejs.dev/linter/rules/no-react-forward-ref",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReactForwardRefConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRedundantDefaultExport": {
+					"description": "Checks if a default export exports the same symbol as a named export.\nSee https://biomejs.dev/linter/rules/no-redundant-default-export",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoRedundantDefaultExportConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5808,6 +5888,13 @@
 					"description": "Disallow unused catch bindings.\nSee https://biomejs.dev/linter/rules/no-useless-catch-binding",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessCatchBindingConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessReturn": {
+					"description": "Disallow redundant return statements.\nSee https://biomejs.dev/linter/rules/no-useless-return",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessReturnConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5913,6 +6000,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentMethodSignatures": {
+					"description": "Enforce consistent use of either method signatures or function properties within interfaces and type aliases.\nSee https://biomejs.dev/linter/rules/use-consistent-method-signatures",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentMethodSignaturesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useDeprecatedDate": {
 					"description": "Require the @deprecated directive to specify a deletion date.\nSee https://biomejs.dev/linter/rules/use-deprecated-date",
 					"anyOf": [
@@ -5952,6 +6046,13 @@
 					"description": "Enforce the use of Array.prototype.find() over Array.prototype.filter() followed by [0] when looking for a single result.\nSee https://biomejs.dev/linter/rules/use-find",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseFindConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useGlobalThis": {
+					"description": "Enforce the use of globalThis over window, self, and global.\nSee https://biomejs.dev/linter/rules/use-global-this",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseGlobalThisConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6560,6 +6661,14 @@
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
 		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["off", "on"] },
+		"RuleAssistWithNoDuplicateClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateClassesOptions" }
+			},
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithOrganizeImportsOptions": {
 			"type": "object",
 			"properties": {
@@ -8111,6 +8220,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoNestedPromisesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNestedPromisesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoNestedTernaryOptions": {
 			"type": "object",
 			"properties": {
@@ -8375,6 +8493,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoRedundantAltOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoRedundantDefaultExportOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoRedundantDefaultExportOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9102,6 +9229,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUselessReturnOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessReturnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUselessStringConcatOptions": {
 			"type": "object",
 			"properties": {
@@ -9573,6 +9710,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentMethodSignaturesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentMethodSignaturesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentObjectDefinitionsOptions": {
 			"type": "object",
 			"properties": {
@@ -9834,6 +9980,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseGetterReturnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseGlobalThisOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseGlobalThisOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10955,6 +11110,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noDuplicateClasses": {
+					"description": "Remove duplicate CSS classes.\nSee https://biomejs.dev/assist/actions/no-duplicate-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"organizeImports": {
 					"description": "Provides a code action to sort the imports and exports in the file using a built-in or custom order.\nSee https://biomejs.dev/assist/actions/organize-imports",
 					"anyOf": [
@@ -12559,6 +12721,26 @@
 			},
 			"additionalProperties": false
 		},
+		"UseConsistentMethodSignaturesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentMethodSignaturesOptions" }
+			]
+		},
+		"UseConsistentMethodSignaturesOptions": {
+			"description": "Options type for `useConsistentMethodSignatures`.",
+			"type": "object",
+			"properties": {
+				"style": {
+					"description": "The style of method signatures whose usage will be enforced.\n\nDefault: \"property\"",
+					"anyOf": [
+						{ "$ref": "#/$defs/MethodSignatureStyle" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseConsistentObjectDefinitionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12880,6 +13062,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseGlobalThisConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseGlobalThisOptions" }
+			]
+		},
+		"UseGlobalThisOptions": { "type": "object", "additionalProperties": false },
 		"UseGoogleFontDisplayConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

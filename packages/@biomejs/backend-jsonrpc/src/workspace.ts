@@ -229,7 +229,7 @@ Defaults to true.
 	* Use any `.editorconfig` files to configure the formatter. Configuration
 in `biome.json` will override `.editorconfig` configuration.
 
-Default: `true`. 
+Default: `false`. 
 	 */
 	useEditorconfig?: Bool;
 }
@@ -985,6 +985,11 @@ export type VcsClientKind = "git";
  */
 export interface Source {
 	/**
+	* Remove duplicate CSS classes.
+See https://biomejs.dev/assist/actions/no-duplicate-classes 
+	 */
+	noDuplicateClasses?: NoDuplicateClassesConfiguration;
+	/**
 	* Provides a code action to sort the imports and exports in the file using a built-in or custom order.
 See https://biomejs.dev/assist/actions/organize-imports 
 	 */
@@ -1179,6 +1184,9 @@ export interface OverrideLinterConfiguration {
 	 */
 	rules?: Rules;
 }
+export type NoDuplicateClassesConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithNoDuplicateClassesOptions;
 export type OrganizeImportsConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithOrganizeImportsOptions;
@@ -2127,6 +2135,11 @@ See https://biomejs.dev/linter/rules/no-multi-str
 	 */
 	noMultiStr?: NoMultiStrConfiguration;
 	/**
+	* Disallow nested .then() or .catch() promise calls.
+See https://biomejs.dev/linter/rules/no-nested-promises 
+	 */
+	noNestedPromises?: NoNestedPromisesConfiguration;
+	/**
 	* Prevent client components from being async functions.
 See https://biomejs.dev/linter/rules/no-next-async-client-component 
 	 */
@@ -2146,6 +2159,11 @@ See https://biomejs.dev/linter/rules/no-proto
 See https://biomejs.dev/linter/rules/no-react-forward-ref 
 	 */
 	noReactForwardRef?: NoReactForwardRefConfiguration;
+	/**
+	* Checks if a default export exports the same symbol as a named export.
+See https://biomejs.dev/linter/rules/no-redundant-default-export 
+	 */
+	noRedundantDefaultExport?: NoRedundantDefaultExportConfiguration;
 	/**
 	* Disallow assignments in return statements.
 See https://biomejs.dev/linter/rules/no-return-assign 
@@ -2206,6 +2224,11 @@ See https://biomejs.dev/linter/rules/no-unused-expressions
 See https://biomejs.dev/linter/rules/no-useless-catch-binding 
 	 */
 	noUselessCatchBinding?: NoUselessCatchBindingConfiguration;
+	/**
+	* Disallow redundant return statements.
+See https://biomejs.dev/linter/rules/no-useless-return 
+	 */
+	noUselessReturn?: NoUselessReturnConfiguration;
 	/**
 	* Disallow the use of useless undefined.
 See https://biomejs.dev/linter/rules/no-useless-undefined 
@@ -2281,6 +2304,11 @@ See https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions
 	 */
 	useConsistentGraphqlDescriptions?: UseConsistentGraphqlDescriptionsConfiguration;
 	/**
+	* Enforce consistent use of either method signatures or function properties within interfaces and type aliases.
+See https://biomejs.dev/linter/rules/use-consistent-method-signatures 
+	 */
+	useConsistentMethodSignatures?: UseConsistentMethodSignaturesConfiguration;
+	/**
 	* Require the @deprecated directive to specify a deletion date.
 See https://biomejs.dev/linter/rules/use-deprecated-date 
 	 */
@@ -2310,6 +2338,11 @@ See https://biomejs.dev/linter/rules/use-explicit-type
 See https://biomejs.dev/linter/rules/use-find 
 	 */
 	useFind?: UseFindConfiguration;
+	/**
+	* Enforce the use of globalThis over window, self, and global.
+See https://biomejs.dev/linter/rules/use-global-this 
+	 */
+	useGlobalThis?: UseGlobalThisConfiguration;
 	/**
 	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
 See https://biomejs.dev/linter/rules/use-inline-script-id 
@@ -3424,6 +3457,10 @@ See https://biomejs.dev/linter/rules/use-strict-mode
 }
 export type Glob = string;
 export type RuleAssistPlainConfiguration = "off" | "on";
+export interface RuleAssistWithNoDuplicateClassesOptions {
+	level: RuleAssistPlainConfiguration;
+	options: NoDuplicateClassesOptions;
+}
 export interface RuleAssistWithOrganizeImportsOptions {
 	level: RuleAssistPlainConfiguration;
 	options: OrganizeImportsOptions;
@@ -3984,6 +4021,9 @@ export type NoMultiAssignConfiguration =
 export type NoMultiStrConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMultiStrOptions;
+export type NoNestedPromisesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNestedPromisesOptions;
 export type NoNextAsyncClientComponentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNextAsyncClientComponentOptions;
@@ -3996,6 +4036,9 @@ export type NoProtoConfiguration =
 export type NoReactForwardRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactForwardRefOptions;
+export type NoRedundantDefaultExportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoRedundantDefaultExportOptions;
 export type NoReturnAssignConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnAssignOptions;
@@ -4032,6 +4075,9 @@ export type NoUnusedExpressionsConfiguration =
 export type NoUselessCatchBindingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessCatchBindingOptions;
+export type NoUselessReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessReturnOptions;
 export type NoUselessUndefinedConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessUndefinedOptions;
@@ -4074,6 +4120,9 @@ export type UseConsistentEnumValueTypeConfiguration =
 export type UseConsistentGraphqlDescriptionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentGraphqlDescriptionsOptions;
+export type UseConsistentMethodSignaturesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentMethodSignaturesOptions;
 export type UseDeprecatedDateConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDeprecatedDateOptions;
@@ -4092,6 +4141,9 @@ export type UseExplicitTypeConfiguration =
 export type UseFindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFindOptions;
+export type UseGlobalThisConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseGlobalThisOptions;
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
@@ -4735,6 +4787,16 @@ export type UseStaticResponseMethodsConfiguration =
 export type UseStrictModeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStrictModeOptions;
+export interface NoDuplicateClassesOptions {
+	/**
+	 * Additional attributes that will be sorted.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be sorted.
+	 */
+	functions?: string[];
+}
 export interface OrganizeImportsOptions {
 	groups?: ImportGroups;
 	identifierOrder?: SortOrder;
@@ -5548,6 +5610,10 @@ export interface RuleWithNoMultiStrOptions {
 	level: RulePlainConfiguration;
 	options?: NoMultiStrOptions;
 }
+export interface RuleWithNoNestedPromisesOptions {
+	level: RulePlainConfiguration;
+	options?: NoNestedPromisesOptions;
+}
 export interface RuleWithNoNextAsyncClientComponentOptions {
 	level: RulePlainConfiguration;
 	options?: NoNextAsyncClientComponentOptions;
@@ -5565,6 +5631,10 @@ export interface RuleWithNoReactForwardRefOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoReactForwardRefOptions;
+}
+export interface RuleWithNoRedundantDefaultExportOptions {
+	level: RulePlainConfiguration;
+	options?: NoRedundantDefaultExportOptions;
 }
 export interface RuleWithNoReturnAssignOptions {
 	level: RulePlainConfiguration;
@@ -5614,6 +5684,11 @@ export interface RuleWithNoUselessCatchBindingOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoUselessCatchBindingOptions;
+}
+export interface RuleWithNoUselessReturnOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessReturnOptions;
 }
 export interface RuleWithNoUselessUndefinedOptions {
 	fix?: FixKind;
@@ -5675,6 +5750,10 @@ export interface RuleWithUseConsistentGraphqlDescriptionsOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentGraphqlDescriptionsOptions;
 }
+export interface RuleWithUseConsistentMethodSignaturesOptions {
+	level: RulePlainConfiguration;
+	options?: UseConsistentMethodSignaturesOptions;
+}
 export interface RuleWithUseDeprecatedDateOptions {
 	level: RulePlainConfiguration;
 	options?: UseDeprecatedDateOptions;
@@ -5699,6 +5778,10 @@ export interface RuleWithUseExplicitTypeOptions {
 export interface RuleWithUseFindOptions {
 	level: RulePlainConfiguration;
 	options?: UseFindOptions;
+}
+export interface RuleWithUseGlobalThisOptions {
+	level: RulePlainConfiguration;
+	options?: UseGlobalThisOptions;
 }
 export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
@@ -7044,10 +7127,12 @@ export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoMultiAssignOptions = {};
 export type NoMultiStrOptions = {};
+export type NoNestedPromisesOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoProtoOptions = {};
 export type NoReactForwardRefOptions = {};
+export type NoRedundantDefaultExportOptions = {};
 export type NoReturnAssignOptions = {};
 export interface NoRootTypeOptions {
 	/**
@@ -7080,6 +7165,7 @@ export type NoUnusedExpressionsOptions = {};
 Currently empty; reserved for future extensions (e.g. allowlist of names). 
 	 */
 export type NoUselessCatchBindingOptions = {};
+export type NoUselessReturnOptions = {};
 export type NoUselessUndefinedOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueDataObjectDeclarationOptions = {};
@@ -7113,6 +7199,17 @@ export interface UseConsistentGraphqlDescriptionsOptions {
 	 */
 	style?: UseConsistentGraphqlDescriptionsStyle;
 }
+/**
+ * Options type for `useConsistentMethodSignatures`.
+ */
+export interface UseConsistentMethodSignaturesOptions {
+	/**
+	* The style of method signatures whose usage will be enforced.
+
+Default: "property" 
+	 */
+	style?: MethodSignatureStyle;
+}
 export interface UseDeprecatedDateOptions {
 	argumentName?: string;
 }
@@ -7129,6 +7226,7 @@ export interface UseErrorCauseOptions {
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
+export type UseGlobalThisOptions = {};
 export type UseInlineScriptIdOptions = {};
 export interface UseInputNameOptions {
 	/**
@@ -7602,6 +7700,7 @@ export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
  * The GraphQL description style to enforce.
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
+export type MethodSignatureStyle = "property" | "method";
 export type CheckInputType = "off" | "loose" | "strict";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
@@ -8004,10 +8103,12 @@ export type Category =
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noMultiAssign"
 	| "lint/nursery/noMultiStr"
+	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
+	| "lint/nursery/noRedundantDefaultExport"
 	| "lint/nursery/noReturnAssign"
 	| "lint/nursery/noRootType"
 	| "lint/nursery/noScriptUrl"
@@ -8022,6 +8123,7 @@ export type Category =
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCatchBinding"
+	| "lint/nursery/noUselessReturn"
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueArrowFuncInWatch"
 	| "lint/nursery/noVueDataObjectDeclaration"
@@ -8037,6 +8139,7 @@ export type Category =
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentEnumValueType"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
+	| "lint/nursery/useConsistentMethodSignatures"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useDestructuring"
@@ -8045,9 +8148,10 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
+	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useInputName"
 	| "lint/nursery/useInlineScriptId"
+	| "lint/nursery/useInputName"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
@@ -8270,6 +8374,7 @@ export type Category =
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
+	| "assist/source/noDuplicateClasses"
 	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"
@@ -8533,6 +8638,7 @@ export interface CssFileSource {
 For example, if inside a styled`` literal, a top-level declaration is allowed. 
 	 */
 	embeddingKind: EmbeddingKind2;
+	language: CssFileLanguage;
 	variant: CssVariant;
 }
 export interface GraphqlFileSource {
@@ -8596,7 +8702,11 @@ export type LanguageVersion = "eS2022" | "eSNext";
 export type JsonFileVariant = "standard" | "jsonc";
 export type EmbeddingKind2 = "None" | "Styled" | { Html: EmbeddingHtmlKind };
 /**
-	* The style of CSS contained in the file.
+ * The language of the stylesheet.
+ */
+export type CssFileLanguage = "css" | "scss";
+/**
+	* Extra CSS features enabled for the file.
 
 Currently, Biome aims to be compatible with
 the latest Recommendation level standards.

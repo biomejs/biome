@@ -106,6 +106,8 @@ pub enum RuleSource<'a> {
     Eslint(&'a str),
     /// Rules from [Eslint Plugin Barrel Files](https://github.com/thepassle/eslint-plugin-barrel-files)
     EslintBarrelFiles(&'a str),
+    /// Rules from [Eslint Plugin Better Tailwindcss](https://github.com/schoero/eslint-plugin-better-tailwindcss)
+    EslintBetterTailwindcss(&'a str),
     /// Rules from [e18e ESLint Plugin](https://github.com/e18e/eslint-plugin)
     EslintE18e(&'static str),
     /// Rules from [GraphQL-ESLint](https://github.com/graphql-hive/graphql-eslint)
@@ -134,6 +136,8 @@ pub enum RuleSource<'a> {
     EslintPackageJsonDependencies(&'a str),
     /// Rules from [Eslint Plugin Perfectionist](https://perfectionist.dev/)
     EslintPerfectionist(&'a str),
+    /// Rules from [Eslint Plugin Promise](https://github.com/eslint-community/eslint-plugin-promise)
+    EslintPromise(&'a str),
     /// Rules from [Eslint Plugin Qwik](https://github.com/QwikDev/qwik)
     EslintQwik(&'a str),
     /// Rules from [Eslint Plugin React](https://github.com/jsx-eslint/eslint-plugin-react)
@@ -183,6 +187,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::DenoLint(_) => write!(f, "Deno Lint"),
             Self::Eslint(_) => write!(f, "ESLint"),
             Self::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
+            Self::EslintBetterTailwindcss(_) => write!(f, "eslint-plugin-better-tailwindcss"),
             Self::EslintE18e(_) => write!(f, "@e18e/eslint-plugin"),
             Self::EslintGraphql(_) => write!(f, "GraphQL-ESLint"),
             Self::EslintImport(_) => write!(f, "eslint-plugin-import"),
@@ -199,6 +204,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
                 write!(f, "eslint-plugin-package-json-dependencies")
             }
             Self::EslintPerfectionist(_) => write!(f, "eslint-plugin-perfectionist"),
+            Self::EslintPromise(_) => write!(f, "eslint-plugin-promise"),
             Self::EslintQwik(_) => write!(f, "eslint-plugin-qwik"),
             Self::EslintReact(_) => write!(f, "eslint-plugin-react"),
             Self::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
@@ -258,27 +264,29 @@ impl<'a> RuleSource<'a> {
             Self::EslintPackageJson(_) => 14,
             Self::EslintPackageJsonDependencies(_) => 15,
             Self::EslintPerfectionist(_) => 16,
-            Self::EslintQwik(_) => 17,
-            Self::EslintReact(_) => 18,
-            Self::EslintReactHooks(_) => 19,
-            Self::EslintReactPreferFunctionComponent(_) => 20,
-            Self::EslintReactRefresh(_) => 21,
-            Self::EslintReactX(_) => 22,
-            Self::EslintReactXyz(_) => 23,
-            Self::EslintRegexp(_) => 24,
-            Self::EslintSolid(_) => 25,
-            Self::EslintSonarJs(_) => 26,
-            Self::EslintStylistic(_) => 27,
-            Self::EslintTypeScript(_) => 28,
-            Self::EslintUnicorn(_) => 29,
-            Self::EslintUnusedImports(_) => 30,
-            Self::EslintVitest(_) => 31,
-            Self::EslintVueJs(_) => 32,
-            Self::GraphqlSchemaLinter(_) => 33,
-            Self::Stylelint(_) => 34,
-            Self::EslintTurbo(_) => 35,
-            Self::HtmlEslint(_) => 36,
+            Self::EslintPromise(_) => 17,
+            Self::EslintQwik(_) => 18,
+            Self::EslintReact(_) => 19,
+            Self::EslintReactHooks(_) => 20,
+            Self::EslintReactPreferFunctionComponent(_) => 21,
+            Self::EslintReactRefresh(_) => 22,
+            Self::EslintReactX(_) => 23,
+            Self::EslintReactXyz(_) => 24,
+            Self::EslintRegexp(_) => 25,
+            Self::EslintSolid(_) => 26,
+            Self::EslintSonarJs(_) => 27,
+            Self::EslintStylistic(_) => 28,
+            Self::EslintTypeScript(_) => 29,
+            Self::EslintUnicorn(_) => 30,
+            Self::EslintUnusedImports(_) => 31,
+            Self::EslintVitest(_) => 32,
+            Self::EslintVueJs(_) => 33,
+            Self::GraphqlSchemaLinter(_) => 34,
+            Self::Stylelint(_) => 35,
+            Self::EslintTurbo(_) => 36,
+            Self::HtmlEslint(_) => 37,
             Self::EslintE18e(_) => 37,
+            Self::EslintBetterTailwindcss(_) => 38,
         }
     }
 
@@ -302,6 +310,7 @@ impl<'a> RuleSource<'a> {
             | Self::DenoLint(rule_name)
             | Self::Eslint(rule_name)
             | Self::EslintBarrelFiles(rule_name)
+            | Self::EslintBetterTailwindcss(rule_name)
             | Self::EslintE18e(rule_name)
             | Self::EslintGraphql(rule_name)
             | Self::EslintImport(rule_name)
@@ -316,6 +325,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintPackageJson(rule_name)
             | Self::EslintPackageJsonDependencies(rule_name)
             | Self::EslintPerfectionist(rule_name)
+            | Self::EslintPromise(rule_name)
             | Self::EslintQwik(rule_name)
             | Self::EslintReact(rule_name)
             | Self::EslintReactHooks(rule_name)
@@ -360,6 +370,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintPackageJson(_) => "package-json",
             Self::EslintPackageJsonDependencies(_) => "package-json-dependencies",
             Self::EslintPerfectionist(_) => "perfectionist",
+            Self::EslintPromise(_) => "promise",
             Self::EslintQwik(_) => "qwik",
             Self::EslintReact(_) => "react",
             Self::EslintReactHooks(_) => "react-hooks",
@@ -379,6 +390,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintTurbo(_) => "turbo",
             Self::HtmlEslint(_) => "@html-eslint",
             Self::EslintE18e(_) => "e18e",
+            Self::EslintBetterTailwindcss(_) => "better-tailwindcss",
         }
     }
 
@@ -397,6 +409,7 @@ impl<'a> RuleSource<'a> {
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintE18e(_) => "https://github.com/e18e/eslint-plugin".to_string(),
+            Self::EslintBetterTailwindcss(rule_name) => format!("https://github.com/schoero/eslint-plugin-better-tailwindcss/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
             Self::EslintImport(rule_name) => format!("https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintImportAccess(_) => "https://github.com/uhyo/eslint-plugin-import-access".to_string(),
@@ -410,6 +423,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintPackageJson(rule_name) => format!("https://github.com/JoshuaKGoldberg/eslint-plugin-package-json/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintPackageJsonDependencies(rule_name) => format!("https://github.com/idan-at/eslint-plugin-package-json-dependencies/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintPerfectionist(rule_name) => format!("https://perfectionist.dev/rules/{rule_name}"),
+            Self::EslintPromise(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-promise/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintQwik(rule_name) => format!("https://qwik.dev/docs/advanced/eslint/#{rule_name}"),
             Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),

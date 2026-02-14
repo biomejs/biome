@@ -1,8 +1,8 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
-assertion_line: 138
 expression: snapshot
 ---
+
 ## Input
 
 ```html

@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -51,7 +52,7 @@ HtmlRoot {
                                         modifiers: SvelteDirectiveModifierList [],
                                         initializer: HtmlAttributeInitializerClause {
                                             eq_token: EQ@27..28 "=" [] [],
-                                            value: HtmlSingleTextExpression {
+                                            value: HtmlAttributeSingleTextExpression {
                                                 l_curly_token: L_CURLY@28..29 "{" [] [],
                                                 expression: HtmlTextExpression {
                                                     html_literal_token: HTML_LITERAL@29..39 "{ y: 200 }" [] [],
@@ -113,7 +114,7 @@ HtmlRoot {
                                         ],
                                         initializer: HtmlAttributeInitializerClause {
                                             eq_token: EQ@104..105 "=" [] [],
-                                            value: HtmlSingleTextExpression {
+                                            value: HtmlAttributeSingleTextExpression {
                                                 l_curly_token: L_CURLY@105..106 "{" [] [],
                                                 expression: HtmlTextExpression {
                                                     html_literal_token: HTML_LITERAL@106..116 "{ y: 200 }" [] [],
@@ -140,7 +141,7 @@ HtmlRoot {
                                         ],
                                         initializer: HtmlAttributeInitializerClause {
                                             eq_token: EQ@132..133 "=" [] [],
-                                            value: HtmlSingleTextExpression {
+                                            value: HtmlAttributeSingleTextExpression {
                                                 l_curly_token: L_CURLY@133..134 "{" [] [],
                                                 expression: HtmlTextExpression {
                                                     html_literal_token: HTML_LITERAL@134..151 "{ duration: 300 }" [] [],
@@ -213,7 +214,7 @@ HtmlRoot {
                     2: SVELTE_DIRECTIVE_MODIFIER_LIST@27..27
                     3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@27..41
                       0: EQ@27..28 "=" [] []
-                      1: HTML_SINGLE_TEXT_EXPRESSION@28..41
+                      1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@28..41
                         0: L_CURLY@28..29 "{" [] []
                         1: HTML_TEXT_EXPRESSION@29..39
                           0: HTML_LITERAL@29..39 "{ y: 200 }" [] []
@@ -255,7 +256,7 @@ HtmlRoot {
                           0: IDENT@98..104 "global" [] []
                     3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@104..118
                       0: EQ@104..105 "=" [] []
-                      1: HTML_SINGLE_TEXT_EXPRESSION@105..118
+                      1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@105..118
                         0: L_CURLY@105..106 "{" [] []
                         1: HTML_TEXT_EXPRESSION@106..116
                           0: HTML_LITERAL@106..116 "{ y: 200 }" [] []
@@ -273,7 +274,7 @@ HtmlRoot {
                           0: IDENT@127..132 "local" [] []
                     3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@132..152
                       0: EQ@132..133 "=" [] []
-                      1: HTML_SINGLE_TEXT_EXPRESSION@133..152
+                      1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@133..152
                         0: L_CURLY@133..134 "{" [] []
                         1: HTML_TEXT_EXPRESSION@134..151
                           0: HTML_LITERAL@134..151 "{ duration: 300 }" [] []

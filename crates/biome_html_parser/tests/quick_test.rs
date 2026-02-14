@@ -5,10 +5,11 @@ use biome_test_utils::has_bogus_nodes_or_empty_slots;
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"<p {...prop}>Multiple shorthand</p>
+    let code = r#"<Component
+	bind:value
 
+/>
 
-<Base title="500"></Base>
 "#;
 
     let source_type = HtmlFileSource::svelte();

@@ -707,10 +707,10 @@ impl WorkspaceServer {
             path,
             settings.as_ref().experimental_full_html_support_enabled(),
         );
-        let Some(parse_embedded) = capabilities.parser.parse_embedded_nodes else {
+        let Some(parse_embedded_nodes) = capabilities.parser.parse_embedded_nodes else {
             return Ok(Default::default());
         };
-        let result = parse_embedded(root, path, source, settings, cache, builder);
+        let result = parse_embedded_nodes(root, path, source, settings, cache, builder);
 
         for (mut content, file_source) in result.nodes {
             let index = self.insert_source(file_source);
@@ -1160,6 +1160,7 @@ impl Workspace for WorkspaceServer {
         let mut diagnostics: Vec<biome_diagnostics::serde::Diagnostic> = vec![];
         let workspace_directory = workspace_directory.map(|p| p.to_path_buf());
         let is_root = configuration.is_root();
+        let extends_root = configuration.extends_root();
         let mut settings = if !is_root {
             if !self.projects.is_project_registered(project_key) {
                 return Err(WorkspaceError::no_project());
@@ -1179,9 +1180,14 @@ impl Workspace for WorkspaceServer {
         };
         settings.module_graph_resolution_kind = module_graph_resolution_kind;
 
+        let resolution_directory = if extends_root {
+            self.projects.get_project_path(project_key)
+        } else {
+            workspace_directory.clone()
+        };
         settings.merge_with_configuration(
             configuration,
-            workspace_directory.clone(),
+            resolution_directory.clone(),
             extended_configurations
                 .into_iter()
                 .map(|(path, config)| (path.into(), config))
@@ -1189,7 +1195,7 @@ impl Workspace for WorkspaceServer {
         )?;
 
         let plugin_diagnostics = self.load_plugins(
-            &workspace_directory.clone().unwrap_or_default(),
+            &resolution_directory.clone().unwrap_or_default(),
             &settings.as_all_plugins(),
         );
 

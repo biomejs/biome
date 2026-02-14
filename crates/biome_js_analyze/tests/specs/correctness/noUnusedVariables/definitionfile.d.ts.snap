@@ -25,5 +25,3 @@ declare module Module {
     const B;
  }
 ```
-
-
