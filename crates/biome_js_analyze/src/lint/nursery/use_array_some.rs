@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseArraySome {
-        version: "2.3.7",
+        version: "next",
         name: "useArraySome",
         language: "js",
         recommended: false,
