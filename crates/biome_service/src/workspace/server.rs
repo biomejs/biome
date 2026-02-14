@@ -1147,22 +1147,22 @@ impl Workspace for WorkspaceServer {
                             .read_file_from_path(gitignore.as_ref())
                             .ok()
                             .or_else(|| self.fs.read_file_from_path(ignore.as_ref()).ok());
-                        let content = match result {
-                            Some(content) => content,
+                        match result {
+                            Some(content) => {
+                                let lines: Vec<_> = content.lines().collect();
+                                settings.vcs_settings.store_root_ignore_patterns(
+                                    directory.as_ref(),
+                                    lines.as_slice(),
+                                )?;
+                            }
                             None => {
                                 diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
                                     VcsDiagnostic::NoIgnoreFileFound(NoIgnoreFileFound {
                                         path: directory.to_string(),
                                     }),
                                 ));
-                                return Ok(UpdateSettingsResult { diagnostics });
                             }
                         };
-
-                        let lines: Vec<_> = content.lines().collect();
-                        settings
-                            .vcs_settings
-                            .store_root_ignore_patterns(directory.as_ref(), lines.as_slice())?;
                     }
                 }
             }
