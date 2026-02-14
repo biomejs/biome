@@ -2289,6 +2289,11 @@ See https://biomejs.dev/linter/rules/use-await-thenable
 	 */
 	useAwaitThenable?: UseAwaitThenableConfiguration;
 	/**
+	* Disallow template literals with interpolations in class attributes.
+See https://biomejs.dev/linter/rules/use-class-name-helper 
+	 */
+	useClassNameHelper?: UseClassNameHelperConfiguration;
+	/**
 	* Enforce consistent arrow function bodies.
 See https://biomejs.dev/linter/rules/use-consistent-arrow-return 
 	 */
@@ -4111,6 +4116,9 @@ export type UseArraySortCompareConfiguration =
 export type UseAwaitThenableConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAwaitThenableOptions;
+export type UseClassNameHelperConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseClassNameHelperOptions;
 export type UseConsistentArrowReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentArrowReturnOptions;
@@ -5737,6 +5745,10 @@ export interface RuleWithUseAwaitThenableOptions {
 	level: RulePlainConfiguration;
 	options?: UseAwaitThenableOptions;
 }
+export interface RuleWithUseClassNameHelperOptions {
+	level: RulePlainConfiguration;
+	options?: UseClassNameHelperOptions;
+}
 export interface RuleWithUseConsistentArrowReturnOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7177,6 +7189,16 @@ export type NoVueSetupPropsReactivityLossOptions = {};
 export type NoVueVIfWithVForOptions = {};
 export type UseArraySortCompareOptions = {};
 export type UseAwaitThenableOptions = {};
+export interface UseClassNameHelperOptions {
+	/**
+	 * JSX attribute names to check for template literals.
+	 */
+	attributes?: string[];
+	/**
+	 * Preferred helper function names shown in diagnostics.
+	 */
+	helperFunctions?: string[];
+}
 /**
  * Options for the `useConsistentArrowReturn` rule.
  */
@@ -8136,6 +8158,7 @@ export type Category =
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useClassNameHelper"
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentEnumValueType"
 	| "lint/nursery/useConsistentGraphqlDescriptions"

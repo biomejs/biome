@@ -1,0 +1,162 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<div className={`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+<div class={`font-bold ${isPrimary ? "text-white" : "text-black"}`} />;
+<div className={tw`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+<div className={classNames`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+<div className={(`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`)} />;
+<div className={isActive ? `px-4 ${tone}` : "px-4"} />;
+<div className={cn(`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`)} />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:17 lint/nursery/useClassNameHelper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using template literals with interpolations in this class attribute.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <div className={`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+      │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <div class={`font-bold ${isPrimary ? "text-white" : "text-black"}`} />;
+    4 │ <div className={tw`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+  
+  i Prefer helper functions like cn, clsx, cva, cx, classNames with discrete string arguments to improve extraction and tooling reliability.
+  
+  i Template interpolations can prevent class-name tooling from detecting and autocompleting classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:3:13 lint/nursery/useClassNameHelper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using template literals with interpolations in this class attribute.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <div className={`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+  > 3 │ <div class={`font-bold ${isPrimary ? "text-white" : "text-black"}`} />;
+      │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <div className={tw`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+    5 │ <div className={classNames`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+  
+  i Prefer helper functions like cn, clsx, cva, cx, classNames with discrete string arguments to improve extraction and tooling reliability.
+  
+  i Template interpolations can prevent class-name tooling from detecting and autocompleting classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:4:19 lint/nursery/useClassNameHelper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using template literals with interpolations in this class attribute.
+  
+    2 │ <div className={`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+    3 │ <div class={`font-bold ${isPrimary ? "text-white" : "text-black"}`} />;
+  > 4 │ <div className={tw`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <div className={classNames`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+    6 │ <div className={(`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`)} />;
+  
+  i Prefer helper functions like cn, clsx, cva, cx, classNames with discrete string arguments to improve extraction and tooling reliability.
+  
+  i Template interpolations can prevent class-name tooling from detecting and autocompleting classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:27 lint/nursery/useClassNameHelper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using template literals with interpolations in this class attribute.
+  
+    3 │ <div class={`font-bold ${isPrimary ? "text-white" : "text-black"}`} />;
+    4 │ <div className={tw`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+  > 5 │ <div className={classNames`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+      │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <div className={(`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`)} />;
+    7 │ <div className={isActive ? `px-4 ${tone}` : "px-4"} />;
+  
+  i Prefer helper functions like cn, clsx, cva, cx, classNames with discrete string arguments to improve extraction and tooling reliability.
+  
+  i Template interpolations can prevent class-name tooling from detecting and autocompleting classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:18 lint/nursery/useClassNameHelper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using template literals with interpolations in this class attribute.
+  
+    4 │ <div className={tw`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+    5 │ <div className={classNames`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+  > 6 │ <div className={(`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`)} />;
+      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <div className={isActive ? `px-4 ${tone}` : "px-4"} />;
+    8 │ <div className={cn(`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`)} />;
+  
+  i Prefer helper functions like cn, clsx, cva, cx, classNames with discrete string arguments to improve extraction and tooling reliability.
+  
+  i Template interpolations can prevent class-name tooling from detecting and autocompleting classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:28 lint/nursery/useClassNameHelper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using template literals with interpolations in this class attribute.
+  
+    5 │ <div className={classNames`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`} />;
+    6 │ <div className={(`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`)} />;
+  > 7 │ <div className={isActive ? `px-4 ${tone}` : "px-4"} />;
+      │                            ^^^^^^^^^^^^^^^
+    8 │ <div className={cn(`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`)} />;
+    9 │ 
+  
+  i Prefer helper functions like cn, clsx, cva, cx, classNames with discrete string arguments to improve extraction and tooling reliability.
+  
+  i Template interpolations can prevent class-name tooling from detecting and autocompleting classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:20 lint/nursery/useClassNameHelper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using template literals with interpolations in this class attribute.
+  
+    6 │ <div className={(`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`)} />;
+    7 │ <div className={isActive ? `px-4 ${tone}` : "px-4"} />;
+  > 8 │ <div className={cn(`px-4 ${isActive ? "bg-blue-500" : "bg-gray-500"}`)} />;
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Prefer helper functions like cn, clsx, cva, cx, classNames with discrete string arguments to improve extraction and tooling reliability.
+  
+  i Template interpolations can prevent class-name tooling from detecting and autocompleting classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

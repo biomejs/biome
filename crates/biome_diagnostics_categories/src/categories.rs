@@ -229,6 +229,7 @@ define_categories! {
     "lint/nursery/useArraySortCompare": "https://biomejs.dev/linter/rules/use-array-sort-compare",
     "lint/nursery/useAwaitThenable": "https://biomejs.dev/linter/rules/use-await-thenable",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
+    "lint/nursery/useClassNameHelper": "https://biomejs.dev/linter/rules/use-class-name-helper",
     "lint/nursery/useConsistentArrowReturn": "https://biomejs.dev/linter/rules/use-consistent-arrow-return",
     "lint/nursery/useConsistentEnumValueType": "https://biomejs.dev/linter/rules/use-consistent-enum-value-type",
     "lint/nursery/useConsistentGraphqlDescriptions": "https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
