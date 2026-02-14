@@ -3,7 +3,7 @@ use crate::grit_target_language::GritTargetLanguage;
 use grit_pattern_matcher::binding::Binding;
 use grit_pattern_matcher::effects::Effect;
 use grit_pattern_matcher::pattern::{FileRegistry, ResolvedPattern, get_top_level_effects};
-use grit_util::error::GritResult;
+use grit_util::error::{GritPatternError, GritResult};
 use grit_util::{AnalysisLogs, CodeRange, EffectKind};
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -46,7 +46,7 @@ pub(crate) fn linearize_binding<'a>(
                     if let Some(cached_text) = cached {
                         let byte_range = binding
                             .range(language)
-                            .expect("binding should have a range");
+                            .ok_or_else(|| GritPatternError::new("expected binding to have a range for rewrite effect"))?;
                         replacements.push((byte_range.start, byte_range.end, cached_text.clone()));
                         continue;
                     }
@@ -70,7 +70,7 @@ pub(crate) fn linearize_binding<'a>(
 
         let byte_range = binding
             .range(language)
-            .expect("binding should have a range");
+            .ok_or_else(|| GritPatternError::new("expected binding to have a range for rewrite effect"))?;
         replacements.push((byte_range.start, byte_range.end, res.into_owned()));
     }
 
