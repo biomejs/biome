@@ -308,7 +308,10 @@ fn check_static_member_access(
 
     let ref_callee_expr = ref_call_expr.callee().ok()?;
     let ref_callee_name = ref_callee_expr.get_callee_member_name()?;
-    if ref_callee_name.text() == "toRefs" && !is_valid_static_member_wrapped_in_to_refs(ident_binding, &member) {
+    if ref_callee_name.text() == "toRefs" {
+        if is_valid_static_member_wrapped_in_to_refs(ident_binding, &member) {
+            return None
+        }
         return Some(RuleState { range: static_member_expr.range() })
     }
 
@@ -339,9 +342,9 @@ fn is_valid_static_member_wrapped_in_to_refs(
     // Direct refs: `const refs = toRefs(obj); refs.foo.value`
     member
         .syntax()
-        .parent()
-        .and_then(|parent| parent.cast::<JsStaticMemberExpression>())
-        .and_then(|parent_expr| parent_expr.member().ok())
+        .grand_parent()
+        .and_then(|grand_parent| grand_parent.cast::<JsStaticMemberExpression>())
+        .and_then(|grand_parent_expr| grand_parent_expr.member().ok())
         .is_some_and(|m| is_valid_static_member(&m))
 }
 
