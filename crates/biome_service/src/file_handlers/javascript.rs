@@ -1094,6 +1094,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             |signal| process_fix_all.process_signal(signal),
         );
 
+        // Extract plugin text_edit before the action is consumed by process_action,
+        // since plugin rewrites use text_edit instead of tree mutations.
+        let plugin_text_edit = action.as_ref().and_then(|a| a.text_edit.clone());
+
         let result = process_fix_all.process_action(action, |root| {
             tree = match AnyJsRoot::cast(root) {
                 Some(tree) => tree,
@@ -1103,6 +1107,26 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         })?;
 
         if result.is_none() {
+            // No tree mutation was applied. Check if there's a plugin text edit
+            // to apply (plugin rewrites produce text edits, not tree mutations).
+            if let Some((range, edit)) = plugin_text_edit {
+                let old_text = tree.syntax().to_string();
+                let new_text = edit.new_string(&old_text);
+                if new_text != old_text {
+                    let options = params.settings.parse_options::<JsLanguage>(
+                        params.biome_path,
+                        &params.document_file_source,
+                    );
+                    let parse = biome_js_parser::parse(&new_text, file_source, options);
+                    tree = parse.tree();
+                    process_fix_all.record_text_edit_fix(
+                        range,
+                        tree.syntax().text_range_with_trivia().len().into(),
+                    );
+                    continue;
+                }
+            }
+
             return process_fix_all.finish(|| {
                 Ok(if params.should_format {
                     Either::Left(format_node(

@@ -1,0 +1,67 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["useConsoleInfo.grit"],
+  "formatter": { "enabled": false }
+}
+```
+
+## `input.js`
+
+```js
+console.log("hello");
+
+```
+
+## `useConsoleInfo.grit`
+
+```grit
+language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warning"),
+    $call => `console.info($msg)`
+}
+
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+input.js:1:1 plugin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use console.info instead of console.log.
+  
+  > 1 │ console.log("hello");
+      │ ^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Unsafe fix: Rewrite suggested by plugin `useConsoleInfo`
+  
+    1   │ - console.log("hello");
+      1 │ + console.info("hello");
+    2 2 │   
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

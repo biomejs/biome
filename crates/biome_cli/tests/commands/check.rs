@@ -3442,6 +3442,147 @@ const foo = 'bad'
 }
 
 #[test]
+fn check_plugin_apply_rewrite() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["useConsoleInfo.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("useConsoleInfo.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warning"),
+    $call => `console.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "console.info(\"hello\");\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_apply_rewrite",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_rewrite_no_write() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["useConsoleInfo.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("useConsoleInfo.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warning"),
+    $call => `console.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path.as_str()].as_slice()),
+    );
+
+    assert_file_contents(&fs, file_path, "console.log(\"hello\");\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_rewrite_no_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_multiple_rewrites() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["useLoggerInfo.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("useLoggerInfo.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use logger.info instead of console.log.", severity = "warning"),
+    $call => `logger.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(
+        file_path.into(),
+        b"console.log(\"hello\");\nconsole.log(\"world\");\nconsole.log(\"!\");\n",
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(
+        &fs,
+        file_path,
+        "logger.info(\"hello\");\nlogger.info(\"world\");\nlogger.info(\"!\");\n",
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_multiple_rewrites",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn doesnt_check_file_when_assist_is_disabled() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
