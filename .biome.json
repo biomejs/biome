@@ -71,11 +71,11 @@
         "noUndeclaredDependencies": "error"
       },
       "suspicious": {
-        "noVar": "on"
+        "noVar": "on",
+        "noImportCycles": "error"
       },
       "nursery": {
-        "noFloatingPromises": "error",
-        "noImportCycles": "error"
+        "noFloatingPromises": "error"
       }
     }
   },
