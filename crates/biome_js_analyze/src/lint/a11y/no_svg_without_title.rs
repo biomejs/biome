@@ -79,10 +79,6 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```jsx
-    /// <svg role="graphics-symbol img"><rect /></svg>
-    /// ```
-    ///
-    /// ```jsx
     /// <svg aria-hidden="true"><rect /></svg>
     /// ```
     ///

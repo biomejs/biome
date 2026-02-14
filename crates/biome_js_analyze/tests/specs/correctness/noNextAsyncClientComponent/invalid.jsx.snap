@@ -62,7 +62,7 @@ class ComponentClass {
 ```
 invalid.jsx:3:16 lint/correctness/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The component MyComponent is an async client component, which is not allowed.
+  × The component MyComponent is an async client component, which is not allowed.
   
     1 │ "use client";
     2 │ 
@@ -84,7 +84,7 @@ invalid.jsx:3:16 lint/correctness/noNextAsyncClientComponent ━━━━━━�
 ```
 invalid.jsx:7:1 lint/correctness/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The component MyComponent2 is an async client component, which is not allowed.
+  × The component MyComponent2 is an async client component, which is not allowed.
   
      5 │ }
      6 │ 
@@ -106,7 +106,7 @@ invalid.jsx:7:1 lint/correctness/noNextAsyncClientComponent ━━━━━━�
 ```
 invalid.jsx:11:7 lint/correctness/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The component MyComponent3 is an async client component, which is not allowed.
+  × The component MyComponent3 is an async client component, which is not allowed.
   
      9 │ }
     10 │ 
@@ -128,7 +128,7 @@ invalid.jsx:11:7 lint/correctness/noNextAsyncClientComponent ━━━━━━�
 ```
 invalid.jsx:15:7 lint/correctness/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The component MyComponent4 is an async client component, which is not allowed.
+  × The component MyComponent4 is an async client component, which is not allowed.
   
     13 │ };
     14 │ 
@@ -150,7 +150,7 @@ invalid.jsx:15:7 lint/correctness/noNextAsyncClientComponent ━━━━━━�
 ```
 invalid.jsx:20:1 lint/correctness/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The component MyComponent5 is an async client component, which is not allowed.
+  × The component MyComponent5 is an async client component, which is not allowed.
   
     19 │ let MyComponent5;
   > 20 │ MyComponent5 = async () => {
@@ -171,7 +171,7 @@ invalid.jsx:20:1 lint/correctness/noNextAsyncClientComponent ━━━━━━�
 ```
 invalid.jsx:25:1 lint/correctness/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The component MyComponent6 is an async client component, which is not allowed.
+  × The component MyComponent6 is an async client component, which is not allowed.
   
     24 │ let MyComponent6;
   > 25 │ MyComponent6 = async function() {
@@ -192,7 +192,7 @@ invalid.jsx:25:1 lint/correctness/noNextAsyncClientComponent ━━━━━━�
 ```
 invalid.jsx:30:3 lint/correctness/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The component MyComponent is an async client component, which is not allowed.
+  × The component MyComponent is an async client component, which is not allowed.
   
     29 │ const components = {
   > 30 │   async MyComponent() {
@@ -213,7 +213,7 @@ invalid.jsx:30:3 lint/correctness/noNextAsyncClientComponent ━━━━━━�
 ```
 invalid.jsx:36:3 lint/correctness/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The component MyComponent is an async client component, which is not allowed.
+  × The component MyComponent is an async client component, which is not allowed.
   
     35 │ const components2 = {
   > 36 │   MyComponent: async () => {
@@ -234,7 +234,7 @@ invalid.jsx:36:3 lint/correctness/noNextAsyncClientComponent ━━━━━━�
 ```
 invalid.jsx:42:3 lint/correctness/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The component MyComponent is an async client component, which is not allowed.
+  × The component MyComponent is an async client component, which is not allowed.
   
     41 │ const components3 = {
   > 42 │   MyComponent: async function() {
@@ -255,7 +255,7 @@ invalid.jsx:42:3 lint/correctness/noNextAsyncClientComponent ━━━━━━�
 ```
 invalid.jsx:48:3 lint/correctness/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The component MyComponent is an async client component, which is not allowed.
+  × The component MyComponent is an async client component, which is not allowed.
   
     47 │ class ComponentClass {
   > 48 │   async MyComponent() {

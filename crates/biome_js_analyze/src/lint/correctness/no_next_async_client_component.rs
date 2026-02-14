@@ -54,7 +54,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintNext("no-async-client-component").same()],
         recommended: false,
-        severity: Severity::Warning,
+        severity: Severity::Error,
         domains: &[RuleDomain::Next],
     }
 }

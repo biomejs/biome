@@ -30,10 +30,10 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```html
-    /// <>
+    /// <div>
     /// 	<img src="src" alt="alt" />
     /// 	<img src="bar" aria-hidden alt="Picture of me taking a photo of an image" />
-    /// </>
+    /// </div>
     /// ```
     ///
     pub NoRedundantAlt {

@@ -96,10 +96,6 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```html
-    /// <svg role="graphics-symbol img"><rect /></svg>
-    /// ```
-    ///
-    /// ```html
     /// <svg aria-hidden="true"><rect /></svg>
     /// ```
     ///
