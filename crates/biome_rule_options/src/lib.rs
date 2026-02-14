@@ -235,6 +235,7 @@ pub mod no_unnecessary_conditions;
 pub mod no_unreachable;
 pub mod no_unreachable_super;
 pub mod no_unresolved_imports;
+pub mod no_unsafe_assignment;
 pub mod no_unsafe_declaration_merging;
 pub mod no_unsafe_finally;
 pub mod no_unsafe_negation;

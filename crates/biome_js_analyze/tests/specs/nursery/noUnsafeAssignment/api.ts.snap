@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: api.ts
+---
+# Input
+```ts
+export function getPayload(): any {
+    return JSON.parse('{}');
+}
+
+export function getString(): string {
+    return "hello";
+}
+
+```

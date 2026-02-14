@@ -213,6 +213,7 @@ define_categories! {
     "lint/nursery/noUnknownAttribute": "https://biomejs.dev/linter/rules/no-unknown-attribute",
     "lint/nursery/noUnnecessaryConditions": "https://biomejs.dev/linter/rules/no-unnecessary-conditions",
     "lint/nursery/noUnresolvedImports": "https://biomejs.dev/linter/rules/no-unresolved-imports",
+    "lint/nursery/noUnsafeAssignment": "https://biomejs.dev/linter/rules/no-unsafe-assignment",
     "lint/nursery/noUnusedExpressions": "https://biomejs.dev/linter/rules/no-unused-expressions",
     "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
