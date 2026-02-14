@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::CssRoot;
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::no_empty_source::NoEmptySourceOptions;
 
@@ -66,6 +67,7 @@ declare_lint_rule! {
         language: "css",
         sources: &[RuleSource::Stylelint("no-empty-source").same()],
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 
