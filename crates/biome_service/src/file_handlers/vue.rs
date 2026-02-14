@@ -5,7 +5,7 @@ use crate::file_handlers::{
     ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, javascript,
 };
-use crate::settings::Settings;
+use crate::settings::SettingsWithEditor;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
@@ -78,7 +78,10 @@ impl VueFileHandler {
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)
-                        .with_embedding_kind(EmbeddingKind::Vue { setup }),
+                        .with_embedding_kind(EmbeddingKind::Vue {
+                            setup,
+                            is_source: true,
+                        }),
                 )
             })
             .map_or(JsFileSource::js_module(), |fs| fs)
@@ -130,7 +133,7 @@ fn parse(
     _rome_path: &BiomePath,
     _file_source: DocumentFileSource,
     text: &str,
-    _settings: &Settings,
+    _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let script = VueFileHandler::input(text);
@@ -151,7 +154,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
     let html_options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
@@ -161,7 +164,7 @@ fn format(
         0
     };
     let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
+    let formatted = format_node(options, &tree, false)?;
     match formatted.print_with_indent(indent_amount, SourceMapGeneration::Disabled) {
         Ok(printed) => Ok(printed),
         Err(error) => {
@@ -175,7 +178,7 @@ pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format_range(biome_path, document_file_source, parse, settings, range)
@@ -185,7 +188,7 @@ pub(crate) fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)

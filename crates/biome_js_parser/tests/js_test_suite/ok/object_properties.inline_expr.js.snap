@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+{ duration: 400, delay: 100 }
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsObjectExpression {
+        l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+        members: JsObjectMemberList [
+            JsPropertyObjectMember {
+                name: JsLiteralMemberName {
+                    value: IDENT@2..10 "duration" [] [],
+                },
+                colon_token: COLON@10..12 ":" [] [Whitespace(" ")],
+                value: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@12..15 "400" [] [],
+                },
+            },
+            COMMA@15..17 "," [] [Whitespace(" ")],
+            JsPropertyObjectMember {
+                name: JsLiteralMemberName {
+                    value: IDENT@17..22 "delay" [] [],
+                },
+                colon_token: COLON@22..24 ":" [] [Whitespace(" ")],
+                value: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@24..28 "100" [] [Whitespace(" ")],
+                },
+            },
+        ],
+        r_curly_token: R_CURLY@28..29 "}" [] [],
+    },
+    eof_token: EOF@29..30 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..30
+  0: JS_OBJECT_EXPRESSION@0..29
+    0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+    1: JS_OBJECT_MEMBER_LIST@2..28
+      0: JS_PROPERTY_OBJECT_MEMBER@2..15
+        0: JS_LITERAL_MEMBER_NAME@2..10
+          0: IDENT@2..10 "duration" [] []
+        1: COLON@10..12 ":" [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@12..15
+          0: JS_NUMBER_LITERAL@12..15 "400" [] []
+      1: COMMA@15..17 "," [] [Whitespace(" ")]
+      2: JS_PROPERTY_OBJECT_MEMBER@17..28
+        0: JS_LITERAL_MEMBER_NAME@17..22
+          0: IDENT@17..22 "delay" [] []
+        1: COLON@22..24 ":" [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@24..28
+          0: JS_NUMBER_LITERAL@24..28 "100" [] [Whitespace(" ")]
+    2: R_CURLY@28..29 "}" [] []
+  1: EOF@29..30 "" [Newline("\n")] []
+
+```

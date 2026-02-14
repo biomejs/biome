@@ -30,21 +30,36 @@ Global options applied to all commands
                               processed during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit
                               warnings.
-        --reporter=<json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson>  Allows to
-                              change how diagnostics and summary are reported.
-        --log-file=ARG        Optional path to redirect log messages to.
-                              If omitted, logs are printed to stdout.
-        --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
-                              verbose to the least verbose: debug, info, warn, error.
-                              The value `none` won't show any logging.
-                              [default: none]
-        --log-kind=<pretty|compact|json>  How the log should look like.
-                              [default: pretty]
+  [--reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif>] [
+  --reporter-file=PATH]
+        --reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif>
+        --reporter-file=PATH
+
         --diagnostic-level=<info|warn|error>  The level of diagnostics to show. In order, from the
                               lowest to the most important: info, warn, error. Passing
                               `--diagnostic-level=error` will cause Biome to print only diagnostics
                               that contain only errors.
                               [default: info]
+
+Options to control logging (CLI and Daemon)
+        --log-file=STRING     Optional path/file to redirect log messages to. This option is
+                              applicable only to the CLI.
+                              If omitted, logs are printed to stdout.
+                              [env:BIOME_LOG_FILE: N/A]
+        --log-prefix-name=STRING  [env:BIOME_LOG_PREFIX_NAME: N/A]
+                              [default: server.log]
+        --log-path=PATH       Allows changing the folder where logs are stored. This option is
+                              applicable only to the daemon.
+                              [env:BIOME_LOG_PATH: N/A]
+                              [default: <BIOME_DIR>/biome-logs]
+        --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
+                              verbose to the least verbose: debug, info, warn, error.
+                              The value `none` won't show any logging.
+                              [env:BIOME_LOG_LEVEL: N/A]
+                              [default: none]
+        --log-kind=<pretty|compact|json>  What the log should look like.
+                              [env:BIOME_LOG_KIND: N/A]
+                              [default: pretty]
 
 Available options:
         --write               Writes the new configuration file to disk

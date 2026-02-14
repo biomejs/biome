@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/type/type_alias/issue-8774.ts
 ---
+
 # Input
 
 ```ts
@@ -88,6 +89,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -146,4 +148,5 @@ type QQ<RR extends SS, TT extends UU, VV extends WW> =
 	// multiple lines to test
 	// proper indentation
 	XX;
+
 ```

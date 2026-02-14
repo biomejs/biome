@@ -62,4 +62,5 @@ package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━�
 ```block
 Scanned project folder in <TIME>.
 Checked 0 files in <TIME>. No fixes applied.
+Found 1 info.
 ```

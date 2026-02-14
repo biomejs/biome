@@ -1,0 +1,41 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+import { Avatar as AvatarPrimitive } from "bits-ui";
+import { cn } from "$lib/utils.js";
+
+let {
+	ref = $bindable(null),
+	class: className,
+}: AvatarPrimitive.FallbackProps = $props();
+---
+
+<!-- used as value here -->
+<AvatarPrimitive.Fallback
+	bind:ref
+	class="something nice"
+/>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

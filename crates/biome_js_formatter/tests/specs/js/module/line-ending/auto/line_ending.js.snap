@@ -1,8 +1,8 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 211
 info: js/module/line-ending/auto/line_ending.js
 ---
+
 # Input
 
 ```js
@@ -49,6 +49,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -69,6 +70,7 @@ export const env = createEnv({
 
 	NODE_ENV: { type: "string" },
 });
+
 ```
 
 ## Output 1
@@ -89,6 +91,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -109,4 +112,5 @@ export const env = createEnv({
 
 	NODE_ENV: { type: "string" },
 });
+
 ```

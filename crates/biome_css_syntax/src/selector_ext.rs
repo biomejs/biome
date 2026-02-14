@@ -47,7 +47,7 @@ mod tests {
     #[test]
     fn test_nesting_level() {
         let source = "a { b { & & > p {} } }";
-        let parsed = parse_css(source, CssParserOptions::default());
+        let parsed = parse_css(source, Default::default(), CssParserOptions::default());
         let complex_selector = parsed
             .syntax()
             .descendants()

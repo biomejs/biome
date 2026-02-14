@@ -1,0 +1,122 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+import * as React from "react";
+
+const Component1 = React.forwardRef(function Component(props, ref) {
+	return <div ref={ref} />;
+});
+
+const Component2 = React.forwardRef(function Component({ foo, bar }, ref) {
+	return <div ref={ref} />;
+});
+
+const Component3 = React.memo(React.forwardRef(function Component(props, ref) {
+	return <div ref={ref} />;
+}));
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:20 lint/suspicious/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use of forwardRef is detected, which is deprecated.
+  
+    1 │ import * as React from "react";
+    2 │ 
+  > 3 │ const Component1 = React.forwardRef(function Component(props, ref) {
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │ 	return <div ref={ref} />;
+  > 5 │ });
+      │ ^^
+    6 │ 
+    7 │ const Component2 = React.forwardRef(function Component({ foo, bar }, ref) {
+  
+  i In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead.
+  
+  i Replace the use of forwardRef with passing ref as a prop.
+  
+  i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
+  
+     1  1 │   import * as React from "react";
+     2  2 │   
+     3    │ - const·Component1·=·React.forwardRef(function·Component(props,·ref)·{
+        3 │ + const·Component1·=·function·Component({·ref,·...props·})·{
+     4  4 │   	return <div ref={ref} />;
+     5    │ - });
+        5 │ + };
+     6  6 │   
+     7  7 │   const Component2 = React.forwardRef(function Component({ foo, bar }, ref) {
+  
+
+```
+
+```
+invalid.jsx:7:20 lint/suspicious/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use of forwardRef is detected, which is deprecated.
+  
+     5 │ });
+     6 │ 
+   > 7 │ const Component2 = React.forwardRef(function Component({ foo, bar }, ref) {
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │ 	return <div ref={ref} />;
+   > 9 │ });
+       │ ^^
+    10 │ 
+    11 │ const Component3 = React.memo(React.forwardRef(function Component(props, ref) {
+  
+  i In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead.
+  
+  i Replace the use of forwardRef with passing ref as a prop.
+  
+  i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
+  
+     5  5 │   });
+     6  6 │   
+     7    │ - const·Component2·=·React.forwardRef(function·Component({·foo,·bar·},·ref)·{
+        7 │ + const·Component2·=·function·Component({·foo,·bar,·ref·})·{
+     8  8 │   	return <div ref={ref} />;
+     9    │ - });
+        9 │ + };
+    10 10 │   
+    11 11 │   const Component3 = React.memo(React.forwardRef(function Component(props, ref) {
+  
+
+```
+
+```
+invalid.jsx:11:31 lint/suspicious/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use of forwardRef is detected, which is deprecated.
+  
+     9 │ });
+    10 │ 
+  > 11 │ const Component3 = React.memo(React.forwardRef(function Component(props, ref) {
+       │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 12 │ 	return <div ref={ref} />;
+  > 13 │ }));
+       │ ^^
+    14 │ 
+  
+  i In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead.
+  
+  i Replace the use of forwardRef with passing ref as a prop.
+  
+  i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
+  
+     9  9 │   });
+    10 10 │   
+    11    │ - const·Component3·=·React.memo(React.forwardRef(function·Component(props,·ref)·{
+       11 │ + const·Component3·=·React.memo(function·Component({·ref,·...props·})·{
+    12 12 │   	return <div ref={ref} />;
+    13    │ - }));
+       13 │ + });
+    14 14 │   
+  
+
+```

@@ -11,6 +11,8 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         // Native Biome AST patterns
         "CssAtRule" => lang::CssAtRule::KIND_SET.iter().next(),
         "CssAtRuleDeclarator" => lang::CssAtRuleDeclarator::KIND_SET.iter().next(),
+        "CssAttrFallbackValue" => lang::CssAttrFallbackValue::KIND_SET.iter().next(),
+        "CssAttrFunction" => lang::CssAttrFunction::KIND_SET.iter().next(),
         "CssAttributeMatcher" => lang::CssAttributeMatcher::KIND_SET.iter().next(),
         "CssAttributeMatcherValue" => lang::CssAttributeMatcherValue::KIND_SET.iter().next(),
         "CssAttributeName" => lang::CssAttributeName::KIND_SET.iter().next(),
@@ -24,6 +26,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssColorProfileAtRuleDeclarator" => lang::CssColorProfileAtRuleDeclarator::KIND_SET
             .iter()
             .next(),
+        "CssCommaSeparatedValue" => lang::CssCommaSeparatedValue::KIND_SET.iter().next(),
         "CssComplexSelector" => lang::CssComplexSelector::KIND_SET.iter().next(),
         "CssComposesImportSpecifier" => lang::CssComposesImportSpecifier::KIND_SET.iter().next(),
         "CssComposesProperty" => lang::CssComposesProperty::KIND_SET.iter().next(),
@@ -76,6 +79,12 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
                 .next()
         }
         "CssFunction" => lang::CssFunction::KIND_SET.iter().next(),
+        "CssFunctionAtRule" => lang::CssFunctionAtRule::KIND_SET.iter().next(),
+        "CssFunctionAtRuleDeclarator" => lang::CssFunctionAtRuleDeclarator::KIND_SET.iter().next(),
+        "CssFunctionParameter" => lang::CssFunctionParameter::KIND_SET.iter().next(),
+        "CssFunctionParameterDefaultValue" => lang::CssFunctionParameterDefaultValue::KIND_SET
+            .iter()
+            .next(),
         "CssGenericDelimiter" => lang::CssGenericDelimiter::KIND_SET.iter().next(),
         "CssGenericProperty" => lang::CssGenericProperty::KIND_SET.iter().next(),
         "CssIdSelector" => lang::CssIdSelector::KIND_SET.iter().next(),
@@ -129,6 +138,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssNestedSelector" => lang::CssNestedSelector::KIND_SET.iter().next(),
         "CssNthOffset" => lang::CssNthOffset::KIND_SET.iter().next(),
         "CssNumber" => lang::CssNumber::KIND_SET.iter().next(),
+        "CssNumberDeclarator" => lang::CssNumberDeclarator::KIND_SET.iter().next(),
         "CssPageAtRule" => lang::CssPageAtRule::KIND_SET.iter().next(),
         "CssPageAtRuleBlock" => lang::CssPageAtRuleBlock::KIND_SET.iter().next(),
         "CssPageSelector" => lang::CssPageSelector::KIND_SET.iter().next(),
@@ -189,8 +199,12 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         }
         "CssQueryFeatureReverseRange" => lang::CssQueryFeatureReverseRange::KIND_SET.iter().next(),
         "CssRatio" => lang::CssRatio::KIND_SET.iter().next(),
+        "CssRawStringDeclarator" => lang::CssRawStringDeclarator::KIND_SET.iter().next(),
+        "CssRegularAttrUnit" => lang::CssRegularAttrUnit::KIND_SET.iter().next(),
         "CssRegularDimension" => lang::CssRegularDimension::KIND_SET.iter().next(),
+        "CssRegularSyntaxTypeName" => lang::CssRegularSyntaxTypeName::KIND_SET.iter().next(),
         "CssRelativeSelector" => lang::CssRelativeSelector::KIND_SET.iter().next(),
+        "CssReturnsStatement" => lang::CssReturnsStatement::KIND_SET.iter().next(),
         "CssRoot" => lang::CssRoot::KIND_SET.iter().next(),
         "CssRuleBlock" => lang::CssRuleBlock::KIND_SET.iter().next(),
         "CssScopeAtRule" => lang::CssScopeAtRule::KIND_SET.iter().next(),
@@ -199,6 +213,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssScopeRangeEnd" => lang::CssScopeRangeEnd::KIND_SET.iter().next(),
         "CssScopeRangeInterval" => lang::CssScopeRangeInterval::KIND_SET.iter().next(),
         "CssScopeRangeStart" => lang::CssScopeRangeStart::KIND_SET.iter().next(),
+        "CssSnippetRoot" => lang::CssSnippetRoot::KIND_SET.iter().next(),
         "CssStartingStyleAtRule" => lang::CssStartingStyleAtRule::KIND_SET.iter().next(),
         "CssStartingStyleAtRuleDeclarator" => lang::CssStartingStyleAtRuleDeclarator::KIND_SET
             .iter()
@@ -216,6 +231,15 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssSupportsFeatureSelector" => lang::CssSupportsFeatureSelector::KIND_SET.iter().next(),
         "CssSupportsNotCondition" => lang::CssSupportsNotCondition::KIND_SET.iter().next(),
         "CssSupportsOrCondition" => lang::CssSupportsOrCondition::KIND_SET.iter().next(),
+        "CssSyntaxComponent" => lang::CssSyntaxComponent::KIND_SET.iter().next(),
+        "CssSyntaxComponentWithoutMultiplier" => {
+            lang::CssSyntaxComponentWithoutMultiplier::KIND_SET
+                .iter()
+                .next()
+        }
+        "CssSyntaxMultiplier" => lang::CssSyntaxMultiplier::KIND_SET.iter().next(),
+        "CssSyntaxType" => lang::CssSyntaxType::KIND_SET.iter().next(),
+        "CssTypeFunction" => lang::CssTypeFunction::KIND_SET.iter().next(),
         "CssTypeSelector" => lang::CssTypeSelector::KIND_SET.iter().next(),
         "CssUnicodeCodepoint" => lang::CssUnicodeCodepoint::KIND_SET.iter().next(),
         "CssUnicodeRange" => lang::CssUnicodeRange::KIND_SET.iter().next(),
@@ -223,8 +247,11 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssUnicodeRangeWildcard" => lang::CssUnicodeRangeWildcard::KIND_SET.iter().next(),
         "CssUniversalNamespacePrefix" => lang::CssUniversalNamespacePrefix::KIND_SET.iter().next(),
         "CssUniversalSelector" => lang::CssUniversalSelector::KIND_SET.iter().next(),
+        "CssUniversalSyntax" => lang::CssUniversalSyntax::KIND_SET.iter().next(),
+        "CssUnknownAttrUnit" => lang::CssUnknownAttrUnit::KIND_SET.iter().next(),
         "CssUnknownBlockAtRule" => lang::CssUnknownBlockAtRule::KIND_SET.iter().next(),
         "CssUnknownDimension" => lang::CssUnknownDimension::KIND_SET.iter().next(),
+        "CssUnknownSyntaxTypeName" => lang::CssUnknownSyntaxTypeName::KIND_SET.iter().next(),
         "CssUnknownValueAtRule" => lang::CssUnknownValueAtRule::KIND_SET.iter().next(),
         "CssUrlFunction" => lang::CssUrlFunction::KIND_SET.iter().next(),
         "CssUrlValueRaw" => lang::CssUrlValueRaw::KIND_SET.iter().next(),
@@ -246,6 +273,10 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssViewTransitionAtRuleDeclarator" => lang::CssViewTransitionAtRuleDeclarator::KIND_SET
             .iter()
             .next(),
+        "ScssDeclaration" => lang::ScssDeclaration::KIND_SET.iter().next(),
+        "ScssIdentifier" => lang::ScssIdentifier::KIND_SET.iter().next(),
+        "ScssNamespacedIdentifier" => lang::ScssNamespacedIdentifier::KIND_SET.iter().next(),
+        "ScssVariableModifier" => lang::ScssVariableModifier::KIND_SET.iter().next(),
         "TwApplyAtRule" => lang::TwApplyAtRule::KIND_SET.iter().next(),
         "TwConfigAtRule" => lang::TwConfigAtRule::KIND_SET.iter().next(),
         "TwCustomVariantAtRule" => lang::TwCustomVariantAtRule::KIND_SET.iter().next(),

@@ -29,10 +29,10 @@ impl FormatNodeRule<SvelteElseIfClause> for FormatSvelteElseIfClause {
             ]
         )?;
 
-        let format_children = FormatHtmlElementList::default()
+        FormatHtmlElementList::default()
             .with_multiline()
-            .fmt_children(&children, f)?;
+            .fmt(&children, f)?;
 
-        write!(f, [format_children, hard_line_break(),])
+        write!(f, [hard_line_break(),])
     }
 }

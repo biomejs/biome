@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// Invalid: basic parameter destructuring
+export default {
+  setup({ count }) {
+    return () => h('div', count);
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:9 lint/correctness/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Destructuring `props` in the `setup` function parameters loses reactivity.
+  
+    1 │ // Invalid: basic parameter destructuring
+    2 │ export default {
+  > 3 │   setup({ count }) {
+      │         ^^^^^^^^^
+    4 │     return () => h('div', count);
+    5 │   }
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+
+```

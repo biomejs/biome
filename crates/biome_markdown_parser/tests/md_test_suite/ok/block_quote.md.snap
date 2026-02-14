@@ -1,0 +1,103 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+> This is a quote
+> It continues here
+
+> Another quote block
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            marker_token: R_ANGLE@0..1 ">" [] [],
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@1..17 "This is a quote" [Skipped(" ")] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@17..18 "\n" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@18..37 "It continues here" [Skipped(">"), Skipped(" ")] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@37..38 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@38..39 "\n" [] [],
+        },
+        MdQuote {
+            marker_token: R_ANGLE@39..40 ">" [] [],
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@40..60 "Another quote block" [Skipped(" ")] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@60..61 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@61..61 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..61
+  0: (empty)
+  1: MD_BLOCK_LIST@0..61
+    0: MD_QUOTE@0..38
+      0: R_ANGLE@0..1 ">" [] []
+      1: MD_BLOCK_LIST@1..38
+        0: MD_PARAGRAPH@1..38
+          0: MD_INLINE_ITEM_LIST@1..38
+            0: MD_TEXTUAL@1..17
+              0: MD_TEXTUAL_LITERAL@1..17 "This is a quote" [Skipped(" ")] []
+            1: MD_TEXTUAL@17..18
+              0: MD_TEXTUAL_LITERAL@17..18 "\n" [] []
+            2: MD_TEXTUAL@18..37
+              0: MD_TEXTUAL_LITERAL@18..37 "It continues here" [Skipped(">"), Skipped(" ")] []
+            3: MD_TEXTUAL@37..38
+              0: MD_TEXTUAL_LITERAL@37..38 "\n" [] []
+          1: (empty)
+    1: MD_NEWLINE@38..39
+      0: NEWLINE@38..39 "\n" [] []
+    2: MD_QUOTE@39..61
+      0: R_ANGLE@39..40 ">" [] []
+      1: MD_BLOCK_LIST@40..61
+        0: MD_PARAGRAPH@40..61
+          0: MD_INLINE_ITEM_LIST@40..61
+            0: MD_TEXTUAL@40..60
+              0: MD_TEXTUAL_LITERAL@40..60 "Another quote block" [Skipped(" ")] []
+            1: MD_TEXTUAL@60..61
+              0: MD_TEXTUAL_LITERAL@60..61 "\n" [] []
+          1: (empty)
+  2: EOF@61..61 "" [] []
+
+```

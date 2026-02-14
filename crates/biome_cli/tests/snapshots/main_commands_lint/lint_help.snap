@@ -7,8 +7,9 @@ expression: redactor(content)
 ```block
 Run various checks on a set of files.
 
-Usage: lint [--write] [--unsafe] [--suppress] [--reason=STRING] [--only=<GROUP|RULE|DOMAIN>]... [
---skip=<GROUP|RULE|DOMAIN>]... [--staged] [--changed] [--since=REF] [PATH]...
+Usage: lint [--write] [--unsafe] [--suppress] [--reason=STRING] [--only=<GROUP|RULE|DOMAIN|ACTION>
+]... [--skip=<GROUP|RULE|DOMAIN|ACTION>]... [--staged] [--changed] [--since=REF] [--profile-rules] [
+PATH]...
 
 Options that changes how the JSON parser behaves
         --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
@@ -64,21 +65,36 @@ Global options applied to all commands
                               processed during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit
                               warnings.
-        --reporter=<json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson>  Allows to
-                              change how diagnostics and summary are reported.
-        --log-file=ARG        Optional path to redirect log messages to.
-                              If omitted, logs are printed to stdout.
-        --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
-                              verbose to the least verbose: debug, info, warn, error.
-                              The value `none` won't show any logging.
-                              [default: none]
-        --log-kind=<pretty|compact|json>  How the log should look like.
-                              [default: pretty]
+  [--reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif>] [
+  --reporter-file=PATH]
+        --reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif>
+        --reporter-file=PATH
+
         --diagnostic-level=<info|warn|error>  The level of diagnostics to show. In order, from the
                               lowest to the most important: info, warn, error. Passing
                               `--diagnostic-level=error` will cause Biome to print only diagnostics
                               that contain only errors.
                               [default: info]
+
+Options to control logging (CLI and Daemon)
+        --log-file=STRING     Optional path/file to redirect log messages to. This option is
+                              applicable only to the CLI.
+                              If omitted, logs are printed to stdout.
+                              [env:BIOME_LOG_FILE: N/A]
+        --log-prefix-name=STRING  [env:BIOME_LOG_PREFIX_NAME: N/A]
+                              [default: server.log]
+        --log-path=PATH       Allows changing the folder where logs are stored. This option is
+                              applicable only to the daemon.
+                              [env:BIOME_LOG_PATH: N/A]
+                              [default: <BIOME_DIR>/biome-logs]
+        --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
+                              verbose to the least verbose: debug, info, warn, error.
+                              The value `none` won't show any logging.
+                              [env:BIOME_LOG_LEVEL: N/A]
+                              [default: none]
+        --log-kind=<pretty|compact|json>  What the log should look like.
+                              [env:BIOME_LOG_KIND: N/A]
+                              [default: pretty]
 
 Available positional items:
     PATH                      Single file, single path or list of paths
@@ -90,15 +106,16 @@ Available options:
         --suppress            Fixes lint rule violations with comment suppressions instead of using
                               a rule code action (fix)
         --reason=STRING       Explanation for suppressing diagnostics with `--suppress`
-        --only=<GROUP|RULE|DOMAIN>  Run only the given rule, group of rules or domain. If the
-                              severity level of a rule is `off`, then the severity level of the rule
-                              is set to `error` if it is a recommended rule or `warn` otherwise.
+        --only=<GROUP|RULE|DOMAIN|ACTION>  Run only the given lint rule, assist action, group of
+                              rules and actions, or domain. If the severity level of a rule is
+                              `off`, then the severity level of the rule is set to `error` if it is
+                              a recommended rule or `warn` otherwise.
                               Example:
                               ```shell biome lint --only=correctness/noUnusedVariables
                               --only=suspicious --only=test ```
-        --skip=<GROUP|RULE|DOMAIN>  Skip the given rule, group of rules or domain by setting the
-                              severity level of the rules to `off`. This option takes precedence
-                              over `--only`.
+        --skip=<GROUP|RULE|DOMAIN|ACTION>  Skip the given lint rule, assist action, group of rules
+                              and actions, or domain by setting the severity level of the rules to
+                              `off`. This option takes precedence over `--only`.
                               Example:
                               ```shell biome lint --skip=correctness/noUnusedVariables
                               --skip=suspicious --skip=project ```
@@ -119,6 +136,8 @@ Available options:
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag and the `defaultBranch` is not set in your
                               biome.json
+        --profile-rules       Enable rule profiling output. Captures timing only for rule execution,
+                              not preprocessing such as querying or building the semantic model.
     -h, --help                Prints help information
 
 ```

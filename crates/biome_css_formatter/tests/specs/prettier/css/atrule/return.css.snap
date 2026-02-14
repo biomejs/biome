@@ -2,25 +2,26 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/return.css
 ---
+
 # Input
 
 ```css
-@function grid-width($n) {
+@function --grid-width($n) {
     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
 @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
 @return $n*$grid-width+($n-1)*$gutter-width/10;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
     @return $n
         *
         $grid-width
@@ -35,7 +36,7 @@ info: css/atrule/return.css
         10
         ;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
     @return
         $n
         *
@@ -52,7 +53,7 @@ info: css/atrule/return.css
         ;
 }
 @function
-grid-width(
+--grid-width(
 $n
 )
 {
@@ -74,7 +75,7 @@ $gutter-width
 }
 @function
 
-grid-width(
+--grid-width(
 
 $n
 
@@ -113,19 +114,19 @@ $gutter-width
 ;
 
 }
-@function grid-width($n) {
+@function --grid-width($n) {
     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
 }
-@function extend($obj, $ext-obj) {
+@function --extend($obj, $ext-obj) {
     @return map-merge($obj, $ext-obj);
 }
-@function extend($obj, $ext-obj) {
+@function --extend($obj, $ext-obj) {
     @return map-merge( $obj , $ext-obj ) ;
 }
-@function extend($obj, $ext-obj) {
+@function --extend($obj, $ext-obj) {
     @return map-merge($obj,$ext-obj);
 }
-@function extend($obj, $ext-obj) {
+@function --extend($obj, $ext-obj) {
     @return
     map-merge(
     $obj
@@ -143,38 +144,33 @@ $gutter-width
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,41 +5,106 @@
+@@ -1,45 +1,104 @@
+-@function grid-width($n) {
++@function --grid-width($n) {
    @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
  }
- @function grid-width($n) {
+-@function grid-width($n) {
++@function --grid-width($n) {
+   @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+ }
+-@function grid-width($n) {
 -  @return $n * $grid-width + ($n-1) * $gutter-width/10;
++@function --grid-width($n) {
 +  @return $n*$grid-width+($n-1)*$gutter-width/10;
  }
- @function grid-width($n) {
+-@function grid-width($n) {
 -  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
++@function --grid-width($n) {
 +  @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10;
  }
- @function grid-width($n) {
+-@function grid-width($n) {
 -  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
++@function --grid-width($n) {
 +  @return $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10;
  }
- @function grid-width($n) {
+-@function grid-width($n) {
 -  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-+  @return $n
-+        *
-+        $grid-width
-+        + (
-+            $n
-+            -
-+            1
-+        )
-+        *
-+        $gutter-width
-+        /
-+        10;
- }
- @function grid-width($n) {
--  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
++@function --grid-width($n) {
 +  @return $n
 +        *
 +        $grid-width
@@ -190,9 +186,23 @@ $gutter-width
  }
 -@function grid-width($n) {
 -  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-+@function grid-width(
-+$n
-+) {
++@function --grid-width($n) {
++  @return $n
++        *
++        $grid-width
++        + (
++            $n
++            -
++            1
++        )
++        *
++        $gutter-width
++        /
++        10;
+ }
+-@function grid-width($n) {
+-  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
++@function --grid-width($n) {
 +  @return $n
 +*
 +$grid-width
@@ -209,11 +219,7 @@ $gutter-width
  }
 -@function grid-width($n) {
 -  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-+@function grid-width(
-+
-+$n
-+
-+) {
++@function --grid-width($n) {
 +  @return $n
 +
 +*
@@ -240,26 +246,31 @@ $gutter-width
 +
 +10;
  }
- @function grid-width($n) {
+-@function grid-width($n) {
 -  @return $very-very-very-very-very-very-vey-long-var *
 -    $very-very-very-very-very-very-vey-long-var +
 -    ($very-very-very-very-very-very-vey-long-var - 1) *
 -    $very-very-very-very-very-very-vey-long-var;
++@function --grid-width($n) {
 +  @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
  }
- @function extend($obj, $ext-obj) {
+-@function extend($obj, $ext-obj) {
++@function --extend($obj, $ext-obj) {
    @return map-merge($obj, $ext-obj);
  }
- @function extend($obj, $ext-obj) {
+-@function extend($obj, $ext-obj) {
 -  @return map-merge($obj, $ext-obj);
++@function --extend($obj, $ext-obj) {
 +  @return map-merge( $obj , $ext-obj );
  }
- @function extend($obj, $ext-obj) {
+-@function extend($obj, $ext-obj) {
 -  @return map-merge($obj, $ext-obj);
++@function --extend($obj, $ext-obj) {
 +  @return map-merge($obj,$ext-obj);
  }
- @function extend($obj, $ext-obj) {
+-@function extend($obj, $ext-obj) {
 -  @return map-merge($obj, $ext-obj);
++@function --extend($obj, $ext-obj) {
 +  @return map-merge(
 +    $obj
 +    ,
@@ -271,22 +282,22 @@ $gutter-width
 # Output
 
 ```css
-@function grid-width($n) {
+@function --grid-width($n) {
   @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
   @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
   @return $n*$grid-width+($n-1)*$gutter-width/10;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
   @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
   @return $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
   @return $n
         *
         $grid-width
@@ -300,7 +311,7 @@ $gutter-width
         /
         10;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
   @return $n
         *
         $grid-width
@@ -314,9 +325,7 @@ $gutter-width
         /
         10;
 }
-@function grid-width(
-$n
-) {
+@function --grid-width($n) {
   @return $n
 *
 $grid-width
@@ -331,11 +340,7 @@ $gutter-width
 /
 10;
 }
-@function grid-width(
-
-$n
-
-) {
+@function --grid-width($n) {
   @return $n
 
 *
@@ -362,19 +367,19 @@ $gutter-width
 
 10;
 }
-@function grid-width($n) {
+@function --grid-width($n) {
   @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
 }
-@function extend($obj, $ext-obj) {
+@function --extend($obj, $ext-obj) {
   @return map-merge($obj, $ext-obj);
 }
-@function extend($obj, $ext-obj) {
+@function --extend($obj, $ext-obj) {
   @return map-merge( $obj , $ext-obj );
 }
-@function extend($obj, $ext-obj) {
+@function --extend($obj, $ext-obj) {
   @return map-merge($obj,$ext-obj);
 }
-@function extend($obj, $ext-obj) {
+@function --extend($obj, $ext-obj) {
   @return map-merge(
     $obj
     ,
@@ -385,729 +390,364 @@ $gutter-width
 
 # Errors
 ```
-return.css:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:1:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$n'.
   
-  > 1 │ @function grid-width($n) {
-      │                      ^
+  > 1 │ @function --grid-width($n) {
+      │                        ^^
     2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     3 │ }
   
-return.css:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
-    1 │ @function grid-width($n) {
-  > 2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-      │             ^
+  > 1 │ @function --grid-width($n) {
+      │                        ^^
+    2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     3 │ }
-    4 │ @function grid-width($n) {
   
-return.css:2:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:4:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
-  
-    1 │ @function grid-width($n) {
-  > 2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-      │                  ^
-    3 │ }
-    4 │ @function grid-width($n) {
-  
-return.css:2:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    1 │ @function grid-width($n) {
-  > 2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-      │                                 ^
-    3 │ }
-    4 │ @function grid-width($n) {
-  
-return.css:2:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    1 │ @function grid-width($n) {
-  > 2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-      │                                           ^
-    3 │ }
-    4 │ @function grid-width($n) {
-  
-return.css:4:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$n'.
   
     2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     3 │ }
-  > 4 │ @function grid-width($n) {
-      │                      ^
+  > 4 │ @function --grid-width($n) {
+      │                        ^^
     5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     6 │ }
   
-return.css:5:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
+    2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     3 │ }
-    4 │ @function grid-width($n) {
-  > 5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-      │         ^
+  > 4 │ @function --grid-width($n) {
+      │                        ^^
+    5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     6 │ }
-    7 │ @function grid-width($n) {
   
-return.css:5:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:7:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
-  
-    3 │ }
-    4 │ @function grid-width($n) {
-  > 5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-      │              ^
-    6 │ }
-    7 │ @function grid-width($n) {
-  
-return.css:5:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    3 │ }
-    4 │ @function grid-width($n) {
-  > 5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-      │                             ^
-    6 │ }
-    7 │ @function grid-width($n) {
-  
-return.css:5:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    3 │ }
-    4 │ @function grid-width($n) {
-  > 5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-      │                                       ^
-    6 │ }
-    7 │ @function grid-width($n) {
-  
-return.css:7:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$n'.
   
     5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     6 │ }
-  > 7 │ @function grid-width($n) {
-      │                      ^
+  > 7 │ @function --grid-width($n) {
+      │                        ^^
     8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
     9 │ }
   
-return.css:8:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  i Expected a function parameter here.
+  
+    5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+    6 │ }
+  > 7 │ @function --grid-width($n) {
+      │                        ^^
+    8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
+    9 │ }
+  
+return.css:10:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
-  
-     6 │ }
-     7 │ @function grid-width($n) {
-   > 8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
-       │         ^
-     9 │ }
-    10 │ @function grid-width($n) {
-  
-return.css:8:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-     6 │ }
-     7 │ @function grid-width($n) {
-   > 8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
-       │            ^
-     9 │ }
-    10 │ @function grid-width($n) {
-  
-return.css:8:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-     6 │ }
-     7 │ @function grid-width($n) {
-   > 8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
-       │                         ^
-     9 │ }
-    10 │ @function grid-width($n) {
-  
-return.css:8:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-     6 │ }
-     7 │ @function grid-width($n) {
-   > 8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
-       │                               ^
-     9 │ }
-    10 │ @function grid-width($n) {
-  
-return.css:10:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$n'.
   
      8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
      9 │ }
-  > 10 │ @function grid-width($n) {
-       │                      ^
+  > 10 │ @function --grid-width($n) {
+       │                        ^^
     11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
     12 │ }
   
-return.css:11:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
+     8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
      9 │ }
-    10 │ @function grid-width($n) {
-  > 11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
-       │             ^
+  > 10 │ @function --grid-width($n) {
+       │                        ^^
+    11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
     12 │ }
-    13 │ @function grid-width($n) {
   
-return.css:11:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:13:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
-  
-     9 │ }
-    10 │ @function grid-width($n) {
-  > 11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
-       │                  ^
-    12 │ }
-    13 │ @function grid-width($n) {
-  
-return.css:11:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-     9 │ }
-    10 │ @function grid-width($n) {
-  > 11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
-       │                                  ^
-    12 │ }
-    13 │ @function grid-width($n) {
-  
-return.css:11:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-     9 │ }
-    10 │ @function grid-width($n) {
-  > 11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
-       │                                             ^
-    12 │ }
-    13 │ @function grid-width($n) {
-  
-return.css:13:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$n'.
   
     11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
     12 │ }
-  > 13 │ @function grid-width($n) {
-       │                      ^
+  > 13 │ @function --grid-width($n) {
+       │                        ^^
     14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
     15 │ }
   
-return.css:14:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
+    11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
     12 │ }
-    13 │ @function grid-width($n) {
-  > 14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
-       │              ^
+  > 13 │ @function --grid-width($n) {
+       │                        ^^
+    14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
     15 │ }
-    16 │ @function grid-width($n) {
   
-return.css:14:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:16:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
-  
-    12 │ }
-    13 │ @function grid-width($n) {
-  > 14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
-       │                      ^
-    15 │ }
-    16 │ @function grid-width($n) {
-  
-return.css:14:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    12 │ }
-    13 │ @function grid-width($n) {
-  > 14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
-       │                                         ^
-    15 │ }
-    16 │ @function grid-width($n) {
-  
-return.css:14:57 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    12 │ }
-    13 │ @function grid-width($n) {
-  > 14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
-       │                                                         ^
-    15 │ }
-    16 │ @function grid-width($n) {
-  
-return.css:16:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$n'.
   
     14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
     15 │ }
-  > 16 │ @function grid-width($n) {
-       │                      ^
+  > 16 │ @function --grid-width($n) {
+       │                        ^^
     17 │     @return $n
     18 │         *
   
-return.css:17:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
+    14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
     15 │ }
-    16 │ @function grid-width($n) {
-  > 17 │     @return $n
-       │             ^
-    18 │         *
-    19 │         $grid-width
-  
-return.css:19:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
+  > 16 │ @function --grid-width($n) {
+       │                        ^^
     17 │     @return $n
     18 │         *
-  > 19 │         $grid-width
-       │         ^
-    20 │         + (
-    21 │             $n
   
-return.css:21:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:31:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
-  
-    19 │         $grid-width
-    20 │         + (
-  > 21 │             $n
-       │             ^
-    22 │             -
-    23 │             1
-  
-return.css:26:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    24 │         )
-    25 │         *
-  > 26 │         $gutter-width
-       │         ^
-    27 │         /
-    28 │         10
-  
-return.css:31:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$n'.
   
     29 │         ;
     30 │ }
-  > 31 │ @function grid-width($n) {
-       │                      ^
+  > 31 │ @function --grid-width($n) {
+       │                        ^^
     32 │     @return
     33 │         $n
   
-return.css:33:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
-    31 │ @function grid-width($n) {
+    29 │         ;
+    30 │ }
+  > 31 │ @function --grid-width($n) {
+       │                        ^^
     32 │     @return
-  > 33 │         $n
-       │         ^
-    34 │         *
-    35 │         $grid-width
-  
-return.css:35:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
     33 │         $n
-    34 │         *
-  > 35 │         $grid-width
-       │         ^
-    36 │         + (
-    37 │             $n
-  
-return.css:37:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    35 │         $grid-width
-    36 │         + (
-  > 37 │             $n
-       │             ^
-    38 │             -
-    39 │             1
-  
-return.css:42:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    40 │         )
-    41 │         *
-  > 42 │         $gutter-width
-       │         ^
-    43 │         /
-    44 │         10
   
 return.css:49:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$n'.
   
     47 │ @function
-    48 │ grid-width(
+    48 │ --grid-width(
   > 49 │ $n
-       │ ^
+       │ ^^
     50 │ )
     51 │ {
   
-return.css:53:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
+    47 │ @function
+    48 │ --grid-width(
+  > 49 │ $n
+       │ ^^
+    50 │ )
     51 │ {
-    52 │ @return
-  > 53 │ $n
-       │ ^
-    54 │ *
-    55 │ $grid-width
-  
-return.css:55:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    53 │ $n
-    54 │ *
-  > 55 │ $grid-width
-       │ ^
-    56 │ +
-    57 │ (
-  
-return.css:58:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    56 │ +
-    57 │ (
-  > 58 │ $n
-       │ ^
-    59 │ -
-    60 │ 1
-  
-return.css:63:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    61 │ )
-    62 │ *
-  > 63 │ $gutter-width
-       │ ^
-    64 │ /
-    65 │ 10
   
 return.css:72:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$n'.
   
-    70 │ grid-width(
+    70 │ --grid-width(
     71 │ 
   > 72 │ $n
-       │ ^
+       │ ^^
     73 │ 
     74 │ )
   
-return.css:80:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  i Expected a function parameter here.
+  
+    70 │ --grid-width(
+    71 │ 
+  > 72 │ $n
+       │ ^^
+    73 │ 
+    74 │ )
+  
+return.css:109:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
-  
-    78 │ @return
-    79 │ 
-  > 80 │ $n
-       │ ^
-    81 │ 
-    82 │ *
-  
-return.css:84:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    82 │ *
-    83 │ 
-  > 84 │ $grid-width
-       │ ^
-    85 │ 
-    86 │ +
-  
-return.css:90:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    88 │ (
-    89 │ 
-  > 90 │ $n
-       │ ^
-    91 │ 
-    92 │ -
-  
-return.css:100:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-     98 │ *
-     99 │ 
-  > 100 │ $gutter-width
-        │ ^
-    101 │ 
-    102 │ /
-  
-return.css:109:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$n'.
   
     108 │ }
-  > 109 │ @function grid-width($n) {
-        │                      ^
+  > 109 │ @function --grid-width($n) {
+        │                        ^^
     110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
     111 │ }
   
-return.css:110:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
     108 │ }
-    109 │ @function grid-width($n) {
-  > 110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
-        │             ^
+  > 109 │ @function --grid-width($n) {
+        │                        ^^
+    110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
     111 │ }
-    112 │ @function extend($obj, $ext-obj) {
   
-return.css:110:59 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:112:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
-  
-    108 │ }
-    109 │ @function grid-width($n) {
-  > 110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
-        │                                                           ^
-    111 │ }
-    112 │ @function extend($obj, $ext-obj) {
-  
-return.css:110:106 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    108 │ }
-    109 │ @function grid-width($n) {
-  > 110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
-        │                                                                                                          ^
-    111 │ }
-    112 │ @function extend($obj, $ext-obj) {
-  
-return.css:110:157 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    108 │ }
-    109 │ @function grid-width($n) {
-  > 110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
-        │                                                                                                                                                             ^
-    111 │ }
-    112 │ @function extend($obj, $ext-obj) {
-  
-return.css:112:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$obj'.
   
     110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
     111 │ }
-  > 112 │ @function extend($obj, $ext-obj) {
-        │                  ^
+  > 112 │ @function --extend($obj, $ext-obj) {
+        │                    ^^^^
     113 │     @return map-merge($obj, $ext-obj);
     114 │ }
   
-return.css:112:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
     110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
     111 │ }
-  > 112 │ @function extend($obj, $ext-obj) {
-        │                        ^
+  > 112 │ @function --extend($obj, $ext-obj) {
+        │                    ^^^^
     113 │     @return map-merge($obj, $ext-obj);
     114 │ }
   
-return.css:113:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:112:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$ext-obj'.
   
+    110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
     111 │ }
-    112 │ @function extend($obj, $ext-obj) {
-  > 113 │     @return map-merge($obj, $ext-obj);
-        │                       ^
+  > 112 │ @function --extend($obj, $ext-obj) {
+        │                          ^^^^^^^^
+    113 │     @return map-merge($obj, $ext-obj);
     114 │ }
-    115 │ @function extend($obj, $ext-obj) {
   
-return.css:113:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
+    110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
     111 │ }
-    112 │ @function extend($obj, $ext-obj) {
-  > 113 │     @return map-merge($obj, $ext-obj);
-        │                             ^
+  > 112 │ @function --extend($obj, $ext-obj) {
+        │                          ^^^^^^^^
+    113 │     @return map-merge($obj, $ext-obj);
     114 │ }
-    115 │ @function extend($obj, $ext-obj) {
   
-return.css:115:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:115:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$obj'.
   
     113 │     @return map-merge($obj, $ext-obj);
     114 │ }
-  > 115 │ @function extend($obj, $ext-obj) {
-        │                  ^
+  > 115 │ @function --extend($obj, $ext-obj) {
+        │                    ^^^^
     116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
   
-return.css:115:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
     113 │     @return map-merge($obj, $ext-obj);
     114 │ }
-  > 115 │ @function extend($obj, $ext-obj) {
-        │                        ^
+  > 115 │ @function --extend($obj, $ext-obj) {
+        │                    ^^^^
     116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
   
-return.css:116:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:115:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$ext-obj'.
   
+    113 │     @return map-merge($obj, $ext-obj);
     114 │ }
-    115 │ @function extend($obj, $ext-obj) {
-  > 116 │     @return map-merge( $obj , $ext-obj ) ;
-        │                        ^
+  > 115 │ @function --extend($obj, $ext-obj) {
+        │                          ^^^^^^^^
+    116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
-    118 │ @function extend($obj, $ext-obj) {
   
-return.css:116:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
+    113 │     @return map-merge($obj, $ext-obj);
     114 │ }
-    115 │ @function extend($obj, $ext-obj) {
-  > 116 │     @return map-merge( $obj , $ext-obj ) ;
-        │                               ^
+  > 115 │ @function --extend($obj, $ext-obj) {
+        │                          ^^^^^^^^
+    116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
-    118 │ @function extend($obj, $ext-obj) {
   
-return.css:118:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:118:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$obj'.
   
     116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
-  > 118 │ @function extend($obj, $ext-obj) {
-        │                  ^
+  > 118 │ @function --extend($obj, $ext-obj) {
+        │                    ^^^^
     119 │     @return map-merge($obj,$ext-obj);
     120 │ }
   
-return.css:118:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
     116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
-  > 118 │ @function extend($obj, $ext-obj) {
-        │                        ^
+  > 118 │ @function --extend($obj, $ext-obj) {
+        │                    ^^^^
     119 │     @return map-merge($obj,$ext-obj);
     120 │ }
   
-return.css:119:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:118:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$ext-obj'.
   
+    116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
-    118 │ @function extend($obj, $ext-obj) {
-  > 119 │     @return map-merge($obj,$ext-obj);
-        │                       ^
+  > 118 │ @function --extend($obj, $ext-obj) {
+        │                          ^^^^^^^^
+    119 │     @return map-merge($obj,$ext-obj);
     120 │ }
-    121 │ @function extend($obj, $ext-obj) {
   
-return.css:119:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
+    116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
-    118 │ @function extend($obj, $ext-obj) {
-  > 119 │     @return map-merge($obj,$ext-obj);
-        │                            ^
+  > 118 │ @function --extend($obj, $ext-obj) {
+        │                          ^^^^^^^^
+    119 │     @return map-merge($obj,$ext-obj);
     120 │ }
-    121 │ @function extend($obj, $ext-obj) {
   
-return.css:121:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:121:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$obj'.
   
     119 │     @return map-merge($obj,$ext-obj);
     120 │ }
-  > 121 │ @function extend($obj, $ext-obj) {
-        │                  ^
+  > 121 │ @function --extend($obj, $ext-obj) {
+        │                    ^^^^
     122 │     @return
     123 │     map-merge(
   
-return.css:121:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
     119 │     @return map-merge($obj,$ext-obj);
     120 │ }
-  > 121 │ @function extend($obj, $ext-obj) {
-        │                        ^
+  > 121 │ @function --extend($obj, $ext-obj) {
+        │                    ^^^^
     122 │     @return
     123 │     map-merge(
   
-return.css:124:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:121:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$ext-obj'.
   
+    119 │     @return map-merge($obj,$ext-obj);
+    120 │ }
+  > 121 │ @function --extend($obj, $ext-obj) {
+        │                          ^^^^^^^^
     122 │     @return
     123 │     map-merge(
-  > 124 │     $obj
-        │     ^
-    125 │     ,
-    126 │     $ext-obj
   
-return.css:126:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected a function parameter here.
   
-    124 │     $obj
-    125 │     ,
-  > 126 │     $ext-obj
-        │     ^
-    127 │     )
-    128 │     ;
+    119 │     @return map-merge($obj,$ext-obj);
+    120 │ }
+  > 121 │ @function --extend($obj, $ext-obj) {
+        │                          ^^^^^^^^
+    122 │     @return
+    123 │     map-merge(
   
 
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-   93:   @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
+   87:   @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
 ```

@@ -1,0 +1,15 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"assist": {
+		"actions": {
+			"source": {
+				"noDuplicateClasses": {
+					"level": "on",
+					"options": {
+						"functions": ["cn", "clsx", "cva"]
+					}
+				}
+			}
+		}
+	}
+}

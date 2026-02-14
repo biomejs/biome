@@ -1,0 +1,167 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div style:color|important="red" style:width="100px" style:background-color|important={bg}>
+  Mixed important
+</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@5..10 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@10..11 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@11..26 "color|important" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@26..27 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@27..33 "\"red\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    },
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@33..38 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@38..39 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@39..44 "width" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@44..45 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@45..53 "\"100px\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    },
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@53..58 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@58..59 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@59..85 "background-color|important" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@85..86 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@86..87 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@87..89 "bg" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@89..90 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@90..91 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@91..109 "Mixed important" [Newline("\n"), Whitespace("  ")] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@109..111 "<" [Newline("\n")] [],
+                slash_token: SLASH@111..112 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@112..115 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@115..116 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@116..117 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..117
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..116
+    0: HTML_ELEMENT@0..116
+      0: HTML_OPENING_ELEMENT@0..91
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..90
+          0: SVELTE_STYLE_DIRECTIVE@5..33
+            0: STYLE_KW@5..10 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..33
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..26
+                0: HTML_LITERAL@11..26 "color|important" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@26..26
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@26..33
+                0: EQ@26..27 "=" [] []
+                1: HTML_STRING@27..33
+                  0: HTML_STRING_LITERAL@27..33 "\"red\"" [] [Whitespace(" ")]
+          1: SVELTE_STYLE_DIRECTIVE@33..53
+            0: STYLE_KW@33..38 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@38..53
+              0: COLON@38..39 ":" [] []
+              1: SVELTE_LITERAL@39..44
+                0: HTML_LITERAL@39..44 "width" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@44..44
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@44..53
+                0: EQ@44..45 "=" [] []
+                1: HTML_STRING@45..53
+                  0: HTML_STRING_LITERAL@45..53 "\"100px\"" [] [Whitespace(" ")]
+          2: SVELTE_STYLE_DIRECTIVE@53..90
+            0: STYLE_KW@53..58 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@58..90
+              0: COLON@58..59 ":" [] []
+              1: SVELTE_LITERAL@59..85
+                0: HTML_LITERAL@59..85 "background-color|important" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@85..85
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@85..90
+                0: EQ@85..86 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@86..90
+                  0: L_CURLY@86..87 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@87..89
+                    0: HTML_LITERAL@87..89 "bg" [] []
+                  2: R_CURLY@89..90 "}" [] []
+        3: R_ANGLE@90..91 ">" [] []
+      1: HTML_ELEMENT_LIST@91..109
+        0: HTML_CONTENT@91..109
+          0: HTML_LITERAL@91..109 "Mixed important" [Newline("\n"), Whitespace("  ")] []
+      2: HTML_CLOSING_ELEMENT@109..116
+        0: L_ANGLE@109..111 "<" [Newline("\n")] []
+        1: SLASH@111..112 "/" [] []
+        2: HTML_TAG_NAME@112..115
+          0: HTML_LITERAL@112..115 "div" [] []
+        3: R_ANGLE@115..116 ">" [] []
+  4: EOF@116..117 "" [Newline("\n")] []
+
+```

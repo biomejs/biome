@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: html/whitespace/fill.html
 ---
+
 # Input
 
 ```html
@@ -25,18 +26,15 @@ info: html/whitespace/fill.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,8 +2,9 @@
+@@ -2,7 +2,7 @@
    <img
      src="/images/pansies.jpg"
      alt="about fedco bottom image"
 -    style="float: left"
--  /><strong>We are a cooperative</strong>, one of the few seed companies so
 +    style="float: left;"
-+  />
-+  <strong>We are a cooperative</strong>, one of the few seed companies so
+   /><strong>We are a cooperative</strong>, one of the few seed companies so
    organized in the United States. Because we do not have an individual owner or
    beneficiary, profit is not our primary goal. Consumers own 60% of the
-   cooperative and worker members 40%. Consumer and worker members share
 ```
 
 # Output
@@ -47,8 +45,7 @@ info: html/whitespace/fill.html
     src="/images/pansies.jpg"
     alt="about fedco bottom image"
     style="float: left;"
-  />
-  <strong>We are a cooperative</strong>, one of the few seed companies so
+  /><strong>We are a cooperative</strong>, one of the few seed companies so
   organized in the United States. Because we do not have an individual owner or
   beneficiary, profit is not our primary goal. Consumers own 60% of the
   cooperative and worker members 40%. Consumer and worker members share

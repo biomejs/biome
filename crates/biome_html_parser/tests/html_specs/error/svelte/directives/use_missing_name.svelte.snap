@@ -1,0 +1,112 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div use:>Hover me</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteUseDirective {
+                        use_token: USE_KW@5..8 "use" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@8..9 ":" [] [],
+                            property: missing (required),
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@10..18 "Hover me" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@18..19 "<" [] [],
+                slash_token: SLASH@19..20 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@20..23 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@23..24 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@24..25 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..25
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..24
+    0: HTML_ELEMENT@0..24
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..9
+          0: SVELTE_USE_DIRECTIVE@5..9
+            0: USE_KW@5..8 "use" [] []
+            1: SVELTE_DIRECTIVE_VALUE@8..9
+              0: COLON@8..9 ":" [] []
+              1: (empty)
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@9..9
+              3: (empty)
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..18
+        0: HTML_CONTENT@10..18
+          0: HTML_LITERAL@10..18 "Hover me" [] []
+      2: HTML_CLOSING_ELEMENT@18..24
+        0: L_ANGLE@18..19 "<" [] []
+        1: SLASH@19..20 "/" [] []
+        2: HTML_TAG_NAME@20..23
+          0: HTML_LITERAL@20..23 "div" [] []
+        3: R_ANGLE@23..24 ">" [] []
+  4: EOF@24..25 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+use_missing_name.svelte:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ <div use:>Hover me</div>
+      │          ^^^^^^^^^^^^^^^
+  > 2 │ 
+      │ 
+  
+  i Expected one of:
+  
+  - name
+  - closing block
+  
+```

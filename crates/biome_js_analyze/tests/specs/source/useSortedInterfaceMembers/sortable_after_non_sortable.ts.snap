@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: sortable_after_non_sortable.ts
+---
+# Input
+```ts
+interface _TestInterface {
+	aProperty: string;
+	[index: number]: any; // Non-sortable index signature
+	bProperty: number; // This should trigger an error - sortable after non-sortable
+	(): void; // Call signature
+	cProperty: boolean; // This should also trigger an error
+}
+
+```
+
+# Diagnostics
+```
+sortable_after_non_sortable.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i The interface members are not sorted by key.
+  
+  > 1 │ interface _TestInterface {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ 	aProperty: string;
+  > 3 │ 	[index: number]: any; // Non-sortable index signature
+  > 4 │ 	bProperty: number; // This should trigger an error - sortable after non-sortable
+  > 5 │ 	(): void; // Call signature
+  > 6 │ 	cProperty: boolean; // This should also trigger an error
+  > 7 │ }
+      │ ^
+    8 │ 
+  
+  i Safe fix: Sort the interface members by key.
+  
+    1 1 │   interface _TestInterface {
+    2 2 │   	aProperty: string;
+    3   │ - → [index:·number]:·any;·//·Non-sortable·index·signature
+    4   │ - → bProperty:·number;·//·This·should·trigger·an·error·-·sortable·after·non-sortable
+    5   │ - → ():·void;·//·Call·signature
+    6   │ - → cProperty:·boolean;·//·This·should·also·trigger·an·error
+      3 │ + → bProperty:·number;·//·This·should·trigger·an·error·-·sortable·after·non-sortable
+      4 │ + → cProperty:·boolean;·//·This·should·also·trigger·an·error
+      5 │ + → [index:·number]:·any;·//·Non-sortable·index·signature
+      6 │ + → ():·void;·//·Call·signature
+    7 7 │   }
+    8 8 │   
+  
+
+```

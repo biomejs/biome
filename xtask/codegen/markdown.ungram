@@ -1,6 +1,6 @@
 // Markdown Un-Grammar.
 //
-// This grammar specifies the structure of Rust's concrete syntax tree.
+// This grammar specifies the structure of Markdown's concrete syntax tree.
 // It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
 // Tokens are processed -- contextual keywords are recognised, compound operators glued.
 //
@@ -48,22 +48,24 @@ MdDocument =
 MdBlockList = AnyMdBlock*
 
 AnyMdBlock =
-	AnyLeafBlock
-	| AnyContainerBlock
+	AnyMdLeafBlock
+	| AnyMdContainerBlock
 
-AnyLeafBlock =
+AnyMdLeafBlock =
 	MdThematicBreakBlock
 	| MdHeader
 	| MdSetextHeader
-	| AnyCodeBlock
+	| AnyMdCodeBlock
 	| MdHtmlBlock
+	| MdLinkReferenceDefinition
 	| MdLinkBlock
 	| MdParagraph
+	| MdNewline
 
-AnyContainerBlock =
+AnyMdContainerBlock =
 	MdQuote
 	| MdBulletListItem
-	| MdOrderListItem
+	| MdOrderedListItem
 
 
 
@@ -84,68 +86,97 @@ MdHash = '#'
 // ===
 // bar
 // ---
-MdSetextHeader  = MdParagraph
+// The underline indicates heading level: '=' for H1, '-' for H2
+// The underline is stored as a setext underline literal token
+MdSetextHeader =
+	content: MdInlineItemList
+	underline: 'md_setext_underline_literal'
 
 // indented code blocks & fenced code blocks
-AnyCodeBlock =
+AnyMdCodeBlock =
 	MdIndentCodeBlock
 	| MdFencedCodeBlock
 
 //     code
 // ^^^^^^^^
 // The space before "code" is intentional.
+// Indentation is tracked in trivia, so we use MdInlineItemList for content.
 MdIndentCodeBlock =
-	lines: MdIndentedCodeLineList
-
-MdIndentedCodeLineList = MdIndentedCodeLine*
-
-MdIndentedCodeLine =
-	indentation: MdIndent
-	content: MdTextual
+	content: MdInlineItemList
 
 
 // ```shell
 //
 // ```
+// or
+// ~~~shell
+//
+// ~~~
 MdFencedCodeBlock =
-	l_fence: '```'
+	l_fence: ('```' | '~~~')
 	code_list: MdCodeNameList
-	l_hard_line: MdHardLine
-	content: MdTextual
-	r_hard_line: MdHardLine
-	r_fence: '```'
+	content: MdInlineItemList
+	r_fence: ('```' | '~~~')
 
-MdCodeNameList = (MdTextual (',' MdTextual)*)
+MdCodeNameList = MdTextual*
 
-// html block
-MdHtmlBlock = MdTextual
+// html block - content is stored as raw text (multiple textual tokens)
+MdHtmlBlock = content: MdInlineItemList
 
+// Link reference definition per CommonMark §4.7
+// [label]: destination "title" or [label]: destination 'title' or [label]: destination (title)
+// Labels are case-insensitive and whitespace-normalized
+MdLinkReferenceDefinition =
+	'['
+	label: MdLinkLabel
+	']'
+	':'
+	destination: MdLinkDestination
+	title: MdLinkTitle?
+
+// Label for link reference definitions (CommonMark §4.7)
+// Up to 999 chars, no unescaped brackets, whitespace-normalized
+// Labels can contain multiple tokens (e.g., "foo-bar" is: foo, -, bar)
+MdLinkLabel = content: MdInlineItemList
+
+// Destination URL for link reference definitions
+// Can be angle-bracketed <url> or bare url (no whitespace)
+// Destinations can contain multiple tokens
+MdLinkDestination = content: MdInlineItemList
+
+// Optional title for link reference definitions
+// Quoted with ", ', or ()
+// Titles can contain multiple tokens
+MdLinkTitle = content: MdInlineItemList
+
+// Legacy MdLinkBlock retained for backwards compatibility
 MdLinkBlock = label: MdTextual
                 url: MdTextual
                 title: MdTextual?
 
-MdQuote = AnyMdBlock
+MdQuote =
+	marker: '>'
+	content: MdBlockList
 
 MdBulletListItem = MdBulletList
-MdOrderListItem = MdBulletList
+MdOrderedListItem = MdBulletList
 
 
 MdBulletList = MdBullet*
 // - Hey!
 // ^^^^^^
+// 1. Hey!
+// ^^^^^^^
 MdBullet =
-	bullet: ('-' | '*')
-	space: 'md_textual_literal'
-	content: MdInlineItemList
-
-MdOrderList = AnyCodeBlock*
+	bullet: ('-' | '*' | '+' | 'md_ordered_list_marker')
+	content: MdBlockList
 
 // Any block paragraph
 //
 // Another block paragraph
 MdParagraph =
 	list: MdInlineItemList
-	hard_line: MdHardLine
+	hard_line: MdHardLine?
 
 MdInlineItemList = AnyMdInline*
 
@@ -156,6 +187,11 @@ AnyMdInline =
 	| MdInlineItalic
 	| MdInlineLink
 	| MdInlineImage
+	| MdReferenceLink
+	| MdReferenceImage
+	| MdAutolink
+	| MdInlineHtml
+	| MdEntityReference
 	| MdHtmlBlock
 	| MdHardLine
 	| MdSoftBreak
@@ -191,39 +227,68 @@ MdInlineLink =
 	text: MdInlineItemList
 	']'
 	'('
-	source: MdInlineItemList
+	destination: MdInlineItemList
+	title: MdLinkTitle?
 	')'
 
-// [![alt](image)](link)
-// ^^^^^^^^^^^^^^^^^^^^^
+// ![alt](image)
+// ^^^^^^^^^^^^^^
 MdInlineImage =
-	'['
 	'!'
-	alt: MdInlineImageAlt
-	source: MdInlineImageSource
-	']'
-  link: MdInlineImageLink?
-
-// [![alt](image)](link)
-//   ^^^^^
-MdInlineImageAlt =
 	'['
-	content: MdInlineItemList
+	alt: MdInlineItemList
+	']'
+	'('
+	destination: MdInlineItemList
+	title: MdLinkTitle?
+	')'
+
+// Reference-style link per CommonMark §6.5
+// Full reference: [text][label]
+// Collapsed reference: [text][]
+// Shortcut reference: [text]
+MdReferenceLink =
+	'['
+	text: MdInlineItemList
+	']'
+	label: MdReferenceLinkLabel?
+
+// Reference-style image per CommonMark §6.6
+// Full reference: ![alt][label]
+// Collapsed reference: ![alt][]
+// Shortcut reference: ![alt]
+MdReferenceImage =
+	'!'
+	'['
+	alt: MdInlineItemList
+	']'
+	label: MdReferenceLinkLabel?
+
+// Label part of a reference link/image
+// Either [label] (full) or [] (collapsed)
+// Absent for shortcut references
+MdReferenceLinkLabel =
+	'['
+	label: MdInlineItemList
 	']'
 
-// [![alt](image)](link)
-//        ^^^^^^^
-MdInlineImageSource =
-	'('
-	content: MdInlineItemList
-	')'
+// <https://example.com> or <user@example.com>
+// Autolinks per CommonMark §6.4 (URI) and §6.5 (email)
+MdAutolink =
+	'<'
+	value: MdInlineItemList
+	'>'
 
-// [![alt](image)](link)
-//                ^^^^^^
-MdInlineImageLink =
-	'('
-	content: MdInlineItemList
-	')'
+// Raw inline HTML per CommonMark §6.8
+// Includes: open tags, closing tags, comments, processing instructions,
+// declarations, and CDATA sections
+MdInlineHtml = value: MdInlineItemList
+
+// Entity and numeric character references per CommonMark §6.2
+// Named entities: &name; (2-31 alphanumeric chars starting with letter)
+// Decimal numeric: &#digits; (1-7 decimal digits)
+// Hexadecimal: &#xhex; or &#Xhex; (1-6 hex digits)
+MdEntityReference = value: 'md_entity_literal'
 
 // ***
 // ---
@@ -231,10 +296,12 @@ MdInlineImageLink =
 // https://spec.commonmark.org/0.31.2/#container-blocks-and-leaf-blocks
 MdThematicBreakBlock = value: 'md_thematic_break_literal'
 
+// Explicit newline node for inter-block newlines.
+// This preserves NEWLINEs in the CST without creating "newline-only paragraphs".
+// Used when a NEWLINE appears between blocks and isn't part of inline content.
+MdNewline = value: 'NEWLINE'
+
 MdHardLine = value: 'md_hard_line_literal'
 MdSoftBreak = value: 'md_soft_break_literal'
 MdTextual = value: 'md_textual_literal'
 MdIndent = value: 'md_indent_chunk_literal'
-
-
-

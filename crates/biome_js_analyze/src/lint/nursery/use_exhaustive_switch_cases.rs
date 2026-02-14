@@ -97,7 +97,7 @@ declare_lint_rule! {
         recommended: true,
         sources: &[RuleSource::EslintTypeScript("switch-exhaustiveness-check").same()],
         fix_kind: FixKind::Unsafe,
-        domains: &[RuleDomain::Project],
+        domains: &[RuleDomain::Types],
     }
 }
 

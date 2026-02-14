@@ -48,21 +48,23 @@ impl Rule for NoDuplicateObjectKeys {
         let mut names = FxHashMap::<JsonMemberName, Vec<TextRange>>::default();
         let mut keys_found = FxHashMap::<String, JsonMemberName>::default();
         for member in query.json_member_list().iter().flatten() {
-            let name = member.name();
-
-            if let Ok(name) = name {
-                let text = name.inner_string_text();
-                if let Ok(text) = text {
-                    if let Some(original_member) = keys_found.get(text.text()) {
-                        if let Some(ranges) = names.get_mut(original_member) {
-                            ranges.push(name.range());
-                        } else {
-                            names.insert(original_member.clone(), vec![name.range()]);
-                        }
-                    } else {
-                        keys_found.insert(text.to_string(), name);
-                    }
+            let Ok(any_name) = member.name() else {
+                continue;
+            };
+            let Some(name) = any_name.as_json_member_name().cloned() else {
+                continue;
+            };
+            let Ok(text) = name.inner_string_text() else {
+                continue;
+            };
+            if let Some(original_member) = keys_found.get(text.text()) {
+                if let Some(ranges) = names.get_mut(original_member) {
+                    ranges.push(name.range());
+                } else {
+                    names.insert(original_member.clone(), vec![name.range()]);
                 }
+            } else {
+                keys_found.insert(text.to_string(), name);
             }
         }
         let duplicated_keys: Vec<_> = names.into_iter().collect();

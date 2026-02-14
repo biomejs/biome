@@ -18,10 +18,11 @@ expression: redactor(content)
 
 ```vue
 <script lang="jsx">
+import s from "src/utils";
 import { sure } from "sure.js";
 import z from "zod";
 
-const schema = z.object().optional();
+let schema = z.object().optional();
 schema + sure();
 
 function _FunctionalComponent() {

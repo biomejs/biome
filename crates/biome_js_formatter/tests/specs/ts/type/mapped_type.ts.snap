@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/type/mapped_type.ts
 ---
+
 # Input
 
 ```ts
@@ -38,6 +39,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -49,6 +51,7 @@ export type OmitIndexSignature<ObjectType> = {
 		? never
 		: KeyType]: ObjectType[KeyType];
 };
+
 ```
 
 # Lines exceeding max width of 80 characters

@@ -1,22 +1,29 @@
-use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
+use crate::reporter::{Reporter, ReporterVisitor, ReporterWriter};
+use crate::runner::execution::Execution;
+use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{Console, ConsoleExt, MarkupBuf, markup};
+use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::display::{SourceFile, markup_to_string};
 use biome_diagnostics::{Error, Location, LogCategory, PrintDescription, Visit};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
 
-pub(crate) struct RdJsonReporter {
-    pub(crate) diagnostics_payload: DiagnosticsPayload,
-    pub(crate) execution: Execution,
+pub(crate) struct RdJsonReporter<'a> {
+    pub(crate) diagnostics_payload: &'a DiagnosticsPayload,
+    pub(crate) execution: &'a dyn Execution,
     pub(crate) verbose: bool,
     pub(crate) working_directory: Option<Utf8PathBuf>,
 }
 
-impl Reporter for RdJsonReporter {
-    fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
+impl Reporter for RdJsonReporter<'_> {
+    fn write(
+        self,
+        writer: &mut dyn ReporterWriter,
+        visitor: &mut dyn ReporterVisitor,
+    ) -> std::io::Result<()> {
         visitor.report_diagnostics(
-            &self.execution,
+            writer,
+            self.execution,
             self.diagnostics_payload,
             self.verbose,
             self.working_directory.as_deref(),
@@ -25,12 +32,13 @@ impl Reporter for RdJsonReporter {
     }
 }
 
-pub(crate) struct RdJsonReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
+pub(crate) struct RdJsonReporterVisitor;
 
-impl ReporterVisitor for RdJsonReporterVisitor<'_> {
+impl ReporterVisitor for RdJsonReporterVisitor {
     fn report_summary(
         &mut self,
-        _execution: &Execution,
+        _writer: &mut dyn ReporterWriter,
+        _execution: &dyn Execution,
         _summary: TraversalSummary,
         _verbose: bool,
     ) -> std::io::Result<()> {
@@ -39,8 +47,9 @@ impl ReporterVisitor for RdJsonReporterVisitor<'_> {
 
     fn report_diagnostics(
         &mut self,
-        _execution: &Execution,
-        payload: DiagnosticsPayload,
+        writer: &mut dyn ReporterWriter,
+        _execution: &dyn Execution,
+        payload: &DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,
     ) -> std::io::Result<()> {
@@ -74,7 +83,7 @@ impl ReporterVisitor for RdJsonReporterVisitor<'_> {
 
         let result = serde_json::to_string_pretty(&report)?;
 
-        self.0.log(markup! {
+        writer.log(markup! {
             {result}
         });
 

@@ -29,15 +29,15 @@ impl FormatNodeRule<JsModule> for FormatJsModule {
             ]
         ]?;
 
-        write!(
-            f,
-            [
-                items.format(),
-                format_trailing_comments(node.syntax()),
-                format_removed(&eof_token?),
-                hard_line_break()
-            ]
-        )
+        write!(f, [items.format(), format_trailing_comments(node.syntax())])?;
+
+        write!(f, [format_removed(&eof_token?)])?;
+
+        if f.options().trailing_newline().value() {
+            write!(f, [hard_line_break()])
+        } else {
+            Ok(())
+        }
     }
 
     fn fmt_leading_comments(&self, _: &JsModule, _: &mut JsFormatter) -> FormatResult<()> {

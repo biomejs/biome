@@ -1,0 +1,289 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Paragraph text
+# Heading interrupts
+
+More text here
+- List interrupts
+
+Another para
+> Quote interrupts
+
+Some text
+```
+Fence interrupts
+```
+
+Final text
+***
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..14 "Paragraph text" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@14..15 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@15..16 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@16..35 " Heading interrupts" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@35..36 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@36..37 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@37..51 "More text here" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@51..52 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@52..53 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@53..69 " List interrupts" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@69..70 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@70..71 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@71..83 "Another para" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@83..84 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdQuote {
+            marker_token: R_ANGLE@84..85 ">" [] [],
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@85..102 "Quote interrupts" [Skipped(" ")] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@102..103 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@103..104 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@104..113 "Some text" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@113..114 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_BACKTICK@114..117 "```" [] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@117..118 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@118..134 "Fence interrupts" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@134..135 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_BACKTICK@135..138 "```" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@138..139 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@139..140 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@140..150 "Final text" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@150..151 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdThematicBreakBlock {
+            value_token: MD_THEMATIC_BREAK_LITERAL@151..154 "***" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@154..155 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@155..155 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..155
+  0: (empty)
+  1: MD_BLOCK_LIST@0..155
+    0: MD_PARAGRAPH@0..15
+      0: MD_INLINE_ITEM_LIST@0..15
+        0: MD_TEXTUAL@0..14
+          0: MD_TEXTUAL_LITERAL@0..14 "Paragraph text" [] []
+        1: MD_TEXTUAL@14..15
+          0: MD_TEXTUAL_LITERAL@14..15 "\n" [] []
+      1: (empty)
+    1: MD_HEADER@15..35
+      0: MD_HASH_LIST@15..16
+        0: MD_HASH@15..16
+          0: HASH@15..16 "#" [] []
+      1: MD_PARAGRAPH@16..35
+        0: MD_INLINE_ITEM_LIST@16..35
+          0: MD_TEXTUAL@16..35
+            0: MD_TEXTUAL_LITERAL@16..35 " Heading interrupts" [] []
+        1: (empty)
+      2: MD_HASH_LIST@35..35
+    2: MD_NEWLINE@35..36
+      0: NEWLINE@35..36 "\n" [] []
+    3: MD_NEWLINE@36..37
+      0: NEWLINE@36..37 "\n" [] []
+    4: MD_PARAGRAPH@37..52
+      0: MD_INLINE_ITEM_LIST@37..52
+        0: MD_TEXTUAL@37..51
+          0: MD_TEXTUAL_LITERAL@37..51 "More text here" [] []
+        1: MD_TEXTUAL@51..52
+          0: MD_TEXTUAL_LITERAL@51..52 "\n" [] []
+      1: (empty)
+    5: MD_BULLET_LIST_ITEM@52..70
+      0: MD_BULLET_LIST@52..70
+        0: MD_BULLET@52..70
+          0: MINUS@52..53 "-" [] []
+          1: MD_BLOCK_LIST@53..70
+            0: MD_PARAGRAPH@53..70
+              0: MD_INLINE_ITEM_LIST@53..70
+                0: MD_TEXTUAL@53..69
+                  0: MD_TEXTUAL_LITERAL@53..69 " List interrupts" [] []
+                1: MD_TEXTUAL@69..70
+                  0: MD_TEXTUAL_LITERAL@69..70 "\n" [] []
+              1: (empty)
+    6: MD_NEWLINE@70..71
+      0: NEWLINE@70..71 "\n" [] []
+    7: MD_PARAGRAPH@71..84
+      0: MD_INLINE_ITEM_LIST@71..84
+        0: MD_TEXTUAL@71..83
+          0: MD_TEXTUAL_LITERAL@71..83 "Another para" [] []
+        1: MD_TEXTUAL@83..84
+          0: MD_TEXTUAL_LITERAL@83..84 "\n" [] []
+      1: (empty)
+    8: MD_QUOTE@84..103
+      0: R_ANGLE@84..85 ">" [] []
+      1: MD_BLOCK_LIST@85..103
+        0: MD_PARAGRAPH@85..103
+          0: MD_INLINE_ITEM_LIST@85..103
+            0: MD_TEXTUAL@85..102
+              0: MD_TEXTUAL_LITERAL@85..102 "Quote interrupts" [Skipped(" ")] []
+            1: MD_TEXTUAL@102..103
+              0: MD_TEXTUAL_LITERAL@102..103 "\n" [] []
+          1: (empty)
+    9: MD_NEWLINE@103..104
+      0: NEWLINE@103..104 "\n" [] []
+    10: MD_PARAGRAPH@104..114
+      0: MD_INLINE_ITEM_LIST@104..114
+        0: MD_TEXTUAL@104..113
+          0: MD_TEXTUAL_LITERAL@104..113 "Some text" [] []
+        1: MD_TEXTUAL@113..114
+          0: MD_TEXTUAL_LITERAL@113..114 "\n" [] []
+      1: (empty)
+    11: MD_FENCED_CODE_BLOCK@114..138
+      0: TRIPLE_BACKTICK@114..117 "```" [] []
+      1: MD_CODE_NAME_LIST@117..117
+      2: MD_INLINE_ITEM_LIST@117..135
+        0: MD_TEXTUAL@117..118
+          0: MD_TEXTUAL_LITERAL@117..118 "\n" [] []
+        1: MD_TEXTUAL@118..134
+          0: MD_TEXTUAL_LITERAL@118..134 "Fence interrupts" [] []
+        2: MD_TEXTUAL@134..135
+          0: MD_TEXTUAL_LITERAL@134..135 "\n" [] []
+      3: TRIPLE_BACKTICK@135..138 "```" [] []
+    12: MD_NEWLINE@138..139
+      0: NEWLINE@138..139 "\n" [] []
+    13: MD_NEWLINE@139..140
+      0: NEWLINE@139..140 "\n" [] []
+    14: MD_PARAGRAPH@140..151
+      0: MD_INLINE_ITEM_LIST@140..151
+        0: MD_TEXTUAL@140..150
+          0: MD_TEXTUAL_LITERAL@140..150 "Final text" [] []
+        1: MD_TEXTUAL@150..151
+          0: MD_TEXTUAL_LITERAL@150..151 "\n" [] []
+      1: (empty)
+    15: MD_THEMATIC_BREAK_BLOCK@151..154
+      0: MD_THEMATIC_BREAK_LITERAL@151..154 "***" [] []
+    16: MD_NEWLINE@154..155
+      0: NEWLINE@154..155 "\n" [] []
+  2: EOF@155..155 "" [] []
+
+```

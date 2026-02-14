@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/trailing_newline/simple.css
+---
+
+# Input
+
+```css
+.test {
+  color: red;
+  font-size: 14px;
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Trailing newline: true
+-----
+
+```css
+.test {
+	color: red;
+	font-size: 14px;
+}
+
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Trailing newline: false
+-----
+
+```css
+.test {
+	color: red;
+	font-size: 14px;
+}
+```

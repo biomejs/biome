@@ -1,0 +1,11 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<iframe title="This is a unique title"></iframe>
+<Iframe />
+
+```

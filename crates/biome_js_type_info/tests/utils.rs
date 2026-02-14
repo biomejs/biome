@@ -29,7 +29,7 @@ pub fn assert_type_data_snapshot(
 
     let source_type = JsFileSource::ts();
     let tree = parse(source_code, source_type, JsParserOptions::default());
-    let formatted = format_node(JsFormatOptions::default(), tree.tree().syntax())
+    let formatted = format_node(JsFormatOptions::default(), tree.tree().syntax(), false)
         .unwrap()
         .print()
         .unwrap();
@@ -64,7 +64,7 @@ pub fn assert_typed_bindings_snapshot(
 
     let source_type = JsFileSource::ts();
     let tree = parse(source_code, source_type, JsParserOptions::default());
-    let formatted = format_node(JsFormatOptions::default(), tree.tree().syntax())
+    let formatted = format_node(JsFormatOptions::default(), tree.tree().syntax(), false)
         .unwrap()
         .print()
         .unwrap();

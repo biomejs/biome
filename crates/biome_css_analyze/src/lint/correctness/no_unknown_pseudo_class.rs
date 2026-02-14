@@ -10,12 +10,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    CssBogusPseudoClass, CssPageSelectorPseudo, CssPseudoClassFunctionCompoundSelector,
-    CssPseudoClassFunctionCompoundSelectorList, CssPseudoClassFunctionIdentifier,
-    CssPseudoClassFunctionNth, CssPseudoClassFunctionRelativeSelectorList,
-    CssPseudoClassFunctionSelector, CssPseudoClassFunctionSelectorList,
-    CssPseudoClassFunctionValueList, CssPseudoClassIdentifier, CssPseudoElementSelector,
-    CssSyntaxToken,
+    CssBogusPseudoClass, CssFileSource, CssPageSelectorPseudo,
+    CssPseudoClassFunctionCompoundSelector, CssPseudoClassFunctionCompoundSelectorList,
+    CssPseudoClassFunctionIdentifier, CssPseudoClassFunctionNth,
+    CssPseudoClassFunctionRelativeSelectorList, CssPseudoClassFunctionSelector,
+    CssPseudoClassFunctionSelectorList, CssPseudoClassFunctionValueList, CssPseudoClassIdentifier,
+    CssPseudoElementSelector, CssSyntaxToken,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
@@ -61,6 +61,28 @@ declare_lint_rule! {
     ///
     /// ```css
     /// input:-moz-placeholder {}
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `ignore`
+    ///
+    /// A list of unknown pseudo-class names to ignore (case-insensitive).
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignore": [
+    ///       "custom-pseudo-class"
+    ///     ]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```css,use_options
+    /// a:custom-pseudo-class {}
     /// ```
     ///
     pub NoUnknownPseudoClass {
@@ -146,9 +168,9 @@ impl Rule for NoUnknownPseudoClass {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let pseudo_class = ctx.query();
-        let is_css_modules = ctx.is_css_modules();
         let span = pseudo_class.name_range()?;
         let name = pseudo_class.name()?;
+        let file_source = ctx.source_type::<CssFileSource>();
 
         let pseudo_type = match &pseudo_class {
             AnyPseudoLike::CssPageSelectorPseudo(_) => PseudoClassType::PagePseudoClass,
@@ -177,7 +199,10 @@ impl Rule for NoUnknownPseudoClass {
             }
         };
 
-        if is_valid_class || is_css_modules && is_css_module_pseudo_class(lower_name) {
+        if is_valid_class
+            || should_ignore(lower_name, ctx.options())
+            || file_source.is_css_modules() && is_css_module_pseudo_class(lower_name)
+        {
             None
         } else {
             Some(NoUnknownPseudoClassSelectorState {
@@ -220,4 +245,13 @@ impl Rule for NoUnknownPseudoClass {
         };
         Some(diag)
     }
+}
+
+fn should_ignore(name: &str, options: &NoUnknownPseudoClassOptions) -> bool {
+    for ignore_pattern in &options.ignore {
+        if name.eq_ignore_ascii_case(ignore_pattern) {
+            return true;
+        }
+    }
+    false
 }

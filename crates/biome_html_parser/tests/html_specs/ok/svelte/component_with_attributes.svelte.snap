@@ -1,0 +1,103 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<AvatarPrimitive.Fallback
+  class="something nice"
+  data-test="value"
+/>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlMemberName {
+                object: HtmlComponentName {
+                    value_token: HTML_LITERAL@1..16 "AvatarPrimitive" [] [],
+                },
+                dot_token: DOT@16..17 "." [] [],
+                member: HtmlTagName {
+                    value_token: HTML_LITERAL@17..25 "Fallback" [] [],
+                },
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@25..33 "class" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@33..34 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@34..50 "\"something nice\"" [] [],
+                        },
+                    },
+                },
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@50..62 "data-test" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@62..63 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@63..70 "\"value\"" [] [],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@70..72 "/" [Newline("\n")] [],
+            r_angle_token: R_ANGLE@72..73 ">" [] [],
+        },
+    ],
+    eof_token: EOF@73..74 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..74
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..73
+    0: HTML_SELF_CLOSING_ELEMENT@0..73
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_MEMBER_NAME@1..25
+        0: HTML_COMPONENT_NAME@1..16
+          0: HTML_LITERAL@1..16 "AvatarPrimitive" [] []
+        1: DOT@16..17 "." [] []
+        2: HTML_TAG_NAME@17..25
+          0: HTML_LITERAL@17..25 "Fallback" [] []
+      2: HTML_ATTRIBUTE_LIST@25..70
+        0: HTML_ATTRIBUTE@25..50
+          0: HTML_ATTRIBUTE_NAME@25..33
+            0: HTML_LITERAL@25..33 "class" [Newline("\n"), Whitespace("  ")] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@33..50
+            0: EQ@33..34 "=" [] []
+            1: HTML_STRING@34..50
+              0: HTML_STRING_LITERAL@34..50 "\"something nice\"" [] []
+        1: HTML_ATTRIBUTE@50..70
+          0: HTML_ATTRIBUTE_NAME@50..62
+            0: HTML_LITERAL@50..62 "data-test" [Newline("\n"), Whitespace("  ")] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@62..70
+            0: EQ@62..63 "=" [] []
+            1: HTML_STRING@63..70
+              0: HTML_STRING_LITERAL@63..70 "\"value\"" [] []
+      3: SLASH@70..72 "/" [Newline("\n")] []
+      4: R_ANGLE@72..73 ">" [] []
+  4: EOF@73..74 "" [Newline("\n")] []
+
+```

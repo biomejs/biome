@@ -1,0 +1,100 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Link with emphasis: [a *b* c](u)
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..20 "Link with emphasis: " [] [],
+                },
+                MdInlineLink {
+                    l_brack_token: L_BRACK@20..21 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@21..23 "a " [] [],
+                        },
+                        MdInlineItalic {
+                            l_fence: STAR@23..24 "*" [] [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@24..25 "b" [] [],
+                                },
+                            ],
+                            r_fence: STAR@25..26 "*" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@26..28 " c" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@28..29 "]" [] [],
+                    l_paren_token: L_PAREN@29..30 "(" [] [],
+                    destination: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@30..31 "u" [] [],
+                        },
+                    ],
+                    title: missing (optional),
+                    r_paren_token: R_PAREN@31..32 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@32..33 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@33..33 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..33
+  0: (empty)
+  1: MD_BLOCK_LIST@0..33
+    0: MD_PARAGRAPH@0..33
+      0: MD_INLINE_ITEM_LIST@0..33
+        0: MD_TEXTUAL@0..20
+          0: MD_TEXTUAL_LITERAL@0..20 "Link with emphasis: " [] []
+        1: MD_INLINE_LINK@20..32
+          0: L_BRACK@20..21 "[" [] []
+          1: MD_INLINE_ITEM_LIST@21..28
+            0: MD_TEXTUAL@21..23
+              0: MD_TEXTUAL_LITERAL@21..23 "a " [] []
+            1: MD_INLINE_ITALIC@23..26
+              0: STAR@23..24 "*" [] []
+              1: MD_INLINE_ITEM_LIST@24..25
+                0: MD_TEXTUAL@24..25
+                  0: MD_TEXTUAL_LITERAL@24..25 "b" [] []
+              2: STAR@25..26 "*" [] []
+            2: MD_TEXTUAL@26..28
+              0: MD_TEXTUAL_LITERAL@26..28 " c" [] []
+          2: R_BRACK@28..29 "]" [] []
+          3: L_PAREN@29..30 "(" [] []
+          4: MD_INLINE_ITEM_LIST@30..31
+            0: MD_TEXTUAL@30..31
+              0: MD_TEXTUAL_LITERAL@30..31 "u" [] []
+          5: (empty)
+          6: R_PAREN@31..32 ")" [] []
+        2: MD_TEXTUAL@32..33
+          0: MD_TEXTUAL_LITERAL@32..33 "\n" [] []
+      1: (empty)
+  2: EOF@33..33 "" [] []
+
+```

@@ -1,0 +1,406 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Whitespace around destination and title:
+[link](   /uri
+  "title"  )
+
+Title spanning lines:
+[link](/url "title
+continued")
+
+Line break between destination and title:
+[link](/uri
+"title")
+
+Leading whitespace before destination:
+[link](   /url)
+
+Trailing whitespace before close paren:
+[link](/url   )
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..40 "Whitespace around destination and title:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@40..41 "\n" [] [],
+                },
+                MdInlineLink {
+                    l_brack_token: L_BRACK@41..42 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@42..46 "link" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@46..47 "]" [] [],
+                    l_paren_token: L_PAREN@47..48 "(" [] [],
+                    destination: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@48..51 "   " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@51..55 "/uri" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@55..56 "\n" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@56..57 " " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@57..58 " " [] [],
+                        },
+                    ],
+                    title: MdLinkTitle {
+                        content: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@58..65 "\"title\"" [] [],
+                            },
+                        ],
+                    },
+                    r_paren_token: R_PAREN@65..68 "  )" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@68..69 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@69..70 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@70..91 "Title spanning lines:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@91..92 "\n" [] [],
+                },
+                MdInlineLink {
+                    l_brack_token: L_BRACK@92..93 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@93..97 "link" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@97..98 "]" [] [],
+                    l_paren_token: L_PAREN@98..99 "(" [] [],
+                    destination: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@99..103 "/url" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@103..104 " " [] [],
+                        },
+                    ],
+                    title: MdLinkTitle {
+                        content: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@104..110 "\"title" [] [],
+                            },
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@110..111 "\n" [] [],
+                            },
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@111..121 "continued\"" [] [],
+                            },
+                        ],
+                    },
+                    r_paren_token: R_PAREN@121..122 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@122..123 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@123..124 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@124..165 "Line break between destination and title:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@165..166 "\n" [] [],
+                },
+                MdInlineLink {
+                    l_brack_token: L_BRACK@166..167 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@167..171 "link" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@171..172 "]" [] [],
+                    l_paren_token: L_PAREN@172..173 "(" [] [],
+                    destination: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@173..177 "/uri" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@177..178 "\n" [] [],
+                        },
+                    ],
+                    title: MdLinkTitle {
+                        content: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@178..185 "\"title\"" [] [],
+                            },
+                        ],
+                    },
+                    r_paren_token: R_PAREN@185..186 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@186..187 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@187..188 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@188..226 "Leading whitespace before destination:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@226..227 "\n" [] [],
+                },
+                MdInlineLink {
+                    l_brack_token: L_BRACK@227..228 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@228..232 "link" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@232..233 "]" [] [],
+                    l_paren_token: L_PAREN@233..234 "(" [] [],
+                    destination: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@234..237 "   " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@237..241 "/url" [] [],
+                        },
+                    ],
+                    title: missing (optional),
+                    r_paren_token: R_PAREN@241..242 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@242..243 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@243..244 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@244..283 "Trailing whitespace before close paren:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@283..284 "\n" [] [],
+                },
+                MdInlineLink {
+                    l_brack_token: L_BRACK@284..285 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@285..289 "link" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@289..290 "]" [] [],
+                    l_paren_token: L_PAREN@290..291 "(" [] [],
+                    destination: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@291..295 "/url" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@295..298 "   " [] [],
+                        },
+                    ],
+                    title: missing (optional),
+                    r_paren_token: R_PAREN@298..299 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@299..300 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@300..300 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..300
+  0: (empty)
+  1: MD_BLOCK_LIST@0..300
+    0: MD_PARAGRAPH@0..69
+      0: MD_INLINE_ITEM_LIST@0..69
+        0: MD_TEXTUAL@0..40
+          0: MD_TEXTUAL_LITERAL@0..40 "Whitespace around destination and title:" [] []
+        1: MD_TEXTUAL@40..41
+          0: MD_TEXTUAL_LITERAL@40..41 "\n" [] []
+        2: MD_INLINE_LINK@41..68
+          0: L_BRACK@41..42 "[" [] []
+          1: MD_INLINE_ITEM_LIST@42..46
+            0: MD_TEXTUAL@42..46
+              0: MD_TEXTUAL_LITERAL@42..46 "link" [] []
+          2: R_BRACK@46..47 "]" [] []
+          3: L_PAREN@47..48 "(" [] []
+          4: MD_INLINE_ITEM_LIST@48..58
+            0: MD_TEXTUAL@48..51
+              0: MD_TEXTUAL_LITERAL@48..51 "   " [] []
+            1: MD_TEXTUAL@51..55
+              0: MD_TEXTUAL_LITERAL@51..55 "/uri" [] []
+            2: MD_TEXTUAL@55..56
+              0: MD_TEXTUAL_LITERAL@55..56 "\n" [] []
+            3: MD_TEXTUAL@56..57
+              0: MD_TEXTUAL_LITERAL@56..57 " " [] []
+            4: MD_TEXTUAL@57..58
+              0: MD_TEXTUAL_LITERAL@57..58 " " [] []
+          5: MD_LINK_TITLE@58..65
+            0: MD_INLINE_ITEM_LIST@58..65
+              0: MD_TEXTUAL@58..65
+                0: MD_TEXTUAL_LITERAL@58..65 "\"title\"" [] []
+          6: R_PAREN@65..68 "  )" [] []
+        3: MD_TEXTUAL@68..69
+          0: MD_TEXTUAL_LITERAL@68..69 "\n" [] []
+      1: (empty)
+    1: MD_NEWLINE@69..70
+      0: NEWLINE@69..70 "\n" [] []
+    2: MD_PARAGRAPH@70..123
+      0: MD_INLINE_ITEM_LIST@70..123
+        0: MD_TEXTUAL@70..91
+          0: MD_TEXTUAL_LITERAL@70..91 "Title spanning lines:" [] []
+        1: MD_TEXTUAL@91..92
+          0: MD_TEXTUAL_LITERAL@91..92 "\n" [] []
+        2: MD_INLINE_LINK@92..122
+          0: L_BRACK@92..93 "[" [] []
+          1: MD_INLINE_ITEM_LIST@93..97
+            0: MD_TEXTUAL@93..97
+              0: MD_TEXTUAL_LITERAL@93..97 "link" [] []
+          2: R_BRACK@97..98 "]" [] []
+          3: L_PAREN@98..99 "(" [] []
+          4: MD_INLINE_ITEM_LIST@99..104
+            0: MD_TEXTUAL@99..103
+              0: MD_TEXTUAL_LITERAL@99..103 "/url" [] []
+            1: MD_TEXTUAL@103..104
+              0: MD_TEXTUAL_LITERAL@103..104 " " [] []
+          5: MD_LINK_TITLE@104..121
+            0: MD_INLINE_ITEM_LIST@104..121
+              0: MD_TEXTUAL@104..110
+                0: MD_TEXTUAL_LITERAL@104..110 "\"title" [] []
+              1: MD_TEXTUAL@110..111
+                0: MD_TEXTUAL_LITERAL@110..111 "\n" [] []
+              2: MD_TEXTUAL@111..121
+                0: MD_TEXTUAL_LITERAL@111..121 "continued\"" [] []
+          6: R_PAREN@121..122 ")" [] []
+        3: MD_TEXTUAL@122..123
+          0: MD_TEXTUAL_LITERAL@122..123 "\n" [] []
+      1: (empty)
+    3: MD_NEWLINE@123..124
+      0: NEWLINE@123..124 "\n" [] []
+    4: MD_PARAGRAPH@124..187
+      0: MD_INLINE_ITEM_LIST@124..187
+        0: MD_TEXTUAL@124..165
+          0: MD_TEXTUAL_LITERAL@124..165 "Line break between destination and title:" [] []
+        1: MD_TEXTUAL@165..166
+          0: MD_TEXTUAL_LITERAL@165..166 "\n" [] []
+        2: MD_INLINE_LINK@166..186
+          0: L_BRACK@166..167 "[" [] []
+          1: MD_INLINE_ITEM_LIST@167..171
+            0: MD_TEXTUAL@167..171
+              0: MD_TEXTUAL_LITERAL@167..171 "link" [] []
+          2: R_BRACK@171..172 "]" [] []
+          3: L_PAREN@172..173 "(" [] []
+          4: MD_INLINE_ITEM_LIST@173..178
+            0: MD_TEXTUAL@173..177
+              0: MD_TEXTUAL_LITERAL@173..177 "/uri" [] []
+            1: MD_TEXTUAL@177..178
+              0: MD_TEXTUAL_LITERAL@177..178 "\n" [] []
+          5: MD_LINK_TITLE@178..185
+            0: MD_INLINE_ITEM_LIST@178..185
+              0: MD_TEXTUAL@178..185
+                0: MD_TEXTUAL_LITERAL@178..185 "\"title\"" [] []
+          6: R_PAREN@185..186 ")" [] []
+        3: MD_TEXTUAL@186..187
+          0: MD_TEXTUAL_LITERAL@186..187 "\n" [] []
+      1: (empty)
+    5: MD_NEWLINE@187..188
+      0: NEWLINE@187..188 "\n" [] []
+    6: MD_PARAGRAPH@188..243
+      0: MD_INLINE_ITEM_LIST@188..243
+        0: MD_TEXTUAL@188..226
+          0: MD_TEXTUAL_LITERAL@188..226 "Leading whitespace before destination:" [] []
+        1: MD_TEXTUAL@226..227
+          0: MD_TEXTUAL_LITERAL@226..227 "\n" [] []
+        2: MD_INLINE_LINK@227..242
+          0: L_BRACK@227..228 "[" [] []
+          1: MD_INLINE_ITEM_LIST@228..232
+            0: MD_TEXTUAL@228..232
+              0: MD_TEXTUAL_LITERAL@228..232 "link" [] []
+          2: R_BRACK@232..233 "]" [] []
+          3: L_PAREN@233..234 "(" [] []
+          4: MD_INLINE_ITEM_LIST@234..241
+            0: MD_TEXTUAL@234..237
+              0: MD_TEXTUAL_LITERAL@234..237 "   " [] []
+            1: MD_TEXTUAL@237..241
+              0: MD_TEXTUAL_LITERAL@237..241 "/url" [] []
+          5: (empty)
+          6: R_PAREN@241..242 ")" [] []
+        3: MD_TEXTUAL@242..243
+          0: MD_TEXTUAL_LITERAL@242..243 "\n" [] []
+      1: (empty)
+    7: MD_NEWLINE@243..244
+      0: NEWLINE@243..244 "\n" [] []
+    8: MD_PARAGRAPH@244..300
+      0: MD_INLINE_ITEM_LIST@244..300
+        0: MD_TEXTUAL@244..283
+          0: MD_TEXTUAL_LITERAL@244..283 "Trailing whitespace before close paren:" [] []
+        1: MD_TEXTUAL@283..284
+          0: MD_TEXTUAL_LITERAL@283..284 "\n" [] []
+        2: MD_INLINE_LINK@284..299
+          0: L_BRACK@284..285 "[" [] []
+          1: MD_INLINE_ITEM_LIST@285..289
+            0: MD_TEXTUAL@285..289
+              0: MD_TEXTUAL_LITERAL@285..289 "link" [] []
+          2: R_BRACK@289..290 "]" [] []
+          3: L_PAREN@290..291 "(" [] []
+          4: MD_INLINE_ITEM_LIST@291..298
+            0: MD_TEXTUAL@291..295
+              0: MD_TEXTUAL_LITERAL@291..295 "/url" [] []
+            1: MD_TEXTUAL@295..298
+              0: MD_TEXTUAL_LITERAL@295..298 "   " [] []
+          5: (empty)
+          6: R_PAREN@298..299 ")" [] []
+        3: MD_TEXTUAL@299..300
+          0: MD_TEXTUAL_LITERAL@299..300 "\n" [] []
+      1: (empty)
+  2: EOF@300..300 "" [] []
+
+```

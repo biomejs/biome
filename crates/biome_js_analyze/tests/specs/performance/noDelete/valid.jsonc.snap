@@ -31,5 +31,3 @@ delete f()
 ```cjs
 delete el.dataset.something
 ```
-
-

@@ -1,0 +1,141 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div style:color={>Incomplete</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlBogusAttribute {
+                        items: [
+                            STYLE_KW@5..10 "style" [] [],
+                            HtmlBogus {
+                                items: [
+                                    COLON@10..11 ":" [] [],
+                                    SvelteLiteral {
+                                        value_token: HTML_LITERAL@11..16 "color" [] [],
+                                    },
+                                    SvelteDirectiveModifierList [],
+                                    HtmlBogus {
+                                        items: [
+                                            EQ@16..17 "=" [] [],
+                                            HtmlBogusTextExpression {
+                                                items: [
+                                                    L_CURLY@17..18 "{" [] [],
+                                                    HTML_LITERAL@18..29 ">Incomplete" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+                r_angle_token: missing (required),
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@29..30 "<" [] [],
+                slash_token: SLASH@30..31 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@31..34 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@34..35 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..36
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..35
+    0: HTML_ELEMENT@0..35
+      0: HTML_OPENING_ELEMENT@0..29
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..29
+          0: HTML_BOGUS_ATTRIBUTE@5..29
+            0: STYLE_KW@5..10 "style" [] []
+            1: HTML_BOGUS@10..29
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..16
+                0: HTML_LITERAL@11..16 "color" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@16..16
+              3: HTML_BOGUS@16..29
+                0: EQ@16..17 "=" [] []
+                1: HTML_BOGUS_TEXT_EXPRESSION@17..29
+                  0: L_CURLY@17..18 "{" [] []
+                  1: HTML_LITERAL@18..29 ">Incomplete" [] []
+        3: (empty)
+      1: HTML_ELEMENT_LIST@29..29
+      2: HTML_CLOSING_ELEMENT@29..35
+        0: L_ANGLE@29..30 "<" [] []
+        1: SLASH@30..31 "/" [] []
+        2: HTML_TAG_NAME@31..34
+          0: HTML_LITERAL@31..34 "div" [] []
+        3: R_ANGLE@34..35 ">" [] []
+  4: EOF@35..36 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+style_incomplete_expression.svelte:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found a text expression that doesn't have the closing expression:
+  
+  > 1 │ <div style:color={>Incomplete</div>
+      │                  ^^^^^^^^^^^^
+    2 │ 
+  
+  i This is where the opening expression was found:
+  
+  > 1 │ <div style:color={>Incomplete</div>
+      │                  ^
+    2 │ 
+  
+style_incomplete_expression.svelte:1:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+  > 1 │ <div style:color={>Incomplete</div>
+      │                              ^
+    2 │ 
+  
+  i Expected an attribute here.
+  
+  > 1 │ <div style:color={>Incomplete</div>
+      │                              ^
+    2 │ 
+  
+```

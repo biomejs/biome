@@ -4,18 +4,22 @@ use std::fmt::Display;
 use std::slice;
 use std::str::FromStr;
 
+use super::*;
+use crate::WorkspaceSettings;
 use anyhow::{Context, Error, Result, bail};
 use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::analyzer::assist::AssistConfiguration;
+use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
-use biome_service::Watcher;
 use biome_service::workspace::{
     FileContent, GetFileContentParams, GetModuleGraphParams, GetModuleGraphResult,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenFileResult, OpenProjectParams,
     OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams,
     ScanProjectResult,
 };
+use biome_service::{Watcher, WatcherOptions};
 use camino::Utf8PathBuf;
 use futures::channel::mpsc::{Sender, channel};
 use futures::{Sink, SinkExt, Stream, StreamExt};
@@ -35,10 +39,6 @@ use tower_lsp_server::ls_types::{
     TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri,
     VersionedTextDocumentIdentifier, WorkDoneProgressParams, WorkspaceFolder,
 };
-
-use crate::WorkspaceSettings;
-
-use super::*;
 
 /// Statically build an [Uri] instance that points to the file at `$path`
 /// within the workspace. The filesystem path contained in the return URI is
@@ -335,6 +335,20 @@ impl Server {
             "workspace/didChangeConfiguration",
             DidChangeConfigurationParams {
                 settings: to_value(())?,
+            },
+        )
+        .await
+    }
+
+    /// When calling this function, remember to insert the file inside the memory file system
+    async fn load_configuration_with_settings<V>(&mut self, value: V) -> Result<()>
+    where
+        V: Serialize,
+    {
+        self.notify(
+            "workspace/didChangeConfiguration",
+            DidChangeConfigurationParams {
+                settings: to_value(value)?,
             },
         )
         .await
@@ -3393,7 +3407,7 @@ export function bar() {
     fs.create_file("foo.ts", FOO_CONTENT);
     fs.create_file("bar.ts", BAR_CONTENT);
 
-    let (watcher, instruction_channel) = Watcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
 
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
@@ -3450,6 +3464,7 @@ export function bar() {
                 content: FileContent::FromServer,
                 document_file_source: None,
                 persist_node_cache: false,
+                inline_config: None,
             },
         )
         .await?
@@ -3468,6 +3483,7 @@ export function bar() {
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
+                inline_config: None,
             },
         )
         .await?
@@ -3498,6 +3514,7 @@ export function bar() {
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
+                inline_config: None,
             },
         )
         .await?
@@ -3524,6 +3541,7 @@ export function bar() {
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
+                inline_config: None,
             },
         )
         .await?
@@ -3554,6 +3572,7 @@ export function bar() {
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
+                inline_config: None,
             },
         )
         .await?
@@ -3604,7 +3623,7 @@ export function bar() {
     fs.create_file("foo.ts", FOO_CONTENT);
     fs.create_file("utils/bar.ts", BAR_CONTENT);
 
-    let (watcher, instruction_channel) = Watcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
 
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
@@ -3661,6 +3680,7 @@ export function bar() {
                 content: FileContent::FromServer,
                 document_file_source: None,
                 persist_node_cache: false,
+                inline_config: None,
             },
         )
         .await?
@@ -3679,6 +3699,7 @@ export function bar() {
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
+                inline_config: None,
             },
         )
         .await?
@@ -3713,6 +3734,7 @@ export function bar() {
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
+                inline_config: None,
             },
         )
         .await?
@@ -3744,6 +3766,7 @@ export function bar() {
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
+                inline_config: None,
             },
         )
         .await?
@@ -3773,7 +3796,7 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     let mut fs = TemporaryFs::new("should_open_and_update_nested_files");
     fs.create_file(FILE_PATH, FILE_CONTENT_BEFORE);
 
-    let (watcher, instruction_channel) = Watcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
 
     // ARRANGE: Start server.
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
@@ -4065,7 +4088,9 @@ async fn should_correctly_fix_all_astro_files() -> Result<()> {
     server
         .open_named_document(
             r#"---
-let useConst = "Astro Test";
+loop: for (let i = 0; i < 5; i++) {
+  continue loop;
+}
 ---
 <!doctype html>"#,
             uri!("document.astro"),
@@ -4118,13 +4143,13 @@ let useConst = "Astro Test";
                     character: 0,
                 },
                 end: Position {
-                    line: 4,
+                    line: 6,
                     character: 0,
                 },
             },
             new_text: String::from(
                 r#"---
-const useConst = "Astro Test";
+for (let i = 0; i < 5; i++) {}
 ---
 <!doctype html>"#,
             ),
@@ -4210,6 +4235,329 @@ async fn should_not_return_error_on_code_actions_for_grit_files() -> Result<()> 
     assert_eq!(res, vec![]);
 
     server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_apply_the_inline_configuration_when_formatting_a_file() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .load_configuration_with_settings(WorkspaceSettings {
+            inline_config: Some(Configuration {
+                formatter: Some(FormatterConfiguration {
+                    enabled: Some(false.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        })
+        .await?;
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: uri!("document.js"),
+                    language_id: String::from("javascript"),
+                    version: 0,
+                    text: String::from(r#"function f() {return "Foobar"}"#),
+                },
+            },
+        )
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_none(),
+        "It should not format the file because the inline settings disabled the formatter"
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_acknowledge_changes_in_settings_in_formatting() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: uri!("document.js"),
+                    language_id: String::from("javascript"),
+                    version: 0,
+                    text: String::from(r#"function f() {return "Foobar"}"#),
+                },
+            },
+        )
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_some(),
+        "It should format the file because by the default the formatter is enabled"
+    );
+
+    sleep(Duration::from_millis(300)).await;
+
+    server
+        .load_configuration_with_settings(WorkspaceSettings {
+            inline_config: Some(Configuration {
+                formatter: Some(FormatterConfiguration {
+                    enabled: Some(false.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        })
+        .await?;
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: uri!("document.js"),
+                    language_id: String::from("javascript"),
+                    version: 0,
+                    text: String::from(r#"function f() {return "Foobar"}"#),
+                },
+            },
+        )
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_none(),
+        "It should not format the file because the inline settings disabled the formatter now"
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_apply_the_inline_configuration_when_pulling_diagnostics() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .load_configuration_with_settings(WorkspaceSettings {
+            inline_config: Some(Configuration {
+                linter: Some(LinterConfiguration {
+                    enabled: Some(false.into()),
+                    ..Default::default()
+                }),
+                assist: Some(AssistConfiguration {
+                    enabled: Some(false.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        })
+        .await?;
+    server.open_document("const a = 1; a = 2;").await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.js"),
+                version: Some(0),
+                diagnostics: vec![],
+            }
+        )),
+        "diagnostics should be empty because linting and assist are disabled"
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_acknowledge_changes_in_settings_when_pulling_diagnostics() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("const a = 1; a = 2;").await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert!(notification.is_some());
+
+    let notification = notification.expect("notification");
+    assert!(matches!(
+        notification,
+        ServerNotification::PublishDiagnostics(_)
+    ));
+    if let ServerNotification::PublishDiagnostics(result) = notification {
+        assert!(!result.diagnostics.is_empty(), "should contain diagnostics");
+    }
+
+    sleep(Duration::from_millis(300)).await;
+
+    server
+        .load_configuration_with_settings(WorkspaceSettings {
+            inline_config: Some(Configuration {
+                linter: Some(LinterConfiguration {
+                    enabled: Some(false.into()),
+                    ..Default::default()
+                }),
+                assist: Some(AssistConfiguration {
+                    enabled: Some(false.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        })
+        .await?;
+
+    server.open_document("const a = 1; a = 2;").await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.js"),
+                version: Some(0),
+                diagnostics: vec![],
+            }
+        )),
+        "diagnostics should be empty because linting and assist are disabled"
+    );
+
+    server.close_document().await?;
+
     server.shutdown().await?;
     reader.abort();
 

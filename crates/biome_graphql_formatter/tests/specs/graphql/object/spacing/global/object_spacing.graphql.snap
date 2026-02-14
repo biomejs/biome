@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: graphql/object/spacing/global/object_spacing.graphql
 ---
+
 # Input
 
 ```graphql
@@ -27,12 +28,14 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
 {
 	field_value(object_value: { key: "value" })
 }
+
 ```
 
 ## Output 1
@@ -44,10 +47,12 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
 {
 	field_value(object_value: { key: "value" })
 }
+
 ```

@@ -5,10 +5,10 @@ use biome_analyze::{Rule, RuleFilter};
 use std::sync::LazyLock;
 static NEXT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("correctness", "noNextAsyncClientComponent"),
         RuleFilter::Rule("correctness", "useExhaustiveDependencies"),
         RuleFilter::Rule("correctness", "useHookAtTopLevel"),
         RuleFilter::Rule("nursery", "noBeforeInteractiveScriptOutsideDocument"),
-        RuleFilter::Rule("nursery", "noNextAsyncClientComponent"),
         RuleFilter::Rule("nursery", "noSyncScripts"),
         RuleFilter::Rule("nursery", "useInlineScriptId"),
         RuleFilter::Rule("performance", "noImgElement"),
@@ -23,20 +23,11 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("correctness", "noPrivateImports"),
         RuleFilter::Rule("correctness", "noUndeclaredDependencies"),
+        RuleFilter::Rule("correctness", "noUnresolvedImports"),
         RuleFilter::Rule("correctness", "useImportExtensions"),
         RuleFilter::Rule("correctness", "useJsonImportAttributes"),
-        RuleFilter::Rule("nursery", "noDeprecatedImports"),
-        RuleFilter::Rule("nursery", "noFloatingPromises"),
-        RuleFilter::Rule("nursery", "noImportCycles"),
-        RuleFilter::Rule("nursery", "noMisusedPromises"),
-        RuleFilter::Rule("nursery", "noUnnecessaryConditions"),
-        RuleFilter::Rule("nursery", "noUnresolvedImports"),
-        RuleFilter::Rule("nursery", "useArraySortCompare"),
-        RuleFilter::Rule("nursery", "useAwaitThenable"),
-        RuleFilter::Rule("nursery", "useConsistentEnumValueType"),
-        RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
-        RuleFilter::Rule("nursery", "useFind"),
-        RuleFilter::Rule("nursery", "useRegexpExec"),
+        RuleFilter::Rule("suspicious", "noDeprecatedImports"),
+        RuleFilter::Rule("suspicious", "noImportCycles"),
     ]
 });
 static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
@@ -45,8 +36,8 @@ static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useImageSize"),
         RuleFilter::Rule("correctness", "useJsxKeyInIterable"),
         RuleFilter::Rule("correctness", "useQwikClasslist"),
-        RuleFilter::Rule("nursery", "useQwikMethodUsage"),
-        RuleFilter::Rule("nursery", "useQwikValidLexicalScope"),
+        RuleFilter::Rule("correctness", "useQwikMethodUsage"),
+        RuleFilter::Rule("correctness", "useQwikValidLexicalScope"),
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
     ]
 });
@@ -63,7 +54,6 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noDuplicatedSpreadProps"),
         RuleFilter::Rule("nursery", "noJsxPropsBind"),
         RuleFilter::Rule("nursery", "noLeakedRender"),
-        RuleFilter::Rule("nursery", "noReactForwardRef"),
         RuleFilter::Rule("nursery", "noSyncScripts"),
         RuleFilter::Rule("nursery", "noUnknownAttribute"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtml"),
@@ -71,6 +61,7 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("style", "useComponentExportOnlyModules"),
         RuleFilter::Rule("style", "useReactFunctionComponents"),
         RuleFilter::Rule("suspicious", "noArrayIndexKey"),
+        RuleFilter::Rule("suspicious", "noReactForwardRef"),
     ]
 });
 static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
@@ -91,15 +82,28 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 });
 static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
     LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noUndeclaredEnvVars")]);
+static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "noFloatingPromises"),
+        RuleFilter::Rule("nursery", "noMisusedPromises"),
+        RuleFilter::Rule("nursery", "noUnnecessaryConditions"),
+        RuleFilter::Rule("nursery", "useArraySortCompare"),
+        RuleFilter::Rule("nursery", "useAwaitThenable"),
+        RuleFilter::Rule("nursery", "useConsistentEnumValueType"),
+        RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
+        RuleFilter::Rule("nursery", "useFind"),
+        RuleFilter::Rule("nursery", "useRegexpExec"),
+    ]
+});
 static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("correctness", "noVueDataObjectDeclaration"),
+        RuleFilter::Rule("correctness", "noVueDuplicateKeys"),
+        RuleFilter::Rule("correctness", "noVueReservedKeys"),
+        RuleFilter::Rule("correctness", "noVueReservedProps"),
+        RuleFilter::Rule("correctness", "noVueSetupPropsReactivityLoss"),
         RuleFilter::Rule("nursery", "noVueArrowFuncInWatch"),
-        RuleFilter::Rule("nursery", "noVueDataObjectDeclaration"),
-        RuleFilter::Rule("nursery", "noVueDuplicateKeys"),
         RuleFilter::Rule("nursery", "noVueOptionsApi"),
-        RuleFilter::Rule("nursery", "noVueReservedKeys"),
-        RuleFilter::Rule("nursery", "noVueReservedProps"),
-        RuleFilter::Rule("nursery", "noVueSetupPropsReactivityLoss"),
         RuleFilter::Rule("nursery", "useVueConsistentDefinePropsDeclaration"),
         RuleFilter::Rule("nursery", "useVueDefineMacrosOrder"),
         RuleFilter::Rule("nursery", "useVueMultiWordComponentNames"),
@@ -115,6 +119,7 @@ impl DomainSelector {
             "solid" => SOLID_FILTERS.clone(),
             "test" => TEST_FILTERS.clone(),
             "turborepo" => TURBOREPO_FILTERS.clone(),
+            "types" => TYPES_FILTERS.clone(),
             "vue" => VUE_FILTERS.clone(),
             _ => unreachable!("DomainFilter::as_rule_filters: domain {} not found", self.0),
         }
@@ -135,6 +140,7 @@ impl DomainSelector {
             "turborepo" => TURBOREPO_FILTERS
                 .iter()
                 .any(|filter| filter.match_rule::<R>()),
+            "types" => TYPES_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "vue" => VUE_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             _ => false,
         }

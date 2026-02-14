@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnknownProperty": {
+          "level": "error",
+          "options": {
+            "ignore": [
+              "custom-property",
+              "MyCustomProperty",
+              "another-custom-property"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,11 +1,18 @@
 use crate::prelude::*;
-use biome_formatter::{format_args, write};
+use biome_formatter::{FormatRuleWithOptions, format_args, write};
 use biome_html_syntax::{HtmlString, HtmlStringFields};
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatHtmlString;
+pub(crate) struct FormatHtmlString {
+    compact: bool,
+}
 impl FormatNodeRule<HtmlString> for FormatHtmlString {
     fn fmt_fields(&self, node: &HtmlString, f: &mut HtmlFormatter) -> FormatResult<()> {
         let HtmlStringFields { value_token } = node.as_fields();
+
+        if self.compact {
+            let value_token = value_token.clone()?;
+            return format_removed(&value_token).fmt(f);
+        }
 
         // Prettier always uses double quotes for HTML strings, regardless of configuration.
         // Unless the string contains a double quote, in which case it uses single quotes.
@@ -47,5 +54,13 @@ impl FormatNodeRule<HtmlString> for FormatHtmlString {
         }
 
         write!(f, [value_token.format()])
+    }
+}
+
+impl FormatRuleWithOptions<HtmlString> for FormatHtmlString {
+    type Options = bool;
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.compact = options;
+        self
     }
 }

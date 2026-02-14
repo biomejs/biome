@@ -1,0 +1,1247 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.txt`
+
+```txt
+index.ts:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This import is unused.
+  
+  > 1 │ import { z} from "z"
+      │        ^^^^
+    2 │ import { z, b , a} from "lodash"
+    3 │ 
+  
+  ℹ Unused imports might be the result of an incomplete refactoring.
+  
+  ℹ Unsafe fix: Remove the unused imports.
+  
+    1 │ import·{·z}·from·"z"
+      │ --------------------
+index.ts:2:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ Several of these imports are unused.
+  
+    1 │ import { z} from "z"
+  > 2 │ import { z, b , a} from "lodash"
+      │          ^
+    3 │ 
+    4 │ a ==b
+  
+  ℹ Unused imports might be the result of an incomplete refactoring.
+  
+  ℹ Unsafe fix: Remove the unused imports.
+  
+    2 │ import·{·z,·b·,·a}·from·"lodash"
+      │          ---                    
+index.ts:14:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This variable f is unused.
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+  ℹ Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  ℹ Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    12 12 │   debugger
+    13 13 │   
+    14    │ - let·f;
+       14 │ + let·_f;
+    15 15 │   let f;
+    16 16 │   let f;
+  
+index.ts:15:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This variable f is unused.
+  
+    14 │ let f;
+  > 15 │ let f;
+       │     ^
+    16 │ let f;
+    17 │ 		let f;
+  
+  ℹ Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  ℹ Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    13 13 │   
+    14 14 │   let f;
+    15    │ - let·f;
+       15 │ + let·_f;
+    16 16 │   let f;
+    17 17 │   		let f;
+  
+index.ts:16:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This variable f is unused.
+  
+    14 │ let f;
+    15 │ let f;
+  > 16 │ let f;
+       │     ^
+    17 │ 		let f;
+    18 │ 		let f;
+  
+  ℹ Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  ℹ Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    14 14 │   let f;
+    15 15 │   let f;
+    16    │ - let·f;
+       16 │ + let·_f;
+    17 17 │   		let f;
+    18 18 │   		let f;
+  
+index.ts:17:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This variable f is unused.
+  
+    15 │ let f;
+    16 │ let f;
+  > 17 │ 		let f;
+       │ 		    ^
+    18 │ 		let f;
+    19 │ 		let f;
+  
+  ℹ Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  ℹ Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    15 15 │   let f;
+    16 16 │   let f;
+    17    │ - → → let·f;
+       17 │ + → → let·_f;
+    18 18 │   		let f;
+    19 19 │   		let f;
+  
+index.ts:18:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This variable f is unused.
+  
+    16 │ let f;
+    17 │ 		let f;
+  > 18 │ 		let f;
+       │ 		    ^
+    19 │ 		let f;
+  
+  ℹ Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  ℹ Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    16 16 │   let f;
+    17 17 │   		let f;
+    18    │ - → → let·f;
+       18 │ + → → let·_f;
+    19 19 │   		let f;
+  
+index.ts:19:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This variable f is unused.
+  
+    17 │ 		let f;
+    18 │ 		let f;
+  > 19 │ 		let f;
+       │ 		    ^
+  
+  ℹ Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  ℹ Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    17 17 │   		let f;
+    18 18 │   		let f;
+    19    │ - → → let·f;
+       19 │ + → → let·_f;
+  
+main.ts:19:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This variable f is unused.
+  
+    17 │ 		let f;
+    18 │ 		let f;
+  > 19 │ 		let f;
+       │ 		    ^
+  
+  ℹ Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  ℹ Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    17 17 │   		let f;
+    18 18 │   		let f;
+    19    │ - → → let·f;
+       19 │ + → → let·_f;
+  
+main.ts:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This import is unused.
+  
+  > 1 │ import { z} from "z"
+      │        ^^^^
+    2 │ import { z, b , a} from "lodash"
+    3 │ 
+  
+  ℹ Unused imports might be the result of an incomplete refactoring.
+  
+  ℹ Unsafe fix: Remove the unused imports.
+  
+    1 │ import·{·z}·from·"z"
+      │ --------------------
+main.ts:2:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ Several of these imports are unused.
+  
+    1 │ import { z} from "z"
+  > 2 │ import { z, b , a} from "lodash"
+      │          ^
+    3 │ 
+    4 │ a ==b
+  
+  ℹ Unused imports might be the result of an incomplete refactoring.
+  
+  ℹ Unsafe fix: Remove the unused imports.
+  
+    2 │ import·{·z,·b·,·a}·from·"lodash"
+      │          ---                    
+main.ts:14:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This variable f is unused.
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+  ℹ Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  ℹ Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    12 12 │   debugger
+    13 13 │   
+    14    │ - let·f;
+       14 │ + let·_f;
+    15 15 │   let f;
+    16 16 │   let f;
+  
+main.ts:15:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This variable f is unused.
+  
+    14 │ let f;
+  > 15 │ let f;
+       │     ^
+    16 │ let f;
+    17 │ 		let f;
+  
+  ℹ Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  ℹ Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    13 13 │   
+    14 14 │   let f;
+    15    │ - let·f;
+       15 │ + let·_f;
+    16 16 │   let f;
+    17 17 │   		let f;
+  
+main.ts:16:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This variable f is unused.
+  
+    14 │ let f;
+    15 │ let f;
+  > 16 │ let f;
+       │     ^
+    17 │ 		let f;
+    18 │ 		let f;
+  
+  ℹ Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  ℹ Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    14 14 │   let f;
+    15 15 │   let f;
+    16    │ - let·f;
+       16 │ + let·_f;
+    17 17 │   		let f;
+    18 18 │   		let f;
+  
+main.ts:17:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This variable f is unused.
+  
+    15 │ let f;
+    16 │ let f;
+  > 17 │ 		let f;
+       │ 		    ^
+    18 │ 		let f;
+    19 │ 		let f;
+  
+  ℹ Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  ℹ Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    15 15 │   let f;
+    16 16 │   let f;
+    17    │ - → → let·f;
+       17 │ + → → let·_f;
+    18 18 │   		let f;
+    19 19 │   		let f;
+  
+main.ts:18:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ This variable f is unused.
+  
+    16 │ let f;
+    17 │ 		let f;
+  > 18 │ 		let f;
+       │ 		    ^
+    19 │ 		let f;
+  
+  ℹ Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  ℹ Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    16 16 │   let f;
+    17 17 │   		let f;
+    18    │ - → → let·f;
+       18 │ + → → let·_f;
+    19 19 │   		let f;
+  
+index.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Expected a declaration item but instead found '}'.
+  
+  > 3 │ .brokenStyle { color: f( }
+      │                          ^
+    4 │ 
+    5 │ .style {
+  
+  ℹ Expected a declaration item here.
+  
+  > 3 │ .brokenStyle { color: f( }
+      │                          ^
+    4 │ 
+    5 │ .style {
+  
+index.css:3:23 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Unexpected unknown function: f
+  
+  > 3 │ .brokenStyle { color: f( }
+      │                       ^
+    4 │ 
+    5 │ .style {
+  
+  ℹ Use a known function instead.
+  
+  ℹ See MDN web docs for more details.
+  
+index.css:7:17 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Unexpected unknown function: fakeFunction
+  
+    5 │ .style {
+    6 │                 color:
+  > 7 │                 fakeFunction()
+      │                 ^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  ℹ Use a known function instead.
+  
+  ℹ See MDN web docs for more details.
+  
+index.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Expected a declaration item but instead found '}'.
+  
+  > 3 │ .brokenStyle { color: f( }
+      │                          ^
+    4 │ 
+    5 │ .style {
+  
+  ℹ Expected a declaration item here.
+  
+  > 3 │ .brokenStyle { color: f( }
+      │                          ^
+    4 │ 
+    5 │ .style {
+  
+index.css format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  
+index.ts:12:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This is an unexpected use of the debugger statement.
+  
+    10 │ debugger
+    11 │ debugger
+  > 12 │ debugger
+       │ ^^^^^^^^
+    13 │ 
+    14 │ let f;
+  
+  ℹ Unsafe fix: Remove debugger statement
+  
+    10 10 │   debugger
+    11 11 │   debugger
+    12    │ - debugger
+    13 12 │   
+    14 13 │   let f;
+  
+index.ts:17:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Shouldn't redeclare 'f'. Consider to delete it or rename it.
+  
+    15 │ let f;
+    16 │ let f;
+  > 17 │ 		let f;
+       │ 		    ^
+    18 │ 		let f;
+    19 │ 		let f;
+  
+  ℹ 'f' is defined here:
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+index.ts:18:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Shouldn't redeclare 'f'. Consider to delete it or rename it.
+  
+    16 │ let f;
+    17 │ 		let f;
+  > 18 │ 		let f;
+       │ 		    ^
+    19 │ 		let f;
+  
+  ℹ 'f' is defined here:
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+index.ts:19:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Shouldn't redeclare 'f'. Consider to delete it or rename it.
+  
+    17 │ 		let f;
+    18 │ 		let f;
+  > 19 │ 		let f;
+       │ 		    ^
+  
+  ℹ 'f' is defined here:
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+index.ts:19:7 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This variable implicitly has the any type.
+  
+    17 │ 		let f;
+    18 │ 		let f;
+  > 19 │ 		let f;
+       │ 		    ^
+  
+  ℹ Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+index.ts:2:10 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Shouldn't redeclare 'z'. Consider to delete it or rename it.
+  
+    1 │ import { z} from "z"
+  > 2 │ import { z, b , a} from "lodash"
+      │          ^
+    3 │ 
+    4 │ a ==b
+  
+  ℹ 'z' is defined here:
+  
+  > 1 │ import { z} from "z"
+      │          ^
+    2 │ import { z, b , a} from "lodash"
+    3 │ 
+  
+index.ts:15:5 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Shouldn't redeclare 'f'. Consider to delete it or rename it.
+  
+    14 │ let f;
+  > 15 │ let f;
+       │     ^
+    16 │ let f;
+    17 │ 		let f;
+  
+  ℹ 'f' is defined here:
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+index.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ The imports and exports are not sorted.
+  
+  > 1 │ import { z} from "z"
+      │ ^^^^^^^^^^^^^^^^^^^^
+    2 │ import { z, b , a} from "lodash"
+    3 │ 
+  
+  ℹ Safe fix: Organize Imports (Biome)
+  
+     1    │ - import·{·z}·from·"z"
+     2    │ - import·{·z,·b·,·a}·from·"lodash"
+        1 │ + import·{·a,·b·,·z·}·from·"lodash"
+        2 │ + import·{·z}·from·"z"
+     3  3 │   
+     4  4 │   a ==b
+  
+index.ts:4:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Using == may be unsafe if you are relying on type coercion.
+  
+    2 │ import { z, b , a} from "lodash"
+    3 │ 
+  > 4 │ a ==b
+      │   ^^
+    5 │ a ==b
+    6 │ a ==b
+  
+  ℹ == is only allowed when comparing against null.
+  
+  ℹ Unsafe fix: Use === instead.
+  
+    4 │ a·===b
+      │     + 
+index.ts:5:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Using == may be unsafe if you are relying on type coercion.
+  
+    4 │ a ==b
+  > 5 │ a ==b
+      │   ^^
+    6 │ a ==b
+    7 │ a ==b
+  
+  ℹ == is only allowed when comparing against null.
+  
+  ℹ Unsafe fix: Use === instead.
+  
+    5 │ a·===b
+      │     + 
+index.ts:6:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Using == may be unsafe if you are relying on type coercion.
+  
+    4 │ a ==b
+    5 │ a ==b
+  > 6 │ a ==b
+      │   ^^
+    7 │ a ==b
+    8 │ 
+  
+  ℹ == is only allowed when comparing against null.
+  
+  ℹ Unsafe fix: Use === instead.
+  
+    6 │ a·===b
+      │     + 
+index.ts:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Using == may be unsafe if you are relying on type coercion.
+  
+    5 │ a ==b
+    6 │ a ==b
+  > 7 │ a ==b
+      │   ^^
+    8 │ 
+    9 │ debugger
+  
+  ℹ == is only allowed when comparing against null.
+  
+  ℹ Unsafe fix: Use === instead.
+  
+    7 │ a·===b
+      │     + 
+index.ts format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Formatter would have printed the following content:
+  
+     1    │ - import·{·z}·from·"z"
+     2    │ - import·{·z,·b·,·a}·from·"lodash"
+        1 │ + import·{·z·}·from·"z";
+        2 │ + import·{·z,·b,·a·}·from·"lodash";
+     3  3 │   
+     4    │ - a·==b
+     5    │ - a·==b
+     6    │ - a·==b
+     7    │ - a·==b
+        4 │ + a·==·b;
+        5 │ + a·==·b;
+        6 │ + a·==·b;
+        7 │ + a·==·b;
+     8  8 │   
+     9    │ - debugger
+    10    │ - debugger
+    11    │ - debugger
+    12    │ - debugger
+        9 │ + debugger;
+       10 │ + debugger;
+       11 │ + debugger;
+       12 │ + debugger;
+    13 13 │   
+    14 14 │   let f;
+    15 15 │   let f;
+    16 16 │   let f;
+    17    │ - → → let·f;
+    18    │ - → → let·f;
+    19    │ - → → let·f;
+       17 │ + let·f;
+       18 │ + let·f;
+       19 │ + let·f;
+       20 │ + 
+  
+index.ts:9:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This is an unexpected use of the debugger statement.
+  
+     7 │ a ==b
+     8 │ 
+   > 9 │ debugger
+       │ ^^^^^^^^
+    10 │ debugger
+    11 │ debugger
+  
+  ℹ Unsafe fix: Remove debugger statement
+  
+     6  6 │   a ==b
+     7  7 │   a ==b
+     8    │ - 
+     9    │ - debugger
+    10  8 │   debugger
+    11  9 │   debugger
+  
+index.ts:10:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This is an unexpected use of the debugger statement.
+  
+     9 │ debugger
+  > 10 │ debugger
+       │ ^^^^^^^^
+    11 │ debugger
+    12 │ debugger
+  
+  ℹ Unsafe fix: Remove debugger statement
+  
+     8  8 │   
+     9  9 │   debugger
+    10    │ - debugger
+    11 10 │   debugger
+    12 11 │   debugger
+  
+index.ts:11:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This is an unexpected use of the debugger statement.
+  
+     9 │ debugger
+    10 │ debugger
+  > 11 │ debugger
+       │ ^^^^^^^^
+    12 │ debugger
+    13 │ 
+  
+  ℹ Unsafe fix: Remove debugger statement
+  
+     9  9 │   debugger
+    10 10 │   debugger
+    11    │ - debugger
+    12 11 │   debugger
+    13 12 │   
+  
+index.ts:16:5 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Shouldn't redeclare 'f'. Consider to delete it or rename it.
+  
+    14 │ let f;
+    15 │ let f;
+  > 16 │ let f;
+       │     ^
+    17 │ 		let f;
+    18 │ 		let f;
+  
+  ℹ 'f' is defined here:
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+index.ts:14:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This variable implicitly has the any type.
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+  ℹ Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+index.ts:15:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This variable implicitly has the any type.
+  
+    14 │ let f;
+  > 15 │ let f;
+       │     ^
+    16 │ let f;
+    17 │ 		let f;
+  
+  ℹ Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+index.ts:16:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This variable implicitly has the any type.
+  
+    14 │ let f;
+    15 │ let f;
+  > 16 │ let f;
+       │     ^
+    17 │ 		let f;
+    18 │ 		let f;
+  
+  ℹ Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+index.ts:17:7 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This variable implicitly has the any type.
+  
+    15 │ let f;
+    16 │ let f;
+  > 17 │ 		let f;
+       │ 		    ^
+    18 │ 		let f;
+    19 │ 		let f;
+  
+  ℹ Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+index.ts:18:7 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This variable implicitly has the any type.
+  
+    16 │ let f;
+    17 │ 		let f;
+  > 18 │ 		let f;
+       │ 		    ^
+    19 │ 		let f;
+  
+  ℹ Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+main.ts:12:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This is an unexpected use of the debugger statement.
+  
+    10 │ debugger
+    11 │ debugger
+  > 12 │ debugger
+       │ ^^^^^^^^
+    13 │ 
+    14 │ let f;
+  
+  ℹ Unsafe fix: Remove debugger statement
+  
+    10 10 │   debugger
+    11 11 │   debugger
+    12    │ - debugger
+    13 12 │   
+    14 13 │   let f;
+  
+main.ts:14:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This variable implicitly has the any type.
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+  ℹ Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+main.ts:15:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This variable implicitly has the any type.
+  
+    14 │ let f;
+  > 15 │ let f;
+       │     ^
+    16 │ let f;
+    17 │ 		let f;
+  
+  ℹ Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+main.ts:16:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This variable implicitly has the any type.
+  
+    14 │ let f;
+    15 │ let f;
+  > 16 │ let f;
+       │     ^
+    17 │ 		let f;
+    18 │ 		let f;
+  
+  ℹ Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+main.ts:17:7 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This variable implicitly has the any type.
+  
+    15 │ let f;
+    16 │ let f;
+  > 17 │ 		let f;
+       │ 		    ^
+    18 │ 		let f;
+    19 │ 		let f;
+  
+  ℹ Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+main.ts:18:7 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This variable implicitly has the any type.
+  
+    16 │ let f;
+    17 │ 		let f;
+  > 18 │ 		let f;
+       │ 		    ^
+    19 │ 		let f;
+  
+  ℹ Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+main.ts:19:7 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This variable implicitly has the any type.
+  
+    17 │ 		let f;
+    18 │ 		let f;
+  > 19 │ 		let f;
+       │ 		    ^
+  
+  ℹ Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+main.ts:2:10 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Shouldn't redeclare 'z'. Consider to delete it or rename it.
+  
+    1 │ import { z} from "z"
+  > 2 │ import { z, b , a} from "lodash"
+      │          ^
+    3 │ 
+    4 │ a ==b
+  
+  ℹ 'z' is defined here:
+  
+  > 1 │ import { z} from "z"
+      │          ^
+    2 │ import { z, b , a} from "lodash"
+    3 │ 
+  
+main.ts:15:5 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Shouldn't redeclare 'f'. Consider to delete it or rename it.
+  
+    14 │ let f;
+  > 15 │ let f;
+       │     ^
+    16 │ let f;
+    17 │ 		let f;
+  
+  ℹ 'f' is defined here:
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+main.ts:16:5 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Shouldn't redeclare 'f'. Consider to delete it or rename it.
+  
+    14 │ let f;
+    15 │ let f;
+  > 16 │ let f;
+       │     ^
+    17 │ 		let f;
+    18 │ 		let f;
+  
+  ℹ 'f' is defined here:
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+main.ts:17:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Shouldn't redeclare 'f'. Consider to delete it or rename it.
+  
+    15 │ let f;
+    16 │ let f;
+  > 17 │ 		let f;
+       │ 		    ^
+    18 │ 		let f;
+    19 │ 		let f;
+  
+  ℹ 'f' is defined here:
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+main.ts:18:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Shouldn't redeclare 'f'. Consider to delete it or rename it.
+  
+    16 │ let f;
+    17 │ 		let f;
+  > 18 │ 		let f;
+       │ 		    ^
+    19 │ 		let f;
+  
+  ℹ 'f' is defined here:
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+main.ts:19:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Shouldn't redeclare 'f'. Consider to delete it or rename it.
+  
+    17 │ 		let f;
+    18 │ 		let f;
+  > 19 │ 		let f;
+       │ 		    ^
+  
+  ℹ 'f' is defined here:
+  
+    12 │ debugger
+    13 │ 
+  > 14 │ let f;
+       │     ^
+    15 │ let f;
+    16 │ let f;
+  
+main.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ The imports and exports are not sorted.
+  
+  > 1 │ import { z} from "z"
+      │ ^^^^^^^^^^^^^^^^^^^^
+    2 │ import { z, b , a} from "lodash"
+    3 │ 
+  
+  ℹ Safe fix: Organize Imports (Biome)
+  
+     1    │ - import·{·z}·from·"z"
+     2    │ - import·{·z,·b·,·a}·from·"lodash"
+        1 │ + import·{·a,·b·,·z·}·from·"lodash"
+        2 │ + import·{·z}·from·"z"
+     3  3 │   
+     4  4 │   a ==b
+  
+main.ts:4:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Using == may be unsafe if you are relying on type coercion.
+  
+    2 │ import { z, b , a} from "lodash"
+    3 │ 
+  > 4 │ a ==b
+      │   ^^
+    5 │ a ==b
+    6 │ a ==b
+  
+  ℹ == is only allowed when comparing against null.
+  
+  ℹ Unsafe fix: Use === instead.
+  
+    4 │ a·===b
+      │     + 
+main.ts:5:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Using == may be unsafe if you are relying on type coercion.
+  
+    4 │ a ==b
+  > 5 │ a ==b
+      │   ^^
+    6 │ a ==b
+    7 │ a ==b
+  
+  ℹ == is only allowed when comparing against null.
+  
+  ℹ Unsafe fix: Use === instead.
+  
+    5 │ a·===b
+      │     + 
+main.ts:6:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Using == may be unsafe if you are relying on type coercion.
+  
+    4 │ a ==b
+    5 │ a ==b
+  > 6 │ a ==b
+      │   ^^
+    7 │ a ==b
+    8 │ 
+  
+  ℹ == is only allowed when comparing against null.
+  
+  ℹ Unsafe fix: Use === instead.
+  
+    6 │ a·===b
+      │     + 
+main.ts:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Using == may be unsafe if you are relying on type coercion.
+  
+    5 │ a ==b
+    6 │ a ==b
+  > 7 │ a ==b
+      │   ^^
+    8 │ 
+    9 │ debugger
+  
+  ℹ == is only allowed when comparing against null.
+  
+  ℹ Unsafe fix: Use === instead.
+  
+    7 │ a·===b
+      │     + 
+main.ts:9:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This is an unexpected use of the debugger statement.
+  
+     7 │ a ==b
+     8 │ 
+   > 9 │ debugger
+       │ ^^^^^^^^
+    10 │ debugger
+    11 │ debugger
+  
+  ℹ Unsafe fix: Remove debugger statement
+  
+     6  6 │   a ==b
+     7  7 │   a ==b
+     8    │ - 
+     9    │ - debugger
+    10  8 │   debugger
+    11  9 │   debugger
+  
+main.ts:10:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This is an unexpected use of the debugger statement.
+  
+     9 │ debugger
+  > 10 │ debugger
+       │ ^^^^^^^^
+    11 │ debugger
+    12 │ debugger
+  
+  ℹ Unsafe fix: Remove debugger statement
+  
+     8  8 │   
+     9  9 │   debugger
+    10    │ - debugger
+    11 10 │   debugger
+    12 11 │   debugger
+  
+main.ts:11:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ This is an unexpected use of the debugger statement.
+  
+     9 │ debugger
+    10 │ debugger
+  > 11 │ debugger
+       │ ^^^^^^^^
+    12 │ debugger
+    13 │ 
+  
+  ℹ Unsafe fix: Remove debugger statement
+  
+     9  9 │   debugger
+    10 10 │   debugger
+    11    │ - debugger
+    12 11 │   debugger
+    13 12 │   
+  
+main.ts format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ Formatter would have printed the following content:
+  
+     1    │ - import·{·z}·from·"z"
+     2    │ - import·{·z,·b·,·a}·from·"lodash"
+        1 │ + import·{·z·}·from·"z";
+        2 │ + import·{·z,·b,·a·}·from·"lodash";
+     3  3 │   
+     4    │ - a·==b
+     5    │ - a·==b
+     6    │ - a·==b
+     7    │ - a·==b
+        4 │ + a·==·b;
+        5 │ + a·==·b;
+        6 │ + a·==·b;
+        7 │ + a·==·b;
+     8  8 │   
+     9    │ - debugger
+    10    │ - debugger
+    11    │ - debugger
+    12    │ - debugger
+        9 │ + debugger;
+       10 │ + debugger;
+       11 │ + debugger;
+       12 │ + debugger;
+    13 13 │   
+    14 14 │   let f;
+    15 15 │   let f;
+    16 16 │   let f;
+    17    │ - → → let·f;
+    18    │ - → → let·f;
+    19    │ - → → let·f;
+       17 │ + let·f;
+       18 │ + let·f;
+       19 │ + let·f;
+       20 │ + 
+  
+ VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ℹ Files processed:
+  
+  - index.css
+  - index.ts
+  - main.ts
+  
+ VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ℹ Files fixed:
+  
+  ⚠ The list is empty.
+  
+Scanned project folder in <TIME>.
+Checked 3 files in <TIME>. No fixes applied.
+Found 49 errors.
+Found 16 warnings.
+```
+
+## `index.css`
+
+```css
+
+
+.brokenStyle { color: f( }
+
+.style {
+                color:
+                fakeFunction()
+}
+
+```
+
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+a ==b
+a ==b
+a ==b
+
+debugger
+debugger
+debugger
+debugger
+
+let f;
+let f;
+let f;
+		let f;
+		let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+a ==b
+a ==b
+a ==b
+
+debugger
+debugger
+debugger
+debugger
+
+let f;
+let f;
+let f;
+		let f;
+		let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```

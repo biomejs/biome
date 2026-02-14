@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: graphql/definitions/interface_extension.graphql
 ---
+
 # Input
 
 ```graphql
@@ -67,6 +68,7 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
@@ -87,4 +89,5 @@ extend interface User @deprecated {
 extend interface User implements Character @deprecated {
 	name: String
 }
+
 ```

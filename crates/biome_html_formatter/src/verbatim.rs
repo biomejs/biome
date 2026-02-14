@@ -1,6 +1,7 @@
 use crate::HtmlFormatter;
+use crate::comments::HtmlCommentStyle;
 use crate::context::HtmlFormatContext;
-use biome_formatter::comments::{CommentKind, SourceComment};
+use biome_formatter::comments::{CommentKind, CommentStyle, SourceComment};
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::prelude::{
@@ -52,13 +53,6 @@ pub struct FormatHtmlVerbatimNode<'node> {
     format_comments: bool,
 }
 
-impl FormatHtmlVerbatimNode<'_> {
-    pub fn with_format_comments(mut self, format_comments: bool) -> Self {
-        self.format_comments = format_comments;
-        self
-    }
-}
-
 impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
         for element in self.node.descendants_with_tokens(Direction::Next) {
@@ -106,10 +100,7 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             let (outside_trimmed_range, in_trimmed_range) =
                 leading_comments.split_at(outside_trimmed_range);
 
-            biome_formatter::write!(
-                f,
-                [FormatLHtmlLeadingComments::Comments(outside_trimmed_range)]
-            )?;
+            biome_formatter::write!(f, [FormatLeadingCommentsSlice(outside_trimmed_range)])?;
 
             for comment in in_trimmed_range {
                 comment.mark_formatted();
@@ -196,59 +187,112 @@ pub fn format_suppressed_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'
 }
 
 /// Formats the leading comments of `node`
-pub const fn format_html_leading_comments(node: &HtmlSyntaxNode) -> FormatLHtmlLeadingComments<'_> {
-    FormatLHtmlLeadingComments::Node(node)
+pub const fn format_html_leading_comments(node: &HtmlSyntaxNode) -> FormatHtmlLeadingComments<'_> {
+    FormatHtmlLeadingComments {
+        node,
+        is_block_element: false,
+    }
+}
+
+/// Formats the leading comments of `node`, treating it as a block element.
+/// For block elements, comments with no line break after them will still get a hard line break.
+pub const fn format_html_leading_comments_for_block(
+    node: &HtmlSyntaxNode,
+) -> FormatHtmlLeadingComments<'_> {
+    FormatHtmlLeadingComments {
+        node,
+        is_block_element: true,
+    }
 }
 
 /// Formats the leading comments of a node.
 #[derive(Debug, Copy, Clone)]
-pub enum FormatLHtmlLeadingComments<'a> {
-    Node(&'a HtmlSyntaxNode),
-    Comments(&'a [SourceComment<HtmlLanguage>]),
+pub struct FormatHtmlLeadingComments<'a> {
+    node: &'a HtmlSyntaxNode,
+    /// Whether the node is a block element. If true, comments with no line break after
+    /// them will still get a hard line break instead of a space.
+    is_block_element: bool,
 }
 
-impl<'a> Format<HtmlFormatContext> for FormatLHtmlLeadingComments<'a> {
+impl<'a> Format<HtmlFormatContext> for FormatHtmlLeadingComments<'a> {
     fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
         let comments = f.context().comments().clone();
-        let leading_comments = match self {
-            FormatLHtmlLeadingComments::Node(node) => comments.leading_comments(node),
-            FormatLHtmlLeadingComments::Comments(comments) => comments,
-        };
+        let leading_comments = comments.leading_comments(self.node);
+        format_leading_comments_impl(leading_comments, self.is_block_element, f)
+    }
+}
 
-        let leading_comments_iter = leading_comments.iter().peekable();
-        for comment in leading_comments_iter {
-            let format_comment = FormatRefWithRule::new(
-                comment,
-                <HtmlFormatContext as CstFormatContext>::CommentRule::default(),
-            );
-            biome_formatter::write!(f, [format_comment])?;
+/// Formats a slice of leading comments (used for verbatim node formatting).
+#[derive(Debug, Copy, Clone)]
+pub struct FormatLeadingCommentsSlice<'a>(&'a [SourceComment<HtmlLanguage>]);
 
-            match comment.kind() {
-                CommentKind::Block | CommentKind::InlineBlock => {
-                    unreachable!("Html comments only have line comments")
-                }
+impl<'a> Format<HtmlFormatContext> for FormatLeadingCommentsSlice<'a> {
+    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
+        format_leading_comments_impl(self.0, false, f)
+    }
+}
 
-                CommentKind::Line => {
-                    // TODO: review logic here
-                    match comment.lines_after() {
-                        0 => {}
-                        1 => {
-                            if comment.lines_before() == 0 {
-                                biome_formatter::write!(f, [soft_line_break_or_space()])?;
-                            } else {
-                                biome_formatter::write!(f, [hard_line_break()])?;
-                            }
+/// Shared implementation for formatting leading comments.
+fn format_leading_comments_impl(
+    leading_comments: &[SourceComment<HtmlLanguage>],
+    is_block_element: bool,
+    f: &mut HtmlFormatter,
+) -> FormatResult<()> {
+    let leading_comments_iter = leading_comments.iter().peekable();
+    for comment in leading_comments_iter {
+        let format_comment = FormatRefWithRule::new(
+            comment,
+            <HtmlFormatContext as CstFormatContext>::CommentRule::default(),
+        );
+        biome_formatter::write!(f, [format_comment])?;
+
+        // Check if this is a suppression comment
+        let is_suppression = HtmlCommentStyle::is_suppression(comment.piece().text());
+
+        match comment.kind() {
+            CommentKind::Block | CommentKind::InlineBlock => {
+                // HTML comments are block comments (<!-- ... -->)
+                match comment.lines_after() {
+                    0 => {
+                        // No newline after comment in source
+                        if is_suppression {
+                            // Don't add trailing whitespace after suppression comments -
+                            // the suppressed content should directly follow
+                        } else if is_block_element {
+                            // Block elements always get a line break after leading comments
+                            biome_formatter::write!(f, [hard_line_break()])?;
+                        } else {
+                            // Inline elements get a space
+                            biome_formatter::write!(f, [space()])?;
                         }
-                        _ => biome_formatter::write!(f, [empty_line()])?,
                     }
+                    1 => {
+                        biome_formatter::write!(f, [hard_line_break()])?;
+                    }
+                    _ => biome_formatter::write!(f, [empty_line()])?,
                 }
             }
 
-            comment.mark_formatted()
+            CommentKind::Line => {
+                // TODO: review logic here
+                match comment.lines_after() {
+                    0 => {}
+                    1 => {
+                        if comment.lines_before() == 0 {
+                            biome_formatter::write!(f, [soft_line_break_or_space()])?;
+                        } else {
+                            biome_formatter::write!(f, [hard_line_break()])?;
+                        }
+                    }
+                    _ => biome_formatter::write!(f, [empty_line()])?,
+                }
+            }
         }
 
-        Ok(())
+        comment.mark_formatted()
     }
+
+    Ok(())
 }
 
 /// Formats the leading comments of `node`

@@ -175,33 +175,34 @@ pub(crate) fn analyze_and_snap(
             }) as Arc<dyn ExtendedConfigurationProvider>
         }),
     };
-    let (_, errors) = biome_json_analyze::analyze(&root, filter, &options, services, |event| {
-        if let Some(mut diag) = event.diagnostic() {
-            for action in event.actions() {
-                if action.is_suppression() {
-                    if action_type.is_suppression() {
+    let (_, errors) =
+        biome_json_analyze::analyze(&root, filter, &options, services, &[], |event| {
+            if let Some(mut diag) = event.diagnostic() {
+                for action in event.actions() {
+                    if action.is_suppression() {
+                        if action_type.is_suppression() {
+                            check_code_action(input_file, input_code, &action, parser_options);
+                            diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
+                        }
+                    } else if !action.is_suppression() {
                         check_code_action(input_file, input_code, &action, parser_options);
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
-                } else if !action.is_suppression() {
+                }
+
+                diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
+                return ControlFlow::Continue(());
+            }
+
+            for action in event.actions() {
+                if !action.is_suppression() {
                     check_code_action(input_file, input_code, &action, parser_options);
-                    diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
+                    code_fixes.push(code_fix_to_string(input_code, action));
                 }
             }
 
-            diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
-            return ControlFlow::Continue(());
-        }
-
-        for action in event.actions() {
-            if !action.is_suppression() {
-                check_code_action(input_file, input_code, &action, parser_options);
-                code_fixes.push(code_fix_to_string(input_code, action));
-            }
-        }
-
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        });
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));

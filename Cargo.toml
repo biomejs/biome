@@ -21,6 +21,7 @@ biome_analyze                = { path = "./crates/biome_analyze", version = "0.5
 biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
 biome_aria                   = { path = "./crates/biome_aria", version = "0.5.7" }
 biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version = "0.5.7" }
+biome_bench_utils            = { path = "./crates/biome_bench_utils" }
 # not publish
 biome_cli                    = { path = "./crates/biome_cli" }
 biome_configuration          = { path = "./crates/biome_configuration" }
@@ -79,6 +80,7 @@ biome_line_index             = { path = "./crates/biome_line_index", version = "
 biome_lsp                    = { path = "./crates/biome_lsp" }
 biome_lsp_converters         = { path = "./crates/biome_lsp_converters", version = "0.1.0" }
 biome_markdown_factory       = { path = "./crates/biome_markdown_factory", version = "0.0.1" }
+biome_markdown_formatter     = { path = "./crates/biome_markdown_formatter", version = "0.0.1" }
 biome_markdown_parser        = { path = "./crates/biome_markdown_parser", version = "0.0.1" }
 biome_markdown_syntax        = { path = "./crates/biome_markdown_syntax", version = "0.0.1" }
 biome_markup                 = { path = "./crates/biome_markup", version = "0.5.7" }
@@ -114,7 +116,7 @@ cfg-if                       = "1.0.4"
 countme                      = "3.0.1"
 crossbeam                    = "0.8.4"
 dashmap                      = "6.1.0"
-dirs                         = "6.0.0"
+directories                  = "6.0.0"
 either                       = "1.15.0"
 enumflags2                   = "0.7.12"
 filetime                     = "0.2.27"
@@ -162,6 +164,7 @@ unicode-bom                  = "2.0.3"
 unicode-width                = "0.1.12"
 ureq                         = "3.1.4"
 url                          = "2.5.8"
+uuid                         = "1.18.1"
 walkdir                      = "2.5.0"
 web-time                     = "1.1.0"
 windows                      = "0.62.2"

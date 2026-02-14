@@ -1,0 +1,19 @@
+// Global flag usage
+$global-var: initial;
+
+.component {
+  // Override global variable
+  $global-var: modified !global;
+
+  // Combined flags
+  $another-var: value !default !global;
+  $third-var: value !global !default;
+
+  color: $global-var;
+}
+
+// Global flag with important (SCSS allows both)
+.important-test {
+  $important-var: red !global;
+  color: $important-var !important;
+}

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/class/assignment_layout.ts
 ---
+
 # Input
 
 ```ts
@@ -38,6 +39,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -48,4 +50,5 @@ class SourceRemoveUnused extends SourceAction {
 	public static readonly id =
 		"javascript-walkthrough.commands.nodeInstallationFound";
 }
+
 ```

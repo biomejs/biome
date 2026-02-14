@@ -1,0 +1,88 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "experimentalEmbeddedSnippetsEnabled": true,
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+const Foo = gql`
+	query { people(id: ) { }
+`;
+const Bar = styled.div`
+	background-color: ;
+	align: center;
+	padding: 0;
+`;
+
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.js:1:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found ')'.
+  
+  > 1 │ const Foo = gql`query { people(id: ) { }`;
+      │                                    ^
+    2 │ const Bar = styled.div`background-color: ; align: center; padding: 0;`;
+    3 │ 
+  
+  i Expected a value here.
+  
+  > 1 │ const Foo = gql`query { people(id: ) { }`;
+      │                                    ^
+    2 │ const Bar = styled.div`background-color: ; align: center; padding: 0;`;
+    3 │ 
+  
+
+```
+
+```block
+file.js:1:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+  > 1 │ const Foo = gql`query { people(id: ) { }`;
+      │                                         
+    2 │ const Bar = styled.div`background-color: ; align: center; padding: 0;`;
+    3 │ 
+  
+  i the file ends here
+  
+  > 1 │ const Foo = gql`query { people(id: ) { }`;
+      │                                         
+    2 │ const Bar = styled.div`background-color: ; align: center; padding: 0;`;
+    3 │ 
+  
+
+```
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+Found 2 errors.
+```

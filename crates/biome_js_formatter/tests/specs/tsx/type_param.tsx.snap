@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: tsx/type_param.tsx
 ---
+
 # Input
 
 ```tsx
@@ -45,6 +46,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```tsx
@@ -62,4 +64,5 @@ Operator linebreak: After
 class A<T> {}
 class B<T> {}
 class C<T, D> {}
+
 ```

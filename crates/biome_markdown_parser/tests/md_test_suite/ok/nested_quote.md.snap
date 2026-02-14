@@ -1,0 +1,146 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+> Outer quote
+>> Nested quote
+>>> Deeply nested
+
+> Back to outer
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            marker_token: R_ANGLE@0..1 ">" [] [],
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@1..13 "Outer quote" [Skipped(" ")] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+                MdQuote {
+                    marker_token: R_ANGLE@14..16 ">" [Skipped(">")] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@16..29 "Nested quote" [Skipped(" ")] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@29..30 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdQuote {
+                            marker_token: R_ANGLE@30..33 ">" [Skipped(">"), Skipped(">")] [],
+                            content: MdBlockList [
+                                MdParagraph {
+                                    list: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@33..47 "Deeply nested" [Skipped(" ")] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@47..48 "\n" [] [],
+                                        },
+                                    ],
+                                    hard_line: missing (optional),
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@48..49 "\n" [] [],
+        },
+        MdQuote {
+            marker_token: R_ANGLE@49..50 ">" [] [],
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@50..64 "Back to outer" [Skipped(" ")] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@64..65 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@65..65 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..65
+  0: (empty)
+  1: MD_BLOCK_LIST@0..65
+    0: MD_QUOTE@0..48
+      0: R_ANGLE@0..1 ">" [] []
+      1: MD_BLOCK_LIST@1..48
+        0: MD_PARAGRAPH@1..14
+          0: MD_INLINE_ITEM_LIST@1..14
+            0: MD_TEXTUAL@1..13
+              0: MD_TEXTUAL_LITERAL@1..13 "Outer quote" [Skipped(" ")] []
+            1: MD_TEXTUAL@13..14
+              0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
+          1: (empty)
+        1: MD_QUOTE@14..48
+          0: R_ANGLE@14..16 ">" [Skipped(">")] []
+          1: MD_BLOCK_LIST@16..48
+            0: MD_PARAGRAPH@16..30
+              0: MD_INLINE_ITEM_LIST@16..30
+                0: MD_TEXTUAL@16..29
+                  0: MD_TEXTUAL_LITERAL@16..29 "Nested quote" [Skipped(" ")] []
+                1: MD_TEXTUAL@29..30
+                  0: MD_TEXTUAL_LITERAL@29..30 "\n" [] []
+              1: (empty)
+            1: MD_QUOTE@30..48
+              0: R_ANGLE@30..33 ">" [Skipped(">"), Skipped(">")] []
+              1: MD_BLOCK_LIST@33..48
+                0: MD_PARAGRAPH@33..48
+                  0: MD_INLINE_ITEM_LIST@33..48
+                    0: MD_TEXTUAL@33..47
+                      0: MD_TEXTUAL_LITERAL@33..47 "Deeply nested" [Skipped(" ")] []
+                    1: MD_TEXTUAL@47..48
+                      0: MD_TEXTUAL_LITERAL@47..48 "\n" [] []
+                  1: (empty)
+    1: MD_NEWLINE@48..49
+      0: NEWLINE@48..49 "\n" [] []
+    2: MD_QUOTE@49..65
+      0: R_ANGLE@49..50 ">" [] []
+      1: MD_BLOCK_LIST@50..65
+        0: MD_PARAGRAPH@50..65
+          0: MD_INLINE_ITEM_LIST@50..65
+            0: MD_TEXTUAL@50..64
+              0: MD_TEXTUAL_LITERAL@50..64 "Back to outer" [Skipped(" ")] []
+            1: MD_TEXTUAL@64..65
+              0: MD_TEXTUAL_LITERAL@64..65 "\n" [] []
+          1: (empty)
+  2: EOF@65..65 "" [] []
+
+```

@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: directive.js
+---
+# Input
+```js
+'use strict';
+
+```
+
+# Diagnostics
+```
+directive.js:1:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty source is not allowed.
+  
+  > 1 │ 'use strict';
+      │ ^^^^^^^^^^^^^
+    2 │ 
+  
+  i Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it.
+  
+
+```

@@ -239,6 +239,9 @@ schema + sure()
 
 <style>
 #id { font-family: comic-sans } .class { background: red}
+:global(div) {
+  color: red;
+}
 </style>
 "#
         .as_bytes(),
@@ -534,6 +537,371 @@ fn check_stdin_write_unsafe_successfully() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_stdin_write_unsafe_successfully",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn embedded_bindings_are_tracked_correctly() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script>
+import { Component } from "./component.svelte";
+let hello = "Hello World";
+let array = [];
+let props = [];
+</script>
+
+<html>
+    <span>{hello}</span>
+    <span>{notDefined}</span>
+    {#each array as item}
+    {/each}
+    <Component />
+    <input {...props} />
+</html>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "embedded_bindings_are_tracked_correctly",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_const_not_triggered_in_snippet_sources() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script>
+let hello = "Hello World";
+</script>
+
+<html>
+    <span>{hello}</span>
+</html>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useConst", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_const_not_triggered_in_snippet_sources",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_unused_imports_is_not_triggered_in_snippet_sources() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script>
+import Component from "./Component.vue"
+</script>
+
+<Component />
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedImports", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_imports_is_not_triggered_in_snippet_sources",
+        fs,
+        console,
+        result,
+    ));
+}
+
+const SVELTE_ENUM_IN_TEMPLATE: &str = r#"<script lang="ts">
+import { Component, FooEnum } from './types';
+</script>
+<main>
+  <Component />
+  {FooEnum.Foo}
+</main>"#;
+
+#[test]
+fn use_import_type_not_triggered_for_enum_in_template() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(file.into(), SVELTE_ENUM_IN_TEMPLATE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_import_type_not_triggered_for_enum_in_template",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_import_type_not_triggered_for_enum_in_template_v2() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+import { Avatar as AvatarPrimitive } from "bits-ui"; // <-- false positive
+import { cn } from "$lib/utils.js";
+
+let {
+	ref = $bindable(null),
+	class: className,
+}: AvatarPrimitive.FallbackProps = $props();
+</script>
+
+<!-- used as value here -->
+<AvatarPrimitive.Fallback
+	bind:ref
+	class="something nice"
+/>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_import_type_not_triggered_for_enum_in_template_v2",
+        fs,
+        console,
+        result,
+    ));
+}
+#[test]
+fn no_useless_lone_block_statements_is_not_triggered() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<CollapsiblePrimitive.Content>
+	{#snippet child({ props, open })}
+		{#if open}
+			<div {...props} transition:slide={{ duration }}>
+				{@render children?.()}
+			</div>
+		{/if}
+	{/snippet}
+</CollapsiblePrimitive.Content>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUselessLoneBlockStatements", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_useless_lone_block_statements_is_not_triggered",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn supports_ts_in_embedded_expressions() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+// this makes it typescript
+</script>
+
+<div
+	onclick={(e) => {
+		if ((e.target as HTMLElement).closest("button")) {
+			return;
+		}
+		e.currentTarget.parentElement?.querySelector("input")?.focus();
+	}}
+>
+</div>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUselessLoneBlockStatements", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "supports_ts_in_embedded_expressions",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_unused_variables_in_svelte_directives() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script>
+const isActive = false;
+const color = "red";
+let inputValue = "";
+let isChecked = false;
+</script>
+
+<main>
+  <!-- bind: directive -->
+  <input bind:value={inputValue} />
+  
+  <!-- bind: directive with checkbox -->
+  <input type="checkbox" bind:checked={isChecked} />
+  
+  <!-- class: directive -->
+  <div class:active={isActive}>Active</div>
+  
+  <!-- style: directive -->
+  <div style:color={color}>Styled</div>
+  
+  <!-- Using variables in text expressions -->
+  <p>{inputValue}</p>
+  <p>{isChecked}</p>
+</main>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_variables_in_svelte_directives",
         fs,
         console,
         result,

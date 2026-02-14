@@ -1,0 +1,83 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+(x) => x * 2
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsArrowFunctionExpression {
+        async_token: missing (optional),
+        type_parameters: missing (optional),
+        parameters: JsParameters {
+            l_paren_token: L_PAREN@0..1 "(" [] [],
+            items: JsParameterList [
+                JsFormalParameter {
+                    decorators: JsDecoratorList [],
+                    binding: JsIdentifierBinding {
+                        name_token: IDENT@1..2 "x" [] [],
+                    },
+                    question_mark_token: missing (optional),
+                    type_annotation: missing (optional),
+                    initializer: missing (optional),
+                },
+            ],
+            r_paren_token: R_PAREN@2..4 ")" [] [Whitespace(" ")],
+        },
+        return_type_annotation: missing (optional),
+        fat_arrow_token: FAT_ARROW@4..7 "=>" [] [Whitespace(" ")],
+        body: JsBinaryExpression {
+            left: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@7..9 "x" [] [Whitespace(" ")],
+                },
+            },
+            operator_token: STAR@9..11 "*" [] [Whitespace(" ")],
+            right: JsNumberLiteralExpression {
+                value_token: JS_NUMBER_LITERAL@11..12 "2" [] [],
+            },
+        },
+    },
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..13
+  0: JS_ARROW_FUNCTION_EXPRESSION@0..12
+    0: (empty)
+    1: (empty)
+    2: JS_PARAMETERS@0..4
+      0: L_PAREN@0..1 "(" [] []
+      1: JS_PARAMETER_LIST@1..2
+        0: JS_FORMAL_PARAMETER@1..2
+          0: JS_DECORATOR_LIST@1..1
+          1: JS_IDENTIFIER_BINDING@1..2
+            0: IDENT@1..2 "x" [] []
+          2: (empty)
+          3: (empty)
+          4: (empty)
+      2: R_PAREN@2..4 ")" [] [Whitespace(" ")]
+    3: (empty)
+    4: FAT_ARROW@4..7 "=>" [] [Whitespace(" ")]
+    5: JS_BINARY_EXPRESSION@7..12
+      0: JS_IDENTIFIER_EXPRESSION@7..9
+        0: JS_REFERENCE_IDENTIFIER@7..9
+          0: IDENT@7..9 "x" [] [Whitespace(" ")]
+      1: STAR@9..11 "*" [] [Whitespace(" ")]
+      2: JS_NUMBER_LITERAL_EXPRESSION@11..12
+        0: JS_NUMBER_LITERAL@11..12 "2" [] []
+  1: EOF@12..13 "" [Newline("\n")] []
+
+```

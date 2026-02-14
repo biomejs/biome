@@ -6,6 +6,8 @@ pub use formatter::*;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
+pub type ExperimentalEmbeddedSnippetsEnabled = Bool<false>;
+
 /// A set of options applied to the JavaScript files
 #[derive(
     Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
@@ -44,6 +46,11 @@ pub struct JsConfiguration {
     #[bpaf(hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jsx_runtime: Option<JsxRuntime>,
+
+    /// Enables support for embedding snippets.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub experimental_embedded_snippets_enabled: Option<ExperimentalEmbeddedSnippetsEnabled>,
 }
 
 pub type UnsafeParameterDecoratorsEnabled = Bool<false>;

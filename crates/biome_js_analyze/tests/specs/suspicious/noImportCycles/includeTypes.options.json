@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noImportCycles": {
+          "level": "on",
+          "options": {
+            "ignoreTypes": false
+          }
+        }
+      }
+    }
+  }
+}

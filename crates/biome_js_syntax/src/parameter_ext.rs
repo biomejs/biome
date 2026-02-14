@@ -1,7 +1,7 @@
 use crate::{
     AnyJsBindingPattern, AnyJsConstructorParameter, AnyJsFormalParameter, AnyJsParameter,
     JsConstructorParameterList, JsConstructorParameters, JsDecoratorList, JsLanguage,
-    JsParameterList, JsParameters, TsTypeAnnotation,
+    JsParameterList, JsParameters, JsSyntaxToken, TsTypeAnnotation,
 };
 use biome_rowan::{
     AstNodeList, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxResult, declare_node_union,
@@ -468,6 +468,16 @@ impl AnyParameter {
                 AnyJsParameter::TsThisParameter(_) => None,
             },
         }
+    }
+
+    /// Obtain the name syntax token for this parameter, if it has one.
+    /// TODO: move this method into AnyJsBindingPattern and then remove it from everywhere else
+    pub fn name_token(&self) -> Option<JsSyntaxToken> {
+        self.binding()?
+            .as_any_js_binding()?
+            .as_js_identifier_binding()?
+            .name_token()
+            .ok()
     }
 
     /// Returns type annotation of the parameter if any.

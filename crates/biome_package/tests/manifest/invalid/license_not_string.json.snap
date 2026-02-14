@@ -10,7 +10,4 @@ license_not_string.json:2:13 deserialize ━━━━━━━━━━━━━
   > 2 │ 	"license": false
       │ 	           ^^^^^
     3 │ }
-    4 │ 
-  
-
-
+    4 │

@@ -26,5 +26,5 @@ The --json option is unstable/experimental and its output might change between p
 ```
 
 ```block
-{"summary":{"changed":0,"unchanged":1,"matches":0,"errors":1,"warnings":0,"infos":0,"skipped":0,"suggestedFixesSkipped":0,"diagnosticsNotPrinted":0},"diagnostics":[{"category":"format","severity":"error","description":"Formatter would have printed the following content:","message":[{"elements":[],"content":"Formatter would have printed the following content:"}],"advices":{"advices":[{"diff":{"dictionary":"  statement();\n","ops":[{"diffOp":{"delete":{"range":[0,2]}}},{"diffOp":{"equal":{"range":[2,12]}}},{"diffOp":{"delete":{"range":[0,2]}}},{"diffOp":{"equal":{"range":[12,13]}}},{"diffOp":{"delete":{"range":[0,2]}}},{"diffOp":{"insert":{"range":[13,15]}}}]}}]},"verboseAdvices":{"advices":[]},"location":{"path":{"file":"format.js"},"span":null,"sourceCode":"  statement(  )  "},"tags":[],"source":null}],"command":"format"}
+{"summary":{"changed":0,"unchanged":1,"matches":0,"errors":1,"warnings":0,"infos":0,"skipped":0,"suggestedFixesSkipped":0,"diagnosticsNotPrinted":0},"diagnostics":[{"severity":"error","message":"Formatter would have printed the following content:","category":"format","location":{"path":"format.js","start":{"line":0,"column":0},"end":{"line":0,"column":0}},"advices":[]}],"command":"format"}
 ```

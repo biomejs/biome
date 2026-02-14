@@ -76,6 +76,7 @@ impl Format<GraphqlFormatContext> for FormatGraphqlVerbatimNode<'_> {
         // Format all leading comments that are outside of the node's source range.
         if self.format_comments {
             let comments = f.context().comments().clone();
+
             let leading_comments = comments.leading_comments(self.node);
 
             let outside_trimmed_range = leading_comments.partition_point(|comment| {

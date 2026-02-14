@@ -142,74 +142,6 @@ fn with_malformed_configuration() {
 }
 
 #[test]
-fn with_server_logs() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let (fs, result) = {
-        let log_dir = TestLogDir::new("biome-test-logs");
-        fs::create_dir_all(&log_dir.path).expect("Failed to create test log directory");
-
-        fs::write(log_dir.path.join("server.log.2022-10-14-16"), r#"
-┐biome_cli::commands::daemon::Running Server{pid=195434}
-├─2547ms INFO biome_lsp::server Starting Biome Language Server...
-├─15333ms INFO biome_lsp::server Starting Biome Language Server...
-├─15347ms INFO biome_lsp::server Attempting to load the configuration from 'biome.json' file
-├─15347ms INFO biome_service::configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/biome.json"
-├─15347ms ERROR biome_service::configuration Could not find the file configuration at "/home/micha/git/ant-design/biome.json"
-├─15347ms ERROR biome_service::configuration Reason: Os { code: 2, kind: NotFound, message: "No such file or directory" }
-├─┐biome_js_parser::parse::parse{file_id=FileId(0)}
-├─┘
-├─┐biome_js_parser::parse::parse{file_id=FileId(1)}
-├─┘
-├─16108ms INFO biome_lsp::server Starting Biome Language Server...
-├─41801ms INFO biome_lsp::server Starting Biome Language Server...
-├─41802ms INFO biome_lsp::server Sending shutdown signal
-INFO biome_cli::commands::daemon Received shutdown signal
-├─41802ms ERROR tower_lsp::transport failed to encode message: failed to encode response: Broken pipe (os error 32)
-┘
-┐biome_cli::commands::daemon::Running Server{pid=197796}
-├─2822ms INFO biome_lsp::server Starting Biome Language Server...
-├─7550ms INFO biome_lsp::server Starting Biome Language Server...
-├─7551ms INFO biome_lsp::server Attempting to load the configuration from 'biome.json' file
-├─7551ms INFO biome_service::configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/biome.json"
-├─7551ms ERROR biome_service::configuration Could not find the file configuration at "/home/micha/git/ant-design/biome.json"
-├─7551ms ERROR biome_service::configuration Reason: Os { code: 2, kind: NotFound, message: "No such file or directory" }
-├─┐biome_js_parser::parse::parse{file_id=FileId(0)}
-├─┘
-├─┐biome_js_parser::parse::parse{file_id=FileId(1)}
-├─┘
-├─7897ms INFO biome_lsp::server Starting Biome Language Server...
-"#,
-        ).expect("Failed to write log file");
-
-        fs::write(
-            log_dir.path.join("server.log.2022-10-14-15"),
-            r#"
-Not most recent log file
-"#,
-        )
-        .expect("Failed to write configuration file");
-
-        run_cli(
-            fs,
-            &mut console,
-            Args::from(["rage", "--daemon-logs"].as_slice()),
-        )
-    };
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_rage_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "with_server_logs",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn with_formatter_configuration() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -386,8 +318,6 @@ impl TestLogDir {
         let guard = RAGE_GUARD.lock().unwrap();
         let path = env::temp_dir().join(name);
 
-        unsafe { env::set_var("BIOME_LOG_PATH", &path) };
-
         Self {
             path: Utf8PathBuf::from_path_buf(path).unwrap(),
             _guard: guard,
@@ -398,6 +328,5 @@ impl TestLogDir {
 impl Drop for TestLogDir {
     fn drop(&mut self) {
         fs::remove_dir_all(&self.path).ok();
-        unsafe { env::remove_var("BIOME_LOG_PATH") };
     }
 }

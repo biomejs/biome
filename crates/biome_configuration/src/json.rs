@@ -1,6 +1,8 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{BracketSpacing, Expand, IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{
+    BracketSpacing, Expand, IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline,
+};
 use biome_json_formatter::context::TrailingCommas;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -106,6 +108,20 @@ pub struct JsonFormatterConfiguration {
     #[bpaf(long("json-formatter-bracket-spacing"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
+
+    /// Whether to add a trailing newline at the end of the file.
+    ///
+    /// Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+    /// - <https://thoughtbot.com/blog/no-newline-at-end-of-file>
+    /// - <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+    /// - <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+    ///
+    /// Disable the option at your own risk.
+    ///
+    /// Defaults to true.
+    #[bpaf(long("json-formatter-trailing-newline"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl JsonFormatterConfiguration {

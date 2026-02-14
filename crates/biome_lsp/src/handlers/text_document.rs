@@ -39,7 +39,7 @@ pub(crate) async fn did_open(
 
             session.set_configuration_status(ConfigurationStatus::Loading);
             if !session.has_initialized() {
-                session.load_extension_settings().await;
+                session.load_extension_settings(None).await;
             }
 
             let status = if let Some(path) = session.get_settings_configuration_path() {
@@ -131,6 +131,7 @@ pub(crate) async fn did_open(
         content: FileContent::FromClient { content, version },
         document_file_source: Some(language_hint),
         persist_node_cache: true,
+        inline_config: session.inline_config(),
     })?;
 
     session.insert_document(url.clone(), doc);
@@ -188,6 +189,7 @@ pub(crate) async fn did_change(
         path,
         version,
         content: text,
+        inline_config: session.inline_config(),
     })?;
 
     if let Err(err) = session.update_diagnostics(url).await {
@@ -218,6 +220,7 @@ pub(crate) async fn did_save(
             path,
             content: text.clone(),
             version: doc.version,
+            inline_config: None,
         })?;
 
         session.insert_document(

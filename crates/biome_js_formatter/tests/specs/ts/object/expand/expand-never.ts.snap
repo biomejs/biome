@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/object/expand/expand-never.ts
 ---
+
 # Input
 
 ```ts
@@ -66,6 +67,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -106,6 +108,7 @@ const d: D = {
 type E = { name1: "value1"; name2: "value2" };
 
 const e: E = { name1: "value1", name2: "value2" };
+
 ```
 
 ## Output 1
@@ -126,6 +129,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Never
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -148,4 +152,5 @@ const d: D = { name1: "value1", name2: "value2" };
 type E = { name1: "value1"; name2: "value2" };
 
 const e: E = { name1: "value1", name2: "value2" };
+
 ```

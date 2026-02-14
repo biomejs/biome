@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/arrow/arrow_test_callback.js
 ---
+
 # Input
 
 ```js
@@ -35,6 +36,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -42,6 +44,7 @@ it("should have the default duration when using the onClose arguments", (done) =
 	expect(true);
 	done();
 });
+
 ```
 
 # Lines exceeding max width of 80 characters
@@ -67,6 +70,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -74,6 +78,7 @@ it("should have the default duration when using the onClose arguments", done => 
 	expect(true);
 	done();
 });
+
 ```
 
 # Lines exceeding max width of 80 characters

@@ -251,7 +251,7 @@ impl SummaryReporter {
             let coverage = if summary.coverage.is_nan() {
                 "\u{221E}".to_string()
             } else {
-                format!("{:.2}", summary.coverage)
+                format!("{:.2}%", summary.coverage)
             };
 
             let total = panicked + errored + passed;

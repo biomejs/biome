@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/expression/as_expression.ts
 ---
+
 # Input
 
 ```ts
@@ -34,9 +35,11 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
 let a: any;
 let b = a as string;
+
 ```

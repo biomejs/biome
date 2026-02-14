@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/object/trailing_commas_none/object_trailing_commas.ts
 ---
+
 # Input
 
 ```ts
@@ -53,6 +54,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -77,6 +79,7 @@ const obj = {
 		dsadsadasdasdasdasdasdasdasd,
 	) {},
 };
+
 ```
 
 ## Output 1
@@ -97,6 +100,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -121,4 +125,5 @@ const obj = {
 		dsadsadasdasdasdasdasdasdasd
 	) {}
 };
+
 ```

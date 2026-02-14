@@ -36,7 +36,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[RuleSource::EslintTypeScript("prefer-regexp-exec").same(), RuleSource::EslintRegexp("prefer-regexp-exec").same()],
-        domains: &[RuleDomain::Project],
+        domains: &[RuleDomain::Types],
     }
 }
 

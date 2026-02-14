@@ -1,0 +1,1185 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Bullet with proper indent (2 spaces = marker + 1):
+
+- item
+  continued
+
+Bullet with insufficient indent (1 space - NOT part of item):
+
+- item
+ not continued
+
+Ordered list multi-digit marker (10. = 3 chars, need 4 indent):
+
+10. item
+    continued
+
+Ordered list insufficient indent (3 spaces - NOT part of item):
+
+10. item
+   not continued
+
+Simple ordered marker (1. = 2 chars, need 3 indent):
+
+1. item
+   continued
+
+Simple ordered insufficient (2 spaces - NOT part of item):
+
+1. item
+  not continued
+
+Multiple spaces after marker (align to first non-space):
+
+-  item with extra space
+   continued at 3 spaces
+
+Plus marker:
+
++ item
+  continued
+
+Star marker:
+
+* item
+  continued
+
+Nested list continuation:
+
+- outer
+  - inner
+    inner continued
+  outer continued
+
+Mixed paragraphs and lists:
+
+Some text before.
+
+- list item
+  with continuation
+
+Some text after.
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..26 "Bullet with proper indent " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@26..27 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@27..45 "2 spaces = marker " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@45..46 "+" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@46..48 " 1" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@48..49 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@49..50 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@50..51 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@51..52 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@52..53 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@53..58 " item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@58..59 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@59..70 "continued" [Skipped(" "), Skipped(" ")] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@70..71 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@71..72 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@72..104 "Bullet with insufficient indent " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@104..105 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@105..113 "1 space " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@113..114 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@114..131 " NOT part of item" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@131..132 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@132..133 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@133..134 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@134..135 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@135..136 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@136..141 " item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@141..142 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@142..143 " " [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@143..156 "not continued" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@156..157 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@157..158 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@158..176 "Ordered list multi" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@176..177 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@177..190 "digit marker " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@190..191 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@191..219 "10. = 3 chars, need 4 indent" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@219..220 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@220..221 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@221..222 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@222..223 "\n" [] [],
+        },
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MD_ORDERED_LIST_MARKER@223..226 "10." [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@226..231 " item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@231..232 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@232..245 "continued" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@245..246 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@246..247 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@247..280 "Ordered list insufficient indent " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@280..281 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@281..290 "3 spaces " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@290..291 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@291..308 " NOT part of item" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@308..309 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@309..310 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@310..311 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@311..312 "\n" [] [],
+        },
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MD_ORDERED_LIST_MARKER@312..315 "10." [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@315..320 " item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@320..321 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@321..322 " " [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@322..323 " " [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@323..324 " " [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@324..337 "not continued" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@337..338 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@338..339 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@339..361 "Simple ordered marker " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@361..362 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@362..389 "1. = 2 chars, need 3 indent" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@389..390 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@390..391 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@391..392 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@392..393 "\n" [] [],
+        },
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MD_ORDERED_LIST_MARKER@393..395 "1." [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@395..400 " item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@400..401 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@401..413 "continued" [Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@413..414 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@414..415 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@415..443 "Simple ordered insufficient " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@443..444 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@444..453 "2 spaces " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@453..454 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@454..471 " NOT part of item" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@471..472 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@472..473 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@473..474 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@474..475 "\n" [] [],
+        },
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MD_ORDERED_LIST_MARKER@475..477 "1." [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@477..482 " item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@482..483 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@483..484 " " [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@484..485 " " [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@485..498 "not continued" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@498..499 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@499..500 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@500..529 "Multiple spaces after marker " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@529..530 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@530..548 "align to first non" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@548..549 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@549..554 "space" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@554..555 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@555..556 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@556..557 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@557..558 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@558..559 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@559..582 "  item with extra space" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@582..583 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@583..607 "continued at 3 spaces" [Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@607..608 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@608..609 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@609..621 "Plus marker:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@621..622 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@622..623 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: PLUS@623..624 "+" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@624..629 " item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@629..630 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@630..641 "continued" [Skipped(" "), Skipped(" ")] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@641..642 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@642..643 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@643..655 "Star marker:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@655..656 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@656..657 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: STAR@657..658 "*" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@658..663 " item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@663..664 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@664..675 "continued" [Skipped(" "), Skipped(" ")] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@675..676 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@676..677 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@677..702 "Nested list continuation:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@702..703 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@703..704 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@704..705 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@705..711 " outer" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@711..712 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdBulletListItem {
+                            md_bullet_list: MdBulletList [
+                                MdBullet {
+                                    bullet: MINUS@712..715 "-" [Skipped(" "), Skipped(" ")] [],
+                                    content: MdBlockList [
+                                        MdParagraph {
+                                            list: MdInlineItemList [
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@715..721 " inner" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@721..722 "\n" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@722..741 "inner continued" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@741..742 "\n" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@742..743 " " [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@743..744 " " [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@744..759 "outer continued" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@759..760 "\n" [] [],
+                                                },
+                                            ],
+                                            hard_line: missing (optional),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@760..761 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@761..788 "Mixed paragraphs and lists:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@788..789 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@789..790 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@790..807 "Some text before." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@807..808 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@808..809 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@809..810 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@810..820 " list item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@820..821 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@821..840 "with continuation" [Skipped(" "), Skipped(" ")] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@840..841 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@841..842 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@842..858 "Some text after." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@858..859 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@859..859 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..859
+  0: (empty)
+  1: MD_BLOCK_LIST@0..859
+    0: MD_PARAGRAPH@0..51
+      0: MD_INLINE_ITEM_LIST@0..51
+        0: MD_TEXTUAL@0..26
+          0: MD_TEXTUAL_LITERAL@0..26 "Bullet with proper indent " [] []
+        1: MD_TEXTUAL@26..27
+          0: MD_TEXTUAL_LITERAL@26..27 "(" [] []
+        2: MD_TEXTUAL@27..45
+          0: MD_TEXTUAL_LITERAL@27..45 "2 spaces = marker " [] []
+        3: MD_TEXTUAL@45..46
+          0: MD_TEXTUAL_LITERAL@45..46 "+" [] []
+        4: MD_TEXTUAL@46..48
+          0: MD_TEXTUAL_LITERAL@46..48 " 1" [] []
+        5: MD_TEXTUAL@48..49
+          0: MD_TEXTUAL_LITERAL@48..49 ")" [] []
+        6: MD_TEXTUAL@49..50
+          0: MD_TEXTUAL_LITERAL@49..50 ":" [] []
+        7: MD_TEXTUAL@50..51
+          0: MD_TEXTUAL_LITERAL@50..51 "\n" [] []
+      1: (empty)
+    1: MD_NEWLINE@51..52
+      0: NEWLINE@51..52 "\n" [] []
+    2: MD_BULLET_LIST_ITEM@52..71
+      0: MD_BULLET_LIST@52..71
+        0: MD_BULLET@52..71
+          0: MINUS@52..53 "-" [] []
+          1: MD_BLOCK_LIST@53..71
+            0: MD_PARAGRAPH@53..71
+              0: MD_INLINE_ITEM_LIST@53..71
+                0: MD_TEXTUAL@53..58
+                  0: MD_TEXTUAL_LITERAL@53..58 " item" [] []
+                1: MD_TEXTUAL@58..59
+                  0: MD_TEXTUAL_LITERAL@58..59 "\n" [] []
+                2: MD_TEXTUAL@59..70
+                  0: MD_TEXTUAL_LITERAL@59..70 "continued" [Skipped(" "), Skipped(" ")] []
+                3: MD_TEXTUAL@70..71
+                  0: MD_TEXTUAL_LITERAL@70..71 "\n" [] []
+              1: (empty)
+    3: MD_NEWLINE@71..72
+      0: NEWLINE@71..72 "\n" [] []
+    4: MD_PARAGRAPH@72..134
+      0: MD_INLINE_ITEM_LIST@72..134
+        0: MD_TEXTUAL@72..104
+          0: MD_TEXTUAL_LITERAL@72..104 "Bullet with insufficient indent " [] []
+        1: MD_TEXTUAL@104..105
+          0: MD_TEXTUAL_LITERAL@104..105 "(" [] []
+        2: MD_TEXTUAL@105..113
+          0: MD_TEXTUAL_LITERAL@105..113 "1 space " [] []
+        3: MD_TEXTUAL@113..114
+          0: MD_TEXTUAL_LITERAL@113..114 "-" [] []
+        4: MD_TEXTUAL@114..131
+          0: MD_TEXTUAL_LITERAL@114..131 " NOT part of item" [] []
+        5: MD_TEXTUAL@131..132
+          0: MD_TEXTUAL_LITERAL@131..132 ")" [] []
+        6: MD_TEXTUAL@132..133
+          0: MD_TEXTUAL_LITERAL@132..133 ":" [] []
+        7: MD_TEXTUAL@133..134
+          0: MD_TEXTUAL_LITERAL@133..134 "\n" [] []
+      1: (empty)
+    5: MD_NEWLINE@134..135
+      0: NEWLINE@134..135 "\n" [] []
+    6: MD_BULLET_LIST_ITEM@135..157
+      0: MD_BULLET_LIST@135..157
+        0: MD_BULLET@135..157
+          0: MINUS@135..136 "-" [] []
+          1: MD_BLOCK_LIST@136..157
+            0: MD_PARAGRAPH@136..157
+              0: MD_INLINE_ITEM_LIST@136..157
+                0: MD_TEXTUAL@136..141
+                  0: MD_TEXTUAL_LITERAL@136..141 " item" [] []
+                1: MD_TEXTUAL@141..142
+                  0: MD_TEXTUAL_LITERAL@141..142 "\n" [] []
+                2: MD_TEXTUAL@142..143
+                  0: MD_TEXTUAL_LITERAL@142..143 " " [] []
+                3: MD_TEXTUAL@143..156
+                  0: MD_TEXTUAL_LITERAL@143..156 "not continued" [] []
+                4: MD_TEXTUAL@156..157
+                  0: MD_TEXTUAL_LITERAL@156..157 "\n" [] []
+              1: (empty)
+    7: MD_NEWLINE@157..158
+      0: NEWLINE@157..158 "\n" [] []
+    8: MD_PARAGRAPH@158..222
+      0: MD_INLINE_ITEM_LIST@158..222
+        0: MD_TEXTUAL@158..176
+          0: MD_TEXTUAL_LITERAL@158..176 "Ordered list multi" [] []
+        1: MD_TEXTUAL@176..177
+          0: MD_TEXTUAL_LITERAL@176..177 "-" [] []
+        2: MD_TEXTUAL@177..190
+          0: MD_TEXTUAL_LITERAL@177..190 "digit marker " [] []
+        3: MD_TEXTUAL@190..191
+          0: MD_TEXTUAL_LITERAL@190..191 "(" [] []
+        4: MD_TEXTUAL@191..219
+          0: MD_TEXTUAL_LITERAL@191..219 "10. = 3 chars, need 4 indent" [] []
+        5: MD_TEXTUAL@219..220
+          0: MD_TEXTUAL_LITERAL@219..220 ")" [] []
+        6: MD_TEXTUAL@220..221
+          0: MD_TEXTUAL_LITERAL@220..221 ":" [] []
+        7: MD_TEXTUAL@221..222
+          0: MD_TEXTUAL_LITERAL@221..222 "\n" [] []
+      1: (empty)
+    9: MD_NEWLINE@222..223
+      0: NEWLINE@222..223 "\n" [] []
+    10: MD_ORDERED_LIST_ITEM@223..246
+      0: MD_BULLET_LIST@223..246
+        0: MD_BULLET@223..246
+          0: MD_ORDERED_LIST_MARKER@223..226 "10." [] []
+          1: MD_BLOCK_LIST@226..246
+            0: MD_PARAGRAPH@226..246
+              0: MD_INLINE_ITEM_LIST@226..246
+                0: MD_TEXTUAL@226..231
+                  0: MD_TEXTUAL_LITERAL@226..231 " item" [] []
+                1: MD_TEXTUAL@231..232
+                  0: MD_TEXTUAL_LITERAL@231..232 "\n" [] []
+                2: MD_TEXTUAL@232..245
+                  0: MD_TEXTUAL_LITERAL@232..245 "continued" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+                3: MD_TEXTUAL@245..246
+                  0: MD_TEXTUAL_LITERAL@245..246 "\n" [] []
+              1: (empty)
+    11: MD_NEWLINE@246..247
+      0: NEWLINE@246..247 "\n" [] []
+    12: MD_PARAGRAPH@247..311
+      0: MD_INLINE_ITEM_LIST@247..311
+        0: MD_TEXTUAL@247..280
+          0: MD_TEXTUAL_LITERAL@247..280 "Ordered list insufficient indent " [] []
+        1: MD_TEXTUAL@280..281
+          0: MD_TEXTUAL_LITERAL@280..281 "(" [] []
+        2: MD_TEXTUAL@281..290
+          0: MD_TEXTUAL_LITERAL@281..290 "3 spaces " [] []
+        3: MD_TEXTUAL@290..291
+          0: MD_TEXTUAL_LITERAL@290..291 "-" [] []
+        4: MD_TEXTUAL@291..308
+          0: MD_TEXTUAL_LITERAL@291..308 " NOT part of item" [] []
+        5: MD_TEXTUAL@308..309
+          0: MD_TEXTUAL_LITERAL@308..309 ")" [] []
+        6: MD_TEXTUAL@309..310
+          0: MD_TEXTUAL_LITERAL@309..310 ":" [] []
+        7: MD_TEXTUAL@310..311
+          0: MD_TEXTUAL_LITERAL@310..311 "\n" [] []
+      1: (empty)
+    13: MD_NEWLINE@311..312
+      0: NEWLINE@311..312 "\n" [] []
+    14: MD_ORDERED_LIST_ITEM@312..338
+      0: MD_BULLET_LIST@312..338
+        0: MD_BULLET@312..338
+          0: MD_ORDERED_LIST_MARKER@312..315 "10." [] []
+          1: MD_BLOCK_LIST@315..338
+            0: MD_PARAGRAPH@315..338
+              0: MD_INLINE_ITEM_LIST@315..338
+                0: MD_TEXTUAL@315..320
+                  0: MD_TEXTUAL_LITERAL@315..320 " item" [] []
+                1: MD_TEXTUAL@320..321
+                  0: MD_TEXTUAL_LITERAL@320..321 "\n" [] []
+                2: MD_TEXTUAL@321..322
+                  0: MD_TEXTUAL_LITERAL@321..322 " " [] []
+                3: MD_TEXTUAL@322..323
+                  0: MD_TEXTUAL_LITERAL@322..323 " " [] []
+                4: MD_TEXTUAL@323..324
+                  0: MD_TEXTUAL_LITERAL@323..324 " " [] []
+                5: MD_TEXTUAL@324..337
+                  0: MD_TEXTUAL_LITERAL@324..337 "not continued" [] []
+                6: MD_TEXTUAL@337..338
+                  0: MD_TEXTUAL_LITERAL@337..338 "\n" [] []
+              1: (empty)
+    15: MD_NEWLINE@338..339
+      0: NEWLINE@338..339 "\n" [] []
+    16: MD_PARAGRAPH@339..392
+      0: MD_INLINE_ITEM_LIST@339..392
+        0: MD_TEXTUAL@339..361
+          0: MD_TEXTUAL_LITERAL@339..361 "Simple ordered marker " [] []
+        1: MD_TEXTUAL@361..362
+          0: MD_TEXTUAL_LITERAL@361..362 "(" [] []
+        2: MD_TEXTUAL@362..389
+          0: MD_TEXTUAL_LITERAL@362..389 "1. = 2 chars, need 3 indent" [] []
+        3: MD_TEXTUAL@389..390
+          0: MD_TEXTUAL_LITERAL@389..390 ")" [] []
+        4: MD_TEXTUAL@390..391
+          0: MD_TEXTUAL_LITERAL@390..391 ":" [] []
+        5: MD_TEXTUAL@391..392
+          0: MD_TEXTUAL_LITERAL@391..392 "\n" [] []
+      1: (empty)
+    17: MD_NEWLINE@392..393
+      0: NEWLINE@392..393 "\n" [] []
+    18: MD_ORDERED_LIST_ITEM@393..414
+      0: MD_BULLET_LIST@393..414
+        0: MD_BULLET@393..414
+          0: MD_ORDERED_LIST_MARKER@393..395 "1." [] []
+          1: MD_BLOCK_LIST@395..414
+            0: MD_PARAGRAPH@395..414
+              0: MD_INLINE_ITEM_LIST@395..414
+                0: MD_TEXTUAL@395..400
+                  0: MD_TEXTUAL_LITERAL@395..400 " item" [] []
+                1: MD_TEXTUAL@400..401
+                  0: MD_TEXTUAL_LITERAL@400..401 "\n" [] []
+                2: MD_TEXTUAL@401..413
+                  0: MD_TEXTUAL_LITERAL@401..413 "continued" [Skipped(" "), Skipped(" "), Skipped(" ")] []
+                3: MD_TEXTUAL@413..414
+                  0: MD_TEXTUAL_LITERAL@413..414 "\n" [] []
+              1: (empty)
+    19: MD_NEWLINE@414..415
+      0: NEWLINE@414..415 "\n" [] []
+    20: MD_PARAGRAPH@415..474
+      0: MD_INLINE_ITEM_LIST@415..474
+        0: MD_TEXTUAL@415..443
+          0: MD_TEXTUAL_LITERAL@415..443 "Simple ordered insufficient " [] []
+        1: MD_TEXTUAL@443..444
+          0: MD_TEXTUAL_LITERAL@443..444 "(" [] []
+        2: MD_TEXTUAL@444..453
+          0: MD_TEXTUAL_LITERAL@444..453 "2 spaces " [] []
+        3: MD_TEXTUAL@453..454
+          0: MD_TEXTUAL_LITERAL@453..454 "-" [] []
+        4: MD_TEXTUAL@454..471
+          0: MD_TEXTUAL_LITERAL@454..471 " NOT part of item" [] []
+        5: MD_TEXTUAL@471..472
+          0: MD_TEXTUAL_LITERAL@471..472 ")" [] []
+        6: MD_TEXTUAL@472..473
+          0: MD_TEXTUAL_LITERAL@472..473 ":" [] []
+        7: MD_TEXTUAL@473..474
+          0: MD_TEXTUAL_LITERAL@473..474 "\n" [] []
+      1: (empty)
+    21: MD_NEWLINE@474..475
+      0: NEWLINE@474..475 "\n" [] []
+    22: MD_ORDERED_LIST_ITEM@475..499
+      0: MD_BULLET_LIST@475..499
+        0: MD_BULLET@475..499
+          0: MD_ORDERED_LIST_MARKER@475..477 "1." [] []
+          1: MD_BLOCK_LIST@477..499
+            0: MD_PARAGRAPH@477..499
+              0: MD_INLINE_ITEM_LIST@477..499
+                0: MD_TEXTUAL@477..482
+                  0: MD_TEXTUAL_LITERAL@477..482 " item" [] []
+                1: MD_TEXTUAL@482..483
+                  0: MD_TEXTUAL_LITERAL@482..483 "\n" [] []
+                2: MD_TEXTUAL@483..484
+                  0: MD_TEXTUAL_LITERAL@483..484 " " [] []
+                3: MD_TEXTUAL@484..485
+                  0: MD_TEXTUAL_LITERAL@484..485 " " [] []
+                4: MD_TEXTUAL@485..498
+                  0: MD_TEXTUAL_LITERAL@485..498 "not continued" [] []
+                5: MD_TEXTUAL@498..499
+                  0: MD_TEXTUAL_LITERAL@498..499 "\n" [] []
+              1: (empty)
+    23: MD_NEWLINE@499..500
+      0: NEWLINE@499..500 "\n" [] []
+    24: MD_PARAGRAPH@500..557
+      0: MD_INLINE_ITEM_LIST@500..557
+        0: MD_TEXTUAL@500..529
+          0: MD_TEXTUAL_LITERAL@500..529 "Multiple spaces after marker " [] []
+        1: MD_TEXTUAL@529..530
+          0: MD_TEXTUAL_LITERAL@529..530 "(" [] []
+        2: MD_TEXTUAL@530..548
+          0: MD_TEXTUAL_LITERAL@530..548 "align to first non" [] []
+        3: MD_TEXTUAL@548..549
+          0: MD_TEXTUAL_LITERAL@548..549 "-" [] []
+        4: MD_TEXTUAL@549..554
+          0: MD_TEXTUAL_LITERAL@549..554 "space" [] []
+        5: MD_TEXTUAL@554..555
+          0: MD_TEXTUAL_LITERAL@554..555 ")" [] []
+        6: MD_TEXTUAL@555..556
+          0: MD_TEXTUAL_LITERAL@555..556 ":" [] []
+        7: MD_TEXTUAL@556..557
+          0: MD_TEXTUAL_LITERAL@556..557 "\n" [] []
+      1: (empty)
+    25: MD_NEWLINE@557..558
+      0: NEWLINE@557..558 "\n" [] []
+    26: MD_BULLET_LIST_ITEM@558..608
+      0: MD_BULLET_LIST@558..608
+        0: MD_BULLET@558..608
+          0: MINUS@558..559 "-" [] []
+          1: MD_BLOCK_LIST@559..608
+            0: MD_PARAGRAPH@559..608
+              0: MD_INLINE_ITEM_LIST@559..608
+                0: MD_TEXTUAL@559..582
+                  0: MD_TEXTUAL_LITERAL@559..582 "  item with extra space" [] []
+                1: MD_TEXTUAL@582..583
+                  0: MD_TEXTUAL_LITERAL@582..583 "\n" [] []
+                2: MD_TEXTUAL@583..607
+                  0: MD_TEXTUAL_LITERAL@583..607 "continued at 3 spaces" [Skipped(" "), Skipped(" "), Skipped(" ")] []
+                3: MD_TEXTUAL@607..608
+                  0: MD_TEXTUAL_LITERAL@607..608 "\n" [] []
+              1: (empty)
+    27: MD_NEWLINE@608..609
+      0: NEWLINE@608..609 "\n" [] []
+    28: MD_PARAGRAPH@609..622
+      0: MD_INLINE_ITEM_LIST@609..622
+        0: MD_TEXTUAL@609..621
+          0: MD_TEXTUAL_LITERAL@609..621 "Plus marker:" [] []
+        1: MD_TEXTUAL@621..622
+          0: MD_TEXTUAL_LITERAL@621..622 "\n" [] []
+      1: (empty)
+    29: MD_NEWLINE@622..623
+      0: NEWLINE@622..623 "\n" [] []
+    30: MD_BULLET_LIST_ITEM@623..642
+      0: MD_BULLET_LIST@623..642
+        0: MD_BULLET@623..642
+          0: PLUS@623..624 "+" [] []
+          1: MD_BLOCK_LIST@624..642
+            0: MD_PARAGRAPH@624..642
+              0: MD_INLINE_ITEM_LIST@624..642
+                0: MD_TEXTUAL@624..629
+                  0: MD_TEXTUAL_LITERAL@624..629 " item" [] []
+                1: MD_TEXTUAL@629..630
+                  0: MD_TEXTUAL_LITERAL@629..630 "\n" [] []
+                2: MD_TEXTUAL@630..641
+                  0: MD_TEXTUAL_LITERAL@630..641 "continued" [Skipped(" "), Skipped(" ")] []
+                3: MD_TEXTUAL@641..642
+                  0: MD_TEXTUAL_LITERAL@641..642 "\n" [] []
+              1: (empty)
+    31: MD_NEWLINE@642..643
+      0: NEWLINE@642..643 "\n" [] []
+    32: MD_PARAGRAPH@643..656
+      0: MD_INLINE_ITEM_LIST@643..656
+        0: MD_TEXTUAL@643..655
+          0: MD_TEXTUAL_LITERAL@643..655 "Star marker:" [] []
+        1: MD_TEXTUAL@655..656
+          0: MD_TEXTUAL_LITERAL@655..656 "\n" [] []
+      1: (empty)
+    33: MD_NEWLINE@656..657
+      0: NEWLINE@656..657 "\n" [] []
+    34: MD_BULLET_LIST_ITEM@657..676
+      0: MD_BULLET_LIST@657..676
+        0: MD_BULLET@657..676
+          0: STAR@657..658 "*" [] []
+          1: MD_BLOCK_LIST@658..676
+            0: MD_PARAGRAPH@658..676
+              0: MD_INLINE_ITEM_LIST@658..676
+                0: MD_TEXTUAL@658..663
+                  0: MD_TEXTUAL_LITERAL@658..663 " item" [] []
+                1: MD_TEXTUAL@663..664
+                  0: MD_TEXTUAL_LITERAL@663..664 "\n" [] []
+                2: MD_TEXTUAL@664..675
+                  0: MD_TEXTUAL_LITERAL@664..675 "continued" [Skipped(" "), Skipped(" ")] []
+                3: MD_TEXTUAL@675..676
+                  0: MD_TEXTUAL_LITERAL@675..676 "\n" [] []
+              1: (empty)
+    35: MD_NEWLINE@676..677
+      0: NEWLINE@676..677 "\n" [] []
+    36: MD_PARAGRAPH@677..703
+      0: MD_INLINE_ITEM_LIST@677..703
+        0: MD_TEXTUAL@677..702
+          0: MD_TEXTUAL_LITERAL@677..702 "Nested list continuation:" [] []
+        1: MD_TEXTUAL@702..703
+          0: MD_TEXTUAL_LITERAL@702..703 "\n" [] []
+      1: (empty)
+    37: MD_NEWLINE@703..704
+      0: NEWLINE@703..704 "\n" [] []
+    38: MD_BULLET_LIST_ITEM@704..760
+      0: MD_BULLET_LIST@704..760
+        0: MD_BULLET@704..760
+          0: MINUS@704..705 "-" [] []
+          1: MD_BLOCK_LIST@705..760
+            0: MD_PARAGRAPH@705..712
+              0: MD_INLINE_ITEM_LIST@705..712
+                0: MD_TEXTUAL@705..711
+                  0: MD_TEXTUAL_LITERAL@705..711 " outer" [] []
+                1: MD_TEXTUAL@711..712
+                  0: MD_TEXTUAL_LITERAL@711..712 "\n" [] []
+              1: (empty)
+            1: MD_BULLET_LIST_ITEM@712..760
+              0: MD_BULLET_LIST@712..760
+                0: MD_BULLET@712..760
+                  0: MINUS@712..715 "-" [Skipped(" "), Skipped(" ")] []
+                  1: MD_BLOCK_LIST@715..760
+                    0: MD_PARAGRAPH@715..760
+                      0: MD_INLINE_ITEM_LIST@715..760
+                        0: MD_TEXTUAL@715..721
+                          0: MD_TEXTUAL_LITERAL@715..721 " inner" [] []
+                        1: MD_TEXTUAL@721..722
+                          0: MD_TEXTUAL_LITERAL@721..722 "\n" [] []
+                        2: MD_TEXTUAL@722..741
+                          0: MD_TEXTUAL_LITERAL@722..741 "inner continued" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+                        3: MD_TEXTUAL@741..742
+                          0: MD_TEXTUAL_LITERAL@741..742 "\n" [] []
+                        4: MD_TEXTUAL@742..743
+                          0: MD_TEXTUAL_LITERAL@742..743 " " [] []
+                        5: MD_TEXTUAL@743..744
+                          0: MD_TEXTUAL_LITERAL@743..744 " " [] []
+                        6: MD_TEXTUAL@744..759
+                          0: MD_TEXTUAL_LITERAL@744..759 "outer continued" [] []
+                        7: MD_TEXTUAL@759..760
+                          0: MD_TEXTUAL_LITERAL@759..760 "\n" [] []
+                      1: (empty)
+    39: MD_NEWLINE@760..761
+      0: NEWLINE@760..761 "\n" [] []
+    40: MD_PARAGRAPH@761..789
+      0: MD_INLINE_ITEM_LIST@761..789
+        0: MD_TEXTUAL@761..788
+          0: MD_TEXTUAL_LITERAL@761..788 "Mixed paragraphs and lists:" [] []
+        1: MD_TEXTUAL@788..789
+          0: MD_TEXTUAL_LITERAL@788..789 "\n" [] []
+      1: (empty)
+    41: MD_NEWLINE@789..790
+      0: NEWLINE@789..790 "\n" [] []
+    42: MD_PARAGRAPH@790..808
+      0: MD_INLINE_ITEM_LIST@790..808
+        0: MD_TEXTUAL@790..807
+          0: MD_TEXTUAL_LITERAL@790..807 "Some text before." [] []
+        1: MD_TEXTUAL@807..808
+          0: MD_TEXTUAL_LITERAL@807..808 "\n" [] []
+      1: (empty)
+    43: MD_NEWLINE@808..809
+      0: NEWLINE@808..809 "\n" [] []
+    44: MD_BULLET_LIST_ITEM@809..841
+      0: MD_BULLET_LIST@809..841
+        0: MD_BULLET@809..841
+          0: MINUS@809..810 "-" [] []
+          1: MD_BLOCK_LIST@810..841
+            0: MD_PARAGRAPH@810..841
+              0: MD_INLINE_ITEM_LIST@810..841
+                0: MD_TEXTUAL@810..820
+                  0: MD_TEXTUAL_LITERAL@810..820 " list item" [] []
+                1: MD_TEXTUAL@820..821
+                  0: MD_TEXTUAL_LITERAL@820..821 "\n" [] []
+                2: MD_TEXTUAL@821..840
+                  0: MD_TEXTUAL_LITERAL@821..840 "with continuation" [Skipped(" "), Skipped(" ")] []
+                3: MD_TEXTUAL@840..841
+                  0: MD_TEXTUAL_LITERAL@840..841 "\n" [] []
+              1: (empty)
+    45: MD_NEWLINE@841..842
+      0: NEWLINE@841..842 "\n" [] []
+    46: MD_PARAGRAPH@842..859
+      0: MD_INLINE_ITEM_LIST@842..859
+        0: MD_TEXTUAL@842..858
+          0: MD_TEXTUAL_LITERAL@842..858 "Some text after." [] []
+        1: MD_TEXTUAL@858..859
+          0: MD_TEXTUAL_LITERAL@858..859 "\n" [] []
+      1: (empty)
+  2: EOF@859..859 "" [] []
+
+```

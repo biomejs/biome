@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -32,9 +33,9 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@6..15 " classes " [] [],
                 },
                 item: SvelteEachAsKeyedItem {
-                    as_token: AS_KW@15..17 "as" [] [],
-                    name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@17..23 " class" [] [],
+                    as_token: AS_KW@15..18 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@18..23 "class" [] [],
                     },
                     index: missing (optional),
                     key: missing (optional),
@@ -93,9 +94,9 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@68..81 " async_tasks " [] [],
                 },
                 item: SvelteEachAsKeyedItem {
-                    as_token: AS_KW@81..83 "as" [] [],
-                    name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@83..88 " task" [] [],
+                    as_token: AS_KW@81..84 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@84..88 "task" [] [],
                     },
                     index: missing (optional),
                     key: missing (optional),
@@ -158,9 +159,9 @@ HtmlRoot {
         2: HTML_TEXT_EXPRESSION@6..15
           0: HTML_LITERAL@6..15 " classes " [] []
         3: SVELTE_EACH_AS_KEYED_ITEM@15..23
-          0: AS_KW@15..17 "as" [] []
-          1: HTML_TEXT_EXPRESSION@17..23
-            0: HTML_LITERAL@17..23 " class" [] []
+          0: AS_KW@15..18 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@18..23
+            0: IDENT@18..23 "class" [] []
           2: (empty)
           3: (empty)
         4: R_CURLY@23..24 "}" [] []
@@ -201,9 +202,9 @@ HtmlRoot {
         2: HTML_TEXT_EXPRESSION@68..81
           0: HTML_LITERAL@68..81 " async_tasks " [] []
         3: SVELTE_EACH_AS_KEYED_ITEM@81..88
-          0: AS_KW@81..83 "as" [] []
-          1: HTML_TEXT_EXPRESSION@83..88
-            0: HTML_LITERAL@83..88 " task" [] []
+          0: AS_KW@81..84 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@84..88
+            0: IDENT@84..88 "task" [] []
           2: (empty)
           3: (empty)
         4: R_CURLY@88..89 "}" [] []

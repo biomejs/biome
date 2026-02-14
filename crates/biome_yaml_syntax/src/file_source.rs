@@ -60,7 +60,6 @@ impl YamlFileSource {
     ///
     /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
-    #[expect(dead_code)]
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "yaml" => Ok(Self::yaml()),

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/type/import_type_with_resolution_mode.ts
 ---
+
 # Input
 
 ```ts
@@ -35,6 +36,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -45,4 +47,5 @@ export type TypeFromRequire = import("pkg", { with: {
 export type TypeFromImport = import("pkg", { with: {
 	"resolution-mode": "import",
 }}).TypeFromImport;
+
 ```

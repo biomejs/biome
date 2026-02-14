@@ -23,7 +23,7 @@ impl Rule for UseNamingConventionEnumMemberCase {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let name = node.name().ok()?;
-        let text = name.inner_string_text().ok()?;
+        let text = name.inner_string_text()?.ok()?;
         if text.text() == "enumMemberCase" {
             let value = node.value().ok()?;
             let value = value.as_json_string_value()?.inner_string_text().ok()?;
@@ -52,12 +52,12 @@ impl Rule for UseNamingConventionEnumMemberCase {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<MigrationAction> {
         let selector_kind = make::json_member(
-            make::json_member_name(make::json_string_literal("kind")),
+            make::json_member_name(make::json_string_literal("kind")).into(),
             make::token(T![:]),
             make::json_string_value(make::json_string_literal("enumMember")).into(),
         );
         let selector = make::json_member(
-            make::json_member_name(make::json_string_literal("selector")),
+            make::json_member_name(make::json_string_literal("selector")).into(),
             make::token(T![:]),
             make::json_object_value(
                 make::token(T!['{']),
@@ -67,7 +67,7 @@ impl Rule for UseNamingConventionEnumMemberCase {
             .into(),
         );
         let formats = make::json_member(
-            make::json_member_name(make::json_string_literal("formats")),
+            make::json_member_name(make::json_string_literal("formats")).into(),
             make::token(T![:]),
             make::json_array_value(
                 make::token(T!['[']),
@@ -89,7 +89,7 @@ impl Rule for UseNamingConventionEnumMemberCase {
         let parent = node.parent::<JsonMemberList>()?;
         let conventions = parent.into_iter().find_map(|member| {
             let member = member.ok()?;
-            let member_name = member.name().ok()?.inner_string_text().ok()?;
+            let member_name = member.name().ok()?.inner_string_text()?.ok()?;
             if member_name.text() == "conventions"
                 && let Ok(AnyJsonValue::JsonArrayValue(conventions)) = member.value()
             {
@@ -132,7 +132,7 @@ impl Rule for UseNamingConventionEnumMemberCase {
                 make::token(T![']']),
             );
             let conventions = make::json_member(
-                make::json_member_name(make::json_string_literal("conventions")),
+                make::json_member_name(make::json_string_literal("conventions")).into(),
                 make::token(T![:]),
                 conventions_array.into(),
             );

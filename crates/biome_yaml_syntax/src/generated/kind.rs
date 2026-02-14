@@ -163,7 +163,7 @@ impl YamlSyntaxKind {
             DOC_END => "...",
             BACKTICK => "`",
             AT => "@",
-            EOF => "EOF",
+            EOF => "",
             FLOW_START => "start of a flow node",
             FLOW_END => "end of a flow node",
             MAPPING_START => "start of a block mapping",

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: issue4248.tsx
 ---
 # Input
@@ -18,5 +17,3 @@ const ExampleComponent: React.FC<ExampleProps> = ({ getData }) => {
 };
 
 ```
-
-

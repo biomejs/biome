@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```vue
@@ -32,7 +33,7 @@ HtmlRoot {
             children: HtmlElementList [
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] [],
-                    name: HtmlTagName {
+                    name: HtmlComponentName {
                         value_token: HTML_LITERAL@13..17 "Foo" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
@@ -90,7 +91,7 @@ HtmlRoot {
       1: HTML_ELEMENT_LIST@10..32
         0: HTML_SELF_CLOSING_ELEMENT@10..32
           0: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] []
-          1: HTML_TAG_NAME@13..17
+          1: HTML_COMPONENT_NAME@13..17
             0: HTML_LITERAL@13..17 "Foo" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@17..30
             0: VUE_V_BIND_SHORTHAND_DIRECTIVE@17..30

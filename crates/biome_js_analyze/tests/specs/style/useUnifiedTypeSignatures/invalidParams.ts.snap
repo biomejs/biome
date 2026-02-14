@@ -1,0 +1,103 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidParams.ts
+---
+# Input
+```ts
+// different name from implementation, but same between overloads
+function f(foo: string): string;
+function f(foo: number): string;
+function f(param: any): string {return ""}
+
+// Destructuring doesn't count since they don't have names
+function f2(foo: string, {bar}: Record<"bar", string>): string;
+function f2(foo: string, {barrer}: Record<"bar" | "barrer", string>): string;
+function f2(whatever: any): string {return "foooarafv"}
+
+// neither does array spread
+function g(foo: string, [a, b]: [number, string]): string;
+function g(foo: string, [a, b]: [string, string]): string;
+function g(whatever: any): any {}
+
+```
+
+# Diagnostics
+```
+invalidParams.ts:2:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Multiple similar overload signatures are hard to read and maintain.
+  
+    1 │ // different name from implementation, but same between overloads
+  > 2 │ function f(foo: string): string;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ function f(foo: number): string;
+    4 │ function f(param: any): string {return ""}
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+     1    │ - //·different·name·from·implementation,·but·same·between·overloads
+     2    │ - function·f(foo:·string):·string;
+     3    │ - function·f(foo:·number):·string;
+        1 │ + //·different·name·from·implementation,·but·same·between·overloads
+        2 │ + function·f(foo:·number·|·string):·string;
+     4  3 │   function f(param: any): string {return ""}
+     5  4 │   
+  
+
+```
+
+```
+invalidParams.ts:7:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Multiple similar overload signatures are hard to read and maintain.
+  
+    6 │ // Destructuring doesn't count since they don't have names
+  > 7 │ function f2(foo: string, {bar}: Record<"bar", string>): string;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ function f2(foo: string, {barrer}: Record<"bar" | "barrer", string>): string;
+    9 │ function f2(whatever: any): string {return "foooarafv"}
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+     3  3 │   function f(foo: number): string;
+     4  4 │   function f(param: any): string {return ""}
+     5    │ - 
+     6    │ - //·Destructuring·doesn't·count·since·they·don't·have·names
+     7    │ - function·f2(foo:·string,·{bar}:·Record<"bar",·string>):·string;
+     8    │ - function·f2(foo:·string,·{barrer}:·Record<"bar"·|·"barrer",·string>):·string;
+        5 │ + 
+        6 │ + //·Destructuring·doesn't·count·since·they·don't·have·names
+        7 │ + function·f2(foo:·string,·{barrer}:·Record<"bar"·|·"barrer",·string>·|·Record<"bar",·string>):·string;
+     9  8 │   function f2(whatever: any): string {return "foooarafv"}
+    10  9 │   
+  
+
+```
+
+```
+invalidParams.ts:12:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Multiple similar overload signatures are hard to read and maintain.
+  
+    11 │ // neither does array spread
+  > 12 │ function g(foo: string, [a, b]: [number, string]): string;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ function g(foo: string, [a, b]: [string, string]): string;
+    14 │ function g(whatever: any): any {}
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+     8  8 │   function f2(foo: string, {barrer}: Record<"bar" | "barrer", string>): string;
+     9  9 │   function f2(whatever: any): string {return "foooarafv"}
+    10    │ - 
+    11    │ - //·neither·does·array·spread
+    12    │ - function·g(foo:·string,·[a,·b]:·[number,·string]):·string;
+    13    │ - function·g(foo:·string,·[a,·b]:·[string,·string]):·string;
+       10 │ + 
+       11 │ + //·neither·does·array·spread
+       12 │ + function·g(foo:·string,·[a,·b]:·[string,·string]·|·[number,·string]):·string;
+    14 13 │   function g(whatever: any): any {}
+    15 14 │   
+  
+
+```

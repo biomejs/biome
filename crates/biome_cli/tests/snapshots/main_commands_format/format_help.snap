@@ -31,6 +31,15 @@ Generic options applied to all files
                               list. When set to `never`, these literals are formatted on a single
                               line if it fits in the line. When formatting `package.json`, Biome
                               will use `always` unless configured otherwise. Defaults to "auto".
+        --trailing-newline=<true|false>  Whether to add a trailing newline at the end of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
         --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
                               Configuration in `biome.json` will override `.editorconfig`
                               configuration.
@@ -78,11 +87,111 @@ Formatting options specific to the JavaScript files
         --javascript-formatter-operator-linebreak=<before|after>  When breaking binary expressions
                               into multiple lines, whether to break them before or after the binary
                               operator. Defaults to "after".
+        --javascript-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at
+                              the end of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
 
 Options that changes how the JSON parser behaves
         --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
         --json-parse-allow-trailing-commas=<true|false>  Allow parsing trailing commas in `.json`
                               files
+
+Options that changes how the CSS parser behaves
+        --css-parse-css-modules=<true|false>  Enables parsing of CSS Modules specific features.
+                              Enable this feature only when your files don't end in `.module.css`.
+        --css-parse-tailwind-directives=<true|false>  Enables parsing of Tailwind CSS 4.0 directives
+                              and functions.
+
+Options that changes how the GraphQL formatter behaves
+        --graphql-formatter-enabled=<true|false>  Control the formatter for GraphQL files.
+        --graphql-formatter-indent-style=<tab|space>  The indent style applied to GraphQL files.
+        --graphql-formatter-indent-width=NUMBER  The size of the indentation applied to GraphQL
+                              files. Default to 2.
+        --graphql-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to
+                              GraphQL files. `auto` uses CRLF on Windows and LF on other platforms.
+        --graphql-formatter-line-width=NUMBER  What's the max width of a line applied to GraphQL
+                              files. Defaults to 80.
+        --graphql-formatter-quote-style=<double|single>  The type of quotes used in GraphQL code.
+                              Defaults to double.
+        --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
+                              Defaults to true.
+        --graphql-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the
+                              end of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
+
+Options that changes how the CSS formatter behaves
+        --css-formatter-enabled=<true|false>  Control the formatter for CSS (and its super
+                              languages) files.
+        --css-formatter-indent-style=<tab|space>  The indent style applied to CSS (and its super
+                              languages) files.
+        --css-formatter-indent-width=NUMBER  The size of the indentation applied to CSS (and its
+                              super languages) files. Default to 2.
+        --css-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to CSS (and
+                              its super languages) files. `auto` uses CRLF on Windows and LF on
+                              other platforms.
+        --css-formatter-line-width=NUMBER  What's the max width of a line applied to CSS (and its
+                              super languages) files. Defaults to 80.
+        --css-formatter-quote-style=<double|single>  The type of quotes used in CSS code. Defaults
+                              to double.
+        --css-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
+
+Options that changes how the HTML formatter behaves
+        --html-formatter-enabled=<true|false>  Control the formatter for HTML (and its super
+                              languages) files.
+        --html-formatter-indent-style=<tab|space>  The indent style applied to HTML (and its super
+                              languages) files.
+        --html-formatter-indent-width=NUMBER  The size of the indentation applied to HTML (and its
+                              super languages) files. Default to 2.
+        --html-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to HTML (and
+                              its super languages) files. `auto` uses CRLF on Windows and LF on
+                              other platforms.
+        --html-formatter-line-width=NUMBER  What's the max width of a line applied to HTML (and its
+                              super languages) files. Defaults to 80.
+        --html-formatter-attribute-position=<multiline|auto>  The attribute position style in HTML
+                              elements. Defaults to auto.
+        --html-formatter-bracket-same-line=<true|false>  Whether to hug the closing bracket of
+                              multiline HTML tags to the end of the last line, rather than being
+                              alone on the following line. Defaults to false.
+        --html-formatter-whitespace-sensitivity=<css|strict|ignore>  Whether to account for
+                              whitespace sensitivity when formatting HTML (and its super languages).
+                              Defaults to "css".
+        --html-formatter-indent-script-and-style=<true|false>  Whether to indent the `<script>` and
+                              `<style>` tags for HTML (and its super languages). Defaults to false.
+        --html-formatter-self-close-void-elements=<always|never>  Whether void elements should be
+                              self-closed. Defaults to never.
+        --html-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -125,21 +234,36 @@ Global options applied to all commands
                               processed during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit
                               warnings.
-        --reporter=<json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson>  Allows to
-                              change how diagnostics and summary are reported.
-        --log-file=ARG        Optional path to redirect log messages to.
-                              If omitted, logs are printed to stdout.
-        --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
-                              verbose to the least verbose: debug, info, warn, error.
-                              The value `none` won't show any logging.
-                              [default: none]
-        --log-kind=<pretty|compact|json>  How the log should look like.
-                              [default: pretty]
+  [--reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif>] [
+  --reporter-file=PATH]
+        --reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif>
+        --reporter-file=PATH
+
         --diagnostic-level=<info|warn|error>  The level of diagnostics to show. In order, from the
                               lowest to the most important: info, warn, error. Passing
                               `--diagnostic-level=error` will cause Biome to print only diagnostics
                               that contain only errors.
                               [default: info]
+
+Options to control logging (CLI and Daemon)
+        --log-file=STRING     Optional path/file to redirect log messages to. This option is
+                              applicable only to the CLI.
+                              If omitted, logs are printed to stdout.
+                              [env:BIOME_LOG_FILE: N/A]
+        --log-prefix-name=STRING  [env:BIOME_LOG_PREFIX_NAME: N/A]
+                              [default: server.log]
+        --log-path=PATH       Allows changing the folder where logs are stored. This option is
+                              applicable only to the daemon.
+                              [env:BIOME_LOG_PATH: N/A]
+                              [default: <BIOME_DIR>/biome-logs]
+        --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
+                              verbose to the least verbose: debug, info, warn, error.
+                              The value `none` won't show any logging.
+                              [env:BIOME_LOG_LEVEL: N/A]
+                              [default: none]
+        --log-kind=<pretty|compact|json>  What the log should look like.
+                              [env:BIOME_LOG_KIND: N/A]
+                              [default: pretty]
 
 Available positional items:
     PATH                      Single file, single path or list of paths.
@@ -169,6 +293,16 @@ Available options:
                               Defaults to "auto".
         --json-formatter-bracket-spacing=<true|false>  Whether to insert spaces around brackets in
                               object literals. Defaults to true.
+        --json-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
+                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              -
+                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              Disable the option at your own risk.
+                              Defaults to true.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension

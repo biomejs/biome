@@ -1,0 +1,601 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Code spans block emphasis: `*not emphasis*`
+
+Escaped asterisks: \*not emphasis\*
+
+HTML with asterisks: <span>*between tags*</span>
+
+HTML attribute: <span title="*not emphasis*">attr</span>
+
+Autolink: <https://example.com/*not-emphasis*>
+
+Link text: [*emphasis*](https://example.com)
+
+Reference link text: [*emphasis*][label]
+
+Image alt: ![*emphasis*][label]
+
+[label]: https://example.com
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..27 "Code spans block emphasis: " [] [],
+                },
+                MdInlineCode {
+                    l_tick_token: BACKTICK@27..28 "`" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@28..29 "*" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@29..41 "not emphasis" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@41..42 "*" [] [],
+                        },
+                    ],
+                    r_tick_token: BACKTICK@42..43 "`" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@43..44 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@44..45 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@45..64 "Escaped asterisks: " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@64..66 "\\*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@66..78 "not emphasis" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@78..80 "\\*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@80..81 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@81..82 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@82..103 "HTML with asterisks: " [] [],
+                },
+                MdInlineHtml {
+                    value: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@103..104 "<" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@104..108 "span" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@108..109 ">" [] [],
+                        },
+                    ],
+                },
+                MdInlineItalic {
+                    l_fence: STAR@109..110 "*" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@110..122 "between tags" [] [],
+                        },
+                    ],
+                    r_fence: STAR@122..123 "*" [] [],
+                },
+                MdInlineHtml {
+                    value: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@123..124 "<" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@124..129 "/span" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@129..130 ">" [] [],
+                        },
+                    ],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@130..131 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@131..132 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@132..148 "HTML attribute: " [] [],
+                },
+                MdInlineHtml {
+                    value: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@148..149 "<" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@149..161 "span title=\"" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@161..162 "*" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@162..174 "not emphasis" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@174..175 "*" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@175..176 "\"" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@176..177 ">" [] [],
+                        },
+                    ],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@177..181 "attr" [] [],
+                },
+                MdInlineHtml {
+                    value: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@181..182 "<" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@182..187 "/span" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@187..188 ">" [] [],
+                        },
+                    ],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@188..189 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@189..190 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@190..200 "Autolink: " [] [],
+                },
+                MdAutolink {
+                    l_angle_token: L_ANGLE@200..201 "<" [] [],
+                    value: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@201..221 "https://example.com/" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@221..222 "*" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@222..225 "not" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@225..226 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@226..234 "emphasis" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@234..235 "*" [] [],
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@235..236 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@236..237 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@237..238 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@238..249 "Link text: " [] [],
+                },
+                MdInlineLink {
+                    l_brack_token: L_BRACK@249..250 "[" [] [],
+                    text: MdInlineItemList [
+                        MdInlineItalic {
+                            l_fence: STAR@250..251 "*" [] [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@251..259 "emphasis" [] [],
+                                },
+                            ],
+                            r_fence: STAR@259..260 "*" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@260..261 "]" [] [],
+                    l_paren_token: L_PAREN@261..262 "(" [] [],
+                    destination: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@262..281 "https://example.com" [] [],
+                        },
+                    ],
+                    title: missing (optional),
+                    r_paren_token: R_PAREN@281..282 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@282..283 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@283..284 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@284..305 "Reference link text: " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@305..306 "[" [] [],
+                    text: MdInlineItemList [
+                        MdInlineItalic {
+                            l_fence: STAR@306..307 "*" [] [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@307..315 "emphasis" [] [],
+                                },
+                            ],
+                            r_fence: STAR@315..316 "*" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@316..317 "]" [] [],
+                    label: MdReferenceLinkLabel {
+                        l_brack_token: L_BRACK@317..318 "[" [] [],
+                        label: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@318..323 "label" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@323..324 "]" [] [],
+                    },
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@324..325 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@325..326 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@326..337 "Image alt: " [] [],
+                },
+                MdReferenceImage {
+                    excl_token: BANG@337..338 "!" [] [],
+                    l_brack_token: L_BRACK@338..339 "[" [] [],
+                    alt: MdInlineItemList [
+                        MdInlineItalic {
+                            l_fence: STAR@339..340 "*" [] [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@340..348 "emphasis" [] [],
+                                },
+                            ],
+                            r_fence: STAR@348..349 "*" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@349..350 "]" [] [],
+                    label: MdReferenceLinkLabel {
+                        l_brack_token: L_BRACK@350..351 "[" [] [],
+                        label: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@351..356 "label" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@356..357 "]" [] [],
+                    },
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@357..358 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@358..359 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@359..360 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@360..365 "label" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@365..366 "]" [] [],
+            colon_token: COLON@366..367 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@367..368 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@368..387 "https://example.com" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@387..388 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@388..388 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..388
+  0: (empty)
+  1: MD_BLOCK_LIST@0..388
+    0: MD_PARAGRAPH@0..44
+      0: MD_INLINE_ITEM_LIST@0..44
+        0: MD_TEXTUAL@0..27
+          0: MD_TEXTUAL_LITERAL@0..27 "Code spans block emphasis: " [] []
+        1: MD_INLINE_CODE@27..43
+          0: BACKTICK@27..28 "`" [] []
+          1: MD_INLINE_ITEM_LIST@28..42
+            0: MD_TEXTUAL@28..29
+              0: MD_TEXTUAL_LITERAL@28..29 "*" [] []
+            1: MD_TEXTUAL@29..41
+              0: MD_TEXTUAL_LITERAL@29..41 "not emphasis" [] []
+            2: MD_TEXTUAL@41..42
+              0: MD_TEXTUAL_LITERAL@41..42 "*" [] []
+          2: BACKTICK@42..43 "`" [] []
+        2: MD_TEXTUAL@43..44
+          0: MD_TEXTUAL_LITERAL@43..44 "\n" [] []
+      1: (empty)
+    1: MD_NEWLINE@44..45
+      0: NEWLINE@44..45 "\n" [] []
+    2: MD_PARAGRAPH@45..81
+      0: MD_INLINE_ITEM_LIST@45..81
+        0: MD_TEXTUAL@45..64
+          0: MD_TEXTUAL_LITERAL@45..64 "Escaped asterisks: " [] []
+        1: MD_TEXTUAL@64..66
+          0: MD_TEXTUAL_LITERAL@64..66 "\\*" [] []
+        2: MD_TEXTUAL@66..78
+          0: MD_TEXTUAL_LITERAL@66..78 "not emphasis" [] []
+        3: MD_TEXTUAL@78..80
+          0: MD_TEXTUAL_LITERAL@78..80 "\\*" [] []
+        4: MD_TEXTUAL@80..81
+          0: MD_TEXTUAL_LITERAL@80..81 "\n" [] []
+      1: (empty)
+    3: MD_NEWLINE@81..82
+      0: NEWLINE@81..82 "\n" [] []
+    4: MD_PARAGRAPH@82..131
+      0: MD_INLINE_ITEM_LIST@82..131
+        0: MD_TEXTUAL@82..103
+          0: MD_TEXTUAL_LITERAL@82..103 "HTML with asterisks: " [] []
+        1: MD_INLINE_HTML@103..109
+          0: MD_INLINE_ITEM_LIST@103..109
+            0: MD_TEXTUAL@103..104
+              0: MD_TEXTUAL_LITERAL@103..104 "<" [] []
+            1: MD_TEXTUAL@104..108
+              0: MD_TEXTUAL_LITERAL@104..108 "span" [] []
+            2: MD_TEXTUAL@108..109
+              0: MD_TEXTUAL_LITERAL@108..109 ">" [] []
+        2: MD_INLINE_ITALIC@109..123
+          0: STAR@109..110 "*" [] []
+          1: MD_INLINE_ITEM_LIST@110..122
+            0: MD_TEXTUAL@110..122
+              0: MD_TEXTUAL_LITERAL@110..122 "between tags" [] []
+          2: STAR@122..123 "*" [] []
+        3: MD_INLINE_HTML@123..130
+          0: MD_INLINE_ITEM_LIST@123..130
+            0: MD_TEXTUAL@123..124
+              0: MD_TEXTUAL_LITERAL@123..124 "<" [] []
+            1: MD_TEXTUAL@124..129
+              0: MD_TEXTUAL_LITERAL@124..129 "/span" [] []
+            2: MD_TEXTUAL@129..130
+              0: MD_TEXTUAL_LITERAL@129..130 ">" [] []
+        4: MD_TEXTUAL@130..131
+          0: MD_TEXTUAL_LITERAL@130..131 "\n" [] []
+      1: (empty)
+    5: MD_NEWLINE@131..132
+      0: NEWLINE@131..132 "\n" [] []
+    6: MD_PARAGRAPH@132..189
+      0: MD_INLINE_ITEM_LIST@132..189
+        0: MD_TEXTUAL@132..148
+          0: MD_TEXTUAL_LITERAL@132..148 "HTML attribute: " [] []
+        1: MD_INLINE_HTML@148..177
+          0: MD_INLINE_ITEM_LIST@148..177
+            0: MD_TEXTUAL@148..149
+              0: MD_TEXTUAL_LITERAL@148..149 "<" [] []
+            1: MD_TEXTUAL@149..161
+              0: MD_TEXTUAL_LITERAL@149..161 "span title=\"" [] []
+            2: MD_TEXTUAL@161..162
+              0: MD_TEXTUAL_LITERAL@161..162 "*" [] []
+            3: MD_TEXTUAL@162..174
+              0: MD_TEXTUAL_LITERAL@162..174 "not emphasis" [] []
+            4: MD_TEXTUAL@174..175
+              0: MD_TEXTUAL_LITERAL@174..175 "*" [] []
+            5: MD_TEXTUAL@175..176
+              0: MD_TEXTUAL_LITERAL@175..176 "\"" [] []
+            6: MD_TEXTUAL@176..177
+              0: MD_TEXTUAL_LITERAL@176..177 ">" [] []
+        2: MD_TEXTUAL@177..181
+          0: MD_TEXTUAL_LITERAL@177..181 "attr" [] []
+        3: MD_INLINE_HTML@181..188
+          0: MD_INLINE_ITEM_LIST@181..188
+            0: MD_TEXTUAL@181..182
+              0: MD_TEXTUAL_LITERAL@181..182 "<" [] []
+            1: MD_TEXTUAL@182..187
+              0: MD_TEXTUAL_LITERAL@182..187 "/span" [] []
+            2: MD_TEXTUAL@187..188
+              0: MD_TEXTUAL_LITERAL@187..188 ">" [] []
+        4: MD_TEXTUAL@188..189
+          0: MD_TEXTUAL_LITERAL@188..189 "\n" [] []
+      1: (empty)
+    7: MD_NEWLINE@189..190
+      0: NEWLINE@189..190 "\n" [] []
+    8: MD_PARAGRAPH@190..237
+      0: MD_INLINE_ITEM_LIST@190..237
+        0: MD_TEXTUAL@190..200
+          0: MD_TEXTUAL_LITERAL@190..200 "Autolink: " [] []
+        1: MD_AUTOLINK@200..236
+          0: L_ANGLE@200..201 "<" [] []
+          1: MD_INLINE_ITEM_LIST@201..235
+            0: MD_TEXTUAL@201..221
+              0: MD_TEXTUAL_LITERAL@201..221 "https://example.com/" [] []
+            1: MD_TEXTUAL@221..222
+              0: MD_TEXTUAL_LITERAL@221..222 "*" [] []
+            2: MD_TEXTUAL@222..225
+              0: MD_TEXTUAL_LITERAL@222..225 "not" [] []
+            3: MD_TEXTUAL@225..226
+              0: MD_TEXTUAL_LITERAL@225..226 "-" [] []
+            4: MD_TEXTUAL@226..234
+              0: MD_TEXTUAL_LITERAL@226..234 "emphasis" [] []
+            5: MD_TEXTUAL@234..235
+              0: MD_TEXTUAL_LITERAL@234..235 "*" [] []
+          2: R_ANGLE@235..236 ">" [] []
+        2: MD_TEXTUAL@236..237
+          0: MD_TEXTUAL_LITERAL@236..237 "\n" [] []
+      1: (empty)
+    9: MD_NEWLINE@237..238
+      0: NEWLINE@237..238 "\n" [] []
+    10: MD_PARAGRAPH@238..283
+      0: MD_INLINE_ITEM_LIST@238..283
+        0: MD_TEXTUAL@238..249
+          0: MD_TEXTUAL_LITERAL@238..249 "Link text: " [] []
+        1: MD_INLINE_LINK@249..282
+          0: L_BRACK@249..250 "[" [] []
+          1: MD_INLINE_ITEM_LIST@250..260
+            0: MD_INLINE_ITALIC@250..260
+              0: STAR@250..251 "*" [] []
+              1: MD_INLINE_ITEM_LIST@251..259
+                0: MD_TEXTUAL@251..259
+                  0: MD_TEXTUAL_LITERAL@251..259 "emphasis" [] []
+              2: STAR@259..260 "*" [] []
+          2: R_BRACK@260..261 "]" [] []
+          3: L_PAREN@261..262 "(" [] []
+          4: MD_INLINE_ITEM_LIST@262..281
+            0: MD_TEXTUAL@262..281
+              0: MD_TEXTUAL_LITERAL@262..281 "https://example.com" [] []
+          5: (empty)
+          6: R_PAREN@281..282 ")" [] []
+        2: MD_TEXTUAL@282..283
+          0: MD_TEXTUAL_LITERAL@282..283 "\n" [] []
+      1: (empty)
+    11: MD_NEWLINE@283..284
+      0: NEWLINE@283..284 "\n" [] []
+    12: MD_PARAGRAPH@284..325
+      0: MD_INLINE_ITEM_LIST@284..325
+        0: MD_TEXTUAL@284..305
+          0: MD_TEXTUAL_LITERAL@284..305 "Reference link text: " [] []
+        1: MD_REFERENCE_LINK@305..324
+          0: L_BRACK@305..306 "[" [] []
+          1: MD_INLINE_ITEM_LIST@306..316
+            0: MD_INLINE_ITALIC@306..316
+              0: STAR@306..307 "*" [] []
+              1: MD_INLINE_ITEM_LIST@307..315
+                0: MD_TEXTUAL@307..315
+                  0: MD_TEXTUAL_LITERAL@307..315 "emphasis" [] []
+              2: STAR@315..316 "*" [] []
+          2: R_BRACK@316..317 "]" [] []
+          3: MD_REFERENCE_LINK_LABEL@317..324
+            0: L_BRACK@317..318 "[" [] []
+            1: MD_INLINE_ITEM_LIST@318..323
+              0: MD_TEXTUAL@318..323
+                0: MD_TEXTUAL_LITERAL@318..323 "label" [] []
+            2: R_BRACK@323..324 "]" [] []
+        2: MD_TEXTUAL@324..325
+          0: MD_TEXTUAL_LITERAL@324..325 "\n" [] []
+      1: (empty)
+    13: MD_NEWLINE@325..326
+      0: NEWLINE@325..326 "\n" [] []
+    14: MD_PARAGRAPH@326..358
+      0: MD_INLINE_ITEM_LIST@326..358
+        0: MD_TEXTUAL@326..337
+          0: MD_TEXTUAL_LITERAL@326..337 "Image alt: " [] []
+        1: MD_REFERENCE_IMAGE@337..357
+          0: BANG@337..338 "!" [] []
+          1: L_BRACK@338..339 "[" [] []
+          2: MD_INLINE_ITEM_LIST@339..349
+            0: MD_INLINE_ITALIC@339..349
+              0: STAR@339..340 "*" [] []
+              1: MD_INLINE_ITEM_LIST@340..348
+                0: MD_TEXTUAL@340..348
+                  0: MD_TEXTUAL_LITERAL@340..348 "emphasis" [] []
+              2: STAR@348..349 "*" [] []
+          3: R_BRACK@349..350 "]" [] []
+          4: MD_REFERENCE_LINK_LABEL@350..357
+            0: L_BRACK@350..351 "[" [] []
+            1: MD_INLINE_ITEM_LIST@351..356
+              0: MD_TEXTUAL@351..356
+                0: MD_TEXTUAL_LITERAL@351..356 "label" [] []
+            2: R_BRACK@356..357 "]" [] []
+        2: MD_TEXTUAL@357..358
+          0: MD_TEXTUAL_LITERAL@357..358 "\n" [] []
+      1: (empty)
+    15: MD_NEWLINE@358..359
+      0: NEWLINE@358..359 "\n" [] []
+    16: MD_LINK_REFERENCE_DEFINITION@359..387
+      0: L_BRACK@359..360 "[" [] []
+      1: MD_LINK_LABEL@360..365
+        0: MD_INLINE_ITEM_LIST@360..365
+          0: MD_TEXTUAL@360..365
+            0: MD_TEXTUAL_LITERAL@360..365 "label" [] []
+      2: R_BRACK@365..366 "]" [] []
+      3: COLON@366..367 ":" [] []
+      4: MD_LINK_DESTINATION@367..387
+        0: MD_INLINE_ITEM_LIST@367..387
+          0: MD_TEXTUAL@367..368
+            0: MD_TEXTUAL_LITERAL@367..368 " " [] []
+          1: MD_TEXTUAL@368..387
+            0: MD_TEXTUAL_LITERAL@368..387 "https://example.com" [] []
+      5: (empty)
+    17: MD_NEWLINE@387..388
+      0: NEWLINE@387..388 "\n" [] []
+  2: EOF@388..388 "" [] []
+
+```

@@ -44,7 +44,7 @@ Fast iteration during development:
 
 ```rust
 // In crates/biome_js_analyze/tests/quick_test.rs
-// Uncomment #[ignore] and modify:
+// Modify the quick_test function:
 
 const SOURCE: &str = r#"
 const x = 1;
@@ -56,9 +56,42 @@ let rule_filter = RuleFilter::Rule("nursery", "noVar");
 
 Run:
 ```shell
-cd crates/biome_js_analyze
-cargo test quick_test -- --show-output
+just qt biome_js_analyze
 ```
+
+### Quick Test for Parser Development
+
+**IMPORTANT:** Use this instead of building full Biome binary for syntax inspection - it's much faster!
+
+For inspecting AST structure when implementing parsers or working with embedded languages:
+
+```rust
+// In crates/biome_html_parser/tests/quick_test.rs
+// Modify the quick_test function:
+
+#[test]
+pub fn quick_test() {
+    let code = r#"<button on:click={handleClick}>Click</button>"#;
+    
+    let source_type = HtmlFileSource::svelte();
+    let options = HtmlParseOptions::from(&source_type);
+    let root = parse_html(code, options);
+    let syntax = root.syntax();
+    
+    dbg!(&syntax, root.diagnostics(), root.has_errors());
+}
+```
+
+Run:
+```shell
+just qt biome_html_parser
+```
+
+The `dbg!` output shows the full AST tree structure, helping you understand:
+- How directives/attributes are parsed (e.g., `HtmlAttribute` vs `SvelteBindDirective`)
+- Whether values use `HtmlString` (quotes) or `HtmlTextExpression` (curly braces)
+- Token ranges and offsets needed for proper snippet creation
+- Node hierarchy and parent-child relationships
 
 ### Snapshot Testing with Insta
 
@@ -263,6 +296,10 @@ cargo test test_name -- --show-output
 - **Changeset timing**: Create before opening PR, can edit after
 - **Snapshot review**: Always review snapshots carefully - don't blindly accept
 - **Test performance**: Use `#[ignore]` for slow tests, run with `cargo test -- --ignored`
+- **Parser inspection**: Use `just qt <package>` to run quick_test and inspect AST, NOT full Biome builds (much faster)
+- **String extraction**: Use `inner_string_text()` for quoted strings, not `text_trimmed()` (which includes quotes)
+- **Legacy syntax**: Ask users before implementing deprecated/legacy syntax - wait for user demand
+- **Borrow checker**: Avoid temporary borrows that get dropped - use `let binding = value; binding.method()` pattern
 
 ## Common Test Patterns
 

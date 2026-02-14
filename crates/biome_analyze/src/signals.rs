@@ -406,7 +406,8 @@ where
             preferred_jsx_quote,
             preferred_indentation,
             self.options.jsx_runtime(),
-            self.options.css_modules(),
+            self.options.jsx_factory(),
+            self.options.jsx_fragment_factory(),
         )
         .ok()?;
 
@@ -455,7 +456,8 @@ where
             self.options.preferred_jsx_quote(),
             self.options.preferred_indentation(),
             self.options.jsx_runtime(),
-            self.options.css_modules(),
+            self.options.jsx_factory(),
+            self.options.jsx_fragment_factory(),
         )
         .ok();
         let mut actions = Vec::new();
@@ -520,7 +522,8 @@ where
             self.options.preferred_jsx_quote(),
             self.options.preferred_indentation(),
             self.options.jsx_runtime(),
-            self.options.css_modules(),
+            self.options.jsx_factory(),
+            self.options.jsx_fragment_factory(),
         )
         .ok();
         if let Some(ctx) = ctx {

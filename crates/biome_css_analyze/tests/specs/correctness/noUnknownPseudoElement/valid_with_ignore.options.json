@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnknownPseudoElement": {
+          "level": "error",
+          "options": {
+            "ignore": [
+              "custom-pseudo-element",
+              "MyCustomPseudoElement",
+              "another-custom-pseudo-element"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

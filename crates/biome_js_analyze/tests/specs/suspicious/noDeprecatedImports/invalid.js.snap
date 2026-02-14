@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { DEPRECATED_CONSTANT as CONSTANT } from "./utils";
+
+import { deprecatedUtil } from "./utils";
+
+import Component from "./component";
+
+```
+
+# Diagnostics
+```
+invalid.js:2:10 lint/suspicious/noDeprecatedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Deprecated import.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import { DEPRECATED_CONSTANT as CONSTANT } from "./utils";
+      │          ^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ import { deprecatedUtil } from "./utils";
+  
+  i An @deprecated annotation indicates the author doesn't want you to rely on this import anymore.
+  
+  i You should probably import a different symbol instead.
+  
+
+```
+
+```
+invalid.js:4:10 lint/suspicious/noDeprecatedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Deprecated import: This method has been deprecated for a long time and you should really consider using `modernUtil()` instead.
+  
+    2 │ import { DEPRECATED_CONSTANT as CONSTANT } from "./utils";
+    3 │ 
+  > 4 │ import { deprecatedUtil } from "./utils";
+      │          ^^^^^^^^^^^^^^
+    5 │ 
+    6 │ import Component from "./component";
+  
+  i An @deprecated annotation indicates the author doesn't want you to rely on this import anymore.
+  
+  i You should probably import a different symbol instead.
+  
+
+```
+
+```
+invalid.js:6:8 lint/suspicious/noDeprecatedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Deprecated import: Use a named import instead.
+  
+    4 │ import { deprecatedUtil } from "./utils";
+    5 │ 
+  > 6 │ import Component from "./component";
+      │        ^^^^^^^^^
+    7 │ 
+  
+  i An @deprecated annotation indicates the author doesn't want you to rely on this import anymore.
+  
+  i You should probably import a different symbol instead.
+  
+
+```

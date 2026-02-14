@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: component-frameworks/vue-component-casing.vue
 ---
+
 # Input
 
 ```vue
@@ -35,6 +36,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```vue
@@ -48,6 +50,7 @@ import TextInput from './TextInput.vue';
 	<TextInput placeholder="enter text" />
 	<button>native button</button>
 </template>
+
 ```
 
 

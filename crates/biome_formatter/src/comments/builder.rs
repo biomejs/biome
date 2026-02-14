@@ -1059,6 +1059,10 @@ b;"#;
             false
         }
 
+        fn is_global_suppression(_: &str) -> bool {
+            false
+        }
+
         fn get_comment_kind(_: &SyntaxTriviaPieceComments<Self::Language>) -> CommentKind {
             CommentKind::Block
         }

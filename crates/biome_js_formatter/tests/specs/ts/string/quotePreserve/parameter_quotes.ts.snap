@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/string/quotePreserve/parameter_quotes.ts
 ---
+
 # Input
 
 ```ts
@@ -66,6 +67,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -104,6 +106,7 @@ const Y = {
 	"3n": false,
 	12334: false,
 };
+
 ```
 
 ## Output 1
@@ -124,6 +127,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -162,4 +166,5 @@ const Y = {
 	"3n": false,
 	12334: false,
 };
+
 ```

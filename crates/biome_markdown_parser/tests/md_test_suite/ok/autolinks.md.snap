@@ -1,0 +1,226 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+URL autolink: <https://example.com>
+
+Email autolink: <user@example.com>
+
+Not an autolink (no scheme): <example.com>
+
+Mixed text: Visit <http://rust-lang.org> for more.
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..14 "URL autolink: " [] [],
+                },
+                MdAutolink {
+                    l_angle_token: L_ANGLE@14..15 "<" [] [],
+                    value: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@15..34 "https://example.com" [] [],
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@34..35 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@35..36 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@36..37 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@37..53 "Email autolink: " [] [],
+                },
+                MdAutolink {
+                    l_angle_token: L_ANGLE@53..54 "<" [] [],
+                    value: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@54..70 "user@example.com" [] [],
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@70..71 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@71..72 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@72..73 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@73..89 "Not an autolink " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@89..90 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@90..99 "no scheme" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@99..100 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@100..101 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@101..102 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@102..103 "<" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@103..114 "example.com" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@114..115 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@115..116 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@116..117 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@117..135 "Mixed text: Visit " [] [],
+                },
+                MdAutolink {
+                    l_angle_token: L_ANGLE@135..136 "<" [] [],
+                    value: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@136..147 "http://rust" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@147..148 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@148..156 "lang.org" [] [],
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@156..157 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@157..167 " for more." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@167..168 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@168..168 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..168
+  0: (empty)
+  1: MD_BLOCK_LIST@0..168
+    0: MD_PARAGRAPH@0..36
+      0: MD_INLINE_ITEM_LIST@0..36
+        0: MD_TEXTUAL@0..14
+          0: MD_TEXTUAL_LITERAL@0..14 "URL autolink: " [] []
+        1: MD_AUTOLINK@14..35
+          0: L_ANGLE@14..15 "<" [] []
+          1: MD_INLINE_ITEM_LIST@15..34
+            0: MD_TEXTUAL@15..34
+              0: MD_TEXTUAL_LITERAL@15..34 "https://example.com" [] []
+          2: R_ANGLE@34..35 ">" [] []
+        2: MD_TEXTUAL@35..36
+          0: MD_TEXTUAL_LITERAL@35..36 "\n" [] []
+      1: (empty)
+    1: MD_NEWLINE@36..37
+      0: NEWLINE@36..37 "\n" [] []
+    2: MD_PARAGRAPH@37..72
+      0: MD_INLINE_ITEM_LIST@37..72
+        0: MD_TEXTUAL@37..53
+          0: MD_TEXTUAL_LITERAL@37..53 "Email autolink: " [] []
+        1: MD_AUTOLINK@53..71
+          0: L_ANGLE@53..54 "<" [] []
+          1: MD_INLINE_ITEM_LIST@54..70
+            0: MD_TEXTUAL@54..70
+              0: MD_TEXTUAL_LITERAL@54..70 "user@example.com" [] []
+          2: R_ANGLE@70..71 ">" [] []
+        2: MD_TEXTUAL@71..72
+          0: MD_TEXTUAL_LITERAL@71..72 "\n" [] []
+      1: (empty)
+    3: MD_NEWLINE@72..73
+      0: NEWLINE@72..73 "\n" [] []
+    4: MD_PARAGRAPH@73..116
+      0: MD_INLINE_ITEM_LIST@73..116
+        0: MD_TEXTUAL@73..89
+          0: MD_TEXTUAL_LITERAL@73..89 "Not an autolink " [] []
+        1: MD_TEXTUAL@89..90
+          0: MD_TEXTUAL_LITERAL@89..90 "(" [] []
+        2: MD_TEXTUAL@90..99
+          0: MD_TEXTUAL_LITERAL@90..99 "no scheme" [] []
+        3: MD_TEXTUAL@99..100
+          0: MD_TEXTUAL_LITERAL@99..100 ")" [] []
+        4: MD_TEXTUAL@100..101
+          0: MD_TEXTUAL_LITERAL@100..101 ":" [] []
+        5: MD_TEXTUAL@101..102
+          0: MD_TEXTUAL_LITERAL@101..102 " " [] []
+        6: MD_TEXTUAL@102..103
+          0: MD_TEXTUAL_LITERAL@102..103 "<" [] []
+        7: MD_TEXTUAL@103..114
+          0: MD_TEXTUAL_LITERAL@103..114 "example.com" [] []
+        8: MD_TEXTUAL@114..115
+          0: MD_TEXTUAL_LITERAL@114..115 ">" [] []
+        9: MD_TEXTUAL@115..116
+          0: MD_TEXTUAL_LITERAL@115..116 "\n" [] []
+      1: (empty)
+    5: MD_NEWLINE@116..117
+      0: NEWLINE@116..117 "\n" [] []
+    6: MD_PARAGRAPH@117..168
+      0: MD_INLINE_ITEM_LIST@117..168
+        0: MD_TEXTUAL@117..135
+          0: MD_TEXTUAL_LITERAL@117..135 "Mixed text: Visit " [] []
+        1: MD_AUTOLINK@135..157
+          0: L_ANGLE@135..136 "<" [] []
+          1: MD_INLINE_ITEM_LIST@136..156
+            0: MD_TEXTUAL@136..147
+              0: MD_TEXTUAL_LITERAL@136..147 "http://rust" [] []
+            1: MD_TEXTUAL@147..148
+              0: MD_TEXTUAL_LITERAL@147..148 "-" [] []
+            2: MD_TEXTUAL@148..156
+              0: MD_TEXTUAL_LITERAL@148..156 "lang.org" [] []
+          2: R_ANGLE@156..157 ">" [] []
+        2: MD_TEXTUAL@157..167
+          0: MD_TEXTUAL_LITERAL@157..167 " for more." [] []
+        3: MD_TEXTUAL@167..168
+          0: MD_TEXTUAL_LITERAL@167..168 "\n" [] []
+      1: (empty)
+  2: EOF@168..168 "" [] []
+
+```
