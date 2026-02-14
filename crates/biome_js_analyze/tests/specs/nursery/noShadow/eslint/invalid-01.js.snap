@@ -12,7 +12,7 @@ function a(x) { var b = function c() { var x = 'foo'; }; }
 ```
 invalid-01.js:1:44 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
   > 1 │ function a(x) { var b = function c() { var x = 'foo'; }; }
       │                                            ^

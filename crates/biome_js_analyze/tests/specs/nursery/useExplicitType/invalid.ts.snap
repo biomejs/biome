@@ -182,6 +182,8 @@ invalid.ts:1:1 lint/nursery/useExplicitType ━━━━━━━━━━━━
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -202,6 +204,8 @@ invalid.ts:5:1 lint/nursery/useExplicitType ━━━━━━━━━━━━
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -227,6 +231,8 @@ invalid.ts:9:12 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -248,6 +254,8 @@ invalid.ts:13:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -267,6 +275,8 @@ invalid.ts:14:22 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -292,6 +302,8 @@ invalid.ts:18:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the member.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -312,6 +324,8 @@ invalid.ts:21:11 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a type to the parameter.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -337,6 +351,8 @@ invalid.ts:23:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the member.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -357,6 +373,8 @@ invalid.ts:26:10 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -382,6 +400,8 @@ invalid.ts:27:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the member.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -404,6 +424,8 @@ invalid.ts:33:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the member.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -428,6 +450,8 @@ invalid.ts:39:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the member.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -448,6 +472,8 @@ invalid.ts:42:13 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a type to the parameter.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -470,6 +496,8 @@ invalid.ts:47:14 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -489,6 +517,8 @@ invalid.ts:48:14 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -511,6 +541,8 @@ invalid.ts:50:16 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -531,6 +563,8 @@ invalid.ts:51:16 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -550,6 +584,8 @@ invalid.ts:54:23 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -572,6 +608,8 @@ invalid.ts:55:23 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -592,6 +630,8 @@ invalid.ts:57:9 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -619,6 +659,8 @@ invalid.ts:62:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -645,6 +687,8 @@ invalid.ts:71:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -665,6 +709,8 @@ invalid.ts:85:1 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -687,6 +733,8 @@ invalid.ts:92:1 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -707,6 +755,8 @@ invalid.ts:99:29 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -729,6 +779,8 @@ invalid.ts:99:69 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -748,6 +800,8 @@ invalid.ts:100:36 lint/nursery/useExplicitType ━━━━━━━━━━━
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -766,6 +820,8 @@ invalid.ts:100:76 lint/nursery/useExplicitType ━━━━━━━━━━━
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -788,6 +844,8 @@ invalid.ts:112:16 lint/nursery/useExplicitType ━━━━━━━━━━━
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -809,6 +867,8 @@ invalid.ts:120:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the member.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -829,6 +889,8 @@ invalid.ts:124:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the member.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -848,6 +910,8 @@ invalid.ts:129:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the member.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -870,6 +934,8 @@ invalid.ts:134:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the member.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -890,6 +956,8 @@ invalid.ts:138:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the function declaration.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -909,6 +977,8 @@ invalid.ts:142:17 lint/nursery/useExplicitType ━━━━━━━━━━━
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function declaration.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -931,6 +1001,8 @@ invalid.ts:145:19 lint/nursery/useExplicitType ━━━━━━━━━━━
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -950,6 +1022,8 @@ invalid.ts:146:26 lint/nursery/useExplicitType ━━━━━━━━━━━
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -972,6 +1046,8 @@ invalid.ts:148:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a type to the variable.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -993,6 +1069,8 @@ invalid.ts:150:5 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a type to the variable.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -1012,6 +1090,8 @@ invalid.ts:151:5 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a type to the variable.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1034,6 +1114,8 @@ invalid.ts:152:5 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a type to the variable.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -1053,6 +1135,8 @@ invalid.ts:155:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1074,6 +1158,8 @@ invalid.ts:158:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Add a return type to the function.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -1093,6 +1179,8 @@ invalid.ts:158:18 lint/nursery/useExplicitType ━━━━━━━━━━━
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
