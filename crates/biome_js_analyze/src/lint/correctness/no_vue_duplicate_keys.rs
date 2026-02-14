@@ -142,7 +142,8 @@ impl Rule for NoVueDuplicateKeys {
             if let Some(name) = declaration.declaration_name() {
                 // Handle cases like `const { foo } = defineProps(...);`.
                 if let VueDeclaration::Setup(ref setup_decl) = declaration
-                    && setup_decl.is_assigned_to_props(model)
+                    && (setup_decl.is_assigned_to_props(model)
+                        || setup_decl.is_assigned_to_to_refs(model))
                 {
                     continue;
                 }
