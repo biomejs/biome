@@ -831,12 +831,25 @@ impl<'a> ProcessFixAll<'a> {
                             },
                         ));
                     };
-                };
 
-                Ok(Some(()))
+                    Ok(Some(()))
+                } else {
+                    // Mutation was empty (no tree changes), signal no fix applied
+                    Ok(None)
+                }
             }
             None => Ok(None),
         }
+    }
+
+    /// Record a text-edit-based fix (e.g. from a plugin rewrite) that was
+    /// applied outside of the normal mutation path.
+    pub(crate) fn record_text_edit_fix(&mut self, range: TextRange, new_text_len: u32) {
+        self.actions.push(FixAction {
+            rule_name: None,
+            range,
+        });
+        self.growth_guard.check(new_text_len);
     }
 
     /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`
