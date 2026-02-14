@@ -1501,4 +1501,3 @@ import { mdiSquareOutline } from "@mdi/js";
         result,
     ));
 }
-
