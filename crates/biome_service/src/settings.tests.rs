@@ -133,7 +133,7 @@ fn merge_override_linter_group_rule() {
 
     assert_eq!(
         disabled_rules,
-        FxHashSet::from_iter([RuleFilter::Rule("nursery", "useExplicitType")])
+        FxHashSet::from_iter([RuleFilter::Rule("style", "noDefaultExport")])
     );
 }
 
