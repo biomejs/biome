@@ -244,7 +244,8 @@ impl ServiceLanguage for CssLanguage {
                     .parser
                     .css_modules_enabled
                     .is_some_and(|css_modules_enabled| css_modules_enabled.into()),
-            );
+            )
+            .with_plugin_severities(global.get_plugin_severities_for_path(file_path.as_path()));
 
         AnalyzerOptions::default()
             .with_file_path(file_path.as_path())

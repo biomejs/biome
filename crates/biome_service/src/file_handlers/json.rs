@@ -231,7 +231,8 @@ impl ServiceLanguage for JsonLanguage {
     ) -> AnalyzerOptions {
         let configuration = AnalyzerConfiguration::default()
             .with_rules(to_analyzer_rules(global, path.as_path()))
-            .with_preferred_quote(PreferredQuote::Double);
+            .with_preferred_quote(PreferredQuote::Double)
+            .with_plugin_severities(global.get_plugin_severities_for_path(path.as_path()));
         AnalyzerOptions::default()
             .with_file_path(path.as_path())
             .with_configuration(configuration)
