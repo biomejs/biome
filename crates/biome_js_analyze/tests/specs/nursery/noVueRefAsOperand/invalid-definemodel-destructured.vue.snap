@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalid-definemodel-destructured copy.vue
+expression: invalid-definemodel-destructured.vue
 ---
 # Input
 ```ts
@@ -17,7 +17,7 @@ function update(value) {
 
 # Diagnostics
 ```
-invalid-definemodel-destructured copy.vue:4:7 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━
+invalid-definemodel-destructured.vue:4:7 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Ref value is accessed without `.value`.
   
@@ -36,7 +36,7 @@ invalid-definemodel-destructured copy.vue:4:7 lint/nursery/noVueRefAsOperand ━
 ```
 
 ```
-invalid-definemodel-destructured copy.vue:7:3 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━
+invalid-definemodel-destructured.vue:7:3 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Ref value is accessed without `.value`.
   

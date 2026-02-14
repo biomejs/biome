@@ -1,6 +1,6 @@
 /* should generate diagnostics */
 
-<script>
+<script setup>
 let model = defineModel();
 console.log(model);
 function process() {

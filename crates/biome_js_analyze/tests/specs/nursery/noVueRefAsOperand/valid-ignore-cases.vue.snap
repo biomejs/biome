@@ -41,8 +41,8 @@ foo4[bar] = 123
 const count2 = ref
 count2++
 
-const foo4 = ref(0)
+const foo5 = ref(0)
 function tag(arr, ...args) {}
-tag`${foo4}` // ignore tagged template
+tag`${foo5}` // ignore tagged template
 
 ```
