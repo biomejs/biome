@@ -243,7 +243,7 @@ if let Some(directive) = VueDirective::cast_ref(&element) {
 
 **DO:**
 - ✅ Use spaces around table separators: `| --- | --- | --- |` (not `|---|---|---|`)
-- ✅ Ensure all markdown tables follow "compact" style with proper spacing
+- ✅ Ensure all Markdown tables follow "compact" style with proper spacing
 - ✅ Test documentation changes with markdown linters before committing
 
 **DON'T:**
