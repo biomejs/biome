@@ -5979,6 +5979,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useClassNameHelper": {
+					"description": "Disallow template literals with interpolations in class attributes.\nSee https://biomejs.dev/linter/rules/use-class-name-helper",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseClassNameHelperConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentArrowReturn": {
 					"description": "Enforce consistent arrow function bodies.\nSee https://biomejs.dev/linter/rules/use-consistent-arrow-return",
 					"anyOf": [
@@ -9612,6 +9619,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseClassNameHelperOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseClassNameHelperOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseCollapsedElseIfOptions": {
 			"type": "object",
 			"properties": {
@@ -12547,6 +12563,28 @@
 			]
 		},
 		"UseButtonTypeOptions": { "type": "object", "additionalProperties": false },
+		"UseClassNameHelperConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseClassNameHelperOptions" }
+			]
+		},
+		"UseClassNameHelperOptions": {
+			"type": "object",
+			"properties": {
+				"attributes": {
+					"description": "JSX attribute names to check for template literals.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"helperFunctions": {
+					"description": "Preferred helper function names shown in diagnostics.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseCollapsedElseIfConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
