@@ -82,6 +82,10 @@ pub(crate) fn linearize_binding<'a>(
     let mut cursor = range.start as usize;
 
     for (start, end, replacement) in &replacements {
+        debug_assert!(
+            *start >= cursor,
+            "overlapping replacements detected: start={start}, cursor={cursor}"
+        );
         // Copy the gap from cursor to this replacement.
         if *start > cursor {
             result.push_str(&source[cursor..*start]);
