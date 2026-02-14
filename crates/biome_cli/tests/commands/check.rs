@@ -3520,6 +3520,7 @@ fn check_plugin_rewrite_no_write() {
         Args::from(["check", file_path.as_str()].as_slice()),
     );
 
+    assert!(result.is_err(), "run_cli returned {result:?}");
     assert_file_contents(&fs, file_path, "console.log(\"hello\");\n");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
