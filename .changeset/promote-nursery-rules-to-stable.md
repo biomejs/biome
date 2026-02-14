@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Promoted 24 nursery rules to stable groups.
+Promoted 21 nursery rules to stable groups.
 
 #### Correctness
 
@@ -31,8 +31,6 @@ Promoted the following rules to the `correctness` group:
 
 Promoted the following rules to the `suspicious` group:
 
-- [`noShadow`](https://biomejs.dev/linter/rules/no-shadow/). The rule reports variable shadowing.
-  The default rule severity is set to `warn`.
 - [`noImportCycles`](https://biomejs.dev/linter/rules/no-import-cycles/). The rule reports circular imports.
   The default rule severity is set to `warn`.
 - [`noDeprecatedImports`](https://biomejs.dev/linter/rules/no-deprecated-imports/). The rule reports imports of deprecated symbols.

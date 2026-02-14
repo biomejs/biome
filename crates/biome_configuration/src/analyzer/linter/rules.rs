@@ -1172,7 +1172,7 @@ impl RuleName {
             Self::NoSelfAssign => RuleGroup::Correctness,
             Self::NoSelfCompare => RuleGroup::Suspicious,
             Self::NoSetterReturn => RuleGroup::Correctness,
-            Self::NoShadow => RuleGroup::Suspicious,
+            Self::NoShadow => RuleGroup::Nursery,
             Self::NoShadowRestrictedNames => RuleGroup::Suspicious,
             Self::NoShorthandPropertyOverrides => RuleGroup::Suspicious,
             Self::NoShoutyConstants => RuleGroup::Style,
