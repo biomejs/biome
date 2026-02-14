@@ -12,7 +12,7 @@ expression: comment.css
 ```
 comment.css:2:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i An empty source is not allowed.
+  ! An empty source is not allowed.
   
     1 │ /* Test */
   > 2 │ 
