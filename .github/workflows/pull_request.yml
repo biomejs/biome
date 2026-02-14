@@ -101,9 +101,7 @@ jobs:
       - name: Build Biome debug binary
         run: cargo build --bin biome
       - name: Run tests
-        run: |
-          cd e2e-tests
-          sh test-all.sh
+        run: ./e2e-tests/test-all.sh
 
   documentation:
     name: Documentation

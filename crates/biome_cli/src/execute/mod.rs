@@ -562,7 +562,15 @@ pub fn execute_mode(
 
     // don't do any traversal if there's some content coming from stdin
     if let Some(stdin) = execution.as_stdin_file() {
-        let biome_path = BiomePath::new(stdin.as_path());
+        // Biome path must starts_with(the project directory), which will have been
+        // joined to workdir. Otherwise we won't find nested settings.
+        let working_dir = session
+            .app
+            .workspace
+            .fs()
+            .working_directory()
+            .unwrap_or_default();
+        let biome_path = BiomePath::new(working_dir.join(stdin.as_path()));
         return std_in::run(
             session,
             project_key,
