@@ -44,7 +44,7 @@ Fast iteration during development:
 
 ```rust
 // In crates/biome_js_analyze/tests/quick_test.rs
-// Uncomment #[ignore] and modify:
+// Modify the quick_test function:
 
 const SOURCE: &str = r#"
 const x = 1;
@@ -56,8 +56,7 @@ let rule_filter = RuleFilter::Rule("nursery", "noVar");
 
 Run:
 ```shell
-cd crates/biome_js_analyze
-cargo test quick_test -- --show-output
+just qt biome_js_analyze
 ```
 
 ### Quick Test for Parser Development
@@ -68,7 +67,7 @@ For inspecting AST structure when implementing parsers or working with embedded 
 
 ```rust
 // In crates/biome_html_parser/tests/quick_test.rs
-// Uncomment #[ignore] and modify:
+// Modify the quick_test function:
 
 #[test]
 pub fn quick_test() {
@@ -85,8 +84,7 @@ pub fn quick_test() {
 
 Run:
 ```shell
-cd crates/biome_html_parser
-cargo test quick_test -- --nocapture
+just qt biome_html_parser
 ```
 
 The `dbg!` output shows the full AST tree structure, helping you understand:
@@ -94,8 +92,6 @@ The `dbg!` output shows the full AST tree structure, helping you understand:
 - Whether values use `HtmlString` (quotes) or `HtmlTextExpression` (curly braces)
 - Token ranges and offsets needed for proper snippet creation
 - Node hierarchy and parent-child relationships
-
-**CRITICAL:** Always restore `#[ignore]` to the test after you're done developing!
 
 ### Snapshot Testing with Insta
 
@@ -300,10 +296,9 @@ cargo test test_name -- --show-output
 - **Changeset timing**: Create before opening PR, can edit after
 - **Snapshot review**: Always review snapshots carefully - don't blindly accept
 - **Test performance**: Use `#[ignore]` for slow tests, run with `cargo test -- --ignored`
-- **Parser inspection**: Use parser crate's `quick_test` to inspect AST, NOT full Biome builds (much faster)
+- **Parser inspection**: Use `just qt <package>` to run quick_test and inspect AST, NOT full Biome builds (much faster)
 - **String extraction**: Use `inner_string_text()` for quoted strings, not `text_trimmed()` (which includes quotes)
 - **Legacy syntax**: Ask users before implementing deprecated/legacy syntax - wait for user demand
-- **Clean up quick tests**: Always restore `#[ignore]` to quick_test files after development
 - **Borrow checker**: Avoid temporary borrows that get dropped - use `let binding = value; binding.method()` pattern
 
 ## Common Test Patterns

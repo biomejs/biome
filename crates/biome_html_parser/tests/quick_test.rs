@@ -6,7 +6,7 @@ use biome_test_utils::has_bogus_nodes_or_empty_slots;
 #[test]
 pub fn quick_test() {
     let code = r#"<Component
-	on:something
+	bind:value
 
 />
 

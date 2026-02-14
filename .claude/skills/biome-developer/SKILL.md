@@ -30,6 +30,7 @@ This skill provides general development best practices, common gotchas, and Biom
 **Example - Inspecting AST:**
 ```rust
 // In crates/biome_html_parser/tests/quick_test.rs
+// Modify the quick_test function:
 #[test]
 pub fn quick_test() {
     let code = r#"<button on:click={handleClick}>Click</button>"#;
@@ -40,7 +41,7 @@ pub fn quick_test() {
 }
 ```
 
-Run: `cd crates/biome_html_parser && cargo test quick_test -- --nocapture`
+Run: `just qt biome_html_parser`
 
 ### String Extraction and Text Handling
 
@@ -153,25 +154,15 @@ Svelte's `on:click` event handler syntax is legacy (Svelte 3/4). Modern Svelte 5
 ### Testing and Development
 
 **DO:**
-- ✅ Restore `#[ignore]` to quick_test files after using them for development
+- ✅ Use `just qt <package>` to run quick tests (handles test execution automatically)
 - ✅ Review snapshot changes carefully - don't blindly accept
 - ✅ Test with multiple variants when working with enums (e.g., all `VueV*ShorthandDirective` types)
 - ✅ Add tests for both valid and invalid cases
-- ✅ Restore quick_test after it's been modified and before committing the code
+- ✅ Use CLI tests for testing embedded languages (Vue/Svelte directives, etc.)
 
 **DON'T:**
-- ❌ Leave quick_test files uncommented after development
 - ❌ Blindly accept all snapshot changes
-
-**Example - Clean Quick Test:**
-```rust
-// After development, restore this:
-#[ignore]  // ← IMPORTANT: Re-add this!
-#[test]
-pub fn quick_test() {
-    // ...
-}
-```
+- ❌ Try to test embedded languages in analyzer packages (they don't have embedding capabilities)
 
 ## Pattern Matching Tips
 
