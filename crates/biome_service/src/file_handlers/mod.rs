@@ -844,12 +844,31 @@ impl<'a> ProcessFixAll<'a> {
 
     /// Record a text-edit-based fix (e.g. from a plugin rewrite) that was
     /// applied outside of the normal mutation path.
-    pub(crate) fn record_text_edit_fix(&mut self, range: TextRange, new_text_len: u32) {
+    pub(crate) fn record_text_edit_fix(
+        &mut self,
+        range: TextRange,
+        new_text_len: u32,
+    ) -> Result<(), WorkspaceError> {
         self.actions.push(FixAction {
             rule_name: None,
             range,
         });
-        self.growth_guard.check(new_text_len);
+        if !self.growth_guard.check(new_text_len) {
+            return Err(WorkspaceError::RuleError(
+                RuleError::ConflictingRuleFixesError {
+                    rules: self
+                        .actions
+                        .iter()
+                        .rev()
+                        .take(10)
+                        .filter_map(|action| action.rule_name.clone())
+                        .collect::<HashSet<_>>()
+                        .into_iter()
+                        .collect(),
+                },
+            ));
+        }
+        Ok(())
     }
 
     /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`

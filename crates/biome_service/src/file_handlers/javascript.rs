@@ -1122,7 +1122,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     process_fix_all.record_text_edit_fix(
                         range,
                         tree.syntax().text_range_with_trivia().len().into(),
-                    );
+                    )?;
                     continue;
                 }
             }
