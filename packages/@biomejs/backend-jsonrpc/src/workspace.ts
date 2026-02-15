@@ -216,9 +216,9 @@ match these patterns.
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
-- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
-- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+- https://thoughtbot.com/blog/no-newline-at-end-of-file
+- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
 
 Disable the option at your own risk.
 
@@ -447,9 +447,9 @@ export interface CssFormatterConfiguration {
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
-- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
-- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+- https://thoughtbot.com/blog/no-newline-at-end-of-file
+- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
 
 Disable the option at your own risk.
 
@@ -547,9 +547,9 @@ export interface GraphqlFormatterConfiguration {
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
-- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
-- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+- https://thoughtbot.com/blog/no-newline-at-end-of-file
+- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
 
 Disable the option at your own risk.
 
@@ -597,9 +597,9 @@ export interface GritFormatterConfiguration {
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
-- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
-- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+- https://thoughtbot.com/blog/no-newline-at-end-of-file
+- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
 
 Disable the option at your own risk.
 
@@ -666,9 +666,9 @@ export interface HtmlFormatterConfiguration {
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
-- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
-- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+- https://thoughtbot.com/blog/no-newline-at-end-of-file
+- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
 
 Disable the option at your own risk.
 
@@ -784,9 +784,9 @@ When formatting `package.json`, Biome will use `always` unless configured otherw
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
-- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
-- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+- https://thoughtbot.com/blog/no-newline-at-end-of-file
+- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
 
 Disable the option at your own risk.
 
@@ -880,9 +880,9 @@ When formatting `package.json`, Biome will use `always` unless configured otherw
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
-- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
-- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+- https://thoughtbot.com/blog/no-newline-at-end-of-file
+- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
 
 Disable the option at your own risk.
 
@@ -1159,9 +1159,9 @@ has syntax errors
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- <https://thoughtbot.com/blog/no-newline-at-end-of-file>
-- <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
-- <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+- https://thoughtbot.com/blog/no-newline-at-end-of-file
+- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
 
 Disable the option at your own risk.
 

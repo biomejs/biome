@@ -34,10 +34,10 @@ Generic options applied to all files
         --trailing-newline=<true|false>  Whether to add a trailing newline at the end of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
         --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
@@ -91,10 +91,10 @@ Formatting options specific to the JavaScript files
                               the end of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
 
@@ -126,10 +126,10 @@ Options that changes how the GraphQL formatter behaves
                               end of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
 
@@ -151,10 +151,10 @@ Options that changes how the CSS formatter behaves
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
 
@@ -186,10 +186,10 @@ Options that changes how the HTML formatter behaves
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
 
@@ -297,10 +297,10 @@ Available options:
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and

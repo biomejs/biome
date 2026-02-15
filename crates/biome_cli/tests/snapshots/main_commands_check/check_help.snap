@@ -57,10 +57,10 @@ The configuration that is contained inside the file `biome.json`
         --trailing-newline=<true|false>  Whether to add a trailing newline at the end of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
         --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
@@ -115,10 +115,10 @@ The configuration that is contained inside the file `biome.json`
                               the end of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
         --javascript-linter-enabled=<true|false>  Control the linter for JavaScript (and its super
@@ -156,10 +156,10 @@ The configuration that is contained inside the file `biome.json`
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
         --json-linter-enabled=<true|false>  Control the linter for JSON (and its super languages)
@@ -187,10 +187,10 @@ The configuration that is contained inside the file `biome.json`
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
         --css-linter-enabled=<true|false>  Control the linter for CSS files.
@@ -209,10 +209,10 @@ The configuration that is contained inside the file `biome.json`
                               end of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
         --graphql-linter-enabled=<true|false>  Control the formatter for GraphQL files.
@@ -228,10 +228,10 @@ The configuration that is contained inside the file `biome.json`
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
         --grit-linter-enabled=<true|false>  Control the linter for Grit files.
@@ -263,10 +263,10 @@ The configuration that is contained inside the file `biome.json`
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
-                              <https://thoughtbot.com/blog/no-newline-at-end-of-file> -
-                              <https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804>
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
                               -
-                              <https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files>
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
         --html-linter-enabled=<true|false>  Control the linter for HTML (and its super languages)
