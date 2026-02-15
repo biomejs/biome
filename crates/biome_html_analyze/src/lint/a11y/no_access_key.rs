@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// - [MDN `accesskey` documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/accesskey)
     ///
     pub NoAccessKey {
-        version: "next",
+        version: "2.4.0",
         name: "noAccessKey",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-access-key").same()],

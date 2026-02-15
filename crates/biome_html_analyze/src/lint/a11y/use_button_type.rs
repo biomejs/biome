@@ -28,7 +28,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseButtonType {
-        version: "next",
+        version: "2.4.0",
         name: "useButtonType",
         language: "html",
         sources: &[RuleSource::EslintReact("button-has-type").same()],

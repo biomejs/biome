@@ -58,7 +58,7 @@ declare_lint_rule! {
     /// - [WCAG 1.2.3](https://www.w3.org/WAI/WCAG21/Understanding/audio-description-or-media-alternative-prerecorded)
     ///
     pub UseMediaCaption {
-        version: "next",
+        version: "2.4.0",
         name: "useMediaCaption",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("media-has-caption").same()],

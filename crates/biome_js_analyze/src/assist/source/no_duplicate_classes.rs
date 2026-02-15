@@ -40,7 +40,7 @@ declare_source_rule! {
     /// Use the `functions` option to specify utility functions to check (e.g., `clsx`, `cn`, `cva`).
     ///
     pub NoDuplicateClasses {
-        version: "next",
+        version: "2.4.0",
         name: "noDuplicateClasses",
         language: "jsx",
         sources: &[RuleSource::EslintBetterTailwindcss("no-duplicate-classes").inspired()],

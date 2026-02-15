@@ -82,7 +82,7 @@ declare_lint_rule! {
     /// - [WCAG 1.1.1](https://www.w3.org/WAI/WCAG21/Understanding/non-text-content.html)
     ///
     pub UseAltText {
-        version: "next",
+        version: "2.4.0",
         name: "useAltText",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("alt-text").same()],

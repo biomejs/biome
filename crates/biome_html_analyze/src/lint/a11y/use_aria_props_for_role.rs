@@ -45,7 +45,7 @@ declare_lint_rule! {
     /// - [Chrome Audit Rules, AX_ARIA_03](https://github.com/GoogleChrome/accessibility-developer-tools/wiki/Audit-Rules#ax_aria_03)
     ///
     pub UseAriaPropsForRole {
-        version: "next",
+        version: "2.4.0",
         name: "useAriaPropsForRole",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("role-has-required-aria-props").same()],
