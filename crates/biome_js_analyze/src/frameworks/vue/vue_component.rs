@@ -800,26 +800,27 @@ impl AnyVueSetupDeclaration {
             {
                 // Case 1: Direct defineProps() call: `toRefs(defineProps(...))`
                 if let AnyJsExpression::JsCallExpression(arg_call) = &arg_expr
-                    && is_vue_compiler_macro_call(arg_call, model, "defineProps") {
-                        return true;
-                    }
+                    && is_vue_compiler_macro_call(arg_call, model, "defineProps")
+                {
+                    return true;
+                }
 
                 // Case 2: Identifier bound to defineProps: `const props = defineProps(...); toRefs(props)`
                 if let Some(ident_ref) = arg_expr.as_js_reference_identifier()
                     && let Some(binding) = model.binding(&ident_ref)
-                        && let Some(declarator) = binding
-                            .syntax()
-                            .ancestors()
-                            .find_map(|syntax| JsVariableDeclarator::try_cast(syntax).ok())
-                        && let Some(decl_initializer) = declarator.initializer()
-                        && let Some(decl_expr) = decl_initializer
-                            .expression()
-                            .ok()
-                            .and_then(|expr| expr.inner_expression())
-                        && let AnyJsExpression::JsCallExpression(decl_call) = decl_expr
-                    {
-                        return is_vue_compiler_macro_call(&decl_call, model, "defineProps");
-                    }
+                    && let Some(declarator) = binding
+                        .syntax()
+                        .ancestors()
+                        .find_map(|syntax| JsVariableDeclarator::try_cast(syntax).ok())
+                    && let Some(decl_initializer) = declarator.initializer()
+                    && let Some(decl_expr) = decl_initializer
+                        .expression()
+                        .ok()
+                        .and_then(|expr| expr.inner_expression())
+                    && let AnyJsExpression::JsCallExpression(decl_call) = decl_expr
+                {
+                    return is_vue_compiler_macro_call(&decl_call, model, "defineProps");
+                }
             }
         }
         false
