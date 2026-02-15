@@ -3,12 +3,14 @@
 pub mod file_source;
 #[macro_use]
 mod generated;
+mod file_source;
 mod syntax_node;
 
 pub use file_source::MdFileSource;
 
 pub use self::generated::*;
 use biome_rowan::{RawSyntaxKind, SyntaxKind, TriviaPieceKind};
+pub use file_source::*;
 pub use syntax_node::*;
 
 impl From<u16> for MarkdownSyntaxKind {

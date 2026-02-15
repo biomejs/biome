@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{fmt, rc::Rc};
 
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
@@ -62,6 +62,16 @@ impl FormatOptions for MarkdownFormatOptions {
 }
 
 impl MarkdownFormatOptions {
+    pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
+        self.indent_style = indent_style;
+        self
+    }
+
+    pub fn with_indent_width(mut self, indent_width: IndentWidth) -> Self {
+        self.indent_width = indent_width;
+        self
+    }
+
     pub fn with_line_width(mut self, line_width: LineWidth) -> Self {
         self.line_width = line_width;
         self
@@ -96,5 +106,11 @@ impl FormatContext for MarkdownFormatContext {
 
     fn source_map(&self) -> Option<&TransformSourceMap> {
         None
+    }
+}
+
+impl fmt::Display for MarkdownFormatOptions {
+    fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!("Implement when MarkdownFormatOptions is flushed out")
     }
 }

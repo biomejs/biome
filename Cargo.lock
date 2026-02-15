@@ -1307,12 +1307,21 @@ dependencies = [
 name = "biome_markdown_formatter"
 version = "0.0.1"
 dependencies = [
+ "biome_configuration",
  "biome_formatter",
+ "biome_formatter_test",
+ "biome_fs",
  "biome_markdown_factory",
  "biome_markdown_parser",
  "biome_markdown_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_service",
+ "camino",
+ "countme",
+ "schemars",
+ "serde",
+ "tests_macros",
 ]
 
 [[package]]
@@ -1624,6 +1633,8 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_markdown_factory",
+ "biome_markdown_formatter",
  "biome_markdown_parser",
  "biome_markdown_syntax",
  "biome_module_graph",
