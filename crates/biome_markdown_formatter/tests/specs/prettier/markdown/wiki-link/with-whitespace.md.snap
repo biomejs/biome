@@ -1,0 +1,27 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/wiki-link/with-whitespace.md
+---
+# Input
+
+```md
+[[ Here is a link with leading and trailing whitespace.    ]]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-[[Here is a link with leading and trailing whitespace.]]
++[[ Here is a link with leading and trailing whitespace.    ]]
+```
+
+# Output
+
+```md
+[[ Here is a link with leading and trailing whitespace.    ]]
+```

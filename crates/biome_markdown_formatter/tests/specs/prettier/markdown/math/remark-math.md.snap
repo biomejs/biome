@@ -1,0 +1,238 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/math/remark-math.md
+---
+# Input
+
+```md
+<!-- tests from https://github.com/Rokt33r/remark-math/blob/9e13e49/specs/remark-math.spec.js -->
+
+$$
+\beta+\gamma
+$$
+
+---
+
+$\alpha\$
+
+---
+
+\$\alpha\$
+
+---
+
+\\$\alpha$
+
+---
+
+`$`\alpha$
+
+---
+
+$\alpha`$` foo
+
+---
+
+$`\alpha`$
+
+---
+
+$\alpha\$$
+
+---
+
+$$
+\alpha\$
+$$
+
+---
+
+tango
+$$
+\alpha
+$$
+
+---
+
+$$\\alpha$$
+
+---
+
+$$\alpha$$
+$$
+\alpha\beta
+$$
+
+---
+
+> $$
+> \alpha\beta
+> $$
+
+---
+
+  $$$
+    \alpha
+  $$$
+
+---
+
+$$  must
+\alpha
+$$
+
+---
+
+$$
+\alpha
+$$
+```
+code fence
+```
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -41,7 +41,6 @@
+ ---
+ 
+ tango
+-
+ $$
+ \alpha
+ $$
+@@ -53,7 +52,6 @@
+ ---
+ 
+ $$\alpha$$
+-
+ $$
+ \alpha\beta
+ $$
+@@ -66,14 +64,13 @@
+ 
+ ---
+ 
+-$$
+-  \alpha
+-$$
++  $$$
++    \alpha
++  $$$
+ 
+ ---
+ 
+-$$
+-must
++$$  must
+ \alpha
+ $$
+ 
+@@ -82,7 +79,6 @@
+ $$
+ \alpha
+ $$
+-
+ ```
+ code fence
+ ```
+```
+
+# Output
+
+```md
+<!-- tests from https://github.com/Rokt33r/remark-math/blob/9e13e49/specs/remark-math.spec.js -->
+
+$$
+\beta+\gamma
+$$
+
+---
+
+$\alpha\$
+
+---
+
+\$\alpha\$
+
+---
+
+\\$\alpha$
+
+---
+
+`$`\alpha$
+
+---
+
+$\alpha`$` foo
+
+---
+
+$`\alpha`$
+
+---
+
+$\alpha\$$
+
+---
+
+$$
+\alpha\$
+$$
+
+---
+
+tango
+$$
+\alpha
+$$
+
+---
+
+$$\\alpha$$
+
+---
+
+$$\alpha$$
+$$
+\alpha\beta
+$$
+
+---
+
+> $$
+> \alpha\beta
+> $$
+
+---
+
+  $$$
+    \alpha
+  $$$
+
+---
+
+$$  must
+\alpha
+$$
+
+---
+
+$$
+\alpha
+$$
+```
+code fence
+```
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: <!-- tests from https://github.com/Rokt33r/remark-math/blob/9e13e49/specs/remark-math.spec.js -->
+```

@@ -1,0 +1,254 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/html/multiline-with-trailing-space.md
+---
+# Input
+
+```md
+1.  Some test text, the goal is to have the html table below nested within this number. When formating on save Prettier will continue to add an indent each time pushing the table further and further out of sync. 
+
+    <table class="table table-striped">
+    <tr>
+    <th>Test</th>
+    <th>Table</th>
+    </tr>
+    <tbody>
+        <tr>
+        <td>will</td>  
+        <td>be</td>
+        </tr>
+        <tr>  
+        <td>pushed</td>  
+        <td>When</td>
+        </tr>  
+        <tr>  
+        <td>Format on</td>  
+        <td>Save</td>  
+        </tr>
+    </tbody>
+    </table>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-1.  Some test text, the goal is to have the html table below nested within this number. When formating on save Prettier will continue to add an indent each time pushing the table further and further out of sync.
++1.  Some test text, the goal is to have the html table below nested within this number. When formating on save Prettier will continue to add an indent each time pushing the table further and further out of sync. 
+ 
+     <table class="table table-striped">
+     <tr>
+```
+
+# Output
+
+```md
+1.  Some test text, the goal is to have the html table below nested within this number. When formating on save Prettier will continue to add an indent each time pushing the table further and further out of sync. 
+
+    <table class="table table-striped">
+    <tr>
+    <th>Test</th>
+    <th>Table</th>
+    </tr>
+    <tbody>
+        <tr>
+        <td>will</td>  
+        <td>be</td>
+        </tr>
+        <tr>  
+        <td>pushed</td>  
+        <td>When</td>
+        </tr>  
+        <tr>  
+        <td>Format on</td>  
+        <td>Save</td>  
+        </tr>
+    </tbody>
+    </table>
+```
+
+# Errors
+```
+multiline-with-trailing-space.md:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Parser made no progress while parsing a block.
+  
+    1 │ 1.  Some test text, the goal is to have the html table below nested within this number. When formating on save Prettier will continue to add an indent each time pushing the table further and further out of sync.·
+    2 │ 
+  > 3 │     <table class="table table-striped">
+      │     ^
+    4 │     <tr>
+    5 │     <th>Test</th>
+  
+  i stuck token skipped
+  
+    1 │ 1.  Some test text, the goal is to have the html table below nested within this number. When formating on save Prettier will continue to add an indent each time pushing the table further and further out of sync.·
+    2 │ 
+  > 3 │     <table class="table table-striped">
+      │     ^
+    4 │     <tr>
+    5 │     <th>Test</th>
+  
+  i This is likely a parser bug; the token was skipped to recover.
+  
+multiline-with-trailing-space.md:4:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Parser made no progress while parsing a block.
+  
+    3 │     <table class="table table-striped">
+  > 4 │     <tr>
+      │     ^
+    5 │     <th>Test</th>
+    6 │     <th>Table</th>
+  
+  i stuck token skipped
+  
+    3 │     <table class="table table-striped">
+  > 4 │     <tr>
+      │     ^
+    5 │     <th>Test</th>
+    6 │     <th>Table</th>
+  
+  i This is likely a parser bug; the token was skipped to recover.
+  
+multiline-with-trailing-space.md:5:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Parser made no progress while parsing a block.
+  
+    3 │     <table class="table table-striped">
+    4 │     <tr>
+  > 5 │     <th>Test</th>
+      │     ^
+    6 │     <th>Table</th>
+    7 │     </tr>
+  
+  i stuck token skipped
+  
+    3 │     <table class="table table-striped">
+    4 │     <tr>
+  > 5 │     <th>Test</th>
+      │     ^
+    6 │     <th>Table</th>
+    7 │     </tr>
+  
+  i This is likely a parser bug; the token was skipped to recover.
+  
+multiline-with-trailing-space.md:6:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Parser made no progress while parsing a block.
+  
+    4 │     <tr>
+    5 │     <th>Test</th>
+  > 6 │     <th>Table</th>
+      │     ^
+    7 │     </tr>
+    8 │     <tbody>
+  
+  i stuck token skipped
+  
+    4 │     <tr>
+    5 │     <th>Test</th>
+  > 6 │     <th>Table</th>
+      │     ^
+    7 │     </tr>
+    8 │     <tbody>
+  
+  i This is likely a parser bug; the token was skipped to recover.
+  
+multiline-with-trailing-space.md:7:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Parser made no progress while parsing a block.
+  
+    5 │     <th>Test</th>
+    6 │     <th>Table</th>
+  > 7 │     </tr>
+      │     ^
+    8 │     <tbody>
+    9 │         <tr>
+  
+  i stuck token skipped
+  
+    5 │     <th>Test</th>
+    6 │     <th>Table</th>
+  > 7 │     </tr>
+      │     ^
+    8 │     <tbody>
+    9 │         <tr>
+  
+  i This is likely a parser bug; the token was skipped to recover.
+  
+multiline-with-trailing-space.md:8:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Parser made no progress while parsing a block.
+  
+     6 │     <th>Table</th>
+     7 │     </tr>
+   > 8 │     <tbody>
+       │     ^
+     9 │         <tr>
+    10 │         <td>will</td>··
+  
+  i stuck token skipped
+  
+     6 │     <th>Table</th>
+     7 │     </tr>
+   > 8 │     <tbody>
+       │     ^
+     9 │         <tr>
+    10 │         <td>will</td>··
+  
+  i This is likely a parser bug; the token was skipped to recover.
+  
+multiline-with-trailing-space.md:21:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Parser made no progress while parsing a block.
+  
+    19 │         <td>Save</td>··
+    20 │         </tr>
+  > 21 │     </tbody>
+       │     ^
+    22 │     </table>
+    23 │ 
+  
+  i stuck token skipped
+  
+    19 │         <td>Save</td>··
+    20 │         </tr>
+  > 21 │     </tbody>
+       │     ^
+    22 │     </table>
+    23 │ 
+  
+  i This is likely a parser bug; the token was skipped to recover.
+  
+multiline-with-trailing-space.md:22:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Parser made no progress while parsing a block.
+  
+    20 │         </tr>
+    21 │     </tbody>
+  > 22 │     </table>
+       │     ^
+    23 │ 
+  
+  i stuck token skipped
+  
+    20 │         </tr>
+    21 │     </tbody>
+  > 22 │     </table>
+       │     ^
+    23 │ 
+  
+  i This is likely a parser bug; the token was skipped to recover.
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: 1.  Some test text, the goal is to have the html table below nested within this number. When formating on save Prettier will continue to add an indent each time pushing the table further and further out of sync. 
+```

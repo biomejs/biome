@@ -1,0 +1,94 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/code/angular/angular-ts.md
+---
+# Input
+
+```md
+```angular-ts
+type A ={
+        Ugly:string
+}
+
+@Component({template: `
+@if (orderForm.couponCode().disabled()) {
+      <div class="info">
+        @for (reason of orderForm.couponCode().disabledReasons(); track reason) {
+<p>{{ reason.message }}</p>
+        }</div>
+    }
+  `
+})
+export class Order {
+}
+```
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,21 +1,17 @@
+ ```angular-ts
+-type A = {
+-  Ugly: string;
+-};
++type A ={
++        Ugly:string
++}
+ 
+-@Component({
+-  template: `
+-    @if (orderForm.couponCode().disabled()) {
++@Component({template: `
++@if (orderForm.couponCode().disabled()) {
+       <div class="info">
+-        @for (
+-          reason of orderForm.couponCode().disabledReasons();
+-          track reason
+-        ) {
+-          <p>{{ reason.message }}</p>
+-        }
+-      </div>
++        @for (reason of orderForm.couponCode().disabledReasons(); track reason) {
++<p>{{ reason.message }}</p>
++        }</div>
+     }
+-  `,
++  `
+ })
+-export class Order {}
++export class Order {
++}
+ ```
+```
+
+# Output
+
+```md
+```angular-ts
+type A ={
+        Ugly:string
+}
+
+@Component({template: `
+@if (orderForm.couponCode().disabled()) {
+      <div class="info">
+        @for (reason of orderForm.couponCode().disabledReasons(); track reason) {
+<p>{{ reason.message }}</p>
+        }</div>
+    }
+  `
+})
+export class Order {
+}
+```
+```
+
+# Lines exceeding max width of 80 characters
+```
+    9:         @for (reason of orderForm.couponCode().disabledReasons(); track reason) {
+```

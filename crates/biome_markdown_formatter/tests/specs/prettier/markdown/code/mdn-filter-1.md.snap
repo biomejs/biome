@@ -1,0 +1,58 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/code/mdn-filter-1.md
+---
+# Input
+
+```md
+
+```css
+
+img {
+  filter: drop-shadow(2px 2px 0 hsl(300deg 100% 50%)) drop-shadow(
+      -2px -2px 0 hsl(210deg 100% 50%) ) drop-shadow(2px 2px 0 hsl(120deg 100% 50%)) drop-shadow(
+      -2px -2px 0 hsl(30deg 100% 50%)
+    );
+}
+img + img {
+filter: none;
+}
+```
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,3 +1,4 @@
++
+ ```css
+ 
+ img {
+```
+
+# Output
+
+```md
+
+```css
+
+img {
+  filter: drop-shadow(2px 2px 0 hsl(300deg 100% 50%)) drop-shadow(
+      -2px -2px 0 hsl(210deg 100% 50%) ) drop-shadow(2px 2px 0 hsl(120deg 100% 50%)) drop-shadow(
+      -2px -2px 0 hsl(30deg 100% 50%)
+    );
+}
+img + img {
+filter: none;
+}
+```
+```
+
+# Lines exceeding max width of 80 characters
+```
+    6:       -2px -2px 0 hsl(210deg 100% 50%) ) drop-shadow(2px 2px 0 hsl(120deg 100% 50%)) drop-shadow(
+```

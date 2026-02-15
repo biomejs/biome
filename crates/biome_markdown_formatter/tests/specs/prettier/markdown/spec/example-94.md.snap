@@ -1,0 +1,60 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/spec/example-94.md
+---
+# Input
+
+```md
+`````
+
+```
+aaa
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,4 @@
+-````
++`````
+ 
+ ```
+ aaa
+-````
+```
+
+# Output
+
+```md
+`````
+
+```
+aaa
+```
+
+# Errors
+```
+example-94.md:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unterminated fenced code block, expected closing triple backticks (```).
+  
+  > 1 │ `````
+      │ ^^^^^
+    2 │ 
+    3 │ ```
+  
+  i code block started here
+  
+  > 1 │ `````
+      │ ^^^^^
+    2 │ 
+    3 │ ```
+  
+  i Add closing triple backticks (```) at the start of a new line.
+  
+
+```

@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/paragraph/inline-nodes.md
+---
+# Input
+
+```md
+It removes all original styling[*](#styling-footnote) and ensures that all outputted code conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Prettier-Formatter))
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-It removes all original styling[\*](#styling-footnote) and ensures that all outputted code conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Prettier-Formatter))
++It removes all original styling[*](#styling-footnote) and ensures that all outputted code conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Prettier-Formatter))
+```
+
+# Output
+
+```md
+It removes all original styling[*](#styling-footnote) and ensures that all outputted code conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Prettier-Formatter))
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: It removes all original styling[*](#styling-footnote) and ensures that all outputted code conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Prettier-Formatter))
+```

@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/liquid/unbalanced-mismatched-braces.md
+---
+# Input
+
+```md
+
+Braces {%  doesn't    match so   these   words should not   be   considered as *liquid node* }}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,2 @@
+-Braces {% doesn't match so these words should not be considered as _liquid node_ }}
++
++Braces {%  doesn't    match so   these   words should not   be   considered as *liquid node* }}
+```
+
+# Output
+
+```md
+
+Braces {%  doesn't    match so   these   words should not   be   considered as *liquid node* }}
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: Braces {%  doesn't    match so   these   words should not   be   considered as *liquid node* }}
+```

@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/unordered.md
+---
+# Input
+
+```md
+- first line
+    - second line indented
+- third line
+    - fourth line
+        - fifth line
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ - first line
+-  - second line indented
++    - second line indented
+ - third line
+-  - fourth line
+-    - fifth line
++    - fourth line
++        - fifth line
+```
+
+# Output
+
+```md
+- first line
+    - second line indented
+- third line
+    - fourth line
+        - fifth line
+```

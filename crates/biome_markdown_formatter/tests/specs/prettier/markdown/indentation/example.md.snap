@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/indentation/example.md
+---
+# Input
+
+```md
+- Top level list item 1 
+- Top level list item 2
+  - Nested List item 1
+  - Nested List item 2
+    - Sub-Nested List item 1
+    - Sub-Nested List item 2
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-- Top level list item 1
++- Top level list item 1 
+ - Top level list item 2
+   - Nested List item 1
+   - Nested List item 2
+```
+
+# Output
+
+```md
+- Top level list item 1 
+- Top level list item 2
+  - Nested List item 1
+  - Nested List item 2
+    - Sub-Nested List item 1
+    - Sub-Nested List item 2
+```

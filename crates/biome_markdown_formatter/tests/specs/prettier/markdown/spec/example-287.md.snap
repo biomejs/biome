@@ -1,0 +1,49 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/spec/example-287.md
+---
+# Input
+
+```md
+\*not emphasized*
+\<br/> not a tag
+\[not a link](/foo)
+\`not code`
+1\. not a list
+\* not a list
+\# not a heading
+\[foo]: /url "not a reference"
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,8 @@
+-\*not emphasized\*
++\*not emphasized*
+ \<br/> not a tag
+ \[not a link](/foo)
+ \`not code`
+-1\. not a list \* not a list
++1\. not a list
++\* not a list
+ \# not a heading
+ \[foo]: /url "not a reference"
+```
+
+# Output
+
+```md
+\*not emphasized*
+\<br/> not a tag
+\[not a link](/foo)
+\`not code`
+1\. not a list
+\* not a list
+\# not a heading
+\[foo]: /url "not a reference"
+```
