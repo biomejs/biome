@@ -5,6 +5,7 @@ Profile-*.json
 .idea
 .vs
 .zed/*
+.opencode/plans/
 # Release artifacts
 **/target
 # Ignore test files that contributors could create locally
