@@ -383,6 +383,7 @@ pub mod use_lone_anonymous_operation;
 pub mod use_lone_executable_definition;
 pub mod use_max_params;
 pub mod use_media_caption;
+pub mod use_member_ordering;
 pub mod use_namespace_keyword;
 pub mod use_naming_convention;
 pub mod use_node_assert_strict;

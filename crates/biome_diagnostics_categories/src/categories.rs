@@ -254,6 +254,7 @@ define_categories! {
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",
     "lint/nursery/useLoneAnonymousOperation": "https://biomejs.dev/linter/rules/use-lone-anonymous-operation",
     "lint/nursery/useLoneExecutableDefinition": "https://biomejs.dev/linter/rules/use-lone-executable-definition",
+    "lint/nursery/useMemberOrdering": "https://biomejs.dev/linter/rules/use-member-ordering",
     "lint/nursery/usePlaywrightValidDescribeCallback": "https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback",
     "lint/nursery/useRegexpExec": "https://biomejs.dev/linter/rules/use-regexp-exec",
     "lint/nursery/useRequiredScripts": "https://biomejs.dev/linter/rules/use-required-scripts",

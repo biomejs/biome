@@ -2565,6 +2565,56 @@
 			"additionalProperties": false
 		},
 		"MaxSize": { "type": "integer", "format": "uint64", "minimum": 1 },
+		"MemberGroup": {
+			"description": "Represents a category of class member for ordering purposes.",
+			"type": "string",
+			"enum": [
+				"index-signature",
+				"static-index-signature",
+				"property",
+				"static-property",
+				"protected-property",
+				"protected-static-property",
+				"private-property",
+				"private-static-property",
+				"#private-property",
+				"#private-static-property",
+				"accessor",
+				"static-accessor",
+				"protected-accessor",
+				"protected-static-accessor",
+				"private-accessor",
+				"private-static-accessor",
+				"#private-accessor",
+				"#private-static-accessor",
+				"get-accessor",
+				"static-get-accessor",
+				"protected-get-accessor",
+				"protected-static-get-accessor",
+				"private-get-accessor",
+				"private-static-get-accessor",
+				"#private-get-accessor",
+				"#private-static-get-accessor",
+				"set-accessor",
+				"static-set-accessor",
+				"protected-set-accessor",
+				"protected-static-set-accessor",
+				"private-set-accessor",
+				"private-static-set-accessor",
+				"#private-set-accessor",
+				"#private-static-set-accessor",
+				"constructor",
+				"method",
+				"static-method",
+				"protected-method",
+				"protected-static-method",
+				"private-method",
+				"private-static-method",
+				"#private-method",
+				"#private-static-method",
+				"static-block"
+			]
+		},
 		"MethodSignatureStyle": {
 			"oneOf": [
 				{
@@ -6233,6 +6283,13 @@
 					"description": "Require queries, mutations, subscriptions or fragments each to be located in separate files.\nSee https://biomejs.dev/linter/rules/use-lone-executable-definition",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseLoneExecutableDefinitionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useMemberOrdering": {
+					"description": "Enforce a consistent ordering of class members.\nSee https://biomejs.dev/linter/rules/use-member-ordering",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseMemberOrderingConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10520,6 +10577,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseMemberOrderingOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseMemberOrderingOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseNamespaceKeywordOptions": {
 			"type": "object",
 			"properties": {
@@ -13737,6 +13803,23 @@
 		},
 		"UseMediaCaptionOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseMemberOrderingConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseMemberOrderingOptions" }
+			]
+		},
+		"UseMemberOrderingOptions": {
+			"type": "object",
+			"properties": {
+				"groups": {
+					"description": "Custom order of member groups.\nIf not provided, the default order is used.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/MemberGroup" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseNamespaceKeywordConfiguration": {

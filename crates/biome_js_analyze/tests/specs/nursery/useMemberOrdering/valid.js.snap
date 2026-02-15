@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// Correct order: property -> constructor -> method
+class CorrectOrder {
+    name;
+    constructor() {}
+    method() {}
+}
+
+// Only properties
+class OnlyProperties {
+    a;
+    b;
+    c;
+}
+
+// Only methods
+class OnlyMethods {
+    foo() {}
+    bar() {}
+    baz() {}
+}
+
+// Static property -> instance property
+class StaticFirst {
+    static count = 0;
+    name;
+}
+
+// Static method -> constructor -> method
+class StaticMethodFirst {
+    static create() {}
+    constructor() {}
+    run() {}
+}
+
+// Getter and setter usage
+class WithAccessors {
+    name;
+    get value() { return this._value; }
+    set value(v) { this._value = v; }
+    method() {}
+}
+
+// Empty class
+class Empty {}
+
+// Single member
+class Single {
+    name;
+}
+
+```
