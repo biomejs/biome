@@ -1,8 +1,8 @@
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
 use biome_markdown_formatter::{MarkdownFormatLanguage, context::MarkdownFormatContext};
-use biome_markdown_parser::{MarkdownParseOptions, parse_markdown};
-use biome_markdown_syntax::{MarkdownFileSource, MarkdownLanguage};
+use biome_markdown_parser::parse_markdown;
+use biome_markdown_syntax::MarkdownLanguage;
 use biome_parser::AnyParse;
 use biome_service::{
     settings::{ServiceLanguage, Settings},
