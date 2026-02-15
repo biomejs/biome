@@ -381,7 +381,7 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     parsed
 }
 
-fn with_virtual_line_start<F, R>(p: &mut MarkdownParser, start: TextSize, op: F) -> R
+pub(crate) fn with_virtual_line_start<F, R>(p: &mut MarkdownParser, start: TextSize, op: F) -> R
 where
     F: FnOnce(&mut MarkdownParser) -> R,
 {

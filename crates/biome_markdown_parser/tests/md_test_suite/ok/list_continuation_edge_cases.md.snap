@@ -1,0 +1,612 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+# 1) Quote-only blank line inside list item
+
+- > quoted line
+  >
+  > continued quote line
+
+- sibling item
+
+# 2) Marker-only item followed by blank line
+
+- 
+
+Outside paragraph after marker-only list item.
+
+# 3) Nested list with continuation requiring virtual line restore
+
+- outer item
+  - inner item
+    inner continuation
+  outer continuation at parent indentation
+
+- next outer item
+
+# 4) Lazy continuation with insufficient indent after paragraph
+
+- first line in item
+lazy continuation line
+- next item
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@0..1 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..3 " 1" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@3..4 ")" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@4..10 " Quote" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@10..11 "-" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@11..43 "only blank line inside list item" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@43..44 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@44..45 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@45..46 "-" [] [],
+                    content: MdBlockList [
+                        MdQuote {
+                            marker_token: R_ANGLE@46..48 ">" [Skipped(" ")] [],
+                            content: MdBlockList [
+                                MdParagraph {
+                                    list: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@48..60 " quoted line" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@60..61 "\n" [] [],
+                                        },
+                                    ],
+                                    hard_line: missing (optional),
+                                },
+                                MdNewline {
+                                    value_token: NEWLINE@61..65 "\n" [Skipped(" "), Skipped(" "), Skipped(">")] [],
+                                },
+                                MdParagraph {
+                                    list: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@65..89 "continued quote line" [Skipped(" "), Skipped(" "), Skipped(">"), Skipped(" ")] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@89..90 "\n" [] [],
+                                        },
+                                    ],
+                                    hard_line: missing (optional),
+                                },
+                            ],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@90..91 "\n" [] [],
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: MINUS@91..92 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@92..105 " sibling item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@105..106 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@106..107 "\n" [] [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@107..108 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@108..110 " 2" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@110..111 ")" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@111..118 " Marker" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@118..119 "-" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@119..151 "only item followed by blank line" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@151..152 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@152..153 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@153..155 "- " [] [],
+                    content: MdBlockList [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@155..157 "\n" [Skipped("\n")] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@157..187 "Outside paragraph after marker" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@187..188 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@188..203 "only list item." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@203..204 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@204..205 "\n" [] [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@205..206 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@206..208 " 3" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@208..209 ")" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@209..270 " Nested list with continuation requiring virtual line restore" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@270..271 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@271..272 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@272..273 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@273..284 " outer item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@284..285 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdBulletListItem {
+                            md_bullet_list: MdBulletList [
+                                MdBullet {
+                                    bullet: MINUS@285..288 "-" [Skipped(" "), Skipped(" ")] [],
+                                    content: MdBlockList [
+                                        MdParagraph {
+                                            list: MdInlineItemList [
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@288..299 " inner item" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@299..300 "\n" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@300..322 "inner continuation" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@322..323 "\n" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@323..324 " " [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@324..325 " " [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@325..365 "outer continuation at parent indentation" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@365..366 "\n" [] [],
+                                                },
+                                            ],
+                                            hard_line: missing (optional),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@366..367 "\n" [] [],
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: MINUS@367..368 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@368..384 " next outer item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@384..385 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@385..386 "\n" [] [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@386..387 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@387..389 " 4" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@389..390 ")" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@390..449 " Lazy continuation with insufficient indent after paragraph" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@449..450 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@450..451 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@451..452 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@452..471 " first line in item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@471..472 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@472..494 "lazy continuation line" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@494..495 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: MINUS@495..496 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@496..506 " next item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@506..507 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@507..507 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..507
+  0: (empty)
+  1: MD_BLOCK_LIST@0..507
+    0: MD_HEADER@0..43
+      0: MD_HASH_LIST@0..1
+        0: MD_HASH@0..1
+          0: HASH@0..1 "#" [] []
+      1: MD_PARAGRAPH@1..43
+        0: MD_INLINE_ITEM_LIST@1..43
+          0: MD_TEXTUAL@1..3
+            0: MD_TEXTUAL_LITERAL@1..3 " 1" [] []
+          1: MD_TEXTUAL@3..4
+            0: MD_TEXTUAL_LITERAL@3..4 ")" [] []
+          2: MD_TEXTUAL@4..10
+            0: MD_TEXTUAL_LITERAL@4..10 " Quote" [] []
+          3: MD_TEXTUAL@10..11
+            0: MD_TEXTUAL_LITERAL@10..11 "-" [] []
+          4: MD_TEXTUAL@11..43
+            0: MD_TEXTUAL_LITERAL@11..43 "only blank line inside list item" [] []
+        1: (empty)
+      2: MD_HASH_LIST@43..43
+    1: MD_NEWLINE@43..44
+      0: NEWLINE@43..44 "\n" [] []
+    2: MD_NEWLINE@44..45
+      0: NEWLINE@44..45 "\n" [] []
+    3: MD_BULLET_LIST_ITEM@45..106
+      0: MD_BULLET_LIST@45..106
+        0: MD_BULLET@45..91
+          0: MINUS@45..46 "-" [] []
+          1: MD_BLOCK_LIST@46..91
+            0: MD_QUOTE@46..90
+              0: R_ANGLE@46..48 ">" [Skipped(" ")] []
+              1: MD_BLOCK_LIST@48..90
+                0: MD_PARAGRAPH@48..61
+                  0: MD_INLINE_ITEM_LIST@48..61
+                    0: MD_TEXTUAL@48..60
+                      0: MD_TEXTUAL_LITERAL@48..60 " quoted line" [] []
+                    1: MD_TEXTUAL@60..61
+                      0: MD_TEXTUAL_LITERAL@60..61 "\n" [] []
+                  1: (empty)
+                1: MD_NEWLINE@61..65
+                  0: NEWLINE@61..65 "\n" [Skipped(" "), Skipped(" "), Skipped(">")] []
+                2: MD_PARAGRAPH@65..90
+                  0: MD_INLINE_ITEM_LIST@65..90
+                    0: MD_TEXTUAL@65..89
+                      0: MD_TEXTUAL_LITERAL@65..89 "continued quote line" [Skipped(" "), Skipped(" "), Skipped(">"), Skipped(" ")] []
+                    1: MD_TEXTUAL@89..90
+                      0: MD_TEXTUAL_LITERAL@89..90 "\n" [] []
+                  1: (empty)
+            1: MD_NEWLINE@90..91
+              0: NEWLINE@90..91 "\n" [] []
+        1: MD_BULLET@91..106
+          0: MINUS@91..92 "-" [] []
+          1: MD_BLOCK_LIST@92..106
+            0: MD_PARAGRAPH@92..106
+              0: MD_INLINE_ITEM_LIST@92..106
+                0: MD_TEXTUAL@92..105
+                  0: MD_TEXTUAL_LITERAL@92..105 " sibling item" [] []
+                1: MD_TEXTUAL@105..106
+                  0: MD_TEXTUAL_LITERAL@105..106 "\n" [] []
+              1: (empty)
+    4: MD_NEWLINE@106..107
+      0: NEWLINE@106..107 "\n" [] []
+    5: MD_HEADER@107..151
+      0: MD_HASH_LIST@107..108
+        0: MD_HASH@107..108
+          0: HASH@107..108 "#" [] []
+      1: MD_PARAGRAPH@108..151
+        0: MD_INLINE_ITEM_LIST@108..151
+          0: MD_TEXTUAL@108..110
+            0: MD_TEXTUAL_LITERAL@108..110 " 2" [] []
+          1: MD_TEXTUAL@110..111
+            0: MD_TEXTUAL_LITERAL@110..111 ")" [] []
+          2: MD_TEXTUAL@111..118
+            0: MD_TEXTUAL_LITERAL@111..118 " Marker" [] []
+          3: MD_TEXTUAL@118..119
+            0: MD_TEXTUAL_LITERAL@118..119 "-" [] []
+          4: MD_TEXTUAL@119..151
+            0: MD_TEXTUAL_LITERAL@119..151 "only item followed by blank line" [] []
+        1: (empty)
+      2: MD_HASH_LIST@151..151
+    6: MD_NEWLINE@151..152
+      0: NEWLINE@151..152 "\n" [] []
+    7: MD_NEWLINE@152..153
+      0: NEWLINE@152..153 "\n" [] []
+    8: MD_BULLET_LIST_ITEM@153..155
+      0: MD_BULLET_LIST@153..155
+        0: MD_BULLET@153..155
+          0: MINUS@153..155 "- " [] []
+          1: MD_BLOCK_LIST@155..155
+    9: MD_NEWLINE@155..157
+      0: NEWLINE@155..157 "\n" [Skipped("\n")] []
+    10: MD_PARAGRAPH@157..204
+      0: MD_INLINE_ITEM_LIST@157..204
+        0: MD_TEXTUAL@157..187
+          0: MD_TEXTUAL_LITERAL@157..187 "Outside paragraph after marker" [] []
+        1: MD_TEXTUAL@187..188
+          0: MD_TEXTUAL_LITERAL@187..188 "-" [] []
+        2: MD_TEXTUAL@188..203
+          0: MD_TEXTUAL_LITERAL@188..203 "only list item." [] []
+        3: MD_TEXTUAL@203..204
+          0: MD_TEXTUAL_LITERAL@203..204 "\n" [] []
+      1: (empty)
+    11: MD_NEWLINE@204..205
+      0: NEWLINE@204..205 "\n" [] []
+    12: MD_HEADER@205..270
+      0: MD_HASH_LIST@205..206
+        0: MD_HASH@205..206
+          0: HASH@205..206 "#" [] []
+      1: MD_PARAGRAPH@206..270
+        0: MD_INLINE_ITEM_LIST@206..270
+          0: MD_TEXTUAL@206..208
+            0: MD_TEXTUAL_LITERAL@206..208 " 3" [] []
+          1: MD_TEXTUAL@208..209
+            0: MD_TEXTUAL_LITERAL@208..209 ")" [] []
+          2: MD_TEXTUAL@209..270
+            0: MD_TEXTUAL_LITERAL@209..270 " Nested list with continuation requiring virtual line restore" [] []
+        1: (empty)
+      2: MD_HASH_LIST@270..270
+    13: MD_NEWLINE@270..271
+      0: NEWLINE@270..271 "\n" [] []
+    14: MD_NEWLINE@271..272
+      0: NEWLINE@271..272 "\n" [] []
+    15: MD_BULLET_LIST_ITEM@272..385
+      0: MD_BULLET_LIST@272..385
+        0: MD_BULLET@272..367
+          0: MINUS@272..273 "-" [] []
+          1: MD_BLOCK_LIST@273..367
+            0: MD_PARAGRAPH@273..285
+              0: MD_INLINE_ITEM_LIST@273..285
+                0: MD_TEXTUAL@273..284
+                  0: MD_TEXTUAL_LITERAL@273..284 " outer item" [] []
+                1: MD_TEXTUAL@284..285
+                  0: MD_TEXTUAL_LITERAL@284..285 "\n" [] []
+              1: (empty)
+            1: MD_BULLET_LIST_ITEM@285..366
+              0: MD_BULLET_LIST@285..366
+                0: MD_BULLET@285..366
+                  0: MINUS@285..288 "-" [Skipped(" "), Skipped(" ")] []
+                  1: MD_BLOCK_LIST@288..366
+                    0: MD_PARAGRAPH@288..366
+                      0: MD_INLINE_ITEM_LIST@288..366
+                        0: MD_TEXTUAL@288..299
+                          0: MD_TEXTUAL_LITERAL@288..299 " inner item" [] []
+                        1: MD_TEXTUAL@299..300
+                          0: MD_TEXTUAL_LITERAL@299..300 "\n" [] []
+                        2: MD_TEXTUAL@300..322
+                          0: MD_TEXTUAL_LITERAL@300..322 "inner continuation" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+                        3: MD_TEXTUAL@322..323
+                          0: MD_TEXTUAL_LITERAL@322..323 "\n" [] []
+                        4: MD_TEXTUAL@323..324
+                          0: MD_TEXTUAL_LITERAL@323..324 " " [] []
+                        5: MD_TEXTUAL@324..325
+                          0: MD_TEXTUAL_LITERAL@324..325 " " [] []
+                        6: MD_TEXTUAL@325..365
+                          0: MD_TEXTUAL_LITERAL@325..365 "outer continuation at parent indentation" [] []
+                        7: MD_TEXTUAL@365..366
+                          0: MD_TEXTUAL_LITERAL@365..366 "\n" [] []
+                      1: (empty)
+            2: MD_NEWLINE@366..367
+              0: NEWLINE@366..367 "\n" [] []
+        1: MD_BULLET@367..385
+          0: MINUS@367..368 "-" [] []
+          1: MD_BLOCK_LIST@368..385
+            0: MD_PARAGRAPH@368..385
+              0: MD_INLINE_ITEM_LIST@368..385
+                0: MD_TEXTUAL@368..384
+                  0: MD_TEXTUAL_LITERAL@368..384 " next outer item" [] []
+                1: MD_TEXTUAL@384..385
+                  0: MD_TEXTUAL_LITERAL@384..385 "\n" [] []
+              1: (empty)
+    16: MD_NEWLINE@385..386
+      0: NEWLINE@385..386 "\n" [] []
+    17: MD_HEADER@386..449
+      0: MD_HASH_LIST@386..387
+        0: MD_HASH@386..387
+          0: HASH@386..387 "#" [] []
+      1: MD_PARAGRAPH@387..449
+        0: MD_INLINE_ITEM_LIST@387..449
+          0: MD_TEXTUAL@387..389
+            0: MD_TEXTUAL_LITERAL@387..389 " 4" [] []
+          1: MD_TEXTUAL@389..390
+            0: MD_TEXTUAL_LITERAL@389..390 ")" [] []
+          2: MD_TEXTUAL@390..449
+            0: MD_TEXTUAL_LITERAL@390..449 " Lazy continuation with insufficient indent after paragraph" [] []
+        1: (empty)
+      2: MD_HASH_LIST@449..449
+    18: MD_NEWLINE@449..450
+      0: NEWLINE@449..450 "\n" [] []
+    19: MD_NEWLINE@450..451
+      0: NEWLINE@450..451 "\n" [] []
+    20: MD_BULLET_LIST_ITEM@451..507
+      0: MD_BULLET_LIST@451..507
+        0: MD_BULLET@451..495
+          0: MINUS@451..452 "-" [] []
+          1: MD_BLOCK_LIST@452..495
+            0: MD_PARAGRAPH@452..495
+              0: MD_INLINE_ITEM_LIST@452..495
+                0: MD_TEXTUAL@452..471
+                  0: MD_TEXTUAL_LITERAL@452..471 " first line in item" [] []
+                1: MD_TEXTUAL@471..472
+                  0: MD_TEXTUAL_LITERAL@471..472 "\n" [] []
+                2: MD_TEXTUAL@472..494
+                  0: MD_TEXTUAL_LITERAL@472..494 "lazy continuation line" [] []
+                3: MD_TEXTUAL@494..495
+                  0: MD_TEXTUAL_LITERAL@494..495 "\n" [] []
+              1: (empty)
+        1: MD_BULLET@495..507
+          0: MINUS@495..496 "-" [] []
+          1: MD_BLOCK_LIST@496..507
+            0: MD_PARAGRAPH@496..507
+              0: MD_INLINE_ITEM_LIST@496..507
+                0: MD_TEXTUAL@496..506
+                  0: MD_TEXTUAL_LITERAL@496..506 " next item" [] []
+                1: MD_TEXTUAL@506..507
+                  0: MD_TEXTUAL_LITERAL@506..507 "\n" [] []
+              1: (empty)
+  2: EOF@507..507 "" [] []
+
+```
