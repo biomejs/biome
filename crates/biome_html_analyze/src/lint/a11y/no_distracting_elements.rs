@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// - [WCAG 2.2.2](https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide)
     ///
     pub NoDistractingElements {
-        version: "next",
+        version: "2.4.0",
         name: "noDistractingElements",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-distracting-elements").same()],

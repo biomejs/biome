@@ -1,6 +1,6 @@
 {
   "name": "@biomejs/cli-linux-arm64",
-  "version": "2.3.15",
+  "version": "2.4.0",
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",

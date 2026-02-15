@@ -42,7 +42,7 @@ declare_lint_rule! {
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     ///
     pub UseIframeTitle {
-        version: "next",
+        version: "2.4.0",
         name: "useIframeTitle",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("iframe-has-title").same()],

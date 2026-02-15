@@ -33,7 +33,7 @@ declare_lint_rule! {
     /// <html lang="en-GB" />
     /// ```
     pub UseValidLang {
-        version: "next",
+        version: "2.4.0",
         name: "useValidLang",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("lang").same()],

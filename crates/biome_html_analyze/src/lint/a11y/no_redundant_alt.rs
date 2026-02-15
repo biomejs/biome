@@ -37,7 +37,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoRedundantAlt {
-        version: "next",
+        version: "2.4.0",
         name: "noRedundantAlt",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("img-redundant-alt").same()],
