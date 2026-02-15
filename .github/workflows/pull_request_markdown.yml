@@ -23,4 +23,5 @@ jobs:
             #xtask/coverage
             #target
             #crates/biome_markdown_parser/tests
+            #crates/biome_markdown_formatter/tests
             #crates/biome_js_formatter/report*.md
