@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-script-setup-to-refs.vue
+---
+# Input
+```ts
+import { toRefs } from 'vue';
+const props = defineProps<{ toast: string; number?: number }>()
+const { toast } = toRefs(props)
+
+```
