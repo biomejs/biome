@@ -65,6 +65,10 @@ export interface Configuration {
 	 */
 	linter?: LinterConfiguration;
 	/**
+	 * Specific configuration for the Markdown language
+	 */
+	markdown?: MarkdownConfiguration;
+	/**
 	 * A list of granular patterns that should be applied only to a sub set of files
 	 */
 	overrides?: Overrides;
@@ -360,6 +364,12 @@ match these patterns.
 	 * List of rules
 	 */
 	rules?: Rules;
+}
+/**
+ * Options applied to Markdown files
+ */
+export interface MarkdownConfiguration {
+	formatter?: MarkdownFormatterConfiguration;
 }
 export type Overrides = OverridePattern[];
 export type Plugins = PluginConfiguration[];
@@ -926,6 +936,27 @@ export interface Rules {
 	security?: SeverityOrSecurity;
 	style?: SeverityOrStyle;
 	suspicious?: SeverityOrSuspicious;
+}
+/**
+ * Options that changes how the Markdown formatter behaves
+ */
+export interface MarkdownFormatterConfiguration {
+	/**
+	 * Control the formatter for Markdown (and its super languages) files.
+	 */
+	enabled?: Bool;
+	/**
+	 * The indent style applied to Markdown files.
+	 */
+	indentStyle?: IndentStyle;
+	/**
+	 * The size of the indentation applied to Markdown files. Default to 2.
+	 */
+	indentWidth?: IndentWidth;
+	/**
+	 * What's the max width of a line applied to Markdown files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
 }
 export interface OverridePattern {
 	/**

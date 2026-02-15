@@ -55,6 +55,10 @@
 			"description": "The configuration for the linter",
 			"anyOf": [{ "$ref": "#/$defs/LinterConfiguration" }, { "type": "null" }]
 		},
+		"markdown": {
+			"description": "Specific configuration for the Markdown language",
+			"anyOf": [{ "$ref": "#/$defs/MarkdownConfiguration" }, { "type": "null" }]
+		},
 		"overrides": {
 			"description": "A list of granular patterns that should be applied only to a sub set of files",
 			"anyOf": [{ "$ref": "#/$defs/Overrides" }, { "type": "null" }]
@@ -2560,6 +2564,42 @@
 				"rules": {
 					"description": "List of rules",
 					"anyOf": [{ "$ref": "#/$defs/Rules" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"MarkdownConfiguration": {
+			"description": "Options applied to Markdown files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"anyOf": [
+						{ "$ref": "#/$defs/MarkdownFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"MarkdownFormatterConfiguration": {
+			"description": "Options that changes how the Markdown formatter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for Markdown (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"indentStyle": {
+					"description": "The indent style applied to Markdown files.",
+					"anyOf": [{ "$ref": "#/$defs/IndentStyle" }, { "type": "null" }]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to Markdown files. Default to 2.",
+					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to Markdown files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

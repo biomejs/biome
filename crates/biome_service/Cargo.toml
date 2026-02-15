@@ -55,35 +55,37 @@ biome_markdown_parser   = { workspace = true }
 biome_markdown_factory  = { workspace = true }
 biome_markdown_syntax   = { workspace = true }
 biome_markdown_formatter = { workspace = true }
-biome_module_graph      = { workspace = true, features = ["serde"] }
-biome_package           = { workspace = true }
-biome_parser            = { workspace = true }
-biome_plugin_loader     = { workspace = true }
-biome_project_layout    = { workspace = true }
-biome_resolver          = { workspace = true }
-biome_rowan             = { workspace = true, features = ["serde"] }
-biome_string_case       = { workspace = true }
-biome_text_edit         = { workspace = true }
-boxcar                  = { workspace = true }
-bpaf                    = { workspace = true }
-camino                  = { workspace = true }
-crossbeam               = { workspace = true }
-either                  = { workspace = true }
-enumflags2              = { workspace = true, features = ["serde"] }
-getrandom               = { workspace = true, features = ["js"] }
-ignore                  = { workspace = true }
-notify                  = { version = "8.2.0", features = ["crossbeam-channel"] }
-papaya                  = { workspace = true }
-rayon                   = { workspace = true }
-regex                   = { workspace = true }
-rustc-hash              = { workspace = true }
-schemars                = { workspace = true, optional = true }
-serde                   = { workspace = true, features = ["derive"] }
-serde_json              = { workspace = true, features = ["raw_value"] }
-smallvec                = { workspace = true, features = ["serde"] }
-tokio                   = { workspace = true, features = ["sync"] }
-tracing                 = { workspace = true, features = ["attributes", "log"] }
-web-time                = { workspace = true }
+biome_markdown_parser    = { workspace = true }
+biome_markdown_syntax    = { workspace = true }
+biome_module_graph       = { workspace = true, features = ["serde"] }
+biome_package            = { workspace = true }
+biome_parser             = { workspace = true }
+biome_plugin_loader      = { workspace = true }
+biome_project_layout     = { workspace = true }
+biome_resolver           = { workspace = true }
+biome_rowan              = { workspace = true, features = ["serde"] }
+biome_string_case        = { workspace = true }
+biome_text_edit          = { workspace = true }
+boxcar                   = { workspace = true }
+bpaf                     = { workspace = true }
+camino                   = { workspace = true }
+crossbeam                = { workspace = true }
+either                   = { workspace = true }
+enumflags2               = { workspace = true, features = ["serde"] }
+getrandom                = { workspace = true, features = ["js"] }
+ignore                   = { workspace = true }
+notify                   = { version = "8.2.0", features = ["crossbeam-channel"] }
+papaya                   = { workspace = true }
+rayon                    = { workspace = true }
+regex                    = { workspace = true }
+rustc-hash               = { workspace = true }
+schemars                 = { workspace = true, optional = true }
+serde                    = { workspace = true, features = ["derive"] }
+serde_json               = { workspace = true, features = ["raw_value"] }
+smallvec                 = { workspace = true, features = ["serde"] }
+tokio                    = { workspace = true, features = ["sync"] }
+tracing                  = { workspace = true, features = ["attributes", "log"] }
+web-time                 = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true }
