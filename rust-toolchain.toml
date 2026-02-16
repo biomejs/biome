@@ -2,5 +2,5 @@
 # The default profile includes rustc, rust-std, cargo, rust-docs, rustfmt and clippy.
 # https://rust-lang.github.io/rustup/concepts/profiles.html
 profile = "default"
-channel = "1.93.0"
+channel = "1.93.1"
 targets = ["wasm32-unknown-unknown"]
