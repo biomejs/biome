@@ -5,7 +5,10 @@ mod vue;
 
 use crate::parser::HtmlParser;
 use crate::syntax::HtmlSyntaxFeatures::{Astro, DoubleTextExpressions, Svelte, Vue};
-use crate::syntax::astro::{parse_astro_fence, parse_astro_spread_or_expression};
+use crate::syntax::astro::{
+    is_at_astro_directive_start, parse_astro_directive, parse_astro_fence,
+    parse_astro_spread_or_expression,
+};
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
     is_at_svelte_directive_start, is_at_svelte_keyword, parse_attach_attribute,
@@ -131,7 +134,7 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
 /// will emit diagnostics. We want to allow them if they have no special meaning.
 #[inline(always)]
 fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
-    // Only Vue files use InsideTagVue context, which has Vue-specific directive parsing (v-bind, :, @, etc.)
+    // Only Vue files use InsideTagWithDirectives context, which has Vue-specific directive parsing (v-bind, :, @, etc.)
     // Svelte and Astro use regular InsideTag context as they have different directive syntax
     if Vue.is_supported(p) {
         HtmlLexContext::InsideTagWithDirectives
@@ -460,6 +463,16 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             parse_vue_v_slot_shorthand_directive,
             |p, m| disabled_vue(p, m.range(p)),
         ),
+        // Check for Astro directives before Vue colon shorthand
+        _ if is_at_astro_directive_start(p) => {
+            Astro.parse_exclusive_syntax(p, parse_astro_directive, |p, m| {
+                p.err_builder(
+                    "Astro directives are only valid inside Astro files.",
+                    m.range(p),
+                )
+                .with_hint("Remove it or rename the file to have the .astro extension.")
+            })
+        }
         T!['{'] if Svelte.is_supported(p) => parse_svelte_spread_or_expression(p),
         T!['{'] if Astro.is_supported(p) => parse_astro_spread_or_expression(p),
         // Keep previous behaviour so that invalid documents are still parsed.
