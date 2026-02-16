@@ -224,6 +224,37 @@ import z from "zod";
 import { sure } from "sure.js";
 import s from "src/utils";
 
+// Always considered as used
+interface Props {
+  name: string;
+}
+
+type Props = {
+  name: string;
+};
+
+// Still reported as unused
+interface Foo {
+  name: string;
+}
+
+type Bar = {
+  name: string;
+};
+
+function doSomething() {
+  // Still reported as unused, Props interface must be at top-level
+  interface Props {
+    name: string;
+  }
+
+  type Props = {
+    name: string;
+  };
+}
+
+const { name } = Astro.props;
+
 let schema = z.object().optional();
 schema + sure()
 ---
