@@ -3,7 +3,9 @@ use super::parse_error::expected_expression;
 use super::url::{is_at_url_function, parse_url_function};
 use crate::parser::CssParser;
 use crate::syntax::css_modules::v_bind_not_allowed;
-use crate::syntax::parse_error::{expected_component_value, expected_declaration_item};
+use crate::syntax::parse_error::{
+    expected_component_value, expected_declaration_item, expected_identifier,
+};
 use crate::syntax::property::parse_generic_component_value;
 use crate::syntax::scss::{
     is_at_scss_qualified_name, is_at_scss_qualified_name_function, parse_scss_function_name,
@@ -112,9 +114,9 @@ pub(crate) fn parse_function(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_scss_function_name(p);
+        parse_scss_function_name(p).or_add_diagnostic(p, expected_identifier);
     } else {
-        parse_regular_identifier(p).ok();
+        parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
     }
     p.bump(T!['(']);
     ParameterList.parse_list(p);

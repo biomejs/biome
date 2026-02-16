@@ -55,10 +55,10 @@ pub(crate) fn is_at_scss_qualified_name_function(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-pub(crate) fn parse_scss_function_name(p: &mut CssParser) {
+pub(crate) fn parse_scss_function_name(p: &mut CssParser) -> ParsedSyntax {
     if is_at_scss_qualified_name(p) {
-        parse_scss_qualified_name(p).ok();
+        parse_scss_qualified_name(p)
     } else {
-        parse_regular_identifier(p).ok();
+        parse_regular_identifier(p)
     }
 }
