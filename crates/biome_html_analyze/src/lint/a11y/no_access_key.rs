@@ -42,7 +42,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "noAccessKey",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("no-access-key").same()],
+        sources: &[RuleSource::EslintJsxA11y("no-access-key").same(), RuleSource::HtmlEslint("no-accesskey-attrs").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
