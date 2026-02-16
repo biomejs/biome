@@ -29,7 +29,9 @@ pub(crate) fn parse_scss_identifier(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn is_at_scss_qualified_name(p: &mut CssParser) -> bool {
-    is_at_identifier(p) && p.nth_at(1, T![.]) && (p.nth_at(2, T![$]) || is_nth_at_identifier(p, 2))
+    is_at_identifier(p)
+        && p.nth_at(1, T![.])
+        && ((p.nth_at(2, T![$]) && is_nth_at_identifier(p, 3)) || is_nth_at_identifier(p, 2))
 }
 
 #[inline]
