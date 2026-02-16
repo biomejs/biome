@@ -59,7 +59,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoPlaywrightMissingAwait {
-        version: "next",
+        version: "2.4.2",
         name: "noPlaywrightMissingAwait",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("missing-playwright-await").same()],

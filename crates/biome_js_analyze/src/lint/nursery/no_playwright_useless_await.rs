@@ -52,7 +52,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoPlaywrightUselessAwait {
-        version: "next",
+        version: "2.4.2",
         name: "noPlaywrightUselessAwait",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-useless-await").same()],
