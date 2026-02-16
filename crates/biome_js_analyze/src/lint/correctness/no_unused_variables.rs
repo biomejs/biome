@@ -97,7 +97,7 @@ declare_lint_rule! {
     ///
     /// In Astro files, a top-level interface or a type alias named `Props` is always ignored
     /// as it's implicitly read by the framework.
-    /// ```astro
+    /// ```astro,ignore
     /// ---
     /// interface Props {
     ///   name: string;
