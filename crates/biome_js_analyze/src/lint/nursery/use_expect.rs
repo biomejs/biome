@@ -43,7 +43,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseExpect {
-        version: "next",
+        version: "2.4.2",
         name: "useExpect",
         language: "js",
         sources: &[

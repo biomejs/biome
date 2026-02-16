@@ -46,7 +46,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UsePlaywrightValidDescribeCallback {
-        version: "next",
+        version: "2.4.2",
         name: "usePlaywrightValidDescribeCallback",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("valid-describe-callback").same()],
