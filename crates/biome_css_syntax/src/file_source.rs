@@ -189,6 +189,7 @@ impl CssFileSource {
         // We assume the file extension is normalized to lowercase
         match extension {
             "css" => Ok(Self::css()),
+            #[cfg(feature = "scss")]
             "scss" => Ok(Self::scss()),
             "module.css" => Ok(Self::new_css_modules()),
             _ => Err(FileSourceError::UnknownExtension),
@@ -204,6 +205,7 @@ impl CssFileSource {
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "css" => Ok(Self::css()),
+            #[cfg(feature = "scss")]
             "scss" => Ok(Self::scss()),
             "tailwindcss" => Ok(Self::tailwind_css()),
             _ => Err(FileSourceError::UnknownLanguageId),
