@@ -31,7 +31,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useButtonType",
         language: "html",
-        sources: &[RuleSource::EslintReact("button-has-type").same()],
+        sources: &[RuleSource::EslintReact("button-has-type").same(), RuleSource::HtmlEslint("require-button-type").same()],
         recommended: true,
         severity: Severity::Error,
     }

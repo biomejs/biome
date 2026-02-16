@@ -328,6 +328,15 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintVueJs("space-infix-ops"), FormatterCovers),
     UnsupportedRule(EslintVueJs("space-unary-ops"), FormatterCovers),
     UnsupportedRule(EslintVueJs("template-curly-spacing"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("attrs-newline"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("element-newline"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("indent"), FormatterOption("indentWidth")),
+    UnsupportedRule(HtmlEslint("lowercase"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("no-extra-spacing-attrs"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("no-extra-spacing-text"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("no-multiple-empty-lines"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("no-trailing-spaces"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("quotes"), FormatterCovers),
 ];
 
 #[cfg(test)]
