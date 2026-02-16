@@ -402,13 +402,13 @@ pub(crate) trait CommandRunner {
             open_uninitialized: true,
         })?;
 
-        let stdin = self.get_stdin(console, execution.as_ref())?;
+        let stdin = execution.get_stdin_file_path().map(Utf8PathBuf::from);
         let computed_scan_kind =
             execution.scan_kind_computer(ProjectScanComputer::new(&configuration));
 
         let scan_kind = derive_best_scan_kind(
             computed_scan_kind,
-            stdin.as_ref(),
+            stdin.as_deref(),
             &root_configuration_dir,
             &working_dir,
             &configuration,
