@@ -32,10 +32,10 @@ impl AstroClientDirective {
     }
 }
 impl AstroDirectiveValue {
-    pub fn with_colon_token_token(self, element: Option<SyntaxToken>) -> Self {
+    pub fn with_colon_token_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
     pub fn with_name(self, element: HtmlAttributeName) -> Self {

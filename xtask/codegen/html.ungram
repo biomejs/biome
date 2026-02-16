@@ -746,8 +746,7 @@ AstroServerDirective =
 
 // <Component client:load />
 //                   ^^^^^
-// Note: In Astro files, the colon is not a separate token due to InsideTag lexing context
 AstroDirectiveValue =
-	colon_token: ':'?
+	colon_token: ':'
 	name: HtmlAttributeName
 	initializer: HtmlAttributeInitializerClause?

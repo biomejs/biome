@@ -120,8 +120,8 @@ impl AstroDirectiveValue {
             initializer: self.initializer(),
         }
     }
-    pub fn colon_token_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 0usize)
+    pub fn colon_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn name(&self) -> SyntaxResult<HtmlAttributeName> {
         support::required_node(&self.syntax, 1usize)
@@ -140,7 +140,7 @@ impl Serialize for AstroDirectiveValue {
 }
 #[derive(Serialize)]
 pub struct AstroDirectiveValueFields {
-    pub colon_token_token: Option<SyntaxToken>,
+    pub colon_token_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<HtmlAttributeName>,
     pub initializer: Option<HtmlAttributeInitializerClause>,
 }
@@ -4499,7 +4499,7 @@ impl std::fmt::Debug for AstroDirectiveValue {
             f.debug_struct("AstroDirectiveValue")
                 .field(
                     "colon_token_token",
-                    &support::DebugOptionalElement(self.colon_token_token()),
+                    &support::DebugSyntaxResult(self.colon_token_token()),
                 )
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
