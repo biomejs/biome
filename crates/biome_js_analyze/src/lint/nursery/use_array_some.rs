@@ -29,6 +29,18 @@ declare_lint_rule! {
     /// if (array.find(predicate)) {}
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// array.find(predicate) != null;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// array.findLastIndex(predicate) !== -1;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// if (array.findLast(predicate)) {}
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
@@ -40,7 +52,7 @@ declare_lint_rule! {
         name: "useArraySome",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintUnicorn("prefer-array-some").same()],
+        sources: &[RuleSource::EslintUnicorn("prefer-array-some").inspired()],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -76,11 +88,13 @@ impl Rule for UseArraySome {
             return detect_find_index_comparison_pattern(call, &method_name);
         }
 
-        if method_name == "find" || method_name == "findLast" {
-            if let Some(state) = detect_find_existence_comparison_pattern(call, &method_name) {
-                return Some(state);
-            }
+        if (method_name == "find" || method_name == "findLast")
+            && let Some(state) = detect_find_existence_comparison_pattern(call, &method_name)
+        {
+            return Some(state);
+        }
 
+        if method_name == "find" || method_name == "findLast" {
             if is_in_boolean_context(call.syntax()).unwrap_or(false) {
                 return Some(UseArraySomeState::Suggest {
                     range: call.range(),
