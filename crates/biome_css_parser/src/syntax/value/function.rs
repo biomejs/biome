@@ -5,9 +5,6 @@ use crate::parser::CssParser;
 use crate::syntax::css_modules::v_bind_not_allowed;
 use crate::syntax::parse_error::{expected_component_value, expected_declaration_item};
 use crate::syntax::property::parse_generic_component_value;
-use crate::syntax::scss::{
-    is_at_scss_qualified_name, is_at_scss_qualified_name_function, parse_scss_function_name,
-};
 use crate::syntax::value::attr::{is_at_attr_function, parse_attr_function};
 use crate::syntax::value::r#if::parse_if_function;
 use crate::syntax::{
@@ -69,10 +66,6 @@ pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
 /// excluding URL functions (since URL functions are also considered simple functions but are handled separately).
 #[inline]
 pub(crate) fn is_at_function(p: &mut CssParser) -> bool {
-    if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_qualified_name(p) {
-        return is_at_scss_qualified_name_function(p);
-    }
-
     is_nth_at_function(p, 0) && !is_at_url_function(p)
 }
 
@@ -111,11 +104,7 @@ pub(crate) fn parse_function(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_scss_function_name(p);
-    } else {
-        parse_regular_identifier(p).ok();
-    }
+    parse_regular_identifier(p).ok();
     p.bump(T!['(']);
     ParameterList.parse_list(p);
     p.expect(T![')']);
