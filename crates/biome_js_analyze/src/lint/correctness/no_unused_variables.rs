@@ -13,7 +13,7 @@ use biome_js_syntax::{
     AnyJsExpression, EmbeddingKind, JsClassExpression, JsFileSource, JsForStatement,
     JsFunctionExpression, JsIdentifierExpression, JsModuleItemList, JsSequenceExpression,
     JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule, TsInferType,
-    TsInterfaceDeclaration,
+    TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
@@ -95,8 +95,8 @@ declare_lint_rule! {
     /// console.log(rest);
     /// ```
     ///
-    /// In Astro files, a top-level interface `Props` is always ignored as it's implicitly read by
-    /// the framework.
+    /// In Astro files, a top-level interface or a type alias named `Props` is always ignored
+    /// as it's implicitly read by the framework.
     /// ```astro
     /// ---
     /// interface Props {
@@ -346,13 +346,14 @@ impl Rule for NoUnusedVariables {
             return None;
         }
 
-        // In Astro files, a top-level interface `Props` is always ignored as it's implicitly read
-        // by the framework.
+        // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
+        // read by the framework.
         if binding_name == "Props"
             && let EmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
             && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
-            && let Some(decl) = binding.parent::<TsInterfaceDeclaration>()
-            && let Some(_) = decl.parent::<JsModuleItemList>()
+            && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
+                || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))
+            && JsModuleItemList::can_cast(binding.syntax().grand_parent()?.kind())
         {
             return None;
         }
