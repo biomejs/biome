@@ -1,5 +1,17 @@
 # @biomejs/biome
 
+## 2.4.1
+
+### Patch Changes
+
+- [#9092](https://github.com/biomejs/biome/pull/9092) [`6edd600`](https://github.com/biomejs/biome/commit/6edd6006b3f58e2e60f16eecd232cb6029794d5e) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9052](https://github.com/biomejs/biome/issues/9052). This PR reverts changes introduced by https://github.com/biomejs/biome/pull/8519, which caused unwanted changes on how paths are resolved.
+
+- [#9091](https://github.com/biomejs/biome/pull/9091) [`3bf674d`](https://github.com/biomejs/biome/commit/3bf674d2b30dc039b2488f2e57a779aea29024ae) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9090](https://github.com/biomejs/biome/issues/9090), where SCSS files were incorrectly processed by Biome. This was a regressions caused by the latest developments for supporting SCSS out of the box.
+
+- [#9100](https://github.com/biomejs/biome/pull/9100) [`66931a8`](https://github.com/biomejs/biome/commit/66931a8d024fb33b004b1aad3ae8fe63ddac4781) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#9081](https://github.com/biomejs/biome/issues/9081): The `noUnknownPseudoElement` rule no longer reports false positives for any known pseudo elements in CSS modules. This was a regression introduced in v2.4.0.
+
+- [#9102](https://github.com/biomejs/biome/pull/9102) [`d01b903`](https://github.com/biomejs/biome/commit/d01b90322ee587c65fbb7920ecd5d21ae13eeb52) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9095](https://github.com/biomejs/biome/issues/9095), where Biome didn't print anything in stdin mode. This was a regression caused by a recent, internal refactor.
+
 ## 2.4.0
 
 ### Minor Changes
