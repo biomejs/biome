@@ -110,7 +110,7 @@ impl FormatContext for MarkdownFormatContext {
 }
 
 impl fmt::Display for MarkdownFormatOptions {
-    fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!("Implement when MarkdownFormatOptions is flushed out")
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        std::fmt::Debug::fmt(self, f)
     }
 }
