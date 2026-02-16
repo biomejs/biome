@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -28,14 +29,14 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@6..13 " items " [] [],
                 },
                 item: SvelteEachAsKeyedItem {
-                    as_token: AS_KW@13..15 "as" [] [],
-                    name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@15..20 " item" [] [],
+                    as_token: AS_KW@13..16 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@16..20 "item" [] [],
                     },
                     index: SvelteEachIndex {
-                        comma_token: COMMA@20..21 "," [] [],
-                        value: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@21..23 " i" [] [],
+                        comma_token: COMMA@20..22 "," [] [Whitespace(" ")],
+                        value: SvelteName {
+                            ident_token: IDENT@22..23 "i" [] [],
                         },
                     },
                     key: missing (optional),
@@ -108,13 +109,13 @@ HtmlRoot {
         2: HTML_TEXT_EXPRESSION@6..13
           0: HTML_LITERAL@6..13 " items " [] []
         3: SVELTE_EACH_AS_KEYED_ITEM@13..23
-          0: AS_KW@13..15 "as" [] []
-          1: HTML_TEXT_EXPRESSION@15..20
-            0: HTML_LITERAL@15..20 " item" [] []
+          0: AS_KW@13..16 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@16..20
+            0: IDENT@16..20 "item" [] []
           2: SVELTE_EACH_INDEX@20..23
-            0: COMMA@20..21 "," [] []
-            1: HTML_TEXT_EXPRESSION@21..23
-              0: HTML_LITERAL@21..23 " i" [] []
+            0: COMMA@20..22 "," [] [Whitespace(" ")]
+            1: SVELTE_NAME@22..23
+              0: IDENT@22..23 "i" [] []
           3: (empty)
         4: R_CURLY@23..24 "}" [] []
       1: HTML_ELEMENT_LIST@24..49

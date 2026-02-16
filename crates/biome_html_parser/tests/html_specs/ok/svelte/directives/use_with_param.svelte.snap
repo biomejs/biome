@@ -1,0 +1,186 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div use:tooltip={options}>Hover me</div>
+<button use:longpress={duration}>Press me</button>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteUseDirective {
+                        use_token: USE_KW@5..8 "use" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@8..9 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@9..16 "tooltip" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@16..17 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@17..18 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@18..25 "options" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@25..26 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@26..27 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@27..35 "Hover me" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@35..36 "<" [] [],
+                slash_token: SLASH@36..37 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@37..40 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@40..41 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@41..43 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@43..50 "button" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteUseDirective {
+                        use_token: USE_KW@50..53 "use" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@53..54 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@54..63 "longpress" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@63..64 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@64..65 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@65..73 "duration" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@73..74 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@74..75 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@75..83 "Press me" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@83..84 "<" [] [],
+                slash_token: SLASH@84..85 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@85..91 "button" [] [],
+                },
+                r_angle_token: R_ANGLE@91..92 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@92..93 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..93
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..92
+    0: HTML_ELEMENT@0..41
+      0: HTML_OPENING_ELEMENT@0..27
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..26
+          0: SVELTE_USE_DIRECTIVE@5..26
+            0: USE_KW@5..8 "use" [] []
+            1: SVELTE_DIRECTIVE_VALUE@8..26
+              0: COLON@8..9 ":" [] []
+              1: SVELTE_NAME@9..16
+                0: IDENT@9..16 "tooltip" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@16..16
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@16..26
+                0: EQ@16..17 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@17..26
+                  0: L_CURLY@17..18 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@18..25
+                    0: HTML_LITERAL@18..25 "options" [] []
+                  2: R_CURLY@25..26 "}" [] []
+        3: R_ANGLE@26..27 ">" [] []
+      1: HTML_ELEMENT_LIST@27..35
+        0: HTML_CONTENT@27..35
+          0: HTML_LITERAL@27..35 "Hover me" [] []
+      2: HTML_CLOSING_ELEMENT@35..41
+        0: L_ANGLE@35..36 "<" [] []
+        1: SLASH@36..37 "/" [] []
+        2: HTML_TAG_NAME@37..40
+          0: HTML_LITERAL@37..40 "div" [] []
+        3: R_ANGLE@40..41 ">" [] []
+    1: HTML_ELEMENT@41..92
+      0: HTML_OPENING_ELEMENT@41..75
+        0: L_ANGLE@41..43 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@43..50
+          0: HTML_LITERAL@43..50 "button" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@50..74
+          0: SVELTE_USE_DIRECTIVE@50..74
+            0: USE_KW@50..53 "use" [] []
+            1: SVELTE_DIRECTIVE_VALUE@53..74
+              0: COLON@53..54 ":" [] []
+              1: SVELTE_NAME@54..63
+                0: IDENT@54..63 "longpress" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@63..63
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@63..74
+                0: EQ@63..64 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@64..74
+                  0: L_CURLY@64..65 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@65..73
+                    0: HTML_LITERAL@65..73 "duration" [] []
+                  2: R_CURLY@73..74 "}" [] []
+        3: R_ANGLE@74..75 ">" [] []
+      1: HTML_ELEMENT_LIST@75..83
+        0: HTML_CONTENT@75..83
+          0: HTML_LITERAL@75..83 "Press me" [] []
+      2: HTML_CLOSING_ELEMENT@83..92
+        0: L_ANGLE@83..84 "<" [] []
+        1: SLASH@84..85 "/" [] []
+        2: HTML_TAG_NAME@85..91
+          0: HTML_LITERAL@85..91 "button" [] []
+        3: R_ANGLE@91..92 ">" [] []
+  4: EOF@92..93 "" [Newline("\n")] []
+
+```

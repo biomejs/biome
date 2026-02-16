@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/no-semi/types.ts
 ---
+
 # Input
 
 ```ts
@@ -44,6 +45,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -64,6 +66,7 @@ interface C {
 type OptionsFlags<Type> = {
 	[Property in keyof Type]: boolean;
 };
+
 ```
 
 ## Output 1
@@ -84,6 +87,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -104,4 +108,5 @@ interface C {
 type OptionsFlags<Type> = {
 	[Property in keyof Type]: boolean
 }
+
 ```

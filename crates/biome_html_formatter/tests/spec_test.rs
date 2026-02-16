@@ -45,6 +45,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
             project_key,
             workspace_directory: Some(BiomePath::new(test_directory)),
             extended_configurations: vec![],
+            module_graph_resolution_kind: Default::default(),
         })
     }) else {
         panic!("Failed to set up snapshot test");

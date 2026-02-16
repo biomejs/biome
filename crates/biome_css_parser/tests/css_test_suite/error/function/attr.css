@@ -1,0 +1,30 @@
+div {
+	/* <transform-list> with multipliers */
+	a: attr(data-width type(<transform-list>+));
+	b: attr(data-width type(<transform-list>#));
+	/* extra closing paren */
+	c: attr(data-test ));
+	/* missing attr name */
+	d: attr();
+	e: attr(href | test |);
+	/* missing closing parens */
+	f: attr(data-count;
+	g: attr(data-count type(<string>);
+	/* missing angle brackets */
+	h: attr(data-count type(<string));
+	i: attr(data-count type(string>));
+	j: attr(data-count type(string>), 0);
+	/* extra multiplier */
+	k: attr(data-count type(<string>##), 1);
+	l: attr(data-count type(<string>++), 1);
+	/* missing type name */
+	m: attr(data-count type(<>));
+	/* invalid attr names */
+	n: attr(data-a | #bogus! | data-b | &unknown&);
+	/* invalid type names */
+	o: attr(data-test type(<number> | #bogus! | <string>));
+	/* missing type name */
+	p: attr(href type(foo | bar |));
+	/* missing fallback comma */
+	q: attr(data-test type(string) 1);
+}

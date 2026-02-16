@@ -1,6 +1,10 @@
 #![deny(clippy::use_self)]
 #![warn(clippy::needless_pass_by_value)]
 
+pub use crate::registry::visit_registry;
+pub use crate::services::control_flow::ControlFlowGraph;
+use crate::services::embedded_bindings::EmbeddedBindings;
+use crate::services::embedded_value_references::EmbeddedValueReferences;
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
@@ -14,8 +18,9 @@ use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_module_graph::{ModuleGraph, ModuleResolver};
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::TextRange;
+use biome_rowan::{TextRange, TokenText};
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use rustc_hash::FxHashMap;
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
 
@@ -29,12 +34,10 @@ mod nextjs;
 mod react;
 mod registry;
 mod services;
+pub mod shared;
 mod suppression_action;
 mod syntax;
 pub mod utils;
-
-pub use crate::registry::visit_registry;
-pub use crate::services::control_flow::ControlFlowGraph;
 
 pub(crate) type JsRuleAction = RuleAction<JsLanguage>;
 
@@ -49,6 +52,8 @@ pub struct JsAnalyzerServices {
     module_graph: Arc<ModuleGraph>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
+    embedded_bindings: Vec<FxHashMap<TextRange, TokenText>>,
+    embedded_value_references: Vec<FxHashMap<TextRange, TokenText>>,
 }
 
 impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
@@ -63,7 +68,19 @@ impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             module_graph,
             project_layout,
             source_type,
+            embedded_bindings: Default::default(),
+            embedded_value_references: Default::default(),
         }
+    }
+}
+
+impl JsAnalyzerServices {
+    pub fn set_embedded_bindings(&mut self, bindings: Vec<FxHashMap<TextRange, TokenText>>) {
+        self.embedded_bindings = bindings;
+    }
+
+    pub fn set_embedded_value_references(&mut self, refs: Vec<FxHashMap<TextRange, TokenText>>) {
+        self.embedded_value_references = refs;
     }
 }
 
@@ -120,6 +137,8 @@ where
         module_graph,
         project_layout,
         source_type,
+        embedded_bindings,
+        embedded_value_references,
     } = services;
 
     let (registry, mut services, diagnostics, visitors) = registry.build();
@@ -175,6 +194,8 @@ where
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
+    services.insert_service(EmbeddedBindings(embedded_bindings));
+    services.insert_service(EmbeddedValueReferences(embedded_value_references));
 
     (
         analyzer.run(AnalyzerContext {

@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "files": {
+    "includes": ["**/*.html"]
+  },
+  "html": {
+    "formatter": {
+      "enabled": true,
+      "trailingNewline": false
+    }
+  }
+}
+```
+
+## `test.html`
+
+```html
+<!doctype html>
+<html>
+	<body>
+		Hello
+	</body>
+</html>
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

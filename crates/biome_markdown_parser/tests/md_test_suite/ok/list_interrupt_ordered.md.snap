@@ -1,0 +1,84 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Paragraph followed by ordered list.
+1. first item
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..35 "Paragraph followed by ordered list." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@35..36 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MD_ORDERED_LIST_MARKER@36..38 "1." [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@38..49 " first item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@49..50 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@50..50 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..50
+  0: (empty)
+  1: MD_BLOCK_LIST@0..50
+    0: MD_PARAGRAPH@0..36
+      0: MD_INLINE_ITEM_LIST@0..36
+        0: MD_TEXTUAL@0..35
+          0: MD_TEXTUAL_LITERAL@0..35 "Paragraph followed by ordered list." [] []
+        1: MD_TEXTUAL@35..36
+          0: MD_TEXTUAL_LITERAL@35..36 "\n" [] []
+      1: (empty)
+    1: MD_ORDERED_LIST_ITEM@36..50
+      0: MD_BULLET_LIST@36..50
+        0: MD_BULLET@36..50
+          0: MD_ORDERED_LIST_MARKER@36..38 "1." [] []
+          1: MD_BLOCK_LIST@38..50
+            0: MD_PARAGRAPH@38..50
+              0: MD_INLINE_ITEM_LIST@38..50
+                0: MD_TEXTUAL@38..49
+                  0: MD_TEXTUAL_LITERAL@38..49 " first item" [] []
+                1: MD_TEXTUAL@49..50
+                  0: MD_TEXTUAL_LITERAL@49..50 "\n" [] []
+              1: (empty)
+  2: EOF@50..50 "" [] []
+
+```

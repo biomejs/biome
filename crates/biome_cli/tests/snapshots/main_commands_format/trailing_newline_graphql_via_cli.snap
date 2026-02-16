@@ -1,0 +1,17 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `test.graphql`
+
+```graphql
+type Query {
+	hello: String
+}
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

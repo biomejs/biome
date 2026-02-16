@@ -66,6 +66,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noInvalidUseBeforeDeclaration
   - noMissingVarFunction
   - noNestedComponentDefinitions
+  - noNextAsyncClientComponent
   - noNodejsModules
   - noNonoctalDecimalEscape
   - noPrecisionLoss
@@ -92,6 +93,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnmatchableAnbSelector
   - noUnreachable
   - noUnreachableSuper
+  - noUnresolvedImports
   - noUnsafeFinally
   - noUnsafeOptionalChaining
   - noUnusedFunctionParameters
@@ -101,6 +103,11 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnusedVariables
   - noVoidElementsWithChildren
   - noVoidTypeReturn
+  - noVueDataObjectDeclaration
+  - noVueDuplicateKeys
+  - noVueReservedKeys
+  - noVueReservedProps
+  - noVueSetupPropsReactivityLoss
   - useExhaustiveDependencies
   - useGraphqlNamedOperations
   - useHookAtTopLevel
@@ -111,6 +118,8 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useJsxKeyInIterable
   - useParseIntRadix
   - useQwikClasslist
+  - useQwikMethodUsage
+  - useQwikValidLexicalScope
   - useSingleJsDocAsterisk
   - useUniqueElementIds
   - useValidForDirection
@@ -144,6 +153,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noHeadElement
   - noImplicitBoolean
   - noInferrableTypes
+  - noJsxLiterals
   - noMagicNumbers
   - noNamespace
   - noNegationElse
@@ -169,6 +179,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useCollapsedIf
   - useComponentExportOnlyModules
   - useConsistentArrayType
+  - useConsistentArrowReturn
   - useConsistentBuiltinInstantiation
   - useConsistentCurlyBraces
   - useConsistentMemberAccessibility

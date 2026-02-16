@@ -1,0 +1,185 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+1. First item
+2. Second item
+3. Third item
+
+1) Using parenthesis
+2) Another item
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MD_ORDERED_LIST_MARKER@0..2 "1." [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@2..13 " First item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: MD_ORDERED_LIST_MARKER@14..16 "2." [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@16..28 " Second item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@28..29 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: MD_ORDERED_LIST_MARKER@29..31 "3." [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@31..42 " Third item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@42..43 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@43..44 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MD_ORDERED_LIST_MARKER@44..46 "1)" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@46..64 " Using parenthesis" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@64..65 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: MD_ORDERED_LIST_MARKER@65..67 "2)" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@67..80 " Another item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@80..81 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@81..81 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..81
+  0: (empty)
+  1: MD_BLOCK_LIST@0..81
+    0: MD_ORDERED_LIST_ITEM@0..44
+      0: MD_BULLET_LIST@0..44
+        0: MD_BULLET@0..14
+          0: MD_ORDERED_LIST_MARKER@0..2 "1." [] []
+          1: MD_BLOCK_LIST@2..14
+            0: MD_PARAGRAPH@2..14
+              0: MD_INLINE_ITEM_LIST@2..14
+                0: MD_TEXTUAL@2..13
+                  0: MD_TEXTUAL_LITERAL@2..13 " First item" [] []
+                1: MD_TEXTUAL@13..14
+                  0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
+              1: (empty)
+        1: MD_BULLET@14..29
+          0: MD_ORDERED_LIST_MARKER@14..16 "2." [] []
+          1: MD_BLOCK_LIST@16..29
+            0: MD_PARAGRAPH@16..29
+              0: MD_INLINE_ITEM_LIST@16..29
+                0: MD_TEXTUAL@16..28
+                  0: MD_TEXTUAL_LITERAL@16..28 " Second item" [] []
+                1: MD_TEXTUAL@28..29
+                  0: MD_TEXTUAL_LITERAL@28..29 "\n" [] []
+              1: (empty)
+        2: MD_BULLET@29..44
+          0: MD_ORDERED_LIST_MARKER@29..31 "3." [] []
+          1: MD_BLOCK_LIST@31..44
+            0: MD_PARAGRAPH@31..43
+              0: MD_INLINE_ITEM_LIST@31..43
+                0: MD_TEXTUAL@31..42
+                  0: MD_TEXTUAL_LITERAL@31..42 " Third item" [] []
+                1: MD_TEXTUAL@42..43
+                  0: MD_TEXTUAL_LITERAL@42..43 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@43..44
+              0: NEWLINE@43..44 "\n" [] []
+    1: MD_ORDERED_LIST_ITEM@44..81
+      0: MD_BULLET_LIST@44..81
+        0: MD_BULLET@44..65
+          0: MD_ORDERED_LIST_MARKER@44..46 "1)" [] []
+          1: MD_BLOCK_LIST@46..65
+            0: MD_PARAGRAPH@46..65
+              0: MD_INLINE_ITEM_LIST@46..65
+                0: MD_TEXTUAL@46..64
+                  0: MD_TEXTUAL_LITERAL@46..64 " Using parenthesis" [] []
+                1: MD_TEXTUAL@64..65
+                  0: MD_TEXTUAL_LITERAL@64..65 "\n" [] []
+              1: (empty)
+        1: MD_BULLET@65..81
+          0: MD_ORDERED_LIST_MARKER@65..67 "2)" [] []
+          1: MD_BLOCK_LIST@67..81
+            0: MD_PARAGRAPH@67..81
+              0: MD_INLINE_ITEM_LIST@67..81
+                0: MD_TEXTUAL@67..80
+                  0: MD_TEXTUAL_LITERAL@67..80 " Another item" [] []
+                1: MD_TEXTUAL@80..81
+                  0: MD_TEXTUAL_LITERAL@80..81 "\n" [] []
+              1: (empty)
+  2: EOF@81..81 "" [] []
+
+```

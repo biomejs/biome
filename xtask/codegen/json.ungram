@@ -39,6 +39,7 @@ SyntaxElement = SyntaxElement
 
 JsonBogus = SyntaxElement*
 JsonBogusValue = SyntaxElement*
+JsonBogusName = SyntaxElement*
 
 JsonRoot =
     bom: 'UNICODE_BOM'?
@@ -52,13 +53,19 @@ AnyJsonValue =
     | JsonNumberValue
     | JsonArrayValue
     | JsonObjectValue
+    | JsonMetavariable
     | JsonBogusValue
 
 JsonObjectValue = '{' JsonMemberList '}'
 
 JsonMemberList = (JsonMember (',' JsonMember)* ','?)
 
-JsonMember = name: JsonMemberName ':' value: AnyJsonValue
+JsonMember = name: AnyJsonMemberName ':' value: AnyJsonValue
+
+AnyJsonMemberName =
+    JsonMemberName
+    | JsonMetavariable
+    | JsonBogusName
 
 JsonMemberName = value: 'json_string_literal'
 
@@ -73,3 +80,6 @@ JsonNullValue = value: 'null'
 JsonStringValue = value: 'json_string_literal'
 
 JsonNumberValue = value: 'json_number_literal'
+
+// https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-json/grammar.js
+JsonMetavariable = value: 'grit_metavariable'

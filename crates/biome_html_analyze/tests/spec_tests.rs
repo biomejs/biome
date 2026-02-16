@@ -13,8 +13,8 @@ use camino::Utf8Path;
 use std::ops::Deref;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{html,vue,astro,svelte,json,jsonc}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{html,vue,astro,svelte,json,jsonc}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{html,vue,svelte,astro,json,jsonc}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{html,vue,svelte,astro,json,jsonc}", crate::run_suppression_test, "module"}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
@@ -100,7 +100,7 @@ pub(crate) fn analyze_and_snap(
     let mut code_fixes = Vec::new();
     let options = create_analyzer_options::<HtmlLanguage>(input_file, &mut diagnostics);
 
-    let (_, errors) = biome_html_analyze::analyze(&root, filter, &options, |event| {
+    let (_, errors) = biome_html_analyze::analyze(&root, filter, &options, source_type, |event| {
         if let Some(mut diag) = event.diagnostic() {
             for action in event.actions() {
                 if check_action_type.is_suppression() {

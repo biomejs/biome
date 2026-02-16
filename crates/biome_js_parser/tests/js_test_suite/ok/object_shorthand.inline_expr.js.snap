@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+{ duration }
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsObjectExpression {
+        l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+        members: JsObjectMemberList [
+            JsShorthandPropertyObjectMember {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@2..11 "duration" [] [Whitespace(" ")],
+                },
+            },
+        ],
+        r_curly_token: R_CURLY@11..12 "}" [] [],
+    },
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..13
+  0: JS_OBJECT_EXPRESSION@0..12
+    0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+    1: JS_OBJECT_MEMBER_LIST@2..11
+      0: JS_SHORTHAND_PROPERTY_OBJECT_MEMBER@2..11
+        0: JS_REFERENCE_IDENTIFIER@2..11
+          0: IDENT@2..11 "duration" [] [Whitespace(" ")]
+    2: R_CURLY@11..12 "}" [] []
+  1: EOF@12..13 "" [Newline("\n")] []
+
+```

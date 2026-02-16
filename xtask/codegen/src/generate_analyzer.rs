@@ -136,7 +136,7 @@ pub fn generate_analyzer() -> Result<()> {
     )?;
     generate_analyzer_crate(
         "biome_html_analyze",
-        &["lint"],
+        &["lint", "assist"],
         update_html_registry_builder,
     )?;
     Ok(())

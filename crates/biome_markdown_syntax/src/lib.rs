@@ -37,7 +37,7 @@ impl SyntaxKind for MarkdownSyntaxKind {
     }
 
     fn is_root(&self) -> bool {
-        todo!()
+        matches!(self, Self::MD_DOCUMENT)
     }
 
     fn is_list(&self) -> bool {
@@ -45,7 +45,9 @@ impl SyntaxKind for MarkdownSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        matches!(self, Self::NEWLINE | Self::WHITESPACE | Self::TAB)
+        // Markdown is markup: whitespace is syntactic, and NEWLINE is explicit.
+        // We intentionally avoid trivia for whitespace so it becomes part of text.
+        false
     }
 
     fn to_string(&self) -> Option<&'static str> {
@@ -56,16 +58,7 @@ impl SyntaxKind for MarkdownSyntaxKind {
 impl TryFrom<MarkdownSyntaxKind> for TriviaPieceKind {
     type Error = ();
 
-    fn try_from(value: MarkdownSyntaxKind) -> Result<Self, Self::Error> {
-        if value.is_trivia() {
-            match value {
-                MarkdownSyntaxKind::NEWLINE => Ok(Self::Newline),
-                MarkdownSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
-                MarkdownSyntaxKind::TAB => Ok(Self::Skipped),
-                _ => unreachable!("Not Trivia"),
-            }
-        } else {
-            Err(())
-        }
+    fn try_from(_value: MarkdownSyntaxKind) -> Result<Self, Self::Error> {
+        Err(())
     }
 }

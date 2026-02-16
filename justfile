@@ -65,8 +65,8 @@ gen-migrate:
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
 
 # Generates the initial files for all formatter crates
-gen-formatter:
-  cargo run -p xtask_codegen -- formatter
+gen-formatter *args='':
+  cargo run -p xtask_codegen -- formatter {{args}}
 
 # Generates the Tailwind CSS preset for utility class sorting
 [working-directory: 'packages/tailwindcss-config-analyzer']
@@ -229,6 +229,14 @@ test-crate name:
 # Run doc tests
 test-doc:
 	cargo test --doc
+
+# Run CommonMark conformance tests for the markdown parser
+test-markdown-conformance:
+	cargo run -p xtask_coverage -- --suites=markdown/commonmark
+
+# Update the CommonMark spec.json to a specific version
+update-commonmark-spec version:
+	./scripts/update-commonmark-spec.sh {{version}}
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-lintrule name:

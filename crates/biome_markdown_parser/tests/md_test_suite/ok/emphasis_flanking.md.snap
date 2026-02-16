@@ -1,0 +1,336 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Valid emphasis: *italic* and **bold**
+
+Valid underscore: _italic_ and __bold__
+
+Asterisk after space: foo * bar* should not be emphasis
+
+Underscore intraword: foo_bar_baz (not emphasis)
+
+Valid underscore at word boundary: _word_
+
+Mixed: foo *bar* baz
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..16 "Valid emphasis: " [] [],
+                },
+                MdInlineItalic {
+                    l_fence: STAR@16..17 "*" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@17..23 "italic" [] [],
+                        },
+                    ],
+                    r_fence: STAR@23..24 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@24..29 " and " [] [],
+                },
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_STAR@29..31 "**" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@31..35 "bold" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_STAR@35..37 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@37..38 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@38..39 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@39..57 "Valid underscore: " [] [],
+                },
+                MdInlineItalic {
+                    l_fence: UNDERSCORE@57..58 "_" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@58..64 "italic" [] [],
+                        },
+                    ],
+                    r_fence: UNDERSCORE@64..65 "_" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@65..70 " and " [] [],
+                },
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_UNDERSCORE@70..72 "__" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@72..76 "bold" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_UNDERSCORE@76..78 "__" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@78..79 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@79..80 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@80..106 "Asterisk after space: foo " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@106..107 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@107..111 " bar" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@111..112 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@112..135 " should not be emphasis" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@135..136 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@136..137 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@137..162 "Underscore intraword: foo" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@162..163 "_" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@163..166 "bar" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@166..167 "_" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@167..171 "baz " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@171..172 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@172..184 "not emphasis" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@184..185 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@185..186 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@186..187 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@187..222 "Valid underscore at word boundary: " [] [],
+                },
+                MdInlineItalic {
+                    l_fence: UNDERSCORE@222..223 "_" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@223..227 "word" [] [],
+                        },
+                    ],
+                    r_fence: UNDERSCORE@227..228 "_" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@228..229 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@229..230 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@230..241 "Mixed: foo " [] [],
+                },
+                MdInlineItalic {
+                    l_fence: STAR@241..242 "*" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@242..245 "bar" [] [],
+                        },
+                    ],
+                    r_fence: STAR@245..246 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@246..250 " baz" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@250..251 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@251..251 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..251
+  0: (empty)
+  1: MD_BLOCK_LIST@0..251
+    0: MD_PARAGRAPH@0..38
+      0: MD_INLINE_ITEM_LIST@0..38
+        0: MD_TEXTUAL@0..16
+          0: MD_TEXTUAL_LITERAL@0..16 "Valid emphasis: " [] []
+        1: MD_INLINE_ITALIC@16..24
+          0: STAR@16..17 "*" [] []
+          1: MD_INLINE_ITEM_LIST@17..23
+            0: MD_TEXTUAL@17..23
+              0: MD_TEXTUAL_LITERAL@17..23 "italic" [] []
+          2: STAR@23..24 "*" [] []
+        2: MD_TEXTUAL@24..29
+          0: MD_TEXTUAL_LITERAL@24..29 " and " [] []
+        3: MD_INLINE_EMPHASIS@29..37
+          0: DOUBLE_STAR@29..31 "**" [] []
+          1: MD_INLINE_ITEM_LIST@31..35
+            0: MD_TEXTUAL@31..35
+              0: MD_TEXTUAL_LITERAL@31..35 "bold" [] []
+          2: DOUBLE_STAR@35..37 "**" [] []
+        4: MD_TEXTUAL@37..38
+          0: MD_TEXTUAL_LITERAL@37..38 "\n" [] []
+      1: (empty)
+    1: MD_NEWLINE@38..39
+      0: NEWLINE@38..39 "\n" [] []
+    2: MD_PARAGRAPH@39..79
+      0: MD_INLINE_ITEM_LIST@39..79
+        0: MD_TEXTUAL@39..57
+          0: MD_TEXTUAL_LITERAL@39..57 "Valid underscore: " [] []
+        1: MD_INLINE_ITALIC@57..65
+          0: UNDERSCORE@57..58 "_" [] []
+          1: MD_INLINE_ITEM_LIST@58..64
+            0: MD_TEXTUAL@58..64
+              0: MD_TEXTUAL_LITERAL@58..64 "italic" [] []
+          2: UNDERSCORE@64..65 "_" [] []
+        2: MD_TEXTUAL@65..70
+          0: MD_TEXTUAL_LITERAL@65..70 " and " [] []
+        3: MD_INLINE_EMPHASIS@70..78
+          0: DOUBLE_UNDERSCORE@70..72 "__" [] []
+          1: MD_INLINE_ITEM_LIST@72..76
+            0: MD_TEXTUAL@72..76
+              0: MD_TEXTUAL_LITERAL@72..76 "bold" [] []
+          2: DOUBLE_UNDERSCORE@76..78 "__" [] []
+        4: MD_TEXTUAL@78..79
+          0: MD_TEXTUAL_LITERAL@78..79 "\n" [] []
+      1: (empty)
+    3: MD_NEWLINE@79..80
+      0: NEWLINE@79..80 "\n" [] []
+    4: MD_PARAGRAPH@80..136
+      0: MD_INLINE_ITEM_LIST@80..136
+        0: MD_TEXTUAL@80..106
+          0: MD_TEXTUAL_LITERAL@80..106 "Asterisk after space: foo " [] []
+        1: MD_TEXTUAL@106..107
+          0: MD_TEXTUAL_LITERAL@106..107 "*" [] []
+        2: MD_TEXTUAL@107..111
+          0: MD_TEXTUAL_LITERAL@107..111 " bar" [] []
+        3: MD_TEXTUAL@111..112
+          0: MD_TEXTUAL_LITERAL@111..112 "*" [] []
+        4: MD_TEXTUAL@112..135
+          0: MD_TEXTUAL_LITERAL@112..135 " should not be emphasis" [] []
+        5: MD_TEXTUAL@135..136
+          0: MD_TEXTUAL_LITERAL@135..136 "\n" [] []
+      1: (empty)
+    5: MD_NEWLINE@136..137
+      0: NEWLINE@136..137 "\n" [] []
+    6: MD_PARAGRAPH@137..186
+      0: MD_INLINE_ITEM_LIST@137..186
+        0: MD_TEXTUAL@137..162
+          0: MD_TEXTUAL_LITERAL@137..162 "Underscore intraword: foo" [] []
+        1: MD_TEXTUAL@162..163
+          0: MD_TEXTUAL_LITERAL@162..163 "_" [] []
+        2: MD_TEXTUAL@163..166
+          0: MD_TEXTUAL_LITERAL@163..166 "bar" [] []
+        3: MD_TEXTUAL@166..167
+          0: MD_TEXTUAL_LITERAL@166..167 "_" [] []
+        4: MD_TEXTUAL@167..171
+          0: MD_TEXTUAL_LITERAL@167..171 "baz " [] []
+        5: MD_TEXTUAL@171..172
+          0: MD_TEXTUAL_LITERAL@171..172 "(" [] []
+        6: MD_TEXTUAL@172..184
+          0: MD_TEXTUAL_LITERAL@172..184 "not emphasis" [] []
+        7: MD_TEXTUAL@184..185
+          0: MD_TEXTUAL_LITERAL@184..185 ")" [] []
+        8: MD_TEXTUAL@185..186
+          0: MD_TEXTUAL_LITERAL@185..186 "\n" [] []
+      1: (empty)
+    7: MD_NEWLINE@186..187
+      0: NEWLINE@186..187 "\n" [] []
+    8: MD_PARAGRAPH@187..229
+      0: MD_INLINE_ITEM_LIST@187..229
+        0: MD_TEXTUAL@187..222
+          0: MD_TEXTUAL_LITERAL@187..222 "Valid underscore at word boundary: " [] []
+        1: MD_INLINE_ITALIC@222..228
+          0: UNDERSCORE@222..223 "_" [] []
+          1: MD_INLINE_ITEM_LIST@223..227
+            0: MD_TEXTUAL@223..227
+              0: MD_TEXTUAL_LITERAL@223..227 "word" [] []
+          2: UNDERSCORE@227..228 "_" [] []
+        2: MD_TEXTUAL@228..229
+          0: MD_TEXTUAL_LITERAL@228..229 "\n" [] []
+      1: (empty)
+    9: MD_NEWLINE@229..230
+      0: NEWLINE@229..230 "\n" [] []
+    10: MD_PARAGRAPH@230..251
+      0: MD_INLINE_ITEM_LIST@230..251
+        0: MD_TEXTUAL@230..241
+          0: MD_TEXTUAL_LITERAL@230..241 "Mixed: foo " [] []
+        1: MD_INLINE_ITALIC@241..246
+          0: STAR@241..242 "*" [] []
+          1: MD_INLINE_ITEM_LIST@242..245
+            0: MD_TEXTUAL@242..245
+              0: MD_TEXTUAL_LITERAL@242..245 "bar" [] []
+          2: STAR@245..246 "*" [] []
+        2: MD_TEXTUAL@246..250
+          0: MD_TEXTUAL_LITERAL@246..250 " baz" [] []
+        3: MD_TEXTUAL@250..251
+          0: MD_TEXTUAL_LITERAL@250..251 "\n" [] []
+      1: (empty)
+  2: EOF@251..251 "" [] []
+
+```

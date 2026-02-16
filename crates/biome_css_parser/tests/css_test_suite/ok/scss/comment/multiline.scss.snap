@@ -1,0 +1,366 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+/* Standard CSS multiline comment
+   in SCSS context */
+$var: value;
+
+/* Comment before selector */
+.foo {
+  color: red;
+}
+
+/* Multi-line comment
+   with multiple lines
+   and more content */
+$another-var: blue;
+
+// SCSS line comment
+$line-comment: true;
+
+/* Nested /* comment */ attempt */
+.nested {
+  /* Comment inside rule */
+  background: white;
+}
+
+/* Comment with special chars: @#$%^&*() */
+$special: 10px;
+
+/*
+ * Comment before mixin
+ */
+@mixin test-mixin {
+  /* Comment inside mixin */
+  margin: 0;
+}
+
+/* Comment at end of file */
+
+
+
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..57 "$" [Comments("/* Standard CSS multi ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@57..60 "var" [] [],
+                },
+            },
+            colon_token: COLON@60..62 ":" [] [Whitespace(" ")],
+            value: CssGenericComponentValueList [
+                CssIdentifier {
+                    value_token: IDENT@62..67 "value" [] [],
+                },
+            ],
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@67..68 ";" [] [],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@68..101 "." [Newline("\n"), Newline("\n"), Comments("/* Comment before sel ..."), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@101..105 "foo" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@105..106 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@106..114 "color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@114..116 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@116..119 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@119..120 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@120..122 "}" [Newline("\n")] [],
+            },
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@122..193 "$" [Newline("\n"), Newline("\n"), Comments("/* Multi-line comment ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@193..204 "another-var" [] [],
+                },
+            },
+            colon_token: COLON@204..206 ":" [] [Whitespace(" ")],
+            value: CssGenericComponentValueList [
+                CssIdentifier {
+                    value_token: IDENT@206..210 "blue" [] [],
+                },
+            ],
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@210..211 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@211..235 "$" [Newline("\n"), Newline("\n"), Comments("// SCSS line comment"), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@235..247 "line-comment" [] [],
+                },
+            },
+            colon_token: COLON@247..249 ":" [] [Whitespace(" ")],
+            value: CssGenericComponentValueList [
+                CssIdentifier {
+                    value_token: IDENT@249..253 "true" [] [],
+                },
+            ],
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@253..254 ";" [] [],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@254..292 "." [Newline("\n"), Newline("\n"), Comments("/* Nested /* comment  ..."), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@292..299 "nested" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@299..300 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@300..341 "background" [Newline("\n"), Whitespace("  "), Comments("/* Comment inside rul ..."), Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@341..343 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@343..348 "white" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@348..349 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@349..351 "}" [Newline("\n")] [],
+            },
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@351..398 "$" [Newline("\n"), Newline("\n"), Comments("/* Comment with speci ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@398..405 "special" [] [],
+                },
+            },
+            colon_token: COLON@405..407 ":" [] [Whitespace(" ")],
+            value: CssGenericComponentValueList [
+                CssRegularDimension {
+                    value_token: CSS_NUMBER_LITERAL@407..409 "10" [] [],
+                    unit_token: IDENT@409..411 "px" [] [],
+                },
+            ],
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@411..412 ";" [] [],
+        },
+        CssAtRule {
+            at_token: AT@412..446 "@" [Newline("\n"), Newline("\n"), Comments("/*\n * Comment before  ..."), Newline("\n")] [],
+            rule: CssUnknownBlockAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@446..452 "mixin" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@452..463 "test-mixin" [] [Whitespace(" ")],
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@463..464 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@464..502 "margin" [Newline("\n"), Whitespace("  "), Comments("/* Comment inside mix ..."), Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    colon_token: COLON@502..504 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@504..505 "0" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@505..506 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@506..508 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@508..542 "" [Newline("\n"), Newline("\n"), Comments("/* Comment at end of  ..."), Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..542
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..508
+    0: SCSS_DECLARATION@0..68
+      0: SCSS_IDENTIFIER@0..60
+        0: DOLLAR@0..57 "$" [Comments("/* Standard CSS multi ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@57..60
+          0: IDENT@57..60 "var" [] []
+      1: COLON@60..62 ":" [] [Whitespace(" ")]
+      2: CSS_GENERIC_COMPONENT_VALUE_LIST@62..67
+        0: CSS_IDENTIFIER@62..67
+          0: IDENT@62..67 "value" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@67..67
+      4: SEMICOLON@67..68 ";" [] []
+    1: CSS_QUALIFIED_RULE@68..122
+      0: CSS_SELECTOR_LIST@68..105
+        0: CSS_COMPOUND_SELECTOR@68..105
+          0: CSS_NESTED_SELECTOR_LIST@68..68
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@68..105
+            0: CSS_CLASS_SELECTOR@68..105
+              0: DOT@68..101 "." [Newline("\n"), Newline("\n"), Comments("/* Comment before sel ..."), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@101..105
+                0: IDENT@101..105 "foo" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@105..122
+        0: L_CURLY@105..106 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@106..120
+          0: CSS_DECLARATION_WITH_SEMICOLON@106..120
+            0: CSS_DECLARATION@106..119
+              0: CSS_GENERIC_PROPERTY@106..119
+                0: CSS_IDENTIFIER@106..114
+                  0: IDENT@106..114 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@114..116 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@116..119
+                  0: CSS_IDENTIFIER@116..119
+                    0: IDENT@116..119 "red" [] []
+              1: (empty)
+            1: SEMICOLON@119..120 ";" [] []
+        2: R_CURLY@120..122 "}" [Newline("\n")] []
+    2: SCSS_DECLARATION@122..211
+      0: SCSS_IDENTIFIER@122..204
+        0: DOLLAR@122..193 "$" [Newline("\n"), Newline("\n"), Comments("/* Multi-line comment ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@193..204
+          0: IDENT@193..204 "another-var" [] []
+      1: COLON@204..206 ":" [] [Whitespace(" ")]
+      2: CSS_GENERIC_COMPONENT_VALUE_LIST@206..210
+        0: CSS_IDENTIFIER@206..210
+          0: IDENT@206..210 "blue" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@210..210
+      4: SEMICOLON@210..211 ";" [] []
+    3: SCSS_DECLARATION@211..254
+      0: SCSS_IDENTIFIER@211..247
+        0: DOLLAR@211..235 "$" [Newline("\n"), Newline("\n"), Comments("// SCSS line comment"), Newline("\n")] []
+        1: CSS_IDENTIFIER@235..247
+          0: IDENT@235..247 "line-comment" [] []
+      1: COLON@247..249 ":" [] [Whitespace(" ")]
+      2: CSS_GENERIC_COMPONENT_VALUE_LIST@249..253
+        0: CSS_IDENTIFIER@249..253
+          0: IDENT@249..253 "true" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@253..253
+      4: SEMICOLON@253..254 ";" [] []
+    4: CSS_QUALIFIED_RULE@254..351
+      0: CSS_SELECTOR_LIST@254..299
+        0: CSS_COMPOUND_SELECTOR@254..299
+          0: CSS_NESTED_SELECTOR_LIST@254..254
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@254..299
+            0: CSS_CLASS_SELECTOR@254..299
+              0: DOT@254..292 "." [Newline("\n"), Newline("\n"), Comments("/* Nested /* comment  ..."), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@292..299
+                0: IDENT@292..299 "nested" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@299..351
+        0: L_CURLY@299..300 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@300..349
+          0: CSS_DECLARATION_WITH_SEMICOLON@300..349
+            0: CSS_DECLARATION@300..348
+              0: CSS_GENERIC_PROPERTY@300..348
+                0: CSS_IDENTIFIER@300..341
+                  0: IDENT@300..341 "background" [Newline("\n"), Whitespace("  "), Comments("/* Comment inside rul ..."), Newline("\n"), Whitespace("  ")] []
+                1: COLON@341..343 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@343..348
+                  0: CSS_IDENTIFIER@343..348
+                    0: IDENT@343..348 "white" [] []
+              1: (empty)
+            1: SEMICOLON@348..349 ";" [] []
+        2: R_CURLY@349..351 "}" [Newline("\n")] []
+    5: SCSS_DECLARATION@351..412
+      0: SCSS_IDENTIFIER@351..405
+        0: DOLLAR@351..398 "$" [Newline("\n"), Newline("\n"), Comments("/* Comment with speci ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@398..405
+          0: IDENT@398..405 "special" [] []
+      1: COLON@405..407 ":" [] [Whitespace(" ")]
+      2: CSS_GENERIC_COMPONENT_VALUE_LIST@407..411
+        0: CSS_REGULAR_DIMENSION@407..411
+          0: CSS_NUMBER_LITERAL@407..409 "10" [] []
+          1: IDENT@409..411 "px" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@411..411
+      4: SEMICOLON@411..412 ";" [] []
+    6: CSS_AT_RULE@412..508
+      0: AT@412..446 "@" [Newline("\n"), Newline("\n"), Comments("/*\n * Comment before  ..."), Newline("\n")] []
+      1: CSS_UNKNOWN_BLOCK_AT_RULE@446..508
+        0: CSS_IDENTIFIER@446..452
+          0: IDENT@446..452 "mixin" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@452..463
+          0: IDENT@452..463 "test-mixin" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@463..508
+          0: L_CURLY@463..464 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@464..506
+            0: CSS_DECLARATION_WITH_SEMICOLON@464..506
+              0: CSS_DECLARATION@464..505
+                0: CSS_GENERIC_PROPERTY@464..505
+                  0: CSS_IDENTIFIER@464..502
+                    0: IDENT@464..502 "margin" [Newline("\n"), Whitespace("  "), Comments("/* Comment inside mix ..."), Newline("\n"), Whitespace("  ")] []
+                  1: COLON@502..504 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@504..505
+                    0: CSS_NUMBER@504..505
+                      0: CSS_NUMBER_LITERAL@504..505 "0" [] []
+                1: (empty)
+              1: SEMICOLON@505..506 ";" [] []
+          2: R_CURLY@506..508 "}" [Newline("\n")] []
+  2: EOF@508..542 "" [Newline("\n"), Newline("\n"), Comments("/* Comment at end of  ..."), Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n")] []
+
+```

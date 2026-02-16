@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -33,9 +34,9 @@ HtmlRoot {
                 },
                 item: SvelteEachKeyedItem {
                     index: SvelteEachIndex {
-                        comma_token: COMMA@43..44 "," [] [],
-                        value: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@44..49 " item" [] [],
+                        comma_token: COMMA@43..45 "," [] [Whitespace(" ")],
+                        value: SvelteName {
+                            ident_token: IDENT@45..49 "item" [] [],
                         },
                     },
                 },
@@ -44,8 +45,14 @@ HtmlRoot {
             children: HtmlElementList [
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@50..53 "<" [Newline("\n"), Whitespace("\t")] [],
-                    name: HtmlTagName {
-                        value_token: HTML_LITERAL@53..67 "InputOTP.Slot" [] [Whitespace(" ")],
+                    name: HtmlMemberName {
+                        object: HtmlComponentName {
+                            value_token: HTML_LITERAL@53..61 "InputOTP" [] [],
+                        },
+                        dot_token: DOT@61..62 "." [] [],
+                        member: HtmlTagName {
+                            value_token: HTML_LITERAL@62..67 "Slot" [] [Whitespace(" ")],
+                        },
                     },
                     attributes: HtmlAttributeList [
                         HtmlAttributeSingleTextExpression {
@@ -75,14 +82,14 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@92..111 " cells.slice(0, 3) " [] [],
                 },
                 item: SvelteEachAsKeyedItem {
-                    as_token: AS_KW@111..113 "as" [] [],
-                    name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@113..118 " cell" [] [],
+                    as_token: AS_KW@111..114 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@114..118 "cell" [] [],
                     },
                     index: SvelteEachIndex {
-                        comma_token: COMMA@118..119 "," [] [],
-                        value: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@119..122 " i " [] [],
+                        comma_token: COMMA@118..120 "," [] [Whitespace(" ")],
+                        value: SvelteName {
+                            ident_token: IDENT@120..122 "i" [] [Whitespace(" ")],
                         },
                     },
                     key: SvelteEachKey {
@@ -98,8 +105,14 @@ HtmlRoot {
             children: HtmlElementList [
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@126..129 "<" [Newline("\n"), Whitespace("\t")] [],
-                    name: HtmlTagName {
-                        value_token: HTML_LITERAL@129..143 "InputOTP.Slot" [] [Whitespace(" ")],
+                    name: HtmlMemberName {
+                        object: HtmlComponentName {
+                            value_token: HTML_LITERAL@129..137 "InputOTP" [] [],
+                        },
+                        dot_token: DOT@137..138 "." [] [],
+                        member: HtmlTagName {
+                            value_token: HTML_LITERAL@138..143 "Slot" [] [Whitespace(" ")],
+                        },
                     },
                     attributes: HtmlAttributeList [
                         HtmlAttributeSingleTextExpression {
@@ -142,15 +155,19 @@ HtmlRoot {
           0: HTML_LITERAL@6..43 " cells.filter(f => { return f === 1})" [] []
         3: SVELTE_EACH_KEYED_ITEM@43..49
           0: SVELTE_EACH_INDEX@43..49
-            0: COMMA@43..44 "," [] []
-            1: HTML_TEXT_EXPRESSION@44..49
-              0: HTML_LITERAL@44..49 " item" [] []
+            0: COMMA@43..45 "," [] [Whitespace(" ")]
+            1: SVELTE_NAME@45..49
+              0: IDENT@45..49 "item" [] []
         4: R_CURLY@49..50 "}" [] []
       1: HTML_ELEMENT_LIST@50..76
         0: HTML_SELF_CLOSING_ELEMENT@50..76
           0: L_ANGLE@50..53 "<" [Newline("\n"), Whitespace("\t")] []
-          1: HTML_TAG_NAME@53..67
-            0: HTML_LITERAL@53..67 "InputOTP.Slot" [] [Whitespace(" ")]
+          1: HTML_MEMBER_NAME@53..67
+            0: HTML_COMPONENT_NAME@53..61
+              0: HTML_LITERAL@53..61 "InputOTP" [] []
+            1: DOT@61..62 "." [] []
+            2: HTML_TAG_NAME@62..67
+              0: HTML_LITERAL@62..67 "Slot" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@67..74
             0: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@67..74
               0: L_CURLY@67..68 "{" [] []
@@ -171,13 +188,13 @@ HtmlRoot {
         2: HTML_TEXT_EXPRESSION@92..111
           0: HTML_LITERAL@92..111 " cells.slice(0, 3) " [] []
         3: SVELTE_EACH_AS_KEYED_ITEM@111..125
-          0: AS_KW@111..113 "as" [] []
-          1: HTML_TEXT_EXPRESSION@113..118
-            0: HTML_LITERAL@113..118 " cell" [] []
+          0: AS_KW@111..114 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@114..118
+            0: IDENT@114..118 "cell" [] []
           2: SVELTE_EACH_INDEX@118..122
-            0: COMMA@118..119 "," [] []
-            1: HTML_TEXT_EXPRESSION@119..122
-              0: HTML_LITERAL@119..122 " i " [] []
+            0: COMMA@118..120 "," [] [Whitespace(" ")]
+            1: SVELTE_NAME@120..122
+              0: IDENT@120..122 "i" [] [Whitespace(" ")]
           3: SVELTE_EACH_KEY@122..125
             0: L_PAREN@122..123 "(" [] []
             1: HTML_TEXT_EXPRESSION@123..124
@@ -187,8 +204,12 @@ HtmlRoot {
       1: HTML_ELEMENT_LIST@126..152
         0: HTML_SELF_CLOSING_ELEMENT@126..152
           0: L_ANGLE@126..129 "<" [Newline("\n"), Whitespace("\t")] []
-          1: HTML_TAG_NAME@129..143
-            0: HTML_LITERAL@129..143 "InputOTP.Slot" [] [Whitespace(" ")]
+          1: HTML_MEMBER_NAME@129..143
+            0: HTML_COMPONENT_NAME@129..137
+              0: HTML_LITERAL@129..137 "InputOTP" [] []
+            1: DOT@137..138 "." [] []
+            2: HTML_TAG_NAME@138..143
+              0: HTML_LITERAL@138..143 "Slot" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@143..150
             0: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@143..150
               0: L_CURLY@143..144 "{" [] []

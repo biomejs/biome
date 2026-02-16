@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/array/nested.json
 ---
+
 # Input
 
 ```json
@@ -26,6 +27,7 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```json
@@ -49,4 +51,5 @@ Bracket spacing: true
 		"Element"
 	]
 }
+
 ```

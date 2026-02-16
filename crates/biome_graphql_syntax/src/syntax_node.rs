@@ -19,6 +19,7 @@ impl Language for GraphqlLanguage {
 }
 
 pub type GraphqlSyntaxNode = biome_rowan::SyntaxNode<GraphqlLanguage>;
+pub type GraphqlSyntaxNodeWithOffset = biome_rowan::SyntaxNodeWithOffset<GraphqlLanguage>;
 pub type GraphqlSyntaxToken = biome_rowan::SyntaxToken<GraphqlLanguage>;
 pub type GraphqlSyntaxElement = biome_rowan::SyntaxElement<GraphqlLanguage>;
 pub type GraphqlSyntaxElementChildren = biome_rowan::SyntaxElementChildren<GraphqlLanguage>;

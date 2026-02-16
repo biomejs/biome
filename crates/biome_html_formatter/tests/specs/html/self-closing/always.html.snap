@@ -1,8 +1,8 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: self-closing/always.html
-snapshot_kind: text
 ---
+
 # Input
 
 ```html
@@ -40,6 +40,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```html
@@ -57,6 +58,7 @@ Self close void elements: never
 <source>
 <track>
 <wbr>
+
 ```
 
 ## Output 1
@@ -71,6 +73,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: always
+Trailing newline: true
 -----
 
 ```html
@@ -88,4 +91,5 @@ Self close void elements: always
 <source />
 <track />
 <wbr />
+
 ```

@@ -129,7 +129,7 @@ pub fn html_cdata_section(
 pub fn html_closing_element(
     l_angle_token: SyntaxToken,
     slash_token: SyntaxToken,
-    name: HtmlTagName,
+    name: AnyHtmlTagName,
     r_angle_token: SyntaxToken,
 ) -> HtmlClosingElement {
     HtmlClosingElement::unwrap_cast(SyntaxNode::new_detached(
@@ -140,6 +140,12 @@ pub fn html_closing_element(
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(r_angle_token)),
         ],
+    ))
+}
+pub fn html_component_name(value_token: SyntaxToken) -> HtmlComponentName {
+    HtmlComponentName::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_COMPONENT_NAME,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn html_content(value_token: SyntaxToken) -> HtmlContent {
@@ -244,9 +250,23 @@ pub fn html_embedded_content(value_token: SyntaxToken) -> HtmlEmbeddedContent {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn html_member_name(
+    object: AnyHtmlComponentObjectName,
+    dot_token: SyntaxToken,
+    member: HtmlTagName,
+) -> HtmlMemberName {
+    HtmlMemberName::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_MEMBER_NAME,
+        [
+            Some(SyntaxElement::Node(object.into_syntax())),
+            Some(SyntaxElement::Token(dot_token)),
+            Some(SyntaxElement::Node(member.into_syntax())),
+        ],
+    ))
+}
 pub fn html_opening_element(
     l_angle_token: SyntaxToken,
-    name: HtmlTagName,
+    name: AnyHtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
 ) -> HtmlOpeningElement {
@@ -306,7 +326,7 @@ impl HtmlRootBuilder {
 }
 pub fn html_self_closing_element(
     l_angle_token: SyntaxToken,
-    name: HtmlTagName,
+    name: AnyHtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
 ) -> HtmlSelfClosingElementBuilder {
@@ -320,7 +340,7 @@ pub fn html_self_closing_element(
 }
 pub struct HtmlSelfClosingElementBuilder {
     l_angle_token: SyntaxToken,
-    name: HtmlTagName,
+    name: AnyHtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
     slash_token: Option<SyntaxToken>,
@@ -357,6 +377,22 @@ pub fn html_single_text_expression(
         ],
     ))
 }
+pub fn html_spread_attribute(
+    l_curly_token: SyntaxToken,
+    dotdotdot_token: SyntaxToken,
+    argument: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+) -> HtmlSpreadAttribute {
+    HtmlSpreadAttribute::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_SPREAD_ATTRIBUTE,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Token(dotdotdot_token)),
+            Some(SyntaxElement::Node(argument.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn html_string(value_token: SyntaxToken) -> HtmlString {
     HtmlString::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_STRING,
@@ -373,6 +409,18 @@ pub fn html_text_expression(html_literal_token: SyntaxToken) -> HtmlTextExpressi
     HtmlTextExpression::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_TEXT_EXPRESSION,
         [Some(SyntaxElement::Token(html_literal_token))],
+    ))
+}
+pub fn svelte_animate_directive(
+    animate_token: SyntaxToken,
+    value: SvelteDirectiveValue,
+) -> SvelteAnimateDirective {
+    SvelteAnimateDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_ANIMATE_DIRECTIVE,
+        [
+            Some(SyntaxElement::Token(animate_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
     ))
 }
 pub fn svelte_attach_attribute(
@@ -531,6 +579,30 @@ pub fn svelte_await_then_clause(
         ],
     ))
 }
+pub fn svelte_bind_directive(
+    bind_token: SyntaxToken,
+    value: SvelteDirectiveValue,
+) -> SvelteBindDirective {
+    SvelteBindDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_BIND_DIRECTIVE,
+        [
+            Some(SyntaxElement::Token(bind_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_class_directive(
+    class_token: SyntaxToken,
+    value: SvelteDirectiveValue,
+) -> SvelteClassDirective {
+    SvelteClassDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_CLASS_DIRECTIVE,
+        [
+            Some(SyntaxElement::Token(class_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn svelte_const_block(
     sv_curly_at_token: SyntaxToken,
     const_token: SyntaxToken,
@@ -543,6 +615,20 @@ pub fn svelte_const_block(
             Some(SyntaxElement::Token(sv_curly_at_token)),
             Some(SyntaxElement::Token(const_token)),
             Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_curly_destructured_name(
+    l_curly_token: SyntaxToken,
+    names: SvelteBindingAssignmentBindingList,
+    r_curly_token: SyntaxToken,
+) -> SvelteCurlyDestructuredName {
+    SvelteCurlyDestructuredName::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_CURLY_DESTRUCTURED_NAME,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(names.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
         ],
     ))
@@ -563,9 +649,57 @@ pub fn svelte_debug_block(
         ],
     ))
 }
+pub fn svelte_directive_modifier(
+    bitwise_or_token: SyntaxToken,
+    name: SvelteName,
+) -> SvelteDirectiveModifier {
+    SvelteDirectiveModifier::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_DIRECTIVE_MODIFIER,
+        [
+            Some(SyntaxElement::Token(bitwise_or_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_directive_value(
+    colon_token: SyntaxToken,
+    property: AnySvelteBindingProperty,
+    modifiers: SvelteDirectiveModifierList,
+) -> SvelteDirectiveValueBuilder {
+    SvelteDirectiveValueBuilder {
+        colon_token,
+        property,
+        modifiers,
+        initializer: None,
+    }
+}
+pub struct SvelteDirectiveValueBuilder {
+    colon_token: SyntaxToken,
+    property: AnySvelteBindingProperty,
+    modifiers: SvelteDirectiveModifierList,
+    initializer: Option<HtmlAttributeInitializerClause>,
+}
+impl SvelteDirectiveValueBuilder {
+    pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
+        self.initializer = Some(initializer);
+        self
+    }
+    pub fn build(self) -> SvelteDirectiveValue {
+        SvelteDirectiveValue::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_DIRECTIVE_VALUE,
+            [
+                Some(SyntaxElement::Token(self.colon_token)),
+                Some(SyntaxElement::Node(self.property.into_syntax())),
+                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
+                self.initializer
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn svelte_each_as_keyed_item(
     as_token: SyntaxToken,
-    name: HtmlTextExpression,
+    name: AnySvelteEachName,
 ) -> SvelteEachAsKeyedItemBuilder {
     SvelteEachAsKeyedItemBuilder {
         as_token,
@@ -576,7 +710,7 @@ pub fn svelte_each_as_keyed_item(
 }
 pub struct SvelteEachAsKeyedItemBuilder {
     as_token: SyntaxToken,
-    name: HtmlTextExpression,
+    name: AnySvelteEachName,
     index: Option<SvelteEachIndex>,
     key: Option<SvelteEachKey>,
 }
@@ -653,7 +787,7 @@ pub fn svelte_each_closing_block(
         ],
     ))
 }
-pub fn svelte_each_index(comma_token: SyntaxToken, value: HtmlTextExpression) -> SvelteEachIndex {
+pub fn svelte_each_index(comma_token: SyntaxToken, value: SvelteName) -> SvelteEachIndex {
     SvelteEachIndex::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_EACH_INDEX,
         [
@@ -856,6 +990,18 @@ pub fn svelte_if_opening_block(
         ],
     ))
 }
+pub fn svelte_in_directive(
+    in_token: SyntaxToken,
+    value: SvelteDirectiveValue,
+) -> SvelteInDirective {
+    SvelteInDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_IN_DIRECTIVE,
+        [
+            Some(SyntaxElement::Token(in_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn svelte_key_block(
     opening_block: SvelteKeyOpeningBlock,
     children: HtmlElementList,
@@ -900,10 +1046,28 @@ pub fn svelte_key_opening_block(
         ],
     ))
 }
+pub fn svelte_literal(value_token: SyntaxToken) -> SvelteLiteral {
+    SvelteLiteral::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_LITERAL,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn svelte_name(ident_token: SyntaxToken) -> SvelteName {
     SvelteName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_NAME,
         [Some(SyntaxElement::Token(ident_token))],
+    ))
+}
+pub fn svelte_out_directive(
+    out_token: SyntaxToken,
+    value: SvelteDirectiveValue,
+) -> SvelteOutDirective {
+    SvelteOutDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_OUT_DIRECTIVE,
+        [
+            Some(SyntaxElement::Token(out_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
     ))
 }
 pub fn svelte_render_block(
@@ -919,6 +1083,15 @@ pub fn svelte_render_block(
             Some(SyntaxElement::Token(render_token)),
             Some(SyntaxElement::Node(expression.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_rest_binding(dotdotdot_token: SyntaxToken, name: SvelteName) -> SvelteRestBinding {
+    SvelteRestBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_REST_BINDING,
+        [
+            Some(SyntaxElement::Token(dotdotdot_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
         ],
     ))
 }
@@ -963,6 +1136,56 @@ pub fn svelte_snippet_opening_block(
             Some(SyntaxElement::Node(expression.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
             Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_square_destructured_name(
+    l_brack_token: SyntaxToken,
+    names: SvelteBindingAssignmentBindingList,
+    r_brack_token: SyntaxToken,
+) -> SvelteSquareDestructuredName {
+    SvelteSquareDestructuredName::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_SQUARE_DESTRUCTURED_NAME,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(names.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
+}
+pub fn svelte_style_directive(
+    style_token: SyntaxToken,
+    value: SvelteDirectiveValue,
+) -> SvelteStyleDirective {
+    SvelteStyleDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_STYLE_DIRECTIVE,
+        [
+            Some(SyntaxElement::Token(style_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_transition_directive(
+    transition_token: SyntaxToken,
+    value: SvelteDirectiveValue,
+) -> SvelteTransitionDirective {
+    SvelteTransitionDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_TRANSITION_DIRECTIVE,
+        [
+            Some(SyntaxElement::Token(transition_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_use_directive(
+    use_token: SyntaxToken,
+    value: SvelteDirectiveValue,
+) -> SvelteUseDirective {
+    SvelteUseDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_USE_DIRECTIVE,
+        [
+            Some(SyntaxElement::Token(use_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
         ],
     ))
 }
@@ -1184,6 +1407,30 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn svelte_binding_assignment_binding_list<I, S>(
+    items: I,
+    separators: S,
+) -> SvelteBindingAssignmentBindingList
+where
+    I: IntoIterator<Item = AnySvelteBindingAssignmentBinding>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = HtmlSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    SvelteBindingAssignmentBindingList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_BINDING_ASSIGNMENT_BINDING_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn svelte_binding_list<I, S>(items: I, separators: S) -> SvelteBindingList
 where
     I: IntoIterator<Item = SvelteName>,
@@ -1203,6 +1450,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn svelte_directive_modifier_list<I>(items: I) -> SvelteDirectiveModifierList
+where
+    I: IntoIterator<Item = SvelteDirectiveModifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    SvelteDirectiveModifierList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_DIRECTIVE_MODIFIER_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn svelte_else_if_clause_list<I>(items: I) -> SvelteElseIfClauseList

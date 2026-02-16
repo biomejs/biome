@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.svelte`
+
+```svelte
+<script>
+const isActive = false;
+const color = "red";
+let inputValue = "";
+let isChecked = false;
+</script>
+
+<main>
+  <!-- bind: directive -->
+  <input bind:value={inputValue} />
+  
+  <!-- bind: directive with checkbox -->
+  <input type="checkbox" bind:checked={isChecked} />
+  
+  <!-- class: directive -->
+  <div class:active={isActive}>Active</div>
+  
+  <!-- style: directive -->
+  <div style:color={color}>Styled</div>
+  
+  <!-- Using variables in text expressions -->
+  <p>{inputValue}</p>
+  <p>{isChecked}</p>
+</main>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

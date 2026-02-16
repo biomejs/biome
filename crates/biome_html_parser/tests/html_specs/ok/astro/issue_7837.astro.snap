@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```astro
@@ -42,7 +43,7 @@ HtmlRoot {
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@359..361 "<" [Newline("\n")] [],
-                name: HtmlTagName {
+                name: HtmlComponentName {
                     value_token: HTML_LITERAL@361..371 "PageLayout" [] [],
                 },
                 attributes: HtmlAttributeList [],
@@ -74,13 +75,19 @@ HtmlRoot {
                         HtmlElement {
                             opening_element: HtmlOpeningElement {
                                 l_angle_token: L_ANGLE@448..452 "<" [Newline("\n"), Whitespace("\t\t")] [],
-                                name: HtmlTagName {
+                                name: HtmlComponentName {
                                     value_token: HTML_LITERAL@452..460 "Counter" [] [Whitespace(" ")],
                                 },
                                 attributes: HtmlAttributeList [
                                     HtmlAttribute {
                                         name: HtmlAttributeName {
-                                            value_token: HTML_LITERAL@460..471 "client:load" [] [],
+                                            value_token: HTML_LITERAL@460..466 "client" [] [],
+                                        },
+                                        initializer: missing (optional),
+                                    },
+                                    HtmlAttribute {
+                                        name: HtmlAttributeName {
+                                            value_token: HTML_LITERAL@466..471 ":load" [] [],
                                         },
                                         initializer: missing (optional),
                                     },
@@ -115,7 +122,7 @@ HtmlRoot {
                             closing_element: HtmlClosingElement {
                                 l_angle_token: L_ANGLE@493..497 "<" [Newline("\n"), Whitespace("\t\t")] [],
                                 slash_token: SLASH@497..498 "/" [] [],
-                                name: HtmlTagName {
+                                name: HtmlComponentName {
                                     value_token: HTML_LITERAL@498..505 "Counter" [] [],
                                 },
                                 r_angle_token: R_ANGLE@505..506 ">" [] [],
@@ -135,7 +142,7 @@ HtmlRoot {
             closing_element: HtmlClosingElement {
                 l_angle_token: L_ANGLE@515..517 "<" [Newline("\n")] [],
                 slash_token: SLASH@517..518 "/" [] [],
-                name: HtmlTagName {
+                name: HtmlComponentName {
                     value_token: HTML_LITERAL@518..528 "PageLayout" [] [],
                 },
                 r_angle_token: R_ANGLE@528..529 ">" [] [],
@@ -161,7 +168,7 @@ HtmlRoot {
     0: HTML_ELEMENT@359..529
       0: HTML_OPENING_ELEMENT@359..372
         0: L_ANGLE@359..361 "<" [Newline("\n")] []
-        1: HTML_TAG_NAME@361..371
+        1: HTML_COMPONENT_NAME@361..371
           0: HTML_LITERAL@361..371 "PageLayout" [] []
         2: HTML_ATTRIBUTE_LIST@371..371
         3: R_ANGLE@371..372 ">" [] []
@@ -184,12 +191,16 @@ HtmlRoot {
             0: HTML_ELEMENT@448..506
               0: HTML_OPENING_ELEMENT@448..472
                 0: L_ANGLE@448..452 "<" [Newline("\n"), Whitespace("\t\t")] []
-                1: HTML_TAG_NAME@452..460
+                1: HTML_COMPONENT_NAME@452..460
                   0: HTML_LITERAL@452..460 "Counter" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@460..471
-                  0: HTML_ATTRIBUTE@460..471
-                    0: HTML_ATTRIBUTE_NAME@460..471
-                      0: HTML_LITERAL@460..471 "client:load" [] []
+                  0: HTML_ATTRIBUTE@460..466
+                    0: HTML_ATTRIBUTE_NAME@460..466
+                      0: HTML_LITERAL@460..466 "client" [] []
+                    1: (empty)
+                  1: HTML_ATTRIBUTE@466..471
+                    0: HTML_ATTRIBUTE_NAME@466..471
+                      0: HTML_LITERAL@466..471 ":load" [] []
                     1: (empty)
                 3: R_ANGLE@471..472 ">" [] []
               1: HTML_ELEMENT_LIST@472..493
@@ -212,7 +223,7 @@ HtmlRoot {
               2: HTML_CLOSING_ELEMENT@493..506
                 0: L_ANGLE@493..497 "<" [Newline("\n"), Whitespace("\t\t")] []
                 1: SLASH@497..498 "/" [] []
-                2: HTML_TAG_NAME@498..505
+                2: HTML_COMPONENT_NAME@498..505
                   0: HTML_LITERAL@498..505 "Counter" [] []
                 3: R_ANGLE@505..506 ">" [] []
           2: HTML_CLOSING_ELEMENT@506..515
@@ -224,7 +235,7 @@ HtmlRoot {
       2: HTML_CLOSING_ELEMENT@515..529
         0: L_ANGLE@515..517 "<" [Newline("\n")] []
         1: SLASH@517..518 "/" [] []
-        2: HTML_TAG_NAME@518..528
+        2: HTML_COMPONENT_NAME@518..528
           0: HTML_LITERAL@518..528 "PageLayout" [] []
         3: R_ANGLE@528..529 ">" [] []
   4: EOF@529..530 "" [Newline("\n")] []

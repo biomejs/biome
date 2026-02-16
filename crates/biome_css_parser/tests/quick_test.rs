@@ -1,4 +1,5 @@
 use biome_css_parser::{CssParserOptions, parse_css};
+use biome_css_syntax::CssFileSource;
 use biome_test_utils::has_bogus_nodes_or_empty_slots;
 
 #[ignore]
@@ -16,6 +17,7 @@ pub fn quick_test() {
 
     let root = parse_css(
         code,
+        CssFileSource::css(),
         CssParserOptions::default()
             .allow_wrong_line_comments()
             .allow_css_modules()

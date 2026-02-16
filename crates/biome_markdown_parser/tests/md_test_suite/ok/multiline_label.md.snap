@@ -1,0 +1,87 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+[foo
+bar]: /url
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@0..1 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..4 "foo" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@4..5 "\n" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@5..8 "bar" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@8..9 "]" [] [],
+            colon_token: COLON@9..10 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@10..11 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@11..15 "/url" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@15..16 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@16..16 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..16
+  0: (empty)
+  1: MD_BLOCK_LIST@0..16
+    0: MD_LINK_REFERENCE_DEFINITION@0..15
+      0: L_BRACK@0..1 "[" [] []
+      1: MD_LINK_LABEL@1..8
+        0: MD_INLINE_ITEM_LIST@1..8
+          0: MD_TEXTUAL@1..4
+            0: MD_TEXTUAL_LITERAL@1..4 "foo" [] []
+          1: MD_TEXTUAL@4..5
+            0: MD_TEXTUAL_LITERAL@4..5 "\n" [] []
+          2: MD_TEXTUAL@5..8
+            0: MD_TEXTUAL_LITERAL@5..8 "bar" [] []
+      2: R_BRACK@8..9 "]" [] []
+      3: COLON@9..10 ":" [] []
+      4: MD_LINK_DESTINATION@10..15
+        0: MD_INLINE_ITEM_LIST@10..15
+          0: MD_TEXTUAL@10..11
+            0: MD_TEXTUAL_LITERAL@10..11 " " [] []
+          1: MD_TEXTUAL@11..15
+            0: MD_TEXTUAL_LITERAL@11..15 "/url" [] []
+      5: (empty)
+    1: MD_NEWLINE@15..16
+      0: NEWLINE@15..16 "\n" [] []
+  2: EOF@16..16 "" [] []
+
+```

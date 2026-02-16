@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/assignment/assignment.ts
 ---
+
 # Input
 
 ```ts
@@ -44,6 +45,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -61,4 +63,5 @@ loooooooooooooooooooooooooong7 =
 
 const gitBaseExtension =
 	extensions.getExtension<GitBaseExtension>("vscode.git-base")!.exports;
+
 ```

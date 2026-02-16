@@ -31,5 +31,3 @@ function foo({a = []}) {}
 ```cjs
 var [a] = foo;
 ```
-
-

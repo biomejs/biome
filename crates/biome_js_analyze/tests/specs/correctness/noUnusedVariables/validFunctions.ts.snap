@@ -24,5 +24,3 @@ add(1, 1);
 function id(a = id(null)) { return a }
 
 ```
-
-

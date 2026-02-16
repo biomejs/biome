@@ -79,7 +79,15 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         }
     }
 
-    let file_source = JsFileSource::try_from(test_case_path).unwrap_or_default();
+    let mut file_source = JsFileSource::try_from(test_case_path).unwrap_or_default();
+
+    // If the file contains "inline_expr" in its name, parse it as a template expression
+    // This simulates how template expressions are parsed in frameworks like Vue, Svelte, and Astro
+    if file_name.contains(".inline_expr.") {
+        // Use Svelte embedding kind for testing (any embedding kind would work)
+        file_source = file_source
+            .with_embedding_kind(biome_js_syntax::EmbeddingKind::Svelte { is_source: false });
+    }
 
     let extension = file_source.file_extension();
     let parsed = parse(&content, file_source, options);

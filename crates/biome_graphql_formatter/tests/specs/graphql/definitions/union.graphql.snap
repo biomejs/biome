@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: graphql/definitions/union.graphql
 ---
+
 # Input
 
 ```graphql
@@ -42,6 +43,7 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
@@ -54,4 +56,5 @@ union union = union | union
 union SearchResult @deprecated
 
 union SearchResult @deprecated = Photo | Person
+
 ```

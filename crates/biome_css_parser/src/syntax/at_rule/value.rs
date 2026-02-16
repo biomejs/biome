@@ -6,12 +6,13 @@ use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::ToDiagnostic;
-use biome_parser::{Parser, parsed_syntax::ParsedSyntax, token_set};
+use biome_parser::{Parser, SyntaxFeature, parsed_syntax::ParsedSyntax, token_set};
 
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{expected_component_value, expected_identifier};
 use crate::syntax::{
-    is_at_identifier, is_at_string, is_nth_at_identifier, parse_regular_identifier, parse_string,
+    CssSyntaxFeatures, is_at_identifier, is_at_string, is_nth_at_identifier,
+    parse_regular_identifier, parse_string,
 };
 
 /// Checks if the current token in the parser is a `@value` at-rule.
@@ -37,7 +38,7 @@ pub(crate) fn parse_value_at_rule(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if p.options().is_css_modules_disabled() {
+    if CssSyntaxFeatures::CssModules.is_unsupported(p) {
         // @value at-rule is not a standard CSS feature.
         // Provide a hint on how to enable parsing of @value at-rules.
         p.error(value_at_rule_not_allowed(p, p.cur_range()));

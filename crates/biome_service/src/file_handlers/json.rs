@@ -1,6 +1,6 @@
 use super::{
     AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
+    ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -10,7 +10,7 @@ use crate::file_handlers::{
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    Settings, check_feature_activity, check_override_feature_activity,
+    Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult};
 use crate::{WorkspaceError, extension_error};
@@ -25,6 +25,7 @@ use biome_configuration::json::{
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_formatter::{
     BracketSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    TrailingNewline,
 };
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices, analyze};
@@ -51,6 +52,7 @@ pub struct JsonFormatterSettings {
     pub expand: Option<Expand>,
     pub bracket_spacing: Option<BracketSpacing>,
     pub enabled: Option<JsonFormatterEnabled>,
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl From<JsonFormatterConfiguration> for JsonFormatterSettings {
@@ -64,6 +66,7 @@ impl From<JsonFormatterConfiguration> for JsonFormatterSettings {
             expand: configuration.expand,
             bracket_spacing: configuration.bracket_spacing,
             enabled: configuration.enabled,
+            trailing_newline: configuration.trailing_newline,
         }
     }
 }
@@ -150,6 +153,7 @@ impl ServiceLanguage for JsonLanguage {
                     || optional_json_file_source.is_some_and(|x| x.allow_trailing_commas()),
                     |value| value.value(),
                 ),
+                allow_metavariables: false,
             };
 
             overrides.apply_override_json_parser_options(path, &mut options);
@@ -176,6 +180,11 @@ impl ServiceLanguage for JsonLanguage {
         let indent_width = language
             .indent_width
             .or(global.indent_width)
+            .unwrap_or_default();
+
+        let trailing_newline = language
+            .trailing_newline
+            .or(global.trailing_newline)
             .unwrap_or_default();
 
         let line_ending = language
@@ -214,7 +223,8 @@ impl ServiceLanguage for JsonLanguage {
             .with_line_width(line_width)
             .with_trailing_commas(trailing_commas)
             .with_expand(expand_lists)
-            .with_bracket_spacing(bracket_spacing);
+            .with_bracket_spacing(bracket_spacing)
+            .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_json_format_options(path, &mut options);
 
@@ -358,24 +368,26 @@ impl ExtensionHandler for JsonFileHandler {
                 format_on_type: Some(format_on_type),
                 format_embedded: None,
             },
-            search: SearchCapabilities { search: None },
+            search: SearchCapabilities {
+                search: Some(search),
+            },
         }
     }
 }
 
-fn formatter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn formatter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.formatter_enabled_for_file_path::<JsonLanguage>(path)
 }
 
-fn linter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn linter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.linter_enabled_for_file_path::<JsonLanguage>(path)
 }
 
-fn assist_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.assist_enabled_for_file_path::<JsonLanguage>(path)
 }
 
-fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
+fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
@@ -383,7 +395,7 @@ fn parse(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let options = settings.parse_options::<JsonLanguage>(biome_path, &file_source);
@@ -409,7 +421,7 @@ fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
@@ -425,7 +437,7 @@ fn format(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
@@ -442,7 +454,7 @@ fn format_range(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
@@ -456,7 +468,7 @@ fn format_on_type(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
@@ -512,7 +524,7 @@ fn lint(params: LintParams) -> LintResults {
     );
 
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(params.only)
             .with_skip(params.skip)
             .with_path(params.path.as_path())
@@ -535,9 +547,14 @@ fn lint(params: LintParams) -> LintResults {
             .full_source()
             .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
     };
-    let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, services, |signal| {
-        process_lint.process_signal(signal)
-    });
+    let (_, analyze_diagnostics) = analyze(
+        &root,
+        filter,
+        &analyzer_options,
+        services,
+        &params.plugins,
+        |signal| process_lint.process_signal(signal),
+    );
 
     let mut diagnostics = params
         .parse
@@ -573,7 +590,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         only,
         enabled_rules: rules,
         suppression_reason,
-        plugins: _,
+        plugins,
         categories,
         action_offset,
         document_services: _,
@@ -588,7 +605,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     );
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(only)
             .with_skip(skip)
             .with_path(path.as_path())
@@ -613,20 +630,27 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .full_source()
             .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
     };
-    analyze(&tree, filter, &analyzer_options, services, |signal| {
-        actions.extend(signal.actions().into_code_action_iter().map(|item| {
-            CodeAction {
-                category: item.category.clone(),
-                rule_name: item
-                    .rule_name
-                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                suggestion: item.suggestion,
-                offset: action_offset,
-            }
-        }));
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        services,
+        &plugins,
+        |signal| {
+            actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                CodeAction {
+                    category: item.category.clone(),
+                    rule_name: item
+                        .rule_name
+                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                    suggestion: item.suggestion,
+                    offset: action_offset,
+                }
+            }));
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     PullActionsResult { actions }
 }
@@ -636,14 +660,17 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let mut tree: JsonRoot = params.parse.tree();
 
     // Compute final rules (taking `overrides` into account)
-    let rules = params.settings.as_linter_rules(params.biome_path.as_path());
+    let rules = params
+        .settings
+        .as_ref()
+        .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
         params.biome_path,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(params.only)
             .with_skip(params.skip)
             .with_path(params.biome_path.as_path())
@@ -679,9 +706,14 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                 .full_source()
                 .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
         };
-        let (action, _) = analyze(&tree, filter, &analyzer_options, services, |signal| {
-            process_fix_all.process_signal(signal)
-        });
+        let (action, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            services,
+            &params.plugins,
+            |signal| process_fix_all.process_signal(signal),
+        );
 
         let result = process_fix_all.process_action(action, |root| {
             tree = match JsonRoot::cast(root) {

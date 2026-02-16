@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: jsx/quote_style/jsx_double_string_double/quote_style.jsx
 ---
+
 # Input
 
 ```jsx
@@ -39,12 +40,14 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```jsx
 <div bar="foo" baz={"foo"}>
 	"123"
 </div>;
+
 ```
 
 ## Output 1
@@ -65,10 +68,12 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```jsx
 <div bar="foo" baz={"foo"}>
 	"123"
 </div>;
+
 ```

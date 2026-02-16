@@ -1,7 +1,11 @@
 use super::{FixFileModeOptions, determine_fix_file_mode};
+use crate::CliDiagnostic;
 use crate::cli_options::CliOptions;
-use crate::commands::{CommandRunner, get_files_to_process_with_cli_options};
-use crate::{CliDiagnostic, Execution, TraversalMode};
+use crate::commands::get_files_to_process_with_cli_options;
+use crate::runner::execution::{AnalyzerSelectors, Execution, VcsTargeted};
+use crate::runner::impls::commands::traversal::TraversalCommand;
+use crate::runner::impls::executions::summary_verb::SummaryVerbExecution;
+use crate::runner::impls::process_file::lint_and_assist::LintAssistProcessFile;
 use biome_configuration::analyzer::AnalyzerSelector;
 use biome_configuration::css::{CssLinterConfiguration, CssParserConfiguration};
 use biome_configuration::graphql::GraphqlLinterConfiguration;
@@ -9,12 +13,19 @@ use biome_configuration::javascript::JsLinterConfiguration;
 use biome_configuration::json::{JsonLinterConfiguration, JsonParserConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, LinterConfiguration};
-use biome_console::Console;
+use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
+use biome_diagnostics::{Category, category};
 use biome_fs::FileSystem;
+use biome_service::configuration::ProjectScanComputer;
+use biome_service::workspace::{
+    FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported, FixFileMode, ScanKind,
+    SupportKind,
+};
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
 use std::ffi::OsString;
+use std::time::Duration;
 
 pub(crate) struct LintCommandPayload {
     pub(crate) write: bool,
@@ -38,10 +49,151 @@ pub(crate) struct LintCommandPayload {
     pub(crate) graphql_linter: Option<GraphqlLinterConfiguration>,
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
+    pub(crate) profile_rules: bool,
 }
 
-impl CommandRunner for LintCommandPayload {
-    const COMMAND_NAME: &'static str = "lint";
+struct LintExecution {
+    /// The type of fixes that should be applied when analyzing a file.
+    ///
+    /// It's [None] if the `lint` command is called without `--apply` or `--apply-suggested`
+    /// arguments.
+    fix_file_mode: Option<FixFileMode>,
+    /// An optional tuple.
+    /// 1. The virtual path to the file
+    /// 2. The content of the file
+    stdin_file_path: Option<String>,
+    /// Run only the given rule or group of rules.
+    /// If the severity level of a rule is `off`,
+    /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
+    only: Vec<AnalyzerSelector>,
+    /// Skip the given rule or group of rules by setting the severity level of the rules to `off`.
+    /// This option takes precedence over `--only`.
+    skip: Vec<AnalyzerSelector>,
+    /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
+    vcs_targeted: VcsTargeted,
+    /// Suppress existing diagnostics with a `// biome-ignore` comment
+    suppress: bool,
+    /// Explanation for suppressing diagnostics with `--suppress` and `--reason`
+    suppression_reason: Option<String>,
+    /// It skips parse errors
+    skip_parse_errors: bool,
+}
+
+impl Execution for LintExecution {
+    fn wanted_features(&self) -> FeatureName {
+        FeaturesBuilder::new().with_linter().build()
+    }
+
+    fn not_requested_features(&self) -> FeatureName {
+        FeaturesBuilder::new()
+            .with_formatter()
+            .with_assist()
+            .with_search()
+            .build()
+    }
+
+    fn can_handle(&self, features: FeaturesSupported) -> bool {
+        features.supports_lint()
+    }
+
+    fn supports_kind(&self, file_features: &FeaturesSupported) -> Option<SupportKind> {
+        Some(file_features.support_kind_for(FeatureKind::Lint))
+    }
+
+    fn is_vcs_targeted(&self) -> bool {
+        self.vcs_targeted.changed || self.vcs_targeted.staged
+    }
+
+    fn get_stdin_file_path(&self) -> Option<&str> {
+        self.stdin_file_path.as_deref()
+    }
+
+    fn scan_kind_computer(&self, computer: ProjectScanComputer) -> ScanKind {
+        computer
+            .with_rule_selectors(self.skip.as_ref(), self.only.as_ref())
+            .compute()
+    }
+
+    fn as_diagnostic_category(&self) -> &'static Category {
+        category!("lint")
+    }
+
+    fn as_fix_file_mode(&self) -> Option<FixFileMode> {
+        self.fix_file_mode
+    }
+
+    fn should_skip_parse_errors(&self) -> bool {
+        self.skip_parse_errors
+    }
+
+    fn suppress(&self) -> bool {
+        self.suppress
+    }
+
+    fn suppression_reason(&self) -> Option<&str> {
+        self.suppression_reason.as_deref()
+    }
+
+    fn requires_write_access(&self) -> bool {
+        self.fix_file_mode.is_some()
+    }
+
+    fn analyzer_selectors(&self) -> AnalyzerSelectors {
+        AnalyzerSelectors {
+            only: self.only.clone(),
+            skip: self.skip.clone(),
+        }
+    }
+
+    fn summary_phrase(&self, files: usize, duration: &Duration) -> MarkupBuf {
+        SummaryVerbExecution.summary_verb("Checked", files, duration)
+    }
+
+    fn is_lint(&self) -> bool {
+        true
+    }
+}
+
+impl TraversalCommand for LintCommandPayload {
+    type ProcessFile = LintAssistProcessFile;
+
+    fn command_name(&self) -> &'static str {
+        "lint"
+    }
+
+    fn minimal_scan_kind(&self) -> Option<ScanKind> {
+        None
+    }
+
+    fn get_execution(
+        &self,
+        cli_options: &CliOptions,
+        _console: &mut dyn Console,
+        _workspace: &dyn Workspace,
+    ) -> Result<Box<dyn Execution>, CliDiagnostic> {
+        let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
+            write: self.write,
+            fix: self.fix,
+            unsafe_: self.unsafe_,
+            suppress: self.suppress,
+            suppression_reason: self.suppression_reason.clone(),
+        })?;
+
+        if self.profile_rules {
+            biome_analyze::profiling::enable();
+        }
+
+        Ok(Box::new(LintExecution {
+            fix_file_mode,
+            stdin_file_path: self.stdin_file_path.clone(),
+            only: self.only.clone(),
+            skip: self.skip.clone(),
+            vcs_targeted: (self.staged, self.changed).into(),
+            suppress: self.suppress,
+            suppression_reason: self.suppression_reason.clone(),
+            skip_parse_errors: cli_options.skip_parse_errors,
+        }))
+    }
 
     fn merge_configuration(
         &mut self,
@@ -120,39 +272,5 @@ impl CommandRunner for LintCommandPayload {
         .unwrap_or(self.paths.clone());
 
         Ok(paths)
-    }
-
-    fn get_stdin_file_path(&self) -> Option<&str> {
-        self.stdin_file_path.as_deref()
-    }
-
-    fn should_write(&self) -> bool {
-        self.write || self.fix
-    }
-
-    fn get_execution(
-        &self,
-        cli_options: &CliOptions,
-        console: &mut dyn Console,
-        _workspace: &dyn Workspace,
-    ) -> Result<Execution, CliDiagnostic> {
-        let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
-            write: self.write,
-            fix: self.fix,
-            unsafe_: self.unsafe_,
-            suppress: self.suppress,
-            suppression_reason: self.suppression_reason.clone(),
-        })?;
-        Ok(Execution::new(TraversalMode::Lint {
-            fix_file_mode,
-            stdin: self.get_stdin(console)?,
-            only: self.only.clone(),
-            skip: self.skip.clone(),
-            vcs_targeted: (self.staged, self.changed).into(),
-            suppress: self.suppress,
-            suppression_reason: self.suppression_reason.clone(),
-            skip_parse_errors: cli_options.skip_parse_errors,
-        })
-        .set_report(cli_options))
     }
 }

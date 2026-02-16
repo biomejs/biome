@@ -1,0 +1,140 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<input bind:value={get, set} />
+<input bind:value={null, setter} />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                SvelteBindDirective {
+                    bind_token: BIND_KW@7..11 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@11..12 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@12..17 "value" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@17..18 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@18..19 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@19..27 "get, set" [] [],
+                                },
+                                r_curly_token: R_CURLY@27..29 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@29..30 "/" [] [],
+            r_angle_token: R_ANGLE@30..31 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@31..33 "<" [Newline("\n")] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@33..39 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                SvelteBindDirective {
+                    bind_token: BIND_KW@39..43 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@43..44 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@44..49 "value" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@49..50 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@50..51 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@51..63 "null, setter" [] [],
+                                },
+                                r_curly_token: R_CURLY@63..65 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@65..66 "/" [] [],
+            r_angle_token: R_ANGLE@66..67 ">" [] [],
+        },
+    ],
+    eof_token: EOF@67..68 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..68
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..67
+    0: HTML_SELF_CLOSING_ELEMENT@0..31
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..7
+        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@7..29
+        0: SVELTE_BIND_DIRECTIVE@7..29
+          0: BIND_KW@7..11 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@11..29
+            0: COLON@11..12 ":" [] []
+            1: SVELTE_NAME@12..17
+              0: IDENT@12..17 "value" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@17..17
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@17..29
+              0: EQ@17..18 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@18..29
+                0: L_CURLY@18..19 "{" [] []
+                1: HTML_TEXT_EXPRESSION@19..27
+                  0: HTML_LITERAL@19..27 "get, set" [] []
+                2: R_CURLY@27..29 "}" [] [Whitespace(" ")]
+      3: SLASH@29..30 "/" [] []
+      4: R_ANGLE@30..31 ">" [] []
+    1: HTML_SELF_CLOSING_ELEMENT@31..67
+      0: L_ANGLE@31..33 "<" [Newline("\n")] []
+      1: HTML_TAG_NAME@33..39
+        0: HTML_LITERAL@33..39 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@39..65
+        0: SVELTE_BIND_DIRECTIVE@39..65
+          0: BIND_KW@39..43 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@43..65
+            0: COLON@43..44 ":" [] []
+            1: SVELTE_NAME@44..49
+              0: IDENT@44..49 "value" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@49..49
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@49..65
+              0: EQ@49..50 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@50..65
+                0: L_CURLY@50..51 "{" [] []
+                1: HTML_TEXT_EXPRESSION@51..63
+                  0: HTML_LITERAL@51..63 "null, setter" [] []
+                2: R_CURLY@63..65 "}" [] [Whitespace(" ")]
+      3: SLASH@65..66 "/" [] []
+      4: R_ANGLE@66..67 ">" [] []
+  4: EOF@67..68 "" [Newline("\n")] []
+
+```

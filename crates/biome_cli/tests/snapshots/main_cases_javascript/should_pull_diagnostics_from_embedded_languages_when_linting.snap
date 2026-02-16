@@ -1,0 +1,145 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "experimentalEmbeddedSnippetsEnabled": true,
+    "formatter": {
+      "enabled": true
+    },
+    "linter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+const Foo = gql`query { people(id: $personId) { name } }`;
+const Bar = styled.div`background-color: red !important; align: center; padding: 0;`;
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.js:1:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable Foo is unused.
+  
+  > 1 │ const Foo = gql`query { people(id: $personId) { name } }`;
+      │       ^^^
+    2 │ const Bar = styled.div`background-color: red !important; align: center; padding: 0;`;
+    3 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend Foo with an underscore.
+  
+    1   │ - const·Foo·=·gql`query·{·people(id:·$personId)·{·name·}·}`;
+      1 │ + const·_Foo·=·gql`query·{·people(id:·$personId)·{·name·}·}`;
+    2 2 │   const Bar = styled.div`background-color: red !important; align: center; padding: 0;`;
+    3 3 │   
+  
+
+```
+
+```block
+file.js:2:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable Bar is unused.
+  
+    1 │ const Foo = gql`query { people(id: $personId) { name } }`;
+  > 2 │ const Bar = styled.div`background-color: red !important; align: center; padding: 0;`;
+      │       ^^^
+    3 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend Bar with an underscore.
+  
+    1 1 │   const Foo = gql`query { people(id: $personId) { name } }`;
+    2   │ - const·Bar·=·styled.div`background-color:·red·!important;·align:·center;·padding:·0;`;
+      2 │ + const·_Bar·=·styled.div`background-color:·red·!important;·align:·center;·padding:·0;`;
+    3 3 │   
+  
+
+```
+
+```block
+file.js:2:46 lint/complexity/noImportantStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of the !important style.
+  
+    1 │ const Foo = gql`query { people(id: $personId) { name } }`;
+  > 2 │ const Bar = styled.div`background-color: red !important; align: center; padding: 0;`;
+      │                                              ^^^^^^^^^^
+    3 │ 
+  
+  i This style reverses the cascade logic, and precedence is reversed. This could lead to having styles with higher specificity being overridden by styles with lower specificity.
+  
+  i Unsafe fix: Remove the style.
+  
+    1 │ background-color:·red·!important;·align:·center;·padding:·0;
+      │                      -----------                            
+
+```
+
+```block
+file.js:1:17 lint/correctness/useGraphqlNamedOperations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Anonymous GraphQL operations are forbidden. Make sure to name your query.
+  
+  > 1 │ const Foo = gql`query { people(id: $personId) { name } }`;
+      │                 ^^^^^
+    2 │ const Bar = styled.div`background-color: red !important; align: center; padding: 0;`;
+    3 │ 
+  
+  i Most GraphQL client libraries use the operation name for caching purposes.
+  
+  i Unsafe fix: Rename this query to People.
+  
+    1 │ query·People{·people(id:·$personId)·{·name·}·}
+      │       ++++++                                  
+
+```
+
+```block
+file.js:2:58 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    1 │ const Foo = gql`query { people(id: $personId) { name } }`;
+  > 2 │ const Bar = styled.div`background-color: red !important; align: center; padding: 0;`;
+      │                                                          ^^^^^
+    3 │ 
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+Found 3 warnings.
+```

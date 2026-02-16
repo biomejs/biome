@@ -41,7 +41,7 @@ biome_html_formatter    = { workspace = true, features = ["serde"] }
 biome_html_parser       = { workspace = true }
 biome_html_syntax       = { workspace = true }
 biome_js_analyze        = { workspace = true }
-biome_js_factory        = { workspace = true, optional = true }
+biome_js_factory        = { workspace = true }
 biome_js_formatter      = { workspace = true, features = ["serde"] }
 biome_js_parser         = { workspace = true }
 biome_js_semantic       = { workspace = true }
@@ -61,6 +61,7 @@ biome_rowan             = { workspace = true, features = ["serde"] }
 biome_string_case       = { workspace = true }
 biome_text_edit         = { workspace = true }
 boxcar                  = { workspace = true }
+bpaf                    = { workspace = true }
 camino                  = { workspace = true }
 crossbeam               = { workspace = true }
 either                  = { workspace = true }
@@ -96,7 +97,6 @@ schema    = [
   "biome_html_formatter/schema",
   "biome_html_syntax/schema",
   "biome_js_analyze/schema",
-  "biome_js_factory",
   "biome_js_syntax/schema",
   "biome_json_syntax/schema",
   "biome_module_graph/schema",

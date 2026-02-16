@@ -1,8 +1,10 @@
 mod at_rule;
 mod block;
 mod css_modules;
+mod declaration;
 mod parse_error;
 mod property;
+mod scss;
 mod selector;
 mod util;
 mod value;
@@ -10,13 +12,16 @@ mod value;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
-use crate::syntax::block::parse_declaration_or_rule_list_block;
+use crate::syntax::block::{DeclarationOrRuleList, parse_declaration_or_rule_list_block};
 use crate::syntax::parse_error::{
-    expected_any_rule, expected_non_css_wide_keyword_identifier, tailwind_disabled,
+    expected_any_rule, expected_component_value, expected_non_css_wide_keyword_identifier,
+    scss_only_syntax_error, tailwind_disabled,
 };
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
-use crate::syntax::property::{is_at_any_property, parse_any_property};
+use crate::syntax::scss::{
+    is_at_scss_declaration, is_at_scss_identifier, parse_scss_declaration, parse_scss_identifier,
+};
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
 use crate::syntax::selector::relative_selector::{RelativeSelectorList, is_at_relative_selector};
@@ -24,7 +29,7 @@ use crate::syntax::value::function::{
     BINARY_OPERATION_TOKEN, parse_tailwind_value_theme_reference,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, T};
+use biome_css_syntax::{CssSyntaxKind, EmbeddingKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
@@ -33,30 +38,108 @@ use biome_parser::{Parser, SyntaxFeature, token_set};
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
 use value::function::{is_at_any_function, parse_any_function};
 
-use self::parse_error::{expected_component_value, expected_declaration_item};
-
 pub(crate) enum CssSyntaxFeatures {
+    /// Enable support for SCSS-specific syntax.
+    Scss,
     /// Enable support for Tailwind CSS directives and syntax.
     Tailwind,
+
+    /// Enable support for CSS Modules syntax.
+    CssModules,
+
+    /// Enable support for CSS Modules syntax plus parsing of pseudo selectors for `:slotted`, `:deep`, and the `v-bind()` function.
+    CssModulesWithVue,
 }
+
+pub(crate) use declaration::{
+    DeclarationList, is_at_any_declaration, is_at_any_declaration_with_semicolon,
+    is_at_declaration, parse_any_declaration_with_semicolon, parse_declaration,
+};
 
 impl SyntaxFeature for CssSyntaxFeatures {
     type Parser<'source> = CssParser<'source>;
 
     fn is_supported(&self, p: &Self::Parser<'_>) -> bool {
         match self {
+            Self::Scss => p.source_type.is_scss(),
             Self::Tailwind => p.options().is_tailwind_directives_enabled(),
+            Self::CssModules => p.options().is_css_modules_enabled(),
+            Self::CssModulesWithVue => p.options().is_css_modules_vue_enabled(),
         }
     }
 }
 
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
-    p.eat(UNICODE_BOM);
+    match p.source_type.as_embedding_kind() {
+        EmbeddingKind::Styled => {
+            DeclarationOrRuleList::new(EOF).parse_list(p);
 
-    RuleList::new(EOF).parse_list(p);
+            m.complete(p, CSS_SNIPPET_ROOT);
+        }
+        EmbeddingKind::None | EmbeddingKind::Html(_) => {
+            p.eat(UNICODE_BOM);
 
-    m.complete(p, CSS_ROOT);
+            RootItemList.parse_list(p);
+
+            m.complete(p, CSS_ROOT);
+        }
+    }
+}
+
+struct RootItemList;
+
+#[inline]
+pub(crate) fn is_at_root_item_list_element(p: &mut CssParser) -> bool {
+    is_at_at_rule(p) || is_at_scss_declaration(p) || is_at_qualified_rule(p)
+}
+
+struct RootItemListParseRecovery;
+
+impl ParseRecovery for RootItemListParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_RULE;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(EOF) || is_at_root_item_list_element(p)
+    }
+}
+
+impl ParseNodeList for RootItemList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_ROOT_ITEM_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if is_at_at_rule(p) {
+            parse_at_rule(p)
+        } else if is_at_scss_declaration(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_declaration,
+                |p, marker| {
+                    scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+                },
+            )
+        } else if is_at_qualified_rule(p) {
+            parse_qualified_rule(p)
+        } else {
+            Absent
+        }
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(EOF)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(p, &RootItemListParseRecovery, expected_any_rule)
+    }
 }
 
 struct RuleList {
@@ -174,131 +257,6 @@ pub(crate) fn parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_NESTED_QUALIFIED_RULE))
 }
 
-pub(crate) struct DeclarationList;
-
-impl ParseNodeList for DeclarationList {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_DECLARATION_LIST;
-
-    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_declaration_with_semicolon(p)
-    }
-
-    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}'])
-    }
-
-    fn recover(
-        &mut self,
-        p: &mut Self::Parser<'_>,
-        parsed_element: ParsedSyntax,
-    ) -> RecoveryResult {
-        parsed_element.or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T!['}'])),
-            expected_declaration_item,
-        )
-    }
-}
-
-pub(crate) fn is_at_declaration(p: &mut CssParser) -> bool {
-    is_at_any_property(p)
-}
-#[inline]
-pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_declaration(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-
-    parse_any_property(p).ok();
-    parse_declaration_important(p).ok();
-
-    Present(m.complete(p, CSS_DECLARATION))
-}
-
-#[inline]
-pub(crate) fn is_at_any_declaration_with_semicolon(p: &mut CssParser) -> bool {
-    is_at_declaration(p) || is_at_empty_declaration(p)
-}
-
-#[inline]
-pub(crate) fn parse_any_declaration_with_semicolon(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_empty_declaration(p) {
-        parse_empty_declaration(p)
-    } else if is_at_any_declaration_with_semicolon(p) {
-        parse_declaration_with_semicolon(p)
-    } else {
-        Absent
-    }
-}
-
-/// Parses a CSS declaration that may optionally end with a semicolon.
-///
-/// This function attempts to parse a single CSS declaration from the current position
-/// of the parser. It handles the optional semicolon (';') at the end of the declaration,
-/// adhering to CSS syntax rules where the semicolon is mandatory for all declarations
-/// except the last one in a block. In the case of the last declaration before a closing
-/// brace ('}'), the semicolon is optional. If the semicolon is omitted for declarations
-/// that are not at the end, the parser will raise an error.
-#[inline]
-pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_declaration(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-
-    parse_declaration(p).ok();
-
-    // If the next token is a closing brace ('}'), the semicolon is optional.
-    // Otherwise, a semicolon is expected and the parser will enforce its presence.
-    // div { color: red; }
-    // div { color: red }
-    if !p.at(T!['}']) {
-        if p.nth_at(1, T!['}']) {
-            p.eat(T![;]);
-        } else {
-            p.expect(T![;]);
-        }
-    }
-
-    Present(m.complete(p, CSS_DECLARATION_WITH_SEMICOLON))
-}
-
-#[inline]
-pub(crate) fn is_at_empty_declaration(p: &mut CssParser) -> bool {
-    p.at(T![;])
-}
-
-#[inline]
-pub(crate) fn parse_empty_declaration(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_empty_declaration(p) {
-        return Absent;
-    }
-    let m = p.start();
-    p.bump(T![;]);
-    Present(m.complete(p, CSS_EMPTY_DECLARATION))
-}
-
-#[inline]
-fn is_at_declaration_important(p: &mut CssParser) -> bool {
-    p.at(T![!]) && p.nth_at(1, T![important])
-}
-
-#[inline]
-fn parse_declaration_important(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_declaration_important(p) {
-        return Absent;
-    }
-    let m = p.start();
-    p.bump(T![!]);
-    p.bump(T![important]);
-    Present(m.complete(p, CSS_DECLARATION_IMPORTANT))
-}
-
 #[inline]
 fn is_at_metavariable(p: &mut CssParser) -> bool {
     p.at(GRIT_METAVARIABLE)
@@ -322,6 +280,7 @@ fn parse_metavariable(p: &mut CssParser) -> ParsedSyntax {
 #[inline]
 pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
     is_at_any_function(p)
+        || is_at_scss_identifier(p)
         || is_at_identifier(p)
         || p.at(CSS_STRING_LITERAL)
         || is_at_any_dimension(p)
@@ -335,7 +294,11 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_any_function(p) {
+    if is_at_scss_identifier(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_identifier, |p, m| {
+            scss_only_syntax_error(p, "SCSS variables", m.range(p))
+        })
+    } else if is_at_any_function(p) {
         parse_any_function(p)
     } else if is_at_dashed_identifier(p) {
         if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
@@ -661,7 +624,7 @@ pub(crate) fn try_parse<T, E>(
 #[cfg(test)]
 mod tests {
     use crate::{CssParserOptions, parser::CssParser};
-    use biome_css_syntax::{CssSyntaxKind, T};
+    use biome_css_syntax::{CssFileSource, CssSyntaxKind, T};
     use biome_parser::Parser;
     use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
@@ -669,7 +632,11 @@ mod tests {
 
     #[test]
     fn try_parse_rewinds_to_checkpoint() {
-        let mut p = CssParser::new("width: blue;", CssParserOptions::default());
+        let mut p = CssParser::new(
+            "width: blue;",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
 
         let pre_try_range = p.cur_range();
         let result = try_parse(&mut p, |p| {
@@ -694,7 +661,11 @@ mod tests {
 
     #[test]
     fn try_parse_preserves_position_on_success() {
-        let mut p = CssParser::new("width: 100;", CssParserOptions::default());
+        let mut p = CssParser::new(
+            "width: 100;",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
 
         let pre_try_range = p.cur_range();
         let result = try_parse(&mut p, |p| {

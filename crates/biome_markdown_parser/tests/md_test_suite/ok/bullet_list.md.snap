@@ -1,0 +1,251 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- Item one
+- Item two
+- Item three
+
+* Alternative marker
+* Another item
+
++ Plus marker
++ Another plus item
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@0..1 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@1..10 " Item one" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@10..11 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: MINUS@11..12 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@12..21 " Item two" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@21..22 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: MINUS@22..23 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@23..34 " Item three" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@34..35 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@35..36 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: STAR@36..37 "*" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@37..56 " Alternative marker" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@56..57 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: STAR@57..58 "*" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@58..71 " Another item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@71..72 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@72..73 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: PLUS@73..74 "+" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@74..86 " Plus marker" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@86..87 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: PLUS@87..88 "+" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@88..106 " Another plus item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@106..107 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@107..107 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..107
+  0: (empty)
+  1: MD_BLOCK_LIST@0..107
+    0: MD_BULLET_LIST_ITEM@0..36
+      0: MD_BULLET_LIST@0..36
+        0: MD_BULLET@0..11
+          0: MINUS@0..1 "-" [] []
+          1: MD_BLOCK_LIST@1..11
+            0: MD_PARAGRAPH@1..11
+              0: MD_INLINE_ITEM_LIST@1..11
+                0: MD_TEXTUAL@1..10
+                  0: MD_TEXTUAL_LITERAL@1..10 " Item one" [] []
+                1: MD_TEXTUAL@10..11
+                  0: MD_TEXTUAL_LITERAL@10..11 "\n" [] []
+              1: (empty)
+        1: MD_BULLET@11..22
+          0: MINUS@11..12 "-" [] []
+          1: MD_BLOCK_LIST@12..22
+            0: MD_PARAGRAPH@12..22
+              0: MD_INLINE_ITEM_LIST@12..22
+                0: MD_TEXTUAL@12..21
+                  0: MD_TEXTUAL_LITERAL@12..21 " Item two" [] []
+                1: MD_TEXTUAL@21..22
+                  0: MD_TEXTUAL_LITERAL@21..22 "\n" [] []
+              1: (empty)
+        2: MD_BULLET@22..36
+          0: MINUS@22..23 "-" [] []
+          1: MD_BLOCK_LIST@23..36
+            0: MD_PARAGRAPH@23..35
+              0: MD_INLINE_ITEM_LIST@23..35
+                0: MD_TEXTUAL@23..34
+                  0: MD_TEXTUAL_LITERAL@23..34 " Item three" [] []
+                1: MD_TEXTUAL@34..35
+                  0: MD_TEXTUAL_LITERAL@34..35 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@35..36
+              0: NEWLINE@35..36 "\n" [] []
+    1: MD_BULLET_LIST_ITEM@36..73
+      0: MD_BULLET_LIST@36..73
+        0: MD_BULLET@36..57
+          0: STAR@36..37 "*" [] []
+          1: MD_BLOCK_LIST@37..57
+            0: MD_PARAGRAPH@37..57
+              0: MD_INLINE_ITEM_LIST@37..57
+                0: MD_TEXTUAL@37..56
+                  0: MD_TEXTUAL_LITERAL@37..56 " Alternative marker" [] []
+                1: MD_TEXTUAL@56..57
+                  0: MD_TEXTUAL_LITERAL@56..57 "\n" [] []
+              1: (empty)
+        1: MD_BULLET@57..73
+          0: STAR@57..58 "*" [] []
+          1: MD_BLOCK_LIST@58..73
+            0: MD_PARAGRAPH@58..72
+              0: MD_INLINE_ITEM_LIST@58..72
+                0: MD_TEXTUAL@58..71
+                  0: MD_TEXTUAL_LITERAL@58..71 " Another item" [] []
+                1: MD_TEXTUAL@71..72
+                  0: MD_TEXTUAL_LITERAL@71..72 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@72..73
+              0: NEWLINE@72..73 "\n" [] []
+    2: MD_BULLET_LIST_ITEM@73..107
+      0: MD_BULLET_LIST@73..107
+        0: MD_BULLET@73..87
+          0: PLUS@73..74 "+" [] []
+          1: MD_BLOCK_LIST@74..87
+            0: MD_PARAGRAPH@74..87
+              0: MD_INLINE_ITEM_LIST@74..87
+                0: MD_TEXTUAL@74..86
+                  0: MD_TEXTUAL_LITERAL@74..86 " Plus marker" [] []
+                1: MD_TEXTUAL@86..87
+                  0: MD_TEXTUAL_LITERAL@86..87 "\n" [] []
+              1: (empty)
+        1: MD_BULLET@87..107
+          0: PLUS@87..88 "+" [] []
+          1: MD_BLOCK_LIST@88..107
+            0: MD_PARAGRAPH@88..107
+              0: MD_INLINE_ITEM_LIST@88..107
+                0: MD_TEXTUAL@88..106
+                  0: MD_TEXTUAL_LITERAL@88..106 " Another plus item" [] []
+                1: MD_TEXTUAL@106..107
+                  0: MD_TEXTUAL_LITERAL@106..107 "\n" [] []
+              1: (empty)
+  2: EOF@107..107 "" [] []
+
+```

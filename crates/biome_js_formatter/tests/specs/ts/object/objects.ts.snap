@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/object/objects.ts
 ---
+
 # Input
 
 ```ts
@@ -82,6 +83,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -120,4 +122,5 @@ function fn4(
 
 // the object type of `baz` should be collapsed
 function fn5(bar: string, baz: { qux: string }): void {}
+
 ```

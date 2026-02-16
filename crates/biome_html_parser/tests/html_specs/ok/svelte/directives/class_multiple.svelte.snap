@@ -1,0 +1,166 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div class:foo class:bar={isBaz} class:baz={isBaz}>
+  Multiple classes
+</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@5..10 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@10..11 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@11..15 "foo" [] [Whitespace(" ")],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@15..20 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@20..21 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@21..24 "bar" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@24..25 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@25..26 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@26..31 "isBaz" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@31..33 "}" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    },
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@33..38 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@38..39 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@39..42 "baz" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@42..43 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@43..44 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@44..49 "isBaz" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@49..50 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@50..51 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@51..70 "Multiple classes" [Newline("\n"), Whitespace("  ")] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@70..72 "<" [Newline("\n")] [],
+                slash_token: SLASH@72..73 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@73..76 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@76..77 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@77..78 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..78
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..77
+    0: HTML_ELEMENT@0..77
+      0: HTML_OPENING_ELEMENT@0..51
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..50
+          0: SVELTE_CLASS_DIRECTIVE@5..15
+            0: CLASS_KW@5..10 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..15
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..15
+                0: HTML_LITERAL@11..15 "foo" [] [Whitespace(" ")]
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@15..15
+              3: (empty)
+          1: SVELTE_CLASS_DIRECTIVE@15..33
+            0: CLASS_KW@15..20 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@20..33
+              0: COLON@20..21 ":" [] []
+              1: SVELTE_LITERAL@21..24
+                0: HTML_LITERAL@21..24 "bar" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@24..24
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@24..33
+                0: EQ@24..25 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@25..33
+                  0: L_CURLY@25..26 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@26..31
+                    0: HTML_LITERAL@26..31 "isBaz" [] []
+                  2: R_CURLY@31..33 "}" [] [Whitespace(" ")]
+          2: SVELTE_CLASS_DIRECTIVE@33..50
+            0: CLASS_KW@33..38 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@38..50
+              0: COLON@38..39 ":" [] []
+              1: SVELTE_LITERAL@39..42
+                0: HTML_LITERAL@39..42 "baz" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@42..42
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@42..50
+                0: EQ@42..43 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@43..50
+                  0: L_CURLY@43..44 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@44..49
+                    0: HTML_LITERAL@44..49 "isBaz" [] []
+                  2: R_CURLY@49..50 "}" [] []
+        3: R_ANGLE@50..51 ">" [] []
+      1: HTML_ELEMENT_LIST@51..70
+        0: HTML_CONTENT@51..70
+          0: HTML_LITERAL@51..70 "Multiple classes" [Newline("\n"), Whitespace("  ")] []
+      2: HTML_CLOSING_ELEMENT@70..77
+        0: L_ANGLE@70..72 "<" [Newline("\n")] []
+        1: SLASH@72..73 "/" [] []
+        2: HTML_TAG_NAME@73..76
+          0: HTML_LITERAL@73..76 "div" [] []
+        3: R_ANGLE@76..77 ">" [] []
+  4: EOF@77..78 "" [Newline("\n")] []
+
+```

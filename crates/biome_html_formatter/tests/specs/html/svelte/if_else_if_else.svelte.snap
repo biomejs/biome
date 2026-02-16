@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: svelte/if_else_if_else.svelte
 ---
+
 # Input
 
 ```svelte
@@ -35,6 +36,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```svelte
@@ -48,4 +50,5 @@ Self close void elements: never
 {:else}
 	<p>just right!</p>
 {/if}
+
 ```

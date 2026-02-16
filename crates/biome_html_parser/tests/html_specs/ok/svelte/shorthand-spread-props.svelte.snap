@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -25,10 +26,11 @@ HtmlRoot {
                     value_token: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
-                    HtmlAttributeSingleTextExpression {
+                    HtmlSpreadAttribute {
                         l_curly_token: L_CURLY@8..9 "{" [] [],
-                        expression: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@9..17 "...props" [] [],
+                        dotdotdot_token: DOT3@9..12 "..." [] [],
+                        argument: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@12..17 "props" [] [],
                         },
                         r_curly_token: R_CURLY@17..18 "}" [] [],
                     },
@@ -68,11 +70,12 @@ HtmlRoot {
         1: HTML_TAG_NAME@1..8
           0: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@8..18
-          0: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@8..18
+          0: HTML_SPREAD_ATTRIBUTE@8..18
             0: L_CURLY@8..9 "{" [] []
-            1: HTML_TEXT_EXPRESSION@9..17
-              0: HTML_LITERAL@9..17 "...props" [] []
-            2: R_CURLY@17..18 "}" [] []
+            1: DOT3@9..12 "..." [] []
+            2: HTML_TEXT_EXPRESSION@12..17
+              0: HTML_LITERAL@12..17 "props" [] []
+            3: R_CURLY@17..18 "}" [] []
         3: R_ANGLE@18..19 ">" [] []
       1: HTML_ELEMENT_LIST@19..27
         0: HTML_CONTENT@19..27

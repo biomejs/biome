@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: vcs_missing_client.json
 ---
 vcs_missing_client.json:4:20 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -31,6 +31,3 @@ vcs_missing_client.json:2:9 deserialize ━━━━━━━━━━━━━�
     7 │ 
   
   i Biome will disable the VCS integration until the issue is fixed.
-  
-
-

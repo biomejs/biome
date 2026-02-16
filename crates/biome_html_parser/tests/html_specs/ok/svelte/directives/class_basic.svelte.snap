@@ -1,0 +1,186 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div class:active={isActive}>Toggle active</div>
+<button class:disabled={!canSubmit}>Submit</button>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@5..10 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@10..11 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@11..17 "active" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@17..18 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@18..19 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@19..27 "isActive" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@27..28 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@28..29 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@29..42 "Toggle active" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@42..43 "<" [] [],
+                slash_token: SLASH@43..44 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@44..47 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@47..48 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@48..50 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@50..57 "button" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@57..62 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@62..63 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@63..71 "disabled" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@71..72 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@72..73 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@73..83 "!canSubmit" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@83..84 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@84..85 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@85..91 "Submit" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@91..92 "<" [] [],
+                slash_token: SLASH@92..93 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@93..99 "button" [] [],
+                },
+                r_angle_token: R_ANGLE@99..100 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@100..101 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..101
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..100
+    0: HTML_ELEMENT@0..48
+      0: HTML_OPENING_ELEMENT@0..29
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..28
+          0: SVELTE_CLASS_DIRECTIVE@5..28
+            0: CLASS_KW@5..10 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..28
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..17
+                0: HTML_LITERAL@11..17 "active" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@17..17
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@17..28
+                0: EQ@17..18 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@18..28
+                  0: L_CURLY@18..19 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@19..27
+                    0: HTML_LITERAL@19..27 "isActive" [] []
+                  2: R_CURLY@27..28 "}" [] []
+        3: R_ANGLE@28..29 ">" [] []
+      1: HTML_ELEMENT_LIST@29..42
+        0: HTML_CONTENT@29..42
+          0: HTML_LITERAL@29..42 "Toggle active" [] []
+      2: HTML_CLOSING_ELEMENT@42..48
+        0: L_ANGLE@42..43 "<" [] []
+        1: SLASH@43..44 "/" [] []
+        2: HTML_TAG_NAME@44..47
+          0: HTML_LITERAL@44..47 "div" [] []
+        3: R_ANGLE@47..48 ">" [] []
+    1: HTML_ELEMENT@48..100
+      0: HTML_OPENING_ELEMENT@48..85
+        0: L_ANGLE@48..50 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@50..57
+          0: HTML_LITERAL@50..57 "button" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@57..84
+          0: SVELTE_CLASS_DIRECTIVE@57..84
+            0: CLASS_KW@57..62 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@62..84
+              0: COLON@62..63 ":" [] []
+              1: SVELTE_LITERAL@63..71
+                0: HTML_LITERAL@63..71 "disabled" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@71..71
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@71..84
+                0: EQ@71..72 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@72..84
+                  0: L_CURLY@72..73 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@73..83
+                    0: HTML_LITERAL@73..83 "!canSubmit" [] []
+                  2: R_CURLY@83..84 "}" [] []
+        3: R_ANGLE@84..85 ">" [] []
+      1: HTML_ELEMENT_LIST@85..91
+        0: HTML_CONTENT@85..91
+          0: HTML_LITERAL@85..91 "Submit" [] []
+      2: HTML_CLOSING_ELEMENT@91..100
+        0: L_ANGLE@91..92 "<" [] []
+        1: SLASH@92..93 "/" [] []
+        2: HTML_TAG_NAME@93..99
+          0: HTML_LITERAL@93..99 "button" [] []
+        3: R_ANGLE@99..100 ">" [] []
+  4: EOF@100..101 "" [Newline("\n")] []
+
+```

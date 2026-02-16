@@ -10,4 +10,5 @@ mod migrate_eslint;
 mod migrate_prettier;
 mod rage;
 mod search;
+mod start;
 mod version;

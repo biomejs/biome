@@ -1,0 +1,630 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Basic (3 backticks):
+```
+code
+```
+
+Longer fence (5 backticks):
+`````
+code with ``` inside
+`````
+
+Tildes:
+~~~
+code
+~~~
+
+Mixed (should not close):
+```
+code
+~~~
+still code
+```
+
+Indented closing (valid):
+```
+code
+   ```
+
+Short closing (invalid - treated as content):
+````
+code
+```
+still code
+````
+
+Indented opening (stripped from content):
+  ```
+  code line
+  ```
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..6 "Basic " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@6..7 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@7..18 "3 backticks" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@18..19 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@19..20 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@20..21 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_BACKTICK@21..24 "```" [] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@24..25 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@25..29 "code" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@29..30 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_BACKTICK@30..33 "```" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@33..34 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@34..35 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@35..48 "Longer fence " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@48..49 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@49..60 "5 backticks" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@60..61 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@61..62 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@62..63 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_BACKTICK@63..68 "`````" [] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@68..69 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@69..79 "code with " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@79..82 "```" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@82..89 " inside" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@89..90 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_BACKTICK@90..95 "`````" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@95..96 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@96..97 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@97..104 "Tildes:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@104..105 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_TILDE@105..108 "~~~" [] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@108..109 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@109..113 "code" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@113..114 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_TILDE@114..117 "~~~" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@117..118 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@118..119 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@119..125 "Mixed " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@125..126 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@126..142 "should not close" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@142..143 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@143..144 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@144..145 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_BACKTICK@145..148 "```" [] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@148..149 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@149..153 "code" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@153..154 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@154..157 "~~~" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@157..158 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@158..168 "still code" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@168..169 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_BACKTICK@169..172 "```" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@172..173 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@173..174 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@174..191 "Indented closing " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@191..192 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@192..197 "valid" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@197..198 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@198..199 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@199..200 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_BACKTICK@200..203 "```" [] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@203..204 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@204..208 "code" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@208..209 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_BACKTICK@209..215 "```" [Skipped(" "), Skipped(" "), Skipped(" ")] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@215..216 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@216..217 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@217..231 "Short closing " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@231..232 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@232..240 "invalid " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@240..241 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@241..260 " treated as content" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@260..261 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@261..262 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@262..263 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_BACKTICK@263..267 "````" [] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@267..268 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@268..272 "code" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@272..273 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@273..276 "```" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@276..277 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@277..287 "still code" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@287..288 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_BACKTICK@288..292 "````" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@292..293 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@293..294 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@294..311 "Indented opening " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@311..312 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@312..333 "stripped from content" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@333..334 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@334..335 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@335..336 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_BACKTICK@336..341 "```" [Skipped(" "), Skipped(" ")] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@341..342 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@342..353 "code line" [Skipped(" "), Skipped(" ")] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@353..354 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_BACKTICK@354..359 "```" [Skipped(" "), Skipped(" ")] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@359..360 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@360..360 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..360
+  0: (empty)
+  1: MD_BLOCK_LIST@0..360
+    0: MD_PARAGRAPH@0..21
+      0: MD_INLINE_ITEM_LIST@0..21
+        0: MD_TEXTUAL@0..6
+          0: MD_TEXTUAL_LITERAL@0..6 "Basic " [] []
+        1: MD_TEXTUAL@6..7
+          0: MD_TEXTUAL_LITERAL@6..7 "(" [] []
+        2: MD_TEXTUAL@7..18
+          0: MD_TEXTUAL_LITERAL@7..18 "3 backticks" [] []
+        3: MD_TEXTUAL@18..19
+          0: MD_TEXTUAL_LITERAL@18..19 ")" [] []
+        4: MD_TEXTUAL@19..20
+          0: MD_TEXTUAL_LITERAL@19..20 ":" [] []
+        5: MD_TEXTUAL@20..21
+          0: MD_TEXTUAL_LITERAL@20..21 "\n" [] []
+      1: (empty)
+    1: MD_FENCED_CODE_BLOCK@21..33
+      0: TRIPLE_BACKTICK@21..24 "```" [] []
+      1: MD_CODE_NAME_LIST@24..24
+      2: MD_INLINE_ITEM_LIST@24..30
+        0: MD_TEXTUAL@24..25
+          0: MD_TEXTUAL_LITERAL@24..25 "\n" [] []
+        1: MD_TEXTUAL@25..29
+          0: MD_TEXTUAL_LITERAL@25..29 "code" [] []
+        2: MD_TEXTUAL@29..30
+          0: MD_TEXTUAL_LITERAL@29..30 "\n" [] []
+      3: TRIPLE_BACKTICK@30..33 "```" [] []
+    2: MD_NEWLINE@33..34
+      0: NEWLINE@33..34 "\n" [] []
+    3: MD_NEWLINE@34..35
+      0: NEWLINE@34..35 "\n" [] []
+    4: MD_PARAGRAPH@35..63
+      0: MD_INLINE_ITEM_LIST@35..63
+        0: MD_TEXTUAL@35..48
+          0: MD_TEXTUAL_LITERAL@35..48 "Longer fence " [] []
+        1: MD_TEXTUAL@48..49
+          0: MD_TEXTUAL_LITERAL@48..49 "(" [] []
+        2: MD_TEXTUAL@49..60
+          0: MD_TEXTUAL_LITERAL@49..60 "5 backticks" [] []
+        3: MD_TEXTUAL@60..61
+          0: MD_TEXTUAL_LITERAL@60..61 ")" [] []
+        4: MD_TEXTUAL@61..62
+          0: MD_TEXTUAL_LITERAL@61..62 ":" [] []
+        5: MD_TEXTUAL@62..63
+          0: MD_TEXTUAL_LITERAL@62..63 "\n" [] []
+      1: (empty)
+    5: MD_FENCED_CODE_BLOCK@63..95
+      0: TRIPLE_BACKTICK@63..68 "`````" [] []
+      1: MD_CODE_NAME_LIST@68..68
+      2: MD_INLINE_ITEM_LIST@68..90
+        0: MD_TEXTUAL@68..69
+          0: MD_TEXTUAL_LITERAL@68..69 "\n" [] []
+        1: MD_TEXTUAL@69..79
+          0: MD_TEXTUAL_LITERAL@69..79 "code with " [] []
+        2: MD_TEXTUAL@79..82
+          0: MD_TEXTUAL_LITERAL@79..82 "```" [] []
+        3: MD_TEXTUAL@82..89
+          0: MD_TEXTUAL_LITERAL@82..89 " inside" [] []
+        4: MD_TEXTUAL@89..90
+          0: MD_TEXTUAL_LITERAL@89..90 "\n" [] []
+      3: TRIPLE_BACKTICK@90..95 "`````" [] []
+    6: MD_NEWLINE@95..96
+      0: NEWLINE@95..96 "\n" [] []
+    7: MD_NEWLINE@96..97
+      0: NEWLINE@96..97 "\n" [] []
+    8: MD_PARAGRAPH@97..105
+      0: MD_INLINE_ITEM_LIST@97..105
+        0: MD_TEXTUAL@97..104
+          0: MD_TEXTUAL_LITERAL@97..104 "Tildes:" [] []
+        1: MD_TEXTUAL@104..105
+          0: MD_TEXTUAL_LITERAL@104..105 "\n" [] []
+      1: (empty)
+    9: MD_FENCED_CODE_BLOCK@105..117
+      0: TRIPLE_TILDE@105..108 "~~~" [] []
+      1: MD_CODE_NAME_LIST@108..108
+      2: MD_INLINE_ITEM_LIST@108..114
+        0: MD_TEXTUAL@108..109
+          0: MD_TEXTUAL_LITERAL@108..109 "\n" [] []
+        1: MD_TEXTUAL@109..113
+          0: MD_TEXTUAL_LITERAL@109..113 "code" [] []
+        2: MD_TEXTUAL@113..114
+          0: MD_TEXTUAL_LITERAL@113..114 "\n" [] []
+      3: TRIPLE_TILDE@114..117 "~~~" [] []
+    10: MD_NEWLINE@117..118
+      0: NEWLINE@117..118 "\n" [] []
+    11: MD_NEWLINE@118..119
+      0: NEWLINE@118..119 "\n" [] []
+    12: MD_PARAGRAPH@119..145
+      0: MD_INLINE_ITEM_LIST@119..145
+        0: MD_TEXTUAL@119..125
+          0: MD_TEXTUAL_LITERAL@119..125 "Mixed " [] []
+        1: MD_TEXTUAL@125..126
+          0: MD_TEXTUAL_LITERAL@125..126 "(" [] []
+        2: MD_TEXTUAL@126..142
+          0: MD_TEXTUAL_LITERAL@126..142 "should not close" [] []
+        3: MD_TEXTUAL@142..143
+          0: MD_TEXTUAL_LITERAL@142..143 ")" [] []
+        4: MD_TEXTUAL@143..144
+          0: MD_TEXTUAL_LITERAL@143..144 ":" [] []
+        5: MD_TEXTUAL@144..145
+          0: MD_TEXTUAL_LITERAL@144..145 "\n" [] []
+      1: (empty)
+    13: MD_FENCED_CODE_BLOCK@145..172
+      0: TRIPLE_BACKTICK@145..148 "```" [] []
+      1: MD_CODE_NAME_LIST@148..148
+      2: MD_INLINE_ITEM_LIST@148..169
+        0: MD_TEXTUAL@148..149
+          0: MD_TEXTUAL_LITERAL@148..149 "\n" [] []
+        1: MD_TEXTUAL@149..153
+          0: MD_TEXTUAL_LITERAL@149..153 "code" [] []
+        2: MD_TEXTUAL@153..154
+          0: MD_TEXTUAL_LITERAL@153..154 "\n" [] []
+        3: MD_TEXTUAL@154..157
+          0: MD_TEXTUAL_LITERAL@154..157 "~~~" [] []
+        4: MD_TEXTUAL@157..158
+          0: MD_TEXTUAL_LITERAL@157..158 "\n" [] []
+        5: MD_TEXTUAL@158..168
+          0: MD_TEXTUAL_LITERAL@158..168 "still code" [] []
+        6: MD_TEXTUAL@168..169
+          0: MD_TEXTUAL_LITERAL@168..169 "\n" [] []
+      3: TRIPLE_BACKTICK@169..172 "```" [] []
+    14: MD_NEWLINE@172..173
+      0: NEWLINE@172..173 "\n" [] []
+    15: MD_NEWLINE@173..174
+      0: NEWLINE@173..174 "\n" [] []
+    16: MD_PARAGRAPH@174..200
+      0: MD_INLINE_ITEM_LIST@174..200
+        0: MD_TEXTUAL@174..191
+          0: MD_TEXTUAL_LITERAL@174..191 "Indented closing " [] []
+        1: MD_TEXTUAL@191..192
+          0: MD_TEXTUAL_LITERAL@191..192 "(" [] []
+        2: MD_TEXTUAL@192..197
+          0: MD_TEXTUAL_LITERAL@192..197 "valid" [] []
+        3: MD_TEXTUAL@197..198
+          0: MD_TEXTUAL_LITERAL@197..198 ")" [] []
+        4: MD_TEXTUAL@198..199
+          0: MD_TEXTUAL_LITERAL@198..199 ":" [] []
+        5: MD_TEXTUAL@199..200
+          0: MD_TEXTUAL_LITERAL@199..200 "\n" [] []
+      1: (empty)
+    17: MD_FENCED_CODE_BLOCK@200..215
+      0: TRIPLE_BACKTICK@200..203 "```" [] []
+      1: MD_CODE_NAME_LIST@203..203
+      2: MD_INLINE_ITEM_LIST@203..209
+        0: MD_TEXTUAL@203..204
+          0: MD_TEXTUAL_LITERAL@203..204 "\n" [] []
+        1: MD_TEXTUAL@204..208
+          0: MD_TEXTUAL_LITERAL@204..208 "code" [] []
+        2: MD_TEXTUAL@208..209
+          0: MD_TEXTUAL_LITERAL@208..209 "\n" [] []
+      3: TRIPLE_BACKTICK@209..215 "```" [Skipped(" "), Skipped(" "), Skipped(" ")] []
+    18: MD_NEWLINE@215..216
+      0: NEWLINE@215..216 "\n" [] []
+    19: MD_NEWLINE@216..217
+      0: NEWLINE@216..217 "\n" [] []
+    20: MD_PARAGRAPH@217..263
+      0: MD_INLINE_ITEM_LIST@217..263
+        0: MD_TEXTUAL@217..231
+          0: MD_TEXTUAL_LITERAL@217..231 "Short closing " [] []
+        1: MD_TEXTUAL@231..232
+          0: MD_TEXTUAL_LITERAL@231..232 "(" [] []
+        2: MD_TEXTUAL@232..240
+          0: MD_TEXTUAL_LITERAL@232..240 "invalid " [] []
+        3: MD_TEXTUAL@240..241
+          0: MD_TEXTUAL_LITERAL@240..241 "-" [] []
+        4: MD_TEXTUAL@241..260
+          0: MD_TEXTUAL_LITERAL@241..260 " treated as content" [] []
+        5: MD_TEXTUAL@260..261
+          0: MD_TEXTUAL_LITERAL@260..261 ")" [] []
+        6: MD_TEXTUAL@261..262
+          0: MD_TEXTUAL_LITERAL@261..262 ":" [] []
+        7: MD_TEXTUAL@262..263
+          0: MD_TEXTUAL_LITERAL@262..263 "\n" [] []
+      1: (empty)
+    21: MD_FENCED_CODE_BLOCK@263..292
+      0: TRIPLE_BACKTICK@263..267 "````" [] []
+      1: MD_CODE_NAME_LIST@267..267
+      2: MD_INLINE_ITEM_LIST@267..288
+        0: MD_TEXTUAL@267..268
+          0: MD_TEXTUAL_LITERAL@267..268 "\n" [] []
+        1: MD_TEXTUAL@268..272
+          0: MD_TEXTUAL_LITERAL@268..272 "code" [] []
+        2: MD_TEXTUAL@272..273
+          0: MD_TEXTUAL_LITERAL@272..273 "\n" [] []
+        3: MD_TEXTUAL@273..276
+          0: MD_TEXTUAL_LITERAL@273..276 "```" [] []
+        4: MD_TEXTUAL@276..277
+          0: MD_TEXTUAL_LITERAL@276..277 "\n" [] []
+        5: MD_TEXTUAL@277..287
+          0: MD_TEXTUAL_LITERAL@277..287 "still code" [] []
+        6: MD_TEXTUAL@287..288
+          0: MD_TEXTUAL_LITERAL@287..288 "\n" [] []
+      3: TRIPLE_BACKTICK@288..292 "````" [] []
+    22: MD_NEWLINE@292..293
+      0: NEWLINE@292..293 "\n" [] []
+    23: MD_NEWLINE@293..294
+      0: NEWLINE@293..294 "\n" [] []
+    24: MD_PARAGRAPH@294..336
+      0: MD_INLINE_ITEM_LIST@294..336
+        0: MD_TEXTUAL@294..311
+          0: MD_TEXTUAL_LITERAL@294..311 "Indented opening " [] []
+        1: MD_TEXTUAL@311..312
+          0: MD_TEXTUAL_LITERAL@311..312 "(" [] []
+        2: MD_TEXTUAL@312..333
+          0: MD_TEXTUAL_LITERAL@312..333 "stripped from content" [] []
+        3: MD_TEXTUAL@333..334
+          0: MD_TEXTUAL_LITERAL@333..334 ")" [] []
+        4: MD_TEXTUAL@334..335
+          0: MD_TEXTUAL_LITERAL@334..335 ":" [] []
+        5: MD_TEXTUAL@335..336
+          0: MD_TEXTUAL_LITERAL@335..336 "\n" [] []
+      1: (empty)
+    25: MD_FENCED_CODE_BLOCK@336..359
+      0: TRIPLE_BACKTICK@336..341 "```" [Skipped(" "), Skipped(" ")] []
+      1: MD_CODE_NAME_LIST@341..341
+      2: MD_INLINE_ITEM_LIST@341..354
+        0: MD_TEXTUAL@341..342
+          0: MD_TEXTUAL_LITERAL@341..342 "\n" [] []
+        1: MD_TEXTUAL@342..353
+          0: MD_TEXTUAL_LITERAL@342..353 "code line" [Skipped(" "), Skipped(" ")] []
+        2: MD_TEXTUAL@353..354
+          0: MD_TEXTUAL_LITERAL@353..354 "\n" [] []
+      3: TRIPLE_BACKTICK@354..359 "```" [Skipped(" "), Skipped(" ")] []
+    26: MD_NEWLINE@359..360
+      0: NEWLINE@359..360 "\n" [] []
+  2: EOF@360..360 "" [] []
+
+```

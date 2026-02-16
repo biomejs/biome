@@ -1,0 +1,132 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<input {...foo} />
+<Component {...foo} />
+<Component {...foo ? [] : []} />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlSpreadAttribute {
+                    l_curly_token: L_CURLY@7..8 "{" [] [],
+                    dotdotdot_token: DOT3@8..11 "..." [] [],
+                    argument: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@11..14 "foo" [] [],
+                    },
+                    r_curly_token: R_CURLY@14..16 "}" [] [Whitespace(" ")],
+                },
+            ],
+            slash_token: SLASH@16..17 "/" [] [],
+            r_angle_token: R_ANGLE@17..18 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@18..20 "<" [Newline("\n")] [],
+            name: HtmlComponentName {
+                value_token: HTML_LITERAL@20..30 "Component" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlSpreadAttribute {
+                    l_curly_token: L_CURLY@30..31 "{" [] [],
+                    dotdotdot_token: DOT3@31..34 "..." [] [],
+                    argument: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@34..37 "foo" [] [],
+                    },
+                    r_curly_token: R_CURLY@37..39 "}" [] [Whitespace(" ")],
+                },
+            ],
+            slash_token: SLASH@39..40 "/" [] [],
+            r_angle_token: R_ANGLE@40..41 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@41..43 "<" [Newline("\n")] [],
+            name: HtmlComponentName {
+                value_token: HTML_LITERAL@43..53 "Component" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlSpreadAttribute {
+                    l_curly_token: L_CURLY@53..54 "{" [] [],
+                    dotdotdot_token: DOT3@54..57 "..." [] [],
+                    argument: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@57..70 "foo ? [] : []" [] [],
+                    },
+                    r_curly_token: R_CURLY@70..72 "}" [] [Whitespace(" ")],
+                },
+            ],
+            slash_token: SLASH@72..73 "/" [] [],
+            r_angle_token: R_ANGLE@73..74 ">" [] [],
+        },
+    ],
+    eof_token: EOF@74..75 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..75
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..74
+    0: HTML_SELF_CLOSING_ELEMENT@0..18
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..7
+        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@7..16
+        0: HTML_SPREAD_ATTRIBUTE@7..16
+          0: L_CURLY@7..8 "{" [] []
+          1: DOT3@8..11 "..." [] []
+          2: HTML_TEXT_EXPRESSION@11..14
+            0: HTML_LITERAL@11..14 "foo" [] []
+          3: R_CURLY@14..16 "}" [] [Whitespace(" ")]
+      3: SLASH@16..17 "/" [] []
+      4: R_ANGLE@17..18 ">" [] []
+    1: HTML_SELF_CLOSING_ELEMENT@18..41
+      0: L_ANGLE@18..20 "<" [Newline("\n")] []
+      1: HTML_COMPONENT_NAME@20..30
+        0: HTML_LITERAL@20..30 "Component" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@30..39
+        0: HTML_SPREAD_ATTRIBUTE@30..39
+          0: L_CURLY@30..31 "{" [] []
+          1: DOT3@31..34 "..." [] []
+          2: HTML_TEXT_EXPRESSION@34..37
+            0: HTML_LITERAL@34..37 "foo" [] []
+          3: R_CURLY@37..39 "}" [] [Whitespace(" ")]
+      3: SLASH@39..40 "/" [] []
+      4: R_ANGLE@40..41 ">" [] []
+    2: HTML_SELF_CLOSING_ELEMENT@41..74
+      0: L_ANGLE@41..43 "<" [Newline("\n")] []
+      1: HTML_COMPONENT_NAME@43..53
+        0: HTML_LITERAL@43..53 "Component" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@53..72
+        0: HTML_SPREAD_ATTRIBUTE@53..72
+          0: L_CURLY@53..54 "{" [] []
+          1: DOT3@54..57 "..." [] []
+          2: HTML_TEXT_EXPRESSION@57..70
+            0: HTML_LITERAL@57..70 "foo ? [] : []" [] []
+          3: R_CURLY@70..72 "}" [] [Whitespace(" ")]
+      3: SLASH@72..73 "/" [] []
+      4: R_ANGLE@73..74 ">" [] []
+  4: EOF@74..75 "" [Newline("\n")] []
+
+```

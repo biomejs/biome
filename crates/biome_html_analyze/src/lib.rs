@@ -1,6 +1,7 @@
 #![deny(clippy::use_self)]
 
 mod a11y;
+mod assist;
 mod lint;
 pub mod options;
 mod registry;
@@ -15,7 +16,7 @@ use biome_analyze::{
 };
 use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
-use biome_html_syntax::HtmlLanguage;
+use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::LazyLock;
@@ -35,13 +36,14 @@ pub fn analyze<'a, F, B>(
     root: &LanguageRoot<HtmlLanguage>,
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
     F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, filter, |_| {}, options, emit_signal)
+    analyze_with_inspect_matcher(root, filter, |_| {}, options, source_type, emit_signal)
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -55,6 +57,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -91,12 +94,14 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, visitors) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
         return (None, diagnostics);
     }
+
+    services.insert_service(source_type);
 
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),
@@ -130,6 +135,7 @@ mod tests {
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use biome_html_parser::parse_html;
+    use biome_html_syntax::HtmlFileSource;
     use biome_rowan::TextRange;
     use std::slice;
 
@@ -159,6 +165,7 @@ mod tests {
                 ..AnalysisFilter::default()
             },
             &options,
+            HtmlFileSource::html(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());

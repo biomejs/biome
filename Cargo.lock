@@ -130,6 +130,7 @@ dependencies = [
  "camino",
  "enumflags2",
  "indexmap",
+ "insta",
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
@@ -193,10 +194,12 @@ dependencies = [
  "biome_grit_patterns",
  "biome_html_analyze",
  "biome_html_formatter",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_formatter",
  "biome_js_syntax",
  "biome_json_analyze",
+ "biome_json_factory",
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
@@ -211,6 +214,7 @@ dependencies = [
  "camino",
  "crossbeam",
  "dashmap 6.1.0",
+ "directories",
  "insta",
  "libc",
  "mimalloc",
@@ -707,6 +711,7 @@ name = "biome_grit_formatter"
 version = "0.0.0"
 dependencies = [
  "biome_configuration",
+ "biome_diagnostics_categories",
  "biome_formatter",
  "biome_formatter_test",
  "biome_fs",
@@ -716,6 +721,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_service",
+ "biome_suppression",
  "camino",
  "serde",
  "serde_json",
@@ -758,6 +764,8 @@ dependencies = [
  "biome_grit_syntax",
  "biome_js_parser",
  "biome_js_syntax",
+ "biome_json_parser",
+ "biome_json_syntax",
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
@@ -793,6 +801,7 @@ version = "0.5.7"
 dependencies = [
  "biome_analyze",
  "biome_analyze_macros",
+ "biome_aria_metadata",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -806,12 +815,15 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "filetime",
  "insta",
- "phf",
+ "mimalloc",
+ "phf 0.13.1",
  "schemars",
  "serde",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -844,6 +856,7 @@ dependencies = [
  "camino",
  "codspeed-criterion-compat",
  "countme",
+ "enumflags2",
  "mimalloc",
  "schemars",
  "serde",
@@ -1111,6 +1124,7 @@ name = "biome_jsdoc_comment"
 version = "0.0.1"
 dependencies = [
  "biome_formatter",
+ "biome_js_parser",
  "biome_js_syntax",
  "biome_js_type_info",
  "biome_rowan",
@@ -1209,7 +1223,7 @@ dependencies = [
  "biome_rowan",
  "biome_string_case",
  "camino",
- "dirs",
+ "directories",
  "schemars",
  "serde",
 ]
@@ -1264,6 +1278,7 @@ dependencies = [
  "tower",
  "tower-lsp-server",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -1287,20 +1302,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_markdown_formatter"
+version = "0.0.1"
+dependencies = [
+ "biome_formatter",
+ "biome_markdown_factory",
+ "biome_markdown_parser",
+ "biome_markdown_syntax",
+ "biome_parser",
+ "biome_rowan",
+]
+
+[[package]]
 name = "biome_markdown_parser"
 version = "0.0.1"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_markdown_factory",
+ "biome_markdown_parser",
  "biome_markdown_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_string_case",
  "biome_test_utils",
  "biome_unicode_table",
+ "htmlize",
  "insta",
+ "percent-encoding",
  "quickcheck",
  "quickcheck_macros",
+ "serde",
+ "serde_json",
  "tests_macros",
  "tracing",
  "unicode-bom",
@@ -1445,6 +1478,7 @@ dependencies = [
  "biome_js_runtime",
  "biome_js_syntax",
  "biome_json_parser",
+ "biome_json_syntax",
  "biome_parser",
  "biome_resolver",
  "biome_rowan",
@@ -1596,6 +1630,7 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "boxcar",
+ "bpaf",
  "camino",
  "crossbeam",
  "either",
@@ -1622,6 +1657,7 @@ name = "biome_string_case"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
+ "caseless",
 ]
 
 [[package]]
@@ -1776,6 +1812,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_yaml_formatter"
+version = "0.1.0"
+dependencies = [
+ "biome_deserialize",
+ "biome_diagnostics",
+ "biome_formatter",
+ "biome_rowan",
+ "biome_suppression",
+ "biome_yaml_parser",
+ "biome_yaml_syntax",
+ "schemars",
+ "serde",
+]
+
+[[package]]
 name = "biome_yaml_parser"
 version = "0.0.1"
 dependencies = [
@@ -1919,7 +1970,7 @@ dependencies = [
  "hashbrown 0.16.1",
  "indexmap",
  "once_cell",
- "phf",
+ "phf 0.13.1",
  "rustc-hash 2.1.1",
  "static_assertions",
 ]
@@ -2006,9 +2057,9 @@ dependencies = [
 
 [[package]]
 name = "bstr"
-version = "1.8.0"
+version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "542f33a8835a0884b006a0c3df3dadd99c0c3f296ed26c2fdc8028e01ad6230c"
+checksum = "63044e1ae8e69f3b5a92c736ca6269b8d12fa7efe39bf34ddb06d102cf0e2cab"
 dependencies = [
  "memchr",
  "regex-automata",
@@ -2067,6 +2118,15 @@ name = "case"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd6c0e7b807d60291f42f33f58480c0bfafe28ed08286446f45e463728cf9c1c"
+
+[[package]]
+name = "caseless"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b6fd507454086c8edfd769ca6ada439193cdb209c7681712ef6275cccbfe5d8"
+dependencies = [
+ "unicode-normalization",
+]
 
 [[package]]
 name = "cast"
@@ -2579,15 +2639,6 @@ name = "directories"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "16f5094c54661b38d03bd7e50df373292118db60b585c08a411c6d840017fe7d"
-dependencies = [
- "dirs-sys",
-]
-
-[[package]]
-name = "dirs"
-version = "6.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3e8aa94d75141228480295a7d0e7feb620b1a5ad9f12bc40be62411e38cce4e"
 dependencies = [
  "dirs-sys",
 ]
@@ -3162,6 +3213,19 @@ name = "hermit-abi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
+
+[[package]]
+name = "htmlize"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d347c0de239be20ba0982e4822de3124404281e119ae3e11f5d7425a414e1935"
+dependencies = [
+ "memchr",
+ "pastey",
+ "phf 0.11.3",
+ "phf_codegen",
+ "serde_json",
+]
 
 [[package]]
 name = "http"
@@ -4041,6 +4105,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
+name = "pastey"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "35fb2e5f958ec131621fdd531e9fc186ed768cbe395337403ae56c17a74c68ec"
+
+[[package]]
 name = "path-absolutize"
 version = "3.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4066,13 +4136,42 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
 name = "phf"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fd6780a80ae0c52cc120a26a1a42c1ae51b247a253e4e06113d23d2c2edd078"
+dependencies = [
+ "phf_shared 0.11.3",
+]
+
+[[package]]
+name = "phf"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1562dc717473dbaa4c1f85a36410e03c047b2e7df7f45ee938fbef64ae7fadf"
 dependencies = [
  "phf_macros",
- "phf_shared",
+ "phf_shared 0.13.1",
  "serde",
+]
+
+[[package]]
+name = "phf_codegen"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aef8048c789fa5e851558d709946d6d79a8ff88c0440c587967f8e94bfb1216a"
+dependencies = [
+ "phf_generator 0.11.3",
+ "phf_shared 0.11.3",
+]
+
+[[package]]
+name = "phf_generator"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c80231409c20246a13fddb31776fb942c38553c51e871f8cbd687a4cfb5843d"
+dependencies = [
+ "phf_shared 0.11.3",
+ "rand 0.8.5",
 ]
 
 [[package]]
@@ -4082,7 +4181,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "135ace3a761e564ec88c03a77317a7c6b80bb7f7135ef2544dbe054243b89737"
 dependencies = [
  "fastrand",
- "phf_shared",
+ "phf_shared 0.13.1",
 ]
 
 [[package]]
@@ -4091,11 +4190,20 @@ version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "812f032b54b1e759ccd5f8b6677695d5268c588701effba24601f6932f8269ef"
 dependencies = [
- "phf_generator",
- "phf_shared",
+ "phf_generator 0.13.1",
+ "phf_shared 0.13.1",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
+]
+
+[[package]]
+name = "phf_shared"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "67eabc2ef2a60eb7faa00097bd1ffdb5bd28e62bf39990626a582201b7a754e5"
+dependencies = [
+ "siphasher",
 ]
 
 [[package]]
@@ -5261,6 +5369,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "tinyvec"
+version = "1.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bfa5fdc3bce6191a1dbc8c02d5c8bffcf557bafa17c124c5264a458f1b0613fa"
+dependencies = [
+ "tinyvec_macros",
+]
+
+[[package]]
+name = "tinyvec_macros"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
+
+[[package]]
 name = "tokio"
 version = "1.49.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5538,6 +5661,15 @@ name = "unicode-ident"
 version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5464a87b239f13a63a501f2701565754bae92d243d4bb7eb12f6d57d2269bf4"
+
+[[package]]
+name = "unicode-normalization"
+version = "0.1.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5fd4f6878c9cb28d874b009da9e8d183b5abc80117c40bbd187a1fde336be6e8"
+dependencies = [
+ "tinyvec",
+]
 
 [[package]]
 name = "unicode-segmentation"
@@ -6396,6 +6528,8 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
+ "biome_markdown_parser",
+ "biome_markdown_syntax",
  "biome_parser",
  "biome_rowan",
  "biome_string_case",

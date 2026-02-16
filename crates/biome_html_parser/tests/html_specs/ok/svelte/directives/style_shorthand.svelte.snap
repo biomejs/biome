@@ -1,0 +1,175 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div style:color>Shorthand</div>
+<p style:width style:height>Multiple shorthand</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@5..10 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@10..11 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@11..16 "color" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@16..17 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@17..26 "Shorthand" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@26..27 "<" [] [],
+                slash_token: SLASH@27..28 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@28..31 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@31..32 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@32..34 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@34..36 "p" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@36..41 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@41..42 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@42..48 "width" [] [Whitespace(" ")],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@48..53 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@53..54 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@54..60 "height" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@60..61 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@61..79 "Multiple shorthand" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@79..80 "<" [] [],
+                slash_token: SLASH@80..81 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@81..82 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@82..83 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@83..84 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..84
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..83
+    0: HTML_ELEMENT@0..32
+      0: HTML_OPENING_ELEMENT@0..17
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..16
+          0: SVELTE_STYLE_DIRECTIVE@5..16
+            0: STYLE_KW@5..10 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..16
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..16
+                0: HTML_LITERAL@11..16 "color" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@16..16
+              3: (empty)
+        3: R_ANGLE@16..17 ">" [] []
+      1: HTML_ELEMENT_LIST@17..26
+        0: HTML_CONTENT@17..26
+          0: HTML_LITERAL@17..26 "Shorthand" [] []
+      2: HTML_CLOSING_ELEMENT@26..32
+        0: L_ANGLE@26..27 "<" [] []
+        1: SLASH@27..28 "/" [] []
+        2: HTML_TAG_NAME@28..31
+          0: HTML_LITERAL@28..31 "div" [] []
+        3: R_ANGLE@31..32 ">" [] []
+    1: HTML_ELEMENT@32..83
+      0: HTML_OPENING_ELEMENT@32..61
+        0: L_ANGLE@32..34 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@34..36
+          0: HTML_LITERAL@34..36 "p" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@36..60
+          0: SVELTE_STYLE_DIRECTIVE@36..48
+            0: STYLE_KW@36..41 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@41..48
+              0: COLON@41..42 ":" [] []
+              1: SVELTE_LITERAL@42..48
+                0: HTML_LITERAL@42..48 "width" [] [Whitespace(" ")]
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@48..48
+              3: (empty)
+          1: SVELTE_STYLE_DIRECTIVE@48..60
+            0: STYLE_KW@48..53 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@53..60
+              0: COLON@53..54 ":" [] []
+              1: SVELTE_LITERAL@54..60
+                0: HTML_LITERAL@54..60 "height" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@60..60
+              3: (empty)
+        3: R_ANGLE@60..61 ">" [] []
+      1: HTML_ELEMENT_LIST@61..79
+        0: HTML_CONTENT@61..79
+          0: HTML_LITERAL@61..79 "Multiple shorthand" [] []
+      2: HTML_CLOSING_ELEMENT@79..83
+        0: L_ANGLE@79..80 "<" [] []
+        1: SLASH@80..81 "/" [] []
+        2: HTML_TAG_NAME@81..82
+          0: HTML_LITERAL@81..82 "p" [] []
+        3: R_ANGLE@82..83 ">" [] []
+  4: EOF@83..84 "" [Newline("\n")] []
+
+```

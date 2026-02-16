@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssPseudoElement, CssPseudoElementSelector};
+use biome_css_syntax::{AnyCssPseudoElement, CssFileSource, CssPseudoElementSelector};
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 use biome_rule_options::no_unknown_pseudo_element::NoUnknownPseudoElementOptions;
@@ -51,6 +51,28 @@ declare_lint_rule! {
     /// input::-moz-placeholder {}
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `ignore`
+    ///
+    /// A list of unknown pseudo-element names to ignore (case-insensitive).
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignore": [
+    ///       "custom-pseudo-element"
+    ///     ]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```css,use_options
+    /// ::custom-pseudo-element {}
+    /// ```
+    ///
     pub NoUnknownPseudoElement {
         version: "1.8.0",
         name: "noUnknownPseudoElement",
@@ -70,23 +92,34 @@ impl Rule for NoUnknownPseudoElement {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node: &CssPseudoElementSelector = ctx.query();
         let pseudo_element = node.element().ok()?;
+        let file_source = ctx.source_type::<CssFileSource>();
 
         let should_not_trigger = match &pseudo_element {
             AnyCssPseudoElement::CssBogusPseudoElement(element) => {
-                should_not_trigger(element.to_trimmed_text().text())
+                should_not_trigger(element.to_trimmed_text().text(), file_source, ctx.options())
             }
             AnyCssPseudoElement::CssPseudoElementFunctionCustomIdentifier(ident) => {
-                should_not_trigger(ident.name().ok()?.to_trimmed_text().text())
+                should_not_trigger(
+                    ident.name().ok()?.to_trimmed_text().text(),
+                    file_source,
+                    ctx.options(),
+                )
             }
-            AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => {
-                should_not_trigger(selector.name().ok()?.to_trimmed_text().text())
-            }
-            AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => {
-                should_not_trigger(ident.name().ok()?.to_trimmed_text().text())
-            }
-            AnyCssPseudoElement::CssPseudoElementFunction(ident) => {
-                should_not_trigger(ident.name().ok()?.to_trimmed_text().text())
-            }
+            AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => should_not_trigger(
+                selector.name().ok()?.to_trimmed_text().text(),
+                file_source,
+                ctx.options(),
+            ),
+            AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => should_not_trigger(
+                ident.name().ok()?.to_trimmed_text().text(),
+                file_source,
+                ctx.options(),
+            ),
+            AnyCssPseudoElement::CssPseudoElementFunction(ident) => should_not_trigger(
+                ident.name().ok()?.to_trimmed_text().text(),
+                file_source,
+                ctx.options(),
+            ),
         };
 
         if should_not_trigger {
@@ -120,7 +153,28 @@ impl Rule for NoUnknownPseudoElement {
 }
 
 /// It doesn't trigger the rule if the pseudo-element name isn't a vendor prefix or is a pseudo-element
-fn should_not_trigger(pseudo_element_name: &str) -> bool {
+fn should_not_trigger(
+    pseudo_element_name: &str,
+    file_source: &CssFileSource,
+    options: &NoUnknownPseudoElementOptions,
+) -> bool {
+    let lowercase = pseudo_element_name.to_ascii_lowercase_cow();
+    let lowercase = &lowercase.as_ref();
+
+    if file_source.is_css_modules() {
+        return ["global", "local"].contains(lowercase);
+    }
+
     !vender_prefix(pseudo_element_name).is_empty()
-        || is_pseudo_elements(pseudo_element_name.to_ascii_lowercase_cow().as_ref())
+        || is_pseudo_elements(lowercase)
+        || should_ignore(pseudo_element_name, options)
+}
+
+fn should_ignore(name: &str, options: &NoUnknownPseudoElementOptions) -> bool {
+    for ignore_pattern in &options.ignore {
+        if name.eq_ignore_ascii_case(ignore_pattern) {
+            return true;
+        }
+    }
+    false
 }

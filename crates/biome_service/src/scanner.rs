@@ -10,6 +10,9 @@ mod workspace_bridges;
 #[cfg(test)]
 mod test_utils;
 
+use crate::diagnostics::Panic;
+use crate::projects::ProjectKey;
+use crate::workspace::{ScanProjectResult, ServiceNotification, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, DiagnosticExt, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope};
@@ -26,11 +29,7 @@ use std::time::Duration;
 use std::{mem, thread};
 use tracing::instrument;
 
-use crate::diagnostics::Panic;
-use crate::projects::ProjectKey;
-use crate::workspace::{ScanProjectResult, ServiceNotification, WorkspaceError};
-
-pub use watcher::{Watcher, WatcherInstruction};
+pub use watcher::{Watcher, WatcherInstruction, WatcherKind, WatcherOptions, watcher_options};
 pub(crate) use workspace_bridges::{
     ScannerWatcherBridge, WorkspaceScannerBridge, WorkspaceWatcherBridge,
 };
@@ -711,6 +710,9 @@ pub enum ScanKind {
     },
     /// Scans the entire repository, indexing all files to enable project rules.
     Project,
+
+    /// Scans the entire repository, indexing all files to enable type inference rules
+    TypeAware,
 }
 
 impl ScanKind {
@@ -724,11 +726,16 @@ impl ScanKind {
             Self::KnownFiles => Self::KnownFiles,
             Self::Project => Self::Project,
             Self::TargetedKnownFiles { .. } => Self::KnownFiles,
+            Self::TypeAware => Self::TypeAware,
         }
     }
 
     pub const fn is_project(&self) -> bool {
         matches!(self, Self::Project)
+    }
+
+    pub const fn is_type_aware(&self) -> bool {
+        matches!(self, Self::TypeAware)
     }
 
     pub const fn is_known_files(&self) -> bool {

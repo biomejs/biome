@@ -419,25 +419,6 @@ invalid.html:39:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━
 ```
 
 ```
-invalid.html:41:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i No ambiguous anchor descriptions allowed.
-  
-    39 │ <a><span> click </span> here</a>
-    40 │ 
-  > 41 │ <a><span aria-hidden>more text</span>learn more</a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    42 │ 
-    43 │ <a><span aria-hidden="true">more text</span>learn more</a>
-  
-  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
 invalid.html:43:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i No ambiguous anchor descriptions allowed.

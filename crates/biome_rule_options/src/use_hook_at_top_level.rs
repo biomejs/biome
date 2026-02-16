@@ -5,12 +5,18 @@ use biome_deserialize::{
 };
 use biome_deserialize_macros::Merge;
 use biome_rowan::Text;
+use rustc_hash::FxHashSet;
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Debug, Deserialize, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseHookAtTopLevelOptions {}
+pub struct UseHookAtTopLevelOptions {
+    /// List of function names that should not be treated as hooks.
+    /// Functions in this list will be ignored by the rule even if they follow the `use*` naming convention.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore: Option<FxHashSet<String>>,
+}
 
 impl Deserializable for UseHookAtTopLevelOptions {
     fn deserialize(
@@ -36,7 +42,9 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {
-        const ALLOWED_KEYS: &[&str] = &["hooks"];
+        const ALLOWED_KEYS: &[&str] = &["hooks", "ignore"];
+        let mut ignore = None;
+
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(ctx, &key, "") else {
                 continue;
@@ -53,6 +61,9 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
                         })
                     );
                 }
+                "ignore" => {
+                    ignore = Deserializable::deserialize(ctx, &value, key_text.text());
+                }
                 text => ctx.report(DeserializationDiagnostic::new_unknown_key(
                     text,
                     key.range(),
@@ -60,6 +71,6 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
                 )),
             }
         }
-        Some(Self::Output::default())
+        Some(Self::Output { ignore })
     }
 }

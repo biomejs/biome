@@ -1,0 +1,107 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div out:fade|local>Local out transition</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteOutDirective {
+                        out_token: OUT_KW@5..8 "out" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@8..9 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@9..13 "fade" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@13..14 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@14..19 "local" [] [],
+                                    },
+                                },
+                            ],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@19..20 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@20..40 "Local out transition" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@40..41 "<" [] [],
+                slash_token: SLASH@41..42 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@42..45 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@45..46 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@46..47 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..47
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..46
+    0: HTML_ELEMENT@0..46
+      0: HTML_OPENING_ELEMENT@0..20
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..19
+          0: SVELTE_OUT_DIRECTIVE@5..19
+            0: OUT_KW@5..8 "out" [] []
+            1: SVELTE_DIRECTIVE_VALUE@8..19
+              0: COLON@8..9 ":" [] []
+              1: SVELTE_NAME@9..13
+                0: IDENT@9..13 "fade" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@13..19
+                0: SVELTE_DIRECTIVE_MODIFIER@13..19
+                  0: PIPE@13..14 "|" [] []
+                  1: SVELTE_NAME@14..19
+                    0: IDENT@14..19 "local" [] []
+              3: (empty)
+        3: R_ANGLE@19..20 ">" [] []
+      1: HTML_ELEMENT_LIST@20..40
+        0: HTML_CONTENT@20..40
+          0: HTML_LITERAL@20..40 "Local out transition" [] []
+      2: HTML_CLOSING_ELEMENT@40..46
+        0: L_ANGLE@40..41 "<" [] []
+        1: SLASH@41..42 "/" [] []
+        2: HTML_TAG_NAME@42..45
+          0: HTML_LITERAL@42..45 "div" [] []
+        3: R_ANGLE@45..46 ">" [] []
+  4: EOF@46..47 "" [Newline("\n")] []
+
+```

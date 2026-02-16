@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/object/property_object_member.js
 ---
+
 # Input
 
 ```js
@@ -119,6 +120,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -277,6 +279,7 @@ const fluidObject = {
 		skipNext: true,
 	},
 };
+
 ```
 
 # Lines exceeding max width of 80 characters

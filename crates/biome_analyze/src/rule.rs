@@ -106,6 +106,10 @@ pub enum RuleSource<'a> {
     Eslint(&'a str),
     /// Rules from [Eslint Plugin Barrel Files](https://github.com/thepassle/eslint-plugin-barrel-files)
     EslintBarrelFiles(&'a str),
+    /// Rules from [Eslint Plugin Better Tailwindcss](https://github.com/schoero/eslint-plugin-better-tailwindcss)
+    EslintBetterTailwindcss(&'a str),
+    /// Rules from [e18e ESLint Plugin](https://github.com/e18e/eslint-plugin)
+    EslintE18e(&'static str),
     /// Rules from [GraphQL-ESLint](https://github.com/graphql-hive/graphql-eslint)
     EslintGraphql(&'a str),
     /// Rules from [Eslint Plugin Import](https://github.com/import-js/eslint-plugin-import)
@@ -185,6 +189,8 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::DenoLint(_) => write!(f, "Deno Lint"),
             Self::Eslint(_) => write!(f, "ESLint"),
             Self::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
+            Self::EslintBetterTailwindcss(_) => write!(f, "eslint-plugin-better-tailwindcss"),
+            Self::EslintE18e(_) => write!(f, "@e18e/eslint-plugin"),
             Self::EslintGraphql(_) => write!(f, "GraphQL-ESLint"),
             Self::EslintImport(_) => write!(f, "eslint-plugin-import"),
             Self::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
@@ -283,6 +289,8 @@ impl<'a> RuleSource<'a> {
             Self::Stylelint(_) => 36,
             Self::EslintTurbo(_) => 37,
             Self::HtmlEslint(_) => 38,
+            Self::EslintE18e(_) => 38,
+            Self::EslintBetterTailwindcss(_) => 39,
         }
     }
 
@@ -306,6 +314,8 @@ impl<'a> RuleSource<'a> {
             | Self::DenoLint(rule_name)
             | Self::Eslint(rule_name)
             | Self::EslintBarrelFiles(rule_name)
+            | Self::EslintBetterTailwindcss(rule_name)
+            | Self::EslintE18e(rule_name)
             | Self::EslintGraphql(rule_name)
             | Self::EslintImport(rule_name)
             | Self::EslintImportAccess(rule_name)
@@ -385,6 +395,8 @@ impl<'a> RuleSource<'a> {
             Self::EslintTurbo(_) => "turbo",
             Self::HtmlEslint(_) => "@html-eslint",
             Self::EslintPlaywright(_) => "playwright",
+            Self::EslintE18e(_) => "e18e",
+            Self::EslintBetterTailwindcss(_) => "better-tailwindcss",
         }
     }
 
@@ -402,6 +414,8 @@ impl<'a> RuleSource<'a> {
             Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintE18e(_) => "https://github.com/e18e/eslint-plugin".to_string(),
+            Self::EslintBetterTailwindcss(rule_name) => format!("https://github.com/schoero/eslint-plugin-better-tailwindcss/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
             Self::EslintImport(rule_name) => format!("https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintImportAccess(_) => "https://github.com/uhyo/eslint-plugin-import-access".to_string(),
@@ -544,6 +558,8 @@ pub enum RuleDomain {
     Turborepo,
     /// Playwright testing framework rules
     Playwright,
+    /// Rules that require type inference
+    Types,
 }
 
 impl Display for RuleDomain {
@@ -560,6 +576,7 @@ impl Display for RuleDomain {
             Self::Tailwind => fmt.write_str("tailwind"),
             Self::Turborepo => fmt.write_str("turborepo"),
             Self::Playwright => fmt.write_str("playwright"),
+            Self::Types => fmt.write_str("types"),
         }
     }
 }
@@ -601,6 +618,7 @@ impl RuleDomain {
             Self::Tailwind => &[&("tailwindcss", ">=3.0.0")],
             Self::Turborepo => &[&("turbo", ">=1.0.0")],
             Self::Playwright => &[&("@playwright/test", ">=1.0.0")],
+            Self::Types => &[],
         }
     }
 
@@ -628,6 +646,7 @@ impl RuleDomain {
             Self::Tailwind => &[],
             Self::Turborepo => &[],
             Self::Playwright => &["test", "expect"],
+            Self::Types => &[],
         }
     }
 
@@ -643,6 +662,7 @@ impl RuleDomain {
             Self::Tailwind => "tailwind",
             Self::Turborepo => "turborepo",
             Self::Playwright => "playwright",
+            Self::Types => "types",
         }
     }
 }
@@ -662,6 +682,7 @@ impl FromStr for RuleDomain {
             "tailwind" => Ok(Self::Tailwind),
             "turborepo" => Ok(Self::Turborepo),
             "playwright" => Ok(Self::Playwright),
+            "types" => Ok(Self::Types),
             _ => Err("Invalid rule domain"),
         }
     }

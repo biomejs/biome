@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: svelte/each_with_destructuring.svelte
 ---
+
 # Input
 
 ```svelte
@@ -40,6 +41,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```svelte
@@ -51,11 +53,12 @@ Self close void elements: never
 	<div>{i}: {name} ({email})</div>
 {/each}
 
-{#each products as [id, title]}
+{#each products as [ id, title ]}
 	<div>{id}: {title}</div>
 {/each}
 
 {#each items as { id, ...rest }}
 	<div>{id}</div>
 {/each}
+
 ```

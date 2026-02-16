@@ -1,0 +1,237 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Foo
+   ----
+
+Foo
+-----
+
+Foo\
+----
+
+> Foo
+> ---
+
+- Foo
+  ---
+  baz
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdSetextHeader {
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..3 "Foo" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@3..4 "\n" [] [],
+                },
+            ],
+            underline_token: MD_SETEXT_UNDERLINE_LITERAL@4..11 "----" [Skipped(" "), Skipped(" "), Skipped(" ")] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@11..12 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@12..13 "\n" [] [],
+        },
+        MdSetextHeader {
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@13..16 "Foo" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@16..17 "\n" [] [],
+                },
+            ],
+            underline_token: MD_SETEXT_UNDERLINE_LITERAL@17..22 "-----" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@22..23 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@23..24 "\n" [] [],
+        },
+        MdSetextHeader {
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@24..27 "Foo" [] [],
+                },
+                MdHardLine {
+                    value_token: MD_HARD_LINE_LITERAL@27..29 "\\\n" [] [],
+                },
+            ],
+            underline_token: MD_SETEXT_UNDERLINE_LITERAL@29..33 "----" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@33..34 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@34..35 "\n" [] [],
+        },
+        MdQuote {
+            marker_token: R_ANGLE@35..36 ">" [] [],
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@36..40 "Foo" [Skipped(" ")] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@40..41 "\n" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@41..44 "-" [Skipped(">"), Skipped(" ")] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@44..45 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@45..46 "-" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@46..47 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@47..48 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@48..49 "-" [] [],
+                    content: MdBlockList [
+                        MdSetextHeader {
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@49..53 "Foo" [Skipped(" ")] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@53..54 "\n" [] [],
+                                },
+                            ],
+                            underline_token: MD_SETEXT_UNDERLINE_LITERAL@54..59 "---" [Skipped(" "), Skipped(" ")] [],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@59..60 "\n" [] [],
+                        },
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@60..65 "baz" [Skipped(" "), Skipped(" ")] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@65..66 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@66..66 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..66
+  0: (empty)
+  1: MD_BLOCK_LIST@0..66
+    0: MD_SETEXT_HEADER@0..11
+      0: MD_INLINE_ITEM_LIST@0..4
+        0: MD_TEXTUAL@0..3
+          0: MD_TEXTUAL_LITERAL@0..3 "Foo" [] []
+        1: MD_TEXTUAL@3..4
+          0: MD_TEXTUAL_LITERAL@3..4 "\n" [] []
+      1: MD_SETEXT_UNDERLINE_LITERAL@4..11 "----" [Skipped(" "), Skipped(" "), Skipped(" ")] []
+    1: MD_NEWLINE@11..12
+      0: NEWLINE@11..12 "\n" [] []
+    2: MD_NEWLINE@12..13
+      0: NEWLINE@12..13 "\n" [] []
+    3: MD_SETEXT_HEADER@13..22
+      0: MD_INLINE_ITEM_LIST@13..17
+        0: MD_TEXTUAL@13..16
+          0: MD_TEXTUAL_LITERAL@13..16 "Foo" [] []
+        1: MD_TEXTUAL@16..17
+          0: MD_TEXTUAL_LITERAL@16..17 "\n" [] []
+      1: MD_SETEXT_UNDERLINE_LITERAL@17..22 "-----" [] []
+    4: MD_NEWLINE@22..23
+      0: NEWLINE@22..23 "\n" [] []
+    5: MD_NEWLINE@23..24
+      0: NEWLINE@23..24 "\n" [] []
+    6: MD_SETEXT_HEADER@24..33
+      0: MD_INLINE_ITEM_LIST@24..29
+        0: MD_TEXTUAL@24..27
+          0: MD_TEXTUAL_LITERAL@24..27 "Foo" [] []
+        1: MD_HARD_LINE@27..29
+          0: MD_HARD_LINE_LITERAL@27..29 "\\\n" [] []
+      1: MD_SETEXT_UNDERLINE_LITERAL@29..33 "----" [] []
+    7: MD_NEWLINE@33..34
+      0: NEWLINE@33..34 "\n" [] []
+    8: MD_NEWLINE@34..35
+      0: NEWLINE@34..35 "\n" [] []
+    9: MD_QUOTE@35..47
+      0: R_ANGLE@35..36 ">" [] []
+      1: MD_BLOCK_LIST@36..47
+        0: MD_PARAGRAPH@36..47
+          0: MD_INLINE_ITEM_LIST@36..47
+            0: MD_TEXTUAL@36..40
+              0: MD_TEXTUAL_LITERAL@36..40 "Foo" [Skipped(" ")] []
+            1: MD_TEXTUAL@40..41
+              0: MD_TEXTUAL_LITERAL@40..41 "\n" [] []
+            2: MD_TEXTUAL@41..44
+              0: MD_TEXTUAL_LITERAL@41..44 "-" [Skipped(">"), Skipped(" ")] []
+            3: MD_TEXTUAL@44..45
+              0: MD_TEXTUAL_LITERAL@44..45 "-" [] []
+            4: MD_TEXTUAL@45..46
+              0: MD_TEXTUAL_LITERAL@45..46 "-" [] []
+            5: MD_TEXTUAL@46..47
+              0: MD_TEXTUAL_LITERAL@46..47 "\n" [] []
+          1: (empty)
+    10: MD_NEWLINE@47..48
+      0: NEWLINE@47..48 "\n" [] []
+    11: MD_BULLET_LIST_ITEM@48..66
+      0: MD_BULLET_LIST@48..66
+        0: MD_BULLET@48..66
+          0: MINUS@48..49 "-" [] []
+          1: MD_BLOCK_LIST@49..66
+            0: MD_SETEXT_HEADER@49..59
+              0: MD_INLINE_ITEM_LIST@49..54
+                0: MD_TEXTUAL@49..53
+                  0: MD_TEXTUAL_LITERAL@49..53 "Foo" [Skipped(" ")] []
+                1: MD_TEXTUAL@53..54
+                  0: MD_TEXTUAL_LITERAL@53..54 "\n" [] []
+              1: MD_SETEXT_UNDERLINE_LITERAL@54..59 "---" [Skipped(" "), Skipped(" ")] []
+            1: MD_NEWLINE@59..60
+              0: NEWLINE@59..60 "\n" [] []
+            2: MD_PARAGRAPH@60..66
+              0: MD_INLINE_ITEM_LIST@60..66
+                0: MD_TEXTUAL@60..65
+                  0: MD_TEXTUAL_LITERAL@60..65 "baz" [Skipped(" "), Skipped(" ")] []
+                1: MD_TEXTUAL@65..66
+                  0: MD_TEXTUAL_LITERAL@65..66 "\n" [] []
+              1: (empty)
+  2: EOF@66..66 "" [] []
+
+```

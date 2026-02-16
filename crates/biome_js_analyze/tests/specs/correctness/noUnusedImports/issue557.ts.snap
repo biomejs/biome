@@ -8,5 +8,3 @@ expression: issue557.ts
 import type Type from "mod";
 export const a: typeof Type = {};
 ```
-
-

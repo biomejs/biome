@@ -29,7 +29,7 @@ impl Rule for Schema {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let node_text = node.name().ok()?.inner_string_text().ok()?;
+        let node_text = node.name().ok()?.inner_string_text()?.ok()?;
         let member_value = node.value().ok()?;
         if node_text.text() == "$schema" {
             let string_value = member_value.as_json_string_value()?;

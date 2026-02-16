@@ -1,0 +1,186 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div class:selected={item.id === selectedId}>Item</div>
+<button class:primary={type === 'primary'}>Button</button>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@5..10 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@10..11 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@11..19 "selected" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@19..20 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@20..21 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@21..43 "item.id === selectedId" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@43..44 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@44..45 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@45..49 "Item" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@49..50 "<" [] [],
+                slash_token: SLASH@50..51 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@51..54 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@54..55 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@55..57 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@57..64 "button" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@64..69 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@69..70 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@70..77 "primary" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@77..78 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@78..79 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@79..97 "type === 'primary'" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@97..98 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@98..99 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@99..105 "Button" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@105..106 "<" [] [],
+                slash_token: SLASH@106..107 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@107..113 "button" [] [],
+                },
+                r_angle_token: R_ANGLE@113..114 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@114..115 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..115
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..114
+    0: HTML_ELEMENT@0..55
+      0: HTML_OPENING_ELEMENT@0..45
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..44
+          0: SVELTE_CLASS_DIRECTIVE@5..44
+            0: CLASS_KW@5..10 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..44
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..19
+                0: HTML_LITERAL@11..19 "selected" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@19..19
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@19..44
+                0: EQ@19..20 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@20..44
+                  0: L_CURLY@20..21 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@21..43
+                    0: HTML_LITERAL@21..43 "item.id === selectedId" [] []
+                  2: R_CURLY@43..44 "}" [] []
+        3: R_ANGLE@44..45 ">" [] []
+      1: HTML_ELEMENT_LIST@45..49
+        0: HTML_CONTENT@45..49
+          0: HTML_LITERAL@45..49 "Item" [] []
+      2: HTML_CLOSING_ELEMENT@49..55
+        0: L_ANGLE@49..50 "<" [] []
+        1: SLASH@50..51 "/" [] []
+        2: HTML_TAG_NAME@51..54
+          0: HTML_LITERAL@51..54 "div" [] []
+        3: R_ANGLE@54..55 ">" [] []
+    1: HTML_ELEMENT@55..114
+      0: HTML_OPENING_ELEMENT@55..99
+        0: L_ANGLE@55..57 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@57..64
+          0: HTML_LITERAL@57..64 "button" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@64..98
+          0: SVELTE_CLASS_DIRECTIVE@64..98
+            0: CLASS_KW@64..69 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@69..98
+              0: COLON@69..70 ":" [] []
+              1: SVELTE_LITERAL@70..77
+                0: HTML_LITERAL@70..77 "primary" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@77..77
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@77..98
+                0: EQ@77..78 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@78..98
+                  0: L_CURLY@78..79 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@79..97
+                    0: HTML_LITERAL@79..97 "type === 'primary'" [] []
+                  2: R_CURLY@97..98 "}" [] []
+        3: R_ANGLE@98..99 ">" [] []
+      1: HTML_ELEMENT_LIST@99..105
+        0: HTML_CONTENT@99..105
+          0: HTML_LITERAL@99..105 "Button" [] []
+      2: HTML_CLOSING_ELEMENT@105..114
+        0: L_ANGLE@105..106 "<" [] []
+        1: SLASH@106..107 "/" [] []
+        2: HTML_TAG_NAME@107..113
+          0: HTML_LITERAL@107..113 "button" [] []
+        3: R_ANGLE@113..114 ">" [] []
+  4: EOF@114..115 "" [Newline("\n")] []
+
+```

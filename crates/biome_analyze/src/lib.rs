@@ -13,10 +13,12 @@ pub mod context;
 mod diagnostics;
 mod matcher;
 pub mod options;
+pub mod profiling;
 mod query;
 mod registry;
 mod rule;
 mod services;
+pub mod shared;
 mod signals;
 mod suppression_action;
 mod suppressions;
@@ -53,7 +55,7 @@ pub use crate::services::{
     ExtendedConfigurationProvider, FromServices, ServiceBag, ServicesDiagnostic,
 };
 pub use crate::signals::{
-    AnalyzerAction, AnalyzerSignal, AnalyzerTransformation, DiagnosticSignal,
+    AnalyzerAction, AnalyzerSignal, AnalyzerTransformation, DiagnosticSignal, PluginSignal,
 };
 use crate::suppressions::Suppressions;
 pub use crate::syntax::{Ast, SyntaxVisitor};

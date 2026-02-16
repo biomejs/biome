@@ -8,7 +8,7 @@ impl AnyHtmlAttributeInitializer {
     /// Returns the string value of the attribute, if available, without quotes.
     pub fn string_value(&self) -> Option<Text> {
         match self {
-            Self::HtmlAttributeSingleTextExpression(_) => None,
+            Self::HtmlAttributeSingleTextExpression(text) => text.expression().ok()?.string_value(),
             Self::HtmlString(string) => Some(
                 string
                     .value_token()
@@ -30,6 +30,17 @@ impl HtmlAttributeList {
             }
             None
         })
+    }
+}
+
+impl HtmlAttribute {
+    /// Extracts the value from an attribute's initializer.
+    ///
+    /// Returns `None` if the attribute has no initializer or the value cannot be extracted.
+    pub fn value(&self) -> Option<Text> {
+        self.initializer()
+            .and_then(|init| init.value().ok())
+            .and_then(|value| value.string_value())
     }
 }
 

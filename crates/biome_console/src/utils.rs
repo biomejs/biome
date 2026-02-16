@@ -93,14 +93,25 @@ impl Display for Padding {
 }
 
 /// It writes a pair of key-value, with the given padding
-pub struct KeyValuePair<'a>(pub &'a str, pub Markup<'a>);
+pub struct KeyValuePair<'a>(&'a str, Markup<'a>, usize);
+
+impl<'a> KeyValuePair<'a> {
+    pub fn new(key: &'a str, value: Markup<'a>) -> Self {
+        Self(key, value, 30usize)
+    }
+
+    pub fn with_padding(mut self, padding: usize) -> Self {
+        self.2 = padding;
+        self
+    }
+}
 
 impl Display for KeyValuePair<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        let KeyValuePair(key, value) = self;
+        let KeyValuePair(key, value, padding) = self;
         write!(fmt, "  {key}:")?;
 
-        let padding_width = 30usize.saturating_sub(key.len() + 1);
+        let padding_width = padding.saturating_sub(key.len() + 1);
 
         for _ in 0..padding_width {
             fmt.write_str(" ")?;

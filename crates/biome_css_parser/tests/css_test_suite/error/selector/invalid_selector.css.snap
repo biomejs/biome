@@ -2,6 +2,7 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -17,7 +18,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssBogusRule {
             items: [
                 BANG@0..1 "!" [] [],
@@ -54,7 +55,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..16
   0: (empty)
-  1: CSS_RULE_LIST@0..15
+  1: CSS_ROOT_ITEM_LIST@0..15
     0: CSS_BOGUS_RULE@0..1
       0: BANG@0..1 "!" [] []
     1: CSS_QUALIFIED_RULE@1..15

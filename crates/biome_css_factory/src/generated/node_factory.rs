@@ -27,6 +27,66 @@ pub fn css_at_rule_declarator(
         ],
     ))
 }
+pub fn css_attr_fallback_value(
+    comma_token: SyntaxToken,
+    value: CssGenericComponentValueList,
+) -> CssAttrFallbackValue {
+    CssAttrFallbackValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ATTR_FALLBACK_VALUE,
+        [
+            Some(SyntaxElement::Token(comma_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn css_attr_function(
+    name_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    attr_name: CssAttrNameList,
+    r_paren_token: SyntaxToken,
+) -> CssAttrFunctionBuilder {
+    CssAttrFunctionBuilder {
+        name_token,
+        l_paren_token,
+        attr_name,
+        r_paren_token,
+        attr_type: None,
+        fallback_value: None,
+    }
+}
+pub struct CssAttrFunctionBuilder {
+    name_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    attr_name: CssAttrNameList,
+    r_paren_token: SyntaxToken,
+    attr_type: Option<AnyCssAttrType>,
+    fallback_value: Option<CssAttrFallbackValue>,
+}
+impl CssAttrFunctionBuilder {
+    pub fn with_attr_type(mut self, attr_type: AnyCssAttrType) -> Self {
+        self.attr_type = Some(attr_type);
+        self
+    }
+    pub fn with_fallback_value(mut self, fallback_value: CssAttrFallbackValue) -> Self {
+        self.fallback_value = Some(fallback_value);
+        self
+    }
+    pub fn build(self) -> CssAttrFunction {
+        CssAttrFunction::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_ATTR_FUNCTION,
+            [
+                Some(SyntaxElement::Token(self.name_token)),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.attr_name.into_syntax())),
+                self.attr_type
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.fallback_value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
 pub fn css_attribute_matcher(
     operator_token: SyntaxToken,
     value: CssAttributeMatcherValue,
@@ -207,6 +267,20 @@ pub fn css_color_profile_at_rule_declarator(
         [
             Some(SyntaxElement::Token(color_profile_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn css_comma_separated_value(
+    l_curly_token: SyntaxToken,
+    items: CssGenericComponentValueList,
+    r_curly_token: SyntaxToken,
+) -> CssCommaSeparatedValue {
+    CssCommaSeparatedValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMMA_SEPARATED_VALUE,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
         ],
     ))
 }
@@ -803,6 +877,108 @@ pub fn css_function(
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(items.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_function_at_rule(
+    declarator: CssFunctionAtRuleDeclarator,
+    block: CssDeclarationOrAtRuleBlock,
+) -> CssFunctionAtRule {
+    CssFunctionAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FUNCTION_AT_RULE,
+        [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_function_at_rule_declarator(
+    function_token: SyntaxToken,
+    name: CssDashedIdentifier,
+    l_paren_token: SyntaxToken,
+    parameters: CssFunctionParameterList,
+    r_paren_token: SyntaxToken,
+) -> CssFunctionAtRuleDeclaratorBuilder {
+    CssFunctionAtRuleDeclaratorBuilder {
+        function_token,
+        name,
+        l_paren_token,
+        parameters,
+        r_paren_token,
+        returns: None,
+    }
+}
+pub struct CssFunctionAtRuleDeclaratorBuilder {
+    function_token: SyntaxToken,
+    name: CssDashedIdentifier,
+    l_paren_token: SyntaxToken,
+    parameters: CssFunctionParameterList,
+    r_paren_token: SyntaxToken,
+    returns: Option<CssReturnsStatement>,
+}
+impl CssFunctionAtRuleDeclaratorBuilder {
+    pub fn with_returns(mut self, returns: CssReturnsStatement) -> Self {
+        self.returns = Some(returns);
+        self
+    }
+    pub fn build(self) -> CssFunctionAtRuleDeclarator {
+        CssFunctionAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_FUNCTION_AT_RULE_DECLARATOR,
+            [
+                Some(SyntaxElement::Token(self.function_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.parameters.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+                self.returns
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_function_parameter(name: CssDashedIdentifier) -> CssFunctionParameterBuilder {
+    CssFunctionParameterBuilder {
+        name,
+        ty: None,
+        default_value: None,
+    }
+}
+pub struct CssFunctionParameterBuilder {
+    name: CssDashedIdentifier,
+    ty: Option<AnyCssType>,
+    default_value: Option<CssFunctionParameterDefaultValue>,
+}
+impl CssFunctionParameterBuilder {
+    pub fn with_ty(mut self, ty: AnyCssType) -> Self {
+        self.ty = Some(ty);
+        self
+    }
+    pub fn with_default_value(mut self, default_value: CssFunctionParameterDefaultValue) -> Self {
+        self.default_value = Some(default_value);
+        self
+    }
+    pub fn build(self) -> CssFunctionParameter {
+        CssFunctionParameter::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_FUNCTION_PARAMETER,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                self.ty
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.default_value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_function_parameter_default_value(
+    colon_token: SyntaxToken,
+    value: AnyCssValue,
+) -> CssFunctionParameterDefaultValue {
+    CssFunctionParameterDefaultValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FUNCTION_PARAMETER_DEFAULT_VALUE,
+        [
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
         ],
     ))
 }
@@ -1474,6 +1650,12 @@ pub fn css_number(value_token: SyntaxToken) -> CssNumber {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn css_number_declarator(number_token: SyntaxToken) -> CssNumberDeclarator {
+    CssNumberDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_NUMBER_DECLARATOR,
+        [Some(SyntaxElement::Token(number_token))],
+    ))
+}
 pub fn css_page_at_rule(
     page_token: SyntaxToken,
     selectors: CssPageSelectorList,
@@ -2088,6 +2270,18 @@ pub fn css_ratio(
         ],
     ))
 }
+pub fn css_raw_string_declarator(raw_string_token: SyntaxToken) -> CssRawStringDeclarator {
+    CssRawStringDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_RAW_STRING_DECLARATOR,
+        [Some(SyntaxElement::Token(raw_string_token))],
+    ))
+}
+pub fn css_regular_attr_unit(unit_token: SyntaxToken) -> CssRegularAttrUnit {
+    CssRegularAttrUnit::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_REGULAR_ATTR_UNIT,
+        [Some(SyntaxElement::Token(unit_token))],
+    ))
+}
 pub fn css_regular_dimension(
     value_token: SyntaxToken,
     unit_token: SyntaxToken,
@@ -2098,6 +2292,12 @@ pub fn css_regular_dimension(
             Some(SyntaxElement::Token(value_token)),
             Some(SyntaxElement::Token(unit_token)),
         ],
+    ))
+}
+pub fn css_regular_syntax_type_name(name_token: SyntaxToken) -> CssRegularSyntaxTypeName {
+    CssRegularSyntaxTypeName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_REGULAR_SYNTAX_TYPE_NAME,
+        [Some(SyntaxElement::Token(name_token))],
     ))
 }
 pub fn css_relative_selector(selector: AnyCssSelector) -> CssRelativeSelectorBuilder {
@@ -2126,15 +2326,24 @@ impl CssRelativeSelectorBuilder {
         ))
     }
 }
-pub fn css_root(rules: CssRuleList, eof_token: SyntaxToken) -> CssRootBuilder {
+pub fn css_returns_statement(returns_token: SyntaxToken, ty: AnyCssType) -> CssReturnsStatement {
+    CssReturnsStatement::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_RETURNS_STATEMENT,
+        [
+            Some(SyntaxElement::Token(returns_token)),
+            Some(SyntaxElement::Node(ty.into_syntax())),
+        ],
+    ))
+}
+pub fn css_root(items: CssRootItemList, eof_token: SyntaxToken) -> CssRootBuilder {
     CssRootBuilder {
-        rules,
+        items,
         eof_token,
         bom_token: None,
     }
 }
 pub struct CssRootBuilder {
-    rules: CssRuleList,
+    items: CssRootItemList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
 }
@@ -2148,7 +2357,7 @@ impl CssRootBuilder {
             CssSyntaxKind::CSS_ROOT,
             [
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.rules.into_syntax())),
+                Some(SyntaxElement::Node(self.items.into_syntax())),
                 Some(SyntaxElement::Token(self.eof_token)),
             ],
         ))
@@ -2247,6 +2456,15 @@ pub fn css_scope_range_start(start: CssScopeEdge) -> CssScopeRangeStart {
     CssScopeRangeStart::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_SCOPE_RANGE_START,
         [Some(SyntaxElement::Node(start.into_syntax()))],
+    ))
+}
+pub fn css_snippet_root(items: CssDeclarationOrRuleList, eof_token: SyntaxToken) -> CssSnippetRoot {
+    CssSnippetRoot::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SNIPPET_ROOT,
+        [
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
     ))
 }
 pub fn css_starting_style_at_rule(
@@ -2383,6 +2601,82 @@ pub fn css_supports_or_condition(
         ],
     ))
 }
+pub fn css_syntax_component(component: AnyCssSyntaxSingleComponent) -> CssSyntaxComponentBuilder {
+    CssSyntaxComponentBuilder {
+        component,
+        multiplier: None,
+    }
+}
+pub struct CssSyntaxComponentBuilder {
+    component: AnyCssSyntaxSingleComponent,
+    multiplier: Option<CssSyntaxMultiplier>,
+}
+impl CssSyntaxComponentBuilder {
+    pub fn with_multiplier(mut self, multiplier: CssSyntaxMultiplier) -> Self {
+        self.multiplier = Some(multiplier);
+        self
+    }
+    pub fn build(self) -> CssSyntaxComponent {
+        CssSyntaxComponent::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_SYNTAX_COMPONENT,
+            [
+                Some(SyntaxElement::Node(self.component.into_syntax())),
+                self.multiplier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_syntax_component_without_multiplier(
+    l_angle_token: SyntaxToken,
+    type_name_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> CssSyntaxComponentWithoutMultiplier {
+    CssSyntaxComponentWithoutMultiplier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(type_name_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
+}
+pub fn css_syntax_multiplier(multiplier_token: SyntaxToken) -> CssSyntaxMultiplier {
+    CssSyntaxMultiplier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SYNTAX_MULTIPLIER,
+        [Some(SyntaxElement::Token(multiplier_token))],
+    ))
+}
+pub fn css_syntax_type(
+    l_angle_token: SyntaxToken,
+    type_name: AnyCssSyntaxTypeName,
+    r_angle_token: SyntaxToken,
+) -> CssSyntaxType {
+    CssSyntaxType::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SYNTAX_TYPE,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Node(type_name.into_syntax())),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
+}
+pub fn css_type_function(
+    name_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    ty: AnyCssSyntax,
+    r_paren_token: SyntaxToken,
+) -> CssTypeFunction {
+    CssTypeFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_TYPE_FUNCTION,
+        [
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(ty.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_type_selector(ident: CssIdentifier) -> CssTypeSelectorBuilder {
     CssTypeSelectorBuilder {
         ident,
@@ -2476,6 +2770,18 @@ impl CssUniversalSelectorBuilder {
         ))
     }
 }
+pub fn css_universal_syntax(star_token: SyntaxToken) -> CssUniversalSyntax {
+    CssUniversalSyntax::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNIVERSAL_SYNTAX,
+        [Some(SyntaxElement::Token(star_token))],
+    ))
+}
+pub fn css_unknown_attr_unit(unit_token: SyntaxToken) -> CssUnknownAttrUnit {
+    CssUnknownAttrUnit::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_ATTR_UNIT,
+        [Some(SyntaxElement::Token(unit_token))],
+    ))
+}
 pub fn css_unknown_block_at_rule(
     name: CssIdentifier,
     components: CssUnknownAtRuleComponentList,
@@ -2500,6 +2806,12 @@ pub fn css_unknown_dimension(
             Some(SyntaxElement::Token(value_token)),
             Some(SyntaxElement::Token(unit_token)),
         ],
+    ))
+}
+pub fn css_unknown_syntax_type_name(name_token: SyntaxToken) -> CssUnknownSyntaxTypeName {
+    CssUnknownSyntaxTypeName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_SYNTAX_TYPE_NAME,
+        [Some(SyntaxElement::Token(name_token))],
     ))
 }
 pub fn css_unknown_value_at_rule(
@@ -2650,6 +2962,81 @@ pub fn css_view_transition_at_rule_declarator(
     CssViewTransitionAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR,
         [Some(SyntaxElement::Token(view_transition_token))],
+    ))
+}
+pub fn scss_declaration(
+    name: AnyScssDeclarationName,
+    colon_token: SyntaxToken,
+    value: CssGenericComponentValueList,
+    modifiers: ScssVariableModifierList,
+) -> ScssDeclarationBuilder {
+    ScssDeclarationBuilder {
+        name,
+        colon_token,
+        value,
+        modifiers,
+        semicolon_token: None,
+    }
+}
+pub struct ScssDeclarationBuilder {
+    name: AnyScssDeclarationName,
+    colon_token: SyntaxToken,
+    value: CssGenericComponentValueList,
+    modifiers: ScssVariableModifierList,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl ScssDeclarationBuilder {
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> ScssDeclaration {
+        ScssDeclaration::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_DECLARATION,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.colon_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
+pub fn scss_identifier(dollar_token: SyntaxToken, name: CssIdentifier) -> ScssIdentifier {
+    ScssIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_IDENTIFIER,
+        [
+            Some(SyntaxElement::Token(dollar_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_namespaced_identifier(
+    namespace: CssIdentifier,
+    dot_token: SyntaxToken,
+    name: ScssIdentifier,
+) -> ScssNamespacedIdentifier {
+    ScssNamespacedIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_NAMESPACED_IDENTIFIER,
+        [
+            Some(SyntaxElement::Node(namespace.into_syntax())),
+            Some(SyntaxElement::Token(dot_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_variable_modifier(
+    excl_token: SyntaxToken,
+    value_token: SyntaxToken,
+) -> ScssVariableModifier {
+    ScssVariableModifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_VARIABLE_MODIFIER,
+        [
+            Some(SyntaxElement::Token(excl_token)),
+            Some(SyntaxElement::Token(value_token)),
+        ],
     ))
 }
 pub fn tw_apply_at_rule(
@@ -2926,6 +3313,27 @@ pub fn tw_variant_at_rule(
         ],
     ))
 }
+pub fn css_attr_name_list<I, S>(items: I, separators: S) -> CssAttrNameList
+where
+    I: IntoIterator<Item = AnyCssAttrName>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssAttrNameList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ATTR_NAME_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn css_bracketed_value_list<I>(items: I) -> CssBracketedValueList
 where
     I: IntoIterator<Item = AnyCssCustomIdentifier>,
@@ -3109,6 +3517,27 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_function_parameter_list<I, S>(items: I, separators: S) -> CssFunctionParameterList
+where
+    I: IntoIterator<Item = AnyCssFunctionParameter>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssFunctionParameterList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FUNCTION_PARAMETER_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_generic_component_value_list<I>(items: I) -> CssGenericComponentValueList
@@ -3374,6 +3803,18 @@ where
         }),
     ))
 }
+pub fn css_root_item_list<I>(items: I) -> CssRootItemList
+where
+    I: IntoIterator<Item = AnyCssRootItem>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssRootItemList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ROOT_ITEM_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_rule_list<I>(items: I) -> CssRuleList
 where
     I: IntoIterator<Item = AnyCssRule>,
@@ -3417,6 +3858,27 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_syntax_component_list<I, S>(items: I, separators: S) -> CssSyntaxComponentList
+where
+    I: IntoIterator<Item = AnyCssSyntaxComponent>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssSyntaxComponentList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SYNTAX_COMPONENT_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_url_modifier_list<I>(items: I) -> CssUrlModifierList
@@ -3476,6 +3938,18 @@ where
         }),
     ))
 }
+pub fn scss_variable_modifier_list<I>(items: I) -> ScssVariableModifierList
+where
+    I: IntoIterator<Item = ScssVariableModifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    ScssVariableModifierList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_VARIABLE_MODIFIER_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn tw_apply_class_list<I>(items: I) -> TwApplyClassList
 where
     I: IntoIterator<Item = CssIdentifier>,
@@ -3502,6 +3976,16 @@ where
 {
     CssBogusAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_AT_RULE,
+        slots,
+    ))
+}
+pub fn css_bogus_attr_name<I>(slots: I) -> CssBogusAttrName
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusAttrName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_ATTR_NAME,
         slots,
     ))
 }
@@ -3562,6 +4046,16 @@ where
 {
     CssBogusFontFeatureValuesItem::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_FONT_FEATURE_VALUES_ITEM,
+        slots,
+    ))
+}
+pub fn css_bogus_function_parameter<I>(slots: I) -> CssBogusFunctionParameter
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusFunctionParameter::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_FUNCTION_PARAMETER,
         slots,
     ))
 }
@@ -3742,6 +4236,36 @@ where
 {
     CssBogusSupportsCondition::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_SUPPORTS_CONDITION,
+        slots,
+    ))
+}
+pub fn css_bogus_syntax<I>(slots: I) -> CssBogusSyntax
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusSyntax::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_SYNTAX,
+        slots,
+    ))
+}
+pub fn css_bogus_syntax_single_component<I>(slots: I) -> CssBogusSyntaxSingleComponent
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusSyntaxSingleComponent::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_SYNTAX_SINGLE_COMPONENT,
+        slots,
+    ))
+}
+pub fn css_bogus_type<I>(slots: I) -> CssBogusType
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusType::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_TYPE,
         slots,
     ))
 }

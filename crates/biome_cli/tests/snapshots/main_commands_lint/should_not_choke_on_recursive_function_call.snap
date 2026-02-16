@@ -78,7 +78,7 @@ src/hooks/useHook.ts:2:5 lint/correctness/useHookAtTopLevel ━━━━━━�
   
   i This means recursive calls are not allowed, because they require a condition in order to terminate.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
