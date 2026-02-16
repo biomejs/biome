@@ -873,16 +873,16 @@ let isChecked = false;
 <main>
   <!-- bind: directive -->
   <input bind:value={inputValue} />
-  
+
   <!-- bind: directive with checkbox -->
   <input type="checkbox" bind:checked={isChecked} />
-  
+
   <!-- class: directive -->
   <div class:active={isActive}>Active</div>
-  
+
   <!-- style: directive -->
   <div style:color={color}>Styled</div>
-  
+
   <!-- Using variables in text expressions -->
   <p>{inputValue}</p>
   <p>{isChecked}</p>
@@ -952,6 +952,75 @@ fn no_comma_operator_triggered_in_svelte_template_expression() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "no_comma_operator_triggered_in_svelte_template_expression",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_import_type_not_triggered_for_enum_in_control_flow_blocks() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    // the code in this file is intentionally ridiculous and doesn't necessarily make sense, but it covers a lot of different control flow blocks in one test
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+  import { IfEnum, ElseIfEnum, EachEnum, EachKeyEnum, KeyEnum, AwaitEnum } from './models.ts';
+
+  interface Props {
+    foo: IfEnum;
+    bar: ElseIfEnum;
+    baz: EachEnum;
+    bap: EachKeyEnum;
+    qux: KeyEnum;
+    zap: AwaitEnum;
+  }
+  let { foo }: Props = $props();
+</script>
+
+{#if foo === IfEnum.private}
+  private
+{:else if foo === ElseIfEnum.public}
+  public
+{/if}
+
+{#each EachEnum.Foo as item (EachKeyEnum[item])}
+  {item.name}
+{/each}
+
+{#key KeyEnum.Foo}
+  <Component />
+{/key}
+
+{#await AwaitEnum.Foo}
+  loading
+{:then data}
+  {data}
+{/await}
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_import_type_not_triggered_for_enum_in_control_flow_blocks",
         fs,
         console,
         result,

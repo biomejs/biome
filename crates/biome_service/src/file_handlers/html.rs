@@ -44,7 +44,8 @@ use biome_html_syntax::{
     AnySvelteDirective, AstroEmbeddedContent, HtmlAttributeInitializerClause,
     HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlLanguage, HtmlRoot,
     HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression, HtmlTextExpressions, HtmlVariant,
-    VueDirective, VueVBindShorthandDirective, VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock, SvelteKeyBlock, VueDirective,
+    VueVBindShorthandDirective, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
@@ -760,6 +761,91 @@ fn parse_embedded_nodes(
 
                 if let Some((content, file_source)) = result {
                     nodes.push((content.into(), file_source));
+                }
+            }
+
+            // Parse Svelte control flow block expressions ({#if}, {#each}, {#await}, {#key})
+            for element in html_root.syntax().descendants() {
+                let file_source = embedded_file_source
+                    .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
+
+                // Handle {#if expression}
+                if let Some(if_block) = SvelteIfBlock::cast_ref(&element)
+                    && let Ok(opening_block) = if_block.opening_block()
+                    && let Ok(expression) = opening_block.expression()
+                    && let Some((content, doc_source)) =
+                        parse_text_expression(expression, cache, biome_path, settings, file_source)
+                {
+                    nodes.push((content.into(), doc_source));
+                }
+
+                // Handle {:else if expression}
+                if let Some(if_block) = SvelteIfBlock::cast_ref(&element) {
+                    for else_if_clause in if_block.else_if_clauses() {
+                        if let Ok(expression) = else_if_clause.expression()
+                            && let Some((content, doc_source)) = parse_text_expression(
+                                expression,
+                                cache,
+                                biome_path,
+                                settings,
+                                file_source,
+                            )
+                        {
+                            nodes.push((content.into(), doc_source));
+                        }
+                    }
+                }
+
+                // Handle {#each expression as item}
+                if let Some(each_block) = SvelteEachBlock::cast_ref(&element)
+                    && let Ok(opening_block) = each_block.opening_block()
+                {
+                    if let Ok(expression) = opening_block.list()
+                        && let Some((content, doc_source)) = parse_text_expression(
+                            expression,
+                            cache,
+                            biome_path,
+                            settings,
+                            file_source,
+                        )
+                    {
+                        nodes.push((content.into(), doc_source));
+                    }
+
+                    if let Some(item) = opening_block.item()
+                        && let Some(item) = item.as_svelte_each_as_keyed_item()
+                        && let Some(key) = item.key()
+                        && let Ok(key_expression) = key.expression()
+                        && let Some((content, doc_source)) = parse_text_expression(
+                            key_expression,
+                            cache,
+                            biome_path,
+                            settings,
+                            file_source,
+                        )
+                    {
+                        nodes.push((content.into(), doc_source));
+                    }
+                }
+
+                // Handle {#await expression}
+                if let Some(await_block) = SvelteAwaitBlock::cast_ref(&element)
+                    && let Ok(opening_block) = await_block.opening_block()
+                    && let Ok(expression) = opening_block.expression()
+                    && let Some((content, doc_source)) =
+                        parse_text_expression(expression, cache, biome_path, settings, file_source)
+                {
+                    nodes.push((content.into(), doc_source));
+                }
+
+                // Handle {#key expression}
+                if let Some(key_block) = SvelteKeyBlock::cast_ref(&element)
+                    && let Ok(opening_block) = key_block.opening_block()
+                    && let Ok(expression) = opening_block.expression()
+                    && let Some((content, doc_source)) =
+                        parse_text_expression(expression, cache, biome_path, settings, file_source)
+                {
+                    nodes.push((content.into(), doc_source));
                 }
             }
 
