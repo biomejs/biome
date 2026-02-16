@@ -20,8 +20,7 @@ use crate::syntax::parse_error::{
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::scss::{
-    is_at_scss_declaration, is_at_scss_identifier, is_at_scss_qualified_name,
-    parse_scss_declaration, parse_scss_identifier, parse_scss_qualified_name,
+    is_at_scss_declaration, is_at_scss_identifier, parse_scss_declaration, parse_scss_identifier,
 };
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
@@ -282,7 +281,6 @@ fn parse_metavariable(p: &mut CssParser) -> ParsedSyntax {
 pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
     is_at_any_function(p)
         || is_at_scss_identifier(p)
-        || (CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_qualified_name(p))
         || is_at_identifier(p)
         || p.at(CSS_STRING_LITERAL)
         || is_at_any_dimension(p)
@@ -302,8 +300,6 @@ pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
         })
     } else if is_at_any_function(p) {
         parse_any_function(p)
-    } else if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_qualified_name(p) {
-        parse_scss_qualified_name(p)
     } else if is_at_dashed_identifier(p) {
         if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
             CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(

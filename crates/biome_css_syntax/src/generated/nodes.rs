@@ -2369,7 +2369,7 @@ impl CssFunction {
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<AnyCssFunctionName> {
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -2392,7 +2392,7 @@ impl Serialize for CssFunction {
 }
 #[derive(Serialize)]
 pub struct CssFunctionFields {
-    pub name: SyntaxResult<AnyCssFunctionName>,
+    pub name: SyntaxResult<CssIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub items: CssParameterList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -8853,51 +8853,6 @@ pub struct ScssNamespacedIdentifierFields {
     pub name: SyntaxResult<ScssIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct ScssQualifiedName {
-    pub(crate) syntax: SyntaxNode,
-}
-impl ScssQualifiedName {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> ScssQualifiedNameFields {
-        ScssQualifiedNameFields {
-            module: self.module(),
-            dot_token: self.dot_token(),
-            member: self.member(),
-        }
-    }
-    pub fn module(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn dot_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn member(&self) -> SyntaxResult<AnyScssModuleMember> {
-        support::required_node(&self.syntax, 2usize)
-    }
-}
-impl Serialize for ScssQualifiedName {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct ScssQualifiedNameFields {
-    pub module: SyntaxResult<CssIdentifier>,
-    pub dot_token: SyntaxResult<SyntaxToken>,
-    pub member: SyntaxResult<AnyScssModuleMember>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssVariableModifier {
     pub(crate) syntax: SyntaxNode,
 }
@@ -10692,25 +10647,6 @@ impl AnyCssFunction {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyCssFunctionName {
-    CssIdentifier(CssIdentifier),
-    ScssQualifiedName(ScssQualifiedName),
-}
-impl AnyCssFunctionName {
-    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
-        match &self {
-            Self::CssIdentifier(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_scss_qualified_name(&self) -> Option<&ScssQualifiedName> {
-        match &self {
-            Self::ScssQualifiedName(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssFunctionParameter {
     CssBogusFunctionParameter(CssBogusFunctionParameter),
     CssFunctionParameter(CssFunctionParameter),
@@ -12368,7 +12304,6 @@ pub enum AnyCssValue {
     CssString(CssString),
     CssUnicodeRange(CssUnicodeRange),
     ScssIdentifier(ScssIdentifier),
-    ScssQualifiedName(ScssQualifiedName),
     TwValueThemeReference(TwValueThemeReference),
 }
 impl AnyCssValue {
@@ -12447,12 +12382,6 @@ impl AnyCssValue {
     pub fn as_scss_identifier(&self) -> Option<&ScssIdentifier> {
         match &self {
             Self::ScssIdentifier(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_scss_qualified_name(&self) -> Option<&ScssQualifiedName> {
-        match &self {
-            Self::ScssQualifiedName(item) => Some(item),
             _ => None,
         }
     }
@@ -12558,25 +12487,6 @@ impl AnyScssDeclarationName {
     pub fn as_scss_namespaced_identifier(&self) -> Option<&ScssNamespacedIdentifier> {
         match &self {
             Self::ScssNamespacedIdentifier(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyScssModuleMember {
-    CssIdentifier(CssIdentifier),
-    ScssIdentifier(ScssIdentifier),
-}
-impl AnyScssModuleMember {
-    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
-        match &self {
-            Self::CssIdentifier(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_scss_identifier(&self) -> Option<&ScssIdentifier> {
-        match &self {
-            Self::ScssIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -23399,55 +23309,6 @@ impl From<ScssNamespacedIdentifier> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for ScssQualifiedName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_QUALIFIED_NAME as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SCSS_QUALIFIED_NAME
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for ScssQualifiedName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("ScssQualifiedName")
-                .field("module", &support::DebugSyntaxResult(self.module()))
-                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-                .field("member", &support::DebugSyntaxResult(self.member()))
-                .finish()
-        } else {
-            f.debug_struct("ScssQualifiedName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<ScssQualifiedName> for SyntaxNode {
-    fn from(n: ScssQualifiedName) -> Self {
-        n.syntax
-    }
-}
-impl From<ScssQualifiedName> for SyntaxElement {
-    fn from(n: ScssQualifiedName) -> Self {
-        n.syntax.into()
-    }
-}
 impl AstNode for ScssVariableModifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -27184,66 +27045,6 @@ impl From<AnyCssFunction> for SyntaxNode {
 }
 impl From<AnyCssFunction> for SyntaxElement {
     fn from(n: AnyCssFunction) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl From<CssIdentifier> for AnyCssFunctionName {
-    fn from(node: CssIdentifier) -> Self {
-        Self::CssIdentifier(node)
-    }
-}
-impl From<ScssQualifiedName> for AnyCssFunctionName {
-    fn from(node: ScssQualifiedName) -> Self {
-        Self::ScssQualifiedName(node)
-    }
-}
-impl AstNode for AnyCssFunctionName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssIdentifier::KIND_SET.union(ScssQualifiedName::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_IDENTIFIER | SCSS_QUALIFIED_NAME)
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
-            SCSS_QUALIFIED_NAME => Self::ScssQualifiedName(ScssQualifiedName { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::CssIdentifier(it) => it.syntax(),
-            Self::ScssQualifiedName(it) => it.syntax(),
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::CssIdentifier(it) => it.into_syntax(),
-            Self::ScssQualifiedName(it) => it.into_syntax(),
-        }
-    }
-}
-impl std::fmt::Debug for AnyCssFunctionName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            Self::ScssQualifiedName(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyCssFunctionName> for SyntaxNode {
-    fn from(n: AnyCssFunctionName) -> Self {
-        match n {
-            AnyCssFunctionName::CssIdentifier(it) => it.into_syntax(),
-            AnyCssFunctionName::ScssQualifiedName(it) => it.into_syntax(),
-        }
-    }
-}
-impl From<AnyCssFunctionName> for SyntaxElement {
-    fn from(n: AnyCssFunctionName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -32080,11 +31881,6 @@ impl From<ScssIdentifier> for AnyCssValue {
         Self::ScssIdentifier(node)
     }
 }
-impl From<ScssQualifiedName> for AnyCssValue {
-    fn from(node: ScssQualifiedName) -> Self {
-        Self::ScssQualifiedName(node)
-    }
-}
 impl From<TwValueThemeReference> for AnyCssValue {
     fn from(node: TwValueThemeReference) -> Self {
         Self::TwValueThemeReference(node)
@@ -32105,7 +31901,6 @@ impl AstNode for AnyCssValue {
         .union(CssString::KIND_SET)
         .union(CssUnicodeRange::KIND_SET)
         .union(ScssIdentifier::KIND_SET)
-        .union(ScssQualifiedName::KIND_SET)
         .union(TwValueThemeReference::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
@@ -32120,7 +31915,6 @@ impl AstNode for AnyCssValue {
             | CSS_STRING
             | CSS_UNICODE_RANGE
             | SCSS_IDENTIFIER
-            | SCSS_QUALIFIED_NAME
             | TW_VALUE_THEME_REFERENCE => true,
             k if AnyCssDimension::can_cast(k) => true,
             k if AnyCssFunction::can_cast(k) => true,
@@ -32140,7 +31934,6 @@ impl AstNode for AnyCssValue {
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_UNICODE_RANGE => Self::CssUnicodeRange(CssUnicodeRange { syntax }),
             SCSS_IDENTIFIER => Self::ScssIdentifier(ScssIdentifier { syntax }),
-            SCSS_QUALIFIED_NAME => Self::ScssQualifiedName(ScssQualifiedName { syntax }),
             TW_VALUE_THEME_REFERENCE => {
                 Self::TwValueThemeReference(TwValueThemeReference { syntax })
             }
@@ -32172,7 +31965,6 @@ impl AstNode for AnyCssValue {
             Self::CssString(it) => it.syntax(),
             Self::CssUnicodeRange(it) => it.syntax(),
             Self::ScssIdentifier(it) => it.syntax(),
-            Self::ScssQualifiedName(it) => it.syntax(),
             Self::TwValueThemeReference(it) => it.syntax(),
             Self::AnyCssDimension(it) => it.syntax(),
             Self::AnyCssFunction(it) => it.syntax(),
@@ -32191,7 +31983,6 @@ impl AstNode for AnyCssValue {
             Self::CssString(it) => it.into_syntax(),
             Self::CssUnicodeRange(it) => it.into_syntax(),
             Self::ScssIdentifier(it) => it.into_syntax(),
-            Self::ScssQualifiedName(it) => it.into_syntax(),
             Self::TwValueThemeReference(it) => it.into_syntax(),
             Self::AnyCssDimension(it) => it.into_syntax(),
             Self::AnyCssFunction(it) => it.into_syntax(),
@@ -32214,7 +32005,6 @@ impl std::fmt::Debug for AnyCssValue {
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUnicodeRange(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            Self::ScssQualifiedName(it) => std::fmt::Debug::fmt(it, f),
             Self::TwValueThemeReference(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -32235,7 +32025,6 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::CssString(it) => it.into_syntax(),
             AnyCssValue::CssUnicodeRange(it) => it.into_syntax(),
             AnyCssValue::ScssIdentifier(it) => it.into_syntax(),
-            AnyCssValue::ScssQualifiedName(it) => it.into_syntax(),
             AnyCssValue::TwValueThemeReference(it) => it.into_syntax(),
         }
     }
@@ -32566,66 +32355,6 @@ impl From<AnyScssDeclarationName> for SyntaxNode {
 }
 impl From<AnyScssDeclarationName> for SyntaxElement {
     fn from(n: AnyScssDeclarationName) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl From<CssIdentifier> for AnyScssModuleMember {
-    fn from(node: CssIdentifier) -> Self {
-        Self::CssIdentifier(node)
-    }
-}
-impl From<ScssIdentifier> for AnyScssModuleMember {
-    fn from(node: ScssIdentifier) -> Self {
-        Self::ScssIdentifier(node)
-    }
-}
-impl AstNode for AnyScssModuleMember {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssIdentifier::KIND_SET.union(ScssIdentifier::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_IDENTIFIER | SCSS_IDENTIFIER)
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
-            SCSS_IDENTIFIER => Self::ScssIdentifier(ScssIdentifier { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::CssIdentifier(it) => it.syntax(),
-            Self::ScssIdentifier(it) => it.syntax(),
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::CssIdentifier(it) => it.into_syntax(),
-            Self::ScssIdentifier(it) => it.into_syntax(),
-        }
-    }
-}
-impl std::fmt::Debug for AnyScssModuleMember {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            Self::ScssIdentifier(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyScssModuleMember> for SyntaxNode {
-    fn from(n: AnyScssModuleMember) -> Self {
-        match n {
-            AnyScssModuleMember::CssIdentifier(it) => it.into_syntax(),
-            AnyScssModuleMember::ScssIdentifier(it) => it.into_syntax(),
-        }
-    }
-}
-impl From<AnyScssModuleMember> for SyntaxElement {
-    fn from(n: AnyScssModuleMember) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -33036,11 +32765,6 @@ impl std::fmt::Display for AnyCssFunction {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyCssFunctionName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for AnyCssFunctionParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -33382,11 +33106,6 @@ impl std::fmt::Display for AnyCssValueAtRuleProperty {
     }
 }
 impl std::fmt::Display for AnyScssDeclarationName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for AnyScssModuleMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -34452,11 +34171,6 @@ impl std::fmt::Display for ScssIdentifier {
     }
 }
 impl std::fmt::Display for ScssNamespacedIdentifier {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for ScssQualifiedName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
