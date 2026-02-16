@@ -1,4 +1,3 @@
-use crate::runner::execution::Stdin;
 use biome_configuration::Configuration;
 use biome_fs::BiomePath;
 use biome_service::workspace::ScanKind;
@@ -6,21 +5,20 @@ use camino::Utf8Path;
 
 /// Returns a forced scan kind based on the given `execution`.
 fn get_forced_scan_kind(
-    stdin: Option<&Stdin>,
+    stdin_file_path: Option<&Utf8Path>,
     root_configuration_dir: &Utf8Path,
     working_dir: &Utf8Path,
     maybe_scan_kind: Option<ScanKind>,
 ) -> Option<ScanKind> {
-    if let Some(stdin) = stdin {
-        let path = stdin.as_path();
-        if path
+    if let Some(stdin_file_path) = stdin_file_path {
+        if stdin_file_path
             .parent()
             .is_some_and(|dir| dir == root_configuration_dir)
         {
             return Some(ScanKind::NoScanner);
         } else {
             return Some(ScanKind::TargetedKnownFiles {
-                target_paths: vec![BiomePath::new(working_dir.join(path))],
+                target_paths: vec![BiomePath::new(working_dir.join(stdin_file_path))],
                 descend_from_targets: false,
             });
         }
@@ -43,7 +41,7 @@ fn get_forced_scan_kind(
 /// - Otherwise, we return the requested scan kind.
 pub(crate) fn derive_best_scan_kind(
     requested_scan_kind: ScanKind,
-    stdin: Option<&Stdin>,
+    stdin: Option<&Utf8Path>,
     root_configuration_dir: &Utf8Path,
     working_dir: &Utf8Path,
     configuration: &Configuration,
