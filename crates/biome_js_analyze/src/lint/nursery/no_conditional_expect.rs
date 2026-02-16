@@ -64,7 +64,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoConditionalExpect {
-        version: "next",
+        version: "2.4.2",
         name: "noConditionalExpect",
         language: "js",
         sources: &[

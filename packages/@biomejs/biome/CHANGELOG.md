@@ -1,5 +1,115 @@
 # @biomejs/biome
 
+## 2.4.2
+
+### Patch Changes
+
+- [#9103](https://github.com/biomejs/biome/pull/9103) [`fc9850c`](https://github.com/biomejs/biome/commit/fc9850c4858f6d1a9c1314d782fd561a6c2253c3) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9098](https://github.com/biomejs/biome/issues/9098): `useImportType` no longer incorrectly flags imports used in Svelte control flow blocks (`{#if}`, `{#each}`, `{#await}`, `{#key}`) as type-only imports.
+
+- [#9106](https://github.com/biomejs/biome/pull/9106) [`f4b7296`](https://github.com/biomejs/biome/commit/f4b729679e0ff4452758e026e053bb7b08add4b2) Thanks [@dyc3](https://github.com/dyc3)! - Updated rule source metadata for rules from `html-eslint`.
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noConditionalExpect`](https://biomejs.dev/linter/rules/no-conditional-expect/). This rule disallows conditional `expect()` calls inside tests, which can lead to tests that silently pass when assertions never run.
+
+  ```js
+  // Invalid - conditional expect may not run
+  test("conditional", async ({ page }) => {
+    if (someCondition) {
+      await expect(page).toHaveTitle("Title");
+    }
+  });
+
+  // Valid - unconditional expect
+  test("unconditional", async ({ page }) => {
+    await expect(page).toHaveTitle("Title");
+  });
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightElementHandle`](https://biomejs.dev/linter/rules/no-playwright-element-handle/). Prefers locators to element handles.
+
+  ```js
+  const el = await page.$(".btn");
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightEval`](https://biomejs.dev/linter/rules/no-playwright-eval/). Disallows `page.$eval()` and `page.$$eval()` methods.
+
+  ```js
+  await page.$eval(".btn", (el) => el.textContent);
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightForceOption`](https://biomejs.dev/linter/rules/no-playwright-force-option/). Disallows the `force` option on user interactions.
+
+  ```js
+  await locator.click({ force: true });
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightMissingAwait`](https://biomejs.dev/linter/rules/no-playwright-missing-await/). Enforces awaiting async Playwright APIs.
+
+  ```js
+  const el = page.locator(".btn");
+  el.click(); // Missing await
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightNetworkidle`](https://biomejs.dev/linter/rules/no-playwright-networkidle/). Disallows deprecated `networkidle` wait option.
+
+  ```js
+  await page.goto(url, { waitUntil: "networkidle" });
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightPagePause`](https://biomejs.dev/linter/rules/no-playwright-page-pause/). Disallows `page.pause()` debugging calls in committed code.
+
+  ```js
+  await page.pause();
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightUselessAwait`](https://biomejs.dev/linter/rules/no-playwright-useless-await/). Disallows unnecessary `await` on synchronous Playwright methods.
+
+  ```js
+  // Incorrect - locator() is synchronous
+  const loc = await page.locator(".btn");
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightWaitForNavigation`](https://biomejs.dev/linter/rules/no-playwright-wait-for-navigation/). Prefers modern navigation APIs over deprecated `waitForNavigation()`.
+
+  ```js
+  await page.waitForNavigation();
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightWaitForSelector`](https://biomejs.dev/linter/rules/no-playwright-wait-for-selector/). Prefers locators over deprecated `waitForSelector()`.
+
+  ```js
+  await page.waitForSelector(".btn");
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightWaitForTimeout`](https://biomejs.dev/linter/rules/no-playwright-wait-for-timeout/). Disallows hard-coded timeouts with `waitForTimeout()`.
+
+  ```js
+  await page.waitForTimeout(5000);
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Enhanced `noSkippedTests` to detect Playwright patterns (`.fixme`, `test.describe`, `test.step`, bracket notation, bare calls). Consolidated `noPlaywrightSkippedTest` into this rule.
+
+- [#9101](https://github.com/biomejs/biome/pull/9101) [`0c0fb6f`](https://github.com/biomejs/biome/commit/0c0fb6fe1b5b2a935cf61101a7bc5323a979dce9) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [`#9080`](https://github.com/biomejs/biome/issues/9080): The `noUnusedVariables` rule no longer reports a top-level `Props` interface or type alias as unused in Astro files.
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`useExpect`](https://biomejs.dev/linter/rules/use-expect/). This rule ensures that test functions contain at least one `expect()` assertion.
+
+  ```js
+  // Invalid - test without assertion
+  test("no assertion", async ({ page }) => {
+    await page.goto("/");
+  });
+
+  // Valid - test with assertion
+  test("has assertion", async ({ page }) => {
+    await expect(page).toHaveTitle("Title");
+  });
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`usePlaywrightValidDescribeCallback`](https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback/). Validates that describe callback signatures are not async.
+
+  ```js
+  test.describe("suite", async () => {});
+  ```
+
 ## 2.4.1
 
 ### Patch Changes

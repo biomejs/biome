@@ -38,7 +38,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoPlaywrightNetworkidle {
-        version: "next",
+        version: "2.4.2",
         name: "noPlaywrightNetworkidle",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-networkidle").same()],
