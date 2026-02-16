@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: sync-no-await.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+page.locator('.my-element');
+page.getByRole('button');
+expect(1).toBe(1);
+
+
+```

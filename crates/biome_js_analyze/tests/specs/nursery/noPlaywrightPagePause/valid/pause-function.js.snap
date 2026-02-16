@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: pause-function.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+// This should be valid - pause() is a function, not page.pause()
+function pause() {
+    console.log('pausing');
+}
+
+pause();
+
+
+```

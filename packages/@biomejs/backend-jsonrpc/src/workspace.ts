@@ -1081,6 +1081,7 @@ export type RuleDomain =
 	| "project"
 	| "tailwind"
 	| "turborepo"
+	| "playwright"
 	| "types";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
@@ -2045,6 +2046,11 @@ See https://biomejs.dev/linter/rules/no-before-interactive-script-outside-docume
 	 */
 	noBeforeInteractiveScriptOutsideDocument?: NoBeforeInteractiveScriptOutsideDocumentConfiguration;
 	/**
+	* Disallow conditional expect() calls inside tests.
+See https://biomejs.dev/linter/rules/no-conditional-expect 
+	 */
+	noConditionalExpect?: NoConditionalExpectConfiguration;
+	/**
 	* Disallow continue statements.
 See https://biomejs.dev/linter/rules/no-continue 
 	 */
@@ -2180,6 +2186,56 @@ See https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion
 	 */
 	noParametersOnlyUsedInRecursion?: NoParametersOnlyUsedInRecursionConfiguration;
 	/**
+	* Disallow usage of element handles (page.$() and page.$$()).
+See https://biomejs.dev/linter/rules/no-playwright-element-handle 
+	 */
+	noPlaywrightElementHandle?: NoPlaywrightElementHandleConfiguration;
+	/**
+	* Disallow usage of page.$eval() and page.$$eval().
+See https://biomejs.dev/linter/rules/no-playwright-eval 
+	 */
+	noPlaywrightEval?: NoPlaywrightEvalConfiguration;
+	/**
+	* Disallow usage of the { force: true } option.
+See https://biomejs.dev/linter/rules/no-playwright-force-option 
+	 */
+	noPlaywrightForceOption?: NoPlaywrightForceOptionConfiguration;
+	/**
+	* Enforce Playwright async APIs to be awaited or returned.
+See https://biomejs.dev/linter/rules/no-playwright-missing-await 
+	 */
+	noPlaywrightMissingAwait?: NoPlaywrightMissingAwaitConfiguration;
+	/**
+	* Disallow usage of the networkidle option.
+See https://biomejs.dev/linter/rules/no-playwright-networkidle 
+	 */
+	noPlaywrightNetworkidle?: NoPlaywrightNetworkidleConfiguration;
+	/**
+	* Disallow using page.pause().
+See https://biomejs.dev/linter/rules/no-playwright-page-pause 
+	 */
+	noPlaywrightPagePause?: NoPlaywrightPagePauseConfiguration;
+	/**
+	* Disallow unnecessary await for Playwright methods that don't return promises.
+See https://biomejs.dev/linter/rules/no-playwright-useless-await 
+	 */
+	noPlaywrightUselessAwait?: NoPlaywrightUselessAwaitConfiguration;
+	/**
+	* Disallow using page.waitForNavigation().
+See https://biomejs.dev/linter/rules/no-playwright-wait-for-navigation 
+	 */
+	noPlaywrightWaitForNavigation?: NoPlaywrightWaitForNavigationConfiguration;
+	/**
+	* Disallow using page.waitForSelector().
+See https://biomejs.dev/linter/rules/no-playwright-wait-for-selector 
+	 */
+	noPlaywrightWaitForSelector?: NoPlaywrightWaitForSelectorConfiguration;
+	/**
+	* Disallow using page.waitForTimeout().
+See https://biomejs.dev/linter/rules/no-playwright-wait-for-timeout 
+	 */
+	noPlaywrightWaitForTimeout?: NoPlaywrightWaitForTimeoutConfiguration;
+	/**
 	* Disallow the use of the deprecated __proto__ object property.
 See https://biomejs.dev/linter/rules/no-proto 
 	 */
@@ -2299,6 +2355,11 @@ See https://biomejs.dev/linter/rules/use-exhaustive-switch-cases
 	 */
 	useExhaustiveSwitchCases?: UseExhaustiveSwitchCasesConfiguration;
 	/**
+	* Ensure that test functions contain at least one expect() assertion.
+See https://biomejs.dev/linter/rules/use-expect 
+	 */
+	useExpect?: UseExpectConfiguration;
+	/**
 	* Enforce types in functions, methods, variables, and parameters.
 See https://biomejs.dev/linter/rules/use-explicit-type 
 	 */
@@ -2333,6 +2394,11 @@ See https://biomejs.dev/linter/rules/use-lone-anonymous-operation
 See https://biomejs.dev/linter/rules/use-lone-executable-definition 
 	 */
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
+	/**
+	* Enforce valid describe() callback.
+See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
+	 */
+	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
 	/**
 	* Enforce RegExp#exec over String#match if no global flag is provided.
 See https://biomejs.dev/linter/rules/use-regexp-exec 
@@ -3967,6 +4033,9 @@ export type NoAmbiguousAnchorTextConfiguration =
 export type NoBeforeInteractiveScriptOutsideDocumentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions;
+export type NoConditionalExpectConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConditionalExpectOptions;
 export type NoContinueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoContinueOptions;
@@ -4048,6 +4117,36 @@ export type NoNestedPromisesConfiguration =
 export type NoParametersOnlyUsedInRecursionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoParametersOnlyUsedInRecursionOptions;
+export type NoPlaywrightElementHandleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightElementHandleOptions;
+export type NoPlaywrightEvalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightEvalOptions;
+export type NoPlaywrightForceOptionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightForceOptionOptions;
+export type NoPlaywrightMissingAwaitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightMissingAwaitOptions;
+export type NoPlaywrightNetworkidleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightNetworkidleOptions;
+export type NoPlaywrightPagePauseConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightPagePauseOptions;
+export type NoPlaywrightUselessAwaitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightUselessAwaitOptions;
+export type NoPlaywrightWaitForNavigationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightWaitForNavigationOptions;
+export type NoPlaywrightWaitForSelectorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightWaitForSelectorOptions;
+export type NoPlaywrightWaitForTimeoutConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightWaitForTimeoutOptions;
 export type NoProtoConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoProtoOptions;
@@ -4117,6 +4216,9 @@ export type UseErrorCauseConfiguration =
 export type UseExhaustiveSwitchCasesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExhaustiveSwitchCasesOptions;
+export type UseExpectConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExpectOptions;
 export type UseExplicitTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExplicitTypeOptions;
@@ -4138,6 +4240,9 @@ export type UseLoneAnonymousOperationConfiguration =
 export type UseLoneExecutableDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneExecutableDefinitionOptions;
+export type UsePlaywrightValidDescribeCallbackConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
 export type UseRegexpExecConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRegexpExecOptions;
@@ -5537,6 +5642,10 @@ export interface RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions {
 	level: RulePlainConfiguration;
 	options?: NoBeforeInteractiveScriptOutsideDocumentOptions;
 }
+export interface RuleWithNoConditionalExpectOptions {
+	level: RulePlainConfiguration;
+	options?: NoConditionalExpectOptions;
+}
 export interface RuleWithNoContinueOptions {
 	level: RulePlainConfiguration;
 	options?: NoContinueOptions;
@@ -5650,6 +5759,50 @@ export interface RuleWithNoParametersOnlyUsedInRecursionOptions {
 	level: RulePlainConfiguration;
 	options?: NoParametersOnlyUsedInRecursionOptions;
 }
+export interface RuleWithNoPlaywrightElementHandleOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightElementHandleOptions;
+}
+export interface RuleWithNoPlaywrightEvalOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightEvalOptions;
+}
+export interface RuleWithNoPlaywrightForceOptionOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightForceOptionOptions;
+}
+export interface RuleWithNoPlaywrightMissingAwaitOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightMissingAwaitOptions;
+}
+export interface RuleWithNoPlaywrightNetworkidleOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightNetworkidleOptions;
+}
+export interface RuleWithNoPlaywrightPagePauseOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightPagePauseOptions;
+}
+export interface RuleWithNoPlaywrightUselessAwaitOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightUselessAwaitOptions;
+}
+export interface RuleWithNoPlaywrightWaitForNavigationOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightWaitForNavigationOptions;
+}
+export interface RuleWithNoPlaywrightWaitForSelectorOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightWaitForSelectorOptions;
+}
+export interface RuleWithNoPlaywrightWaitForTimeoutOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightWaitForTimeoutOptions;
+}
 export interface RuleWithNoProtoOptions {
 	level: RulePlainConfiguration;
 	options?: NoProtoOptions;
@@ -5745,6 +5898,10 @@ export interface RuleWithUseExhaustiveSwitchCasesOptions {
 	level: RulePlainConfiguration;
 	options?: UseExhaustiveSwitchCasesOptions;
 }
+export interface RuleWithUseExpectOptions {
+	level: RulePlainConfiguration;
+	options?: UseExpectOptions;
+}
 export interface RuleWithUseExplicitTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseExplicitTypeOptions;
@@ -5772,6 +5929,10 @@ export interface RuleWithUseLoneAnonymousOperationOptions {
 export interface RuleWithUseLoneExecutableDefinitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneExecutableDefinitionOptions;
+}
+export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
+	level: RulePlainConfiguration;
+	options?: UsePlaywrightValidDescribeCallbackOptions;
 }
 export interface RuleWithUseRegexpExecOptions {
 	level: RulePlainConfiguration;
@@ -7068,6 +7229,7 @@ export interface NoAmbiguousAnchorTextOptions {
 	words?: string[];
 }
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
+export type NoConditionalExpectOptions = {};
 export type NoContinueOptions = {};
 export interface NoDeprecatedMediaTypeOptions {
 	/**
@@ -7119,6 +7281,16 @@ export type NoMultiAssignOptions = {};
 export type NoMultiStrOptions = {};
 export type NoNestedPromisesOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
+export type NoPlaywrightElementHandleOptions = {};
+export type NoPlaywrightEvalOptions = {};
+export type NoPlaywrightForceOptionOptions = {};
+export type NoPlaywrightMissingAwaitOptions = {};
+export type NoPlaywrightNetworkidleOptions = {};
+export type NoPlaywrightPagePauseOptions = {};
+export type NoPlaywrightUselessAwaitOptions = {};
+export type NoPlaywrightWaitForNavigationOptions = {};
+export type NoPlaywrightWaitForSelectorOptions = {};
+export type NoPlaywrightWaitForTimeoutOptions = {};
 export type NoProtoOptions = {};
 export type NoRedundantDefaultExportOptions = {};
 export type NoReturnAssignOptions = {};
@@ -7181,6 +7353,7 @@ export interface UseErrorCauseOptions {
 	requireCatchParameter?: boolean;
 }
 export type UseExhaustiveSwitchCasesOptions = {};
+export type UseExpectOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
@@ -7193,6 +7366,7 @@ export interface UseInputNameOptions {
 }
 export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
+export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseRegexpExecOptions = {};
 export interface UseRequiredScriptsOptions {
 	/**
@@ -8080,6 +8254,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
+	| "lint/nursery/useExpect"
 	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
@@ -8112,6 +8287,17 @@ export type Category =
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
+	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noPlaywrightElementHandle"
+	| "lint/nursery/noPlaywrightEval"
+	| "lint/nursery/noPlaywrightForceOption"
+	| "lint/nursery/noPlaywrightMissingAwait"
+	| "lint/nursery/noPlaywrightNetworkidle"
+	| "lint/nursery/noPlaywrightPagePause"
+	| "lint/nursery/noPlaywrightUselessAwait"
+	| "lint/nursery/noPlaywrightWaitForNavigation"
+	| "lint/nursery/noPlaywrightWaitForSelector"
+	| "lint/nursery/noPlaywrightWaitForTimeout"
 	| "lint/nursery/noProto"
 	| "lint/nursery/noRedundantDefaultExport"
 	| "lint/nursery/noReturnAssign"
@@ -8149,6 +8335,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
+	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"

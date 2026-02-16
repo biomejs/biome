@@ -915,16 +915,18 @@ impl AnyJsExpression {
 
     /// This function checks if a call expressions has one of the following members:
     ///
-    /// - `it.(only|skip|todo|fails|failing|concurrent|sequential)`
-    /// - `it.(only|skip|todo|fails|failing|concurrent|sequential).(only|skip|todo|fails|failing|concurrent|sequential)`
-    /// - `test.(only|skip|todo|fails|failing|concurrent|sequential)`
-    /// - `test.(only|skip|todo|fails|failing|concurrent|sequential).(only|skip|todo|fails|failing|concurrent|sequential)`
-    /// - `describe.(only|skip|todo|shuffle|concurrent|sequential)`
-    /// - `describe.(only|skip|todo|shuffle|concurrent|sequential).(only|skip|todo|shuffle|concurrent|sequential)`
+    /// - `it.(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
+    /// - `it.(only|skip|fixme|todo|fails|failing|concurrent|sequential).(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
+    /// - `test.(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
+    /// - `test.(only|skip|fixme|todo|fails|failing|concurrent|sequential).(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
+    /// - `describe.(only|skip|fixme|todo|shuffle|concurrent|sequential)`
+    /// - `describe.(only|skip|fixme|todo|shuffle|concurrent|sequential).(only|skip|fixme|todo|shuffle|concurrent|sequential)`
+    /// - `test.step`
+    /// - `test.step.(skip|fixme)`
     /// - `test.describe`
-    /// - `test.describe.(only|skip)`
+    /// - `test.describe.(only|skip|fixme)`
     /// - `test.describe.(parallel|serial)`
-    /// - `test.describe.(parallel|serial).only`
+    /// - `test.describe.(parallel|serial).(only|skip|fixme)`
     /// - `skip`
     /// - `xit`
     /// - `xdescribe`
@@ -961,11 +963,19 @@ impl AnyJsExpression {
         match first {
             Some("describe") => match second {
                 None => true,
-                Some("concurrent" | "sequential" | "only" | "skip" | "todo" | "shuffle") => {
+                Some(
+                    "concurrent" | "sequential" | "only" | "skip" | "fixme" | "todo" | "shuffle",
+                ) => {
                     matches!(
                         third,
                         None | Some(
-                            "concurrent" | "sequential" | "only" | "skip" | "todo" | "shuffle",
+                            "concurrent"
+                                | "sequential"
+                                | "only"
+                                | "skip"
+                                | "fixme"
+                                | "todo"
+                                | "shuffle",
                         )
                     )
                 }
@@ -973,9 +983,14 @@ impl AnyJsExpression {
             },
             Some("it" | "test") => match second {
                 None => true,
-                Some("step") => third.is_none(),
+                Some("step") => match third {
+                    None => true,
+                    Some("skip" | "fixme") => fourth.is_none(),
+                    _ => false,
+                },
                 Some(
-                    "concurrent" | "sequential" | "only" | "skip" | "todo" | "fails" | "failing",
+                    "concurrent" | "sequential" | "only" | "skip" | "fixme" | "todo" | "fails"
+                    | "failing",
                 ) => matches!(
                     third,
                     None | Some(
@@ -983,6 +998,7 @@ impl AnyJsExpression {
                             | "sequential"
                             | "only"
                             | "skip"
+                            | "fixme"
                             | "todo"
                             | "fails"
                             | "failing",
@@ -990,10 +1006,10 @@ impl AnyJsExpression {
                 ),
                 Some("describe") => match third {
                     None => true,
-                    Some("only" | "skip") => fourth.is_none(),
+                    Some("only" | "skip" | "fixme") => fourth.is_none(),
                     Some("parallel" | "serial") => match fourth {
                         None => true,
-                        Some("only") => fifth.is_none(),
+                        Some("only" | "skip" | "fixme") => fifth.is_none(),
                         _ => false,
                     },
                     _ => false,
@@ -1410,6 +1426,16 @@ impl Iterator for CalleeNamesIterator {
                 }
                 _ => None,
             },
+            JsComputedMemberExpression(member_expression) => {
+                let member = member_expression.member().ok()?;
+                if let AnyJsExpression::AnyJsLiteralExpression(lit) = &member
+                    && let Some(string_lit) = lit.as_js_string_literal_expression()
+                {
+                    self.next = member_expression.object().ok();
+                    return string_lit.inner_string_text().ok();
+                }
+                None
+            }
             _ => None,
         }
     }

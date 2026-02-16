@@ -178,6 +178,8 @@ pub enum RuleSource<'a> {
     EslintTurbo(&'a str),
     /// Rules from [html-eslint](https://html-eslint.org/)
     HtmlEslint(&'a str),
+    /// Rules from [Eslint Plugin Playwright](https://github.com/playwright-community/eslint-plugin-playwright)
+    EslintPlaywright(&'a str),
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -227,6 +229,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::Stylelint(_) => write!(f, "Stylelint"),
             Self::EslintTurbo(_) => write!(f, "eslint-plugin-turbo"),
             Self::HtmlEslint(_) => write!(f, "@html-eslint/eslint-plugin"),
+            Self::EslintPlaywright(_) => write!(f, "eslint-plugin-playwright"),
         }
     }
 }
@@ -264,29 +267,30 @@ impl<'a> RuleSource<'a> {
             Self::EslintPackageJson(_) => 14,
             Self::EslintPackageJsonDependencies(_) => 15,
             Self::EslintPerfectionist(_) => 16,
-            Self::EslintPromise(_) => 17,
-            Self::EslintQwik(_) => 18,
-            Self::EslintReact(_) => 19,
-            Self::EslintReactHooks(_) => 20,
-            Self::EslintReactPreferFunctionComponent(_) => 21,
-            Self::EslintReactRefresh(_) => 22,
-            Self::EslintReactX(_) => 23,
-            Self::EslintReactXyz(_) => 24,
-            Self::EslintRegexp(_) => 25,
-            Self::EslintSolid(_) => 26,
-            Self::EslintSonarJs(_) => 27,
-            Self::EslintStylistic(_) => 28,
-            Self::EslintTypeScript(_) => 29,
-            Self::EslintUnicorn(_) => 30,
-            Self::EslintUnusedImports(_) => 31,
-            Self::EslintVitest(_) => 32,
-            Self::EslintVueJs(_) => 33,
-            Self::GraphqlSchemaLinter(_) => 34,
-            Self::Stylelint(_) => 35,
-            Self::EslintTurbo(_) => 36,
-            Self::HtmlEslint(_) => 37,
-            Self::EslintE18e(_) => 37,
-            Self::EslintBetterTailwindcss(_) => 38,
+            Self::EslintPlaywright(_) => 17,
+            Self::EslintPromise(_) => 18,
+            Self::EslintQwik(_) => 19,
+            Self::EslintReact(_) => 20,
+            Self::EslintReactHooks(_) => 21,
+            Self::EslintReactPreferFunctionComponent(_) => 22,
+            Self::EslintReactRefresh(_) => 23,
+            Self::EslintReactX(_) => 24,
+            Self::EslintReactXyz(_) => 25,
+            Self::EslintRegexp(_) => 26,
+            Self::EslintSolid(_) => 27,
+            Self::EslintSonarJs(_) => 28,
+            Self::EslintStylistic(_) => 29,
+            Self::EslintTypeScript(_) => 30,
+            Self::EslintUnicorn(_) => 31,
+            Self::EslintUnusedImports(_) => 32,
+            Self::EslintVitest(_) => 33,
+            Self::EslintVueJs(_) => 34,
+            Self::GraphqlSchemaLinter(_) => 35,
+            Self::Stylelint(_) => 36,
+            Self::EslintTurbo(_) => 37,
+            Self::HtmlEslint(_) => 38,
+            Self::EslintE18e(_) => 38,
+            Self::EslintBetterTailwindcss(_) => 39,
         }
     }
 
@@ -345,7 +349,8 @@ impl<'a> RuleSource<'a> {
             | Self::GraphqlSchemaLinter(rule_name)
             | Self::Stylelint(rule_name)
             | Self::EslintTurbo(rule_name)
-            | Self::HtmlEslint(rule_name) => rule_name,
+            | Self::HtmlEslint(rule_name)
+            | Self::EslintPlaywright(rule_name) => rule_name,
         }
     }
 
@@ -389,6 +394,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintVueJs(_) => "vue",
             Self::EslintTurbo(_) => "turbo",
             Self::HtmlEslint(_) => "@html-eslint",
+            Self::EslintPlaywright(_) => "playwright",
             Self::EslintE18e(_) => "e18e",
             Self::EslintBetterTailwindcss(_) => "better-tailwindcss",
         }
@@ -444,6 +450,7 @@ impl<'a> RuleSource<'a> {
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
             Self::EslintTurbo(rule_name) => format!("https://github.com/vercel/turborepo/blob/main/packages/eslint-plugin-turbo/docs/rules/{rule_name}.md"),
             Self::HtmlEslint(rule_name) => format!("https://html-eslint.org/docs/rules/{rule_name}"),
+            Self::EslintPlaywright(rule_name) => format!("https://github.com/playwright-community/eslint-plugin-playwright/blob/main/docs/rules/{rule_name}.md"),
         }
     }
 
@@ -549,6 +556,8 @@ pub enum RuleDomain {
     Tailwind,
     /// Turborepo build system rules
     Turborepo,
+    /// Playwright testing framework rules
+    Playwright,
     /// Rules that require type inference
     Types,
 }
@@ -566,6 +575,7 @@ impl Display for RuleDomain {
             Self::Project => fmt.write_str("project"),
             Self::Tailwind => fmt.write_str("tailwind"),
             Self::Turborepo => fmt.write_str("turborepo"),
+            Self::Playwright => fmt.write_str("playwright"),
             Self::Types => fmt.write_str("types"),
         }
     }
@@ -607,6 +617,7 @@ impl RuleDomain {
             Self::Project => &[],
             Self::Tailwind => &[&("tailwindcss", ">=3.0.0")],
             Self::Turborepo => &[&("turbo", ">=1.0.0")],
+            Self::Playwright => &[&("@playwright/test", ">=1.0.0")],
             Self::Types => &[],
         }
     }
@@ -634,6 +645,7 @@ impl RuleDomain {
             Self::Project => &[],
             Self::Tailwind => &[],
             Self::Turborepo => &[],
+            Self::Playwright => &["test", "expect"],
             Self::Types => &[],
         }
     }
@@ -649,6 +661,7 @@ impl RuleDomain {
             Self::Project => "project",
             Self::Tailwind => "tailwind",
             Self::Turborepo => "turborepo",
+            Self::Playwright => "playwright",
             Self::Types => "types",
         }
     }
@@ -668,8 +681,8 @@ impl FromStr for RuleDomain {
             "project" => Ok(Self::Project),
             "tailwind" => Ok(Self::Tailwind),
             "turborepo" => Ok(Self::Turborepo),
+            "playwright" => Ok(Self::Playwright),
             "types" => Ok(Self::Types),
-
             _ => Err("Invalid rule domain"),
         }
     }
