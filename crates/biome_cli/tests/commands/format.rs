@@ -4034,3 +4034,23 @@ fn trailing_newline_html_via_cli() {
         result,
     ));
 }
+
+#[test]
+fn harness_scss() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("format.scss");
+    fs.insert(file_path.into(), "$fff".as_bytes());
+
+    let (_, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", file_path.as_str()].as_slice()),
+    );
+
+    assert!(
+        result.is_err(),
+        "This test will fail once SCSS support is officially dadded"
+    );
+}
