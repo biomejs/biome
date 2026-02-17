@@ -214,10 +214,6 @@ pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
 }
 
 /// Determines if the current position in the CSS parser is at the start of any CSS expression.
-///
-/// This function checks whether the parser's current position is at the beginning of
-/// either a parenthesized expression or any CSS value. It's a preliminary check used
-/// to decide if parsing should proceed for a general CSS expression.
 #[inline]
 pub(crate) fn is_at_any_expression(p: &mut CssParser) -> bool {
     is_at_unary_operator(p)
@@ -227,25 +223,13 @@ pub(crate) fn is_at_any_expression(p: &mut CssParser) -> bool {
 }
 
 /// Parses any CSS expression from the current position in the CSS parser.
-///
-/// Depending on the current position, it either parses a parenthesized expression
-/// or a list of component values. If a binary operator is encountered after parsing
-/// the expression, it continues to parse as a binary expression.
 #[inline]
 pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_any_expression(p) {
         return Absent;
     }
 
-    let param = if is_at_unary_operator(p) {
-        parse_unary_expression(p)
-    } else if is_at_parenthesized(p) {
-        parse_parenthesized_expression(p)
-    } else if is_at_comma_separated_value(p) {
-        parse_comma_separated_value(p)
-    } else {
-        parse_list_of_component_values_expression(p)
-    };
+    let param = parse_unary_expression_operand(p);
 
     if is_at_binary_operator(p) {
         let binary_expression = param.precede(p);
