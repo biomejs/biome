@@ -56,6 +56,8 @@ invalid-multiple-ref-types.vue:5:1 lint/nursery/noVueRefAsOperand ━━━━�
     6 │ cntcnt++
     7 │ 
   
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
   i Use `.value` to access ref value.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -74,6 +76,8 @@ invalid-multiple-ref-types.vue:6:1 lint/nursery/noVueRefAsOperand ━━━━�
       │ ^^^^^^
     7 │ 
     8 │ const state = { foo: 1 }
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   
   i Use `.value` to access ref value.
   
@@ -94,6 +98,8 @@ invalid-multiple-ref-types.vue:18:13 lint/nursery/noVueRefAsOperand ━━━━
     19 │ const { foo2 } = toRefs(state2)
     20 │ console.log(`${foo2}`)
   
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
   i Use `.value` to access ref value.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -112,6 +118,8 @@ invalid-multiple-ref-types.vue:20:16 lint/nursery/noVueRefAsOperand ━━━━
        │                ^^^^
     21 │ 
     22 │ const cref = customRef((track, trigger) => {
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   
   i Use `.value` to access ref value.
   
@@ -132,6 +140,8 @@ invalid-multiple-ref-types.vue:33:16 lint/nursery/noVueRefAsOperand ━━━━
     34 │ 
     35 │ const foo = shallowRef({});
   
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
   i Use `.value` to access ref value.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -148,6 +158,8 @@ invalid-multiple-ref-types.vue:36:11 lint/nursery/noVueRefAsOperand ━━━━
   > 36 │ const n = foo + 1
        │           ^^^
     37 │ 
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   
   i Use `.value` to access ref value.
   

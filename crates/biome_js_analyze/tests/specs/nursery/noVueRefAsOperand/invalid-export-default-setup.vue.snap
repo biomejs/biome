@@ -30,6 +30,8 @@ invalid-export-default-setup.vue:5:5 lint/nursery/noVueRefAsOperand ━━━━
     6 │     console.log(count + 1) // error
     7 │     console.log(1 + count) // error
   
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
   i Use `.value` to access ref value.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -49,6 +51,8 @@ invalid-export-default-setup.vue:6:17 lint/nursery/noVueRefAsOperand ━━━�
     7 │     console.log(1 + count) // error
     8 │     return { count }
   
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
   i Use `.value` to access ref value.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -67,6 +71,8 @@ invalid-export-default-setup.vue:7:21 lint/nursery/noVueRefAsOperand ━━━�
       │                     ^^^^^
     8 │     return { count }
     9 │   }
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   
   i Use `.value` to access ref value.
   

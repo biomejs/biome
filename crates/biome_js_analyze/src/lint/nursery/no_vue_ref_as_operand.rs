@@ -96,17 +96,13 @@ declare_lint_rule! {
     }
 }
 
-pub struct RuleState {
-    range: TextRange,
-}
-
 declare_node_union! {
     pub NoVueRefAsOperandQuery = JsIdentifierExpression | JsIdentifierAssignment
 }
 
 impl Rule for NoVueRefAsOperand {
     type Query = Semantic<NoVueRefAsOperandQuery>;
-    type State = RuleState;
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = NoVueRefAsOperandOptions;
 
@@ -120,11 +116,14 @@ impl Rule for NoVueRefAsOperand {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state.range,
+                state,
                 markup! {
                     "Ref value is accessed without "<Emphasis>"`.value`"</Emphasis>"."
                 },
             )
+            .note(markup! {
+                "Without "<Emphasis>"`.value`"</Emphasis>", Vue cannot track changes to the ref, which may break reactivity."
+            })
             .note(markup! {
                 "Use "<Emphasis>"`.value`"</Emphasis>" to access ref value."
             }),
@@ -132,7 +131,7 @@ impl Rule for NoVueRefAsOperand {
     }
 }
 
-fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Option<RuleState> {
+fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Option<TextRange> {
     match expr {
         NoVueRefAsOperandQuery::JsIdentifierExpression(ident_expr) => {
             let reference = ident_expr.name().ok()?;
@@ -164,7 +163,7 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
                     JsSyntaxKind::JS_BINARY_EXPRESSION |
                     // bar+=refValue, bar-=refValue
                     JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
-                        return Some(RuleState { range: ident_expr.range() })
+                        return Some(ident_expr.range())
                     }
                     // refValue || other, refValue && other. ignore: other || refValue
                     JsSyntaxKind::JS_LOGICAL_EXPRESSION => {
@@ -179,7 +178,7 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
                         // Report only refs which are constants
                         if let Some(declaration) = declarator.syntax().ancestors().find_map(JsVariableDeclaration::cast)
                         && (declaration.is_const()) {
-                            return Some(RuleState { range: ident_expr.range() })
+                            return Some(ident_expr.range())
                         }
                     }
                     // refValue ? x : y
@@ -192,7 +191,7 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
                             return None
                         }
 
-                        return Some(RuleState { range: ident_expr.range() })
+                        return Some(ident_expr.range())
                     }
                     // `${refValue}`
                     JsSyntaxKind::JS_TEMPLATE_ELEMENT => {
@@ -204,7 +203,7 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
                             return None
                         }
 
-                        return Some(RuleState { range: ident_expr.range() })
+                        return Some(ident_expr.range())
                     }
                     // refValue.x
                     JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION => {
@@ -221,7 +220,7 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
                             && let Ok(callee) = call_expr.callee()
                             && (is_emit_call_in_setup(&callee, model) || is_emit_call_by_macro(&callee, model))
                         {
-                            return Some(RuleState { range: ident_expr.range() });
+                            return Some(ident_expr.range());
                         }
                     }
                     _ => {}
@@ -246,7 +245,7 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
                 return None;
             }
 
-            Some(RuleState { range: ident_assignment.range() })
+            Some(ident_assignment.range())
         }
     }
 }
@@ -301,7 +300,7 @@ fn check_static_member_access(
     ident_binding: &JsIdentifierBinding,
     static_member_expr: &AnyJsStaticMemberLike,
     ref_call_expr: &JsCallExpression,
-) -> Option<RuleState> {
+) -> Option<TextRange> {
     let member = match static_member_expr {
         AnyJsStaticMemberLike::JsStaticMemberExpression(expr) => expr.member().ok()?,
         AnyJsStaticMemberLike::JsStaticMemberAssignment(assignment) => assignment.member().ok()?,
@@ -313,11 +312,11 @@ fn check_static_member_access(
         if is_valid_static_member_wrapped_in_to_refs(ident_binding, &member) {
             return None
         }
-        return Some(RuleState { range: static_member_expr.range() })
+        return Some(static_member_expr.range())
     }
 
     if !is_valid_static_member(&member) {
-        return Some(RuleState { range: ident_expr.range() })
+        return Some(ident_expr.range())
     }
 
     None
