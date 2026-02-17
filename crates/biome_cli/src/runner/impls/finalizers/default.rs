@@ -73,43 +73,43 @@ impl Finalizer for DefaultFinalizer {
 
         if !cli_options.cli_reporter.is_empty() {
             for cli_reporter in &cli_options.cli_reporter {
-                print_to_reporter(
+                print_to_reporter(PrintToReporter {
                     cli_reporter,
                     cli_options,
-                    &diagnostics_payload,
+                    diagnostics_payload: &diagnostics_payload,
                     summary,
-                    evaluated_paths.clone(),
-                    &mut file_reporter_writer,
+                    evaluated_paths: evaluated_paths.clone(),
+                    file_reporter_writer: &mut file_reporter_writer,
                     console,
                     fs,
                     execution,
-                )?;
+                })?;
             }
         } else {
             if let Some(reporter) = execution.environment_to_reporter() {
                 let contains_current_reporter = cli_options
                     .cli_reporter
                     .iter()
-                    .any(|r| &r.kind == &reporter.kind);
+                    .any(|r| r.kind == reporter.kind);
 
                 if !contains_current_reporter {
-                    print_to_reporter(
-                        &reporter,
+                    print_to_reporter(PrintToReporter {
+                        cli_reporter: &reporter,
                         cli_options,
-                        &diagnostics_payload,
+                        diagnostics_payload: &diagnostics_payload,
                         summary,
-                        evaluated_paths.clone(),
-                        &mut file_reporter_writer,
+                        evaluated_paths: evaluated_paths.clone(),
+                        file_reporter_writer: &mut file_reporter_writer,
                         console,
                         fs,
                         execution,
-                    )?;
+                    })?;
                 }
             }
             let mut console_reporter_writer = ConsoleReporterWriter(console);
             let reporter = ConsoleReporter {
                 summary,
-                diagnostics_payload,
+                diagnostics_payload: &diagnostics_payload,
                 execution,
                 verbose: cli_options.verbose,
                 working_directory: fs.working_directory().clone(),
@@ -151,17 +151,31 @@ impl Finalizer for () {
     }
 }
 
-fn print_to_reporter<'a, 'b>(
+struct PrintToReporter<'a> {
     cli_reporter: &'a CliReporter,
     cli_options: &'a CliOptions,
     diagnostics_payload: &'a DiagnosticsPayload,
     summary: TraversalSummary,
     evaluated_paths: BTreeSet<BiomePath>,
-    file_reporter_writer: &'b mut FileReporterWriter,
+    file_reporter_writer: &'a mut FileReporterWriter,
     console: &'a mut dyn Console,
     fs: &'a dyn FileSystem,
     execution: &'a dyn Execution,
-) -> Result<(), CliDiagnostic> {
+}
+
+fn print_to_reporter(params: PrintToReporter) -> Result<(), CliDiagnostic> {
+    let PrintToReporter {
+        cli_reporter,
+        cli_options,
+        diagnostics_payload,
+        summary,
+        evaluated_paths,
+        file_reporter_writer,
+        console,
+        fs,
+        execution,
+    } = params;
+
     let mut console_reporter_writer = ConsoleReporterWriter(console);
     match cli_reporter.kind {
         CliReporterKind::Default => {
