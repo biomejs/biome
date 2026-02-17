@@ -1,8 +1,9 @@
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
+    VisitorFinishContext,
 };
-use biome_js_semantic::SemanticModel;
+use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_rowan::AstNode;
 
@@ -47,7 +48,8 @@ impl Queryable for SemanticServices {
     type Language = JsLanguage;
     type Services = Self;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _root: &AnyJsRoot) {
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
         analyzer.add_visitor(Phases::Semantic, || SemanticModelVisitor);
     }
 
@@ -73,7 +75,8 @@ where
     type Language = JsLanguage;
     type Services = SemanticServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _root: &AnyJsRoot) {
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
@@ -85,13 +88,57 @@ where
         N::unwrap_cast(node.clone())
     }
 }
+pub struct SemanticModelBuilderVisitor {
+    extractor: SemanticEventExtractor,
+    builder: SemanticModelBuilder,
+}
+
+impl SemanticModelBuilderVisitor {
+    pub(crate) fn new(root: &AnyJsRoot) -> Self {
+        Self {
+            extractor: SemanticEventExtractor::default(),
+            builder: SemanticModelBuilder::new(root.clone()),
+        }
+    }
+}
+
+impl Visitor for SemanticModelBuilderVisitor {
+    type Language = JsLanguage;
+
+    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, _ctx: VisitorContext<JsLanguage>) {
+        match event {
+            WalkEvent::Enter(node) => {
+                self.builder.push_node(node);
+                self.extractor.enter(node);
+            }
+            WalkEvent::Leave(node) => {
+                self.extractor.leave(node);
+            }
+        }
+
+        while let Some(e) = self.extractor.pop() {
+            self.builder.push_event(e);
+        }
+    }
+
+    fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
+        // If a pre-built SemanticModel was already inserted (e.g. by the workspace
+        // open_file/change_file cycle), skip building a new one.
+        if ctx.services.get_service::<SemanticModel>().is_some() {
+            return;
+        }
+        let model = self.builder.build();
+        ctx.services.insert_service(model);
+    }
+}
+
 pub struct SemanticModelVisitor;
 
-pub struct SemanticModelEvent(AnyJsRoot);
+pub struct SemanticModelEvent(TextRange);
 
 impl QueryMatch for SemanticModelEvent {
     fn text_range(&self) -> TextRange {
-        self.0.syntax().text_range_with_trivia()
+        self.0
     }
 }
 
@@ -101,15 +148,16 @@ impl Visitor for SemanticModelVisitor {
     fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<JsLanguage>) {
         let root = match event {
             WalkEvent::Enter(node) => {
-                let Some(node) = AnyJsRoot::cast_ref(node) else {
+                if node.parent().is_some() {
                     return;
-                };
+                }
 
                 node
             }
             WalkEvent::Leave(_) => return,
         };
 
-        ctx.match_query(SemanticModelEvent(root.clone()));
+        let text_range = root.text_range_with_trivia();
+        ctx.match_query(SemanticModelEvent(text_range));
     }
 }

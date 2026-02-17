@@ -14,7 +14,7 @@ use biome_analyze::{
 };
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
-use biome_js_semantic::{SemanticModel, SemanticModelOptions, semantic_model};
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage};
 use biome_module_graph::{ModuleGraph, ModuleResolver};
 use biome_package::TurboJson;
@@ -105,14 +105,14 @@ impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
 }
 
 impl From<&AnyJsRoot> for JsAnalyzerServices {
-    fn from(value: &AnyJsRoot) -> Self {
+    fn from(_value: &AnyJsRoot) -> Self {
         Self {
             module_graph: Arc::new(ModuleGraph::default()),
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
             embedded_bindings: Default::default(),
             embedded_value_references: Default::default(),
-            semantic_model: Some(semantic_model(value, SemanticModelOptions::default())),
+            semantic_model: None,
         }
     }
 }
@@ -240,11 +240,10 @@ where
     services.insert_service(project_layout);
     services.insert_service(EmbeddedBindings(embedded_bindings));
     services.insert_service(EmbeddedValueReferences(embedded_value_references));
+    // If a pre-built model is available (workspace open_file/change_file path),
+    // insert it now. Otherwise, SemanticModelBuilderVisitor will build it
+    // interleaved with the analyzer's syntax-phase traversal (single pass).
     if let Some(semantic_model) = semantic_model {
-        services.insert_service(semantic_model);
-    } else {
-        let semantic_model =
-            biome_js_semantic::semantic_model(root, SemanticModelOptions::default());
         services.insert_service(semantic_model);
     }
 
