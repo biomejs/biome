@@ -30,6 +30,18 @@ pub fn astro_client_directive(
         ],
     ))
 }
+pub fn astro_define_directive(
+    define_token: SyntaxToken,
+    value: AstroDirectiveValue,
+) -> AstroDefineDirective {
+    AstroDefineDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_DEFINE_DIRECTIVE,
+        [
+            Some(SyntaxElement::Token(define_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn astro_directive_value(
     colon_token_token: SyntaxToken,
     name: HtmlAttributeName,

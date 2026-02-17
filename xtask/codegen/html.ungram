@@ -713,6 +713,7 @@ AnyAstroDirective =
 	| AstroClassDirective
 	| AstroIsDirective
 	| AstroServerDirective
+	| AstroDefineDirective
 
 // <Component client:load />
 //            ^^^^^^^^^^^^
@@ -742,6 +743,12 @@ AstroIsDirective =
 //            ^^^^^^^^^^^^^
 AstroServerDirective =
 	'server'
+	value: AstroDirectiveValue
+
+// <Component define:vars={vars} />
+//            ^^^^^^^^^^^^^^^^^^
+AstroDefineDirective =
+	'define'
 	value: AstroDirectiveValue
 
 // <Component client:load />

@@ -2,6 +2,7 @@
 
 pub(crate) mod class_directive;
 pub(crate) mod client_directive;
+pub(crate) mod define_directive;
 pub(crate) mod embedded_content;
 pub(crate) mod frontmatter_element;
 pub(crate) mod is_directive;

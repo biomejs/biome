@@ -4,9 +4,9 @@ use crate::syntax::parse_error::{expected_closed_fence, expected_expression};
 use crate::syntax::{TextExpression, parse_attribute_initializer, parse_single_text_expression};
 use crate::token_source::{HtmlLexContext, HtmlReLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{
-    ASTRO_CLASS_DIRECTIVE, ASTRO_CLIENT_DIRECTIVE, ASTRO_DIRECTIVE_VALUE, ASTRO_EMBEDDED_CONTENT,
-    ASTRO_FRONTMATTER_ELEMENT, ASTRO_IS_DIRECTIVE, ASTRO_SERVER_DIRECTIVE, ASTRO_SET_DIRECTIVE,
-    FENCE, HTML_ATTRIBUTE_NAME, HTML_LITERAL, HTML_SPREAD_ATTRIBUTE,
+    ASTRO_CLASS_DIRECTIVE, ASTRO_CLIENT_DIRECTIVE, ASTRO_DEFINE_DIRECTIVE, ASTRO_DIRECTIVE_VALUE,
+    ASTRO_EMBEDDED_CONTENT, ASTRO_FRONTMATTER_ELEMENT, ASTRO_IS_DIRECTIVE, ASTRO_SERVER_DIRECTIVE,
+    ASTRO_SET_DIRECTIVE, FENCE, HTML_ATTRIBUTE_NAME, HTML_LITERAL, HTML_SPREAD_ATTRIBUTE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
@@ -81,7 +81,7 @@ pub(crate) fn parse_astro_spread_or_expression(p: &mut HtmlParser) -> ParsedSynt
 // #region Directive parsing functions
 
 /// Astro directive keywords
-const ASTRO_DIRECTIVE_KEYWORDS: &[&str] = &["client", "set", "class", "is", "server"];
+const ASTRO_DIRECTIVE_KEYWORDS: &[&str] = &["client", "set", "class", "is", "server", "define"];
 
 /// Check if the current position is at an Astro directive.
 /// In the InsideTagAstro context, the colon is a separate token.
@@ -103,7 +103,7 @@ pub(crate) fn is_at_astro_directive_start(p: &mut HtmlParser) -> bool {
 
     let first_is_directive = matches!(
         first_token,
-        T![client] | T![set] | T![class] | T![is] | T![server]
+        T![client] | T![set] | T![class] | T![is] | T![server] | T![define]
     ) || ASTRO_DIRECTIVE_KEYWORDS.contains(&first_text.as_str());
 
     first_is_directive && second_token == T![:]
@@ -123,6 +123,7 @@ pub(crate) fn parse_astro_directive(p: &mut HtmlParser) -> ParsedSyntax {
             "class" => ASTRO_CLASS_DIRECTIVE,
             "is" => ASTRO_IS_DIRECTIVE,
             "server" => ASTRO_SERVER_DIRECTIVE,
+            "define" => ASTRO_DEFINE_DIRECTIVE,
             _ => return Absent,
         }
     } else {
@@ -132,6 +133,7 @@ pub(crate) fn parse_astro_directive(p: &mut HtmlParser) -> ParsedSyntax {
             T![class] => ASTRO_CLASS_DIRECTIVE,
             T![is] => ASTRO_IS_DIRECTIVE,
             T![server] => ASTRO_SERVER_DIRECTIVE,
+            T![define] => ASTRO_DEFINE_DIRECTIVE,
             _ => return Absent,
         }
     };

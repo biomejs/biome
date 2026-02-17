@@ -11,6 +11,7 @@ expression: snapshot
   class:list={classes}
   set:text={text}
   is:raw
+  define:vars={vars}
   server:defer
 />
 
@@ -89,38 +90,57 @@ HtmlRoot {
                         initializer: missing (optional),
                     },
                 },
-                AstroServerDirective {
-                    server_token: SERVER_KW@74..83 "server" [Newline("\n"), Whitespace("  ")] [],
+                AstroDefineDirective {
+                    define_token: DEFINE_KW@74..83 "define" [Newline("\n"), Whitespace("  ")] [],
                     value: AstroDirectiveValue {
                         colon_token_token: COLON@83..84 ":" [] [],
                         name: HtmlAttributeName {
-                            value_token: HTML_LITERAL@84..89 "defer" [] [],
+                            value_token: HTML_LITERAL@84..88 "vars" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@88..89 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@89..90 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@90..94 "vars" [] [],
+                                },
+                                r_curly_token: R_CURLY@94..95 "}" [] [],
+                            },
+                        },
+                    },
+                },
+                AstroServerDirective {
+                    server_token: SERVER_KW@95..104 "server" [Newline("\n"), Whitespace("  ")] [],
+                    value: AstroDirectiveValue {
+                        colon_token_token: COLON@104..105 ":" [] [],
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@105..110 "defer" [] [],
                         },
                         initializer: missing (optional),
                     },
                 },
             ],
-            slash_token: SLASH@89..91 "/" [Newline("\n")] [],
-            r_angle_token: R_ANGLE@91..92 ">" [] [],
+            slash_token: SLASH@110..112 "/" [Newline("\n")] [],
+            r_angle_token: R_ANGLE@112..113 ">" [] [],
         },
     ],
-    eof_token: EOF@92..93 "" [Newline("\n")] [],
+    eof_token: EOF@113..114 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..93
+0: HTML_ROOT@0..114
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..92
-    0: HTML_SELF_CLOSING_ELEMENT@0..92
+  3: HTML_ELEMENT_LIST@0..113
+    0: HTML_SELF_CLOSING_ELEMENT@0..113
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_COMPONENT_NAME@1..10
         0: HTML_LITERAL@1..10 "Component" [] []
-      2: HTML_ATTRIBUTE_LIST@10..89
+      2: HTML_ATTRIBUTE_LIST@10..110
         0: ASTRO_CLIENT_DIRECTIVE@10..24
           0: CLIENT_KW@10..19 "client" [Newline("\n"), Whitespace("  ")] []
           1: ASTRO_DIRECTIVE_VALUE@19..24
@@ -161,15 +181,28 @@ HtmlRoot {
             1: HTML_ATTRIBUTE_NAME@71..74
               0: HTML_LITERAL@71..74 "raw" [] []
             2: (empty)
-        4: ASTRO_SERVER_DIRECTIVE@74..89
-          0: SERVER_KW@74..83 "server" [Newline("\n"), Whitespace("  ")] []
-          1: ASTRO_DIRECTIVE_VALUE@83..89
+        4: ASTRO_DEFINE_DIRECTIVE@74..95
+          0: DEFINE_KW@74..83 "define" [Newline("\n"), Whitespace("  ")] []
+          1: ASTRO_DIRECTIVE_VALUE@83..95
             0: COLON@83..84 ":" [] []
-            1: HTML_ATTRIBUTE_NAME@84..89
-              0: HTML_LITERAL@84..89 "defer" [] []
+            1: HTML_ATTRIBUTE_NAME@84..88
+              0: HTML_LITERAL@84..88 "vars" [] []
+            2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@88..95
+              0: EQ@88..89 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@89..95
+                0: L_CURLY@89..90 "{" [] []
+                1: HTML_TEXT_EXPRESSION@90..94
+                  0: HTML_LITERAL@90..94 "vars" [] []
+                2: R_CURLY@94..95 "}" [] []
+        5: ASTRO_SERVER_DIRECTIVE@95..110
+          0: SERVER_KW@95..104 "server" [Newline("\n"), Whitespace("  ")] []
+          1: ASTRO_DIRECTIVE_VALUE@104..110
+            0: COLON@104..105 ":" [] []
+            1: HTML_ATTRIBUTE_NAME@105..110
+              0: HTML_LITERAL@105..110 "defer" [] []
             2: (empty)
-      3: SLASH@89..91 "/" [Newline("\n")] []
-      4: R_ANGLE@91..92 ">" [] []
-  4: EOF@92..93 "" [Newline("\n")] []
+      3: SLASH@110..112 "/" [Newline("\n")] []
+      4: R_ANGLE@112..113 ">" [] []
+  4: EOF@113..114 "" [Newline("\n")] []
 
 ```

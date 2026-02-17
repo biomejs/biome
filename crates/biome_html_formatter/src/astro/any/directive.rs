@@ -10,6 +10,7 @@ impl FormatRule<AnyAstroDirective> for FormatAnyAstroDirective {
         match node {
             AnyAstroDirective::AstroClassDirective(node) => node.format().fmt(f),
             AnyAstroDirective::AstroClientDirective(node) => node.format().fmt(f),
+            AnyAstroDirective::AstroDefineDirective(node) => node.format().fmt(f),
             AnyAstroDirective::AstroIsDirective(node) => node.format().fmt(f),
             AnyAstroDirective::AstroServerDirective(node) => node.format().fmt(f),
             AnyAstroDirective::AstroSetDirective(node) => node.format().fmt(f),

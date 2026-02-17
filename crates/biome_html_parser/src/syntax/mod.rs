@@ -506,7 +506,8 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
                     T![set],
                     T![class],
                     T![is],
-                    T![server]
+                    T![server],
+                    T![define]
                 ])
             {
                 let name = p.start();
@@ -539,7 +540,8 @@ fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
                 T![set],
                 T![class],
                 T![is],
-                T![server]
+                T![server],
+                T![define]
             ]))
 }
 

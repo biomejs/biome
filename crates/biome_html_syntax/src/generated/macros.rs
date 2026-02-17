@@ -24,6 +24,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AstroClientDirective::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::ASTRO_DEFINE_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::AstroDefineDirective::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ASTRO_DIRECTIVE_VALUE => {
                     let $pattern = unsafe { $crate::AstroDirectiveValue::new_unchecked(node) };
                     $body

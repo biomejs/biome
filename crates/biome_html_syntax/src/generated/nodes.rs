@@ -100,6 +100,46 @@ pub struct AstroClientDirectiveFields {
     pub value: SyntaxResult<AstroDirectiveValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroDefineDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroDefineDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroDefineDirectiveFields {
+        AstroDefineDirectiveFields {
+            define_token: self.define_token(),
+            value: self.value(),
+        }
+    }
+    pub fn define_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AstroDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AstroDefineDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroDefineDirectiveFields {
+    pub define_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AstroDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AstroDirectiveValue {
     pub(crate) syntax: SyntaxNode,
 }
@@ -3738,6 +3778,7 @@ pub struct VueVSlotShorthandDirectiveFields {
 pub enum AnyAstroDirective {
     AstroClassDirective(AstroClassDirective),
     AstroClientDirective(AstroClientDirective),
+    AstroDefineDirective(AstroDefineDirective),
     AstroIsDirective(AstroIsDirective),
     AstroServerDirective(AstroServerDirective),
     AstroSetDirective(AstroSetDirective),
@@ -3752,6 +3793,12 @@ impl AnyAstroDirective {
     pub fn as_astro_client_directive(&self) -> Option<&AstroClientDirective> {
         match &self {
             Self::AstroClientDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_astro_define_directive(&self) -> Option<&AstroDefineDirective> {
+        match &self {
+            Self::AstroDefineDirective(item) => Some(item),
             _ => None,
         }
     }
@@ -4466,6 +4513,57 @@ impl From<AstroClientDirective> for SyntaxNode {
 }
 impl From<AstroClientDirective> for SyntaxElement {
     fn from(n: AstroClientDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AstroDefineDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_DEFINE_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_DEFINE_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroDefineDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroDefineDirective")
+                .field(
+                    "define_token",
+                    &support::DebugSyntaxResult(self.define_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("AstroDefineDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroDefineDirective> for SyntaxNode {
+    fn from(n: AstroDefineDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroDefineDirective> for SyntaxElement {
+    fn from(n: AstroDefineDirective) -> Self {
         n.syntax.into()
     }
 }
@@ -8851,6 +8949,11 @@ impl From<AstroClientDirective> for AnyAstroDirective {
         Self::AstroClientDirective(node)
     }
 }
+impl From<AstroDefineDirective> for AnyAstroDirective {
+    fn from(node: AstroDefineDirective) -> Self {
+        Self::AstroDefineDirective(node)
+    }
+}
 impl From<AstroIsDirective> for AnyAstroDirective {
     fn from(node: AstroIsDirective) -> Self {
         Self::AstroIsDirective(node)
@@ -8870,6 +8973,7 @@ impl AstNode for AnyAstroDirective {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AstroClassDirective::KIND_SET
         .union(AstroClientDirective::KIND_SET)
+        .union(AstroDefineDirective::KIND_SET)
         .union(AstroIsDirective::KIND_SET)
         .union(AstroServerDirective::KIND_SET)
         .union(AstroSetDirective::KIND_SET);
@@ -8878,6 +8982,7 @@ impl AstNode for AnyAstroDirective {
             kind,
             ASTRO_CLASS_DIRECTIVE
                 | ASTRO_CLIENT_DIRECTIVE
+                | ASTRO_DEFINE_DIRECTIVE
                 | ASTRO_IS_DIRECTIVE
                 | ASTRO_SERVER_DIRECTIVE
                 | ASTRO_SET_DIRECTIVE
@@ -8887,6 +8992,7 @@ impl AstNode for AnyAstroDirective {
         let res = match syntax.kind() {
             ASTRO_CLASS_DIRECTIVE => Self::AstroClassDirective(AstroClassDirective { syntax }),
             ASTRO_CLIENT_DIRECTIVE => Self::AstroClientDirective(AstroClientDirective { syntax }),
+            ASTRO_DEFINE_DIRECTIVE => Self::AstroDefineDirective(AstroDefineDirective { syntax }),
             ASTRO_IS_DIRECTIVE => Self::AstroIsDirective(AstroIsDirective { syntax }),
             ASTRO_SERVER_DIRECTIVE => Self::AstroServerDirective(AstroServerDirective { syntax }),
             ASTRO_SET_DIRECTIVE => Self::AstroSetDirective(AstroSetDirective { syntax }),
@@ -8898,6 +9004,7 @@ impl AstNode for AnyAstroDirective {
         match self {
             Self::AstroClassDirective(it) => it.syntax(),
             Self::AstroClientDirective(it) => it.syntax(),
+            Self::AstroDefineDirective(it) => it.syntax(),
             Self::AstroIsDirective(it) => it.syntax(),
             Self::AstroServerDirective(it) => it.syntax(),
             Self::AstroSetDirective(it) => it.syntax(),
@@ -8907,6 +9014,7 @@ impl AstNode for AnyAstroDirective {
         match self {
             Self::AstroClassDirective(it) => it.into_syntax(),
             Self::AstroClientDirective(it) => it.into_syntax(),
+            Self::AstroDefineDirective(it) => it.into_syntax(),
             Self::AstroIsDirective(it) => it.into_syntax(),
             Self::AstroServerDirective(it) => it.into_syntax(),
             Self::AstroSetDirective(it) => it.into_syntax(),
@@ -8918,6 +9026,7 @@ impl std::fmt::Debug for AnyAstroDirective {
         match self {
             Self::AstroClassDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::AstroClientDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::AstroDefineDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::AstroIsDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::AstroServerDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::AstroSetDirective(it) => std::fmt::Debug::fmt(it, f),
@@ -8929,6 +9038,7 @@ impl From<AnyAstroDirective> for SyntaxNode {
         match n {
             AnyAstroDirective::AstroClassDirective(it) => it.into_syntax(),
             AnyAstroDirective::AstroClientDirective(it) => it.into_syntax(),
+            AnyAstroDirective::AstroDefineDirective(it) => it.into_syntax(),
             AnyAstroDirective::AstroIsDirective(it) => it.into_syntax(),
             AnyAstroDirective::AstroServerDirective(it) => it.into_syntax(),
             AnyAstroDirective::AstroSetDirective(it) => it.into_syntax(),
@@ -10619,6 +10729,11 @@ impl std::fmt::Display for AstroClassDirective {
     }
 }
 impl std::fmt::Display for AstroClientDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AstroDefineDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

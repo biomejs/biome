@@ -6,10 +6,10 @@ use crate::token_source::{
 };
 use biome_html_syntax::HtmlSyntaxKind::{
     ANIMATE_KW, AS_KW, ATTACH_KW, AWAIT_KW, BIND_KW, CATCH_KW, CLASS_KW, CLIENT_KW, COMMENT,
-    CONST_KW, DEBUG_KW, DOCTYPE_KW, EACH_KW, ELSE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL,
-    HTML_STRING_LITERAL, IDENT, IF_KW, IN_KW, IS_KW, KEY_KW, NEWLINE, OUT_KW, RENDER_KW, SERVER_KW,
-    SET_KW, SNIPPET_KW, STYLE_KW, THEN_KW, TOMBSTONE, TRANSITION_KW, UNICODE_BOM, USE_KW,
-    WHITESPACE,
+    CONST_KW, DEBUG_KW, DEFINE_KW, DOCTYPE_KW, EACH_KW, ELSE_KW, EOF, ERROR_TOKEN, HTML_KW,
+    HTML_LITERAL, HTML_STRING_LITERAL, IDENT, IF_KW, IN_KW, IS_KW, KEY_KW, NEWLINE, OUT_KW,
+    RENDER_KW, SERVER_KW, SET_KW, SNIPPET_KW, STYLE_KW, THEN_KW, TOMBSTONE, TRANSITION_KW,
+    UNICODE_BOM, USE_KW, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -783,6 +783,7 @@ impl<'src> HtmlLexer<'src> {
             b"class" if context.is_astro() => CLASS_KW,
             b"is" if context.is_astro() => IS_KW,
             b"server" if context.is_astro() => SERVER_KW,
+            b"define" if context.is_astro() => DEFINE_KW,
             _ => HTML_LITERAL,
         }
     }
