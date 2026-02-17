@@ -1,0 +1,98 @@
+/* Selector list pseudo-classes */
+:is(h1, h2, h3) {
+    color: blue;
+}
+
+:where(article, section, aside) {
+    padding: 10px;
+}
+
+:not(.hidden) {
+    display: block;
+}
+
+:has(> .active) {
+    border: 2px solid green;
+}
+
+/* Multiple selectors */
+:is(h1, h2, h3, h4, h5, h6) {
+    font-weight: bold;
+}
+
+:not(:first-child, :last-child) {
+    margin: 10px 0;
+}
+
+/* Nth pseudo-classes */
+:nth-child(2n+1) {
+    background: lightgray;
+}
+
+:nth-child(odd) {
+    background: white;
+}
+
+:nth-child(even) {
+    background: aliceblue;
+}
+
+:nth-last-child(2n) {
+    border-bottom: none;
+}
+
+:nth-of-type(3n) {
+    font-style: italic;
+}
+
+:nth-last-of-type(1) {
+    margin-bottom: 0;
+}
+
+/* Nth with selector */
+:nth-child(2n of .item) {
+    color: red;
+}
+
+:nth-child(3n+1 of li.active) {
+    font-weight: bold;
+}
+
+/* Language/direction */
+:lang(en) {
+    quotes: '"' '"';
+}
+
+:lang(en-US) {
+    quotes: '"' '"';
+}
+
+:dir(ltr) {
+    text-align: left;
+}
+
+:dir(rtl) {
+    text-align: right;
+}
+
+/* Relative selectors in :has() */
+:has(+ .sibling) {
+    margin-right: 10px;
+}
+
+:has(~ .general-sibling) {
+    color: purple;
+}
+
+:has(> img) {
+    padding: 5px;
+}
+
+/* Nested pseudo-classes */
+:is(:hover, :focus):not(:disabled) {
+    outline: 2px solid blue;
+}
+
+:has(:is(h1, h2) > .highlight) {
+    background: yellow;
+}

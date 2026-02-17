@@ -1,0 +1,250 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/delimiter_spacing/scope.css
+---
+# Input
+
+```css
+/* Simple scope */
+@scope (.card) {
+    h2 {
+        color: blue;
+    }
+    p {
+        margin: 0;
+    }
+}
+
+@scope (.light-scheme) {
+    body {
+        background: white;
+        color: black;
+    }
+}
+
+/* Scope with limit */
+@scope (.card) to (.content) {
+    * {
+        margin: 0;
+        padding: 0;
+    }
+}
+
+@scope (.article) to (.comments) {
+    h1 {
+        font-size: 2rem;
+    }
+    p {
+        line-height: 1.5;
+    }
+}
+
+/* Multiple selectors */
+@scope (.card, .panel) {
+    header {
+        border-bottom: 1px solid gray;
+    }
+}
+
+@scope (.card, .panel) to (.content, .body) {
+    h2 {
+        margin-bottom: 10px;
+    }
+}
+
+/* Complex selectors */
+@scope (.wrapper > .container) {
+    .item {
+        display: inline-block;
+    }
+}
+
+@scope (article.featured) to (aside.related) {
+    img {
+        max-width: 100%;
+    }
+}
+
+/* Nested scopes */
+@scope (.outer) {
+    @scope (.inner) {
+        span {
+            color: red;
+        }
+    }
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Delimiter spacing: false
+Trailing newline: true
+-----
+
+```css
+/* Simple scope */
+@scope (.card) {
+	h2 {
+		color: blue;
+	}
+	p {
+		margin: 0;
+	}
+}
+
+@scope (.light-scheme) {
+	body {
+		background: white;
+		color: black;
+	}
+}
+
+/* Scope with limit */
+@scope (.card) to (.content) {
+	* {
+		margin: 0;
+		padding: 0;
+	}
+}
+
+@scope (.article) to (.comments) {
+	h1 {
+		font-size: 2rem;
+	}
+	p {
+		line-height: 1.5;
+	}
+}
+
+/* Multiple selectors */
+@scope (.card, .panel) {
+	header {
+		border-bottom: 1px solid gray;
+	}
+}
+
+@scope (.card, .panel) to (.content, .body) {
+	h2 {
+		margin-bottom: 10px;
+	}
+}
+
+/* Complex selectors */
+@scope (.wrapper > .container) {
+	.item {
+		display: inline-block;
+	}
+}
+
+@scope (article.featured) to (aside.related) {
+	img {
+		max-width: 100%;
+	}
+}
+
+/* Nested scopes */
+@scope (.outer) {
+	@scope (.inner) {
+		span {
+			color: red;
+		}
+	}
+}
+
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Delimiter spacing: true
+Trailing newline: true
+-----
+
+```css
+/* Simple scope */
+@scope ( .card ) {
+	h2 {
+		color: blue;
+	}
+	p {
+		margin: 0;
+	}
+}
+
+@scope ( .light-scheme ) {
+	body {
+		background: white;
+		color: black;
+	}
+}
+
+/* Scope with limit */
+@scope ( .card ) to ( .content ) {
+	* {
+		margin: 0;
+		padding: 0;
+	}
+}
+
+@scope ( .article ) to ( .comments ) {
+	h1 {
+		font-size: 2rem;
+	}
+	p {
+		line-height: 1.5;
+	}
+}
+
+/* Multiple selectors */
+@scope ( .card, .panel ) {
+	header {
+		border-bottom: 1px solid gray;
+	}
+}
+
+@scope ( .card, .panel ) to ( .content, .body ) {
+	h2 {
+		margin-bottom: 10px;
+	}
+}
+
+/* Complex selectors */
+@scope ( .wrapper > .container ) {
+	.item {
+		display: inline-block;
+	}
+}
+
+@scope ( article.featured ) to ( aside.related ) {
+	img {
+		max-width: 100%;
+	}
+}
+
+/* Nested scopes */
+@scope ( .outer ) {
+	@scope ( .inner ) {
+		span {
+			color: red;
+		}
+	}
+}
+
+```

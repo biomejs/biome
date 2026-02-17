@@ -1,0 +1,78 @@
+/* Media features in parentheses */
+@media (min-width: 768px) {
+    .container {
+        width: 750px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .container {
+        width: 100%;
+    }
+}
+
+/* Boolean features */
+@media (color) {
+    body {
+        background: white;
+    }
+}
+
+@media (hover) {
+    a:hover {
+        text-decoration: underline;
+    }
+}
+
+/* Range syntax */
+@media (width >= 600px) {
+    .wide {
+        display: block;
+    }
+}
+
+@media (400px <= width <= 700px) {
+    .medium {
+        display: flex;
+    }
+}
+
+/* Combinators */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .tablet {
+        font-size: 14px;
+    }
+}
+
+@media (orientation: portrait) or (orientation: landscape) {
+    .responsive {
+        display: grid;
+    }
+}
+
+/* Negation */
+@media not (color) {
+    body {
+        background: gray;
+    }
+}
+
+@media not (hover) {
+    a {
+        text-decoration: underline;
+    }
+}
+
+/* Nested conditions */
+@media ((min-width: 400px) and (max-width: 800px)) or (orientation: portrait) {
+    .complex {
+        padding: 10px;
+    }
+}
+
+/* Print media */
+@media print and (min-resolution: 300dpi) {
+    .print-only {
+        display: block;
+    }
+}

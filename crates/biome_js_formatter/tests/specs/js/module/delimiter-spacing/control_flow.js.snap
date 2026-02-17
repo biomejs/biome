@@ -1,0 +1,350 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/delimiter-spacing/control_flow.js
+---
+# Input
+
+```js
+// =====================
+// If statements
+// =====================
+
+// Simple if statement
+if (a) {
+}
+
+// If statement with else
+if (a) {
+} else {
+}
+
+// If-else-if chain
+if (a) {
+} else if (b) {
+} else {
+}
+
+// Complex condition
+if (a && b) {
+}
+
+// Nested condition
+if ((a || b) && c) {
+}
+
+// Comparison
+if (a === b) {
+}
+
+// Function call in condition
+if (foo()) {
+}
+
+// Multiline condition (fits on one line)
+if (a && b && c) {
+}
+
+// Boundary: 80 chars with delimiterSpacing (fits)
+if (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) {
+}
+
+// Boundary: 81 chars with delimiterSpacing (breaks)
+if (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) {
+}
+
+// =====================
+// Switch statements
+// =====================
+
+// Simple switch statement
+switch (a) {
+	case 1:
+		break;
+}
+
+// Switch with expression
+switch (a + b) {
+	case 1:
+		break;
+}
+
+// Switch with function call
+switch (foo()) {
+	case 1:
+		break;
+}
+
+// Nested parentheses
+switch ((a || b) && c) {
+	case true:
+		break;
+}
+
+// Comparison
+switch (a === b) {
+	case true:
+		break;
+}
+
+// Multiline expression (fits on one line)
+switch (a + b + c) {
+	case 1:
+		break;
+}
+
+// Boundary: 80 chars with delimiterSpacing (fits)
+switch (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) {}
+
+// Boundary: 81 chars with delimiterSpacing (breaks)
+switch (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) {}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: false
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```js
+// =====================
+// If statements
+// =====================
+
+// Simple if statement
+if (a) {
+}
+
+// If statement with else
+if (a) {
+} else {
+}
+
+// If-else-if chain
+if (a) {
+} else if (b) {
+} else {
+}
+
+// Complex condition
+if (a && b) {
+}
+
+// Nested condition
+if ((a || b) && c) {
+}
+
+// Comparison
+if (a === b) {
+}
+
+// Function call in condition
+if (foo()) {
+}
+
+// Multiline condition (fits on one line)
+if (a && b && c) {
+}
+
+// Boundary: 80 chars with delimiterSpacing (fits)
+if (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) {
+}
+
+// Boundary: 81 chars with delimiterSpacing (breaks)
+if (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) {
+}
+
+// =====================
+// Switch statements
+// =====================
+
+// Simple switch statement
+switch (a) {
+	case 1:
+		break;
+}
+
+// Switch with expression
+switch (a + b) {
+	case 1:
+		break;
+}
+
+// Switch with function call
+switch (foo()) {
+	case 1:
+		break;
+}
+
+// Nested parentheses
+switch ((a || b) && c) {
+	case true:
+		break;
+}
+
+// Comparison
+switch (a === b) {
+	case true:
+		break;
+}
+
+// Multiline expression (fits on one line)
+switch (a + b + c) {
+	case 1:
+		break;
+}
+
+// Boundary: 80 chars with delimiterSpacing (fits)
+switch (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) {
+}
+
+// Boundary: 81 chars with delimiterSpacing (breaks)
+switch (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) {
+}
+
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```js
+// =====================
+// If statements
+// =====================
+
+// Simple if statement
+if ( a ) {
+}
+
+// If statement with else
+if ( a ) {
+} else {
+}
+
+// If-else-if chain
+if ( a ) {
+} else if ( b ) {
+} else {
+}
+
+// Complex condition
+if ( a && b ) {
+}
+
+// Nested condition
+if ( ( a || b ) && c ) {
+}
+
+// Comparison
+if ( a === b ) {
+}
+
+// Function call in condition
+if ( foo() ) {
+}
+
+// Multiline condition (fits on one line)
+if ( a && b && c ) {
+}
+
+// Boundary: 80 chars with delimiterSpacing (fits)
+if ( aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ) {
+}
+
+// Boundary: 81 chars with delimiterSpacing (breaks)
+if (
+	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+) {
+}
+
+// =====================
+// Switch statements
+// =====================
+
+// Simple switch statement
+switch ( a ) {
+	case 1:
+		break;
+}
+
+// Switch with expression
+switch ( a + b ) {
+	case 1:
+		break;
+}
+
+// Switch with function call
+switch ( foo() ) {
+	case 1:
+		break;
+}
+
+// Nested parentheses
+switch ( ( a || b ) && c ) {
+	case true:
+		break;
+}
+
+// Comparison
+switch ( a === b ) {
+	case true:
+		break;
+}
+
+// Multiline expression (fits on one line)
+switch ( a + b + c ) {
+	case 1:
+		break;
+}
+
+// Boundary: 80 chars with delimiterSpacing (fits)
+switch ( aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ) {
+}
+
+// Boundary: 81 chars with delimiterSpacing (breaks)
+switch (
+	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+) {
+}
+
+```

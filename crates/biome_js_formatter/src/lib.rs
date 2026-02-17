@@ -373,8 +373,13 @@ where
     fn fmt_node(&self, node: &N, f: &mut JsFormatter) -> FormatResult<()> {
         let needs_parentheses = self.needs_parentheses(node);
 
+        let should_insert_space = needs_parentheses && f.options().delimiter_spacing().value();
+
         if needs_parentheses {
             write!(f, [token("(")])?;
+            if should_insert_space {
+                write!(f, [space()])?;
+            }
         }
 
         if let Some(range) = self.embedded_node_range(node, f) {
@@ -394,6 +399,9 @@ where
         }
 
         if needs_parentheses {
+            if should_insert_space {
+                write!(f, [space()])?;
+            }
             write!(f, [token(")")])?;
         }
 

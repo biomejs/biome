@@ -58,6 +58,7 @@ Trailing commas: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Delimiter spacing: false
 Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
@@ -123,6 +124,7 @@ Trailing commas: None
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Delimiter spacing: false
 Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto

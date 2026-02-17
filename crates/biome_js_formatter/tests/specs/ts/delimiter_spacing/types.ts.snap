@@ -1,0 +1,2266 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/delimiter_spacing/types.ts
+---
+# Input
+
+```ts
+// =====================
+// Indexed access types
+// =====================
+
+// Test 1: Basic indexed access type
+type A = Foo[Bar];
+
+// Test 2: Indexed access with keyof
+type B = Foo[keyof Foo];
+
+// Test 3: Indexed access with string literal
+type C = Foo["a"];
+
+// Test 4: Nested indexed access
+type D = Foo[Bar][Baz];
+
+// Test 5: Indexed access with union key
+type E = Foo[Bar | Baz];
+
+// Test 6: Indexed access in mapped type
+type F = { [K in keyof Foo]: Foo[K] };
+
+// Test 7: Indexed access on array type
+type G = Foo[][number];
+
+// Test 8: Indexed access on tuple
+type H = [Foo, Bar][0];
+
+// Test 9: Boundary - long index type that fits (80 chars with spaces)
+type I = Foo[Baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa];
+
+// Test 10: Boundary - long index type that breaks (81 chars with spaces)
+type J = Foo[Baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa];
+
+// =====================
+// Mapped types
+// =====================
+
+// Test 1: Basic mapped type
+type K = { [K in keyof Foo]: Bar };
+
+// Test 2: Mapped type with readonly modifier
+type L = { readonly [K in keyof Foo]: Bar };
+
+// Test 3: Mapped type with optional modifier
+type M = { [K in keyof Foo]?: Bar };
+
+// Test 4: Mapped type with minus modifiers
+type N = { -readonly [K in keyof Foo]-?: Bar };
+
+// Test 5: Mapped type with as clause
+type O = { [K in keyof Foo as Bar]: Baz };
+
+// Test 6: Mapped type with union keys
+type P = { [K in 'a' | 'b' | 'c']: Bar };
+
+// Test 7: Nested mapped types
+type Q = { [K in keyof Foo]: { [P in keyof Bar]: Baz } };
+
+// Test 8: Boundary - long mapped type that fits (80 chars with spaces)
+type R = { [K in Fooooooooooooooooooooooooooooooooooooooooooooooooooooo]: B };
+
+// Test 9: Boundary - long mapped type that breaks (81 chars with spaces)
+type S = { [K in Foooooooooooooooooooooooooooooooooooooooooooooooooooooo]: B };
+
+// =====================
+// Tuple types
+// =====================
+
+// Test 1: Single element tuple
+type T = [Foo];
+
+// Test 2: Multiple element tuple
+type U = [Foo, Bar, Baz];
+
+// Test 3: Tuple with optional element
+type V = [Foo, Bar?];
+
+// Test 4: Tuple with rest element
+type W = [Foo, ...Bar];
+
+// Test 5: Tuple with labeled elements
+type X = [a: Foo, b: Bar];
+
+// Test 6: Nested tuple types
+type Y = [[Foo, Bar], Baz];
+
+// Test 7: Tuple in function parameter
+function foo(a: [Foo, Bar]): void {}
+
+// Test 8: Readonly tuple
+type Z = readonly [Foo, Bar];
+
+// Test 9: Boundary - long tuple that fits (80 chars with spaces)
+type AA = [Foooooooooooooooooooooooooooooo, Baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa];
+
+// Test 10: Boundary - long tuple that breaks (81 chars with spaces)
+type BB = [Fooooooooooooooooooooooooooooooo, Baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa];
+
+// =====================
+// Type parameters
+// =====================
+
+// Generic function with one type parameter
+function f1<T>() {}
+
+// Generic function with two type parameters
+function f2<T, U>() {}
+
+// Generic function with three type parameters
+function f3<T, U, V>() {}
+
+// Generic arrow function with one type parameter
+const foo1 = <T>() => {};
+
+// Generic arrow function with two type parameters
+const foo2 = <T, U>() => {};
+
+// Generic class with one type parameter
+class A1<T> {}
+
+// Generic class with two type parameters
+class A2<T, U> {}
+
+// Generic interface with one type parameter
+interface B1<T> {}
+
+// Generic interface with two type parameters
+interface B2<T, U> {}
+
+// Generic type alias with one type parameter
+type CC<T> = T;
+
+// Generic type alias with two type parameters
+type DD<T, U> = T | U;
+
+// Type parameter with extends constraint
+function f4<T extends U>() {}
+
+// Type parameter with extends constraint and default
+function f5<T extends U = V>() {}
+
+// Multiple type parameters with constraints
+function f6<T extends U, V extends W>() {}
+
+// Type parameter extending keyof
+function f7<K extends keyof T>() {}
+
+// Type parameter extending union type
+function f8<T extends A | B>() {}
+
+// Type parameter extending intersection type
+function f9<T extends A & B>() {}
+
+// Type parameter with default type
+function f10<T = U>() {}
+
+// Multiple type parameters with defaults
+function f11<T = A, U = B>() {}
+
+// Type parameter extending object type
+function f12<T extends { a: number }>() {}
+
+// Type parameter extending array type
+function f13<T extends U[]>() {}
+
+// Type parameter extending function type
+function f14<T extends () => U>() {}
+
+// Type parameter extending conditional type
+function f15<T extends U extends V ? W : X>() {}
+
+// Generic method in class
+class A3 {
+	bar<T>() {}
+}
+
+// Generic method in interface
+interface B3 {
+	bar<T>(): void;
+}
+
+// Generic method in object type
+type EE = {
+	bar<T>(): void;
+};
+
+// Generic call signature in interface
+interface B4 {
+	<T>(a: T): T;
+}
+
+// Generic construct signature in interface
+interface B5 {
+	new <T>(a: T): T;
+}
+
+// Type parameters that break due to long constraint
+function f16<T extends Loooooooooooooooooooooooooooooooooooooooooooooooooong>() {}
+
+// Multiple type parameters that break due to length
+function f17<Loooooooooooooooooong, Loooooooooooooooooong, Loooooooooooooooooong>() {}
+
+// Multiple type parameters with long constraints that break
+function f18<T extends Loooooooooooooooooooooooooong, U extends Loooooooooooooooooooooooooong>() {}
+
+// Generic class with long type parameter that breaks
+class A4<T extends Loooooooooooooooooooooooooooooooooooooooooooooooooong> {}
+
+// Generic interface with long type parameter that breaks
+interface B6<T extends Loooooooooooooooooooooooooooooooooooooooooooooooooong> {}
+
+// Generic type alias with long type parameter that breaks
+type FF<T extends Loooooooooooooooooooooooooooooooooooooooooooooooooong> = T;
+
+// Boundary - type parameters that fit (80 chars with spaces)
+function foooooooooooooooooooooooooooooooooooooooooooooooo<T extends Foo>() {}
+
+// Boundary - type parameters that break (81 chars with spaces)
+function fooooooooooooooooooooooooooooooooooooooooooooooooo<T extends Foo>() {}
+
+// =====================
+// Type assertion assignments
+// =====================
+
+// Test 1: Basic type assertion assignment
+let a;
+(<number>a) = 1;
+
+// Test 2: Type assertion with generic type (inner generics not affected by this patch)
+let b;
+(<Array<number>>b) = [1, 2, 3];
+
+// Test 3: Type assertion with union type
+let c;
+(<string | number>c) = "foo";
+
+// Test 4: Type assertion in destructuring
+({ a: <number>a } = { a: 1 });
+
+// Test 5: Nested type assertions
+((<number>(<any>a))) = 1;
+
+// Test 6: Type assertion with member expression
+(<number>a.b) = 1;
+
+// Test 7: Type assertion in for-of loop
+for (<number>a of []) {}
+
+// Test 8: Boundary test - fits (80 chars with spaces)
+(<Fooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo>a) = 1;
+
+// Test 9: Boundary test - breaks (81 chars with spaces)
+(<Foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo>a) = 1;
+
+// Test 10: Type assertion with intersection type
+(<Foo & Bar>a) = x;
+
+// Test 11: Type assertion with array type
+(<Foo[]>a) = [x];
+
+// Test 12: Type assertion with tuple type
+(<[Foo, Bar]>a) = [x, y];
+
+// Test 13: Type assertion with function type
+(<(b: number) => string>a) = fn;
+
+// Test 14: Type assertion with object type
+(<{ foo: number }>a) = obj;
+
+// Test 15: Type assertion with any type
+(<any>a) = x;
+
+// Test 16: Type assertion with unknown type
+(<unknown>a) = x;
+
+// Test 17: Type assertion with typeof type
+(<typeof foo>a) = x;
+
+// Test 18: Type assertion with keyof type
+(<keyof Foo>a) = x;
+
+// Test 19: Type assertion with indexed access type
+(<Foo["bar"]>a) = x;
+
+// Test 20: Type assertion with conditional type
+(<T extends U ? V : W>a) = x;
+
+// =====================
+// Type assertion expressions
+// =====================
+
+// Test 1: Basic type assertion
+const d = <number>b;
+
+// Test 2: Reference type
+const e = <Foo>d;
+
+// Test 3: Union type
+const f = <Foo | Bar>f;
+
+// Test 4: Generic type (inner generics don't get spaces from this patch)
+const g = <Array<number>>h;
+
+// Test 5: Type assertion in function call
+foo(<number>a);
+
+// Test 6: Nested type assertion
+const h = <number>(<any>j);
+
+// Test 7: Const assertion
+const i = <const>'hello';
+
+// Test 8: Type assertion with object literal
+const j = <Foo>({ a: 1, b: 2 });
+
+// Test 9: Boundary - long type that breaks
+const k = <Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong>n;
+
+// Test 10: Boundary - union that breaks
+const l = <Foo | Bar | Baz | Foooooooooooooooooooooooooooooooooooooooooooooooooooo>p;
+
+// Test 11: Type assertion with intersection type
+const m = <Foo & Bar>q;
+
+// Test 12: Type assertion with array type
+const n = <Foo[]>s;
+
+// Test 13: Type assertion with tuple type
+const o = <[Foo, Bar]>u;
+
+// Test 14: Type assertion with function type
+const p = <(b: number) => string>w;
+
+// Test 15: Type assertion with object type
+const q = <{ foo: number }>y;
+
+// Test 16: Type assertion with any type
+const r = <any>aa;
+
+// Test 17: Type assertion with unknown type
+const s = <unknown>cc;
+
+// Test 18: Type assertion with typeof type
+const t = <typeof foo>ee;
+
+// Test 19: Type assertion with keyof type
+const u = <keyof Foo>gg;
+
+// Test 20: Type assertion with indexed access type
+const v = <Foo["bar"]>ii;
+
+// Test 21: Type assertion with conditional type
+const w = <T extends U ? V : W>kk;
+
+// Test 22: Boundary - short type that fits
+const x = <Foo>mm;
+
+// Test 23: Boundary - long type that breaks
+const y = <Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong>n;
+
+// =====================
+// As/satisfies expressions
+// =====================
+
+// As expression as callee in call expression
+(a as Foo)();
+
+// As expression as callee in call expression with arguments
+(a as Foo)(b, c);
+
+// As expression as callee in optional call expression
+(a as Foo)?.();
+
+// As expression as callee in new expression
+new (a as Foo)();
+
+// As expression as callee in new expression with arguments
+new (a as Foo)(b, c);
+
+// As expression as object in static member expression
+(a as Foo).bar;
+
+// As expression as object in static member expression with method call
+(a as Foo).bar();
+
+// As expression as object in static member expression chain
+(a as Foo).bar.baz;
+
+// As expression as object in static member assignment
+(a as Foo).bar = b;
+
+// As expression as object in computed member expression
+(a as Foo)[b];
+
+// As expression as object in computed member expression with string literal
+(a as Foo)["bar"];
+
+// As expression as object in computed member assignment
+(a as Foo)[b] = c;
+
+// As expression with generic type as callee
+(a as Foo<T>)();
+
+// As expression with generic type as object in member expression
+(a as Foo<T>).bar;
+
+// As expression with union type as callee
+(a as Foo | Bar)();
+
+// As expression with union type as object in member expression
+(a as Foo | Bar).baz;
+
+// As expression with intersection type as callee
+(a as Foo & Bar)();
+
+// As expression with intersection type as object in member expression
+(a as Foo & Bar).baz;
+
+// As expression with array type as callee
+(a as Foo[])();
+
+// As expression with array type as object in member expression
+(a as Foo[]).length;
+
+// As expression with tuple type as callee
+(a as [Foo, Bar])();
+
+// As expression with tuple type as object in member expression
+(a as [Foo, Bar])[0];
+
+// As expression with function type as callee
+(a as (b: number) => string)();
+
+// As expression with function type as object in member expression
+(a as (b: number) => string).bind(c);
+
+// As expression with object type as callee
+(a as { foo: () => void })();
+
+// As expression with object type as object in member expression
+(a as { foo: number }).foo;
+
+// Nested as expressions as callee
+(a as Foo as Bar)();
+
+// Nested as expressions as object in member expression
+(a as Foo as Bar).baz;
+
+// As expression with typeof type as callee
+(a as typeof foo)();
+
+// As expression with typeof type as object in member expression
+(a as typeof foo).bar;
+
+// As expression with keyof type as callee
+(a as keyof Foo)();
+
+// As expression with keyof type as object in member expression
+(a as keyof Foo).toString();
+
+// As expression with indexed access type as callee
+(a as Foo["bar"])();
+
+// As expression with indexed access type as object in member expression
+(a as Foo["bar"]).baz;
+
+// As expression with conditional type as callee
+(a as T extends U ? V : W)();
+
+// As expression with conditional type as object in member expression
+(a as T extends U ? V : W).x;
+
+// As expression with any type as callee
+(a as any)();
+
+// As expression with any type as object in member expression
+(a as any).foo;
+
+// As expression with unknown type as callee
+(a as unknown)();
+
+// As expression with unknown type as object in member expression
+(a as unknown as Foo).bar;
+
+// Chained member access on as expression
+(a as Foo).bar.baz.qux;
+
+// Chained method calls on as expression
+(a as Foo).bar().baz().qux();
+
+// Mixed member access and method calls on as expression
+(a as Foo).bar.baz().qux;
+
+// Satisfies expression as callee in call expression
+(a satisfies Foo)();
+
+// Satisfies expression as object in static member expression
+(a satisfies Foo).bar;
+
+// Satisfies expression as object in computed member expression
+(a satisfies Foo)[b];
+
+// Satisfies expression as callee in new expression
+new (a satisfies Foo)();
+
+// Satisfies expression with generic type as callee
+(a satisfies Foo<T>)();
+
+// Satisfies expression with union type as object in member expression
+(a satisfies Foo | Bar).baz;
+
+// Long as expression type that breaks as callee
+(a as Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong)();
+
+// Long as expression type that breaks as object in member expression
+(a as Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong).bar;
+
+// Long as expression with generic that breaks as callee
+(a as Map<Loooooooooooooooooooooooooooong, Loooooooooooooooooooooooooooong>)();
+
+// Long as expression with generic that breaks as object in member expression
+(a as Map<Loooooooooooooooooooooooooooong, Loooooooooooooooooooooooooooong>).bar;
+
+// Long satisfies expression type that breaks as callee
+(a satisfies Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong)();
+
+// Long satisfies expression type that breaks as object in member expression
+(a satisfies Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong).bar;
+
+// Boundary - as expression as callee that fits
+(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa as Foo)();
+
+// Boundary - as expression as callee that breaks
+(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa as Foo)();
+
+// Boundary - as expression as object that fits
+(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa as Foo).bar;
+
+// Boundary - as expression as object that breaks
+(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa as Foo).bar;
+
+// =====================
+// Index signature type members
+// =====================
+
+// Test 1: Basic index signature with string key
+interface C1 {
+	[a: string]: Bar;
+}
+
+// Test 2: Index signature with number key
+interface C2 {
+	[a: number]: Bar;
+}
+
+// Test 3: Readonly index signature
+interface C3 {
+	readonly [a: string]: Bar;
+}
+
+// Test 4: Index signature in type literal
+type GG = {
+	[a: string]: Bar;
+};
+
+// Test 5: Multiple index signatures
+interface C4 {
+	[a: string]: Bar;
+	[b: number]: Baz;
+}
+
+// Test 6: Index signature with other members
+interface C5 {
+	a: Bar;
+	[b: string]: Baz;
+	c(): Qux;
+}
+
+// Test 7: Template literal key type
+interface C6 {
+	[a: `${string}`]: Bar;
+}
+
+// Test 8: Boundary - long value type causes line break
+interface C7 {
+	[a: string]: Looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong;
+}
+
+// =====================
+// Index signature class members
+// =====================
+
+// Test 1: Basic index signature class member with string key
+class D1 {
+	[a: string]: Bar;
+}
+
+// Test 2: Index signature class member with number key
+class D2 {
+	[a: number]: Bar;
+}
+
+// Test 3: Readonly index signature class member
+class D3 {
+	readonly [a: string]: Bar;
+}
+
+// Test 4: Index signature class member with other members
+class D4 {
+	a: Bar;
+	[b: string]: Bar;
+	method(): void {}
+}
+
+// Test 5: Multiple index signatures in class
+class D5 {
+	[a: string]: Bar;
+	[b: number]: Baz;
+}
+
+// Test 6: Boundary - long value type causes line break
+class D6 {
+	[a: string]: Looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong;
+}
+
+// =====================
+// Index signature - Class modifiers
+// =====================
+
+// Test 1: Static index signature
+class E1 {
+	static [key: string]: Bar;
+}
+
+// Test 2: Static readonly index signature
+class E2 {
+	static readonly [key: string]: Bar;
+}
+
+// =====================
+// Index signature - Symbol keys
+// =====================
+
+// Test 1: Symbol key in interface
+interface F1 {
+	[key: symbol]: Bar;
+}
+
+// Test 2: Symbol key in class
+class F2 {
+	[key: symbol]: Bar;
+}
+
+// =====================
+// Index signature - Complex value types
+// =====================
+
+// Test 1: Union type value
+interface G1 {
+	[key: string]: Foo | Bar | Baz;
+}
+
+// Test 2: Intersection type value
+interface G2 {
+	[key: string]: Foo & Bar;
+}
+
+// Test 3: Function type value
+interface G3 {
+	[key: string]: (a: number) => string;
+}
+
+// Test 4: Generic type value
+interface G4 {
+	[key: string]: Array<Foo>;
+}
+
+// Test 5: Tuple type value
+interface G5 {
+	[key: string]: [Foo, Bar];
+}
+
+// =====================
+// Index signature - Boundary conditions
+// =====================
+
+// Test 1: Interface index sig boundary - fits (80 chars with spaces)
+interface H1 {
+	[looooooooooooooooooooooooooooooooooooooooooooo: string]: B;
+}
+
+// Test 2: Interface index sig boundary - breaks (81 chars with spaces)
+interface H2 {
+	[loooooooooooooooooooooooooooooooooooooooooooooo: string]: B;
+}
+
+// Test 3: Class index sig boundary - fits (80 chars with spaces)
+class H3 {
+	[loooooooooooooooooooooooooooooooooooooooooooooo: string]: B;
+}
+
+// Test 4: Class index sig boundary - breaks (81 chars with spaces)
+class H4 {
+	[looooooooooooooooooooooooooooooooooooooooooooooo: string]: B;
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: false
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```ts
+// =====================
+// Indexed access types
+// =====================
+
+// Test 1: Basic indexed access type
+type A = Foo[Bar];
+
+// Test 2: Indexed access with keyof
+type B = Foo[keyof Foo];
+
+// Test 3: Indexed access with string literal
+type C = Foo["a"];
+
+// Test 4: Nested indexed access
+type D = Foo[Bar][Baz];
+
+// Test 5: Indexed access with union key
+type E = Foo[Bar | Baz];
+
+// Test 6: Indexed access in mapped type
+type F = { [K in keyof Foo]: Foo[K] };
+
+// Test 7: Indexed access on array type
+type G = Foo[][number];
+
+// Test 8: Indexed access on tuple
+type H = [Foo, Bar][0];
+
+// Test 9: Boundary - long index type that fits (80 chars with spaces)
+type I = Foo[Baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa];
+
+// Test 10: Boundary - long index type that breaks (81 chars with spaces)
+type J = Foo[Baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa];
+
+// =====================
+// Mapped types
+// =====================
+
+// Test 1: Basic mapped type
+type K = { [K in keyof Foo]: Bar };
+
+// Test 2: Mapped type with readonly modifier
+type L = { readonly [K in keyof Foo]: Bar };
+
+// Test 3: Mapped type with optional modifier
+type M = { [K in keyof Foo]?: Bar };
+
+// Test 4: Mapped type with minus modifiers
+type N = { -readonly [K in keyof Foo]-?: Bar };
+
+// Test 5: Mapped type with as clause
+type O = { [K in keyof Foo as Bar]: Baz };
+
+// Test 6: Mapped type with union keys
+type P = { [K in "a" | "b" | "c"]: Bar };
+
+// Test 7: Nested mapped types
+type Q = { [K in keyof Foo]: { [P in keyof Bar]: Baz } };
+
+// Test 8: Boundary - long mapped type that fits (80 chars with spaces)
+type R = { [K in Fooooooooooooooooooooooooooooooooooooooooooooooooooooo]: B };
+
+// Test 9: Boundary - long mapped type that breaks (81 chars with spaces)
+type S = { [K in Foooooooooooooooooooooooooooooooooooooooooooooooooooooo]: B };
+
+// =====================
+// Tuple types
+// =====================
+
+// Test 1: Single element tuple
+type T = [Foo];
+
+// Test 2: Multiple element tuple
+type U = [Foo, Bar, Baz];
+
+// Test 3: Tuple with optional element
+type V = [Foo, Bar?];
+
+// Test 4: Tuple with rest element
+type W = [Foo, ...Bar];
+
+// Test 5: Tuple with labeled elements
+type X = [a: Foo, b: Bar];
+
+// Test 6: Nested tuple types
+type Y = [[Foo, Bar], Baz];
+
+// Test 7: Tuple in function parameter
+function foo(a: [Foo, Bar]): void {}
+
+// Test 8: Readonly tuple
+type Z = readonly [Foo, Bar];
+
+// Test 9: Boundary - long tuple that fits (80 chars with spaces)
+type AA = [Foooooooooooooooooooooooooooooo, Baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa];
+
+// Test 10: Boundary - long tuple that breaks (81 chars with spaces)
+type BB = [Fooooooooooooooooooooooooooooooo, Baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa];
+
+// =====================
+// Type parameters
+// =====================
+
+// Generic function with one type parameter
+function f1<T>() {}
+
+// Generic function with two type parameters
+function f2<T, U>() {}
+
+// Generic function with three type parameters
+function f3<T, U, V>() {}
+
+// Generic arrow function with one type parameter
+const foo1 = <T>() => {};
+
+// Generic arrow function with two type parameters
+const foo2 = <T, U>() => {};
+
+// Generic class with one type parameter
+class A1<T> {}
+
+// Generic class with two type parameters
+class A2<T, U> {}
+
+// Generic interface with one type parameter
+interface B1<T> {}
+
+// Generic interface with two type parameters
+interface B2<T, U> {}
+
+// Generic type alias with one type parameter
+type CC<T> = T;
+
+// Generic type alias with two type parameters
+type DD<T, U> = T | U;
+
+// Type parameter with extends constraint
+function f4<T extends U>() {}
+
+// Type parameter with extends constraint and default
+function f5<T extends U = V>() {}
+
+// Multiple type parameters with constraints
+function f6<T extends U, V extends W>() {}
+
+// Type parameter extending keyof
+function f7<K extends keyof T>() {}
+
+// Type parameter extending union type
+function f8<T extends A | B>() {}
+
+// Type parameter extending intersection type
+function f9<T extends A & B>() {}
+
+// Type parameter with default type
+function f10<T = U>() {}
+
+// Multiple type parameters with defaults
+function f11<T = A, U = B>() {}
+
+// Type parameter extending object type
+function f12<T extends { a: number }>() {}
+
+// Type parameter extending array type
+function f13<T extends U[]>() {}
+
+// Type parameter extending function type
+function f14<T extends () => U>() {}
+
+// Type parameter extending conditional type
+function f15<T extends U extends V ? W : X>() {}
+
+// Generic method in class
+class A3 {
+	bar<T>() {}
+}
+
+// Generic method in interface
+interface B3 {
+	bar<T>(): void;
+}
+
+// Generic method in object type
+type EE = {
+	bar<T>(): void;
+};
+
+// Generic call signature in interface
+interface B4 {
+	<T>(a: T): T;
+}
+
+// Generic construct signature in interface
+interface B5 {
+	new <T>(a: T): T;
+}
+
+// Type parameters that break due to long constraint
+function f16<
+	T extends Loooooooooooooooooooooooooooooooooooooooooooooooooong,
+>() {}
+
+// Multiple type parameters that break due to length
+function f17<
+	Loooooooooooooooooong,
+	Loooooooooooooooooong,
+	Loooooooooooooooooong,
+>() {}
+
+// Multiple type parameters with long constraints that break
+function f18<
+	T extends Loooooooooooooooooooooooooong,
+	U extends Loooooooooooooooooooooooooong,
+>() {}
+
+// Generic class with long type parameter that breaks
+class A4<T extends Loooooooooooooooooooooooooooooooooooooooooooooooooong> {}
+
+// Generic interface with long type parameter that breaks
+interface B6<T extends Loooooooooooooooooooooooooooooooooooooooooooooooooong> {}
+
+// Generic type alias with long type parameter that breaks
+type FF<T extends Loooooooooooooooooooooooooooooooooooooooooooooooooong> = T;
+
+// Boundary - type parameters that fit (80 chars with spaces)
+function foooooooooooooooooooooooooooooooooooooooooooooooo<T extends Foo>() {}
+
+// Boundary - type parameters that break (81 chars with spaces)
+function fooooooooooooooooooooooooooooooooooooooooooooooooo<T extends Foo>() {}
+
+// =====================
+// Type assertion assignments
+// =====================
+
+// Test 1: Basic type assertion assignment
+let a;
+(<number>a) = 1;
+
+// Test 2: Type assertion with generic type (inner generics not affected by this patch)
+let b;
+(<Array<number>>b) = [1, 2, 3];
+
+// Test 3: Type assertion with union type
+let c;
+(<string | number>c) = "foo";
+
+// Test 4: Type assertion in destructuring
+({ a: <number>a } = { a: 1 });
+
+// Test 5: Nested type assertions
+(<number>(<any>a)) = 1;
+
+// Test 6: Type assertion with member expression
+(<number>a.b) = 1;
+
+// Test 7: Type assertion in for-of loop
+for (<number>a of []) {
+}
+
+// Test 8: Boundary test - fits (80 chars with spaces)
+(<Fooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo>a) = 1;
+
+// Test 9: Boundary test - breaks (81 chars with spaces)
+(<Foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo>a) = 1;
+
+// Test 10: Type assertion with intersection type
+(<Foo & Bar>a) = x;
+
+// Test 11: Type assertion with array type
+(<Foo[]>a) = [x];
+
+// Test 12: Type assertion with tuple type
+(<[Foo, Bar]>a) = [x, y];
+
+// Test 13: Type assertion with function type
+(<(b: number) => string>a) = fn;
+
+// Test 14: Type assertion with object type
+(<{ foo: number }>a) = obj;
+
+// Test 15: Type assertion with any type
+(<any>a) = x;
+
+// Test 16: Type assertion with unknown type
+(<unknown>a) = x;
+
+// Test 17: Type assertion with typeof type
+(<typeof foo>a) = x;
+
+// Test 18: Type assertion with keyof type
+(<keyof Foo>a) = x;
+
+// Test 19: Type assertion with indexed access type
+(<Foo["bar"]>a) = x;
+
+// Test 20: Type assertion with conditional type
+(<T extends U ? V : W>a) = x;
+
+// =====================
+// Type assertion expressions
+// =====================
+
+// Test 1: Basic type assertion
+const d = <number>b;
+
+// Test 2: Reference type
+const e = <Foo>d;
+
+// Test 3: Union type
+const f = <Foo | Bar>f;
+
+// Test 4: Generic type (inner generics don't get spaces from this patch)
+const g = <Array<number>>h;
+
+// Test 5: Type assertion in function call
+foo(<number>a);
+
+// Test 6: Nested type assertion
+const h = <number>(<any>j);
+
+// Test 7: Const assertion
+const i = <const>"hello";
+
+// Test 8: Type assertion with object literal
+const j = <Foo>{ a: 1, b: 2 };
+
+// Test 9: Boundary - long type that breaks
+const k = <
+	Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong
+>n;
+
+// Test 10: Boundary - union that breaks
+const l = <
+	Foo | Bar | Baz | Foooooooooooooooooooooooooooooooooooooooooooooooooooo
+>p;
+
+// Test 11: Type assertion with intersection type
+const m = <Foo & Bar>q;
+
+// Test 12: Type assertion with array type
+const n = <Foo[]>s;
+
+// Test 13: Type assertion with tuple type
+const o = <[Foo, Bar]>u;
+
+// Test 14: Type assertion with function type
+const p = <(b: number) => string>w;
+
+// Test 15: Type assertion with object type
+const q = <{ foo: number }>y;
+
+// Test 16: Type assertion with any type
+const r = <any>aa;
+
+// Test 17: Type assertion with unknown type
+const s = <unknown>cc;
+
+// Test 18: Type assertion with typeof type
+const t = <typeof foo>ee;
+
+// Test 19: Type assertion with keyof type
+const u = <keyof Foo>gg;
+
+// Test 20: Type assertion with indexed access type
+const v = <Foo["bar"]>ii;
+
+// Test 21: Type assertion with conditional type
+const w = <T extends U ? V : W>kk;
+
+// Test 22: Boundary - short type that fits
+const x = <Foo>mm;
+
+// Test 23: Boundary - long type that breaks
+const y = <
+	Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong
+>n;
+
+// =====================
+// As/satisfies expressions
+// =====================
+
+// As expression as callee in call expression
+(a as Foo)();
+
+// As expression as callee in call expression with arguments
+(a as Foo)(b, c);
+
+// As expression as callee in optional call expression
+(a as Foo)?.();
+
+// As expression as callee in new expression
+new (a as Foo)();
+
+// As expression as callee in new expression with arguments
+new (a as Foo)(b, c);
+
+// As expression as object in static member expression
+(a as Foo).bar;
+
+// As expression as object in static member expression with method call
+(a as Foo).bar();
+
+// As expression as object in static member expression chain
+(a as Foo).bar.baz;
+
+// As expression as object in static member assignment
+(a as Foo).bar = b;
+
+// As expression as object in computed member expression
+(a as Foo)[b];
+
+// As expression as object in computed member expression with string literal
+(a as Foo)["bar"];
+
+// As expression as object in computed member assignment
+(a as Foo)[b] = c;
+
+// As expression with generic type as callee
+(a as Foo<T>)();
+
+// As expression with generic type as object in member expression
+(a as Foo<T>).bar;
+
+// As expression with union type as callee
+(a as Foo | Bar)();
+
+// As expression with union type as object in member expression
+(a as Foo | Bar).baz;
+
+// As expression with intersection type as callee
+(a as Foo & Bar)();
+
+// As expression with intersection type as object in member expression
+(a as Foo & Bar).baz;
+
+// As expression with array type as callee
+(a as Foo[])();
+
+// As expression with array type as object in member expression
+(a as Foo[]).length;
+
+// As expression with tuple type as callee
+(a as [Foo, Bar])();
+
+// As expression with tuple type as object in member expression
+(a as [Foo, Bar])[0];
+
+// As expression with function type as callee
+(a as (b: number) => string)();
+
+// As expression with function type as object in member expression
+(a as (b: number) => string).bind(c);
+
+// As expression with object type as callee
+(a as { foo: () => void })();
+
+// As expression with object type as object in member expression
+(a as { foo: number }).foo;
+
+// Nested as expressions as callee
+(a as Foo as Bar)();
+
+// Nested as expressions as object in member expression
+(a as Foo as Bar).baz;
+
+// As expression with typeof type as callee
+(a as typeof foo)();
+
+// As expression with typeof type as object in member expression
+(a as typeof foo).bar;
+
+// As expression with keyof type as callee
+(a as keyof Foo)();
+
+// As expression with keyof type as object in member expression
+(a as keyof Foo).toString();
+
+// As expression with indexed access type as callee
+(a as Foo["bar"])();
+
+// As expression with indexed access type as object in member expression
+(a as Foo["bar"]).baz;
+
+// As expression with conditional type as callee
+(a as T extends U ? V : W)();
+
+// As expression with conditional type as object in member expression
+(a as T extends U ? V : W).x;
+
+// As expression with any type as callee
+(a as any)();
+
+// As expression with any type as object in member expression
+(a as any).foo;
+
+// As expression with unknown type as callee
+(a as unknown)();
+
+// As expression with unknown type as object in member expression
+(a as unknown as Foo).bar;
+
+// Chained member access on as expression
+(a as Foo).bar.baz.qux;
+
+// Chained method calls on as expression
+(a as Foo).bar().baz().qux();
+
+// Mixed member access and method calls on as expression
+(a as Foo).bar.baz().qux;
+
+// Satisfies expression as callee in call expression
+(a satisfies Foo)();
+
+// Satisfies expression as object in static member expression
+(a satisfies Foo).bar;
+
+// Satisfies expression as object in computed member expression
+(a satisfies Foo)[b];
+
+// Satisfies expression as callee in new expression
+new (a satisfies Foo)();
+
+// Satisfies expression with generic type as callee
+(a satisfies Foo<T>)();
+
+// Satisfies expression with union type as object in member expression
+(a satisfies Foo | Bar).baz;
+
+// Long as expression type that breaks as callee
+(
+	a as Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong
+)();
+
+// Long as expression type that breaks as object in member expression
+(a as Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong)
+	.bar;
+
+// Long as expression with generic that breaks as callee
+(a as Map<Loooooooooooooooooooooooooooong, Loooooooooooooooooooooooooooong>)();
+
+// Long as expression with generic that breaks as object in member expression
+(a as Map<Loooooooooooooooooooooooooooong, Loooooooooooooooooooooooooooong>)
+	.bar;
+
+// Long satisfies expression type that breaks as callee
+(
+	a satisfies Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong
+)();
+
+// Long satisfies expression type that breaks as object in member expression
+(a satisfies Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong)
+	.bar;
+
+// Boundary - as expression as callee that fits
+(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa as Foo)();
+
+// Boundary - as expression as callee that breaks
+(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa as Foo)();
+
+// Boundary - as expression as object that fits
+(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa as Foo).bar;
+
+// Boundary - as expression as object that breaks
+(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa as Foo)
+	.bar;
+
+// =====================
+// Index signature type members
+// =====================
+
+// Test 1: Basic index signature with string key
+interface C1 {
+	[a: string]: Bar;
+}
+
+// Test 2: Index signature with number key
+interface C2 {
+	[a: number]: Bar;
+}
+
+// Test 3: Readonly index signature
+interface C3 {
+	readonly [a: string]: Bar;
+}
+
+// Test 4: Index signature in type literal
+type GG = {
+	[a: string]: Bar;
+};
+
+// Test 5: Multiple index signatures
+interface C4 {
+	[a: string]: Bar;
+	[b: number]: Baz;
+}
+
+// Test 6: Index signature with other members
+interface C5 {
+	a: Bar;
+	[b: string]: Baz;
+	c(): Qux;
+}
+
+// Test 7: Template literal key type
+interface C6 {
+	[a: `${string}`]: Bar;
+}
+
+// Test 8: Boundary - long value type causes line break
+interface C7 {
+	[
+		a: string
+	]: Looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong;
+}
+
+// =====================
+// Index signature class members
+// =====================
+
+// Test 1: Basic index signature class member with string key
+class D1 {
+	[a: string]: Bar;
+}
+
+// Test 2: Index signature class member with number key
+class D2 {
+	[a: number]: Bar;
+}
+
+// Test 3: Readonly index signature class member
+class D3 {
+	readonly [a: string]: Bar;
+}
+
+// Test 4: Index signature class member with other members
+class D4 {
+	a: Bar;
+	[b: string]: Bar;
+	method(): void {}
+}
+
+// Test 5: Multiple index signatures in class
+class D5 {
+	[a: string]: Bar;
+	[b: number]: Baz;
+}
+
+// Test 6: Boundary - long value type causes line break
+class D6 {
+	[a: string]: Looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong;
+}
+
+// =====================
+// Index signature - Class modifiers
+// =====================
+
+// Test 1: Static index signature
+class E1 {
+	static [key: string]: Bar;
+}
+
+// Test 2: Static readonly index signature
+class E2 {
+	static readonly [key: string]: Bar;
+}
+
+// =====================
+// Index signature - Symbol keys
+// =====================
+
+// Test 1: Symbol key in interface
+interface F1 {
+	[key: symbol]: Bar;
+}
+
+// Test 2: Symbol key in class
+class F2 {
+	[key: symbol]: Bar;
+}
+
+// =====================
+// Index signature - Complex value types
+// =====================
+
+// Test 1: Union type value
+interface G1 {
+	[key: string]: Foo | Bar | Baz;
+}
+
+// Test 2: Intersection type value
+interface G2 {
+	[key: string]: Foo & Bar;
+}
+
+// Test 3: Function type value
+interface G3 {
+	[key: string]: (a: number) => string;
+}
+
+// Test 4: Generic type value
+interface G4 {
+	[key: string]: Array<Foo>;
+}
+
+// Test 5: Tuple type value
+interface G5 {
+	[key: string]: [Foo, Bar];
+}
+
+// =====================
+// Index signature - Boundary conditions
+// =====================
+
+// Test 1: Interface index sig boundary - fits (80 chars with spaces)
+interface H1 {
+	[looooooooooooooooooooooooooooooooooooooooooooo: string]: B;
+}
+
+// Test 2: Interface index sig boundary - breaks (81 chars with spaces)
+interface H2 {
+	[loooooooooooooooooooooooooooooooooooooooooooooo: string]: B;
+}
+
+// Test 3: Class index sig boundary - fits (80 chars with spaces)
+class H3 {
+	[loooooooooooooooooooooooooooooooooooooooooooooo: string]: B;
+}
+
+// Test 4: Class index sig boundary - breaks (81 chars with spaces)
+class H4 {
+	[looooooooooooooooooooooooooooooooooooooooooooooo: string]: B;
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+  239: // Test 2: Type assertion with generic type (inner generics not affected by this patch)
+  650: 	[a: string]: Looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong;
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```ts
+// =====================
+// Indexed access types
+// =====================
+
+// Test 1: Basic indexed access type
+type A = Foo[ Bar ];
+
+// Test 2: Indexed access with keyof
+type B = Foo[ keyof Foo ];
+
+// Test 3: Indexed access with string literal
+type C = Foo[ "a" ];
+
+// Test 4: Nested indexed access
+type D = Foo[ Bar ][ Baz ];
+
+// Test 5: Indexed access with union key
+type E = Foo[ Bar | Baz ];
+
+// Test 6: Indexed access in mapped type
+type F = { [ K in keyof Foo ]: Foo[ K ] };
+
+// Test 7: Indexed access on array type
+type G = Foo[][ number ];
+
+// Test 8: Indexed access on tuple
+type H = [ Foo, Bar ][ 0 ];
+
+// Test 9: Boundary - long index type that fits (80 chars with spaces)
+type I = Foo[ Baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ];
+
+// Test 10: Boundary - long index type that breaks (81 chars with spaces)
+type J = Foo[
+	Baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+];
+
+// =====================
+// Mapped types
+// =====================
+
+// Test 1: Basic mapped type
+type K = { [ K in keyof Foo ]: Bar };
+
+// Test 2: Mapped type with readonly modifier
+type L = { readonly [ K in keyof Foo ]: Bar };
+
+// Test 3: Mapped type with optional modifier
+type M = { [ K in keyof Foo ]?: Bar };
+
+// Test 4: Mapped type with minus modifiers
+type N = { -readonly [ K in keyof Foo ]-?: Bar };
+
+// Test 5: Mapped type with as clause
+type O = { [ K in keyof Foo as Bar ]: Baz };
+
+// Test 6: Mapped type with union keys
+type P = { [ K in "a" | "b" | "c" ]: Bar };
+
+// Test 7: Nested mapped types
+type Q = { [ K in keyof Foo ]: { [ P in keyof Bar ]: Baz } };
+
+// Test 8: Boundary - long mapped type that fits (80 chars with spaces)
+type R = { [ K in Fooooooooooooooooooooooooooooooooooooooooooooooooooooo ]: B };
+
+// Test 9: Boundary - long mapped type that breaks (81 chars with spaces)
+type S = {
+	[ K in Foooooooooooooooooooooooooooooooooooooooooooooooooooooo ]: B;
+};
+
+// =====================
+// Tuple types
+// =====================
+
+// Test 1: Single element tuple
+type T = [ Foo ];
+
+// Test 2: Multiple element tuple
+type U = [ Foo, Bar, Baz ];
+
+// Test 3: Tuple with optional element
+type V = [ Foo, Bar? ];
+
+// Test 4: Tuple with rest element
+type W = [ Foo, ...Bar ];
+
+// Test 5: Tuple with labeled elements
+type X = [ a: Foo, b: Bar ];
+
+// Test 6: Nested tuple types
+type Y = [ [ Foo, Bar ], Baz ];
+
+// Test 7: Tuple in function parameter
+function foo( a: [ Foo, Bar ] ): void {}
+
+// Test 8: Readonly tuple
+type Z = readonly [ Foo, Bar ];
+
+// Test 9: Boundary - long tuple that fits (80 chars with spaces)
+type AA = [ Foooooooooooooooooooooooooooooo, Baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ];
+
+// Test 10: Boundary - long tuple that breaks (81 chars with spaces)
+type BB = [
+	Fooooooooooooooooooooooooooooooo,
+	Baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+];
+
+// =====================
+// Type parameters
+// =====================
+
+// Generic function with one type parameter
+function f1< T >() {}
+
+// Generic function with two type parameters
+function f2< T, U >() {}
+
+// Generic function with three type parameters
+function f3< T, U, V >() {}
+
+// Generic arrow function with one type parameter
+const foo1 = < T >() => {};
+
+// Generic arrow function with two type parameters
+const foo2 = < T, U >() => {};
+
+// Generic class with one type parameter
+class A1< T > {}
+
+// Generic class with two type parameters
+class A2< T, U > {}
+
+// Generic interface with one type parameter
+interface B1< T > {}
+
+// Generic interface with two type parameters
+interface B2< T, U > {}
+
+// Generic type alias with one type parameter
+type CC< T > = T;
+
+// Generic type alias with two type parameters
+type DD< T, U > = T | U;
+
+// Type parameter with extends constraint
+function f4< T extends U >() {}
+
+// Type parameter with extends constraint and default
+function f5< T extends U = V >() {}
+
+// Multiple type parameters with constraints
+function f6< T extends U, V extends W >() {}
+
+// Type parameter extending keyof
+function f7< K extends keyof T >() {}
+
+// Type parameter extending union type
+function f8< T extends A | B >() {}
+
+// Type parameter extending intersection type
+function f9< T extends A & B >() {}
+
+// Type parameter with default type
+function f10< T = U >() {}
+
+// Multiple type parameters with defaults
+function f11< T = A, U = B >() {}
+
+// Type parameter extending object type
+function f12< T extends { a: number } >() {}
+
+// Type parameter extending array type
+function f13< T extends U[] >() {}
+
+// Type parameter extending function type
+function f14< T extends () => U >() {}
+
+// Type parameter extending conditional type
+function f15< T extends U extends V ? W : X >() {}
+
+// Generic method in class
+class A3 {
+	bar< T >() {}
+}
+
+// Generic method in interface
+interface B3 {
+	bar< T >(): void;
+}
+
+// Generic method in object type
+type EE = {
+	bar< T >(): void;
+};
+
+// Generic call signature in interface
+interface B4 {
+	< T >( a: T ): T;
+}
+
+// Generic construct signature in interface
+interface B5 {
+	new < T >( a: T ): T;
+}
+
+// Type parameters that break due to long constraint
+function f16<
+	T extends Loooooooooooooooooooooooooooooooooooooooooooooooooong,
+>() {}
+
+// Multiple type parameters that break due to length
+function f17<
+	Loooooooooooooooooong,
+	Loooooooooooooooooong,
+	Loooooooooooooooooong,
+>() {}
+
+// Multiple type parameters with long constraints that break
+function f18<
+	T extends Loooooooooooooooooooooooooong,
+	U extends Loooooooooooooooooooooooooong,
+>() {}
+
+// Generic class with long type parameter that breaks
+class A4< T extends Loooooooooooooooooooooooooooooooooooooooooooooooooong > {}
+
+// Generic interface with long type parameter that breaks
+interface B6<
+	T extends Loooooooooooooooooooooooooooooooooooooooooooooooooong,
+> {}
+
+// Generic type alias with long type parameter that breaks
+type FF< T extends Loooooooooooooooooooooooooooooooooooooooooooooooooong > = T;
+
+// Boundary - type parameters that fit (80 chars with spaces)
+function foooooooooooooooooooooooooooooooooooooooooooooooo< T extends Foo >() {}
+
+// Boundary - type parameters that break (81 chars with spaces)
+function fooooooooooooooooooooooooooooooooooooooooooooooooo<
+	T extends Foo,
+>() {}
+
+// =====================
+// Type assertion assignments
+// =====================
+
+// Test 1: Basic type assertion assignment
+let a;
+( < number >a ) = 1;
+
+// Test 2: Type assertion with generic type (inner generics not affected by this patch)
+let b;
+( < Array< number > >b ) = [ 1, 2, 3 ];
+
+// Test 3: Type assertion with union type
+let c;
+( < string | number >c ) = "foo";
+
+// Test 4: Type assertion in destructuring
+( { a: < number >a } = { a: 1 } );
+
+// Test 5: Nested type assertions
+( < number >( < any >a ) ) = 1;
+
+// Test 6: Type assertion with member expression
+( < number >a.b ) = 1;
+
+// Test 7: Type assertion in for-of loop
+for ( < number >a of [] ) {
+}
+
+// Test 8: Boundary test - fits (80 chars with spaces)
+( < Fooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo >a ) = 1;
+
+// Test 9: Boundary test - breaks (81 chars with spaces)
+( < Foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo >a ) =
+	1;
+
+// Test 10: Type assertion with intersection type
+( < Foo & Bar >a ) = x;
+
+// Test 11: Type assertion with array type
+( < Foo[] >a ) = [ x ];
+
+// Test 12: Type assertion with tuple type
+( < [ Foo, Bar ] >a ) = [ x, y ];
+
+// Test 13: Type assertion with function type
+( < ( b: number ) => string >a ) = fn;
+
+// Test 14: Type assertion with object type
+( < { foo: number } >a ) = obj;
+
+// Test 15: Type assertion with any type
+( < any >a ) = x;
+
+// Test 16: Type assertion with unknown type
+( < unknown >a ) = x;
+
+// Test 17: Type assertion with typeof type
+( < typeof foo >a ) = x;
+
+// Test 18: Type assertion with keyof type
+( < keyof Foo >a ) = x;
+
+// Test 19: Type assertion with indexed access type
+( < Foo[ "bar" ] >a ) = x;
+
+// Test 20: Type assertion with conditional type
+( < T extends U ? V : W >a ) = x;
+
+// =====================
+// Type assertion expressions
+// =====================
+
+// Test 1: Basic type assertion
+const d = < number >b;
+
+// Test 2: Reference type
+const e = < Foo >d;
+
+// Test 3: Union type
+const f = < Foo | Bar >f;
+
+// Test 4: Generic type (inner generics don't get spaces from this patch)
+const g = < Array< number > >h;
+
+// Test 5: Type assertion in function call
+foo( < number >a );
+
+// Test 6: Nested type assertion
+const h = < number >( < any >j );
+
+// Test 7: Const assertion
+const i = < const >"hello";
+
+// Test 8: Type assertion with object literal
+const j = < Foo >{ a: 1, b: 2 };
+
+// Test 9: Boundary - long type that breaks
+const k = <
+	Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong
+>n;
+
+// Test 10: Boundary - union that breaks
+const l = <
+	Foo | Bar | Baz | Foooooooooooooooooooooooooooooooooooooooooooooooooooo
+>p;
+
+// Test 11: Type assertion with intersection type
+const m = < Foo & Bar >q;
+
+// Test 12: Type assertion with array type
+const n = < Foo[] >s;
+
+// Test 13: Type assertion with tuple type
+const o = < [ Foo, Bar ] >u;
+
+// Test 14: Type assertion with function type
+const p = < ( b: number ) => string >w;
+
+// Test 15: Type assertion with object type
+const q = < { foo: number } >y;
+
+// Test 16: Type assertion with any type
+const r = < any >aa;
+
+// Test 17: Type assertion with unknown type
+const s = < unknown >cc;
+
+// Test 18: Type assertion with typeof type
+const t = < typeof foo >ee;
+
+// Test 19: Type assertion with keyof type
+const u = < keyof Foo >gg;
+
+// Test 20: Type assertion with indexed access type
+const v = < Foo[ "bar" ] >ii;
+
+// Test 21: Type assertion with conditional type
+const w = < T extends U ? V : W >kk;
+
+// Test 22: Boundary - short type that fits
+const x = < Foo >mm;
+
+// Test 23: Boundary - long type that breaks
+const y = <
+	Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong
+>n;
+
+// =====================
+// As/satisfies expressions
+// =====================
+
+// As expression as callee in call expression
+( a as Foo )();
+
+// As expression as callee in call expression with arguments
+( a as Foo )( b, c );
+
+// As expression as callee in optional call expression
+( a as Foo )?.();
+
+// As expression as callee in new expression
+new ( a as Foo )();
+
+// As expression as callee in new expression with arguments
+new ( a as Foo )( b, c );
+
+// As expression as object in static member expression
+( a as Foo ).bar;
+
+// As expression as object in static member expression with method call
+( a as Foo ).bar();
+
+// As expression as object in static member expression chain
+( a as Foo ).bar.baz;
+
+// As expression as object in static member assignment
+( a as Foo ).bar = b;
+
+// As expression as object in computed member expression
+( a as Foo )[ b ];
+
+// As expression as object in computed member expression with string literal
+( a as Foo )[ "bar" ];
+
+// As expression as object in computed member assignment
+( a as Foo )[ b ] = c;
+
+// As expression with generic type as callee
+( a as Foo< T > )();
+
+// As expression with generic type as object in member expression
+( a as Foo< T > ).bar;
+
+// As expression with union type as callee
+( a as Foo | Bar )();
+
+// As expression with union type as object in member expression
+( a as Foo | Bar ).baz;
+
+// As expression with intersection type as callee
+( a as Foo & Bar )();
+
+// As expression with intersection type as object in member expression
+( a as Foo & Bar ).baz;
+
+// As expression with array type as callee
+( a as Foo[] )();
+
+// As expression with array type as object in member expression
+( a as Foo[] ).length;
+
+// As expression with tuple type as callee
+( a as [ Foo, Bar ] )();
+
+// As expression with tuple type as object in member expression
+( a as [ Foo, Bar ] )[ 0 ];
+
+// As expression with function type as callee
+( a as ( b: number ) => string )();
+
+// As expression with function type as object in member expression
+( a as ( b: number ) => string ).bind( c );
+
+// As expression with object type as callee
+( a as { foo: () => void } )();
+
+// As expression with object type as object in member expression
+( a as { foo: number } ).foo;
+
+// Nested as expressions as callee
+( a as Foo as Bar )();
+
+// Nested as expressions as object in member expression
+( a as Foo as Bar ).baz;
+
+// As expression with typeof type as callee
+( a as typeof foo )();
+
+// As expression with typeof type as object in member expression
+( a as typeof foo ).bar;
+
+// As expression with keyof type as callee
+( a as keyof Foo )();
+
+// As expression with keyof type as object in member expression
+( a as keyof Foo ).toString();
+
+// As expression with indexed access type as callee
+( a as Foo[ "bar" ] )();
+
+// As expression with indexed access type as object in member expression
+( a as Foo[ "bar" ] ).baz;
+
+// As expression with conditional type as callee
+( a as T extends U ? V : W )();
+
+// As expression with conditional type as object in member expression
+( a as T extends U ? V : W ).x;
+
+// As expression with any type as callee
+( a as any )();
+
+// As expression with any type as object in member expression
+( a as any ).foo;
+
+// As expression with unknown type as callee
+( a as unknown )();
+
+// As expression with unknown type as object in member expression
+( a as unknown as Foo ).bar;
+
+// Chained member access on as expression
+( a as Foo ).bar.baz.qux;
+
+// Chained method calls on as expression
+( a as Foo ).bar().baz().qux();
+
+// Mixed member access and method calls on as expression
+( a as Foo ).bar.baz().qux;
+
+// Satisfies expression as callee in call expression
+( a satisfies Foo )();
+
+// Satisfies expression as object in static member expression
+( a satisfies Foo ).bar;
+
+// Satisfies expression as object in computed member expression
+( a satisfies Foo )[ b ];
+
+// Satisfies expression as callee in new expression
+new ( a satisfies Foo )();
+
+// Satisfies expression with generic type as callee
+( a satisfies Foo< T > )();
+
+// Satisfies expression with union type as object in member expression
+( a satisfies Foo | Bar ).baz;
+
+// Long as expression type that breaks as callee
+(
+	a as Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong
+)();
+
+// Long as expression type that breaks as object in member expression
+(
+	a as Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong
+).bar;
+
+// Long as expression with generic that breaks as callee
+(
+	a as Map< Loooooooooooooooooooooooooooong, Loooooooooooooooooooooooooooong >
+)();
+
+// Long as expression with generic that breaks as object in member expression
+( a as Map< Loooooooooooooooooooooooooooong, Loooooooooooooooooooooooooooong > )
+	.bar;
+
+// Long satisfies expression type that breaks as callee
+(
+	a satisfies Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong
+)();
+
+// Long satisfies expression type that breaks as object in member expression
+(
+	a satisfies Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong
+).bar;
+
+// Boundary - as expression as callee that fits
+( aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa as Foo )();
+
+// Boundary - as expression as callee that breaks
+(
+	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa as Foo
+)();
+
+// Boundary - as expression as object that fits
+( aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa as Foo ).bar;
+
+// Boundary - as expression as object that breaks
+( aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa as Foo )
+	.bar;
+
+// =====================
+// Index signature type members
+// =====================
+
+// Test 1: Basic index signature with string key
+interface C1 {
+	[ a: string ]: Bar;
+}
+
+// Test 2: Index signature with number key
+interface C2 {
+	[ a: number ]: Bar;
+}
+
+// Test 3: Readonly index signature
+interface C3 {
+	readonly [ a: string ]: Bar;
+}
+
+// Test 4: Index signature in type literal
+type GG = {
+	[ a: string ]: Bar;
+};
+
+// Test 5: Multiple index signatures
+interface C4 {
+	[ a: string ]: Bar;
+	[ b: number ]: Baz;
+}
+
+// Test 6: Index signature with other members
+interface C5 {
+	a: Bar;
+	[ b: string ]: Baz;
+	c(): Qux;
+}
+
+// Test 7: Template literal key type
+interface C6 {
+	[ a: `${ string }` ]: Bar;
+}
+
+// Test 8: Boundary - long value type causes line break
+interface C7 {
+	[
+		a: string
+	]: Looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong;
+}
+
+// =====================
+// Index signature class members
+// =====================
+
+// Test 1: Basic index signature class member with string key
+class D1 {
+	[ a: string ]: Bar;
+}
+
+// Test 2: Index signature class member with number key
+class D2 {
+	[ a: number ]: Bar;
+}
+
+// Test 3: Readonly index signature class member
+class D3 {
+	readonly [ a: string ]: Bar;
+}
+
+// Test 4: Index signature class member with other members
+class D4 {
+	a: Bar;
+	[ b: string ]: Bar;
+	method(): void {}
+}
+
+// Test 5: Multiple index signatures in class
+class D5 {
+	[ a: string ]: Bar;
+	[ b: number ]: Baz;
+}
+
+// Test 6: Boundary - long value type causes line break
+class D6 {
+	[ a: string ]: Looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong;
+}
+
+// =====================
+// Index signature - Class modifiers
+// =====================
+
+// Test 1: Static index signature
+class E1 {
+	static [ key: string ]: Bar;
+}
+
+// Test 2: Static readonly index signature
+class E2 {
+	static readonly [ key: string ]: Bar;
+}
+
+// =====================
+// Index signature - Symbol keys
+// =====================
+
+// Test 1: Symbol key in interface
+interface F1 {
+	[ key: symbol ]: Bar;
+}
+
+// Test 2: Symbol key in class
+class F2 {
+	[ key: symbol ]: Bar;
+}
+
+// =====================
+// Index signature - Complex value types
+// =====================
+
+// Test 1: Union type value
+interface G1 {
+	[ key: string ]: Foo | Bar | Baz;
+}
+
+// Test 2: Intersection type value
+interface G2 {
+	[ key: string ]: Foo & Bar;
+}
+
+// Test 3: Function type value
+interface G3 {
+	[ key: string ]: ( a: number ) => string;
+}
+
+// Test 4: Generic type value
+interface G4 {
+	[ key: string ]: Array< Foo >;
+}
+
+// Test 5: Tuple type value
+interface G5 {
+	[ key: string ]: [ Foo, Bar ];
+}
+
+// =====================
+// Index signature - Boundary conditions
+// =====================
+
+// Test 1: Interface index sig boundary - fits (80 chars with spaces)
+interface H1 {
+	[ looooooooooooooooooooooooooooooooooooooooooooo: string ]: B;
+}
+
+// Test 2: Interface index sig boundary - breaks (81 chars with spaces)
+interface H2 {
+	[ loooooooooooooooooooooooooooooooooooooooooooooo: string ]: B;
+}
+
+// Test 3: Class index sig boundary - fits (80 chars with spaces)
+class H3 {
+	[ loooooooooooooooooooooooooooooooooooooooooooooo: string ]: B;
+}
+
+// Test 4: Class index sig boundary - breaks (81 chars with spaces)
+class H4 {
+	[ looooooooooooooooooooooooooooooooooooooooooooooo: string ]: B;
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+  250: // Test 2: Type assertion with generic type (inner generics not affected by this patch)
+  668: 	[ a: string ]: Looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong;
+```

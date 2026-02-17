@@ -1406,6 +1406,10 @@
 			"description": "Options that changes how the CSS formatter behaves",
 			"type": "object",
 			"properties": {
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters. Affects parentheses `()` and square brackets `[]`. Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
+				},
 				"enabled": {
 					"description": "Control the formatter for CSS (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -1501,6 +1505,10 @@
 					"const": "runtime"
 				}
 			]
+		},
+		"DelimiterSpacing": {
+			"description": "Whether to insert spaces inside delimiters. Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly braces `{}`.",
+			"type": "boolean"
 		},
 		"DependencyAvailability": {
 			"oneOf": [
@@ -1638,6 +1646,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters.  Affects parentheses `()`,\nsquare brackets `[]`, TypeScript angle brackets `<>`, and JSX curly\nbraces `{}`.  Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -2180,6 +2192,10 @@
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters. Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly braces `{}`. Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
+				},
 				"enabled": {
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -2322,6 +2338,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside square brackets `[]`. Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"description": "Control the formatter for JSON (and its super languages) files.",
@@ -6288,6 +6308,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters.  Affects parentheses `()`,\nsquare brackets `[]`, TypeScript angle brackets `<>`, and JSX curly\nbraces `{}`.  Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]

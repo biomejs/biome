@@ -112,6 +112,14 @@ const APPLY_BRACKET_SPACING_AFTER_GRAPHQL: &str = r#"{
 }
 "#;
 
+const APPLY_DELIMITER_SPACING_BEFORE: &str = r#"const arr = [1, 2, 3];
+function foo(a, b) {}
+"#;
+
+const APPLY_DELIMITER_SPACING_AFTER: &str = r#"const arr = [ 1, 2, 3 ];
+function foo( a, b ) {}
+"#;
+
 const APPLY_BRACKET_SAME_LINE_BEFORE: &str = r#"<Foo
 	className={style}
 	reallyLongAttributeName1={longComplexValue}
@@ -863,6 +871,87 @@ fn applies_custom_bracket_spacing() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "applies_custom_bracket_spacing",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn applies_global_delimiter_spacing() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), APPLY_DELIMITER_SPACING_BEFORE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--delimiter-spacing",
+                "true",
+                "--write",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, APPLY_DELIMITER_SPACING_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_global_delimiter_spacing",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn language_overrides_global_delimiter_spacing() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config_path = Utf8Path::new("biome.json");
+    fs.insert(
+        config_path.into(),
+        r#"{
+  "formatter": {
+    "delimiterSpacing": true
+  },
+  "javascript": {
+    "formatter": {
+      "delimiterSpacing": false
+    }
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), APPLY_DELIMITER_SPACING_AFTER.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    // JS overrides global, so no spaces should be present (delimiterSpacing: false)
+    assert_file_contents(&fs, file_path, APPLY_DELIMITER_SPACING_BEFORE);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "language_overrides_global_delimiter_spacing",
         fs,
         console,
         result,

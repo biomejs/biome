@@ -1,0 +1,60 @@
+/* Color functions */
+div {
+    color: rgba(255, 255, 255, 1);
+    color: rgb(100, 200, 50);
+    color: hsl(120, 50%, 50%);
+    color: hsla(120, 50%, 50%, 0.5);
+    color: hwb(120 20% 30%);
+    color: lab(50% 40 59.5);
+    color: lch(50% 59.5 40);
+    color: oklch(0.7 0.2 30);
+    color: oklab(0.5 0.1 0.2);
+}
+
+/* Math functions */
+.math {
+    width: calc(100% - 20px);
+    width: min(100px, 50%);
+    width: max(200px, 25%);
+    width: clamp(10px, 5vw, 50px);
+}
+
+/* Transform functions */
+.transform {
+    transform: rotate(45deg);
+    transform: scale(1.5);
+    transform: translate(10px, 20px);
+    transform: skew(10deg, 5deg);
+    transform: matrix(1, 0, 0, 1, 0, 0);
+    transform: perspective(500px);
+    transform: rotate3d(1, 1, 1, 45deg);
+    transform: translate3d(10px, 20px, 30px);
+    transform: scale3d(1.5, 2, 1);
+}
+
+/* Gradient functions */
+.gradient {
+    background: linear-gradient(to right, red, blue);
+    background: radial-gradient(circle, red, blue);
+    background: conic-gradient(from 45deg, red, blue);
+    background: repeating-linear-gradient(45deg, red, blue 10px);
+}
+
+/* Filter functions */
+.filter {
+    filter: blur(5px);
+    filter: brightness(1.2);
+    filter: contrast(1.5);
+    filter: grayscale(100%);
+    filter: sepia(80%);
+    filter: drop-shadow(2px 4px 6px black);
+}
+
+/* Other functions */
+.other {
+    color: var(--primary-color);
+    padding: env(safe-area-inset-top);
+    content: attr(data-label);
+    content: counter(section);
+    content: counters(section, ".");
+}

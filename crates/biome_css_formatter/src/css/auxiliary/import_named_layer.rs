@@ -13,13 +13,15 @@ impl FormatNodeRule<CssImportNamedLayer> for FormatCssImportNamedLayer {
             r_paren_token,
         } = node.as_fields();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [
                 layer_token.format(),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&name.format()),
+                    soft_block_indent_with_maybe_space(&name.format(), should_insert_space),
                     r_paren_token.format()
                 ])
             ]
