@@ -318,7 +318,6 @@ pub(crate) trait CommandRunner {
             execution: execution.as_ref(),
             fs,
             console,
-            workspace,
             scan_duration: duration,
             crawler_output: output,
             paths,

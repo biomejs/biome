@@ -1,6 +1,6 @@
 use crate::CliDiagnostic;
 use crate::changed::get_changed_files;
-use crate::cli_options::CliOptions;
+use crate::cli_options::{CliOptions, CliReporter, CliReporterKind};
 use crate::runner::execution::{AnalyzerSelectors, Execution, ExecutionEnvironment, VcsTargeted};
 use crate::runner::impls::commands::traversal::{LoadEditorConfig, TraversalCommand};
 use crate::runner::impls::executions::summary_verb::SummaryVerbExecution;
@@ -44,7 +44,7 @@ pub(crate) struct CiCommandPayload {
 
 struct CiExecution {
     /// Whether the CI is running in a specific environment, e.g. GitHub, GitLab, etc.
-    _environment: Option<ExecutionEnvironment>,
+    environment: Option<ExecutionEnvironment>,
     /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
     vcs_targeted: VcsTargeted,
     /// Whether assist diagnostics should be promoted to error, and fail the CLI
@@ -115,6 +115,15 @@ impl Execution for CiExecution {
     fn summary_phrase(&self, files: usize, duration: &Duration) -> MarkupBuf {
         SummaryVerbExecution.summary_verb("Checked", files, duration)
     }
+
+    fn environment_to_reporter(&self) -> Option<CliReporter> {
+        self.environment.map(|e| match e {
+            ExecutionEnvironment::GitHub => CliReporter {
+                kind: CliReporterKind::GitHub,
+                destination: None,
+            },
+        })
+    }
 }
 
 impl LoadEditorConfig for CiCommandPayload {
@@ -149,7 +158,7 @@ impl TraversalCommand for CiCommandPayload {
             .is_some_and(|value| value == "true");
 
         Ok(Box::new(CiExecution {
-            _environment: if is_github {
+            environment: if is_github {
                 Some(ExecutionEnvironment::GitHub)
             } else {
                 None

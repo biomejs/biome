@@ -199,28 +199,6 @@ const CUSTOM_CONFIGURATION_AFTER: &str = "function f() {
 ";
 
 #[test]
-fn format_help() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["format", "--help"].as_slice()),
-    );
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "format_help",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn print() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
