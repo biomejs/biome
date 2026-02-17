@@ -104,10 +104,6 @@ declare_node_union! {
     pub NoVueRefAsOperandQuery = JsIdentifierExpression | JsIdentifierAssignment
 }
 
-declare_node_union! {
-    pub AnyJsStaticMemberLike = JsStaticMemberExpression | JsStaticMemberAssignment
-}
-
 impl Rule for NoVueRefAsOperand {
     type Query = Semantic<NoVueRefAsOperandQuery>;
     type State = RuleState;
@@ -151,11 +147,12 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
             } else {
                 return None
             };
-            if !is_calling_a_ref(call_expr, ident_binding, model).is_some_and(|v| v) {
+
+            if !is_calling_a_ref(call_expr, ident_binding, model) {
                 return None;
             }
 
-            if let Some(parent) = expr.syntax().parent() {
+            if let Some(parent) = ident_expr.syntax().parent() {
                 match parent.kind() {
                     // if (refValue)
                     JsSyntaxKind::JS_IF_STATEMENT |
@@ -179,12 +176,9 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
                             return None
                         }
 
-                        // Report only constants
-                        if let Some(decl) = binding.declaration()
-                        && let Some(grand_parent) = decl.syntax().grand_parent()
-                        && matches!(grand_parent.kind(), JsSyntaxKind::JS_VARIABLE_DECLARATION)
-                        && let Some(decl) = grand_parent.cast::<JsVariableDeclaration>()
-                        && (decl.is_const()) {
+                        // Report only refs which are constants
+                        if let Some(declaration) = declarator.syntax().ancestors().find_map(JsVariableDeclaration::cast)
+                        && (declaration.is_const()) {
                             return Some(RuleState { range: ident_expr.range() })
                         }
                     }
@@ -248,13 +242,17 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
                 return None
             };
 
-            if !is_calling_a_ref(call_expr, ident_binding, model).is_some_and(|v| v) {
+            if !is_calling_a_ref(call_expr, ident_binding, model) {
                 return None;
             }
 
             Some(RuleState { range: ident_assignment.range() })
         }
     }
+}
+
+declare_node_union! {
+    pub AnyJsStaticMemberLike = JsStaticMemberExpression | JsStaticMemberAssignment
 }
 
 const REF_VALUE_APIS: &[&str] = &[
@@ -269,16 +267,19 @@ const REF_VALUE_APIS: &[&str] = &[
 fn is_calling_a_ref(
     call_expr: &JsCallExpression,
     ident_binding: &JsIdentifierBinding, 
-    model: &SemanticModel) -> Option<bool> {
-    let callee = call_expr.callee().ok()?;
-    if ident_binding.is_under_object_pattern_binding().is_some_and(|v|v) {
-        return Some(is_valid_destructured_ref(&callee, call_expr, model));
+    model: &SemanticModel) -> bool {
+    if let Ok(callee) = call_expr.callee() {
+        if ident_binding.is_under_object_pattern_binding().is_some_and(|v|v) {
+            return is_valid_destructured_ref(&callee, call_expr, model);
+        }
+    
+        REF_VALUE_APIS
+            .iter()
+            .any(|ref_name| is_vue_api_reference(&callee, model, ref_name))
+        || is_vue_compiler_macro_call(call_expr, model, "defineModel")
+    } else {
+        false
     }
-
-    Some(REF_VALUE_APIS
-        .iter()
-        .any(|ref_name| is_vue_api_reference(&callee, model, ref_name))
-    || is_vue_compiler_macro_call(call_expr, model, "defineModel"))
 }
 
 /// Check if a destructured binding is a valid ref.
