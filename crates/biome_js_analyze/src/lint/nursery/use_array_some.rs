@@ -94,13 +94,13 @@ impl Rule for UseArraySome {
             return Some(state);
         }
 
-        if method_name == "find" || method_name == "findLast" {
-            if is_in_boolean_context(call.syntax()).unwrap_or(false) {
-                return Some(UseArraySomeState::Suggest {
-                    range: call.range(),
-                    pattern: "find/findLast used as boolean",
-                });
-            }
+        if (method_name == "find" || method_name == "findLast")
+            && is_in_boolean_context(call.syntax()).unwrap_or(false)
+        {
+            return Some(UseArraySomeState::Suggest {
+                range: call.range(),
+                pattern: "find/findLast used as boolean",
+            });
         }
 
         None
