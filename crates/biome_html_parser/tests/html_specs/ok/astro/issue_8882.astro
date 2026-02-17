@@ -1,0 +1,21 @@
+---
+/**
+ * In this comment, if you add any string opening or closing, such as an apostrophe, the file will show
+ * a bunch of errors. Doesn't (remove the apostrophe in the previous word to fix) that stink?
+ */
+import type { HTMLAttributes } from "astro/types";
+type Props = HTMLAttributes<"div">;
+const { class: className, ...rest } = Astro.props;
+---
+
+<div
+  class="some-classes"
+  data-state="closed"
+  style="animation: none;"
+  data-slot="accordion-content"
+  {...rest}
+>
+  <div class="pt-0 pb-4">
+    <slot />
+  </div>
+</div>

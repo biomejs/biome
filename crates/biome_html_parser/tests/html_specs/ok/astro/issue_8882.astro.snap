@@ -1,0 +1,257 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+---
+/**
+ * In this comment, if you add any string opening or closing, such as an apostrophe, the file will show
+ * a bunch of errors. Doesn't (remove the apostrophe in the previous word to fix) that stink?
+ */
+import type { HTMLAttributes } from "astro/types";
+type Props = HTMLAttributes<"div">;
+const { class: className, ...rest } = Astro.props;
+---
+
+<div
+  class="some-classes"
+  data-state="closed"
+  style="animation: none;"
+  data-slot="accordion-content"
+  {...rest}
+>
+  <div class="pt-0 pb-4">
+    <slot />
+  </div>
+</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..348 "/**\n * In this comment, if you add any string opening or closing, such as an apostrophe, the file will show\n * a bunch of errors. Doesn't (remove the apostrophe in the previous word to fix) that stink?\n */\nimport type { HTMLAttributes } from \"astro/types\";\ntype Props = HTMLAttributes<\"div\">;\nconst { class: className, ...rest } = Astro.props;\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@348..351 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@351..354 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@354..357 "div" [] [],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@357..365 "class" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@365..366 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@366..380 "\"some-classes\"" [] [],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@380..393 "data-state" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@393..394 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@394..402 "\"closed\"" [] [],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@402..410 "style" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@410..411 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@411..429 "\"animation: none;\"" [] [],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@429..441 "data-slot" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@441..442 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@442..461 "\"accordion-content\"" [] [],
+                            },
+                        },
+                    },
+                    HtmlSpreadAttribute {
+                        l_curly_token: L_CURLY@461..465 "{" [Newline("\n"), Whitespace("  ")] [],
+                        dotdotdot_token: DOT3@465..468 "..." [] [],
+                        argument: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@468..472 "rest" [] [],
+                        },
+                        r_curly_token: R_CURLY@472..473 "}" [] [],
+                    },
+                ],
+                r_angle_token: R_ANGLE@473..475 ">" [Newline("\n")] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@475..479 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@479..483 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlAttributeName {
+                                    value_token: HTML_LITERAL@483..488 "class" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@488..489 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@489..500 "\"pt-0 pb-4\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@500..501 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSelfClosingElement {
+                            l_angle_token: L_ANGLE@501..507 "<" [Newline("\n"), Whitespace("    ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@507..512 "slot" [] [Whitespace(" ")],
+                            },
+                            attributes: HtmlAttributeList [],
+                            slash_token: SLASH@512..513 "/" [] [],
+                            r_angle_token: R_ANGLE@513..514 ">" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@514..518 "<" [Newline("\n"), Whitespace("  ")] [],
+                        slash_token: SLASH@518..519 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@519..522 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@522..523 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@523..525 "<" [Newline("\n")] [],
+                slash_token: SLASH@525..526 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@526..529 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@529..530 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@530..531 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..531
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..351
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..348
+      0: HTML_LITERAL@3..348 "/**\n * In this comment, if you add any string opening or closing, such as an apostrophe, the file will show\n * a bunch of errors. Doesn't (remove the apostrophe in the previous word to fix) that stink?\n */\nimport type { HTMLAttributes } from \"astro/types\";\ntype Props = HTMLAttributes<\"div\">;\nconst { class: className, ...rest } = Astro.props;\n" [Newline("\n")] []
+    2: FENCE@348..351 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@351..530
+    0: HTML_ELEMENT@351..530
+      0: HTML_OPENING_ELEMENT@351..475
+        0: L_ANGLE@351..354 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@354..357
+          0: HTML_LITERAL@354..357 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@357..473
+          0: HTML_ATTRIBUTE@357..380
+            0: HTML_ATTRIBUTE_NAME@357..365
+              0: HTML_LITERAL@357..365 "class" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@365..380
+              0: EQ@365..366 "=" [] []
+              1: HTML_STRING@366..380
+                0: HTML_STRING_LITERAL@366..380 "\"some-classes\"" [] []
+          1: HTML_ATTRIBUTE@380..402
+            0: HTML_ATTRIBUTE_NAME@380..393
+              0: HTML_LITERAL@380..393 "data-state" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@393..402
+              0: EQ@393..394 "=" [] []
+              1: HTML_STRING@394..402
+                0: HTML_STRING_LITERAL@394..402 "\"closed\"" [] []
+          2: HTML_ATTRIBUTE@402..429
+            0: HTML_ATTRIBUTE_NAME@402..410
+              0: HTML_LITERAL@402..410 "style" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@410..429
+              0: EQ@410..411 "=" [] []
+              1: HTML_STRING@411..429
+                0: HTML_STRING_LITERAL@411..429 "\"animation: none;\"" [] []
+          3: HTML_ATTRIBUTE@429..461
+            0: HTML_ATTRIBUTE_NAME@429..441
+              0: HTML_LITERAL@429..441 "data-slot" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@441..461
+              0: EQ@441..442 "=" [] []
+              1: HTML_STRING@442..461
+                0: HTML_STRING_LITERAL@442..461 "\"accordion-content\"" [] []
+          4: HTML_SPREAD_ATTRIBUTE@461..473
+            0: L_CURLY@461..465 "{" [Newline("\n"), Whitespace("  ")] []
+            1: DOT3@465..468 "..." [] []
+            2: HTML_TEXT_EXPRESSION@468..472
+              0: HTML_LITERAL@468..472 "rest" [] []
+            3: R_CURLY@472..473 "}" [] []
+        3: R_ANGLE@473..475 ">" [Newline("\n")] []
+      1: HTML_ELEMENT_LIST@475..523
+        0: HTML_ELEMENT@475..523
+          0: HTML_OPENING_ELEMENT@475..501
+            0: L_ANGLE@475..479 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@479..483
+              0: HTML_LITERAL@479..483 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@483..500
+              0: HTML_ATTRIBUTE@483..500
+                0: HTML_ATTRIBUTE_NAME@483..488
+                  0: HTML_LITERAL@483..488 "class" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@488..500
+                  0: EQ@488..489 "=" [] []
+                  1: HTML_STRING@489..500
+                    0: HTML_STRING_LITERAL@489..500 "\"pt-0 pb-4\"" [] []
+            3: R_ANGLE@500..501 ">" [] []
+          1: HTML_ELEMENT_LIST@501..514
+            0: HTML_SELF_CLOSING_ELEMENT@501..514
+              0: L_ANGLE@501..507 "<" [Newline("\n"), Whitespace("    ")] []
+              1: HTML_TAG_NAME@507..512
+                0: HTML_LITERAL@507..512 "slot" [] [Whitespace(" ")]
+              2: HTML_ATTRIBUTE_LIST@512..512
+              3: SLASH@512..513 "/" [] []
+              4: R_ANGLE@513..514 ">" [] []
+          2: HTML_CLOSING_ELEMENT@514..523
+            0: L_ANGLE@514..518 "<" [Newline("\n"), Whitespace("  ")] []
+            1: SLASH@518..519 "/" [] []
+            2: HTML_TAG_NAME@519..522
+              0: HTML_LITERAL@519..522 "div" [] []
+            3: R_ANGLE@522..523 ">" [] []
+      2: HTML_CLOSING_ELEMENT@523..530
+        0: L_ANGLE@523..525 "<" [Newline("\n")] []
+        1: SLASH@525..526 "/" [] []
+        2: HTML_TAG_NAME@526..529
+          0: HTML_LITERAL@526..529 "div" [] []
+        3: R_ANGLE@529..530 ">" [] []
+  4: EOF@530..531 "" [Newline("\n")] []
+
+```
