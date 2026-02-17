@@ -30,6 +30,9 @@ pub(crate) enum HtmlLexContext {
     /// Like [InsideTag], but with Vue-specific tokens enabled.
     /// This enables parsing of Component directives (v-bind, :, @, #, etc.)
     InsideTagWithDirectives,
+    /// Like [InsideTag], but with Astro-specific tokens enabled.
+    /// This enables parsing of Astro directives (client:, set:, class:, is:, server:)
+    InsideTagAstro,
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
@@ -147,6 +150,8 @@ pub(crate) enum HtmlReLexContext {
     HtmlText,
     /// Relex tokens as if the parser was inside a tag.
     InsideTag,
+    /// Relex tokens as if the parser was inside a tag in an Astro file.
+    InsideTagAstro,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;

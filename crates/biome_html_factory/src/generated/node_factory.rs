@@ -30,23 +30,22 @@ pub fn astro_client_directive(
         ],
     ))
 }
-pub fn astro_directive_value(name: HtmlAttributeName) -> AstroDirectiveValueBuilder {
+pub fn astro_directive_value(
+    colon_token_token: SyntaxToken,
+    name: HtmlAttributeName,
+) -> AstroDirectiveValueBuilder {
     AstroDirectiveValueBuilder {
+        colon_token_token,
         name,
-        colon_token_token: None,
         initializer: None,
     }
 }
 pub struct AstroDirectiveValueBuilder {
+    colon_token_token: SyntaxToken,
     name: HtmlAttributeName,
-    colon_token_token: Option<SyntaxToken>,
     initializer: Option<HtmlAttributeInitializerClause>,
 }
 impl AstroDirectiveValueBuilder {
-    pub fn with_colon_token_token(mut self, colon_token_token: SyntaxToken) -> Self {
-        self.colon_token_token = Some(colon_token_token);
-        self
-    }
     pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
         self.initializer = Some(initializer);
         self
@@ -55,8 +54,7 @@ impl AstroDirectiveValueBuilder {
         AstroDirectiveValue::unwrap_cast(SyntaxNode::new_detached(
             HtmlSyntaxKind::ASTRO_DIRECTIVE_VALUE,
             [
-                self.colon_token_token
-                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.colon_token_token)),
                 Some(SyntaxElement::Node(self.name.into_syntax())),
                 self.initializer
                     .map(|token| SyntaxElement::Node(token.into_syntax())),

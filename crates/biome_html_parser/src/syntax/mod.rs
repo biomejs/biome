@@ -127,17 +127,21 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_DIRECTIVE))
 }
 
-/// We need to treat `:`, `.` and `@` differently if we are in a Vue context.
+/// We need to treat `:`, `.` and `@` differently if we are in a Vue or Astro context.
 ///
 /// Normally, we would do this using [`HtmlSyntaxFeatures`], and we do this elsewhere.
 /// However, this makes it so that these characters are disallowed and using them
 /// will emit diagnostics. We want to allow them if they have no special meaning.
 #[inline(always)]
 fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
-    // Only Vue files use InsideTagWithDirectives context, which has Vue-specific directive parsing (v-bind, :, @, etc.)
-    // Svelte and Astro use regular InsideTag context as they have different directive syntax
+    // Vue files use InsideTagWithDirectives for Vue-specific directive parsing (v-bind, :, @, etc.)
+    // Astro files use InsideTagAstro for Astro-specific directive parsing (client:, set:, etc.)
+    // Both contexts enable colon as a separate token
+    // Svelte uses regular InsideTag context as it has different directive syntax
     if Vue.is_supported(p) {
         HtmlLexContext::InsideTagWithDirectives
+    } else if Astro.is_supported(p) {
+        HtmlLexContext::InsideTagAstro
     } else {
         HtmlLexContext::InsideTag
     }
@@ -225,6 +229,10 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
 
     parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
+
+    if Astro.is_supported(p) {
+        p.re_lex(HtmlReLexContext::InsideTagAstro);
+    }
 
     AttributeList.parse_list(p);
 
@@ -420,6 +428,10 @@ impl ParseNodeList for AttributeList {
 }
 
 fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
+    if Astro.is_supported(p) {
+        p.re_lex(HtmlReLexContext::InsideTagAstro);
+    }
+
     if !is_at_attribute_start(p) {
         return Absent;
     }
@@ -448,6 +460,9 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 
             Present(m.complete(p, HTML_ATTRIBUTE))
         }
+        // Check for Astro directives before Vue colon shorthand
+        // This must come first because in Astro files, colons are lexed as separate tokens
+        _ if is_at_astro_directive_start(p) => parse_astro_directive(p),
         T![:] => HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
             p,
             parse_vue_v_bind_shorthand_directive,
@@ -463,16 +478,6 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             parse_vue_v_slot_shorthand_directive,
             |p, m| disabled_vue(p, m.range(p)),
         ),
-        // Check for Astro directives before Vue colon shorthand
-        _ if is_at_astro_directive_start(p) => {
-            Astro.parse_exclusive_syntax(p, parse_astro_directive, |p, m| {
-                p.err_builder(
-                    "Astro directives are only valid inside Astro files.",
-                    m.range(p),
-                )
-                .with_hint("Remove it or rename the file to have the .astro extension.")
-            })
-        }
         T!['{'] if Svelte.is_supported(p) => parse_svelte_spread_or_expression(p),
         T!['{'] if Astro.is_supported(p) => parse_astro_spread_or_expression(p),
         // Keep previous behaviour so that invalid documents are still parsed.
@@ -489,14 +494,27 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         _ if p.cur_text().starts_with("v-") => {
             Vue.parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
         }
-        _ if is_at_svelte_directive_start(p) => {
-            Svelte.parse_exclusive_syntax(p, parse_svelte_directive, |p, m| {
+        _ if !Astro.is_supported(p) && is_at_svelte_directive_start(p) => Svelte
+            .parse_exclusive_syntax(p, parse_svelte_directive, |p, m| {
                 disabled_svelte(p, m.range(p))
-            })
-        }
+            }),
         _ => {
             let m = p.start();
-            parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
+            if Astro.is_supported(p)
+                && p.at_ts(token_set![
+                    T![client],
+                    T![set],
+                    T![class],
+                    T![is],
+                    T![server]
+                ])
+            {
+                let name = p.start();
+                p.bump_remap_with_context(HTML_LITERAL, inside_tag_context(p));
+                name.complete(p, HTML_ATTRIBUTE_NAME);
+            } else {
+                parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
+            }
 
             if p.at(T![=]) {
                 parse_attribute_initializer(p).ok();
@@ -515,6 +533,14 @@ fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
         T![@],
         T![#],
     ]) || (Svelte.is_supported(p) && p.at(T!["{@"]))
+        || (Astro.is_supported(p)
+            && p.at_ts(token_set![
+                T![client],
+                T![set],
+                T![class],
+                T![is],
+                T![server]
+            ]))
 }
 
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
@@ -598,6 +624,10 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
                 expected_attribute,
             )
             .ok();
+
+        if Astro.is_supported(p) {
+            p.re_lex(HtmlReLexContext::InsideTagAstro);
+        }
     } else if p.at(T!["{{"]) {
         HtmlSyntaxFeatures::DoubleTextExpressions
             .parse_exclusive_syntax(
@@ -706,6 +736,7 @@ pub(crate) fn parse_single_text_expression(
         p.bump_remap_with_context(T!['}'], context);
         if context == HtmlLexContext::InsideTag
             || context == HtmlLexContext::InsideTagWithDirectives
+            || context == HtmlLexContext::InsideTagAstro
         {
             Present(m.complete(p, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION))
         } else {

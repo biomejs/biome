@@ -1,10 +1,11 @@
 use crate::prelude::*;
+use biome_formatter::write;
 use biome_html_syntax::AstroClientDirective;
-use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatAstroClientDirective;
 impl FormatNodeRule<AstroClientDirective> for FormatAstroClientDirective {
     fn fmt_fields(&self, node: &AstroClientDirective, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_html_verbatim_node(node.syntax()).fmt(f)
+        let fields = node.as_fields();
+        write!(f, [fields.client_token.format(), fields.value.format()])
     }
 }

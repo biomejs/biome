@@ -2,7 +2,7 @@ use crate::parser::HtmlParser;
 use crate::syntax::HtmlSyntaxFeatures::Astro;
 use crate::syntax::parse_error::{expected_closed_fence, expected_expression};
 use crate::syntax::{TextExpression, parse_attribute_initializer, parse_single_text_expression};
-use crate::token_source::HtmlLexContext;
+use crate::token_source::{HtmlLexContext, HtmlReLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{
     ASTRO_CLASS_DIRECTIVE, ASTRO_CLIENT_DIRECTIVE, ASTRO_DIRECTIVE_VALUE, ASTRO_EMBEDDED_CONTENT,
     ASTRO_FRONTMATTER_ELEMENT, ASTRO_IS_DIRECTIVE, ASTRO_SERVER_DIRECTIVE, ASTRO_SET_DIRECTIVE,
@@ -84,33 +84,29 @@ pub(crate) fn parse_astro_spread_or_expression(p: &mut HtmlParser) -> ParsedSynt
 const ASTRO_DIRECTIVE_KEYWORDS: &[&str] = &["client", "set", "class", "is", "server"];
 
 /// Check if the current position is at an Astro directive.
-/// In the InsideTag context, the colon is not a separate token. The lexer produces
-/// "client" and ":load" as separate HTML_LITERAL tokens. We need to check if the
-/// current token is a directive keyword and the next token starts with a colon.
+/// In the InsideTagAstro context, the colon is a separate token.
 pub(crate) fn is_at_astro_directive_start(p: &mut HtmlParser) -> bool {
     if Astro.is_unsupported(p) {
         return false;
     }
 
-    // Must be at an HTML_LITERAL token
-    if !p.at(HTML_LITERAL) {
-        return false;
-    }
-
-    let text = p.cur_text();
-
-    // Check if the text is exactly one of the directive keywords
-    if !ASTRO_DIRECTIVE_KEYWORDS.contains(&text) {
-        return false;
-    }
-
-    // Check if the next token is an HTML_LITERAL starting with ":"
     let checkpoint = p.checkpoint();
-    p.bump_any();
-    let next_is_colon_literal = p.at(HTML_LITERAL) && p.cur_text().starts_with(':');
+    p.re_lex(HtmlReLexContext::InsideTagAstro);
+
+    let first_token = p.cur();
+    let first_text = p.cur_text().to_string();
+
+    p.bump_any_with_context(HtmlLexContext::InsideTagAstro);
+    let second_token = p.cur();
+
     p.rewind(checkpoint);
 
-    next_is_colon_literal
+    let first_is_directive = matches!(
+        first_token,
+        T![client] | T![set] | T![class] | T![is] | T![server]
+    ) || ASTRO_DIRECTIVE_KEYWORDS.contains(&first_text.as_str());
+
+    first_is_directive && second_token == T![:]
 }
 
 pub(crate) fn parse_astro_directive(p: &mut HtmlParser) -> ParsedSyntax {
@@ -118,14 +114,26 @@ pub(crate) fn parse_astro_directive(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
 
-    // The text should be exactly one of the directive keywords
-    let directive_kind = match p.cur_text() {
-        "client" => ASTRO_CLIENT_DIRECTIVE,
-        "set" => ASTRO_SET_DIRECTIVE,
-        "class" => ASTRO_CLASS_DIRECTIVE,
-        "is" => ASTRO_IS_DIRECTIVE,
-        "server" => ASTRO_SERVER_DIRECTIVE,
-        _ => return Absent,
+    p.re_lex(HtmlReLexContext::InsideTagAstro);
+
+    let directive_kind = if p.at(HTML_LITERAL) {
+        match p.cur_text() {
+            "client" => ASTRO_CLIENT_DIRECTIVE,
+            "set" => ASTRO_SET_DIRECTIVE,
+            "class" => ASTRO_CLASS_DIRECTIVE,
+            "is" => ASTRO_IS_DIRECTIVE,
+            "server" => ASTRO_SERVER_DIRECTIVE,
+            _ => return Absent,
+        }
+    } else {
+        match p.cur() {
+            T![client] => ASTRO_CLIENT_DIRECTIVE,
+            T![set] => ASTRO_SET_DIRECTIVE,
+            T![class] => ASTRO_CLASS_DIRECTIVE,
+            T![is] => ASTRO_IS_DIRECTIVE,
+            T![server] => ASTRO_SERVER_DIRECTIVE,
+            _ => return Absent,
+        }
     };
 
     parse_directive(p, directive_kind)
@@ -133,34 +141,43 @@ pub(crate) fn parse_astro_directive(p: &mut HtmlParser) -> ParsedSyntax {
 
 fn parse_directive(p: &mut HtmlParser, node_kind: HtmlSyntaxKind) -> ParsedSyntax {
     let m = p.start();
+    p.bump_any_with_context(HtmlLexContext::InsideTagAstro);
 
-    // Consume the keyword token (e.g., "client")
-    // The keyword is lexed as an HTML_LITERAL with just the keyword text
-    p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTag);
+    // Parse the directive value (":load" part)
+    parse_directive_value(p).or_add_diagnostic(p, |p, range| {
+        p.err_builder(
+            "Expected a directive value after the directive keyword",
+            range,
+        )
+    });
 
-    // Now parse the directive value (":load" part)
-    // The value starts with an HTML_LITERAL like ":load"
+    Present(m.complete(p, node_kind))
+}
+
+fn parse_directive_value(p: &mut HtmlParser) -> ParsedSyntax {
+    let m = p.start();
+
+    // Consume the colon token
+    p.expect_with_context(T![:], HtmlLexContext::InsideTagAstro);
+
+    // Parse the directive name (e.g., "load" in "client:load")
     if p.at(HTML_LITERAL) {
-        let text = p.cur_text();
-        if text.starts_with(':') {
-            // Create the directive value node as a child
-            let m_value = p.start();
+        let m_name = p.start();
+        p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTagAstro);
+        m_name.complete(p, HTML_ATTRIBUTE_NAME);
+    } else {
+        p.error(p.err_builder("Expected a directive name after ':'", p.cur_range()));
+    }
 
-            // Consume the ":load" token as the name (colon is part of this token in InsideTag context)
-            let m_name = p.start();
-            p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTag);
-            m_name.complete(p, HTML_ATTRIBUTE_NAME);
-
-            // Parse optional initializer if present (e.g., "={value}")
-            if p.at(T![=]) {
-                parse_attribute_initializer(p).ok();
-            }
-
-            m_value.complete(p, ASTRO_DIRECTIVE_VALUE);
+    // Parse optional initializer if present (e.g., "={value}")
+    if p.at(T![=]) {
+        parse_attribute_initializer(p).ok();
+        if Astro.is_supported(p) {
+            p.re_lex(HtmlReLexContext::InsideTagAstro);
         }
     }
 
-    Present(m.complete(p, node_kind))
+    Present(m.complete(p, ASTRO_DIRECTIVE_VALUE))
 }
 
 // #endregion
