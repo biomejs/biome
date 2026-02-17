@@ -1,0 +1,137 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.test {
+  value: map.$;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..6 "test" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@6..7 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@7..15 "value" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@15..17 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssIdentifier {
+                                                value_token: IDENT@17..20 "map" [] [],
+                                            },
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    DOT@20..21 "." [] [],
+                                                    DOLLAR@21..22 "$" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@22..23 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@23..25 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@25..26 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..26
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..25
+    0: CSS_QUALIFIED_RULE@0..25
+      0: CSS_SELECTOR_LIST@0..6
+        0: CSS_COMPOUND_SELECTOR@0..6
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..6
+            0: CSS_CLASS_SELECTOR@0..6
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..6
+                0: IDENT@1..6 "test" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@6..25
+        0: L_CURLY@6..7 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@7..23
+          0: CSS_DECLARATION_WITH_SEMICOLON@7..23
+            0: CSS_DECLARATION@7..22
+              0: CSS_BOGUS_PROPERTY@7..22
+                0: CSS_IDENTIFIER@7..15
+                  0: IDENT@7..15 "value" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@15..17 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@17..22
+                  0: CSS_IDENTIFIER@17..20
+                    0: IDENT@17..20 "map" [] []
+                  1: CSS_BOGUS_PROPERTY_VALUE@20..22
+                    0: DOT@20..21 "." [] []
+                    1: DOLLAR@21..22 "$" [] []
+              1: (empty)
+            1: SEMICOLON@22..23 ";" [] []
+        2: R_CURLY@23..25 "}" [Newline("\n")] []
+  2: EOF@25..26 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+qualified-name-missing-member.scss:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ .test {
+  > 2 │   value: map.$;
+      │             ^^
+    3 │ }
+    4 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+```
