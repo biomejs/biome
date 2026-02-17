@@ -814,6 +814,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssTypeSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_UNARY_EXPRESSION => {
+                    let $pattern = unsafe { $crate::CssUnaryExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_UNICODE_CODEPOINT => {
                     let $pattern = unsafe { $crate::CssUnicodeCodepoint::new_unchecked(node) };
                     $body

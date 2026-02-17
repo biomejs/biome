@@ -2703,6 +2703,18 @@ impl CssTypeSelectorBuilder {
         ))
     }
 }
+pub fn css_unary_expression(
+    operator_token: SyntaxToken,
+    expression: AnyCssExpression,
+) -> CssUnaryExpression {
+    CssUnaryExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNARY_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
 pub fn css_unicode_codepoint(value_token: SyntaxToken) -> CssUnicodeCodepoint {
     CssUnicodeCodepoint::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_UNICODE_CODEPOINT,

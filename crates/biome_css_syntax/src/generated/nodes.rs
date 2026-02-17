@@ -7835,6 +7835,46 @@ pub struct CssTypeSelectorFields {
     pub ident: SyntaxResult<CssIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssUnaryExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssUnaryExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssUnaryExpressionFields {
+        CssUnaryExpressionFields {
+            operator: self.operator(),
+            expression: self.expression(),
+        }
+    }
+    pub fn operator(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<AnyCssExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssUnaryExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssUnaryExpressionFields {
+    pub operator: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<AnyCssExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUnicodeCodepoint {
     pub(crate) syntax: SyntaxNode,
 }
@@ -10558,6 +10598,7 @@ pub enum AnyCssExpression {
     CssCommaSeparatedValue(CssCommaSeparatedValue),
     CssListOfComponentValuesExpression(CssListOfComponentValuesExpression),
     CssParenthesizedExpression(CssParenthesizedExpression),
+    CssUnaryExpression(CssUnaryExpression),
 }
 impl AnyCssExpression {
     pub fn as_css_binary_expression(&self) -> Option<&CssBinaryExpression> {
@@ -10583,6 +10624,12 @@ impl AnyCssExpression {
     pub fn as_css_parenthesized_expression(&self) -> Option<&CssParenthesizedExpression> {
         match &self {
             Self::CssParenthesizedExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_unary_expression(&self) -> Option<&CssUnaryExpression> {
+        match &self {
+            Self::CssUnaryExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -22135,6 +22182,54 @@ impl From<CssTypeSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssUnaryExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNARY_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNARY_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUnaryExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUnaryExpression")
+                .field("operator", &support::DebugSyntaxResult(self.operator()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("CssUnaryExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssUnaryExpression> for SyntaxNode {
+    fn from(n: CssUnaryExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<CssUnaryExpression> for SyntaxElement {
+    fn from(n: CssUnaryExpression) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssUnicodeCodepoint {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26804,12 +26899,18 @@ impl From<CssParenthesizedExpression> for AnyCssExpression {
         Self::CssParenthesizedExpression(node)
     }
 }
+impl From<CssUnaryExpression> for AnyCssExpression {
+    fn from(node: CssUnaryExpression) -> Self {
+        Self::CssUnaryExpression(node)
+    }
+}
 impl AstNode for AnyCssExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBinaryExpression::KIND_SET
         .union(CssCommaSeparatedValue::KIND_SET)
         .union(CssListOfComponentValuesExpression::KIND_SET)
-        .union(CssParenthesizedExpression::KIND_SET);
+        .union(CssParenthesizedExpression::KIND_SET)
+        .union(CssUnaryExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -26817,6 +26918,7 @@ impl AstNode for AnyCssExpression {
                 | CSS_COMMA_SEPARATED_VALUE
                 | CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION
                 | CSS_PARENTHESIZED_EXPRESSION
+                | CSS_UNARY_EXPRESSION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -26833,6 +26935,7 @@ impl AstNode for AnyCssExpression {
             CSS_PARENTHESIZED_EXPRESSION => {
                 Self::CssParenthesizedExpression(CssParenthesizedExpression { syntax })
             }
+            CSS_UNARY_EXPRESSION => Self::CssUnaryExpression(CssUnaryExpression { syntax }),
             _ => return None,
         };
         Some(res)
@@ -26843,6 +26946,7 @@ impl AstNode for AnyCssExpression {
             Self::CssCommaSeparatedValue(it) => it.syntax(),
             Self::CssListOfComponentValuesExpression(it) => it.syntax(),
             Self::CssParenthesizedExpression(it) => it.syntax(),
+            Self::CssUnaryExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -26851,6 +26955,7 @@ impl AstNode for AnyCssExpression {
             Self::CssCommaSeparatedValue(it) => it.into_syntax(),
             Self::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             Self::CssParenthesizedExpression(it) => it.into_syntax(),
+            Self::CssUnaryExpression(it) => it.into_syntax(),
         }
     }
 }
@@ -26861,6 +26966,7 @@ impl std::fmt::Debug for AnyCssExpression {
             Self::CssCommaSeparatedValue(it) => std::fmt::Debug::fmt(it, f),
             Self::CssListOfComponentValuesExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssUnaryExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -26871,6 +26977,7 @@ impl From<AnyCssExpression> for SyntaxNode {
             AnyCssExpression::CssCommaSeparatedValue(it) => it.into_syntax(),
             AnyCssExpression::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             AnyCssExpression::CssParenthesizedExpression(it) => it.into_syntax(),
+            AnyCssExpression::CssUnaryExpression(it) => it.into_syntax(),
         }
     }
 }
@@ -34309,6 +34416,11 @@ impl std::fmt::Display for CssTypeFunction {
     }
 }
 impl std::fmt::Display for CssTypeSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssUnaryExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
