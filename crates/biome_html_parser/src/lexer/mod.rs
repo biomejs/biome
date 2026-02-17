@@ -15,7 +15,7 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{Dispatch::*, lookup_byte};
-use std::ops::{Add, AddAssign};
+use std::ops::Add;
 
 pub(crate) struct HtmlLexer<'src> {
     /// Source text
@@ -1502,9 +1502,11 @@ impl QuotesSeen {
         self.prev_byte = Some(byte);
     }
 
-    /// Returns `true` when the tracker is not currently inside an open string literal.
+    /// Returns `true` when the tracker is not currently inside an open string literal
+    /// or a comment. Both states must be absent for a `---` fence to be a valid
+    /// frontmatter closing delimiter.
     fn is_empty(&self) -> bool {
-        self.current_quote.is_none()
+        self.current_quote.is_none() && self.comment == QuotesSeenComment::None
     }
 }
 
@@ -1536,19 +1538,17 @@ mod quotes_seen {
         let mut quotes_seen = QuotesSeen::new();
         track(source, &mut quotes_seen);
         assert!(quotes_seen.is_empty());
-
-        let source = r#"// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh."#;
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(quotes_seen.is_empty());
     }
 
+    /// A single-line comment that has not yet been terminated (no trailing newline)
+    /// leaves the tracker inside the comment, so `is_empty()` returns `false`.
+    /// A `---` encountered in this state must not be treated as a closing fence.
     #[test]
-    fn empty_inside_comments() {
+    fn not_empty_inside_unterminated_single_line_comment() {
         let source = r#"// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh."#;
         let mut quotes_seen = QuotesSeen::new();
         track(source, &mut quotes_seen);
-        assert!(quotes_seen.is_empty());
+        assert!(!quotes_seen.is_empty());
     }
 
     #[test]
@@ -1673,6 +1673,36 @@ const f = "something" "#;
         assert!(
             quotes_seen.is_empty(),
             "block comment with unclosed quote chars on every line must not affect tracker"
+        );
+    }
+
+    // --- Tests for fence-inside-comment cases ---
+
+    /// A `---` sequence that appears after `//` on the same line must not close
+    /// the frontmatter, because it is inside a single-line comment.
+    #[test]
+    fn fence_inside_single_line_comment_is_not_empty() {
+        // "// ---" — the dashes are inside a line comment, not a real fence
+        let source = "// ---";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            !quotes_seen.is_empty(),
+            "tracker must be non-empty while inside a single-line comment"
+        );
+    }
+
+    /// A `---` sequence that appears inside a `/* */` block comment must not
+    /// close the frontmatter.
+    #[test]
+    fn fence_inside_block_comment_is_not_empty() {
+        // "/*\n---\n" — the dashes are inside a block comment that has not yet closed
+        let source = "/*\n---\n";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            !quotes_seen.is_empty(),
+            "tracker must be non-empty while inside a multi-line block comment"
         );
     }
 
