@@ -32,6 +32,7 @@ pub(crate) mod font_family_name;
 pub(crate) mod font_feature_values_block;
 pub(crate) mod font_feature_values_item;
 pub(crate) mod function;
+pub(crate) mod function_name;
 pub(crate) mod function_parameter;
 pub(crate) mod generic_component_value;
 pub(crate) mod if_branch;

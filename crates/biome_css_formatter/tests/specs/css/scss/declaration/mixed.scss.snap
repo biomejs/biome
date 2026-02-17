@@ -44,7 +44,7 @@ Trailing newline: true
 	$combined: green !default !global !global;
 
 	padding: $local-var;
-	margin:  ns.$namespaced-var;
+	margin: ns.$namespaced-var;
 }
 
 ```
