@@ -157,7 +157,7 @@ impl TraversalCommand for CiCommandPayload {
         let is_github = if cfg!(debug_assertions) {
             false
         } else {
-        // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
+            // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
             std::env::var("GITHUB_ACTIONS")
                 .ok()
                 .is_some_and(|value| value == "true")
