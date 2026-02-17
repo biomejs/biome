@@ -23,6 +23,12 @@ pub enum AnyEmbeddedSnippet {
     Json(EmbeddedSnippet<JsonLanguage>, DocumentServices),
 }
 
+impl From<(EmbeddedSnippet<JsLanguage>, DocumentServices)> for AnyEmbeddedSnippet {
+    fn from(content: (EmbeddedSnippet<JsLanguage>, DocumentServices)) -> Self {
+        Self::Js(content.0, content.1)
+    }
+}
+
 impl From<EmbeddedSnippet<JsLanguage>> for AnyEmbeddedSnippet {
     fn from(content: EmbeddedSnippet<JsLanguage>) -> Self {
         Self::Js(content, DocumentServices::none())
@@ -280,12 +286,6 @@ pub struct DocumentServices {
     language: LanguageServices,
 }
 
-impl From<JsDocumentServices> for DocumentServices {
-    fn from(services: JsDocumentServices) -> Self {
-        Self::Js(services)
-    }
-}
-
 impl DocumentServices {
     pub fn none() -> Self {
         Self {
@@ -311,6 +311,14 @@ impl DocumentServices {
         }
     }
 
+    pub fn as_js_services(&self) -> Option<&JsDocumentServices> {
+        if let LanguageServices::Js(services) = &self.language {
+            Some(services)
+        } else {
+            None
+        }
+    }
+
     pub fn embedded_bindings(&self) -> Option<EmbeddedExportedBindings> {
         self.exported_bindings.clone()
     }
@@ -318,21 +326,24 @@ impl DocumentServices {
     pub fn embedded_value_references(&self) -> Option<EmbeddedValueReferences> {
         self.value_references.clone()
     }
-
-    pub fn as_js_services(&self) -> Option<&JsDocumentServices> {
-        if let Self::Js(services) = self {
-            Some(services)
-        } else {
-            None
-        }
-    }
 }
 
 #[derive(Clone, Debug)]
 pub enum LanguageServices {
     /// The document doesn't have any services
     None,
+    Js(JsDocumentServices),
     Css(CssDocumentServices),
+}
+
+impl From<JsDocumentServices> for DocumentServices {
+    fn from(services: JsDocumentServices) -> Self {
+        Self {
+            exported_bindings: None,
+            value_references: None,
+            language: LanguageServices::Js(services),
+        }
+    }
 }
 
 impl From<CssDocumentServices> for DocumentServices {

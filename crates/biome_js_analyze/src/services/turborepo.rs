@@ -15,8 +15,6 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_package::TurboJson;
 use biome_rowan::AstNode;
 
-use crate::services::semantic::SemanticModelBuilderVisitor;
-
 /// Holds all turbo.json(c) configurations that apply to a file.
 ///
 /// In a Turborepo monorepo, environment variables can be declared in:
@@ -103,8 +101,7 @@ where
     type Language = JsLanguage;
     type Services = TurborepoServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _root: &AnyJsRoot) {
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 

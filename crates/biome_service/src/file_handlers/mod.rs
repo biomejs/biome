@@ -472,7 +472,6 @@ pub struct FixAllParams<'a> {
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
-    #[expect(unused)]
     pub(crate) document_services: &'a DocumentServices,
 }
 

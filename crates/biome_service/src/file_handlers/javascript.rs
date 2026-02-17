@@ -922,8 +922,18 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
 
-    let mut services =
-        JsAnalyzerServices::from((params.module_graph, params.project_layout, file_source));
+    // Use snippet services (for embedded JS) if present, else document services.
+    let effective_services = params.snippet_services.unwrap_or(params.document_services);
+    let semantic_model = effective_services
+        .as_js_services()
+        .and_then(|s| s.semantic_model.clone());
+
+    let mut services = JsAnalyzerServices::from((
+        params.module_graph,
+        params.project_layout,
+        file_source,
+        semantic_model,
+    ));
 
     if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
         services.set_embedded_bindings(embedded_bindings.bindings)
@@ -932,17 +942,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     if let Some(value_refs) = params.document_services.embedded_value_references() {
         services.set_embedded_value_references(value_refs.references)
     }
-
-    let semantic_model = params
-        .document_services
-        .as_js_services()
-        .and_then(|services| services.semantic_model.clone());
-    let services = JsAnalyzerServices::from((
-        params.module_graph,
-        params.project_layout,
-        file_source,
-        semantic_model,
-    ));
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,
@@ -1008,7 +1007,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     };
     let semantic_model = document_services
         .as_js_services()
-        .and_then(|services| services.semantic_model.clone());
+        .and_then(|s| s.semantic_model.clone());
     let services =
         JsAnalyzerServices::from((module_graph, project_layout, source_type, semantic_model));
 
@@ -1088,7 +1087,6 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             params.module_graph.clone(),
             params.project_layout.clone(),
             file_source,
-            None,
         ));
 
         if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
@@ -1306,7 +1304,7 @@ pub(crate) fn pull_diagnostics_and_actions(
     };
     let semantic_model = document_services
         .as_js_services()
-        .and_then(|services| services.semantic_model.clone());
+        .and_then(|s| s.semantic_model.clone());
     let services =
         JsAnalyzerServices::from((module_graph, project_layout, source_type, semantic_model));
     let mut process_pull_diagnostics_and_actions =

@@ -85,12 +85,33 @@ impl
     }
 }
 
+impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
+    fn from(
+        (module_graph, project_layout, source_type): (
+            Arc<ModuleGraph>,
+            Arc<ProjectLayout>,
+            JsFileSource,
+        ),
+    ) -> Self {
+        Self {
+            module_graph,
+            project_layout,
+            source_type,
+            embedded_bindings: Default::default(),
+            embedded_value_references: Default::default(),
+            semantic_model: None,
+        }
+    }
+}
+
 impl From<&AnyJsRoot> for JsAnalyzerServices {
     fn from(value: &AnyJsRoot) -> Self {
         Self {
             module_graph: Arc::new(ModuleGraph::default()),
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
+            embedded_bindings: Default::default(),
+            embedded_value_references: Default::default(),
             semantic_model: Some(semantic_model(value, SemanticModelOptions::default())),
         }
     }
