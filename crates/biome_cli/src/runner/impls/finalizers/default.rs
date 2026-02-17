@@ -109,7 +109,7 @@ impl Finalizer for DefaultFinalizer {
             let mut console_reporter_writer = ConsoleReporterWriter(console);
             let reporter = ConsoleReporter {
                 summary,
-                diagnostics_payload: &diagnostics_payload,
+                diagnostics_payload,
                 execution,
                 verbose: cli_options.verbose,
                 working_directory: fs.working_directory().clone(),
@@ -167,7 +167,7 @@ fn print_to_reporter<'a, 'b>(
         CliReporterKind::Default => {
             let reporter = ConsoleReporter {
                 summary,
-                diagnostics_payload: &diagnostics_payload,
+                diagnostics_payload,
                 execution,
                 verbose: cli_options.verbose,
                 working_directory: fs.working_directory().clone(),
@@ -182,7 +182,7 @@ fn print_to_reporter<'a, 'b>(
         CliReporterKind::Summary => {
             let reporter = SummaryReporter {
                 summary,
-                diagnostics_payload: &diagnostics_payload,
+                diagnostics_payload,
                 execution,
                 verbose: cli_options.verbose,
                 working_directory: fs.working_directory().clone(),
@@ -200,7 +200,7 @@ fn print_to_reporter<'a, 'b>(
                         });
             let reporter = JsonReporter {
                 summary,
-                diagnostics_payload: &diagnostics_payload,
+                diagnostics_payload,
                 execution,
                 verbose: cli_options.verbose,
                 working_directory: fs.working_directory().clone(),
@@ -227,7 +227,7 @@ fn print_to_reporter<'a, 'b>(
         }
         CliReporterKind::GitHub => {
             let reporter = GithubReporter {
-                diagnostics_payload: &diagnostics_payload,
+                diagnostics_payload,
                 execution,
                 verbose: cli_options.verbose,
                 working_directory: fs.working_directory().clone(),
@@ -240,7 +240,7 @@ fn print_to_reporter<'a, 'b>(
         }
         CliReporterKind::GitLab => {
             let reporter = GitLabReporter {
-                diagnostics_payload: &diagnostics_payload,
+                diagnostics_payload,
                 execution,
                 verbose: cli_options.verbose,
                 working_directory: fs.working_directory().clone(),
@@ -260,7 +260,7 @@ fn print_to_reporter<'a, 'b>(
         CliReporterKind::Junit => {
             let reporter = JunitReporter {
                 summary,
-                diagnostics_payload: &diagnostics_payload,
+                diagnostics_payload,
                 execution,
                 verbose: cli_options.verbose,
                 working_directory: fs.working_directory().clone(),
@@ -278,7 +278,7 @@ fn print_to_reporter<'a, 'b>(
         CliReporterKind::Checkstyle => {
             let reporter = CheckstyleReporter {
                 summary,
-                diagnostics_payload: &diagnostics_payload,
+                diagnostics_payload,
                 execution,
                 verbose: cli_options.verbose,
                 working_directory: fs.working_directory().clone(),
@@ -297,7 +297,7 @@ fn print_to_reporter<'a, 'b>(
         }
         CliReporterKind::RdJson => {
             let reporter = RdJsonReporter {
-                diagnostics_payload: &diagnostics_payload,
+                diagnostics_payload,
                 execution,
                 verbose: cli_options.verbose,
                 working_directory: fs.working_directory().clone(),
@@ -310,7 +310,7 @@ fn print_to_reporter<'a, 'b>(
         }
         CliReporterKind::Sarif => {
             let reporter = SarifReporter {
-                diagnostics_payload: &diagnostics_payload,
+                diagnostics_payload,
                 execution,
                 verbose: cli_options.verbose,
                 working_directory: fs.working_directory().clone(),

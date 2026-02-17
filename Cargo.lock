@@ -227,7 +227,6 @@ dependencies = [
  "serde_json",
  "serial_test",
  "smallvec",
- "temp-env",
  "terminal_size 0.4.3",
  "tikv-jemallocator",
  "tokio",
@@ -5210,15 +5209,6 @@ name = "target-triple"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "591ef38edfb78ca4771ee32cf494cb8771944bee237a9b91fc9c1424ac4b777b"
-
-[[package]]
-name = "temp-env"
-version = "0.3.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96374855068f47402c3121c6eed88d29cb1de8f3ab27090e273e420bdabcf050"
-dependencies = [
- "parking_lot",
-]
 
 [[package]]
 name = "tempfile"
