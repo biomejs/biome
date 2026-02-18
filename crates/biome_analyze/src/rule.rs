@@ -294,6 +294,7 @@ impl<'a> RuleSource<'a> {
             Self::HtmlEslint(_) => 38,
             Self::EslintE18e(_) => 38,
             Self::EslintBetterTailwindcss(_) => 39,
+            Self::SortPackageJson => 40,
         }
     }
 
@@ -354,6 +355,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintTurbo(rule_name)
             | Self::HtmlEslint(rule_name)
             | Self::EslintPlaywright(rule_name) => rule_name,
+            Self::SortPackageJson => "sort-package-json",
         }
     }
 
@@ -363,6 +365,7 @@ impl<'a> RuleSource<'a> {
             | Self::DenoLint(_)
             | Self::Eslint(_)
             | Self::GraphqlSchemaLinter(_)
+            | Self::SortPackageJson
             | Self::Stylelint(_) => "",
             Self::EslintBarrelFiles(_) => "barrel-files",
             Self::EslintGraphql(_) => "@graphql-eslint",
@@ -400,7 +403,6 @@ impl<'a> RuleSource<'a> {
             Self::EslintPlaywright(_) => "playwright",
             Self::EslintE18e(_) => "e18e",
             Self::EslintBetterTailwindcss(_) => "better-tailwindcss",
-            Self::SortPackageJson => "sort-package-json",
         }
     }
 
