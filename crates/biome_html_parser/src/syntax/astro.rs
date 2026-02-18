@@ -3,16 +3,12 @@ use crate::syntax::HtmlSyntaxFeatures::Astro;
 use crate::syntax::parse_error::{expected_closed_fence, expected_expression};
 use crate::syntax::{TextExpression, parse_attribute_initializer, parse_single_text_expression};
 use crate::token_source::{HtmlLexContext, HtmlReLexContext};
-use biome_html_syntax::HtmlSyntaxKind::{
-    ASTRO_CLASS_DIRECTIVE, ASTRO_CLIENT_DIRECTIVE, ASTRO_DEFINE_DIRECTIVE, ASTRO_DIRECTIVE_VALUE,
-    ASTRO_EMBEDDED_CONTENT, ASTRO_FRONTMATTER_ELEMENT, ASTRO_IS_DIRECTIVE, ASTRO_SERVER_DIRECTIVE,
-    ASTRO_SET_DIRECTIVE, FENCE, HTML_ATTRIBUTE_NAME, HTML_LITERAL, HTML_SPREAD_ATTRIBUTE,
-};
+use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::Absent;
-use biome_parser::{Parser, SyntaxFeature};
+use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 pub(crate) fn parse_astro_fence(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![---]) {
@@ -80,9 +76,6 @@ pub(crate) fn parse_astro_spread_or_expression(p: &mut HtmlParser) -> ParsedSynt
 
 // #region Directive parsing functions
 
-/// Astro directive keywords
-const ASTRO_DIRECTIVE_KEYWORDS: &[&str] = &["client", "set", "class", "is", "server", "define"];
-
 /// Check if the current position is at an Astro directive.
 /// In the InsideTagAstro context, the colon is a separate token.
 pub(crate) fn is_at_astro_directive_start(p: &mut HtmlParser) -> bool {
@@ -92,20 +85,14 @@ pub(crate) fn is_at_astro_directive_start(p: &mut HtmlParser) -> bool {
 
     let checkpoint = p.checkpoint();
     p.re_lex(HtmlReLexContext::InsideTagAstro);
-
     let first_token = p.cur();
-    let first_text = p.cur_text().to_string();
 
     p.bump_any_with_context(HtmlLexContext::InsideTagAstro);
     let second_token = p.cur();
 
     p.rewind(checkpoint);
 
-    let first_is_directive = matches!(
-        first_token,
-        T![client] | T![set] | T![class] | T![is] | T![server] | T![define]
-    ) || ASTRO_DIRECTIVE_KEYWORDS.contains(&first_text.as_str());
-
+    let first_is_directive = is_astro_directive_keyword(first_token);
     first_is_directive && second_token == T![:]
 }
 
@@ -116,26 +103,14 @@ pub(crate) fn parse_astro_directive(p: &mut HtmlParser) -> ParsedSyntax {
 
     p.re_lex(HtmlReLexContext::InsideTagAstro);
 
-    let directive_kind = if p.at(HTML_LITERAL) {
-        match p.cur_text() {
-            "client" => ASTRO_CLIENT_DIRECTIVE,
-            "set" => ASTRO_SET_DIRECTIVE,
-            "class" => ASTRO_CLASS_DIRECTIVE,
-            "is" => ASTRO_IS_DIRECTIVE,
-            "server" => ASTRO_SERVER_DIRECTIVE,
-            "define" => ASTRO_DEFINE_DIRECTIVE,
-            _ => return Absent,
-        }
-    } else {
-        match p.cur() {
-            T![client] => ASTRO_CLIENT_DIRECTIVE,
-            T![set] => ASTRO_SET_DIRECTIVE,
-            T![class] => ASTRO_CLASS_DIRECTIVE,
-            T![is] => ASTRO_IS_DIRECTIVE,
-            T![server] => ASTRO_SERVER_DIRECTIVE,
-            T![define] => ASTRO_DEFINE_DIRECTIVE,
-            _ => return Absent,
-        }
+    let directive_kind = match p.cur() {
+        T![client] => ASTRO_CLIENT_DIRECTIVE,
+        T![set] => ASTRO_SET_DIRECTIVE,
+        T![class] => ASTRO_CLASS_DIRECTIVE,
+        T![is] => ASTRO_IS_DIRECTIVE,
+        T![server] => ASTRO_SERVER_DIRECTIVE,
+        T![define] => ASTRO_DEFINE_DIRECTIVE,
+        _ => return Absent,
     };
 
     parse_directive(p, directive_kind)
@@ -174,12 +149,26 @@ fn parse_directive_value(p: &mut HtmlParser) -> ParsedSyntax {
     // Parse optional initializer if present (e.g., "={value}")
     if p.at(T![=]) {
         parse_attribute_initializer(p).ok();
-        if Astro.is_supported(p) {
-            p.re_lex(HtmlReLexContext::InsideTagAstro);
-        }
     }
 
     Present(m.complete(p, ASTRO_DIRECTIVE_VALUE))
+}
+
+pub const ASTRO_DIRECTIVE_TOKEN_SET: TokenSet<HtmlSyntaxKind> = token_set![
+    T![client],
+    T![set],
+    T![class],
+    T![is],
+    T![server],
+    T![define],
+];
+
+pub(crate) fn is_at_astro_directive_keyword(p: &mut HtmlParser) -> bool {
+    p.at_ts(ASTRO_DIRECTIVE_TOKEN_SET)
+}
+
+pub(crate) fn is_astro_directive_keyword(token: HtmlSyntaxKind) -> bool {
+    ASTRO_DIRECTIVE_TOKEN_SET.contains(token)
 }
 
 // #endregion

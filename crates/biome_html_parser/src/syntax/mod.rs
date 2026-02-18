@@ -6,8 +6,8 @@ mod vue;
 use crate::parser::HtmlParser;
 use crate::syntax::HtmlSyntaxFeatures::{Astro, DoubleTextExpressions, Svelte, Vue};
 use crate::syntax::astro::{
-    is_at_astro_directive_start, parse_astro_directive, parse_astro_fence,
-    parse_astro_spread_or_expression,
+    is_at_astro_directive_keyword, is_at_astro_directive_start, parse_astro_directive,
+    parse_astro_fence, parse_astro_spread_or_expression,
 };
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
@@ -428,10 +428,6 @@ impl ParseNodeList for AttributeList {
 }
 
 fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
-    if Astro.is_supported(p) {
-        p.re_lex(HtmlReLexContext::InsideTagAstro);
-    }
-
     if !is_at_attribute_start(p) {
         return Absent;
     }
@@ -462,7 +458,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         }
         // Check for Astro directives before Vue colon shorthand
         // This must come first because in Astro files, colons are lexed as separate tokens
-        _ if is_at_astro_directive_start(p) => parse_astro_directive(p),
+        _ if Astro.is_supported(p) && is_at_astro_directive_start(p) => parse_astro_directive(p),
         T![:] => HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
             p,
             parse_vue_v_bind_shorthand_directive,
@@ -494,22 +490,14 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         _ if p.cur_text().starts_with("v-") => {
             Vue.parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
         }
-        _ if !Astro.is_supported(p) && is_at_svelte_directive_start(p) => Svelte
+        _ if Svelte.is_supported(p) && is_at_svelte_directive_start(p) => Svelte
             .parse_exclusive_syntax(p, parse_svelte_directive, |p, m| {
                 disabled_svelte(p, m.range(p))
             }),
         _ => {
             let m = p.start();
-            if Astro.is_supported(p)
-                && p.at_ts(token_set![
-                    T![client],
-                    T![set],
-                    T![class],
-                    T![is],
-                    T![server],
-                    T![define]
-                ])
-            {
+            // we've already determined that this isn't a valid astro directive, so if it looks like one, we should remap it as a literal.
+            if Astro.is_supported(p) && is_at_astro_directive_keyword(p) {
                 let name = p.start();
                 p.bump_remap_with_context(HTML_LITERAL, inside_tag_context(p));
                 name.complete(p, HTML_ATTRIBUTE_NAME);
@@ -534,15 +522,7 @@ fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
         T![@],
         T![#],
     ]) || (Svelte.is_supported(p) && p.at(T!["{@"]))
-        || (Astro.is_supported(p)
-            && p.at_ts(token_set![
-                T![client],
-                T![set],
-                T![class],
-                T![is],
-                T![server],
-                T![define]
-            ]))
+        || (Astro.is_supported(p) && is_at_astro_directive_keyword(p))
 }
 
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
