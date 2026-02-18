@@ -182,8 +182,8 @@ HtmlAttributeList = AnyHtmlAttribute*
 
 AnyHtmlAttribute =
 	HtmlAttribute
-	| HtmlDoubleTextExpression
-	| HtmlSingleTextExpression
+	| HtmlAttributeDoubleTextExpression
+	| HtmlAttributeSingleTextExpression
 	| SvelteAttachAttribute
 	| HtmlSpreadAttribute
 	| AnySvelteDirective
@@ -206,8 +206,24 @@ HtmlAttributeInitializerClause =
 
 AnyHtmlAttributeInitializer =
 	HtmlString
-	| HtmlSingleTextExpression
+	| HtmlAttributeSingleTextExpression
 
+
+// <a {{ expression }}>
+//    ^^^^^^^^^^^^^^^^
+HtmlAttributeDoubleTextExpression =
+	'{{'
+	expression: HtmlTextExpression
+	'}}'
+
+// <a {expression}>
+//    ^^^^^^^^^^^^
+// <a href={expression}>
+//         ^^^^^^^^^^^^
+HtmlAttributeSingleTextExpression =
+	'{'
+	expression: HtmlTextExpression
+	'}'
 
 // ==================================
 // Svelte

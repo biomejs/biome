@@ -33,7 +33,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
-          node-version: 24.13.0
+          node-version: 24.13.1
 
       - name: Install pnpm
         run: |
@@ -64,7 +64,7 @@ jobs:
 
       - name: Create Release Pull Request
         id: changesets-action
-        uses: changesets/action@c48e67d110a68bc90ccf1098e9646092baacaa87 # v1.6.0
+        uses: changesets/action@6a0a831ff30acef54f2c6aa1cbbc1096b066edaf # v1.7.0
         with:
           version: pnpm run version
           commit: "ci: release"
@@ -88,7 +88,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
-          node-version: 24.13.0
+          node-version: 24.13.1
 
       - name: Check CLI version changes
         id: cli-version-changed
@@ -148,7 +148,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@887bc4e03483810873d617344dd5189cd82e7b8b # v2.67.11
+        uses: taiki-e/install-action@288875dd3d64326724fa6d9593062d9f8ba0b131 # v2.67.30
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -179,7 +179,7 @@ jobs:
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@00014ed6ed5efc5b1ab7f7f34a39eb55d41aa4f8 # v3.1.0
+        uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0
         with:
           subject-path: ./dist/biome-*
 
@@ -210,7 +210,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.93.0-bullseye@sha256:ba31d14ad0062a17302ab8b0b64422aa11c7ad1e8f14427210f626a8dbe14e9b
+      image: rust:1.93.1-bullseye@sha256:70a5d01614c818b1d5ec069c96d58517cdfa84d8aa314b4c859503c43424a984
 
     steps:
       - name: Checkout repository
@@ -237,7 +237,7 @@ jobs:
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@00014ed6ed5efc5b1ab7f7f34a39eb55d41aa4f8 # v3.1.0
+        uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0
         with:
           subject-path: ./dist/biome-*
 
@@ -306,7 +306,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
-          node-version: 24.13.0
+          node-version: 24.13.1
 
       - name: Install just
         uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
@@ -319,7 +319,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache pnpm modules
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -378,7 +378,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
-          node-version: 24.13.0
+          node-version: 24.13.1
           registry-url: "https://registry.npmjs.org"
 
       - name: Install pnpm
@@ -452,7 +452,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
-          node-version: 24.13.0
+          node-version: 24.13.1
           registry-url: "https://registry.npmjs.org"
 
       - name: Install pnpm

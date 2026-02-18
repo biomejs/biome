@@ -1,0 +1,162 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: missing-callback.js
+---
+# Input
+```js
+/* should generate diagnostics */
+describe('suite');
+test.describe('suite');
+test.describe.only('suite');
+test.describe.skip('suite');
+test.describe.parallel('suite');
+test.describe.serial('suite');
+test.describe.parallel.only('suite');
+
+```
+
+# Diagnostics
+```
+missing-callback.js:2:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe requires a callback function.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ describe('suite');
+      │ ^^^^^^^^^^^^^^^^^
+    3 │ test.describe('suite');
+    4 │ test.describe.only('suite');
+  
+  i The second argument to describe must be a function that contains the test definitions.
+  
+  i Add a callback function as the second argument to describe.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+missing-callback.js:3:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe requires a callback function.
+  
+    1 │ /* should generate diagnostics */
+    2 │ describe('suite');
+  > 3 │ test.describe('suite');
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ test.describe.only('suite');
+    5 │ test.describe.skip('suite');
+  
+  i The second argument to describe must be a function that contains the test definitions.
+  
+  i Add a callback function as the second argument to describe.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+missing-callback.js:4:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe requires a callback function.
+  
+    2 │ describe('suite');
+    3 │ test.describe('suite');
+  > 4 │ test.describe.only('suite');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ test.describe.skip('suite');
+    6 │ test.describe.parallel('suite');
+  
+  i The second argument to describe must be a function that contains the test definitions.
+  
+  i Add a callback function as the second argument to describe.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+missing-callback.js:5:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe requires a callback function.
+  
+    3 │ test.describe('suite');
+    4 │ test.describe.only('suite');
+  > 5 │ test.describe.skip('suite');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ test.describe.parallel('suite');
+    7 │ test.describe.serial('suite');
+  
+  i The second argument to describe must be a function that contains the test definitions.
+  
+  i Add a callback function as the second argument to describe.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+missing-callback.js:6:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe requires a callback function.
+  
+    4 │ test.describe.only('suite');
+    5 │ test.describe.skip('suite');
+  > 6 │ test.describe.parallel('suite');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ test.describe.serial('suite');
+    8 │ test.describe.parallel.only('suite');
+  
+  i The second argument to describe must be a function that contains the test definitions.
+  
+  i Add a callback function as the second argument to describe.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+missing-callback.js:7:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe requires a callback function.
+  
+    5 │ test.describe.skip('suite');
+    6 │ test.describe.parallel('suite');
+  > 7 │ test.describe.serial('suite');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ test.describe.parallel.only('suite');
+    9 │ 
+  
+  i The second argument to describe must be a function that contains the test definitions.
+  
+  i Add a callback function as the second argument to describe.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+missing-callback.js:8:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe requires a callback function.
+  
+    6 │ test.describe.parallel('suite');
+    7 │ test.describe.serial('suite');
+  > 8 │ test.describe.parallel.only('suite');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i The second argument to describe must be a function that contains the test definitions.
+  
+  i Add a callback function as the second argument to describe.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

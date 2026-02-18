@@ -17,11 +17,14 @@ use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
 };
 use biome_service::diagnostics::ConfigurationOutsideProject;
+use biome_service::file_handlers::astro::AstroFileHandler;
+use biome_service::file_handlers::svelte::SvelteFileHandler;
+use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::workspace::{
-    FeaturesBuilder, OpenProjectParams, OpenProjectResult, PullDiagnosticsParams,
-    SupportsFeatureParams,
+    FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
+    PullDiagnosticsParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
@@ -459,6 +462,27 @@ impl Session {
                 inline_config: self.inline_config(),
             })?;
 
+            let offset = if file_features.supports_full_html_support() {
+                None
+            } else {
+                let get_start: Option<fn(&str) -> Option<u32>> = match biome_path.extension() {
+                    Some("vue") => Some(VueFileHandler::start),
+                    Some("astro") => Some(AstroFileHandler::start),
+                    Some("svelte") => Some(SvelteFileHandler::start),
+                    _ => None,
+                };
+                get_start.and_then(|f| {
+                    let content = self
+                        .workspace
+                        .get_file_content(GetFileContentParams {
+                            project_key: doc.project_key,
+                            path: biome_path.clone(),
+                        })
+                        .ok()?;
+                    f(content.as_str())
+                })
+            };
+
             result
                 .diagnostics
                 .into_iter()
@@ -468,7 +492,7 @@ impl Session {
                         &url,
                         &doc.line_index,
                         self.position_encoding(),
-                        None,
+                        offset,
                     ) {
                         Ok(diag) => Some(diag),
                         Err(err) => {
@@ -649,16 +673,19 @@ impl Session {
         self.initialized.load(Ordering::Relaxed)
     }
 
+    /// Returns the configuration path set by the user in the extension settings
+    pub(crate) fn get_settings_configuration_path(&self) -> Option<Utf8PathBuf> {
+        self.extension_settings
+            .read()
+            .ok()
+            .and_then(|s| s.configuration_path())
+    }
+
     /// This function attempts to read the `biome.json` configuration file from
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_workspace_settings(self: &Arc<Self>, reload: bool) {
-        if let Some(config_path) = self
-            .extension_settings
-            .read()
-            .ok()
-            .and_then(|s| s.configuration_path())
-        {
+        if let Some(config_path) = self.get_settings_configuration_path() {
             info!("Detected configuration path in the workspace settings.");
             self.set_configuration_status(ConfigurationStatus::Loading);
 
@@ -923,9 +950,20 @@ impl Session {
         // If the configuration from the LSP or the workspace, the directory path is used as
         // the working directory. Otherwise, the base path of the session is used, then the current
         // working directory is used as the last resort.
+        debug!("Configuration path provided {:?}", &base_path);
         let path = match &base_path {
             ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
                 path.to_path_buf()
+            }
+            ConfigurationPathHint::FromUser(path) => {
+                if path.is_file() {
+                    path.parent()
+                        .map_or(fs.working_directory().unwrap_or_default(), |p| {
+                            p.to_path_buf()
+                        })
+                } else {
+                    path.to_path_buf()
+                }
             }
             _ => self
                 .base_path()

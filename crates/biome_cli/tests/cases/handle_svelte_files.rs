@@ -757,3 +757,272 @@ let {
         result,
     ));
 }
+#[test]
+fn no_useless_lone_block_statements_is_not_triggered() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<CollapsiblePrimitive.Content>
+	{#snippet child({ props, open })}
+		{#if open}
+			<div {...props} transition:slide={{ duration }}>
+				{@render children?.()}
+			</div>
+		{/if}
+	{/snippet}
+</CollapsiblePrimitive.Content>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUselessLoneBlockStatements", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_useless_lone_block_statements_is_not_triggered",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn supports_ts_in_embedded_expressions() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+// this makes it typescript
+</script>
+
+<div
+	onclick={(e) => {
+		if ((e.target as HTMLElement).closest("button")) {
+			return;
+		}
+		e.currentTarget.parentElement?.querySelector("input")?.focus();
+	}}
+>
+</div>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUselessLoneBlockStatements", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "supports_ts_in_embedded_expressions",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_unused_variables_in_svelte_directives() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script>
+const isActive = false;
+const color = "red";
+let inputValue = "";
+let isChecked = false;
+</script>
+
+<main>
+  <!-- bind: directive -->
+  <input bind:value={inputValue} />
+
+  <!-- bind: directive with checkbox -->
+  <input type="checkbox" bind:checked={isChecked} />
+
+  <!-- class: directive -->
+  <div class:active={isActive}>Active</div>
+
+  <!-- style: directive -->
+  <div style:color={color}>Styled</div>
+
+  <!-- Using variables in text expressions -->
+  <p>{inputValue}</p>
+  <p>{isChecked}</p>
+</main>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_variables_in_svelte_directives",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_comma_operator_triggered_in_svelte_template_expression() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script>
+  let x = 1;
+</script>
+
+<!-- Comma operator in template expression - should be flagged -->
+<p>{(console.log("side effect"), x)}</p>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noCommaOperator", file.as_str()].as_slice()),
+    );
+
+    // The comma operator SHOULD be flagged in Svelte (hack only applies to Vue)
+    // Result is Ok because it's a warning, but console should contain the diagnostic
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let has_comma_operator = console.out_buffer.iter().any(|m| {
+        let content = format!("{:?}", m.content);
+        content.contains("noCommaOperator")
+    });
+    assert!(
+        has_comma_operator,
+        "Expected noCommaOperator diagnostic in console output"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_comma_operator_triggered_in_svelte_template_expression",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_import_type_not_triggered_for_enum_in_control_flow_blocks() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    // the code in this file is intentionally ridiculous and doesn't necessarily make sense, but it covers a lot of different control flow blocks in one test
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+  import { IfEnum, ElseIfEnum, EachEnum, EachKeyEnum, KeyEnum, AwaitEnum } from './models.ts';
+
+  interface Props {
+    foo: IfEnum;
+    bar: ElseIfEnum;
+    baz: EachEnum;
+    bap: EachKeyEnum;
+    qux: KeyEnum;
+    zap: AwaitEnum;
+  }
+  let { foo }: Props = $props();
+</script>
+
+{#if foo === IfEnum.private}
+  private
+{:else if foo === ElseIfEnum.public}
+  public
+{/if}
+
+{#each EachEnum.Foo as item (EachKeyEnum[item])}
+  {item.name}
+{/each}
+
+{#key KeyEnum.Foo}
+  <Component />
+{/key}
+
+{#await AwaitEnum.Foo}
+  loading
+{:then data}
+  {data}
+{/await}
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_import_type_not_triggered_for_enum_in_control_flow_blocks",
+        fs,
+        console,
+        result,
+    ));
+}

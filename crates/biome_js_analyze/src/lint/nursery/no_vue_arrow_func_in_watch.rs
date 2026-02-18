@@ -90,10 +90,10 @@ declare_lint_rule! {
     /// ```
     ///
     /// References:
-    /// - <https://vuejs.org/api/options-state.html#watch>
+    /// - https://vuejs.org/api/options-state.html#watch
     ///
     pub NoVueArrowFuncInWatch {
-        version: "next",
+        version: "2.3.14",
         name: "noVueArrowFuncInWatch",
         language: "js",
         recommended: true,

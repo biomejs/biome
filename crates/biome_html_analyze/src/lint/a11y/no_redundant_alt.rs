@@ -30,14 +30,14 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```html
-    /// <>
+    /// <div>
     /// 	<img src="src" alt="alt" />
     /// 	<img src="bar" aria-hidden alt="Picture of me taking a photo of an image" />
-    /// </>
+    /// </div>
     /// ```
     ///
     pub NoRedundantAlt {
-        version: "next",
+        version: "2.4.0",
         name: "noRedundantAlt",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("img-redundant-alt").same()],
@@ -75,7 +75,7 @@ impl Rule for NoRedundantAlt {
             .ok()?;
 
         match alt {
-            AnyHtmlAttributeInitializer::HtmlSingleTextExpression(ref expression) => {
+            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(ref expression) => {
                 let value = expression.expression().ok()?.html_literal_token().ok()?;
 
                 is_redundant_alt(value.text_trimmed()).then_some(alt)

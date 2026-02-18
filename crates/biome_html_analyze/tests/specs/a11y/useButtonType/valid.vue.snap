@@ -1,0 +1,19 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+
+<!--
+	For this rule, we treat v-binds as if they fully satisfy all conditions of the rule (both presence and validity of the "type" attribute).
+	This is because its non trivial to determine the value of the "type" attribute when using v-bind, and we favor having a false negative over a false positive.
+-->
+<button v-bind:type="foo">submit</button>
+<button :type="foo">submit</button>
+
+<!-- We also should not flag components, only HTML elements -->
+<Button>submit</Button>
+
+```

@@ -13,6 +13,7 @@ publish              = true
 
 [dependencies]
 biome_rowan = { workspace = true, optional = true }
+caseless    = "0.2.2"
 
 [features]
 biome_rowan = ["dep:biome_rowan"]

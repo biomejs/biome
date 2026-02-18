@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: interpolation/interpolation.html
 ---
+
 # Input
 
 ```html
@@ -32,9 +33,7 @@ Trailing newline: true
 -----
 
 ```html
-<div>
-	{{ $interpolation }}
-</div>
+<div>{{ $interpolation }}</div>
 
 ```
 
@@ -54,8 +53,6 @@ Trailing newline: true
 -----
 
 ```html
-<div>
-	{{ $interpolation }}
-</div>
+<div>{{ $interpolation }}</div>
 
 ```

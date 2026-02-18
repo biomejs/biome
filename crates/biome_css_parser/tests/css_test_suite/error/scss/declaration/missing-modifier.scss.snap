@@ -1,0 +1,194 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+// Exclamation mark but no modifier
+$color: red !;
+
+// Exclamation mark with space but no modifier
+$width: 100px ! ;
+
+// Exclamation mark at the end
+$height: 50vh !
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..37 "$" [Comments("// Exclamation mark b ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@37..42 "color" [] [],
+                },
+            },
+            colon_token: COLON@42..44 ":" [] [Whitespace(" ")],
+            value: CssGenericComponentValueList [
+                CssIdentifier {
+                    value_token: IDENT@44..48 "red" [] [Whitespace(" ")],
+                },
+            ],
+            modifiers: ScssVariableModifierList [
+                ScssVariableModifier {
+                    excl_token: BANG@48..49 "!" [] [],
+                    value: missing (required),
+                },
+            ],
+            semicolon_token: SEMICOLON@49..50 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@50..100 "$" [Newline("\n"), Newline("\n"), Comments("// Exclamation mark w ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@100..105 "width" [] [],
+                },
+            },
+            colon_token: COLON@105..107 ":" [] [Whitespace(" ")],
+            value: CssGenericComponentValueList [
+                CssRegularDimension {
+                    value_token: CSS_NUMBER_LITERAL@107..110 "100" [] [],
+                    unit_token: IDENT@110..113 "px" [] [Whitespace(" ")],
+                },
+            ],
+            modifiers: ScssVariableModifierList [
+                ScssVariableModifier {
+                    excl_token: BANG@113..115 "!" [] [Whitespace(" ")],
+                    value: missing (required),
+                },
+            ],
+            semicolon_token: SEMICOLON@115..116 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@116..150 "$" [Newline("\n"), Newline("\n"), Comments("// Exclamation mark a ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@150..156 "height" [] [],
+                },
+            },
+            colon_token: COLON@156..158 ":" [] [Whitespace(" ")],
+            value: CssGenericComponentValueList [
+                CssRegularDimension {
+                    value_token: CSS_NUMBER_LITERAL@158..160 "50" [] [],
+                    unit_token: IDENT@160..163 "vh" [] [Whitespace(" ")],
+                },
+            ],
+            modifiers: ScssVariableModifierList [
+                ScssVariableModifier {
+                    excl_token: BANG@163..164 "!" [] [],
+                    value: missing (required),
+                },
+            ],
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@164..165 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..165
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..164
+    0: SCSS_DECLARATION@0..50
+      0: SCSS_IDENTIFIER@0..42
+        0: DOLLAR@0..37 "$" [Comments("// Exclamation mark b ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@37..42
+          0: IDENT@37..42 "color" [] []
+      1: COLON@42..44 ":" [] [Whitespace(" ")]
+      2: CSS_GENERIC_COMPONENT_VALUE_LIST@44..48
+        0: CSS_IDENTIFIER@44..48
+          0: IDENT@44..48 "red" [] [Whitespace(" ")]
+      3: SCSS_VARIABLE_MODIFIER_LIST@48..49
+        0: SCSS_VARIABLE_MODIFIER@48..49
+          0: BANG@48..49 "!" [] []
+          1: (empty)
+      4: SEMICOLON@49..50 ";" [] []
+    1: SCSS_DECLARATION@50..116
+      0: SCSS_IDENTIFIER@50..105
+        0: DOLLAR@50..100 "$" [Newline("\n"), Newline("\n"), Comments("// Exclamation mark w ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@100..105
+          0: IDENT@100..105 "width" [] []
+      1: COLON@105..107 ":" [] [Whitespace(" ")]
+      2: CSS_GENERIC_COMPONENT_VALUE_LIST@107..113
+        0: CSS_REGULAR_DIMENSION@107..113
+          0: CSS_NUMBER_LITERAL@107..110 "100" [] []
+          1: IDENT@110..113 "px" [] [Whitespace(" ")]
+      3: SCSS_VARIABLE_MODIFIER_LIST@113..115
+        0: SCSS_VARIABLE_MODIFIER@113..115
+          0: BANG@113..115 "!" [] [Whitespace(" ")]
+          1: (empty)
+      4: SEMICOLON@115..116 ";" [] []
+    2: SCSS_DECLARATION@116..164
+      0: SCSS_IDENTIFIER@116..156
+        0: DOLLAR@116..150 "$" [Newline("\n"), Newline("\n"), Comments("// Exclamation mark a ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@150..156
+          0: IDENT@150..156 "height" [] []
+      1: COLON@156..158 ":" [] [Whitespace(" ")]
+      2: CSS_GENERIC_COMPONENT_VALUE_LIST@158..163
+        0: CSS_REGULAR_DIMENSION@158..163
+          0: CSS_NUMBER_LITERAL@158..160 "50" [] []
+          1: IDENT@160..163 "vh" [] [Whitespace(" ")]
+      3: SCSS_VARIABLE_MODIFIER_LIST@163..164
+        0: SCSS_VARIABLE_MODIFIER@163..164
+          0: BANG@163..164 "!" [] []
+          1: (empty)
+      4: (empty)
+  2: EOF@164..165 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+missing-modifier.scss:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected 'default', or 'global' but instead found `;`
+  
+    1 │ // Exclamation mark but no modifier
+  > 2 │ $color: red !;
+      │              ^
+    3 │ 
+    4 │ // Exclamation mark with space but no modifier
+  
+  i Remove ;
+  
+missing-modifier.scss:5:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected 'default', or 'global' but instead found `;`
+  
+    4 │ // Exclamation mark with space but no modifier
+  > 5 │ $width: 100px ! ;
+      │                 ^
+    6 │ 
+    7 │ // Exclamation mark at the end
+  
+  i Remove ;
+  
+missing-modifier.scss:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected 'default', or 'global' but instead the file ends
+  
+    7 │ // Exclamation mark at the end
+    8 │ $height: 50vh !
+  > 9 │ 
+      │ 
+  
+  i the file ends here
+  
+    7 │ // Exclamation mark at the end
+    8 │ $height: 50vh !
+  > 9 │ 
+      │ 
+  
+```

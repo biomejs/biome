@@ -54,7 +54,7 @@ declare_lint_rule! {
     /// - [MDN Web Docs, HTMLElement: autofocus property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/autofocus)
     ///
     pub NoAutofocus {
-        version: "next",
+        version: "2.4.0",
         name: "noAutofocus",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-autofocus").same()],

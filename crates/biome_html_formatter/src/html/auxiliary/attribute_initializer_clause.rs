@@ -78,7 +78,10 @@ impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeIniti
                 let fmt_eq_token = format_with(|f| {
                     if self.compact.is_curly()
                         && value.as_ref().is_ok_and(|v| {
-                            matches!(v, AnyHtmlAttributeInitializer::HtmlSingleTextExpression(_))
+                            matches!(
+                                v,
+                                AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(_)
+                            )
                         })
                     {
                         format_removed(&eq_token).fmt(f)

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/postcss-plugins/postcss-simple-vars.css
 ---
+
 # Input
 
 ```css
@@ -52,21 +53,61 @@ color: @@(style)color123;
 ```
 postcss-simple-vars.css:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Unexpected value or character.
   
   > 1 │ background-color: $$(style)Color;
       │                   ^
     2 │ background-color: $$(style)Color Color122;
     3 │ color: @@color;
   
-postcss-simple-vars.css:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected one of:
   
-  > 1 │ background-color: $$(style)Color;
-      │                    ^
-    2 │ background-color: $$(style)Color Color122;
-    3 │ color: @@color;
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
   
 postcss-simple-vars.css:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -114,23 +155,23 @@ postcss-simple-vars.css:1:33 parse ━━━━━━━━━━━━━━━
   
 postcss-simple-vars.css:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Unexpected value or character.
   
     1 │ background-color: $$(style)Color;
   > 2 │ background-color: $$(style)Color Color122;
-      │                   ^
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^
     3 │ color: @@color;
     4 │ font: 100% $font-stack;
   
-postcss-simple-vars.css:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
+  i Expected one of:
   
-    1 │ background-color: $$(style)Color;
-  > 2 │ background-color: $$(style)Color Color122;
-      │                    ^
-    3 │ color: @@color;
-    4 │ font: 100% $font-stack;
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
   
 postcss-simple-vars.css:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -155,14 +196,16 @@ postcss-simple-vars.css:3:8 parse ━━━━━━━━━━━━━━━�
   
 postcss-simple-vars.css:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     2 │ background-color: $$(style)Color Color122;
     3 │ color: @@color;
   > 4 │ font: 100% $font-stack;
-      │            ^
+      │            ^^^^^^^^^^^
     5 │ background-color: darken(@link-color, 10%);
     6 │ border: 1px solid var(--border-color);
+  
+  i SCSS only syntax
   
 postcss-simple-vars.css:5:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -199,14 +242,24 @@ postcss-simple-vars.css:5:27 parse ━━━━━━━━━━━━━━━
   
 postcss-simple-vars.css:7:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Unexpected value or character.
   
     5 │ background-color: darken(@link-color, 10%);
     6 │ border: 1px solid var(--border-color);
   > 7 │ color: $(style)color;
-      │        ^
+      │        ^^^^^^^^^^^^^
     8 │ color: @@(style) color123;
     9 │ color: @@(style)color123;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
   
 postcss-simple-vars.css:8:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

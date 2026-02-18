@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -35,7 +36,7 @@ HtmlRoot {
                         modifiers: SvelteDirectiveModifierList [],
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@17..18 "=" [] [],
-                            value: HtmlSingleTextExpression {
+                            value: HtmlAttributeSingleTextExpression {
                                 l_curly_token: L_CURLY@18..19 "{" [] [],
                                 expression: HtmlTextExpression {
                                     html_literal_token: HTML_LITERAL@19..23 "text" [] [],
@@ -55,7 +56,7 @@ HtmlRoot {
                         modifiers: SvelteDirectiveModifierList [],
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@44..45 "=" [] [],
-                            value: HtmlSingleTextExpression {
+                            value: HtmlAttributeSingleTextExpression {
                                 l_curly_token: L_CURLY@45..46 "{" [] [],
                                 expression: HtmlTextExpression {
                                     html_literal_token: HTML_LITERAL@46..51 "start" [] [],
@@ -75,7 +76,7 @@ HtmlRoot {
                         modifiers: SvelteDirectiveModifierList [],
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@70..71 "=" [] [],
-                            value: HtmlSingleTextExpression {
+                            value: HtmlAttributeSingleTextExpression {
                                 l_curly_token: L_CURLY@71..72 "{" [] [],
                                 expression: HtmlTextExpression {
                                     html_literal_token: HTML_LITERAL@72..75 "end" [] [],
@@ -106,7 +107,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@103..104 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@104..105 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@105..109 "time" [] [],
@@ -126,7 +127,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@122..123 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@123..124 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@124..132 "isPaused" [] [],
@@ -146,7 +147,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@145..146 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@146..147 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@147..153 "volume" [] [],
@@ -196,7 +197,7 @@ HtmlRoot {
             2: SVELTE_DIRECTIVE_MODIFIER_LIST@17..17
             3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@17..25
               0: EQ@17..18 "=" [] []
-              1: HTML_SINGLE_TEXT_EXPRESSION@18..25
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@18..25
                 0: L_CURLY@18..19 "{" [] []
                 1: HTML_TEXT_EXPRESSION@19..23
                   0: HTML_LITERAL@19..23 "text" [] []
@@ -210,7 +211,7 @@ HtmlRoot {
             2: SVELTE_DIRECTIVE_MODIFIER_LIST@44..44
             3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@44..53
               0: EQ@44..45 "=" [] []
-              1: HTML_SINGLE_TEXT_EXPRESSION@45..53
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@45..53
                 0: L_CURLY@45..46 "{" [] []
                 1: HTML_TEXT_EXPRESSION@46..51
                   0: HTML_LITERAL@46..51 "start" [] []
@@ -224,7 +225,7 @@ HtmlRoot {
             2: SVELTE_DIRECTIVE_MODIFIER_LIST@70..70
             3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@70..77
               0: EQ@70..71 "=" [] []
-              1: HTML_SINGLE_TEXT_EXPRESSION@71..77
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@71..77
                 0: L_CURLY@71..72 "{" [] []
                 1: HTML_TEXT_EXPRESSION@72..75
                   0: HTML_LITERAL@72..75 "end" [] []
@@ -246,7 +247,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@103..103
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@103..111
                 0: EQ@103..104 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@104..111
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@104..111
                   0: L_CURLY@104..105 "{" [] []
                   1: HTML_TEXT_EXPRESSION@105..109
                     0: HTML_LITERAL@105..109 "time" [] []
@@ -260,7 +261,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@122..122
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@122..134
                 0: EQ@122..123 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@123..134
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@123..134
                   0: L_CURLY@123..124 "{" [] []
                   1: HTML_TEXT_EXPRESSION@124..132
                     0: HTML_LITERAL@124..132 "isPaused" [] []
@@ -274,7 +275,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@145..145
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@145..154
                 0: EQ@145..146 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@146..154
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@146..154
                   0: L_CURLY@146..147 "{" [] []
                   1: HTML_TEXT_EXPRESSION@147..153
                     0: HTML_LITERAL@147..153 "volume" [] []

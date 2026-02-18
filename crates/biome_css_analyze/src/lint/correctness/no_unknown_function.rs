@@ -78,7 +78,10 @@ impl Rule for NoUnknownFunction {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let binding = node.name().ok()?.value_token().ok()?;
+        let binding = node.name().ok().and_then(|name| {
+            name.as_css_identifier()
+                .and_then(|name| name.value_token().ok())
+        })?;
         let function_name = binding.text_trimmed();
 
         // We don't have a semantic model yet, so we can't determine if functions are defined elsewhere.

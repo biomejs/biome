@@ -1,4 +1,4 @@
-use crate::cli_options::CliReporterKind;
+use crate::cli_options::{CliOptions, CliReporter, CliReporterKind};
 use crate::reporter::checkstyle::CheckstyleReporter;
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
@@ -9,15 +9,17 @@ use crate::reporter::sarif::{SarifReporter, SarifReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::reporter::{ConsoleReporterWriter, FileReporterWriter, Reporter, ReporterWriter};
+use crate::runner::execution::Execution;
 use crate::runner::finalizer::{FinalizePayload, Finalizer};
 use crate::runner::impls::commands::traversal::TraverseResult;
-use crate::{CliDiagnostic, DiagnosticsPayload};
-use biome_console::markup;
+use crate::{CliDiagnostic, DiagnosticsPayload, TraversalSummary};
+use biome_console::{Console, markup};
 use biome_diagnostics::{PrintDiagnostic, Resource};
-use biome_fs::OpenOptions;
+use biome_fs::{BiomePath, FileSystem, OpenOptions};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_rowan::AstNode;
 use std::cmp::Ordering;
+use std::collections::BTreeSet;
 
 pub(crate) struct DefaultFinalizer;
 
@@ -27,7 +29,6 @@ impl Finalizer for DefaultFinalizer {
     fn finalize(payload: FinalizePayload<'_, Self::Input>) -> Result<(), CliDiagnostic> {
         let FinalizePayload {
             fs,
-            workspace,
             scan_duration,
             console,
             cli_options,
@@ -68,218 +69,44 @@ impl Finalizer for DefaultFinalizer {
             max_diagnostics: cli_options.max_diagnostics,
         };
 
-        let mut console_reporter_writer = ConsoleReporterWriter(console);
         let mut file_reporter_writer = FileReporterWriter::default();
 
         if !cli_options.cli_reporter.is_empty() {
             for cli_reporter in &cli_options.cli_reporter {
-                match cli_reporter.kind {
-                    CliReporterKind::Default => {
-                        let reporter = ConsoleReporter {
-                            summary,
-                            diagnostics_payload: &diagnostics_payload,
-                            execution,
-                            verbose: cli_options.verbose,
-                            working_directory: fs.working_directory().clone(),
-                            evaluated_paths: evaluated_paths.clone(),
-                        };
-                        if cli_reporter.is_file_report() {
-                            reporter
-                                .write(&mut file_reporter_writer, &mut ConsoleReporterVisitor)?;
-                        } else {
-                            reporter
-                                .write(&mut console_reporter_writer, &mut ConsoleReporterVisitor)?;
-                        }
-                    }
-                    CliReporterKind::Summary => {
-                        let reporter = SummaryReporter {
-                            summary,
-                            diagnostics_payload: &diagnostics_payload,
-                            execution,
-                            verbose: cli_options.verbose,
-                            working_directory: fs.working_directory().clone(),
-                            evaluated_paths: evaluated_paths.clone(),
-                        };
-                        if cli_reporter.is_file_report() {
-                            reporter
-                                .write(&mut file_reporter_writer, &mut SummaryReporterVisitor)?;
-                        } else {
-                            reporter
-                                .write(&mut console_reporter_writer, &mut SummaryReporterVisitor)?;
-                        }
-                    }
-                    CliReporterKind::Json | CliReporterKind::JsonPretty => {
-                        console_reporter_writer.error(markup! {
-                            <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
-                        });
-                        let reporter = JsonReporter {
-                            summary,
-                            diagnostics_payload: &diagnostics_payload,
-                            execution,
-                            verbose: cli_options.verbose,
-                            working_directory: fs.working_directory().clone(),
-                        };
-                        let mut buffer = JsonReporterVisitor::new(summary);
-                        reporter.write(&mut console_reporter_writer, &mut buffer)?;
-                        let root = buffer.to_json();
-                        if cli_reporter.kind == CliReporterKind::JsonPretty {
-                            let formatted = biome_json_formatter::format_node(
-                                JsonFormatOptions::default(),
-                                root.syntax(),
-                            )
-                            .expect("To format the JSON report")
-                            .print()
-                            .expect("To print the JSON report");
-
-                            console_reporter_writer.log(markup! {
-                                {formatted.as_code()}
-                            });
-                        } else {
-                            let code = root.to_string();
-                            console_reporter_writer.log(markup! {
-                                {code}
-                            });
-                        }
-                    }
-                    CliReporterKind::GitHub => {
-                        let reporter = GithubReporter {
-                            diagnostics_payload: &diagnostics_payload,
-                            execution,
-                            verbose: cli_options.verbose,
-                            working_directory: fs.working_directory().clone(),
-                        };
-                        if cli_reporter.is_file_report() {
-                            reporter
-                                .write(&mut file_reporter_writer, &mut GithubReporterVisitor)?;
-                        } else {
-                            reporter
-                                .write(&mut console_reporter_writer, &mut GithubReporterVisitor)?;
-                        }
-                    }
-                    CliReporterKind::GitLab => {
-                        let reporter = GitLabReporter {
-                            diagnostics_payload: &diagnostics_payload,
-                            execution,
-                            verbose: cli_options.verbose,
-                            working_directory: fs.working_directory().clone(),
-                        };
-                        if cli_reporter.is_file_report() {
-                            reporter.write(
-                                &mut file_reporter_writer,
-                                &mut GitLabReporterVisitor::new(workspace.fs().working_directory()),
-                            )?;
-                        } else {
-                            reporter.write(
-                                &mut console_reporter_writer,
-                                &mut GitLabReporterVisitor::new(workspace.fs().working_directory()),
-                            )?;
-                        }
-                    }
-                    CliReporterKind::Junit => {
-                        let reporter = JunitReporter {
-                            summary,
-                            diagnostics_payload: &diagnostics_payload,
-                            execution,
-                            verbose: cli_options.verbose,
-                            working_directory: fs.working_directory().clone(),
-                        };
-
-                        if cli_reporter.is_file_report() {
-                            reporter.write(
-                                &mut file_reporter_writer,
-                                &mut JunitReporterVisitor::new(),
-                            )?;
-                        } else {
-                            reporter.write(
-                                &mut console_reporter_writer,
-                                &mut JunitReporterVisitor::new(),
-                            )?;
-                        }
-                    }
-                    CliReporterKind::Checkstyle => {
-                        let reporter = CheckstyleReporter {
-                            summary,
-                            diagnostics_payload: &diagnostics_payload,
-                            execution,
-                            verbose: cli_options.verbose,
-                            working_directory: fs.working_directory().clone(),
-                        };
-                        if cli_reporter.is_file_report() {
-                            reporter.write(
-                                &mut file_reporter_writer,
-                                &mut crate::reporter::checkstyle::CheckstyleReporterVisitor,
-                            )?;
-                        } else {
-                            reporter.write(
-                                &mut console_reporter_writer,
-                                &mut crate::reporter::checkstyle::CheckstyleReporterVisitor,
-                            )?;
-                        }
-                    }
-                    CliReporterKind::RdJson => {
-                        let reporter = RdJsonReporter {
-                            diagnostics_payload: &diagnostics_payload,
-                            execution,
-                            verbose: cli_options.verbose,
-                            working_directory: fs.working_directory().clone(),
-                        };
-                        if cli_reporter.is_file_report() {
-                            reporter
-                                .write(&mut file_reporter_writer, &mut RdJsonReporterVisitor)?;
-                        } else {
-                            reporter
-                                .write(&mut console_reporter_writer, &mut RdJsonReporterVisitor)?;
-                        }
-                    }
-                    CliReporterKind::Sarif => {
-                        let reporter = SarifReporter {
-                            diagnostics_payload: &diagnostics_payload,
-                            execution,
-                            verbose: cli_options.verbose,
-                            working_directory: fs.working_directory().clone(),
-                        };
-
-                        if cli_reporter.is_file_report() {
-                            reporter.write(
-                                &mut file_reporter_writer,
-                                &mut SarifReporterVisitor::new(),
-                            )?;
-                        } else {
-                            reporter.write(
-                                &mut console_reporter_writer,
-                                &mut SarifReporterVisitor::new(),
-                            )?;
-                        }
-                    }
-                }
-
-                if let Some(destination) = cli_reporter.destination.as_deref()
-                    && let Some(output) = file_reporter_writer.dump()
-                {
-                    let open_options = OpenOptions::default().write(true).create(true);
-                    let mut file = match fs.open_with_options(destination, open_options) {
-                        Ok(file) => file,
-                        Err(err) => {
-                            let diagnostics = CliDiagnostic::from(err);
-                            console_reporter_writer.error(markup! {
-                                {PrintDiagnostic::simple(&diagnostics)}
-                            });
-                            continue;
-                        }
-                    };
-
-                    let result = file.set_content(output.as_bytes());
-                    if let Err(err) = result {
-                        let diagnostics = CliDiagnostic::from(err);
-                        console_reporter_writer.error(markup! {
-                            {PrintDiagnostic::simple(&diagnostics)}
-                        })
-                    }
-
-                    file_reporter_writer.clear();
-                }
+                print_to_reporter(PrintToReporter {
+                    cli_reporter,
+                    cli_options,
+                    diagnostics_payload: &diagnostics_payload,
+                    summary,
+                    evaluated_paths: evaluated_paths.clone(),
+                    file_reporter_writer: &mut file_reporter_writer,
+                    console,
+                    fs,
+                    execution,
+                })?;
             }
         } else {
+            if let Some(reporter) = execution.environment_to_reporter() {
+                let contains_current_reporter = cli_options
+                    .cli_reporter
+                    .iter()
+                    .any(|r| r.kind == reporter.kind);
+
+                if !contains_current_reporter {
+                    print_to_reporter(PrintToReporter {
+                        cli_reporter: &reporter,
+                        cli_options,
+                        diagnostics_payload: &diagnostics_payload,
+                        summary,
+                        evaluated_paths: evaluated_paths.clone(),
+                        file_reporter_writer: &mut file_reporter_writer,
+                        console,
+                        fs,
+                        execution,
+                    })?;
+                }
+            }
+            let mut console_reporter_writer = ConsoleReporterWriter(console);
             let reporter = ConsoleReporter {
                 summary,
                 diagnostics_payload: &diagnostics_payload,
@@ -324,52 +151,220 @@ impl Finalizer for () {
     }
 }
 
-//
-// /// Tells to the execution of the traversal how the information should be reported
-// #[derive(Copy, Clone, Debug)]
-// pub enum ReportMode {
-//     /// Reports information straight to the console, it's the default mode
-//     Terminal { with_summary: bool },
-//     /// Reports information in JSON format
-//     Json { pretty: bool },
-//     /// Reports information for GitHub
-//     GitHub,
-//     /// JUnit output
-//     /// Ref: https://github.com/testmoapp/junitxml?tab=readme-ov-file#basic-junit-xml-structure
-//     Junit,
-//     /// Reports information in the [GitLab Code Quality](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool) format.
-//     GitLab,
-//     /// Reports diagnostics in [Checkstyle XML format](https://checkstyle.org/).
-//     Checkstyle,
-//     /// Reports information in [reviewdog JSON format](https://deepwiki.com/reviewdog/reviewdog/3.2-reviewdog-diagnostic-format)
-//     RdJson,
-//     /// Reports diagnostics using the SARIF format
-//     Sarif,
-// }
+struct PrintToReporter<'a> {
+    cli_reporter: &'a CliReporter,
+    cli_options: &'a CliOptions,
+    diagnostics_payload: &'a DiagnosticsPayload,
+    summary: TraversalSummary,
+    evaluated_paths: BTreeSet<BiomePath>,
+    file_reporter_writer: &'a mut FileReporterWriter,
+    console: &'a mut dyn Console,
+    fs: &'a dyn FileSystem,
+    execution: &'a dyn Execution,
+}
 
-// impl Default for ReportMode {
-//     fn default() -> Self {
-//         Self::Terminal {
-//             with_summary: false,
-//         }
-//     }
-// }
-//
-// impl From<&CliReporterKind> for ReportMode {
-//     fn from(value: &CliReporterKind) -> Self {
-//         match value {
-//             CliReporterKind::Default => Self::Terminal {
-//                 with_summary: false,
-//             },
-//             CliReporterKind::Summary => Self::Terminal { with_summary: true },
-//             CliReporterKind::Json => Self::Json { pretty: false },
-//             CliReporterKind::JsonPretty => Self::Json { pretty: true },
-//             CliReporterKind::GitHub => Self::GitHub,
-//             CliReporterKind::Junit => Self::Junit,
-//             CliReporterKind::GitLab => Self::GitLab {},
-//             CliReporterKind::Checkstyle => Self::Checkstyle,
-//             CliReporterKind::RdJson => Self::RdJson,
-//             CliReporterKind::Sarif => Self::Sarif,
-//         }
-//     }
-// }
+fn print_to_reporter(params: PrintToReporter) -> Result<(), CliDiagnostic> {
+    let PrintToReporter {
+        cli_reporter,
+        cli_options,
+        diagnostics_payload,
+        summary,
+        evaluated_paths,
+        file_reporter_writer,
+        console,
+        fs,
+        execution,
+    } = params;
+
+    let mut console_reporter_writer = ConsoleReporterWriter(console);
+    match cli_reporter.kind {
+        CliReporterKind::Default => {
+            let reporter = ConsoleReporter {
+                summary,
+                diagnostics_payload,
+                execution,
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+                evaluated_paths: evaluated_paths.clone(),
+            };
+            if cli_reporter.is_file_report() {
+                reporter.write(file_reporter_writer, &mut ConsoleReporterVisitor)?;
+            } else {
+                reporter.write(&mut console_reporter_writer, &mut ConsoleReporterVisitor)?;
+            }
+        }
+        CliReporterKind::Summary => {
+            let reporter = SummaryReporter {
+                summary,
+                diagnostics_payload,
+                execution,
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+                evaluated_paths: evaluated_paths.clone(),
+            };
+            if cli_reporter.is_file_report() {
+                reporter.write(file_reporter_writer, &mut SummaryReporterVisitor)?;
+            } else {
+                reporter.write(&mut console_reporter_writer, &mut SummaryReporterVisitor)?;
+            }
+        }
+        CliReporterKind::Json | CliReporterKind::JsonPretty => {
+            console_reporter_writer.error(markup! {
+                            <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
+                        });
+            let reporter = JsonReporter {
+                summary,
+                diagnostics_payload,
+                execution,
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+            };
+            let mut buffer = JsonReporterVisitor::new(summary);
+            reporter.write(&mut console_reporter_writer, &mut buffer)?;
+            let root = buffer.to_json();
+            if cli_reporter.kind == CliReporterKind::JsonPretty {
+                let formatted =
+                    biome_json_formatter::format_node(JsonFormatOptions::default(), root.syntax())
+                        .expect("To format the JSON report")
+                        .print()
+                        .expect("To print the JSON report");
+
+                console_reporter_writer.log(markup! {
+                    {formatted.as_code()}
+                });
+            } else {
+                let code = root.to_string();
+                console_reporter_writer.log(markup! {
+                    {code}
+                });
+            }
+        }
+        CliReporterKind::GitHub => {
+            let reporter = GithubReporter {
+                diagnostics_payload,
+                execution,
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+            };
+            if cli_reporter.is_file_report() {
+                reporter.write(file_reporter_writer, &mut GithubReporterVisitor)?;
+            } else {
+                reporter.write(&mut console_reporter_writer, &mut GithubReporterVisitor)?;
+            }
+        }
+        CliReporterKind::GitLab => {
+            let reporter = GitLabReporter {
+                diagnostics_payload,
+                execution,
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+            };
+            if cli_reporter.is_file_report() {
+                reporter.write(
+                    file_reporter_writer,
+                    &mut GitLabReporterVisitor::new(fs.working_directory()),
+                )?;
+            } else {
+                reporter.write(
+                    &mut console_reporter_writer,
+                    &mut GitLabReporterVisitor::new(fs.working_directory()),
+                )?;
+            }
+        }
+        CliReporterKind::Junit => {
+            let reporter = JunitReporter {
+                summary,
+                diagnostics_payload,
+                execution,
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+            };
+
+            if cli_reporter.is_file_report() {
+                reporter.write(file_reporter_writer, &mut JunitReporterVisitor::new())?;
+            } else {
+                reporter.write(
+                    &mut console_reporter_writer,
+                    &mut JunitReporterVisitor::new(),
+                )?;
+            }
+        }
+        CliReporterKind::Checkstyle => {
+            let reporter = CheckstyleReporter {
+                summary,
+                diagnostics_payload,
+                execution,
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+            };
+            if cli_reporter.is_file_report() {
+                reporter.write(
+                    file_reporter_writer,
+                    &mut crate::reporter::checkstyle::CheckstyleReporterVisitor,
+                )?;
+            } else {
+                reporter.write(
+                    &mut console_reporter_writer,
+                    &mut crate::reporter::checkstyle::CheckstyleReporterVisitor,
+                )?;
+            }
+        }
+        CliReporterKind::RdJson => {
+            let reporter = RdJsonReporter {
+                diagnostics_payload,
+                execution,
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+            };
+            if cli_reporter.is_file_report() {
+                reporter.write(file_reporter_writer, &mut RdJsonReporterVisitor)?;
+            } else {
+                reporter.write(&mut console_reporter_writer, &mut RdJsonReporterVisitor)?;
+            }
+        }
+        CliReporterKind::Sarif => {
+            let reporter = SarifReporter {
+                diagnostics_payload,
+                execution,
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+            };
+
+            if cli_reporter.is_file_report() {
+                reporter.write(file_reporter_writer, &mut SarifReporterVisitor::new())?;
+            } else {
+                reporter.write(
+                    &mut console_reporter_writer,
+                    &mut SarifReporterVisitor::new(),
+                )?;
+            }
+        }
+    }
+
+    if let Some(destination) = cli_reporter.destination.as_deref()
+        && let Some(output) = file_reporter_writer.dump()
+    {
+        let open_options = OpenOptions::default().write(true).create(true);
+        let mut file = match fs.open_with_options(destination, open_options) {
+            Ok(file) => file,
+            Err(err) => {
+                let diagnostics = CliDiagnostic::from(err);
+                console_reporter_writer.error(markup! {
+                    {PrintDiagnostic::simple(&diagnostics)}
+                });
+                return Ok(());
+            }
+        };
+
+        let result = file.set_content(output.as_bytes());
+        if let Err(err) = result {
+            let diagnostics = CliDiagnostic::from(err);
+            console_reporter_writer.error(markup! {
+                {PrintDiagnostic::simple(&diagnostics)}
+            })
+        }
+
+        file_reporter_writer.clear();
+    }
+    Ok(())
+}

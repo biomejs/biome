@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-setup-to-refs-no-assign.vue
+---
+# Input
+```ts
+import { toRefs, reactive } from 'vue';
+defineProps<{ toast: string; number?: number }>();
+const obj = reactive({ toast: 'toast' });
+const { toast } = toRefs(obj)
+
+```
+
+# Diagnostics
+```
+invalid-script-setup-to-refs-no-assign.vue:2:15 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━━━━━
+
+  × Duplicate key toast found in Vue component.
+  
+    1 │ import { toRefs, reactive } from 'vue';
+  > 2 │ defineProps<{ toast: string; number?: number }>();
+      │               ^^^^^
+    3 │ const obj = reactive({ toast: 'toast' });
+    4 │ const { toast } = toRefs(obj)
+  
+  i Key toast is also defined here.
+  
+    2 │ defineProps<{ toast: string; number?: number }>();
+    3 │ const obj = reactive({ toast: 'toast' });
+  > 4 │ const { toast } = toRefs(obj)
+      │         ^^^^^
+    5 │ 
+  
+  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
+  
+
+```

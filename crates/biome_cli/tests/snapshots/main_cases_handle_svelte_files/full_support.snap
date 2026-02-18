@@ -18,6 +18,7 @@ expression: redactor(content)
 
 ```svelte
 <script>
+import s from "src/utils";
 import { sure } from "sure.js";
 import z from "zod";
 

@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -36,7 +37,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@17..18 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@18..19 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@19..27 "isActive" [] [],
@@ -80,7 +81,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@71..72 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@72..73 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@73..83 "!canSubmit" [] [],
@@ -135,7 +136,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@17..17
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@17..28
                 0: EQ@17..18 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@18..28
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@18..28
                   0: L_CURLY@18..19 "{" [] []
                   1: HTML_TEXT_EXPRESSION@19..27
                     0: HTML_LITERAL@19..27 "isActive" [] []
@@ -165,7 +166,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@71..71
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@71..84
                 0: EQ@71..72 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@72..84
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@72..84
                   0: L_CURLY@72..73 "{" [] []
                   1: HTML_TEXT_EXPRESSION@73..83
                     0: HTML_LITERAL@73..83 "!canSubmit" [] []

@@ -1,0 +1,60 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<script setup>
+const supported = ref(true);
+const enabled = ref(false);
+const count = ref(0);
+const isActive = ref(false);
+
+function toggleCaptions() {
+	enabled.value = !enabled.value;
+}
+
+function handleClick() {
+	count.value++;
+}
+</script>
+
+<template>
+  <!-- v-on shorthand with function call -->
+  <button @click="toggleCaptions()">Toggle</button>
+  
+  <!-- v-on shorthand with function reference -->
+  <button @click="handleClick">Click</button>
+  
+  <!-- v-bind shorthand with expression -->
+  <button :disabled="!supported">Disabled</button>
+  
+  <!-- v-if directive -->
+  <div v-if="count > 0">Count: {{ count }}</div>
+  
+  <!-- v-show directive -->
+  <div v-show="isActive">Active</div>
+  
+  <!-- v-for directive - skip for now as it has special syntax -->
+  <!-- <li v-for="item in items" :key="item">{{ item }}</li> -->
+</template>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

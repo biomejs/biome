@@ -39,3 +39,6 @@ type Nullable<T> = T | null;
 interface ExtendedInterface extends Foo {
     extra: boolean;
 }
+
+// Empty types will be left as-is
+type AnyObject = {};

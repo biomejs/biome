@@ -9,10 +9,10 @@ impl FormatRule<AnyCssPageAtRuleItem> for FormatAnyCssPageAtRuleItem {
     fn fmt(&self, node: &AnyCssPageAtRuleItem, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssPageAtRuleItem::CssAtRule(node) => node.format().fmt(f),
+            AnyCssPageAtRuleItem::CssBogus(node) => node.format().fmt(f),
             AnyCssPageAtRuleItem::CssDeclarationWithSemicolon(node) => node.format().fmt(f),
             AnyCssPageAtRuleItem::CssEmptyDeclaration(node) => node.format().fmt(f),
             AnyCssPageAtRuleItem::CssMarginAtRule(node) => node.format().fmt(f),
-            AnyCssPageAtRuleItem::CssBogus(node) => node.format().fmt(f),
         }
     }
 }

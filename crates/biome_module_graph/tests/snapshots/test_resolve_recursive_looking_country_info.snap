@@ -2,6 +2,7 @@
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
+
 # `/node_modules/@types/iso-3166-2/index.d.ts`
 
 ## Source

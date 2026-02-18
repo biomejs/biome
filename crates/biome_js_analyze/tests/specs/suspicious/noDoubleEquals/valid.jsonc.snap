@@ -11,5 +11,3 @@ const isNull = a == null;
 ```cjs
 const isNonNull = a != null;
 ```
-
-

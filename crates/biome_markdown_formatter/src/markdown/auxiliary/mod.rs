@@ -1,0 +1,36 @@
+//! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
+
+pub(crate) mod autolink;
+pub(crate) mod bullet;
+pub(crate) mod bullet_list_item;
+pub(crate) mod document;
+pub(crate) mod entity_reference;
+pub(crate) mod fenced_code_block;
+pub(crate) mod hard_line;
+pub(crate) mod hash;
+pub(crate) mod header;
+pub(crate) mod html_block;
+pub(crate) mod indent;
+pub(crate) mod indent_code_block;
+pub(crate) mod inline_code;
+pub(crate) mod inline_emphasis;
+pub(crate) mod inline_html;
+pub(crate) mod inline_image;
+pub(crate) mod inline_italic;
+pub(crate) mod inline_link;
+pub(crate) mod link_block;
+pub(crate) mod link_destination;
+pub(crate) mod link_label;
+pub(crate) mod link_reference_definition;
+pub(crate) mod link_title;
+pub(crate) mod newline;
+pub(crate) mod ordered_list_item;
+pub(crate) mod paragraph;
+pub(crate) mod quote;
+pub(crate) mod reference_image;
+pub(crate) mod reference_link;
+pub(crate) mod reference_link_label;
+pub(crate) mod setext_header;
+pub(crate) mod soft_break;
+pub(crate) mod textual;
+pub(crate) mod thematic_break_block;

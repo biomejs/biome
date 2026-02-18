@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: in-test.js
+---
+# Input
+```js
+/* should generate diagnostics */
+test('wait', async ({ page }) => {
+    await page.click('button');
+    await page.waitForTimeout(1000);
+});
+
+
+```
+
+# Diagnostics
+```
+in-test.js:4:11 lint/nursery/noPlaywrightWaitForTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of page.waitForTimeout().
+  
+    2 │ test('wait', async ({ page }) => {
+    3 │     await page.click('button');
+  > 4 │     await page.waitForTimeout(1000);
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ });
+    6 │ 
+  
+  i Hardcoded timeouts are flaky and make tests slower. Use conditions that wait for specific events.
+  
+  i Prefer using built-in wait methods like page.waitForLoadState(), page.waitForURL(), or page.waitForFunction() instead.
+  
+  i Consider using web-first assertions like expect(locator).toBeVisible() which auto-wait for conditions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: requireCatchParameter.valid.js
+expression: noRequireCatchParameter.valid.js
 ---
 # Input
 ```js

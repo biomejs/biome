@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/parens/empty-lines.css
 ---
+
 # Input
 
 ```css
@@ -26,22 +27,18 @@ $colours: (
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,15 @@
--$colours: (
+@@ -1,7 +1,12 @@
+ $colours: (
 -  "text": $light-100,
 -  "background-primary": $dark-300,
-+$
-+colours: 
-+(
-+    "text"
-+: $light-100,
++    "text": $light-100,
 +    "background-primary": $dark-300,
-+
-+
 +
  
 -  "background-secondary": $dark-200,
 -  "background-tertiary": $dark-100
++
++
 +
 +
 +    "background-secondary": $dark-200,
@@ -52,11 +49,8 @@ $colours: (
 # Output
 
 ```css
-$
-colours: 
-(
-    "text"
-: $light-100,
+$colours: (
+    "text": $light-100,
     "background-primary": $dark-300,
 
 
@@ -73,283 +67,39 @@ colours:
 ```
 empty-lines.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × SCSS variable declarations are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-  > 1 │ $colours: (
-      │ ^
-    2 │     "text": $light-100,
-    3 │     "background-primary": $dark-300,
-  
-empty-lines.css:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-  > 1 │ $colours: (
-      │           ^
-    2 │     "text": $light-100,
-    3 │     "background-primary": $dark-300,
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - state
-  - current
-  - past
-  - future
-  
-empty-lines.css:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    1 │ $colours: (
-  > 2 │     "text": $light-100,
-      │             ^
-    3 │     "background-primary": $dark-300,
-    4 │ 
-  
-empty-lines.css:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `light-100`
-  
-    1 │ $colours: (
-  > 2 │     "text": $light-100,
-      │              ^^^^^^^^^
-    3 │     "background-primary": $dark-300,
-    4 │ 
-  
-  i Remove light-100
-  
-empty-lines.css:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a selector but instead found '"background-primary"'.
-  
-    1 │ $colours: (
-    2 │     "text": $light-100,
-  > 3 │     "background-primary": $dark-300,
-      │     ^^^^^^^^^^^^^^^^^^^^
-    4 │ 
-  
-  i Expected a selector here.
-  
-    1 │ $colours: (
-    2 │     "text": $light-100,
-  > 3 │     "background-primary": $dark-300,
-      │     ^^^^^^^^^^^^^^^^^^^^
-    4 │ 
-  
-empty-lines.css:3:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `:`
-  
-    1 │ $colours: (
-    2 │     "text": $light-100,
-  > 3 │     "background-primary": $dark-300,
-      │                         ^
-    4 │ 
-  
-  i Remove :
-  
-empty-lines.css:3:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    1 │ $colours: (
-    2 │     "text": $light-100,
-  > 3 │     "background-primary": $dark-300,
-      │                           ^
-    4 │ 
-  
-empty-lines.css:3:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `dark-300`
-  
-    1 │ $colours: (
-    2 │     "text": $light-100,
-  > 3 │     "background-primary": $dark-300,
-      │                            ^^^^^^^^
-    4 │ 
-  
-  i Remove dark-300
-  
-empty-lines.css:10:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a selector but instead found '"background-secondary"'.
-  
+   > 1 │ $colours: (
+       │ ^^^^^^^^^^^
+   > 2 │     "text": $light-100,
+   > 3 │     "background-primary": $dark-300,
+   > 4 │ 
+        ...
   > 10 │     "background-secondary": $dark-200,
-       │     ^^^^^^^^^^^^^^^^^^^^^^
-    11 │     "background-tertiary": $dark-100
-    12 │ );
-  
-  i Expected a selector here.
-  
-  > 10 │     "background-secondary": $dark-200,
-       │     ^^^^^^^^^^^^^^^^^^^^^^
-    11 │     "background-tertiary": $dark-100
-    12 │ );
-  
-empty-lines.css:10:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `:`
-  
-  > 10 │     "background-secondary": $dark-200,
-       │                           ^
-    11 │     "background-tertiary": $dark-100
-    12 │ );
-  
-  i Remove :
-  
-empty-lines.css:10:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-  > 10 │     "background-secondary": $dark-200,
-       │                             ^
-    11 │     "background-tertiary": $dark-100
-    12 │ );
-  
-empty-lines.css:10:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `dark-200`
-  
-  > 10 │     "background-secondary": $dark-200,
-       │                              ^^^^^^^^
-    11 │     "background-tertiary": $dark-100
-    12 │ );
-  
-  i Remove dark-200
-  
-empty-lines.css:11:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a selector but instead found '"background-tertiary"'.
-  
-    10 │     "background-secondary": $dark-200,
   > 11 │     "background-tertiary": $dark-100
-       │     ^^^^^^^^^^^^^^^^^^^^^
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ );
     13 │ 
   
-  i Expected a selector here.
-  
-    10 │     "background-secondary": $dark-200,
-  > 11 │     "background-tertiary": $dark-100
-       │     ^^^^^^^^^^^^^^^^^^^^^
-    12 │ );
-    13 │ 
-  
-empty-lines.css:11:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `:`
-  
-    10 │     "background-secondary": $dark-200,
-  > 11 │     "background-tertiary": $dark-100
-       │                          ^
-    12 │ );
-    13 │ 
-  
-  i Remove :
-  
-empty-lines.css:11:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    10 │     "background-secondary": $dark-200,
-  > 11 │     "background-tertiary": $dark-100
-       │                            ^
-    12 │ );
-    13 │ 
-  
-empty-lines.css:11:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `dark-100`
-  
-    10 │     "background-secondary": $dark-200,
-  > 11 │     "background-tertiary": $dark-100
-       │                             ^^^^^^^^
-    12 │ );
-    13 │ 
-  
-  i Remove dark-100
+  i SCSS only syntax
   
 empty-lines.css:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `)`
+  × Expected a qualified rule, or an at rule but instead found ');'.
   
     10 │     "background-secondary": $dark-200,
     11 │     "background-tertiary": $dark-100
   > 12 │ );
-       │ ^
+       │ ^^
     13 │ 
   
-  i Remove )
-  
-empty-lines.css:12:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
+  i Expected a qualified rule, or an at rule here.
   
     10 │     "background-secondary": $dark-200,
     11 │     "background-tertiary": $dark-100
   > 12 │ );
-       │  ^
+       │ ^^
     13 │ 
-  
-  i Remove ;
-  
-empty-lines.css:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `}` but instead the file ends
-  
-    11 │     "background-tertiary": $dark-100
-    12 │ );
-  > 13 │ 
-       │ 
-  
-  i the file ends here
-  
-    11 │     "background-tertiary": $dark-100
-    12 │ );
-  > 13 │ 
-       │ 
   
 
 ```

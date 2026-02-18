@@ -76,12 +76,19 @@ AnyCssRoot =
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
-	rules: CssRuleList
+	items: CssRootItemList
 	eof: 'EOF'
 
 CssSnippetRoot =
 	items: CssDeclarationOrRuleList
 	eof: 'EOF'
+
+CssRootItemList = AnyCssRootItem*
+
+AnyCssRootItem =
+	AnyCssRule
+	| ScssDeclaration
+	| CssBogus
 
 CssRuleList = AnyCssRule*
 
@@ -485,6 +492,7 @@ CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
+	| ScssDeclaration
 	| CssEmptyDeclaration
 	| CssBogus
 	| CssMetavariable
@@ -504,6 +512,7 @@ CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
 
 AnyCssDeclarationOrAtRule =
 	CssDeclarationWithSemicolon
+	| ScssDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
 
@@ -537,6 +546,7 @@ CssDeclarationList = AnyCssDeclaration*
 
 AnyCssDeclaration =
 	CssDeclarationWithSemicolon
+	| ScssDeclaration
 	| CssEmptyDeclaration
 
 AnyCssRuleBlock =
@@ -1833,6 +1843,8 @@ AnyCssValue =
 	| CssUnicodeRange
 	| CssMetavariable
 	| TwValueThemeReference
+	| ScssIdentifier
+	| ScssQualifiedName
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1885,10 +1897,14 @@ AnyCssFunction =
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
 CssFunction =
-	name: CssIdentifier
+	name: AnyCssFunctionName
 	'('
 	items: CssParameterList
 	')'
+
+AnyCssFunctionName =
+	CssIdentifier
+	| ScssQualifiedName
 
 // https://drafts.csswg.org/css-values-4/#url-value
 // <url> = <url()> | <src()>
@@ -2064,6 +2080,7 @@ AnyCssIfTest =
 
 AnyCssExpression =
 	CssBinaryExpression
+	| CssUnaryExpression
 	| CssParenthesizedExpression
 	| CssListOfComponentValuesExpression
 	| CssCommaSeparatedValue
@@ -2081,6 +2098,10 @@ CssBinaryExpression =
 		'+' | '-' | '*' | '/'
 	)
 	right: AnyCssExpression
+
+CssUnaryExpression =
+	operator: ('+' | '-' | '*')
+	expression: AnyCssExpression
 
 CssParenthesizedExpression =
 	'(' expression: AnyCssExpression? ')'
@@ -2443,3 +2464,54 @@ TwPluginAtRule =
 TwSlotAtRule =
 	'slot'
 	';'
+
+/////////////
+// SCSS
+/////////////
+
+// $variable: value;
+// ^^^^^^^^^^^^^^^^^
+ScssDeclaration =
+	name: AnyScssDeclarationName
+	':'
+	value: CssGenericComponentValueList
+	modifiers: ScssVariableModifierList
+	';'?
+
+// $var: 1
+// ^^^^
+AnyScssDeclarationName =
+	ScssIdentifier
+	| ScssNamespacedIdentifier
+
+// ns.$var: 1;
+// ^^^^^^^
+ScssNamespacedIdentifier =
+	namespace: CssIdentifier
+	'.'
+	name: ScssIdentifier
+
+// module.$var
+// ^^^^^^^^^^^
+ScssQualifiedName =
+	module: CssIdentifier
+	'.'
+	member: AnyScssModuleMember
+
+AnyScssModuleMember =
+	CssIdentifier
+	| ScssIdentifier
+
+// $var: 1 !default !global;
+//         ^^^^^^^^^^^^^^^^
+ScssVariableModifierList = ScssVariableModifier*
+
+// $var: 1 !default;
+//         ^^^^^^^^
+ScssVariableModifier =
+	'!'
+	value: ('default' | 'global')
+
+// $var: 1;
+// ^^^^
+ScssIdentifier = dollar: '$' name: CssIdentifier

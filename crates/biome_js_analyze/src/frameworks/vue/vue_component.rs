@@ -1,4 +1,6 @@
-use crate::frameworks::vue::vue_call::{is_vue_api_reference, is_vue_compiler_macro_call};
+use crate::frameworks::vue::vue_call::{
+    is_to_refs_call, is_vue_api_reference, is_vue_compiler_macro_call,
+};
 use crate::services::semantic::Semantic;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -743,6 +745,10 @@ declare_node_union! {
 }
 
 impl AnyVueSetupDeclaration {
+    /// Checks if this setup declaration is assigned directly from `defineProps`.
+    ///
+    /// This handles cases like `const { foo } = defineProps<{ foo: string }>()` where
+    /// the destructured property comes from the props definition.
     pub fn is_assigned_to_props(&self, model: &SemanticModel) -> bool {
         if let Self::JsIdentifierBinding(binding) = self
             && let Some(declarator) = binding
@@ -757,6 +763,65 @@ impl AnyVueSetupDeclaration {
             && let AnyJsExpression::JsCallExpression(call) = expression
         {
             return is_vue_compiler_macro_call(&call, model, "defineProps");
+        }
+        false
+    }
+
+    /// Checks if this setup declaration is assigned from `toRefs(props)`.
+    ///
+    /// This handles cases like `const { foo } = toRefs(props)` where the destructured
+    /// property comes from converting props to refs. These should not be flagged as
+    /// duplicates of the props themselves.
+    ///
+    /// Only returns true if the argument to `toRefs` is either:
+    /// - A direct `defineProps()` call
+    /// - An identifier whose binding resolves to a variable initialized from `defineProps`
+    pub fn is_assigned_to_to_refs(&self, model: &SemanticModel) -> bool {
+        if let Self::JsIdentifierBinding(binding) = self
+            && let Some(declarator) = binding
+                .syntax()
+                .ancestors()
+                .find_map(|syntax| JsVariableDeclarator::try_cast(syntax).ok())
+            && let Some(initializer) = declarator.initializer()
+            && let Some(expression) = initializer
+                .expression()
+                .ok()
+                .and_then(|expression| expression.inner_expression())
+            && let AnyJsExpression::JsCallExpression(call) = expression
+            && is_to_refs_call(&call, model)
+        {
+            // Check that the first argument to `toRefs` is the props source
+            if let Some(Ok(first_arg)) = call
+                .arguments()
+                .ok()
+                .and_then(|args| args.args().iter().next())
+                && let Some(arg_expr) = first_arg.as_any_js_expression()
+                && let Some(arg_expr) = arg_expr.inner_expression()
+            {
+                // Case 1: Direct defineProps() call: `toRefs(defineProps(...))`
+                if let AnyJsExpression::JsCallExpression(arg_call) = &arg_expr
+                    && is_vue_compiler_macro_call(arg_call, model, "defineProps")
+                {
+                    return true;
+                }
+
+                // Case 2: Identifier bound to defineProps: `const props = defineProps(...); toRefs(props)`
+                if let Some(ident_ref) = arg_expr.as_js_reference_identifier()
+                    && let Some(binding) = model.binding(&ident_ref)
+                    && let Some(declarator) = binding
+                        .syntax()
+                        .ancestors()
+                        .find_map(|syntax| JsVariableDeclarator::try_cast(syntax).ok())
+                    && let Some(decl_initializer) = declarator.initializer()
+                    && let Some(decl_expr) = decl_initializer
+                        .expression()
+                        .ok()
+                        .and_then(|expr| expr.inner_expression())
+                    && let AnyJsExpression::JsCallExpression(decl_call) = decl_expr
+                {
+                    return is_vue_compiler_macro_call(&decl_call, model, "defineProps");
+                }
+            }
         }
         false
     }

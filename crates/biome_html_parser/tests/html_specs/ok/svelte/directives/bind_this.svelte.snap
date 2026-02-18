@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -36,7 +37,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@14..15 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@15..16 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@16..20 "node" [] [],
@@ -80,7 +81,7 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@53..54 "=" [] [],
-                                value: HtmlSingleTextExpression {
+                                value: HtmlAttributeSingleTextExpression {
                                     l_curly_token: L_CURLY@54..55 "{" [] [],
                                     expression: HtmlTextExpression {
                                         html_literal_token: HTML_LITERAL@55..61 "canvas" [] [],
@@ -131,7 +132,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@14..14
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@14..21
                 0: EQ@14..15 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@15..21
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@15..21
                   0: L_CURLY@15..16 "{" [] []
                   1: HTML_TEXT_EXPRESSION@16..20
                     0: HTML_LITERAL@16..20 "node" [] []
@@ -161,7 +162,7 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@53..53
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@53..62
                 0: EQ@53..54 "=" [] []
-                1: HTML_SINGLE_TEXT_EXPRESSION@54..62
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@54..62
                   0: L_CURLY@54..55 "{" [] []
                   1: HTML_TEXT_EXPRESSION@55..61
                     0: HTML_LITERAL@55..61 "canvas" [] []

@@ -1,32 +1,15 @@
 use crate::run_cli;
-use crate::snap_test::{CliSnapshot, SnapshotPayload, assert_cli_snapshot};
+use crate::snap_test::{CliSnapshot, SnapshotPayload};
 use biome_cli::CliDiagnostic;
 use biome_console::{BufferConsole, Console};
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
-use std::sync::{Mutex, MutexGuard};
+use serial_test::serial;
 use std::{env, fs};
 
 #[test]
-fn rage_help() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["rage", "--help"].as_slice()));
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "rage_help",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
+#[serial]
 fn ok() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -45,6 +28,7 @@ fn ok() {
 }
 
 #[test]
+#[serial]
 fn with_configuration() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -71,6 +55,7 @@ fn with_configuration() {
 }
 
 #[test]
+#[serial]
 fn with_no_configuration() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -89,6 +74,7 @@ fn with_no_configuration() {
 }
 
 #[test]
+#[serial]
 fn with_jsonc_configuration() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -116,6 +102,7 @@ fn with_jsonc_configuration() {
 }
 
 #[test]
+#[serial]
 fn with_malformed_configuration() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -142,6 +129,7 @@ fn with_malformed_configuration() {
 }
 
 #[test]
+#[serial]
 fn with_formatter_configuration() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -209,6 +197,7 @@ fn with_formatter_configuration() {
 }
 
 #[test]
+#[serial]
 fn with_linter_configuration() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -302,25 +291,18 @@ fn assert_rage_snapshot(payload: SnapshotPayload<'_>) {
     });
 }
 
-/// Mutex to guarantee that the `rage` tests run sequentially. Necessary to avoid race conditions
-/// when reading the server logs.
-static RAGE_GUARD: Mutex<()> = Mutex::new(());
-
 /// Mocks out the directory from which `rage` reads the server logs. Ensures that the test directory
 /// gets removed at the end of the test.
 struct TestLogDir {
     path: Utf8PathBuf,
-    _guard: MutexGuard<'static, ()>,
 }
 
 impl TestLogDir {
     fn new(name: &str) -> Self {
-        let guard = RAGE_GUARD.lock().unwrap();
         let path = env::temp_dir().join(name);
 
         Self {
             path: Utf8PathBuf::from_path_buf(path).unwrap(),
-            _guard: guard,
         }
     }
 }

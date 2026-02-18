@@ -707,10 +707,10 @@ impl WorkspaceServer {
             path,
             settings.as_ref().experimental_full_html_support_enabled(),
         );
-        let Some(parse_embedded) = capabilities.parser.parse_embedded_nodes else {
+        let Some(parse_embedded_nodes) = capabilities.parser.parse_embedded_nodes else {
             return Ok(Default::default());
         };
-        let result = parse_embedded(root, path, source, settings, cache, builder);
+        let result = parse_embedded_nodes(root, path, source, settings, cache, builder);
 
         for (mut content, file_source) in result.nodes {
             let index = self.insert_source(file_source);
@@ -1228,22 +1228,22 @@ impl Workspace for WorkspaceServer {
                             .read_file_from_path(gitignore.as_ref())
                             .ok()
                             .or_else(|| self.fs.read_file_from_path(ignore.as_ref()).ok());
-                        let content = match result {
-                            Some(content) => content,
+                        match result {
+                            Some(content) => {
+                                let lines: Vec<_> = content.lines().collect();
+                                settings.vcs_settings.store_root_ignore_patterns(
+                                    directory.as_ref(),
+                                    lines.as_slice(),
+                                )?;
+                            }
                             None => {
                                 diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
                                     VcsDiagnostic::NoIgnoreFileFound(NoIgnoreFileFound {
                                         path: directory.to_string(),
                                     }),
                                 ));
-                                return Ok(UpdateSettingsResult { diagnostics });
                             }
                         };
-
-                        let lines: Vec<_> = content.lines().collect();
-                        settings
-                            .vcs_settings
-                            .store_root_ignore_patterns(directory.as_ref(), lines.as_slice())?;
                     }
                 }
             }

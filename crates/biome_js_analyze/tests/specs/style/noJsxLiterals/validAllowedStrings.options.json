@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "style": {
+        "noJsxLiterals": {
+          "level": "on",
+          "options": {
+            "allowedStrings": [
+              "allowed"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

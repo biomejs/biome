@@ -1,5 +1,5 @@
 use crate::parser::HtmlParser;
-use crate::syntax::HtmlSyntaxFeatures::SingleTextExpressions;
+use crate::syntax::HtmlSyntaxFeatures::Svelte;
 use crate::syntax::parse_error::{
     expected_child_or_block, expected_expression, expected_name, expected_svelte_closing_block,
     expected_svelte_property, expected_text_expression, expected_valid_directive,
@@ -358,7 +358,7 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
 
 /// Parses a spread attribute or a single text expression.
 pub(crate) fn parse_svelte_spread_or_expression(p: &mut HtmlParser) -> ParsedSyntax {
-    if !SingleTextExpressions.is_supported(p) {
+    if !Svelte.is_supported(p) {
         return Absent;
     }
 
@@ -1269,6 +1269,20 @@ pub(crate) fn is_at_svelte_keyword(p: &HtmlParser) -> bool {
     )
 }
 
+fn is_at_svelte_directive_keyword(token: HtmlSyntaxKind) -> bool {
+    matches!(
+        token,
+        T![bind]
+            | T![transition]
+            | T![in]
+            | T![out]
+            | T![class]
+            | T![style]
+            | T![use]
+            | T![animate]
+    )
+}
+
 fn is_at_else_opening_block(p: &mut HtmlParser) -> bool {
     p.at(T!["{:"]) && p.nth_at(1, T![else])
 }
@@ -1277,16 +1291,20 @@ fn is_at_then_or_catch_block(p: &mut HtmlParser) -> bool {
     p.at(T!["{:"]) && (p.nth_at(1, T![then]) || p.nth_at(1, T![catch]))
 }
 
-pub(crate) fn is_at_svelte_directive_start(p: &HtmlParser) -> bool {
-    let text = p.cur_text();
-    text.starts_with("bind:")
-        || text.starts_with("transition:")
-        || text.starts_with("in:")
-        || text.starts_with("out:")
-        || text.starts_with("animate:")
-        || text.starts_with("use:")
-        || text.starts_with("style:")
-        || text.starts_with("class:")
+pub(crate) fn is_at_svelte_directive_start(p: &mut HtmlParser) -> bool {
+    if Svelte.is_unsupported(p) {
+        return false;
+    }
+    let checkpoint = p.checkpoint();
+    p.re_lex(HtmlReLexContext::Svelte);
+    let first_token = p.cur();
+
+    p.bump_any_with_context(HtmlLexContext::Svelte);
+    let second_token = p.cur();
+
+    p.rewind(checkpoint);
+
+    second_token == T![:] && is_at_svelte_directive_keyword(first_token)
 }
 
 // #endregion

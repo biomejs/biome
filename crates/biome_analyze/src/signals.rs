@@ -2,8 +2,8 @@ use crate::categories::{
     SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
 };
 use crate::{
-    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, Queryable, RuleGroup, ServiceBag,
-    SuppressionAction,
+    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, Queryable, RuleDiagnostic, RuleGroup,
+    ServiceBag, SuppressionAction,
     categories::ActionCategory,
     context::RuleContext,
     registry::{RuleLanguage, RuleRoot},
@@ -98,6 +98,42 @@ where
         } else {
             AnalyzerTransformationIter::new(vec![])
         }
+    }
+}
+
+/// Implementation of [AnalyzerSignal] for plugin diagnostics that preserves
+/// the [RuleDiagnostic] as [DiagnosticKind::Rule](crate::diagnostics::DiagnosticKind::Rule),
+/// ensuring diagnostic offset adjustments are correctly applied for embedded
+/// languages (Vue, Svelte, Astro).
+///
+/// Unlike [DiagnosticSignal] which converts through [Error] into
+/// [DiagnosticKind::Raw](crate::diagnostics::DiagnosticKind::Raw), this type
+/// directly converts via `AnalyzerDiagnostic::from(RuleDiagnostic)`.
+pub struct PluginSignal<L> {
+    diagnostic: RuleDiagnostic,
+    _phantom: PhantomData<L>,
+}
+
+impl<L: Language> PluginSignal<L> {
+    pub fn new(diagnostic: RuleDiagnostic) -> Self {
+        Self {
+            diagnostic,
+            _phantom: PhantomData,
+        }
+    }
+}
+
+impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
+    fn diagnostic(&self) -> Option<AnalyzerDiagnostic> {
+        Some(AnalyzerDiagnostic::from(self.diagnostic.clone()))
+    }
+
+    fn actions(&self) -> AnalyzerActionIter<L> {
+        AnalyzerActionIter::new(vec![])
+    }
+
+    fn transformations(&self) -> AnalyzerTransformationIter<L> {
+        AnalyzerTransformationIter::new(vec![])
     }
 }
 

@@ -243,3 +243,17 @@ pub(crate) fn tailwind_disabled(p: &CssParser, range: TextRange) -> ParseDiagnos
 pub(crate) fn expected_tw_source(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["string literal", "inline(\"...\")"], range, p)
 }
+
+pub(crate) fn scss_only_syntax_error(
+    p: &CssParser,
+    syntax: &str,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        format!(
+            "{syntax} are an SCSS only feature. Convert your file to an SCSS file or remove the syntax."
+        ),
+        range,
+    )
+        .with_hint(markup! { "SCSS only syntax" })
+}

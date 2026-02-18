@@ -2,3 +2,6 @@
 import React from "react"
 import { default as React } from "react"
 import * as React from "react"
+
+// https://github.com/biomejs/biome/issues/9020
+import React from "./not-actually-react"

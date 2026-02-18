@@ -5,6 +5,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::AstNode;
 
+pub(crate) mod playwright;
 pub(crate) mod vue;
 
 pub(crate) fn is_framework_api_reference(

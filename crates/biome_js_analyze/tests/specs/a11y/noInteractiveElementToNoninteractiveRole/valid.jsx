@@ -172,6 +172,8 @@
 <div role="treeitem" />;
 /* Presentation is a special case role that indicates intentional static semantics */
 <div role="presentation" />;
+<hr role="presentation" />;
+<hr role="none" />;
 /* HTML elements attributed with an abstract role */
 <div role="command" />;
 <div role="composite" />;
@@ -276,4 +278,3 @@
     alt='An ASCII-style headshot'
   />
 </picture>
-

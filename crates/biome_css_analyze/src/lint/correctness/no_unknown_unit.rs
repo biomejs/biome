@@ -115,11 +115,11 @@ impl Rule for NoUnknownUnit {
                                 match ancestor.kind() {
                                     CssSyntaxKind::CSS_FUNCTION => {
                                         let function_name_token = ancestor
-                                            .cast::<CssFunction>()?
-                                            .name()
-                                            .ok()?
-                                            .value_token()
-                                            .ok()?;
+                                    .cast::<CssFunction>()?
+                                    .name()
+                                    .ok()?
+                                    .as_css_identifier()
+                                    .and_then(|name| name.value_token().ok())?;
                                         let function_name = function_name_token
                                             .text_trimmed()
                                             .to_ascii_lowercase_cow();

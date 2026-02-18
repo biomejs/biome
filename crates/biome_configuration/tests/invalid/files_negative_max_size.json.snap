@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: files_negative_max_size.json
 ---
 files_negative_max_size.json:3:14 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -12,6 +12,3 @@ files_negative_max_size.json:3:14 deserialize ━━━━━━━━━━━�
       │ 		           ^^^^^^
     4 │ 	}
     5 │ }
-  
-
-

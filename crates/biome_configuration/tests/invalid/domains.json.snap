@@ -24,6 +24,7 @@ domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━
   - project
   - tailwind
   - turborepo
+  - playwright
   - types
   
 

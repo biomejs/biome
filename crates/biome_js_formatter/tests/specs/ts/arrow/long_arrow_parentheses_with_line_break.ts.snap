@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/arrow/long_arrow_parentheses_with_line_break.ts
 ---
+
 # Input
 
 ```ts

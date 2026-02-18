@@ -1,9 +1,8 @@
 use biome_js_semantic::{BindingExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement,
-    JsArrowFunctionExpression, JsAssignmentOperator, JsFunctionDeclaration, JsLanguage,
-    JsLogicalOperator, JsMethodClassMember, JsMethodObjectMember, JsSyntaxNode, JsSyntaxToken,
-    JsUnaryOperator,
+    AnyFunctionLike, AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression,
+    AnyJsTemplateElement, JsAssignmentOperator, JsLanguage, JsLogicalOperator, JsModule,
+    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsUnaryOperator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TriviaPiece};
 
@@ -318,35 +317,61 @@ fn get_boolean_value(node: &AnyJsLiteralExpression) -> bool {
     }
 }
 
-/// Checks if the given `JsExpressionStatement` is within an async function.
+/// Checks if the given node is within an async function.
 ///
-/// This function traverses up the syntax tree from the given expression node
-/// to find the nearest function and checks if it is an async function. It
-/// supports arrow functions, function declarations, class methods, and object
-/// methods.
-///
-/// # Arguments
-///
-/// * `node` - A reference to a `JsExpressionStatement` to check.
-///
-/// # Returns
-///
-/// * `true` if the expression is within an async function.
-/// * `false` otherwise.
+/// Traverses up the syntax tree to find the nearest function-like boundary
+/// (including arrow functions, function expressions, function declarations,
+/// class methods, object methods, and constructors) and checks if it has the
+/// `async` keyword. Also stops at sync-only boundaries like getters, setters,
+/// and static initialization blocks.
 pub fn is_in_async_function(node: &JsSyntaxNode) -> bool {
     for ancestor in node.ancestors() {
-        if let Some(func) = JsArrowFunctionExpression::cast_ref(&ancestor) {
-            return func.async_token().is_some();
-        } else if let Some(func) = JsFunctionDeclaration::cast_ref(&ancestor) {
-            return func.async_token().is_some();
-        } else if let Some(method) = JsMethodClassMember::cast_ref(&ancestor) {
-            return method.async_token().is_some();
-        } else if let Some(method) = JsMethodObjectMember::cast_ref(&ancestor) {
-            return method.async_token().is_some();
+        if let Some(func) = AnyFunctionLike::cast_ref(&ancestor) {
+            return func.is_async();
+        }
+        if is_sync_only_function_boundary(ancestor.kind()) {
+            return false;
         }
     }
-
     false
+}
+
+/// Returns `true` if `await` is syntactically valid at the given node position.
+///
+/// True when inside an `async` function, or at module top-level where
+/// top-level await (ES2022+) is supported. Biome unconditionally assumes
+/// modules support top-level await.
+pub fn is_await_allowed(node: &JsSyntaxNode) -> bool {
+    for ancestor in node.ancestors() {
+        if let Some(func) = AnyFunctionLike::cast_ref(&ancestor) {
+            return func.is_async();
+        }
+        if is_sync_only_function_boundary(ancestor.kind()) {
+            return false;
+        }
+        if JsModule::can_cast(ancestor.kind()) {
+            return true;
+        }
+    }
+    false
+}
+
+/// Returns `true` if the node kind is a sync-only function boundary where
+/// `async` is never valid (getters, setters, static initialization blocks).
+fn is_sync_only_function_boundary(kind: JsSyntaxKind) -> bool {
+    matches!(
+        kind,
+        JsSyntaxKind::JS_GETTER_CLASS_MEMBER
+            | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
+            | JsSyntaxKind::JS_SETTER_CLASS_MEMBER
+            | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
+            | JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
+    )
+}
+
+/// Returns `true` if the node kind is any function-like scope boundary.
+pub fn is_function_boundary(kind: JsSyntaxKind) -> bool {
+    AnyFunctionLike::can_cast(kind) || is_sync_only_function_boundary(kind)
 }
 
 #[cfg(test)]

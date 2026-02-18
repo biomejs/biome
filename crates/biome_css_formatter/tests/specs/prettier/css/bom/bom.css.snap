@@ -1,8 +1,8 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/bom/bom.css
-snapshot_kind: text
 ---
+
 # Input
 
 ```css

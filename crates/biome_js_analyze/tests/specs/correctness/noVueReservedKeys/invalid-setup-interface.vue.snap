@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-interface.vue
+---
+# Input
+```ts
+interface Props {
+    $el: string
+}
+defineProps<Props>();
+
+```
+
+# Diagnostics
+```
+invalid-setup-interface.vue:2:5 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key $el is reserved in Vue.
+  
+    1 │ interface Props {
+  > 2 │     $el: string
+      │     ^^^
+    3 │ }
+    4 │ defineProps<Props>();
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```

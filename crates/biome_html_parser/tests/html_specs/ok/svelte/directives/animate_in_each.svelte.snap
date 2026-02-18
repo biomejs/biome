@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -64,7 +65,7 @@ HtmlRoot {
                                     modifiers: SvelteDirectiveModifierList [],
                                     initializer: HtmlAttributeInitializerClause {
                                         eq_token: EQ@72..73 "=" [] [],
-                                        value: HtmlSingleTextExpression {
+                                        value: HtmlAttributeSingleTextExpression {
                                             l_curly_token: L_CURLY@73..74 "{" [] [],
                                             expression: HtmlTextExpression {
                                                 html_literal_token: HTML_LITERAL@74..91 "{ duration: 200 }" [] [],
@@ -105,7 +106,7 @@ HtmlRoot {
                                         modifiers: SvelteDirectiveModifierList [],
                                         initializer: HtmlAttributeInitializerClause {
                                             eq_token: EQ@133..134 "=" [] [],
-                                            value: HtmlSingleTextExpression {
+                                            value: HtmlAttributeSingleTextExpression {
                                                 l_curly_token: L_CURLY@134..135 "{" [] [],
                                                 expression: HtmlTextExpression {
                                                     html_literal_token: HTML_LITERAL@135..144 "todo.done" [] [],
@@ -190,7 +191,7 @@ HtmlRoot {
                   2: SVELTE_DIRECTIVE_MODIFIER_LIST@72..72
                   3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@72..92
                     0: EQ@72..73 "=" [] []
-                    1: HTML_SINGLE_TEXT_EXPRESSION@73..92
+                    1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@73..92
                       0: L_CURLY@73..74 "{" [] []
                       1: HTML_TEXT_EXPRESSION@74..91
                         0: HTML_LITERAL@74..91 "{ duration: 200 }" [] []
@@ -218,7 +219,7 @@ HtmlRoot {
                     2: SVELTE_DIRECTIVE_MODIFIER_LIST@133..133
                     3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@133..146
                       0: EQ@133..134 "=" [] []
-                      1: HTML_SINGLE_TEXT_EXPRESSION@134..146
+                      1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@134..146
                         0: L_CURLY@134..135 "{" [] []
                         1: HTML_TEXT_EXPRESSION@135..144
                           0: HTML_LITERAL@135..144 "todo.done" [] []

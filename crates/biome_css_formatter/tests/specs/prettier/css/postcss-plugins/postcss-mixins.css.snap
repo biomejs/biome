@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/postcss-plugins/postcss-mixins.css
 ---
+
 # Input
 
 ```css
@@ -107,47 +108,17 @@ a {
 
 # Errors
 ```
-postcss-mixins.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    1 │ a {
-  > 2 │     @mixin $(theme)-colors;
-      │            ^
-    3 │ }
-    4 │ 
-  
-postcss-mixins.css:5:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    3 │ }
-    4 │ 
-  > 5 │ @define-mixin icon $network, $color: blue {
-      │                    ^
-    6 │     .icon.is-$(network) {
-    7 │         color: $color;
-  
-postcss-mixins.css:5:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    3 │ }
-    4 │ 
-  > 5 │ @define-mixin icon $network, $color: blue {
-      │                              ^
-    6 │     .icon.is-$(network) {
-    7 │         color: $color;
-  
 postcss-mixins.css:6:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × expected `,` but instead found `$`
   
     5 │ @define-mixin icon $network, $color: blue {
   > 6 │     .icon.is-$(network) {
       │              ^
     7 │         color: $color;
     8 │         @mixin-content;
+  
+  i Remove $
   
 postcss-mixins.css:6:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -175,18 +146,20 @@ postcss-mixins.css:6:23 parse ━━━━━━━━━━━━━━━━�
   
 postcss-mixins.css:7:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     5 │ @define-mixin icon $network, $color: blue {
     6 │     .icon.is-$(network) {
   > 7 │         color: $color;
-      │                ^
+      │                ^^^^^^
     8 │         @mixin-content;
     9 │     }
   
+  i SCSS only syntax
+  
 postcss-mixins.css:10:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × expected `,` but instead found `$`
   
      8 │         @mixin-content;
      9 │     }
@@ -194,6 +167,8 @@ postcss-mixins.css:10:14 parse ━━━━━━━━━━━━━━━━�
        │              ^
     11 │        color: white;
     12 │        background: $color;
+  
+  i Remove $
   
 postcss-mixins.css:10:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -236,14 +211,16 @@ postcss-mixins.css:10:24 parse ━━━━━━━━━━━━━━━━�
   
 postcss-mixins.css:12:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     10 │     .icon.is-$(network):hover {
     11 │        color: white;
   > 12 │        background: $color;
-       │                    ^
+       │                    ^^^^^^
     13 │    }
     14 │ }
+  
+  i SCSS only syntax
   
 
 ```

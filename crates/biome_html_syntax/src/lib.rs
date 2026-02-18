@@ -3,6 +3,7 @@
 #[macro_use]
 mod attr_ext;
 pub mod attribute_ext;
+mod directive_ext;
 pub mod element_ext;
 mod file_source;
 mod generated;

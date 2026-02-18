@@ -614,7 +614,8 @@ fn handle_method_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlacem
 fn handle_root_comments(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
     if let Some(root) = AnyJsRoot::cast_ref(comment.enclosing_node()) {
         let is_blank = match &root {
-            AnyJsRoot::JsExpressionSnipped(_) => false,
+            AnyJsRoot::JsExpressionSnippet(_) => false,
+            AnyJsRoot::JsExpressionTemplateRoot(_) => false,
             AnyJsRoot::JsModule(module) => {
                 module.directives().is_empty() && module.items().is_empty()
             }

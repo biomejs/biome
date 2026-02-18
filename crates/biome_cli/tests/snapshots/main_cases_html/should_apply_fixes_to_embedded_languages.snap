@@ -25,9 +25,10 @@ expression: redactor(content)
 
 ```html
 <script type="module">
+	import _ from "lodash";
 	import z from "zod";
 
-	const _schema = z.object({}).optional().nullable();
+	const schema = z.object({}).optional().nullable();
 </script>
 <style>
 	#id .class div {
@@ -60,8 +61,8 @@ file.html:9:2 lint/suspicious/noDuplicateProperties ━━━━━━━━━�
      8 │ 	background-color: red;
    > 9 │ 	background-color: red;
        │ 	^^^^^^^^^^^^^^^^
-    10 │ }
-    11 │  </style>
+    10 │ } </style>
+    11 │ 
   
   i background-color is already defined here.
   
@@ -70,7 +71,7 @@ file.html:9:2 lint/suspicious/noDuplicateProperties ━━━━━━━━━�
    > 8 │ 	background-color: red;
        │ 	^^^^^^^^^^^^^^^^
      9 │ 	background-color: red;
-    10 │ }
+    10 │ } </style>
   
   i Remove or rename the duplicate property to ensure consistent styling.
   

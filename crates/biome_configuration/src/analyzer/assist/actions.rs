@@ -65,6 +65,7 @@ impl std::fmt::Display for RuleGroup {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum ActionName {
+    NoDuplicateClasses,
     OrganizeImports,
     UseSortedAttributes,
     UseSortedInterfaceMembers,
@@ -74,6 +75,7 @@ pub enum ActionName {
 impl ActionName {
     pub const fn as_str(self) -> &'static str {
         match self {
+            Self::NoDuplicateClasses => "noDuplicateClasses",
             Self::OrganizeImports => "organizeImports",
             Self::UseSortedAttributes => "useSortedAttributes",
             Self::UseSortedInterfaceMembers => "useSortedInterfaceMembers",
@@ -83,6 +85,7 @@ impl ActionName {
     }
     pub const fn group(self) -> RuleGroup {
         match self {
+            Self::NoDuplicateClasses => RuleGroup::Source,
             Self::OrganizeImports => RuleGroup::Source,
             Self::UseSortedAttributes => RuleGroup::Source,
             Self::UseSortedInterfaceMembers => RuleGroup::Source,
@@ -95,6 +98,7 @@ impl std::str::FromStr for ActionName {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "noDuplicateClasses" => Ok(Self::NoDuplicateClasses),
             "organizeImports" => Ok(Self::OrganizeImports),
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
             "useSortedInterfaceMembers" => Ok(Self::UseSortedInterfaceMembers),

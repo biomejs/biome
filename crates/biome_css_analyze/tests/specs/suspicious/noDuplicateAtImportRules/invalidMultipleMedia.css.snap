@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalidMultipleMedia.css
-snapshot_kind: text
 ---
 # Input
 ```css

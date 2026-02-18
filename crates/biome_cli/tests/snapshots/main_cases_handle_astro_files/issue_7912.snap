@@ -17,9 +17,7 @@ expression: redactor(content)
 
 ```astro
 ---
-            
             const title = "Hello World";
-
 ---
 
 <html>
@@ -35,5 +33,5 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-Checked 1 file in <TIME>. Fixed 1 file.
+Checked 1 file in <TIME>. No fixes applied.
 ```

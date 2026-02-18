@@ -78,7 +78,7 @@ declare_lint_rule! {
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     ///
     pub UseAnchorContent {
-        version: "next",
+        version: "2.4.0",
         name: "useAnchorContent",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("anchor-has-content").same()],

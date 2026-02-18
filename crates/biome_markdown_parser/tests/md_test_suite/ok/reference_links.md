@@ -31,3 +31,7 @@ Nested in paragraph: This is a paragraph with [a reference][foo] in the middle.
 Case-insensitive: [case label]
 
 Whitespace normalized: [case   label]
+
+[label\]]: https://escaped.example
+
+Escaped bracket in label: [text][label\]]

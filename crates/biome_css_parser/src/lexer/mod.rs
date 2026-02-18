@@ -3,7 +3,7 @@
 mod tests;
 
 use crate::CssParserOptions;
-use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextSize};
+use biome_css_syntax::{CssFileSource, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -94,6 +94,8 @@ pub(crate) struct CssLexer<'src> {
     diagnostics: Vec<ParseDiagnostic>,
 
     options: CssParserOptions,
+
+    source_type: CssFileSource,
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -216,11 +218,19 @@ impl<'src> CssLexer<'src> {
             position: 0,
             diagnostics: vec![],
             options: CssParserOptions::default(),
+            source_type: CssFileSource::default(),
         }
     }
 
     pub(crate) fn with_options(self, options: CssParserOptions) -> Self {
         Self { options, ..self }
+    }
+
+    pub(crate) fn with_source_type(self, source_type: CssFileSource) -> Self {
+        Self {
+            source_type,
+            ..self
+        }
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
@@ -327,6 +337,7 @@ impl<'src> CssLexer<'src> {
                 self.advance(1);
                 self.consume_byte(T!["$="])
             }
+            DOL => self.consume_byte(T![$]),
             UNI if self.options.is_metavariable_enabled() && self.is_metavariable_start() => {
                 self.consume_metavariable(GRIT_METAVARIABLE)
             }
@@ -1099,17 +1110,29 @@ impl<'src> CssLexer<'src> {
                 self.advance(2);
 
                 let mut has_newline = false;
+                let is_scss = self.source_type.is_scss();
+                let mut depth = 1u32;
 
                 while let Some(chr) = self.current_byte() {
                     match chr {
+                        b'/' if is_scss && self.peek_byte() == Some(b'*') => {
+                            self.advance(2);
+                            depth = depth.saturating_add(1);
+                        }
                         b'*' if self.peek_byte() == Some(b'/') => {
                             self.advance(2);
 
-                            if has_newline {
-                                self.after_newline = true;
-                                return MULTILINE_COMMENT;
-                            } else {
-                                return COMMENT;
+                            if is_scss {
+                                depth = depth.saturating_sub(1);
+                            }
+
+                            if !is_scss || depth == 0 {
+                                if has_newline {
+                                    self.after_newline = true;
+                                    return MULTILINE_COMMENT;
+                                } else {
+                                    return COMMENT;
+                                }
                             }
                         }
                         b'\n' | b'\r' => {
@@ -1135,7 +1158,7 @@ impl<'src> CssLexer<'src> {
                     COMMENT
                 }
             }
-            Some(b'/') if self.options.allow_wrong_line_comments => {
+            Some(b'/') if self.options.allow_wrong_line_comments || self.source_type.is_scss() => {
                 self.advance(2);
 
                 while let Some(chr) = self.current_byte() {

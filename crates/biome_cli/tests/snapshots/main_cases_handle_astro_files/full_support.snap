@@ -18,8 +18,40 @@ expression: redactor(content)
 
 ```astro
 ---
+import s from "src/utils";
 import { sure } from "sure.js";
 import z from "zod";
+
+// Always considered as used
+interface Props {
+	name: string;
+}
+
+type Props = {
+	name: string;
+};
+
+// Still reported as unused
+interface Foo {
+	name: string;
+}
+
+type Bar = {
+	name: string;
+};
+
+function _doSomething() {
+	// Still reported as unused, Props interface must be at top-level
+	interface Props {
+		name: string;
+	}
+
+	type Props = {
+		name: string;
+	};
+}
+
+const { name } = Astro.props;
 
 let schema = z.object().optional();
 schema + sure();
@@ -60,22 +92,89 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.astro:10:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:16:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface Foo is unused.
+  
+    15 │ // Still reported as unused
+  > 16 │ interface Foo {
+       │           ^^^
+    17 │ 	name: string;
+    18 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```block
+file.astro:20:6 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type alias Bar is unused.
+  
+    18 │ }
+    19 │ 
+  > 20 │ type Bar = {
+       │      ^^^
+    21 │ 	name: string;
+    22 │ };
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```block
+file.astro:26:12 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface Props is unused.
+  
+    24 │ function _doSomething() {
+    25 │ 	// Still reported as unused, Props interface must be at top-level
+  > 26 │ 	interface Props {
+       │ 	          ^^^^^
+    27 │ 		name: string;
+    28 │ 	}
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```block
+file.astro:30:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type alias Props is unused.
+  
+    28 │ 	}
+    29 │ 
+  > 30 │ 	type Props = {
+       │ 	     ^^^^^
+    31 │ 		name: string;
+    32 │ 	};
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```block
+file.astro:41:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a lang attribute when using the html element.
   
-     8 │ ---
-     9 │ 
-  > 10 │ <html>
+    39 │ ---
+    40 │ 
+  > 41 │ <html>
        │ ^^^^^^
-  > 11 │ 	<head>
-  > 12 │ 		<title>Astro</title>
-  > 13 │ 	</head>
-  > 14 │ 	<body></body>
-  > 15 │ </html>
+  > 42 │ 	<head>
+  > 43 │ 		<title>Astro</title>
+  > 44 │ 	</head>
+  > 45 │ 	<body></body>
+  > 46 │ </html>
        │ ^^^^^^^
-    16 │ 
-    17 │ <style>
+    47 │ 
+    48 │ <style>
   
   i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
@@ -83,16 +182,63 @@ file.astro:10:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 ```
 
 ```block
-file.astro:19:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:11:6 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Shouldn't redeclare 'Props'. Consider to delete it or rename it.
+  
+     9 │ }
+    10 │ 
+  > 11 │ type Props = {
+       │      ^^^^^
+    12 │ 	name: string;
+    13 │ };
+  
+  i 'Props' is defined here:
+  
+    6 │ // Always considered as used
+  > 7 │ interface Props {
+      │           ^^^^^
+    8 │ 	name: string;
+    9 │ }
+  
+
+```
+
+```block
+file.astro:30:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Shouldn't redeclare 'Props'. Consider to delete it or rename it.
+  
+    28 │ 	}
+    29 │ 
+  > 30 │ 	type Props = {
+       │ 	     ^^^^^
+    31 │ 		name: string;
+    32 │ 	};
+  
+  i 'Props' is defined here:
+  
+    24 │ function _doSomething() {
+    25 │ 	// Still reported as unused, Props interface must be at top-level
+  > 26 │ 	interface Props {
+       │ 	          ^^^^^
+    27 │ 		name: string;
+    28 │ 	}
+  
+
+```
+
+```block
+file.astro:50:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
   
-    17 │ <style>
-    18 │ #id {
-  > 19 │ 	font-family: comic-sans;
+    48 │ <style>
+    49 │ #id {
+  > 50 │ 	font-family: comic-sans;
        │ 	             ^^^^^^^^^^
-    20 │ }
-    21 │ .class {
+    51 │ }
+    52 │ .class {
   
   i Consider adding a generic font family as a fallback.
   
@@ -108,5 +254,6 @@ file.astro:19:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━
 
 ```block
 Checked 1 file in <TIME>. Fixed 1 file.
-Found 2 errors.
+Found 4 errors.
+Found 4 warnings.
 ```

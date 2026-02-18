@@ -1,181 +1,72 @@
 # Formatter
 
-The crate `biome_formatter` offers a generic infrastructure to implement a formatting logic for different languages.
+The crate `biome_formatter` offers a generic infrastructure to implement formatting logic for different languages.
 
-The formatting infrastructure of Biome is implemented using traits on syntax nodes. This means that *each node* knows how to format itself.
+The formatting infrastructure of Biome is implemented using traits on syntax nodes. This means that _each node_ knows how to format itself.
+
+## Prerequisites
+
+This guide assumes the parser and grammar for your language are already implemented by following [the guidance](../biome_parser/CONTRIBUTING.md)
+
+The formatter codegen depends on the generated AST types from the grammar, so you must complete the parser and grammar implementation before starting on the formatter.
 
 ## Getting started
 
-Let's start creating some plumbing, for our new language called `Html`.
+The recommended way to add a formatter for a new language is to use the provided codegen. This automatically generates the boilerplate code based on the language's grammar. The following steps refer to html as an example but it should be mostly relevant for any language.
 
-Create a new crate using the command `just new-crate biome_html_formatter`, where `html` is the language you want to format.
+### Step 1: Create the formatter crate
 
-The infrastructure of the formatter requires some preliminary code that can't be vendored from `biome_formatter`, due to some constraints of our infrastructure.
+First, create the formatter crate structure:
 
-Add the following code inside your `lib.rs` file:
-
-<details>
-
-<summary>Code to copy</summary>
-
-```rust
-
-/// Used to get an object that knows how to format this object.
-pub(crate) trait AsFormat<Context> {
-    type Format<'a>: biome_formatter::Format<Context>
-    where
-        Self: 'a;
-
-    /// Returns an object that is able to format this object.
-    fn format(&self) -> Self::Format<'_>;
-}
-
-/// Implement [AsFormat] for references to types that implement [AsFormat].
-impl<T, C> AsFormat<C> for &T
-where
-    T: AsFormat<C>,
-{
-    type Format<'a> = T::Format<'a> where Self: 'a;
-
-    fn format(&self) -> Self::Format<'_> {
-        AsFormat::format(&**self)
-    }
-}
-
-/// Implement [AsFormat] for [SyntaxResult] where `T` implements [AsFormat].
-///
-/// Useful to format mandatory AST fields without having to unwrap the value first.
-impl<T, C> AsFormat<C> for biome_rowan::SyntaxResult<T>
-where
-    T: AsFormat<C>,
-{
-    type Format<'a> = biome_rowan::SyntaxResult<T::Format<'a>> where Self: 'a;
-
-    fn format(&self) -> Self::Format<'_> {
-        match self {
-            Ok(value) => Ok(value.format()),
-            Err(err) => Err(*err),
-        }
-    }
-}
-
-/// Implement [AsFormat] for [Option] when `T` implements [AsFormat]
-///
-/// Allows to call format on optional AST fields without having to unwrap the field first.
-impl<T, C> AsFormat<C> for Option<T>
-where
-    T: AsFormat<C>,
-{
-    type Format<'a> = Option<T::Format<'a>> where Self: 'a;
-
-    fn format(&self) -> Self::Format<'_> {
-        self.as_ref().map(|value| value.format())
-    }
-}
-
-/// Used to convert this object into an object that can be formatted.
-///
-/// The difference to [AsFormat] is that this trait takes ownership of `self`.
-pub(crate) trait IntoFormat<Context> {
-    type Format: biome_formatter::Format<Context>;
-
-    fn into_format(self) -> Self::Format;
-}
-
-impl<T, Context> IntoFormat<Context> for biome_rowan::SyntaxResult<T>
-where
-    T: IntoFormat<Context>,
-{
-    type Format = biome_rowan::SyntaxResult<T::Format>;
-
-    fn into_format(self) -> Self::Format {
-        self.map(IntoFormat::into_format)
-    }
-}
-
-/// Implement [IntoFormat] for [Option] when `T` implements [IntoFormat]
-///
-/// Allows to call format on optional AST fields without having to unwrap the field first.
-impl<T, Context> IntoFormat<Context> for Option<T>
-where
-    T: IntoFormat<Context>,
-{
-    type Format = Option<T::Format>;
-
-    fn into_format(self) -> Self::Format {
-        self.map(IntoFormat::into_format)
-    }
-}
-
-/// Formatting specific [Iterator] extensions
-pub(crate) trait FormattedIterExt {
-    /// Converts every item to an object that knows how to format it.
-    fn formatted<Context>(self) -> FormattedIter<Self, Self::Item, Context>
-    where
-        Self: Iterator + Sized,
-        Self::Item: IntoFormat<Context>,
-    {
-        FormattedIter {
-            inner: self,
-            options: std::marker::PhantomData,
-        }
-    }
-}
-
-impl<I> FormattedIterExt for I where I: std::iter::Iterator {}
-
-pub(crate) struct FormattedIter<Iter, Item, Context>
-where
-    Iter: Iterator<Item = Item>,
-{
-    inner: Iter,
-    options: std::marker::PhantomData<Context>,
-}
-
-impl<Iter, Item, Context> std::iter::Iterator for FormattedIter<Iter, Item, Context>
-where
-    Iter: Iterator<Item = Item>,
-    Item: IntoFormat<Context>,
-{
-    type Item = Item::Format;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        Some(self.inner.next()?.into_format())
-    }
-}
-
-impl<Iter, Item, Context> std::iter::FusedIterator for FormattedIter<Iter, Item, Context>
-where
-    Iter: std::iter::FusedIterator<Item = Item>,
-    Item: IntoFormat<Context>,
-{
-}
-
-impl<Iter, Item, Context> std::iter::ExactSizeIterator for FormattedIter<Iter, Item, Context>
-where
-    Iter: Iterator<Item = Item> + std::iter::ExactSizeIterator,
-    Item: IntoFormat<Context>,
-{
-}
+```shell
+just new-crate biome_html_formatter
 ```
-</details>
 
+This creates `crates/biome_html_formatter/` with the basic Cargo.toml and lib.rs. You'll fill in the implementation details after codegen runs.
 
-Then, you'll have to create four types:
-1. `HtmlCommentStyle`
-1. `HtmlFormatContext`
-1. `FormatHtmlSyntaxNode`
-1. `HtmlLanguage`
+### Step 2: Generate boilerplate
 
-### `HtmlCommentStyle`
+Run the codegen script to generate formatter boilerplate:
 
-The formatter will use this type to get information about the comments of the language.
+```shell
+just gen-formatter
+```
 
-It's more idiomatic to have `HtmlCommentStyle` inside a file called `comments.rs`.
+which will
 
-This type must implement the trait `CommentStyle`.
+1. Generates boilerplate formatter code in `crates/biome_<language>_formatter/src/`
+2. Creates the module structure (`mod.rs` files) automatically
+3. Generates default `FormatNodeRule<N>` implementations (initially using `format_verbatim_node`)
 
-For brevity, create a public type called `HtmlComments`:
+### Step 3: Set up the formatter crate structure
+
+After codegen runs, you'll have some auto-generated files, but you'll need to create the folder structure and implement the core types. The complete structure should look like this:
+
+```
+crates/biome_<language>_formatter/src/
+├── lib.rs                 # Export public API and types (CREATE THIS)
+├── context.rs             # FormatContext implementation (CREATE THIS)
+├── comments.rs            # Comment handling (CREATE THIS)
+├── cst.rs                 # Syntax node formatting (CREATE THIS)
+├── prelude.rs             # Re-export common types (CREATE THIS)
+├── verbatim.rs            # Verbatim formatting helpers (CREATE THIS)
+├── <language>/            # Language-specific formatters (GENERATED)
+│   ├── statements/
+│   ├── expressions/
+│   ├── auxiliary/
+│   └── mod.rs
+└── generated.rs           # Auto-generated trait implementations (DO NOT EDIT)
+```
+
+The codegen creates the `<language>/` folder structure and `generated.rs`. You must manually create the other files (`lib.rs`, `context.rs`, `comments.rs`, `cst.rs`, `prelude.rs`, `verbatim.rs`) and populate them with the required types and traits.
+
+### Step 4: Create the required types
+
+At this point, it's expected that your workspace will have many compile errors. We'll need to do all the plumbing until there are no more compile errors.
+
+#### `CommentStyle`
+
+In `comments.rs`, define how comments are handled:
 
 ```rust
 use biome_formatter::comments::Comments;
@@ -184,24 +75,21 @@ use biome_html_syntax::HtmlLanguage;
 pub type HtmlComments = Comments<HtmlLanguage>;
 ```
 
-### `HtmlFormatContext`
+#### `FormatContext`
 
-The formatter infrastructure allows you to define a `context` that can be mutated during the IR creation phase.
-
-It's more idiomatic to have `HtmlFormatContext` inside a file called `context.rs`.
-
-Usually, the type context must contain `comments` and `source_map` fields:
+In `context.rs`, define the formatting context that carries state during formatting:
 
 ```rust
 pub struct HtmlFormatContext {
-    /// The comments of the nodes and tokens in the program.
+    options: HtmlFormatOptions,
     comments: Rc<HtmlComments>,
     source_map: Option<TransformSourceMap>,
 }
 
 impl HtmlFormatContext {
-    pub fn new(comments: HtmlComments) -> Self {
+    pub fn new(options: HtmlFormatOptions, comments: HtmlComments) -> Self {
         Self {
+            options,
             comments: Rc::new(comments),
             source_map: None,
         }
@@ -212,21 +100,23 @@ impl HtmlFormatContext {
         self
     }
 }
+
+impl FormatOptions for HtmlFormatOptions {
+    // ... implement required methods
+}
+
+impl FormatContext for HtmlFormatContext {
+    // ... implement required methods
+}
+
+impl CstFormatContext for HtmlFormatContext {
+    // ... implement required methods
+}
 ```
 
-This type needs to implement the traits `FormatContext` and `CstFormatContext`.
+#### `FormatSyntaxNode`
 
-### `FormatHtmlSyntaxNode`
-
-This type will instruct the formatter how to format a generic node.
-
-It's more idiomatic to have `FormatHtmlSyntaxNode` inside a file called `cst.rs`.
-
-This is a low level API, it requires just some plumbing. Copy the following code:
-
-<details>
-
-<summary>Low level formatting of CST code.</summary>
+In `cst.rs`, define the generic rule for formatting any syntax node:
 
 ```rust
 use crate::prelude::*;
@@ -260,92 +150,26 @@ impl IntoFormat<HtmlFormatContext> for HtmlSyntaxNode {
     }
 }
 ```
-</details>
 
+#### `FormatLanguage`
 
-### `HtmlLanguage`
-
-This is small type that you need to instruct the formatter infra about a certain language. This type needs to implement the trait `biome_formatter::FormatLanguage`
+In `lib.rs`, implement the `FormatLanguage` trait that ties everything together:
 
 ```rust
+pub struct HtmlFormatLanguage {
+    options: HtmlFormatOptions,
+}
+
 impl FormatLanguage for HtmlFormatLanguage {
     type SyntaxLanguage = HtmlLanguage;
     type Context = HtmlFormatContext;
     type FormatRule = FormatHtmlSyntaxNode;
 }
-```
 
-Then, create a type called `HtmlFormatter`:
-
-```rust
 pub(crate) type HtmlFormatter<'buf> = Formatter<'buf, HtmlFormatContext>;
 ```
 
-The last step is to create a trait that will start the actual formatting:
-
-<details>
-
-<summary>Wire the specific formatting with the `biome_formatter` formatting infra.</summary>
-
-```rust
-/// Format a [HtmlSyntaxNode]
-pub(crate) trait FormatNodeRule<N>
-where
-    N: AstNode<Language = HtmlLanguage>,
-{
-    // this is the method that actually start the formatting
-    fn fmt(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        if self.is_suppressed(node, f) {
-            return write!(f, [format_suppressed_node(node.syntax())]);
-        }
-
-        self.fmt_leading_comments(node, f)?;
-        self.fmt_fields(node, f)?;
-        self.fmt_dangling_comments(node, f)?;
-        self.fmt_trailing_comments(node, f)
-    }
-
-    fn fmt_fields(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()>;
-
-    /// Returns `true` if the node has a suppression comment and should use the same formatting as in the source document.
-    fn is_suppressed(&self, node: &N, f: &HtmlFormatter) -> bool {
-        f.context().comments().is_suppressed(node.syntax())
-    }
-
-    /// Formats the [leading comments](biome_formatter::comments#leading-comments) of the node.
-    ///
-    /// You may want to override this method if you want to manually handle the formatting of comments
-    /// inside of the `fmt_fields` method or customize the formatting of the leading comments.
-    fn fmt_leading_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_leading_comments(node.syntax()).fmt(f)
-    }
-
-    /// Formats the [dangling comments](biome_formatter::comments#dangling-comments) of the node.
-    ///
-    /// You should override this method if the node handled by this rule can have dangling comments because the
-    /// default implementation formats the dangling comments at the end of the node, which isn't ideal but ensures that
-    /// no comments are dropped.
-    ///
-    /// A node can have dangling comments if all its children are tokens or if all node childrens are optional.
-    fn fmt_dangling_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_dangling_comments(node.syntax())
-            .with_soft_block_indent()
-            .fmt(f)
-    }
-
-    /// Formats the [trailing comments](biome_formatter::comments#trailing-comments) of the node.
-    ///
-    /// You may want to override this method if you want to manually handle the formatting of comments
-    /// inside of the `fmt_fields` method or customize the formatting of the trailing comments.
-    fn fmt_trailing_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_trailing_comments(node.syntax()).fmt(f)
-    }
-}
-```
-</details>
-
-
-Now that everything is wired, you just needs to expose a public method that does the actual formattings:
+And expose the public formatting entry point:
 
 ```rust
 pub fn format_node(
@@ -356,58 +180,89 @@ pub fn format_node(
 }
 ```
 
-Since this is a public method, make sure it's appropriately documented.
+### Step 5: Implement node-specific formatters
 
+The generated code initially uses `format_verbatim_node`, which outputs nodes as-is without applying formatting rules. You'll replace it with proper implementation.
 
-## Code generation
+```rust
+use crate::prelude::*;
 
-Considering that we work with traits on syntax nodes, there could be a lot of initial code to start with. No worries, we have command script that generates the initial code for now, starting from the grammar.
+#[derive(Debug, Clone, Default)]
+pub struct FormatHtmlElement;
 
-```shell
-just gen-formatter
+impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
+    fn fmt_fields(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
+      format_verbatim_node(node.syntax()).fmt(f)
+    }
+}
 ```
 
-The initial implementation for the formatting will use the `format_verbatim_node` formatting, which means that the code will be formatted **as is**. From here, you'll have to remove `format_verbatim_node` and use the `biome_formatter` utilities to generate the correct IR.
+Each node type gets its own formatter that implements `FormatNodeRule<NodeType>`. The `fmt_fields` method is where you define how to format the node's children.
+
+## How the codegen works
+
+The `.ungram` file is the **source of truth** for your language's syntax structure. When you run `cargo run -p xtask_codegen -- formatter`:
+
+1. **Determine paths**: For each CST node (already generated from `.ungram`), it determines the output path using the node's name:
+   - Extracts the **dialect** (language prefix): `HtmlElement` → `Html`
+   - Determines the **concept** (node category) by matching suffixes:
+     - `HtmlElement` → `Element` concept → `elements/` directory
+     - `HtmlAttribute` → `Attribute` concept → `attributes/` directory
+     - Generic names → `auxiliary/` directory
+   - Converts to snake_case: `HtmlElement` → `element.rs`
+2. **Generate files**: Creates formatter files at paths like:
+   ```
+   crates/biome_html_formatter/src/html/elements/element.rs
+   crates/biome_html_formatter/src/html/attributes/attribute.rs
+   ```
+3. **Generate `mod.rs`**: Creates module files that export all child modules
+4. **Generate `generated.rs`**: Creates trait implementations (`AsFormat`, `IntoFormat`, `FormatRule`) for all nodes
+
+### Key traits created by codegen
+
+The generated code creates implementations for:
+
+- **`AsFormat<Context>`**: Allows formatting by reference (`node.format()`)
+- **`IntoFormat<Context>`**: Allows formatting by ownership (`node.into_format()`)
+- **`FormatNodeRule<N>`**: The trait that defines formatting logic for a specific node type
+
+You only need to implement `fmt_fields()` to define how to format a node's children. Override the other methods only if you need custom behavior.
 
 ## Testing
 
-### Plumbing
+### Set up the test infrastructure
 
-Inside the `biome_html_formatter` crate, create a folder called `tests`. Inside this folder you have to have a `specs` folder and two files called `spec_test.rs` and `spec_tests.rs` (the names aren't very important though). Create a `language.rs` file too.
-
-Updated the `Cargo.toml` file to import some testing utility:
-
-```toml
-[dev-dependencies]
-biome_formatter_test = { path = "../biome_formatter_test" }
-biome_html_factory     = { path = "../biome_html_factory" }
-biome_html_parser      = { path = "../biome_html_parser" }
-biome_parser         = { path = "../biome_parser" }
-biome_service        = { path = "../biome_service" }
-countme              = { workspace = true, features = ["enable"] }
-iai                  = "0.1.1"
-quickcheck           = { workspace = true }
-quickcheck_macros    = { workspace = true }
-tests_macros         = { path = "../tests_macros" }
-```
-
-Update the `spec_tests.rs` file to look like this:
+Create a test module in `crates/biome_html_formatter/tests/`:
 
 ```rust
+// tests/spec_tests.rs
 mod spec_test;
 
 mod formatter {
-
     mod html_module {
         tests_macros::gen_tests! {"tests/specs/html/**/*.html", crate::spec_test::run, ""}
     }
 }
-
 ```
 
-This code will generate a test function for each `html` file found inside `tests/specs/html`. For each test function, it will run the function `spec_test::run`.
+This will auto-generate a test function for each `.html` file in `tests/specs/html/`.
 
-Create the function `run` inside the `spec_test.rs` file:
+### Define test language
+
+Create `tests/language.rs`:
+
+```rust
+use biome_formatter_test::TestFormatLanguage;
+
+#[derive(Default)]
+pub struct HtmlTestFormatLanguage;
+
+impl TestFormatLanguage for HtmlTestFormatLanguage {
+    // Implement test-specific behavior if needed
+}
+```
+
+And `tests/spec_test.rs`:
 
 ```rust
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
@@ -438,33 +293,45 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
 }
 ```
 
-Now, let's modify the `language.rs` file:
+### Create and run tests
 
-```rust
-use biome_formatter_test::TestFormatLanguage;
+Create test files in `tests/specs/html/`:
 
-#[derive(Default)]
-pub struct HtmlTestFormatLanguage {
-}
+```html
+<!-- tests/specs/html/simple_element.html -->
+<div>
+  <p>Hello</p>
+</div>
+```
 
-impl TestFormatLanguage for HtmlTestFormatLanguage {
+Run tests:
 
+```shell
+cargo t html::simple_element
+```
+
+Accept snapshots after verifying they're correct:
+
+```shell
+cargo insta accept
+```
+
+To use non-default options, create `tests/specs/html/options.json`:
+
+```json
+{
+  "formatter": {
+    "indentWidth": 2
+  }
 }
 ```
 
-The `TestFormatLanguage` contains a series of methods that must be implemented.
+## Troubleshooting
 
-### Create and running the tests
+### "Undefined node" errors during codegen
 
-Now that the plumbing is ready, you just need to create your first `.html` file inside `tests/specs/html`. It's **highly** suggested to create a folder for each kind of test.
+If you get an error like `Undefined node: AnyHtmlBlock`, it's likely that there's a bug in the grammar. Please refer to [the parser contributing guide](../biome_parser/CONTRIBUTING.md) to troubleshoot.
 
-Use `cargo t` to run the testing infrastructure. The infrastructure will create a potential snapshot that will show:
-- the input;
-- the current options applied;
-- the formatted input as output;
+### Generated code references wrong paths
 
-If the snapshot is correct, use `cargo insta accept`, or use `cargo insta review` to check them one by one and accept or reject them.
-
-If you require testing something using options that aren't the default ones, create a file called `options.json` in the same folder where the `.html` files are. Those options will be applied to **all** files that are the in current folder.
-
-The `options.json` file is a `biome.json` file, so you can use the same options as you were and end-user.
+If generated code has incorrect module paths (e.g., `crate::js::any::` when it should be `crate::html::`), the node name in your `.ungram` file is probably missing the language prefix. Use `HtmlElement` instead of `Element`.

@@ -13,7 +13,7 @@ type Fn = (test: string) => typeof test;
 ```
 invalid-06.ts:2:12 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
     1 │ const test = 1;
   > 2 │ type Fn = (test: string) => typeof test;

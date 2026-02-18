@@ -739,6 +739,8 @@ pub const FUNCTION_KEYWORDS: &[&str] = &[
     "selector",
     "sepia",
     "shape",
+    "sibling-count",
+    "sibling-index",
     "sign",
     "sin",
     "skew",

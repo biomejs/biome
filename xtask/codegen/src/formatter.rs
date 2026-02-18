@@ -562,6 +562,7 @@ enum NodeDialect {
     Jsx,
     Json,
     Css,
+    Scss,
     Grit,
     Graphql,
     Html,
@@ -570,6 +571,7 @@ enum NodeDialect {
     Vue,
     Tailwind,
     Yaml,
+    Markdown,
 }
 
 impl NodeDialect {
@@ -580,10 +582,12 @@ impl NodeDialect {
             Self::Jsx,
             Self::Json,
             Self::Css,
+            Self::Scss,
             Self::Grit,
             Self::Graphql,
             Self::Html,
             Self::Yaml,
+            Self::Markdown,
         ]
     }
 
@@ -598,6 +602,7 @@ impl NodeDialect {
             Self::Jsx => "jsx",
             Self::Json => "json",
             Self::Css => "css",
+            Self::Scss => "scss",
             Self::Grit => "grit",
             Self::Graphql => "graphql",
             Self::Html => "html",
@@ -606,6 +611,7 @@ impl NodeDialect {
             Self::Vue => "vue",
             Self::Tailwind => "tailwind",
             Self::Yaml => "yaml",
+            Self::Markdown => "markdown",
         }
     }
 
@@ -616,6 +622,7 @@ impl NodeDialect {
             "Ts" => Self::Ts,
             "Json" => Self::Json,
             "Css" => Self::Css,
+            "Scss" => Self::Scss,
             "Grit" => Self::Grit,
             "Graphql" => Self::Graphql,
             "Html" => Self::Html,
@@ -624,6 +631,7 @@ impl NodeDialect {
             "Vue" => Self::Vue,
             "Tw" => Self::Tailwind,
             "Yaml" => Self::Yaml,
+            "Md" => Self::Markdown,
             _ => {
                 eprintln!("missing prefix {name}");
                 Self::Js
@@ -919,7 +927,7 @@ impl LanguageKind {
             Self::Grit => "GritFormatter",
             Self::Html => "HtmlFormatter",
             Self::Yaml => "YamlFormatter",
-            Self::Markdown => "DemoFormatter",
+            Self::Markdown => "MarkdownFormatter",
             Self::Tailwind => "TailwindFormatter",
         };
 
@@ -935,7 +943,7 @@ impl LanguageKind {
             Self::Grit => "GritFormatContext",
             Self::Html => "HtmlFormatContext",
             Self::Yaml => "YamlFormatContext",
-            Self::Markdown => "DemoFormatterContext",
+            Self::Markdown => "MarkdownFormatContext",
             Self::Tailwind => "TailwindFormatContext",
         };
 

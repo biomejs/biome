@@ -56,7 +56,7 @@ fn can_compact(node: &HtmlAttribute, f: &mut HtmlFormatter) -> bool {
 
         let initializer_value = node.initializer().and_then(|init| init.value().ok());
 
-        let Some(AnyHtmlAttributeInitializer::HtmlSingleTextExpression(initializer_value)) =
+        let Some(AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(initializer_value)) =
             initializer_value
         else {
             return false;

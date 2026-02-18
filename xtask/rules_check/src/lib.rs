@@ -204,11 +204,11 @@ pub fn check_rules() -> anyhow::Result<()> {
     }
 
     let mut visitor = LintRulesVisitor::default();
-    // biome_js_analyze::visit_registry(&mut visitor);
-    // biome_json_analyze::visit_registry(&mut visitor);
+    biome_js_analyze::visit_registry(&mut visitor);
+    biome_json_analyze::visit_registry(&mut visitor);
     biome_css_analyze::visit_registry(&mut visitor);
-    // biome_graphql_analyze::visit_registry(&mut visitor);
-    // biome_html_analyze::visit_registry(&mut visitor);
+    biome_graphql_analyze::visit_registry(&mut visitor);
+    biome_html_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor { groups, errors } = visitor;
     if !errors.is_empty() {

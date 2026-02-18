@@ -7,7 +7,7 @@ use biome_rowan::{AnySyntaxNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode
 
 use crate::matcher::SignalRuleKey;
 use crate::{
-    DiagnosticSignal, RuleCategory, RuleDiagnostic, SignalEntry, Visitor, VisitorContext, profiling,
+    PluginSignal, RuleCategory, RuleDiagnostic, SignalEntry, Visitor, VisitorContext, profiling,
 };
 
 /// Slice of analyzer plugins that can be cheaply cloned.
@@ -116,7 +116,7 @@ where
 
             SignalEntry {
                 text_range: diagnostic.span().unwrap_or_default(),
-                signal: Box::new(DiagnosticSignal::new(move || diagnostic.clone())),
+                signal: Box::new(PluginSignal::<L>::new(diagnostic)),
                 rule: SignalRuleKey::Plugin(name.into()),
                 category: RuleCategory::Lint,
                 instances: Default::default(),
