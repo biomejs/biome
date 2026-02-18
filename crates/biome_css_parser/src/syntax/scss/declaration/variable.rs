@@ -1,5 +1,4 @@
-use super::is_at_scss_identifier;
-use super::parse_scss_identifier;
+use super::super::{is_at_scss_identifier, parse_scss_identifier};
 use crate::parser::CssParser;
 use crate::syntax::property::GenericComponentValueList;
 use crate::syntax::{is_at_identifier, is_nth_at_identifier, parse_regular_identifier};
@@ -15,6 +14,14 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, TokenSet, token_set};
 
+/// Detects a SCSS variable declaration (including module-qualified variables).
+///
+/// Example:
+/// ```scss
+/// $primary: #c00;
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/variables
 #[inline]
 pub(crate) fn is_at_scss_declaration(p: &mut CssParser) -> bool {
     if is_at_scss_identifier(p) {
@@ -26,6 +33,15 @@ pub(crate) fn is_at_scss_declaration(p: &mut CssParser) -> bool {
     }
 }
 
+/// Parses a SCSS variable declaration, including trailing `!default`/`!global`.
+///
+/// Examples:
+/// ```scss
+/// $primary: #c00;
+/// $spacing: 1rem;
+/// ```
+///
+/// Specification: https://sass-lang.com/documentation/variables
 #[inline]
 pub(crate) fn parse_scss_declaration(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_declaration(p) {
@@ -42,6 +58,7 @@ pub(crate) fn parse_scss_declaration(p: &mut CssParser) -> ParsedSyntax {
 
     if !p.at(T!['}']) && !p.at(EOF) {
         if p.nth_at(1, T!['}']) {
+            // Allow a trailing `;` before `}` but don't require it.
             p.eat(T![;]);
         } else {
             p.expect(T![;]);

@@ -493,6 +493,7 @@ AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
 	| ScssDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssBogus
 	| CssMetavariable
@@ -513,6 +514,7 @@ CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
 AnyCssDeclarationOrAtRule =
 	CssDeclarationWithSemicolon
 	| ScssDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
 
@@ -547,6 +549,7 @@ CssDeclarationList = AnyCssDeclaration*
 AnyCssDeclaration =
 	CssDeclarationWithSemicolon
 	| ScssDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 
 AnyCssRuleBlock =
@@ -2491,8 +2494,16 @@ ScssNamespacedIdentifier =
 	'.'
 	name: ScssIdentifier
 
-// module.$var
-// ^^^^^^^^^^^
+// font: { family: sans-serif; size: 12px; }
+// ^^^^
+ScssNestingDeclaration =
+	name: CssIdentifier
+	':'
+	value: CssGenericComponentValueList
+	block: AnyCssDeclarationOrRuleBlock
+
+// color: module.$var;
+//        ^^^^^^^^^^^
 ScssQualifiedName =
 	module: CssIdentifier
 	'.'

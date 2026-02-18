@@ -1235,6 +1235,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
             current_flags,
             current_kind,
             after_line_break,
+            after_whitespace: _,
             unicode_bom_length,
             diagnostics_pos,
         } = checkpoint;
@@ -1360,6 +1361,7 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
             current_flags: self.current_flags,
             current_kind: self.current_kind,
             after_line_break: self.after_newline,
+            after_whitespace: false,
             unicode_bom_length: self.unicode_bom_length,
             diagnostics_pos: self.diagnostics.len() as u32,
         }

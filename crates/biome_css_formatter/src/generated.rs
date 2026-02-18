@@ -7110,6 +7110,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssNamespacedIdentifier
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssNestingDeclaration>
+    for crate::scss::auxiliary::nesting_declaration::FormatScssNestingDeclaration
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssNestingDeclaration,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssNestingDeclaration>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssNestingDeclaration {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssNestingDeclaration,
+        crate::scss::auxiliary::nesting_declaration::FormatScssNestingDeclaration,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::nesting_declaration::FormatScssNestingDeclaration::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssNestingDeclaration {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssNestingDeclaration,
+        crate::scss::auxiliary::nesting_declaration::FormatScssNestingDeclaration,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::nesting_declaration::FormatScssNestingDeclaration::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssQualifiedName>
     for crate::scss::auxiliary::qualified_name::FormatScssQualifiedName
 {
