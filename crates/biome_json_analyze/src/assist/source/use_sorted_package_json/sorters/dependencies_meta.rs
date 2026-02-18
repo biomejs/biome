@@ -41,14 +41,22 @@ pub fn transform(value: &AnyJsonValue) -> Option<AnyJsonValue> {
         let pkg_a = get_package_name(a);
         let pkg_b = get_package_name(b);
         pkg_a.cmp(pkg_b)
-    })?;
+    });
 
-    // Note: sort_object_by_comparator already returns None if no change needed at top level
-    // deep_sort_nested_objects also returns None if no nested changes needed
-    deep_sort_nested_objects(&sorted_top_level).map(AnyJsonValue::from)
+    // Always attempt deep sort — even when top-level is already in order,
+    // nested objects may still be unsorted.
+    let obj_for_deep = sorted_top_level.as_ref().unwrap_or(object);
+    let deep_sorted = deep_sort_nested_objects(obj_for_deep);
+
+    match (sorted_top_level, deep_sorted) {
+        (None, None) => None,
+        (_, Some(obj)) => Some(AnyJsonValue::from(obj)),
+        (Some(obj), None) => Some(AnyJsonValue::from(obj)),
+    }
 }
 
 /// Recursively sorts all nested objects alphabetically.
+/// Returns `None` when no nested changes were needed.
 fn deep_sort_nested_objects(object: &JsonObjectValue) -> Option<JsonObjectValue> {
     let members = object.json_member_list();
     let mut elements = Vec::new();
@@ -68,7 +76,7 @@ fn deep_sort_nested_objects(object: &JsonObjectValue) -> Option<JsonObjectValue>
     }
 
     if !has_changes {
-        return Some(object.clone());
+        return None;
     }
 
     let mut separators = Vec::new();
@@ -83,6 +91,51 @@ fn deep_sort_nested_objects(object: &JsonObjectValue) -> Option<JsonObjectValue>
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_json_parser::{JsonParserOptions, parse_json};
+    use biome_rowan::AstSeparatedList;
+
+    fn parse_value(source: &str) -> AnyJsonValue {
+        let parsed = parse_json(source, JsonParserOptions::default());
+        parsed.tree().value().ok().unwrap()
+    }
+
+    /// When the top-level keys are already sorted but nested objects are not,
+    /// the transform must still sort the nested objects.
+    #[test]
+    fn test_deep_sort_when_top_level_already_sorted() {
+        // Top-level keys "a-pkg" < "z-pkg" — already in order.
+        // But the nested object under "a-pkg" has keys {"z": 1, "a": 2} — unsorted.
+        let value = parse_value(r#"{"a-pkg": {"z": 1, "a": 2}, "z-pkg": {"optional": true}}"#);
+        let result = transform(&value)
+            .expect("Should sort nested objects even when top level is already sorted");
+        let obj = result.as_json_object_value().unwrap();
+
+        // Get nested keys of first member ("a-pkg")
+        let nested_keys: Vec<_> = obj
+            .json_member_list()
+            .iter()
+            .next()
+            .and_then(|m| m.ok())
+            .and_then(|m| m.value().ok())
+            .and_then(|v| v.as_json_object_value().cloned())
+            .unwrap()
+            .json_member_list()
+            .iter()
+            .filter_map(|m| m.ok()?.name().ok()?.inner_string_text())
+            .collect();
+
+        assert_eq!(nested_keys, vec!["a", "z"]);
+    }
+
+    /// When both top-level and nested objects are already sorted, return None.
+    #[test]
+    fn test_returns_none_when_fully_sorted() {
+        let value = parse_value(r#"{"a-pkg": {"a": 1, "z": 2}}"#);
+        assert!(
+            transform(&value).is_none(),
+            "Should return None when everything is already sorted"
+        );
+    }
 
     #[test]
     fn test_get_package_name() {

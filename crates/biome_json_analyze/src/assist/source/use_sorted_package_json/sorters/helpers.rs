@@ -64,13 +64,14 @@ where
     F: Fn(&str, &str) -> Ordering,
 {
     let members = object.json_member_list();
-    let mut member_vec: Vec<JsonMember> = members.iter().filter_map(|m| m.ok()).collect();
+    let original: Vec<JsonMember> = members.iter().filter_map(|m| m.ok()).collect();
 
-    if member_vec.len() < 2 {
+    if original.len() < 2 {
         return None;
     }
 
-    member_vec.sort_by(|a, b| {
+    let mut sorted = original.clone();
+    sorted.sort_by(|a, b| {
         let a_name = a.name().ok().and_then(|n| n.inner_string_text());
         let b_name = b.name().ok().and_then(|n| n.inner_string_text());
 
@@ -80,7 +81,14 @@ where
         }
     });
 
-    rebuild_object_from_members(object, member_vec)
+    // Return None if the sort produced no change in key order
+    let original_keys = extract_member_names(&original);
+    let sorted_keys = extract_member_names(&sorted);
+    if original_keys == sorted_keys {
+        return None;
+    }
+
+    rebuild_object_from_members(object, sorted)
 }
 
 pub fn sort_object_by_key_order(

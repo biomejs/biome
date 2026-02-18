@@ -457,7 +457,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintTurbo(rule_name) => format!("https://github.com/vercel/turborepo/blob/main/packages/eslint-plugin-turbo/docs/rules/{rule_name}.md"),
             Self::HtmlEslint(rule_name) => format!("https://html-eslint.org/docs/rules/{rule_name}"),
             Self::EslintPlaywright(rule_name) => format!("https://github.com/playwright-community/eslint-plugin-playwright/blob/main/docs/rules/{rule_name}.md"),
-            Self::SortPackageJson => "https://docs.npmjs.com/cli/v8/commands/npm-sort-package-json".to_string(),
+            Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
         }
     }
 

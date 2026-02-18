@@ -264,9 +264,7 @@ fn test_compat_with_sortpkg() {
         }
     }
 
-    if failures.is_empty() {
-        eprintln!("All {total} sort-package-json compatibility tests passed");
-    } else {
+    if !failures.is_empty() {
         panic!(
             "{}/{} tests failed:\n\n{}",
             failures.len(),
