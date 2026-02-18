@@ -1,5 +1,6 @@
 use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue, T};
+use biome_rowan::TokenText;
 
 use super::constants::ESLINT_BASE_CONFIG_PROPERTIES;
 use super::helpers::{extract_member_names, sort_alphabetically, sort_object_by_key_order};
@@ -67,8 +68,9 @@ where
     let mut changed = false;
 
     for m in (&members).into_iter().flatten() {
-        let transformed_member = if let Ok(name) = m.name().and_then(|n| n.inner_string_text())
-            && name.text() == field_name
+        let transformed_member = if let Some(name) =
+            m.name().ok().and_then(|n| n.inner_string_text())
+            && name == field_name
             && let Ok(value) = m.value()
             && let Some(obj) = value.as_json_object_value()
             && let Some(new_value) = transform_fn(obj)
@@ -109,16 +111,8 @@ fn sort_eslint_rules(object: &JsonObjectValue) -> Option<JsonObjectValue> {
     let original = member_vec.clone();
 
     member_vec.sort_by(|a, b| {
-        let a_name = a
-            .name()
-            .ok()
-            .and_then(|n| n.inner_string_text().ok())
-            .map(|t| t.text().to_string());
-        let b_name = b
-            .name()
-            .ok()
-            .and_then(|n| n.inner_string_text().ok())
-            .map(|t| t.text().to_string());
+        let a_name: Option<TokenText> = a.name().ok().and_then(|n| n.inner_string_text());
+        let b_name: Option<TokenText> = b.name().ok().and_then(|n| n.inner_string_text());
 
         match (a_name, b_name) {
             (Some(a), Some(b)) => {
@@ -160,6 +154,7 @@ fn sort_eslint_rules(object: &JsonObjectValue) -> Option<JsonObjectValue> {
 mod tests {
     use super::*;
     use biome_json_parser::{JsonParserOptions, parse_json};
+    use biome_rowan::AstSeparatedList;
 
     fn parse_object(source: &str) -> JsonObjectValue {
         let parsed = parse_json(source, JsonParserOptions::default());
@@ -177,14 +172,10 @@ mod tests {
         let result = transform(&AnyJsonValue::from(obj)).expect("Should reorder fields");
         let result_obj = result.as_json_object_value().unwrap();
 
-        let keys: Vec<String> = (&result_obj.json_member_list())
-            .into_iter()
-            .filter_map(|m| {
-                let member = m.ok()?;
-                let name = member.name().ok()?;
-                let text = name.inner_string_text().ok()?;
-                Some(text.text().to_string())
-            })
+        let keys: Vec<TokenText> = result_obj
+            .json_member_list()
+            .iter()
+            .filter_map(|m| m.ok()?.name().ok()?.inner_string_text())
             .collect();
 
         assert_eq!(keys, vec!["env", "plugins", "extends", "rules"]);
@@ -204,8 +195,8 @@ mod tests {
             .into_iter()
             .find_map(|m| {
                 let member = m.ok()?;
-                let name = member.name().ok()?.inner_string_text().ok()?;
-                if name.text() == "rules" {
+                let name = member.name().ok()?.inner_string_text()?;
+                if name == "rules" {
                     Some(member.value().ok()?.as_json_object_value()?.clone())
                 } else {
                     None
@@ -213,14 +204,10 @@ mod tests {
             })
             .unwrap();
 
-        let rule_keys: Vec<String> = rules_member
+        let rule_keys: Vec<TokenText> = rules_member
             .json_member_list()
-            .into_iter()
-            .filter_map(|m| {
-                let member = m.ok()?;
-                let text = member.name().ok()?.inner_string_text().ok()?;
-                Some(text.text().to_string())
-            })
+            .iter()
+            .filter_map(|m| m.ok()?.name().ok()?.inner_string_text())
             .collect();
 
         // Builtin rules first, then plugins (sorted by slash count then alphabetically)
@@ -261,8 +248,8 @@ mod tests {
             .into_iter()
             .find_map(|m| {
                 let member = m.ok()?;
-                let name = member.name().ok()?.inner_string_text().ok()?;
-                if name.text() == "env" {
+                let name = member.name().ok()?.inner_string_text()?;
+                if name == "env" {
                     Some(member.value().ok()?.as_json_object_value()?.clone())
                 } else {
                     None
@@ -270,14 +257,10 @@ mod tests {
             })
             .unwrap();
 
-        let env_keys: Vec<String> = env_member
+        let env_keys: Vec<TokenText> = env_member
             .json_member_list()
-            .into_iter()
-            .filter_map(|m| {
-                let member = m.ok()?;
-                let text = member.name().ok()?.inner_string_text().ok()?;
-                Some(text.text().to_string())
-            })
+            .iter()
+            .filter_map(|m| m.ok()?.name().ok()?.inner_string_text())
             .collect();
 
         assert_eq!(env_keys, vec!["browser", "node"]);

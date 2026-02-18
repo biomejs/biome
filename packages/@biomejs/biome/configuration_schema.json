@@ -6453,16 +6453,6 @@
 			},
 			"additionalProperties": false
 		},
-		"OrganizePackageJsonConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				{ "$ref": "#/$defs/RuleAssistWithOrganizePackageJsonOptions" }
-			]
-		},
-		"OrganizePackageJsonOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"OverrideAssistConfiguration": {
 			"type": "object",
 			"properties": {
@@ -6827,14 +6817,6 @@
 			},
 			"required": ["level", "options"]
 		},
-		"RuleAssistWithOrganizePackageJsonOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				"options": { "$ref": "#/$defs/OrganizePackageJsonOptions" }
-			},
-			"required": ["level", "options"]
-		},
 		"RuleAssistWithUseSortedAttributesOptions": {
 			"type": "object",
 			"properties": {
@@ -6856,6 +6838,14 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseSortedKeysOptions" }
+			},
+			"required": ["level", "options"]
+		},
+		"RuleAssistWithUseSortedPackageJsonOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedPackageJsonOptions" }
 			},
 			"required": ["level", "options"]
 		},
@@ -11410,13 +11400,6 @@
 						{ "type": "null" }
 					]
 				},
-				"organizePackageJson": {
-					"description": "Organize package.json fields according to established conventions.\nSee <https://biomejs.dev/assist/actions/organize-package-json>",
-					"anyOf": [
-						{ "$ref": "#/$defs/OrganizePackageJsonConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -11439,6 +11422,13 @@
 					"description": "Sort the keys of a JSON object in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-keys",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSortedPackageJson": {
+					"description": "Organize package.json fields according to established conventions.\nSee https://biomejs.dev/assist/actions/use-sorted-package-json",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedPackageJsonConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14146,6 +14136,16 @@
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseSortedPackageJsonConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedPackageJsonOptions" }
+			]
+		},
+		"UseSortedPackageJsonOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseSortedPropertiesConfiguration": {

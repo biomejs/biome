@@ -1,19 +1,21 @@
+mod field_order;
+mod sorters;
+
 use crate::JsonRuleAction;
+use crate::assist::source::use_sorted_package_json::field_order::{
+    FieldTransformer, get_field_index, get_field_transformer,
+};
 use crate::utils::is_package_json;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
+    declare_source_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_json_factory::make;
 use biome_json_syntax::{JsonMember, JsonMemberList, JsonObjectValue, JsonRoot, T};
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
 use std::collections::HashMap;
-
-mod field_order;
-mod sorters;
-
-use field_order::{FieldTransformer, get_field_index, get_field_transformer};
 
 declare_source_rule! {
     /// Organize package.json fields according to established conventions.
@@ -247,15 +249,16 @@ declare_source_rule! {
     ///   }
     /// }
     /// ```
-    pub OrganizePackageJson {
+    pub UseSortedPackageJson {
         version: "next",
-        name: "organizePackageJson",
+        name: "useSortedPackageJson",
         language: "json",
         fix_kind: FixKind::Safe,
+        sources: &[RuleSource::SortPackageJson.same()],
     }
 }
 
-impl Rule for OrganizePackageJson {
+impl Rule for UseSortedPackageJson {
     type Query = Ast<JsonRoot>;
     type State = ();
     type Signals = Option<Self::State>;
@@ -285,7 +288,7 @@ impl Rule for OrganizePackageJson {
         let object = value.as_json_object_value()?;
 
         Some(RuleDiagnostic::new(
-            category!("assist/source/organizePackageJson"),
+            category!("assist/source/useSortedPackageJson"),
             object.range(),
             markup! {
                 "package.json fields can be organized."
@@ -316,18 +319,11 @@ impl Rule for OrganizePackageJson {
 }
 
 /// Extract field names from JsonMemberList
-fn extract_field_names(members: &JsonMemberList) -> Vec<String> {
+fn extract_field_names(members: &JsonMemberList) -> Vec<TokenText> {
     members
         .iter()
-        .filter_map(|member| {
-            member
-                .ok()?
-                .name()
-                .ok()?
-                .inner_string_text()
-                .ok()
-                .map(|text| text.text().to_string())
-        })
+        .filter_map(|member| member.ok()?.name().ok())
+        .filter_map(|name| name.inner_string_text())
         .collect()
 }
 
@@ -344,7 +340,7 @@ fn is_organized(members: &JsonMemberList, object: &JsonObjectValue) -> bool {
     }
 
     for member in members.iter().filter_map(|m| m.ok()) {
-        if let Ok(name) = member.name().and_then(|n| n.inner_string_text()) {
+        if let Some(name) = member.name().ok().and_then(|n| n.inner_string_text()) {
             let field_name = name.text();
             let transformer = get_field_transformer(field_name);
 
@@ -375,17 +371,11 @@ fn organize_members(
     members: &JsonMemberList,
     root_object: &JsonObjectValue,
 ) -> Option<JsonMemberList> {
-    let member_map: HashMap<String, JsonMember> = members
+    let member_map: HashMap<TokenText, JsonMember> = members
         .iter()
         .filter_map(|member| {
             let member = member.ok()?;
-            let name = member
-                .name()
-                .ok()?
-                .inner_string_text()
-                .ok()?
-                .text()
-                .to_string();
+            let name = member.name().ok()?.inner_string_text()?;
             Some((name, member))
         })
         .collect();
@@ -431,7 +421,7 @@ fn apply_field_transformer(
     member.clone().with_value(transformed_value)
 }
 
-fn get_sorted_field_order(field_names: &[String]) -> Vec<String> {
+fn get_sorted_field_order(field_names: &[TokenText]) -> Vec<TokenText> {
     let mut known_fields = Vec::new();
     let mut unknown_fields = Vec::new();
     let mut private_fields = Vec::new();
@@ -461,15 +451,20 @@ fn get_sorted_field_order(field_names: &[String]) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_rowan::RawSyntaxKind;
+
+    fn tt(text: &str) -> TokenText {
+        TokenText::new_raw(RawSyntaxKind(0), text)
+    }
 
     #[test]
     fn test_get_sorted_field_order() {
         let fields = vec![
-            "dependencies".to_string(),
-            "name".to_string(),
-            "version".to_string(),
-            "unknown".to_string(),
-            "_private".to_string(),
+            tt("dependencies"),
+            tt("name"),
+            tt("version"),
+            tt("unknown"),
+            tt("_private"),
         ];
 
         let sorted = get_sorted_field_order(&fields);
@@ -482,12 +477,7 @@ mod tests {
 
     #[test]
     fn test_get_sorted_field_order_private_last() {
-        let fields = vec![
-            "_z".to_string(),
-            "name".to_string(),
-            "_a".to_string(),
-            "version".to_string(),
-        ];
+        let fields = vec![tt("_z"), tt("name"), tt("_a"), tt("version")];
 
         let sorted = get_sorted_field_order(&fields);
 
@@ -496,12 +486,7 @@ mod tests {
 
     #[test]
     fn test_get_sorted_field_order_unknown_alphabetical() {
-        let fields = vec![
-            "zebra".to_string(),
-            "name".to_string(),
-            "apple".to_string(),
-            "version".to_string(),
-        ];
+        let fields = vec![tt("zebra"), tt("name"), tt("apple"), tt("version")];
 
         let sorted = get_sorted_field_order(&fields);
 

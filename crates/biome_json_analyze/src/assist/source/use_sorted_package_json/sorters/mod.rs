@@ -13,6 +13,30 @@ use super::field_order::FieldTransformer;
 use constants::*;
 use helpers::*;
 
+/// Sort the `pnpm` configuration object: apply the base property order and also
+/// sort `overrides` by package name (same key extraction as dependenciesMeta).
+fn sort_pnpm_config(obj: &JsonObjectValue) -> Option<JsonObjectValue> {
+    // First, sort nested `overrides` by package name (stripping @version specifier)
+    let after_overrides = transform_nested_property(obj, "overrides", |v| {
+        v.as_json_object_value()
+            .and_then(|o| {
+                sort_object_by_comparator(o, |a, b| {
+                    let pkg_a = dependencies_meta::get_package_name(a);
+                    let pkg_b = dependencies_meta::get_package_name(b);
+                    pkg_a.cmp(pkg_b)
+                })
+            })
+            .map(AnyJsonValue::from)
+    });
+
+    // Then sort the top-level pnpm keys
+    let obj_for_key_sort = after_overrides.as_ref().unwrap_or(obj);
+    let after_key_sort = sort_object_by_key_order(obj_for_key_sort, PNPM_BASE_CONFIG_PROPERTIES);
+
+    // Return Some if either transformation changed anything
+    after_key_sort.or(after_overrides)
+}
+
 /// Single source of truth for all field transformations.
 /// Returns Some(transformed_value) if transformation applied, None if already sorted.
 ///
@@ -88,7 +112,7 @@ pub fn try_transform_field(
 
         FieldTransformer::SortPnpmConfig => value
             .as_json_object_value()
-            .and_then(|obj| sort_object_by_key_order(obj, PNPM_BASE_CONFIG_PROPERTIES))
+            .and_then(|obj| sort_pnpm_config(obj))
             .map(AnyJsonValue::from),
 
         FieldTransformer::SortObjectDeep => value

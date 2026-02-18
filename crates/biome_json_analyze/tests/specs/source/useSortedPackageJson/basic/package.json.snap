@@ -20,7 +20,7 @@ expression: package.json
 
 # Diagnostics
 ```
-package.json:1:1 assist/source/organizePackageJson  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+package.json:1:1 assist/source/useSortedPackageJson  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i package.json fields can be organized.
   

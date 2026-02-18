@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": patch
+"@biomejs/biome": minor
 ---
 
 Added the assist action [`organizePackageJson`](https://biomejs.dev/assist/actions/organize-package-json/).

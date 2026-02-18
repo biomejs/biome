@@ -23,7 +23,7 @@ impl Rule for UseNamingConventionEnumMemberCase {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let name = node.name().ok()?;
-        let text = name.inner_string_text()?.ok()?;
+        let text = name.inner_string_text()?;
         if text.text() == "enumMemberCase" {
             let value = node.value().ok()?;
             let value = value.as_json_string_value()?.inner_string_text().ok()?;
@@ -89,7 +89,7 @@ impl Rule for UseNamingConventionEnumMemberCase {
         let parent = node.parent::<JsonMemberList>()?;
         let conventions = parent.into_iter().find_map(|member| {
             let member = member.ok()?;
-            let member_name = member.name().ok()?.inner_string_text()?.ok()?;
+            let member_name = member.name().ok()?.inner_string_text()?;
             if member_name.text() == "conventions"
                 && let Ok(AnyJsonValue::JsonArrayValue(conventions)) = member.value()
             {

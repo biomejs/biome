@@ -109,8 +109,8 @@ impl Rule for UseRequiredScripts {
             .flatten()
             .filter_map(|member| {
                 let name = member.name().ok()?;
-                let text = name.inner_string_text()?.ok()?;
-                Some(text.to_string())
+                let text = name.inner_string_text()?;
+                Some(text.text().to_string())
             })
             .collect();
 

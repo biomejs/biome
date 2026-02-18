@@ -483,9 +483,9 @@ define_categories! {
     // end lint rules
     // start assist actions
     "assist/source/noDuplicateClasses": "https://biomejs.dev/assist/actions/no-duplicate-classes",
-    "assist/source/organizePackageJson": "https://biomejs.dev/assist/actions/organize-package-json",
     "assist/source/useSortedInterfaceMembers": "https://biomejs.dev/assist/actions/use-sorted-interface-members",
     "assist/source/useSortedKeys": "https://biomejs.dev/assist/actions/use-sorted-keys",
+    "assist/source/useSortedPackageJson": "https://biomejs.dev/assist/actions/use-sorted-package-json",
     "assist/source/useSortedProperties": "https://biomejs.dev/assist/actions/use-sorted-properties",
     // end assist actions
     ; // start syntax rules

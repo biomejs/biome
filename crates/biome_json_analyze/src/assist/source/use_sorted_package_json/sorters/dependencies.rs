@@ -38,7 +38,7 @@ fn should_sort_dependencies_like_npm(package_json: &JsonObjectValue) -> bool {
         && let Some(s) = pm_value.as_json_string_value()
         && let Ok(text) = s.inner_string_text()
     {
-        return text.text().starts_with("npm@");
+        return text.starts_with("npm@");
     }
 
     if let Some(dev_engines) = find_member_value(&members, "devEngines")
@@ -49,7 +49,7 @@ fn should_sort_dependencies_like_npm(package_json: &JsonObjectValue) -> bool {
         && let Some(name_str) = name_value.as_json_string_value()
         && let Ok(text) = name_str.inner_string_text()
     {
-        return text.text() == "npm";
+        return text == "npm";
     }
 
     if find_member_value(&members, "pnpm").is_some() {
@@ -72,10 +72,10 @@ fn should_sort_dependencies_like_npm(package_json: &JsonObjectValue) -> bool {
 fn find_member_value(members: &JsonMemberList, key: &str) -> Option<AnyJsonValue> {
     for member in members {
         let Ok(member) = member else { continue };
-        let Ok(name) = member.name().and_then(|n| n.inner_string_text()) else {
+        let Some(name) = member.name().ok().and_then(|n| n.inner_string_text()) else {
             continue;
         };
-        if name.text() == key {
+        if name == key {
             return member.value().ok();
         }
     }

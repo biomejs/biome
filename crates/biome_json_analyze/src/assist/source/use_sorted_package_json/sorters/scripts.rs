@@ -1,4 +1,5 @@
 use biome_json_syntax::{AnyJsonValue, JsonObjectValue};
+use biome_rowan::TokenText;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
 use std::sync::LazyLock;
@@ -30,7 +31,7 @@ pub fn transform(
     let mut script_names = Vec::new();
     for m in &members {
         if let Ok(member) = m
-            && let Ok(name) = member.name().and_then(|n| n.inner_string_text())
+            && let Some(name) = member.name().ok().and_then(|n| n.inner_string_text())
         {
             script_names.push(name.text().to_string());
         }
@@ -75,15 +76,16 @@ fn has_sequential_script(package_json: &JsonObjectValue) -> bool {
 fn has_dev_dependency(dep_name: &str, members: &biome_json_syntax::JsonMemberList) -> bool {
     for member in members {
         if let Ok(m) = member
-            && let Ok(name) = m.name().and_then(|n| n.inner_string_text())
-            && name.text() == "devDependencies"
+            && let Some(name) = m.name().ok().and_then(|n| n.inner_string_text())
+            && name == "devDependencies"
             && let Ok(value) = m.value()
             && let Some(obj) = value.as_json_object_value()
         {
             for dep_member in obj.json_member_list() {
                 if let Ok(dep) = dep_member
-                    && let Ok(dep_name_token) = dep.name().and_then(|n| n.inner_string_text())
-                    && dep_name_token.text() == dep_name
+                    && let Some(dep_name_token) =
+                        dep.name().ok().and_then(|n| n.inner_string_text())
+                    && dep_name_token == dep_name
                 {
                     return true;
                 }
@@ -93,15 +95,15 @@ fn has_dev_dependency(dep_name: &str, members: &biome_json_syntax::JsonMemberLis
     false
 }
 
-fn get_all_script_values(package_json: &JsonObjectValue) -> Vec<String> {
+fn get_all_script_values(package_json: &JsonObjectValue) -> Vec<TokenText> {
     let members = package_json.json_member_list();
     let mut values = Vec::new();
 
     for field in ["scripts", "betterScripts"] {
         for member in &members {
             if let Ok(m) = member
-                && let Ok(name) = m.name().and_then(|n| n.inner_string_text())
-                && name.text() == field
+                && let Some(name) = m.name().ok().and_then(|n| n.inner_string_text())
+                && name == field
                 && let Ok(value) = m.value()
                 && let Some(obj) = value.as_json_object_value()
             {
@@ -111,7 +113,7 @@ fn get_all_script_values(package_json: &JsonObjectValue) -> Vec<String> {
                         && let Some(s) = sv.as_json_string_value()
                         && let Ok(text) = s.inner_string_text()
                     {
-                        values.push(text.text().to_string());
+                        values.push(text);
                     }
                 }
             }

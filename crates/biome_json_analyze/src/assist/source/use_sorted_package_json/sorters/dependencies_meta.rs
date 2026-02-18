@@ -10,7 +10,7 @@ use super::helpers::sort_object_by_comparator;
 ///
 /// Based on sort-package-json index.js:105-109
 /// https://github.com/keithamus/sort-package-json/blob/main/index.js#L105-L109
-fn get_package_name(ident: &str) -> &str {
+pub(super) fn get_package_name(ident: &str) -> &str {
     let start_idx = if ident.starts_with('@') { 1 } else { 0 };
 
     if let Some(at_pos) = ident[start_idx..].find('@') {

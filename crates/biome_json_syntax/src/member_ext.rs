@@ -11,17 +11,17 @@ impl JsonMemberName {
 
 impl AnyJsonMemberName {
     /// Returns the inner string text if this is a [JsonMemberName], [None] otherwise
-    pub fn inner_string_text(&self) -> Option<SyntaxResult<TokenText>> {
+    pub fn inner_string_text(&self) -> Option<TokenText> {
         match self {
-            Self::JsonMemberName(name) => Some(name.inner_string_text()),
+            Self::JsonMemberName(name) => name.inner_string_text().ok(),
             _ => None,
         }
     }
 
     /// Returns the value token if this is a [JsonMemberName], [None] otherwise
-    pub fn value_token(&self) -> Option<SyntaxResult<crate::JsonSyntaxToken>> {
+    pub fn value_token(&self) -> Option<JsonSyntaxToken> {
         match self {
-            Self::JsonMemberName(name) => Some(name.value_token()),
+            Self::JsonMemberName(name) => name.value_token().ok(),
             _ => None,
         }
     }
