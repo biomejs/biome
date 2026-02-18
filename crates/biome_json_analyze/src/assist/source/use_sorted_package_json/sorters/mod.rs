@@ -112,7 +112,7 @@ pub fn try_transform_field(
 
         FieldTransformer::SortPnpmConfig => value
             .as_json_object_value()
-            .and_then(|obj| sort_pnpm_config(obj))
+            .and_then(sort_pnpm_config)
             .map(AnyJsonValue::from),
 
         FieldTransformer::SortObjectDeep => value

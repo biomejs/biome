@@ -332,6 +332,7 @@ mod tests {
     use super::*;
     use crate::assist::source::use_sorted_package_json::sorters::constants;
     use biome_json_parser::{JsonParserOptions, parse_json};
+    use biome_string_case::StrOnlyExtension;
 
     fn parse_json_object(source: &str) -> JsonObjectValue {
         let parsed = parse_json(source, JsonParserOptions::default());
@@ -515,7 +516,7 @@ mod tests {
         let obj = parse_json_object(r#"{"c": 1, "a": 2, "B": 3}"#);
         // Case-insensitive sort
         let sorted =
-            sort_object_by_comparator(&obj, |a, b| a.to_lowercase().cmp(&b.to_lowercase()))
+            sort_object_by_comparator(&obj, |a, b| a.to_lowercase_cow().cmp(&b.to_lowercase_cow()))
                 .unwrap();
 
         let keys: Vec<TokenText> = sorted
