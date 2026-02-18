@@ -1153,6 +1153,7 @@ dependencies = [
  "filetime",
  "insta",
  "mimalloc",
+ "regex",
  "rustc-hash 2.1.1",
  "tests_macros",
  "tikv-jemallocator",

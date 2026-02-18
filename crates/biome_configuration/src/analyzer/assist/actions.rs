@@ -67,6 +67,7 @@ impl std::fmt::Display for RuleGroup {
 pub enum ActionName {
     NoDuplicateClasses,
     OrganizeImports,
+    OrganizePackageJson,
     UseSortedAttributes,
     UseSortedInterfaceMembers,
     UseSortedKeys,
@@ -77,6 +78,7 @@ impl ActionName {
         match self {
             Self::NoDuplicateClasses => "noDuplicateClasses",
             Self::OrganizeImports => "organizeImports",
+            Self::OrganizePackageJson => "organizePackageJson",
             Self::UseSortedAttributes => "useSortedAttributes",
             Self::UseSortedInterfaceMembers => "useSortedInterfaceMembers",
             Self::UseSortedKeys => "useSortedKeys",
@@ -87,6 +89,7 @@ impl ActionName {
         match self {
             Self::NoDuplicateClasses => RuleGroup::Source,
             Self::OrganizeImports => RuleGroup::Source,
+            Self::OrganizePackageJson => RuleGroup::Source,
             Self::UseSortedAttributes => RuleGroup::Source,
             Self::UseSortedInterfaceMembers => RuleGroup::Source,
             Self::UseSortedKeys => RuleGroup::Source,
@@ -100,6 +103,7 @@ impl std::str::FromStr for ActionName {
         match s {
             "noDuplicateClasses" => Ok(Self::NoDuplicateClasses),
             "organizeImports" => Ok(Self::OrganizeImports),
+            "organizePackageJson" => Ok(Self::OrganizePackageJson),
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
             "useSortedInterfaceMembers" => Ok(Self::UseSortedInterfaceMembers),
             "useSortedKeys" => Ok(Self::UseSortedKeys),
