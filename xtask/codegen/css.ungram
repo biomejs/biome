@@ -1370,6 +1370,8 @@ CssPageAtRuleItemList = AnyCssPageAtRuleItem*
 
 AnyCssPageAtRuleItem =
 	CssDeclarationWithSemicolon
+	| ScssDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
 	| CssMarginAtRule
