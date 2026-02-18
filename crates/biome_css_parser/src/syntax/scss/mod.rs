@@ -8,7 +8,10 @@ use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
-pub(crate) use declaration::{is_at_scss_declaration, parse_scss_declaration};
+pub(crate) use declaration::{
+    is_at_scss_declaration, is_at_scss_nesting_declaration, parse_scss_declaration,
+    parse_scss_nesting_declaration,
+};
 
 #[inline]
 pub(crate) fn is_at_scss_identifier(p: &mut CssParser) -> bool {

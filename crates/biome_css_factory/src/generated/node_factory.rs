@@ -3039,6 +3039,22 @@ pub fn scss_namespaced_identifier(
         ],
     ))
 }
+pub fn scss_nesting_declaration(
+    name: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: CssGenericComponentValueList,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> ScssNestingDeclaration {
+    ScssNestingDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_NESTING_DECLARATION,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn scss_qualified_name(
     module: CssIdentifier,
     dot_token: SyntaxToken,

@@ -655,6 +655,7 @@ where
             current_kind: Lex::Kind::EOF,
             current_flags: TokenFlags::empty(),
             after_line_break: checkpoint.after_line_break,
+            after_whitespace: checkpoint.after_whitespace,
             unicode_bom_length: checkpoint.unicode_bom_length,
             diagnostics_pos: checkpoint.diagnostics_pos,
         };
@@ -784,6 +785,10 @@ impl<Kind: SyntaxKind> LookaheadToken<Kind> {
     pub fn has_preceding_line_break(&self) -> bool {
         self.flags.has_preceding_line_break()
     }
+
+    pub fn has_preceding_whitespace(&self) -> bool {
+        self.flags.has_preceding_whitespace()
+    }
 }
 
 impl<Kind: SyntaxKind> From<&LexerCheckpoint<Kind>> for LookaheadToken<Kind> {
@@ -803,6 +808,7 @@ pub struct LexerCheckpoint<Kind> {
     pub current_kind: Kind,
     pub current_flags: TokenFlags,
     pub after_line_break: bool,
+    pub after_whitespace: bool,
     pub unicode_bom_length: usize,
     pub diagnostics_pos: u32,
 }
@@ -828,6 +834,7 @@ impl<Kind: SyntaxKind> LexerCheckpoint<Kind> {
 enum TokenFlag {
     PrecedingLineBreak = 1 << 0,
     UnicodeEscape = 1 << 1,
+    PrecedingWhitespace = 1 << 2,
 }
 
 /// Flags for a lexed token.
@@ -840,6 +847,10 @@ impl TokenFlags {
 
     /// Indicates that an identifier contains an unicode escape sequence
     pub const UNICODE_ESCAPE: Self = Self(make_bitflags!(TokenFlag::{UnicodeEscape}));
+
+    /// Indicates that there has been a whitespace token between the last
+    /// non-trivia token and the current token.
+    pub const PRECEDING_WHITESPACE: Self = Self(make_bitflags!(TokenFlag::{PrecedingWhitespace}));
 
     pub const fn empty() -> Self {
         Self(BitFlags::EMPTY)
@@ -859,6 +870,10 @@ impl TokenFlags {
 
     pub fn has_unicode_escape(&self) -> bool {
         self.contains(Self::UNICODE_ESCAPE)
+    }
+
+    pub fn has_preceding_whitespace(&self) -> bool {
+        self.contains(Self::PRECEDING_WHITESPACE)
     }
 }
 

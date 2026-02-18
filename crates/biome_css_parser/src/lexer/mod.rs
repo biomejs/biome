@@ -76,6 +76,8 @@ pub(crate) struct CssLexer<'src> {
 
     /// `true` if there has been a line break between the last non-trivia token and the next non-trivia token.
     after_newline: bool,
+    /// `true` if there has been trivia between the last non-trivia token and the next non-trivia token.
+    after_whitespace: bool,
 
     /// If the source starts with a Unicode BOM, this is the number of bytes for that token.
     unicode_bom_length: usize,
@@ -145,10 +147,15 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
 
         self.current_flags
             .set(TokenFlags::PRECEDING_LINE_BREAK, self.after_newline);
+        self.current_flags
+            .set(TokenFlags::PRECEDING_WHITESPACE, self.after_whitespace);
         self.current_kind = kind;
 
         if !kind.is_trivia() {
             self.after_newline = false;
+            self.after_whitespace = false;
+        } else if kind == Self::WHITESPACE {
+            self.after_whitespace = true;
         }
 
         kind
@@ -169,6 +176,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
             current_flags,
             current_kind,
             after_line_break,
+            after_whitespace,
             unicode_bom_length,
             diagnostics_pos,
         } = checkpoint;
@@ -180,6 +188,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         self.current_start = current_start;
         self.current_flags = current_flags;
         self.after_newline = after_line_break;
+        self.after_whitespace = after_whitespace;
         self.unicode_bom_length = unicode_bom_length;
         self.diagnostics.truncate(diagnostics_pos as usize);
     }
@@ -211,6 +220,7 @@ impl<'src> CssLexer<'src> {
         Self {
             source,
             after_newline: false,
+            after_whitespace: false,
             unicode_bom_length: 0,
             current_kind: TOMBSTONE,
             current_start: TextSize::from(0),
@@ -1437,6 +1447,7 @@ impl<'src> LexerWithCheckpoint<'src> for CssLexer<'src> {
             current_flags: self.current_flags,
             current_kind: self.current_kind,
             after_line_break: self.after_newline,
+            after_whitespace: self.after_whitespace,
             unicode_bom_length: self.unicode_bom_length,
             diagnostics_pos: self.diagnostics.len() as u32,
         }
