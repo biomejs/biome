@@ -265,7 +265,7 @@ pub(crate) fn try_parse_nested_qualified_rule_without_selector_recovery(
         };
 
         if block_kind != CSS_DECLARATION_OR_RULE_BLOCK
-            || !p.last().is_some_and(|kind| kind == end_kind)
+            || p.last().is_none_or(|kind| kind != end_kind)
         {
             return Err(());
         }
