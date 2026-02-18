@@ -1,0 +1,13 @@
+@page   :left{
+$padding:12px !default;
+padding:$padding;
+
+font:{
+size:12px;
+}
+
+@top-left{
+$margin:4px !global;
+margin:$margin;
+}
+}
