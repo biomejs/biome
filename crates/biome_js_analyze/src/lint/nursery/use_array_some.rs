@@ -57,7 +57,6 @@ declare_lint_rule! {
     }
 }
 
-#[derive(Clone)]
 pub enum UseArraySomeState {
     Fix {
         call: JsCallExpression,
@@ -127,17 +126,20 @@ impl Rule for UseArraySome {
                 },
             )
             .note(markup! {
-                "Use "<Emphasis>".some()"</Emphasis>" when you only need to know whether at least one element matches."
+                <Emphasis>".some()"</Emphasis>" is more readable and semantically expressive than using "<Emphasis>".find()"</Emphasis>" or "<Emphasis>".filter()"</Emphasis>" just to check for element existence."
+            })
+            .note(markup! {
+                "Use "<Emphasis>".some()"</Emphasis>" when you only need to know if any element matches."
             }),
         )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let (call, replace_node) = match state {
-            UseArraySomeState::Fix {
-                call, replace_node, ..
-            } => (call, replace_node),
-            UseArraySomeState::Suggest { .. } => return None,
+        let UseArraySomeState::Fix {
+            call, replace_node, ..
+        } = state
+        else {
+            return None;
         };
 
         let callee = call.callee().ok()?;

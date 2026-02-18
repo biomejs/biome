@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: invalid.js
 ---
 # Input
@@ -42,7 +41,9 @@ invalid.js:5:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
     6 │ items.filter(function (x) { return x > 1; }, thisArg).length !== 0;
     7 │ items.filter(x => x > 1).length >= 1;
   
-  i Use .some() when you only need to know whether at least one element matches.
+  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  
+  i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -69,7 +70,9 @@ invalid.js:6:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
     7 │ items.filter(x => x > 1).length >= 1;
     8 │ 
   
-  i Use .some() when you only need to know whether at least one element matches.
+  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  
+  i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -97,7 +100,9 @@ invalid.js:7:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
     8 │ 
     9 │ items.findIndex(x => x > 1) !== -1;
   
-  i Use .some() when you only need to know whether at least one element matches.
+  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  
+  i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -125,7 +130,9 @@ invalid.js:9:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
     10 │ items.findLastIndex(x => x > 1) !== -1;
     11 │ 
   
-  i Use .some() when you only need to know whether at least one element matches.
+  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  
+  i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -152,7 +159,9 @@ invalid.js:10:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
     11 │ 
     12 │ if (items.find(x => x > 1)) {}
   
-  i Use .some() when you only need to know whether at least one element matches.
+  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  
+  i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -180,7 +189,9 @@ invalid.js:12:5 lint/nursery/useArraySome ━━━━━━━━━━━━�
     13 │ if (items.findLast(x => x > 1)) {}
     14 │ 
   
-  i Use .some() when you only need to know whether at least one element matches.
+  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  
+  i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -198,7 +209,9 @@ invalid.js:13:5 lint/nursery/useArraySome ━━━━━━━━━━━━�
     14 │ 
     15 │ cond ? (items.find(x => x > 1) ? "a" : "b") : "c";
   
-  i Use .some() when you only need to know whether at least one element matches.
+  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  
+  i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -217,7 +230,9 @@ invalid.js:15:9 lint/nursery/useArraySome ━━━━━━━━━━━━�
     16 │ 
     17 │ items.find(x => x > 1) !== undefined;
   
-  i Use .some() when you only need to know whether at least one element matches.
+  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  
+  i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -236,7 +251,9 @@ invalid.js:17:1 lint/nursery/useArraySome ━━━━━━━━━━━━�
     18 │ items.findLast(x => x > 1) !== undefined;
     19 │ 
   
-  i Use .some() when you only need to know whether at least one element matches.
+  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  
+  i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -254,7 +271,9 @@ invalid.js:18:1 lint/nursery/useArraySome ━━━━━━━━━━━━�
     19 │ 
     20 │ items.find(x => x > 1) != null;
   
-  i Use .some() when you only need to know whether at least one element matches.
+  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  
+  i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -273,7 +292,9 @@ invalid.js:20:1 lint/nursery/useArraySome ━━━━━━━━━━━━�
     21 │ items.findLast(x => x > 1) != null;
     22 │ 
   
-  i Use .some() when you only need to know whether at least one element matches.
+  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  
+  i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -290,7 +311,9 @@ invalid.js:21:1 lint/nursery/useArraySome ━━━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     22 │ 
   
-  i Use .some() when you only need to know whether at least one element matches.
+  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  
+  i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
