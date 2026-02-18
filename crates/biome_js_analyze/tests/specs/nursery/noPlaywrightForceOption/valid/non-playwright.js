@@ -1,0 +1,14 @@
+/* should not generate diagnostics - non-Playwright objects */
+
+// Generic objects with click method should not be flagged
+someObj.click({ force: true });
+myButton.click({ force: true });
+element.click({ force: true });
+
+// Non-page/frame variables should not be flagged
+customElement.hover({ force: true });
+domElement.fill('text', { force: true });
+
+// Random objects with similar method names
+api.click({ force: true });
+controller.tap({ force: true });

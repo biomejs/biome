@@ -1,0 +1,324 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: playwright-chains.js
+---
+# Input
+```js
+/* should generate diagnostics - Playwright call chains */
+
+// Direct page calls
+page.click('button', { force: true });
+
+// Locator chains
+page.locator('button').click({ force: true });
+page.locator('button').hover({ force: true });
+
+// GetBy methods (locator chains)
+page.getByRole('button').click({ force: true });
+page.getByTestId('submit').tap({ force: true });
+page.getByText('Click me').dblclick({ force: true });
+
+// Frame calls
+frame.locator('input').fill('text', { force: true });
+frame.getByLabel('Email').click({ force: true });
+
+// Variables ending with Page/Frame
+myPage.locator('x').click({ force: true });
+childFrame.getByRole('link').hover({ force: true });
+
+// Member access to page
+context.page.locator('button').click({ force: true });
+
+// Nested locator chains
+page.locator('div').locator('button').click({ force: true });
+page.locator('form').first().click({ force: true });
+page.locator('li').nth(0).click({ force: true });
+
+```
+
+# Diagnostics
+```
+playwright-chains.js:4:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    3 │ // Direct page calls
+  > 4 │ page.click('button', { force: true });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // Locator chains
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:7:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    6 │ // Locator chains
+  > 7 │ page.locator('button').click({ force: true });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ page.locator('button').hover({ force: true });
+    9 │ 
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:8:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+     6 │ // Locator chains
+     7 │ page.locator('button').click({ force: true });
+   > 8 │ page.locator('button').hover({ force: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // GetBy methods (locator chains)
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:11:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    10 │ // GetBy methods (locator chains)
+  > 11 │ page.getByRole('button').click({ force: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ page.getByTestId('submit').tap({ force: true });
+    13 │ page.getByText('Click me').dblclick({ force: true });
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:12:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    10 │ // GetBy methods (locator chains)
+    11 │ page.getByRole('button').click({ force: true });
+  > 12 │ page.getByTestId('submit').tap({ force: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ page.getByText('Click me').dblclick({ force: true });
+    14 │ 
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:13:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    11 │ page.getByRole('button').click({ force: true });
+    12 │ page.getByTestId('submit').tap({ force: true });
+  > 13 │ page.getByText('Click me').dblclick({ force: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // Frame calls
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:16:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    15 │ // Frame calls
+  > 16 │ frame.locator('input').fill('text', { force: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ frame.getByLabel('Email').click({ force: true });
+    18 │ 
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:17:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    15 │ // Frame calls
+    16 │ frame.locator('input').fill('text', { force: true });
+  > 17 │ frame.getByLabel('Email').click({ force: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ // Variables ending with Page/Frame
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:20:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    19 │ // Variables ending with Page/Frame
+  > 20 │ myPage.locator('x').click({ force: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ childFrame.getByRole('link').hover({ force: true });
+    22 │ 
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:21:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    19 │ // Variables ending with Page/Frame
+    20 │ myPage.locator('x').click({ force: true });
+  > 21 │ childFrame.getByRole('link').hover({ force: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ // Member access to page
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:24:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    23 │ // Member access to page
+  > 24 │ context.page.locator('button').click({ force: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 
+    26 │ // Nested locator chains
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:27:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    26 │ // Nested locator chains
+  > 27 │ page.locator('div').locator('button').click({ force: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ page.locator('form').first().click({ force: true });
+    29 │ page.locator('li').nth(0).click({ force: true });
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:28:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    26 │ // Nested locator chains
+    27 │ page.locator('div').locator('button').click({ force: true });
+  > 28 │ page.locator('form').first().click({ force: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ page.locator('li').nth(0).click({ force: true });
+    30 │ 
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+playwright-chains.js:29:1 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+    27 │ page.locator('div').locator('button').click({ force: true });
+    28 │ page.locator('form').first().click({ force: true });
+  > 29 │ page.locator('li').nth(0).click({ force: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

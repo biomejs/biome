@@ -19,6 +19,21 @@ static NEXT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("suspicious", "noHeadImportInDocument"),
     ]
 });
+static PLAYWRIGHT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "noPlaywrightElementHandle"),
+        RuleFilter::Rule("nursery", "noPlaywrightEval"),
+        RuleFilter::Rule("nursery", "noPlaywrightForceOption"),
+        RuleFilter::Rule("nursery", "noPlaywrightMissingAwait"),
+        RuleFilter::Rule("nursery", "noPlaywrightNetworkidle"),
+        RuleFilter::Rule("nursery", "noPlaywrightPagePause"),
+        RuleFilter::Rule("nursery", "noPlaywrightUselessAwait"),
+        RuleFilter::Rule("nursery", "noPlaywrightWaitForNavigation"),
+        RuleFilter::Rule("nursery", "noPlaywrightWaitForSelector"),
+        RuleFilter::Rule("nursery", "noPlaywrightWaitForTimeout"),
+        RuleFilter::Rule("nursery", "usePlaywrightValidDescribeCallback"),
+    ]
+});
 static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("correctness", "noPrivateImports"),
@@ -75,9 +90,12 @@ static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "noExcessiveNestedTestSuites"),
+        RuleFilter::Rule("nursery", "noConditionalExpect"),
+        RuleFilter::Rule("nursery", "useExpect"),
         RuleFilter::Rule("suspicious", "noDuplicateTestHooks"),
         RuleFilter::Rule("suspicious", "noExportsInTest"),
         RuleFilter::Rule("suspicious", "noFocusedTests"),
+        RuleFilter::Rule("suspicious", "noSkippedTests"),
     ]
 });
 static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
@@ -113,6 +131,7 @@ impl DomainSelector {
     pub fn as_rule_filters(&self) -> Vec<RuleFilter<'static>> {
         match self.0 {
             "next" => NEXT_FILTERS.clone(),
+            "playwright" => PLAYWRIGHT_FILTERS.clone(),
             "project" => PROJECT_FILTERS.clone(),
             "qwik" => QWIK_FILTERS.clone(),
             "react" => REACT_FILTERS.clone(),
@@ -130,6 +149,9 @@ impl DomainSelector {
     {
         match self.0 {
             "next" => NEXT_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+            "playwright" => PLAYWRIGHT_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule::<R>()),
             "project" => PROJECT_FILTERS
                 .iter()
                 .any(|filter| filter.match_rule::<R>()),

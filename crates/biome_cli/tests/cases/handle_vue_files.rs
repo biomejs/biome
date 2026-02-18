@@ -1570,3 +1570,47 @@ import { mdiSquareOutline } from "@mdi/js";
         result,
     ));
 }
+
+#[test]
+fn no_comma_operator_not_triggered_in_v_for() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<template>
+  <v-list-item
+    v-for="(rate, index) in playbackRate.availablePlaybackRates.value"
+    :key="index"
+    :value="rate"
+    @click="setRate(rate)"
+  >
+    <v-list-item-title>{{ formatRate(rate) }}</v-list-item-title>
+  </v-list-item>
+</template>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noCommaOperator", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_comma_operator_not_triggered_in_v_for",
+        fs,
+        console,
+        result,
+    ));
+}

@@ -673,16 +673,19 @@ impl Session {
         self.initialized.load(Ordering::Relaxed)
     }
 
+    /// Returns the configuration path set by the user in the extension settings
+    pub(crate) fn get_settings_configuration_path(&self) -> Option<Utf8PathBuf> {
+        self.extension_settings
+            .read()
+            .ok()
+            .and_then(|s| s.configuration_path())
+    }
+
     /// This function attempts to read the `biome.json` configuration file from
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_workspace_settings(self: &Arc<Self>, reload: bool) {
-        if let Some(config_path) = self
-            .extension_settings
-            .read()
-            .ok()
-            .and_then(|s| s.configuration_path())
-        {
+        if let Some(config_path) = self.get_settings_configuration_path() {
             info!("Detected configuration path in the workspace settings.");
             self.set_configuration_status(ConfigurationStatus::Loading);
 
@@ -947,9 +950,20 @@ impl Session {
         // If the configuration from the LSP or the workspace, the directory path is used as
         // the working directory. Otherwise, the base path of the session is used, then the current
         // working directory is used as the last resort.
+        debug!("Configuration path provided {:?}", &base_path);
         let path = match &base_path {
             ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
                 path.to_path_buf()
+            }
+            ConfigurationPathHint::FromUser(path) => {
+                if path.is_file() {
+                    path.parent()
+                        .map_or(fs.working_directory().unwrap_or_default(), |p| {
+                            p.to_path_buf()
+                        })
+                } else {
+                    path.to_path_buf()
+                }
             }
             _ => self
                 .base_path()

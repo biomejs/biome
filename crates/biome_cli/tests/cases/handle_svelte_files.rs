@@ -873,16 +873,16 @@ let isChecked = false;
 <main>
   <!-- bind: directive -->
   <input bind:value={inputValue} />
-  
+
   <!-- bind: directive with checkbox -->
   <input type="checkbox" bind:checked={isChecked} />
-  
+
   <!-- class: directive -->
   <div class:active={isActive}>Active</div>
-  
+
   <!-- style: directive -->
   <div style:color={color}>Styled</div>
-  
+
   <!-- Using variables in text expressions -->
   <p>{inputValue}</p>
   <p>{isChecked}</p>
@@ -902,6 +902,125 @@ let isChecked = false;
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "no_unused_variables_in_svelte_directives",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_comma_operator_triggered_in_svelte_template_expression() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script>
+  let x = 1;
+</script>
+
+<!-- Comma operator in template expression - should be flagged -->
+<p>{(console.log("side effect"), x)}</p>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noCommaOperator", file.as_str()].as_slice()),
+    );
+
+    // The comma operator SHOULD be flagged in Svelte (hack only applies to Vue)
+    // Result is Ok because it's a warning, but console should contain the diagnostic
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let has_comma_operator = console.out_buffer.iter().any(|m| {
+        let content = format!("{:?}", m.content);
+        content.contains("noCommaOperator")
+    });
+    assert!(
+        has_comma_operator,
+        "Expected noCommaOperator diagnostic in console output"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_comma_operator_triggered_in_svelte_template_expression",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_import_type_not_triggered_for_enum_in_control_flow_blocks() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    // the code in this file is intentionally ridiculous and doesn't necessarily make sense, but it covers a lot of different control flow blocks in one test
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+  import { IfEnum, ElseIfEnum, EachEnum, EachKeyEnum, KeyEnum, AwaitEnum } from './models.ts';
+
+  interface Props {
+    foo: IfEnum;
+    bar: ElseIfEnum;
+    baz: EachEnum;
+    bap: EachKeyEnum;
+    qux: KeyEnum;
+    zap: AwaitEnum;
+  }
+  let { foo }: Props = $props();
+</script>
+
+{#if foo === IfEnum.private}
+  private
+{:else if foo === ElseIfEnum.public}
+  public
+{/if}
+
+{#each EachEnum.Foo as item (EachKeyEnum[item])}
+  {item.name}
+{/each}
+
+{#key KeyEnum.Foo}
+  <Component />
+{/key}
+
+{#await AwaitEnum.Foo}
+  loading
+{:then data}
+  {data}
+{/await}
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_import_type_not_triggered_for_enum_in_control_flow_blocks",
         fs,
         console,
         result,

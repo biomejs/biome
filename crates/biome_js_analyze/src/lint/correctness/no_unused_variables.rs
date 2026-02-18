@@ -10,9 +10,10 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression,
-    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    TsConditionalType, TsDeclarationModule, TsInferType,
+    AnyJsExpression, EmbeddingKind, JsClassExpression, JsFileSource, JsForStatement,
+    JsFunctionExpression, JsIdentifierExpression, JsModuleItemList, JsSequenceExpression,
+    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule, TsInferType,
+    TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
@@ -92,6 +93,19 @@ declare_lint_rule! {
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, ...rest } = car;
     /// console.log(rest);
+    /// ```
+    ///
+    /// In Astro files, a top-level interface or a type alias named `Props` is always ignored
+    /// as it's implicitly read by the framework.
+    /// ```astro,ignore
+    /// ---
+    /// interface Props {
+    ///   name: string;
+    ///   greeting?: string;
+    /// }
+    ///
+    /// const { name, greeting } = Astro.props;
+    /// ---
     /// ```
     ///
     /// ## Options
@@ -320,23 +334,31 @@ impl Rule for NoUnusedVariables {
             }
         }
 
-        // Ignore name prefixed with `_`
         let binding_name = binding.name_token().ok()?;
-        let is_underscore_prefixed = binding_name.text_trimmed().starts_with('_');
-        let is_defined_in_embedded_binding =
-            embedded_bindings.contains_binding(binding_name.text_trimmed());
-        let is_used_as_reference =
-            embedded_references.is_used_as_value(binding_name.text_trimmed());
+        let binding_name = binding_name.text_trimmed();
 
-        if is_defined_in_embedded_binding {
+        // Ignore name prefixed with `_`
+        let is_underscore_prefixed = binding_name.starts_with('_');
+        let is_defined_in_embedded_binding = embedded_bindings.contains_binding(binding_name);
+        let is_used_as_reference = embedded_references.is_used_as_value(binding_name);
+
+        if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
             return None;
         }
 
-        if is_used_as_reference {
+        // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
+        // read by the framework.
+        if binding_name == "Props"
+            && let EmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
+            && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
+            && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
+                || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))
+            && JsModuleItemList::can_cast(binding.syntax().grand_parent()?.kind())
+        {
             return None;
         }
 
-        if !is_underscore_prefixed && is_unused(model, binding) {
+        if is_unused(model, binding) {
             suggested_fix_if_unused(binding, ctx.options())
         } else {
             None

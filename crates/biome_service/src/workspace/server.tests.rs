@@ -1,15 +1,12 @@
 use super::*;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
-use crate::workspace::FeatureName;
 use biome_configuration::{
     FormatterConfiguration, JsConfiguration,
     javascript::{JsFormatterConfiguration, JsParserConfiguration},
 };
-use biome_deserialize::json::deserialize_from_json_str;
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
-use biome_json_parser::JsonParserOptions;
 use biome_rowan::TextSize;
 
 #[test]
@@ -632,70 +629,4 @@ const Bar = graphql(`
     	}
     `);
     ");
-}
-
-#[test]
-fn extends_root_resolves_globs_from_project_root() {
-    const NESTED_CONFIGURATION: &str = r#"
-    {
-      "extends": "//",
-      "files": {
-        "includes": ["./packages/pkg-a/src/**"]
-      }
-    }
-    "#;
-
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        Utf8PathBuf::from("/project/packages/pkg-a/src/index.ts"),
-        b"const a = 1;",
-    );
-    fs.insert(
-        Utf8PathBuf::from("/project/packages/pkg-a/tests/index.ts"),
-        b"const a = 1;",
-    );
-
-    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
-
-    let configuration = deserialize_from_json_str::<Configuration>(
-        NESTED_CONFIGURATION,
-        JsonParserOptions::default().with_allow_comments(),
-        "biome.jsonc",
-    )
-    .into_deserialized()
-    .expect("valid nested config");
-
-    workspace
-        .update_settings(UpdateSettingsParams {
-            project_key,
-            configuration,
-            workspace_directory: Some(BiomePath::new("/project/packages/pkg-a")),
-            extended_configurations: Default::default(),
-            module_graph_resolution_kind: Default::default(),
-        })
-        .unwrap();
-
-    let src_is_ignored = workspace
-        .is_path_ignored(PathIsIgnoredParams {
-            project_key,
-            path: BiomePath::new("/project/packages/pkg-a/src/index.ts"),
-            features: FeatureName::empty(),
-            ignore_kind: IgnoreKind::Path,
-        })
-        .unwrap();
-
-    let tests_is_ignored = workspace
-        .is_path_ignored(PathIsIgnoredParams {
-            project_key,
-            path: BiomePath::new("/project/packages/pkg-a/tests/index.ts"),
-            features: FeatureName::empty(),
-            ignore_kind: IgnoreKind::Path,
-        })
-        .unwrap();
-
-    assert!(
-        !src_is_ignored,
-        "src file should be included when glob is resolved from project root"
-    );
-    assert!(tests_is_ignored, "file outside includes should be ignored");
 }

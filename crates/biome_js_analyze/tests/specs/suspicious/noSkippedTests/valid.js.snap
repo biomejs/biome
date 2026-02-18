@@ -13,4 +13,25 @@ describe.only('bar', () => {});
 it.only('bar', () => {});
 test.only('bar', () => {});
 
+// Playwright: normal patterns
+test.describe("suite", () => {
+    test("test", async () => {});
+});
+
+test.describe.only("focused suite", () => {
+    test("test", async () => {});
+});
+
+test.describe.parallel("parallel suite", () => {
+    test("test", async () => {});
+});
+
+test.describe.serial("serial suite", () => {
+    test("test", async () => {});
+});
+
+test("test with step", async () => {
+    await test.step("step", async () => {});
+});
+
 ```

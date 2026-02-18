@@ -39,10 +39,10 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoPositiveTabindex {
-        version: "next",
+        version: "2.4.0",
         name: "noPositiveTabindex",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("tabindex-no-positive").same()],
+        sources: &[RuleSource::EslintJsxA11y("tabindex-no-positive").same(), RuleSource::HtmlEslint("no-positive-tabindex").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
