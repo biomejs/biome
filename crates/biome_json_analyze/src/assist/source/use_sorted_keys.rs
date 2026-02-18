@@ -18,6 +18,10 @@ use std::{cmp::Ordering, ops::Not};
 declare_source_rule! {
     /// Sort the keys of a JSON object in natural order.
     ///
+    /// :::note
+    /// For consistent ordering in `package.json` files, use the action [useSortedPackageJson](https://biomejs.dev/assist/actions/use-sorted-package-json)
+    /// :::
+    ///
     /// [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order) means
     /// that uppercase letters come before lowercase letters (e.g. `A` < `a` <
     /// `B` < `b`) and numbers are compared in a human way (e.g. `9` < `10`).
@@ -159,12 +163,6 @@ impl Rule for UseSortedKeys {
     type Options = UseSortedKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        // Skip package.json files - they have specialized sorting via organizePackageJson
-        let path = ctx.file_path();
-        if is_package_json(path) {
-            return None;
-        }
-
         let options = ctx.options();
         let sort_order = options.sort_order.unwrap_or_default();
         let comparator = match sort_order {
@@ -213,6 +211,9 @@ impl Rule for UseSortedKeys {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let options = ctx.options();
+        // Skip package.json files - they have specialized sorting via organizePackageJson
+        let path = ctx.file_path();
+
         let message = if options.group_by_nesting.unwrap_or(false) {
             markup! {
                 "The members are not sorted by nesting level and key."
@@ -222,11 +223,19 @@ impl Rule for UseSortedKeys {
                 "The members are not sorted by key."
             }
         };
-        Some(RuleDiagnostic::new(
+        let mut diagnostic = RuleDiagnostic::new(
             category!("assist/source/useSortedKeys"),
             Self::text_range(ctx, state),
             message,
-        ))
+        );
+
+        if is_package_json(path) {
+            diagnostic = diagnostic.note(markup! {
+                "For consistent ordering in `package.json` files, use the action "<Hyperlink href="https://biomejs.dev/assist/actions/use-sorted-package-json">"useSortedPackageJson"</Hyperlink>"."
+            })
+        }
+
+        Some(diagnostic)
     }
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
