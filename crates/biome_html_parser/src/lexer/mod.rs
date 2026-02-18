@@ -15,7 +15,7 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{Dispatch::*, lookup_byte};
-use std::ops::{Add, AddAssign};
+use std::ops::Add;
 
 pub(crate) struct HtmlLexer<'src> {
     /// Source text
@@ -1366,97 +1366,147 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
     }
 }
 
+/// Tracks whether the lexer is currently inside an open string literal while
+/// scanning Astro frontmatter. Used to determine whether a `---` sequence is
+/// a genuine closing fence or merely three dashes that appear inside a string.
+///
+/// ## Design
+///
+/// The tracker maintains:
+/// - The **currently open quote character** (`current_quote`): `None` when not
+///   inside any string, or `Some(b'"')` / `Some(b'\'')` / `Some(b'`')` when
+///   inside a string. A quote opens a string only when no other string is
+///   already open; it closes the string only when it **matches** the opening
+///   quote. For example, a `'` inside a `"…"` string is treated as a literal
+///   character, not as a new string opener.
+/// - The **comment state** (`comment`): distinguishes single-line (`//`) from
+///   multi-line (`/* … */`) comments, so that quote characters inside comments
+///   are not counted as string delimiters.
+/// - The **escape flag** (`escaped`): set when the previous byte was an
+///   unescaped `\`, so that the immediately following quote character is not
+///   treated as a string delimiter. A double backslash resets the flag because
+///   the backslash itself is escaped.
 struct QuotesSeen {
-    single: u16,
-    double: u16,
-    template: u16,
-    inside_comment: bool,
+    /// The quote character that opened the current string, if any.
+    current_quote: Option<u8>,
+    /// Current comment state.
+    comment: QuotesSeenComment,
+    /// Whether the previous byte was an unescaped backslash.
+    escaped: bool,
+    /// The previous byte, needed to detect `//` and `/* */` comment markers
+    /// and the `*/` block-comment terminator.
     prev_byte: Option<u8>,
+}
+
+/// Distinguishes the kind of comment the lexer is currently inside.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum QuotesSeenComment {
+    /// Not inside any comment.
+    None,
+    /// Inside a `//` single-line comment; exits on `\n`.
+    SingleLine,
+    /// Inside a `/* … */` multi-line comment; exits on `*/`.
+    MultiLine,
 }
 
 impl QuotesSeen {
     fn new() -> Self {
         Self {
-            single: 0,
-            double: 0,
-            template: 0,
-            inside_comment: false,
+            current_quote: None,
+            comment: QuotesSeenComment::None,
+            escaped: false,
             prev_byte: None,
         }
     }
 
-    /// It checks the given byte. If it's a quote, it's tracked
+    /// Processes one byte of frontmatter source and updates the tracking state.
     fn check_byte(&mut self, byte: u8) {
-        // Check for comment exit first
-        if self.inside_comment {
-            if byte == b'\n' {
-                // Exit single-line comment
-                self.inside_comment = false;
-            } else if self.prev_byte == Some(b'*') && byte == b'/' {
-                // Exit multi-line comment
-                self.inside_comment = false;
+        match self.comment {
+            QuotesSeenComment::SingleLine => {
+                // Single-line comment ends at the newline.
+                if byte == b'\n' {
+                    self.comment = QuotesSeenComment::None;
+                }
+                self.prev_byte = Some(byte);
+                // Quotes inside comments are ignored.
+                return;
             }
-            self.prev_byte = Some(byte);
-            return; // Don't track quotes inside comments
+            QuotesSeenComment::MultiLine => {
+                // Multi-line comment ends at `*/`.
+                if self.prev_byte == Some(b'*') && byte == b'/' {
+                    self.comment = QuotesSeenComment::None;
+                }
+                self.prev_byte = Some(byte);
+                // Quotes inside comments are ignored.
+                return;
+            }
+            QuotesSeenComment::None => {}
         }
 
-        // Check for comment entry - but only if we're not inside quotes
-        if self.prev_byte == Some(b'/')
-            && (byte == b'/' || byte == b'*')
-            && self.single == 0
-            && self.double == 0
-            && self.template == 0
-        {
-            self.inside_comment = true;
+        // Handle escape sequences: a `\` that is not itself escaped toggles the
+        // escape flag for the next character.
+        if byte == b'\\' {
+            self.escaped = !self.escaped;
             self.prev_byte = Some(byte);
             return;
         }
 
-        // Normal quote tracking
+        // If the current byte is escaped, it cannot act as a string delimiter
+        // or comment opener.
+        let was_escaped = self.escaped;
+        self.escaped = false;
+
+        if was_escaped {
+            self.prev_byte = Some(byte);
+            return;
+        }
+
+        // Detect comment openers — only valid outside of open strings.
+        if self.current_quote.is_none() && self.prev_byte == Some(b'/') {
+            match byte {
+                b'/' => {
+                    self.comment = QuotesSeenComment::SingleLine;
+                    self.prev_byte = Some(byte);
+                    return;
+                }
+                b'*' => {
+                    self.comment = QuotesSeenComment::MultiLine;
+                    self.prev_byte = Some(byte);
+                    return;
+                }
+                _ => {}
+            }
+        }
+
+        // Track string delimiters.
         match byte {
-            b'"' => self.track_double(),
-            b'\'' => self.track_single(),
-            b'`' => self.track_template(),
+            b'"' | b'\'' | b'`' => {
+                match self.current_quote {
+                    None => {
+                        // No string is open; this quote opens one.
+                        self.current_quote = Some(byte);
+                    }
+                    Some(open) if open == byte => {
+                        // The same quote that opened this string closes it.
+                        self.current_quote = None;
+                    }
+                    Some(_) => {
+                        // A different quote character inside an open string is
+                        // just a literal character — ignore it.
+                    }
+                }
+            }
             _ => {}
         }
 
         self.prev_byte = Some(byte);
     }
 
-    /// It adds a single quote if single quotes are zero and the others are greater than zero. It removes it otherwise
-    fn track_single(&mut self) {
-        if (self.single == 0 && (self.double > 0 || self.template > 0))
-            || (self.single == 0 && self.double == 0 && self.template == 0)
-        {
-            self.single.add_assign(1);
-        } else {
-            self.single = self.single.saturating_sub(1);
-        }
-    }
-    /// It adds a double quote if double quotes are zero and the others are greater than zero. It removes it otherwise
-    fn track_double(&mut self) {
-        if (self.double == 0 && (self.single > 0 || self.template > 0))
-            || (self.double == 0 && self.single == 0 && self.template == 0)
-        {
-            self.double.add_assign(1);
-        } else {
-            self.double = self.double.saturating_sub(1);
-        }
-    }
-
-    /// It adds a template quote if template quotes are zero and the others are greater than zero. It removes it otherwise
-    fn track_template(&mut self) {
-        if (self.template == 0 && (self.single > 0 || self.double > 0))
-            || (self.template == 0 && self.single == 0 && self.double == 0)
-        {
-            self.template.add_assign(1);
-        } else {
-            self.template = self.template.saturating_sub(1);
-        }
-    }
-
+    /// Returns `true` when the tracker is not currently inside an open string literal
+    /// or a comment. Both states must be absent for a `---` fence to be a valid
+    /// frontmatter closing delimiter.
     fn is_empty(&self) -> bool {
-        self.single == 0 && self.double == 0 && self.template == 0
+        self.current_quote.is_none() && self.comment == QuotesSeenComment::None
     }
 }
 
@@ -1488,19 +1538,17 @@ mod quotes_seen {
         let mut quotes_seen = QuotesSeen::new();
         track(source, &mut quotes_seen);
         assert!(quotes_seen.is_empty());
-
-        let source = r#"// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh."#;
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(quotes_seen.is_empty());
     }
 
+    /// A single-line comment that has not yet been terminated (no trailing newline)
+    /// leaves the tracker inside the comment, so `is_empty()` returns `false`.
+    /// A `---` encountered in this state must not be treated as a closing fence.
     #[test]
-    fn empty_inside_comments() {
+    fn not_empty_inside_unterminated_single_line_comment() {
         let source = r#"// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh."#;
         let mut quotes_seen = QuotesSeen::new();
         track(source, &mut quotes_seen);
-        assert!(quotes_seen.is_empty());
+        assert!(!quotes_seen.is_empty());
     }
 
     #[test]
@@ -1530,5 +1578,189 @@ const f = "something" "#;
         let mut quotes_seen = QuotesSeen::new();
         track(source, &mut quotes_seen);
         assert!(quotes_seen.is_empty());
+    }
+
+    // --- Tests for issue #9108: mixed quote types inside a string ---
+
+    /// A double-quoted string containing a single quote should be considered closed.
+    /// The apostrophe is a literal character inside the double-quoted string and
+    /// must not be treated as an opening single-quote delimiter.
+    #[test]
+    fn issue_9108_double_quoted_with_apostrophe() {
+        // "test'"  — double-quoted string that contains an apostrophe
+        let source = r#""test'""#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "double-quoted string containing apostrophe must be treated as closed"
+        );
+    }
+
+    /// A single-quoted string containing a double quote should be considered closed.
+    #[test]
+    fn issue_9108_single_quoted_with_double_quote() {
+        // 'it"s'
+        let source = r#"'it"s'"#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "single-quoted string containing double quote must be treated as closed"
+        );
+    }
+
+    /// A template literal containing both single and double quotes should close cleanly.
+    #[test]
+    fn issue_9108_template_with_mixed_quotes() {
+        // `it's a "test"`
+        let source = "`it's a \"test\"`";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "template literal containing single and double quotes must be treated as closed"
+        );
+    }
+
+    /// Multiple complete strings with different quote types on the same line.
+    #[test]
+    fn issue_9108_multiple_strings_with_mixed_quotes() {
+        // const a = "it's"; const b = 'say "hi"';
+        let source = r#"const a = "it's"; const b = 'say "hi"';"#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "multiple complete string literals with mixed quote types must all be closed"
+        );
+    }
+
+    // --- Tests for issue #8882: multi-line block comments with quotes ---
+
+    /// A multi-line block comment containing an apostrophe must not leave the tracker
+    /// in a non-empty state. Quote characters inside block comments are not string
+    /// delimiters and must be ignored across all lines of the comment.
+    #[test]
+    fn issue_8882_multiline_block_comment_with_apostrophe() {
+        let source = "/*\n * Doesn't that stink?\n */";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "multi-line block comment with apostrophe must not leave an open quote"
+        );
+    }
+
+    /// JSDoc-style comment followed by real code — mirrors the exact pattern from #8882.
+    #[test]
+    fn issue_8882_jsdoc_comment_then_code() {
+        let source = "/**\n * In this comment, if you add any string opening or closing, such as an apostrophe, the file will show \n * a bunch of errors. Doesn't (remove the apostrophe in the previous word to fix) that stink? \n */\nimport type { HTMLAttributes } from \"astro/types\";\nconst { class: className } = Astro.props;";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "JSDoc comment with apostrophes followed by real code must leave tracker empty"
+        );
+    }
+
+    /// Multi-line block comment with quotes on every line.
+    #[test]
+    fn issue_8882_multiline_block_comment_quotes_every_line() {
+        let source = "/* line one 'unclosed\n   line two `unclosed\n   line three \"unclosed */\nconst x = 1;";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "block comment with unclosed quote chars on every line must not affect tracker"
+        );
+    }
+
+    // --- Tests for fence-inside-comment cases ---
+
+    /// A `---` sequence that appears after `//` on the same line must not close
+    /// the frontmatter, because it is inside a single-line comment.
+    #[test]
+    fn fence_inside_single_line_comment_is_not_empty() {
+        // "// ---" — the dashes are inside a line comment, not a real fence
+        let source = "// ---";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            !quotes_seen.is_empty(),
+            "tracker must be non-empty while inside a single-line comment"
+        );
+    }
+
+    /// A `---` sequence that appears inside a `/* */` block comment must not
+    /// close the frontmatter.
+    #[test]
+    fn fence_inside_block_comment_is_not_empty() {
+        // "/*\n---\n" — the dashes are inside a block comment that has not yet closed
+        let source = "/*\n---\n";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            !quotes_seen.is_empty(),
+            "tracker must be non-empty while inside a multi-line block comment"
+        );
+    }
+
+    // --- Tests for escape sequence handling ---
+
+    /// An escaped quote inside a double-quoted string must not close the string early.
+    /// In `"\""`, the inner `\"` is escaped, so only the final `"` closes the string.
+    #[test]
+    fn escaped_double_quote_inside_double_string() {
+        // "\""  — the backslash escapes the inner double quote
+        let source = "\"\\\"\"";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "escaped double quote inside double-quoted string must not close it prematurely"
+        );
+    }
+
+    /// An escaped single quote inside a single-quoted string must not close it early.
+    /// In `'\''`, the inner `\'` is escaped, so only the final `'` closes the string.
+    #[test]
+    fn escaped_single_quote_inside_single_string() {
+        // '\''  — open single quote, escaped single quote, closing single quote
+        let source = r"'\''";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "escaped single quote inside single-quoted string must not close it prematurely"
+        );
+    }
+
+    /// An escaped backtick inside a template literal must not close it early.
+    #[test]
+    fn escaped_backtick_inside_template() {
+        // `\``
+        let source = "`\\``";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "escaped backtick inside template literal must not close it prematurely"
+        );
+    }
+
+    /// A double backslash before a closing quote means the backslash is itself escaped,
+    /// so the quote is a genuine string delimiter. `"\\"` opens with the first `"`,
+    /// contains an escaped backslash `\\`, and closes with the final `"`.
+    #[test]
+    fn double_backslash_then_quote() {
+        // "\\"  — opening quote, escaped backslash, closing quote
+        let source = "\"\\\\\"";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "double backslash followed by closing quote must close the string"
+        );
     }
 }
