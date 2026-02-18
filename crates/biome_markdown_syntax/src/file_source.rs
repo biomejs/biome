@@ -6,20 +6,20 @@ use camino::Utf8Path;
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
-pub struct MarkdownFileSource {
-    variant: MarkdownVariant,
+enum MarkdownVariant {
+    #[default]
+    Standard,
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
-enum MarkdownVariant {
-    #[default]
-    Standard,
+pub struct MdFileSource {
+    variant: MarkdownVariant,
 }
 
-impl MarkdownFileSource {
+impl MdFileSource {
     pub fn markdown() -> Self {
         Self {
             variant: MarkdownVariant::Standard,
@@ -33,6 +33,7 @@ impl MarkdownFileSource {
 
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         match extension {
+            #[cfg(feature = "experimental-markdown")]
             "md" | "markdown" => Ok(Self::markdown()),
             _ => Err(FileSourceError::UnknownExtension),
         }
@@ -40,13 +41,14 @@ impl MarkdownFileSource {
 
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
+            #[cfg(feature = "experimental-markdown")]
             "markdown" => Ok(Self::markdown()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }
 }
 
-impl TryFrom<&Utf8Path> for MarkdownFileSource {
+impl TryFrom<&Utf8Path> for MdFileSource {
     type Error = FileSourceError;
 
     fn try_from(path: &Utf8Path) -> Result<Self, Self::Error> {

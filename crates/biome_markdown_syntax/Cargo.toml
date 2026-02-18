@@ -21,7 +21,8 @@ schemars          = { workspace = true, optional = true }
 serde             = { workspace = true, features = ["derive"] }
 
 [features]
-schema = ["biome_rowan/serde", "schemars"]
+experimental-markdown = []
+schema                = ["biome_rowan/serde", "schemars"]
 
 [lints]
 workspace = true

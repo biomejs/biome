@@ -43,7 +43,7 @@ use biome_js_syntax::{
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
-use biome_markdown_syntax::MarkdownFileSource;
+use biome_markdown_syntax::MdFileSource;
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
@@ -86,7 +86,7 @@ pub enum DocumentFileSource {
     Graphql(GraphqlFileSource),
     Html(HtmlFileSource),
     Grit(GritFileSource),
-    Markdown(MarkdownFileSource),
+    Markdown(MdFileSource),
     // Ignore files
     Ignore,
     #[default]
@@ -129,8 +129,8 @@ impl From<GritFileSource> for DocumentFileSource {
     }
 }
 
-impl From<MarkdownFileSource> for DocumentFileSource {
-    fn from(value: MarkdownFileSource) -> Self {
+impl From<MdFileSource> for DocumentFileSource {
+    fn from(value: MdFileSource) -> Self {
         Self::Markdown(value)
     }
 }
@@ -215,7 +215,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = MarkdownFileSource::try_from_extension(extension) {
+        if let Ok(file_source) = MdFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownExtension)
@@ -246,7 +246,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = MarkdownFileSource::try_from_language_id(language_id) {
+        if let Ok(file_source) = MdFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownLanguageId)
@@ -387,7 +387,7 @@ impl DocumentFileSource {
         }
     }
 
-    pub fn to_markdown_file_source(&self) -> Option<MarkdownFileSource> {
+    pub fn to_markdown_file_source(&self) -> Option<MdFileSource> {
         match self {
             Self::Markdown(markdown) => Some(*markdown),
             _ => None,
@@ -2020,15 +2020,15 @@ mod tests {
     #[test]
     fn markdown_file_source_detection_and_capabilities() {
         let source = DocumentFileSource::from_path(Utf8Path::new("docs/readme.md"), false);
-        assert!(matches!(source, DocumentFileSource::Markdown(_)));
+        assert!(matches!(source, DocumentFileSource::Unknown));
 
         let language_source = DocumentFileSource::from_language_id("markdown");
-        assert!(matches!(language_source, DocumentFileSource::Markdown(_)));
+        assert!(matches!(language_source, DocumentFileSource::Unknown));
 
-        assert!(DocumentFileSource::can_parse(Utf8Path::new(
+        assert!(!DocumentFileSource::can_parse(Utf8Path::new(
             "docs/readme.md"
         )));
-        assert!(DocumentFileSource::can_read(Utf8Path::new(
+        assert!(!DocumentFileSource::can_read(Utf8Path::new(
             "docs/readme.md"
         )));
         assert!(!DocumentFileSource::can_contain_embeds(
@@ -2045,7 +2045,7 @@ mod tests {
             false,
         ));
 
-        assert!(capabilities.formatter.format.is_some());
-        assert!(capabilities.parser.parse.is_some());
+        assert!(capabilities.formatter.format.is_none());
+        assert!(capabilities.parser.parse.is_none());
     }
 }
