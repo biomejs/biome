@@ -70,6 +70,7 @@ pub enum ActionName {
     UseSortedAttributes,
     UseSortedInterfaceMembers,
     UseSortedKeys,
+    UseSortedPackageJson,
     UseSortedProperties,
 }
 impl ActionName {
@@ -80,6 +81,7 @@ impl ActionName {
             Self::UseSortedAttributes => "useSortedAttributes",
             Self::UseSortedInterfaceMembers => "useSortedInterfaceMembers",
             Self::UseSortedKeys => "useSortedKeys",
+            Self::UseSortedPackageJson => "useSortedPackageJson",
             Self::UseSortedProperties => "useSortedProperties",
         }
     }
@@ -90,6 +92,7 @@ impl ActionName {
             Self::UseSortedAttributes => RuleGroup::Source,
             Self::UseSortedInterfaceMembers => RuleGroup::Source,
             Self::UseSortedKeys => RuleGroup::Source,
+            Self::UseSortedPackageJson => RuleGroup::Source,
             Self::UseSortedProperties => RuleGroup::Source,
         }
     }
@@ -103,6 +106,7 @@ impl std::str::FromStr for ActionName {
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
             "useSortedInterfaceMembers" => Ok(Self::UseSortedInterfaceMembers),
             "useSortedKeys" => Ok(Self::UseSortedKeys),
+            "useSortedPackageJson" => Ok(Self::UseSortedPackageJson),
             "useSortedProperties" => Ok(Self::UseSortedProperties),
             _ => Err("This rule name doesn't exist."),
         }

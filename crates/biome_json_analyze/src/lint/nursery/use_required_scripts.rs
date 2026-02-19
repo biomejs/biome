@@ -103,21 +103,19 @@ impl Rule for UseRequiredScripts {
         let scripts_value = scripts_member.value().ok()?;
         let scripts_object = scripts_value.as_json_object_value()?;
 
-        let existing_scripts: Vec<String> = scripts_object
-            .json_member_list()
-            .iter()
-            .flatten()
-            .filter_map(|member| {
-                let name = member.name().ok()?;
-                let text = name.inner_string_text()?.ok()?;
-                Some(text.to_string())
-            })
-            .collect();
-
+        let members = scripts_object.json_member_list();
         let missing_scripts: Vec<String> = options
             .required_scripts
             .iter()
-            .filter(|script| !existing_scripts.iter().any(|s| s == *script))
+            .filter(|script| {
+                !members.iter().flatten().any(|member| {
+                    member
+                        .name()
+                        .ok()
+                        .and_then(|n| n.inner_string_text())
+                        .is_some_and(|text| text.text() == script.as_str())
+                })
+            })
             .cloned()
             .collect();
 

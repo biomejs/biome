@@ -1014,6 +1014,11 @@ See https://biomejs.dev/assist/actions/use-sorted-keys
 	 */
 	useSortedKeys?: UseSortedKeysConfiguration;
 	/**
+	* Organize package.json fields according to established conventions.
+See https://biomejs.dev/assist/actions/use-sorted-package-json 
+	 */
+	useSortedPackageJson?: UseSortedPackageJsonConfiguration;
+	/**
 	* Enforce ordering of CSS properties and nested rules.
 See https://biomejs.dev/assist/actions/use-sorted-properties 
 	 */
@@ -1200,6 +1205,9 @@ export type UseSortedInterfaceMembersConfiguration =
 export type UseSortedKeysConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedKeysOptions;
+export type UseSortedPackageJsonConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedPackageJsonOptions;
 export type UseSortedPropertiesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedPropertiesOptions;
@@ -3543,6 +3551,10 @@ export interface RuleAssistWithUseSortedKeysOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedKeysOptions;
 }
+export interface RuleAssistWithUseSortedPackageJsonOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedPackageJsonOptions;
+}
 export interface RuleAssistWithUseSortedPropertiesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedPropertiesOptions;
@@ -4919,6 +4931,7 @@ followed by nested values (multi-line objects, multi-line arrays).
 	groupByNesting?: boolean;
 	sortOrder?: SortOrder;
 }
+export type UseSortedPackageJsonOptions = {};
 export type UseSortedPropertiesOptions = {};
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithNoAccessKeyOptions {
@@ -8562,11 +8575,12 @@ export type Category =
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
 	| "assist/source/noDuplicateClasses"
+	| "assist/source/organizeImports"
+	| "assist/source/useSortedAttributes"
 	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
+	| "assist/source/useSortedPackageJson"
 	| "assist/source/useSortedProperties"
-	| "assist/source/useSortedAttributes"
-	| "assist/source/organizeImports"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"

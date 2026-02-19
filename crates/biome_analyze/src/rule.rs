@@ -180,6 +180,8 @@ pub enum RuleSource<'a> {
     HtmlEslint(&'a str),
     /// Rules from [Eslint Plugin Playwright](https://github.com/playwright-community/eslint-plugin-playwright)
     EslintPlaywright(&'a str),
+    /// Action for https://github.com/keithamus/sort-package-json
+    SortPackageJson,
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -230,6 +232,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintTurbo(_) => write!(f, "eslint-plugin-turbo"),
             Self::HtmlEslint(_) => write!(f, "@html-eslint/eslint-plugin"),
             Self::EslintPlaywright(_) => write!(f, "eslint-plugin-playwright"),
+            Self::SortPackageJson => write!(f, "sort-package-json"),
         }
     }
 }
@@ -291,6 +294,7 @@ impl<'a> RuleSource<'a> {
             Self::HtmlEslint(_) => 38,
             Self::EslintE18e(_) => 38,
             Self::EslintBetterTailwindcss(_) => 39,
+            Self::SortPackageJson => 40,
         }
     }
 
@@ -351,6 +355,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintTurbo(rule_name)
             | Self::HtmlEslint(rule_name)
             | Self::EslintPlaywright(rule_name) => rule_name,
+            Self::SortPackageJson => "sort-package-json",
         }
     }
 
@@ -360,6 +365,7 @@ impl<'a> RuleSource<'a> {
             | Self::DenoLint(_)
             | Self::Eslint(_)
             | Self::GraphqlSchemaLinter(_)
+            | Self::SortPackageJson
             | Self::Stylelint(_) => "",
             Self::EslintBarrelFiles(_) => "barrel-files",
             Self::EslintGraphql(_) => "@graphql-eslint",
@@ -451,6 +457,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintTurbo(rule_name) => format!("https://github.com/vercel/turborepo/blob/main/packages/eslint-plugin-turbo/docs/rules/{rule_name}.md"),
             Self::HtmlEslint(rule_name) => format!("https://html-eslint.org/docs/rules/{rule_name}"),
             Self::EslintPlaywright(rule_name) => format!("https://github.com/playwright-community/eslint-plugin-playwright/blob/main/docs/rules/{rule_name}.md"),
+            Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
         }
     }
 
