@@ -267,8 +267,6 @@ impl<'src> HtmlLexer<'src> {
             COM if self.current() == T![<] => self.consume_byte(T![,]),
             MIN if self.at_frontmatter_edge() => self.consume_frontmatter_edge(),
             BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
-            BTO => self.consume_byte(T!['[']),
-            BTC => self.consume_byte(T![']']),
             BEO => {
                 if self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
