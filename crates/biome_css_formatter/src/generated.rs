@@ -10066,6 +10066,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssAttributeMatcherVa
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssBracketedValueItem {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssBracketedValueItem,
+        crate::css::any::bracketed_value_item::FormatAnyCssBracketedValueItem,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::bracketed_value_item::FormatAnyCssBracketedValueItem::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssBracketedValueItem {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssBracketedValueItem,
+        crate::css::any::bracketed_value_item::FormatAnyCssBracketedValueItem,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::bracketed_value_item::FormatAnyCssBracketedValueItem::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssComposesImportSource {
     type Format<'a> = FormatRefWithRule<
         'a,

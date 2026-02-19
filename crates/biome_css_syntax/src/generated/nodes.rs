@@ -10121,6 +10121,25 @@ impl AnyCssAttributeMatcherValue {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssBracketedValueItem {
+    AnyCssCustomIdentifier(AnyCssCustomIdentifier),
+    CssGenericDelimiter(CssGenericDelimiter),
+}
+impl AnyCssBracketedValueItem {
+    pub fn as_any_css_custom_identifier(&self) -> Option<&AnyCssCustomIdentifier> {
+        match &self {
+            Self::AnyCssCustomIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_generic_delimiter(&self) -> Option<&CssGenericDelimiter> {
+        match &self {
+            Self::CssGenericDelimiter(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssComposesImportSource {
     CssIdentifier(CssIdentifier),
     CssString(CssString),
@@ -25453,6 +25472,69 @@ impl From<AnyCssAttributeMatcherValue> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssGenericDelimiter> for AnyCssBracketedValueItem {
+    fn from(node: CssGenericDelimiter) -> Self {
+        Self::CssGenericDelimiter(node)
+    }
+}
+impl AstNode for AnyCssBracketedValueItem {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssCustomIdentifier::KIND_SET.union(CssGenericDelimiter::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_GENERIC_DELIMITER => true,
+            k if AnyCssCustomIdentifier::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_GENERIC_DELIMITER => Self::CssGenericDelimiter(CssGenericDelimiter { syntax }),
+            _ => {
+                if let Some(any_css_custom_identifier) = AnyCssCustomIdentifier::cast(syntax) {
+                    return Some(Self::AnyCssCustomIdentifier(any_css_custom_identifier));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssGenericDelimiter(it) => it.syntax(),
+            Self::AnyCssCustomIdentifier(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssGenericDelimiter(it) => it.into_syntax(),
+            Self::AnyCssCustomIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssBracketedValueItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssGenericDelimiter(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssBracketedValueItem> for SyntaxNode {
+    fn from(n: AnyCssBracketedValueItem) -> Self {
+        match n {
+            AnyCssBracketedValueItem::AnyCssCustomIdentifier(it) => it.into_syntax(),
+            AnyCssBracketedValueItem::CssGenericDelimiter(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssBracketedValueItem> for SyntaxElement {
+    fn from(n: AnyCssBracketedValueItem) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssIdentifier> for AnyCssComposesImportSource {
     fn from(node: CssIdentifier) -> Self {
         Self::CssIdentifier(node)
@@ -33206,6 +33288,11 @@ impl std::fmt::Display for AnyCssAttributeMatcherValue {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssBracketedValueItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssComposesImportSource {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -36943,7 +37030,7 @@ impl Serialize for CssBracketedValueList {
 }
 impl AstNodeList for CssBracketedValueList {
     type Language = Language;
-    type Node = AnyCssCustomIdentifier;
+    type Node = AnyCssBracketedValueItem;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -36958,15 +37045,15 @@ impl Debug for CssBracketedValueList {
     }
 }
 impl IntoIterator for &CssBracketedValueList {
-    type Item = AnyCssCustomIdentifier;
-    type IntoIter = AstNodeListIterator<Language, AnyCssCustomIdentifier>;
+    type Item = AnyCssBracketedValueItem;
+    type IntoIter = AstNodeListIterator<Language, AnyCssBracketedValueItem>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for CssBracketedValueList {
-    type Item = AnyCssCustomIdentifier;
-    type IntoIter = AstNodeListIterator<Language, AnyCssCustomIdentifier>;
+    type Item = AnyCssBracketedValueItem;
+    type IntoIter = AstNodeListIterator<Language, AnyCssBracketedValueItem>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
