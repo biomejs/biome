@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: valid.js
 ---
 # Input
@@ -14,6 +13,8 @@ items.some(x => x > 1);
 
 items.filter(x => x > 1).length === 0;
 items.filter(x => x > 1).length > 1;
+0 === items.filter(x => x > 1).length;
+1 > items.filter(x => x > 1).length;
 
 items.findIndex(x => x > 1) === -1;
 items.findLastIndex(x => x > 1) === -1;

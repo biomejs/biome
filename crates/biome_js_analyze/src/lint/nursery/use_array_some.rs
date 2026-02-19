@@ -9,6 +9,7 @@ use biome_js_syntax::{
     is_in_boolean_context,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast, TextRange};
+use biome_rule_options::use_array_some::UseArraySomeOptions;
 
 declare_lint_rule! {
     /// Prefer `Array.prototype.some()` over verbose existence checks.
@@ -73,7 +74,7 @@ impl Rule for UseArraySome {
     type Query = Ast<JsCallExpression>;
     type State = UseArraySomeState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseArraySomeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();
@@ -98,7 +99,7 @@ impl Rule for UseArraySome {
         {
             return Some(UseArraySomeState::Suggest {
                 range: call.range(),
-                pattern: "find/findLast used as boolean",
+                pattern: "find-family used as boolean",
             });
         }
 
@@ -122,11 +123,11 @@ impl Rule for UseArraySome {
                 rule_category!(),
                 range,
                 markup! {
-                    "Prefer "<Emphasis>".some()"</Emphasis>" over "<Emphasis>{pattern}</Emphasis>" to check for existence."
+                    "Prefer "<Emphasis>".some()"</Emphasis>" over "<Emphasis>{pattern}</Emphasis>"."
                 },
             )
             .note(markup! {
-                <Emphasis>".some()"</Emphasis>" is more readable and semantically expressive than using "<Emphasis>".find()"</Emphasis>" or "<Emphasis>".filter()"</Emphasis>" just to check for element existence."
+                "Using "<Emphasis>".filter()"</Emphasis>" followed by a length check iterates the entire array unnecessarily. "<Emphasis>".some()"</Emphasis>" stops at the first match."
             })
             .note(markup! {
                 "Use "<Emphasis>".some()"</Emphasis>" when you only need to know if any element matches."
@@ -181,17 +182,33 @@ fn detect_filter_length_pattern(call: &JsCallExpression) -> Option<UseArraySomeS
 
     let comparison = nearest_parent_binary_expression(parent_member.syntax())?;
     let left = comparison.left().ok()?;
-    if !left_is_expression(&left, parent_member.syntax()) {
-        return None;
-    }
-
     let right = comparison.right().ok()?;
     let operator = comparison.operator().ok()?;
-    let matches = match operator {
-        JsBinaryOperator::GreaterThan => is_number_literal_value(&right, 0.0),
-        JsBinaryOperator::GreaterThanOrEqual => is_number_literal_value(&right, 1.0),
+
+    // Determine which side is the length expression and normalize the operator
+    let (literal, normalized_op) =
+        if expression_matches_target(&left, parent_member.syntax()) {
+            // arr.filter(...).length OP literal
+            (right, operator)
+        } else if expression_matches_target(&right, parent_member.syntax()) {
+            // literal OP arr.filter(...).length — swap the operator
+            let swapped = match operator {
+                JsBinaryOperator::GreaterThan => JsBinaryOperator::LessThan,
+                JsBinaryOperator::GreaterThanOrEqual => JsBinaryOperator::LessThanOrEqual,
+                JsBinaryOperator::LessThan => JsBinaryOperator::GreaterThan,
+                JsBinaryOperator::LessThanOrEqual => JsBinaryOperator::GreaterThanOrEqual,
+                other => other, // symmetric operators like !== stay the same
+            };
+            (left, swapped)
+        } else {
+            return None;
+        };
+
+    let matches = match normalized_op {
+        JsBinaryOperator::GreaterThan => is_number_literal_value(&literal, 0.0),
+        JsBinaryOperator::GreaterThanOrEqual => is_number_literal_value(&literal, 1.0),
         JsBinaryOperator::StrictInequality | JsBinaryOperator::Inequality => {
-            is_number_literal_value(&right, 0.0)
+            is_number_literal_value(&literal, 0.0)
         }
         _ => false,
     };
@@ -218,8 +235,8 @@ fn detect_find_index_comparison_pattern(
 
     let left = comparison.left().ok()?;
     let right = comparison.right().ok()?;
-    let left_matches_call = left_is_expression(&left, call.syntax());
-    let right_matches_call = left_is_expression(&right, call.syntax());
+    let left_matches_call = expression_matches_target(&left, call.syntax());
+    let right_matches_call = expression_matches_target(&right, call.syntax());
 
     let is_match = (left_matches_call && is_negative_one_literal(&right))
         || (right_matches_call && is_negative_one_literal(&left));
@@ -244,8 +261,8 @@ fn detect_find_existence_comparison_pattern(
 
     let left = comparison.left().ok()?;
     let right = comparison.right().ok()?;
-    let left_matches_call = left_is_expression(&left, call.syntax());
-    let right_matches_call = left_is_expression(&right, call.syntax());
+    let left_matches_call = expression_matches_target(&left, call.syntax());
+    let right_matches_call = expression_matches_target(&right, call.syntax());
     if !left_matches_call && !right_matches_call {
         return None;
     }
@@ -280,7 +297,7 @@ fn nearest_parent_binary_expression(node: &JsSyntaxNode) -> Option<JsBinaryExpre
     }
 }
 
-fn left_is_expression(expression: &AnyJsExpression, target: &JsSyntaxNode) -> bool {
+fn expression_matches_target(expression: &AnyJsExpression, target: &JsSyntaxNode) -> bool {
     expression
         .clone()
         .omit_parentheses()

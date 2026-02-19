@@ -12,6 +12,11 @@ items.filter(x => x > 1).length > 0;
 items.filter(function (x) { return x > 1; }, thisArg).length !== 0;
 items.filter(x => x > 1).length >= 1;
 
+0 < items.filter(x => x > 1).length;
+0 !== items.filter(x => x > 1).length;
+0 != items.filter(x => x > 1).length;
+1 <= items.filter(x => x > 1).length;
+
 items.findIndex(x => x > 1) !== -1;
 items.findLastIndex(x => x > 1) !== -1;
 
@@ -32,7 +37,7 @@ items.findLast(x => x > 1) != null;
 ```
 invalid.js:5:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .some() over filter(...).length comparison to check for existence.
+  i Prefer .some() over filter(...).length comparison.
   
     3 │ const cond = true;
     4 │ 
@@ -41,7 +46,7 @@ invalid.js:5:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
     6 │ items.filter(function (x) { return x > 1; }, thisArg).length !== 0;
     7 │ items.filter(x => x > 1).length >= 1;
   
-  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
   
   i Use .some() when you only need to know if any element matches.
   
@@ -62,7 +67,7 @@ invalid.js:5:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:6:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .some() over filter(...).length comparison to check for existence.
+  i Prefer .some() over filter(...).length comparison.
   
     5 │ items.filter(x => x > 1).length > 0;
   > 6 │ items.filter(function (x) { return x > 1; }, thisArg).length !== 0;
@@ -70,7 +75,7 @@ invalid.js:6:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
     7 │ items.filter(x => x > 1).length >= 1;
     8 │ 
   
-  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
   
   i Use .some() when you only need to know if any element matches.
   
@@ -91,16 +96,16 @@ invalid.js:6:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:7:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .some() over filter(...).length comparison to check for existence.
+  i Prefer .some() over filter(...).length comparison.
   
     5 │ items.filter(x => x > 1).length > 0;
     6 │ items.filter(function (x) { return x > 1; }, thisArg).length !== 0;
   > 7 │ items.filter(x => x > 1).length >= 1;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ 
-    9 │ items.findIndex(x => x > 1) !== -1;
+    9 │ 0 < items.filter(x => x > 1).length;
   
-  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
   
   i Use .some() when you only need to know if any element matches.
   
@@ -113,7 +118,7 @@ invalid.js:7:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
      7    │ - items.filter(x·=>·x·>·1).length·>=·1;
         7 │ + items.some(x·=>·x·>·1);
      8  8 │   
-     9  9 │   items.findIndex(x => x > 1) !== -1;
+     9  9 │   0 < items.filter(x => x > 1).length;
   
 
 ```
@@ -121,16 +126,16 @@ invalid.js:7:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:9:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .some() over findIndex(...) !== -1 to check for existence.
+  i Prefer .some() over filter(...).length comparison.
   
      7 │ items.filter(x => x > 1).length >= 1;
      8 │ 
-   > 9 │ items.findIndex(x => x > 1) !== -1;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    10 │ items.findLastIndex(x => x > 1) !== -1;
-    11 │ 
+   > 9 │ 0 < items.filter(x => x > 1).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 0 !== items.filter(x => x > 1).length;
+    11 │ 0 != items.filter(x => x > 1).length;
   
-  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
   
   i Use .some() when you only need to know if any element matches.
   
@@ -140,10 +145,10 @@ invalid.js:9:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
   
      7  7 │   items.filter(x => x > 1).length >= 1;
      8  8 │   
-     9    │ - items.findIndex(x·=>·x·>·1)·!==·-1;
+     9    │ - 0·<·items.filter(x·=>·x·>·1).length;
         9 │ + items.some(x·=>·x·>·1);
-    10 10 │   items.findLastIndex(x => x > 1) !== -1;
-    11 11 │   
+    10 10 │   0 !== items.filter(x => x > 1).length;
+    11 11 │   0 != items.filter(x => x > 1).length;
   
 
 ```
@@ -151,15 +156,15 @@ invalid.js:9:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:10:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .some() over findLastIndex(...) !== -1 to check for existence.
+  i Prefer .some() over filter(...).length comparison.
   
-     9 │ items.findIndex(x => x > 1) !== -1;
-  > 10 │ items.findLastIndex(x => x > 1) !== -1;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ 
-    12 │ if (items.find(x => x > 1)) {}
+     9 │ 0 < items.filter(x => x > 1).length;
+  > 10 │ 0 !== items.filter(x => x > 1).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 0 != items.filter(x => x > 1).length;
+    12 │ 1 <= items.filter(x => x > 1).length;
   
-  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
   
   i Use .some() when you only need to know if any element matches.
   
@@ -168,150 +173,269 @@ invalid.js:10:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
   i Unsafe fix: Use .some() instead.
   
      8  8 │   
-     9  9 │   items.findIndex(x => x > 1) !== -1;
-    10    │ - items.findLastIndex(x·=>·x·>·1)·!==·-1;
+     9  9 │   0 < items.filter(x => x > 1).length;
+    10    │ - 0·!==·items.filter(x·=>·x·>·1).length;
        10 │ + items.some(x·=>·x·>·1);
-    11 11 │   
-    12 12 │   if (items.find(x => x > 1)) {}
+    11 11 │   0 != items.filter(x => x > 1).length;
+    12 12 │   1 <= items.filter(x => x > 1).length;
   
 
 ```
 
 ```
-invalid.js:12:5 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .some() over find/findLast used as boolean to check for existence.
+  i Prefer .some() over filter(...).length comparison.
   
-    10 │ items.findLastIndex(x => x > 1) !== -1;
-    11 │ 
-  > 12 │ if (items.find(x => x > 1)) {}
-       │     ^^^^^^^^^^^^^^^^^^^^^^
-    13 │ if (items.findLast(x => x > 1)) {}
-    14 │ 
-  
-  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
-  
-  i Use .some() when you only need to know if any element matches.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:13:5 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer .some() over find/findLast used as boolean to check for existence.
-  
-    12 │ if (items.find(x => x > 1)) {}
-  > 13 │ if (items.findLast(x => x > 1)) {}
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │ 
-    15 │ cond ? (items.find(x => x > 1) ? "a" : "b") : "c";
-  
-  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
-  
-  i Use .some() when you only need to know if any element matches.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:15:9 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer .some() over find/findLast used as boolean to check for existence.
-  
-    13 │ if (items.findLast(x => x > 1)) {}
-    14 │ 
-  > 15 │ cond ? (items.find(x => x > 1) ? "a" : "b") : "c";
-       │         ^^^^^^^^^^^^^^^^^^^^^^
-    16 │ 
-    17 │ items.find(x => x > 1) !== undefined;
-  
-  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
-  
-  i Use .some() when you only need to know if any element matches.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:17:1 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer .some() over find(...) existence comparison to check for existence.
-  
-    15 │ cond ? (items.find(x => x > 1) ? "a" : "b") : "c";
-    16 │ 
-  > 17 │ items.find(x => x > 1) !== undefined;
+     9 │ 0 < items.filter(x => x > 1).length;
+    10 │ 0 !== items.filter(x => x > 1).length;
+  > 11 │ 0 != items.filter(x => x > 1).length;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    18 │ items.findLast(x => x > 1) !== undefined;
-    19 │ 
+    12 │ 1 <= items.filter(x => x > 1).length;
+    13 │ 
   
-  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
-  
-  i Use .some() when you only need to know if any element matches.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:18:1 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer .some() over findLast(...) existence comparison to check for existence.
-  
-    17 │ items.find(x => x > 1) !== undefined;
-  > 18 │ items.findLast(x => x > 1) !== undefined;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    19 │ 
-    20 │ items.find(x => x > 1) != null;
-  
-  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
   
   i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Use .some() instead.
+  
+     9  9 │   0 < items.filter(x => x > 1).length;
+    10 10 │   0 !== items.filter(x => x > 1).length;
+    11    │ - 0·!=·items.filter(x·=>·x·>·1).length;
+       11 │ + items.some(x·=>·x·>·1);
+    12 12 │   1 <= items.filter(x => x > 1).length;
+    13 13 │   
+  
 
 ```
 
 ```
-invalid.js:20:1 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .some() over find(...) existence comparison to check for existence.
+  i Prefer .some() over filter(...).length comparison.
   
-    18 │ items.findLast(x => x > 1) !== undefined;
-    19 │ 
-  > 20 │ items.find(x => x > 1) != null;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    21 │ items.findLast(x => x > 1) != null;
-    22 │ 
+    10 │ 0 !== items.filter(x => x > 1).length;
+    11 │ 0 != items.filter(x => x > 1).length;
+  > 12 │ 1 <= items.filter(x => x > 1).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ items.findIndex(x => x > 1) !== -1;
   
-  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
   
   i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-
-```
-
-```
-invalid.js:21:1 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer .some() over findLast(...) existence comparison to check for existence.
+  i Unsafe fix: Use .some() instead.
   
-    20 │ items.find(x => x > 1) != null;
-  > 21 │ items.findLast(x => x > 1) != null;
+    10 10 │   0 !== items.filter(x => x > 1).length;
+    11 11 │   0 != items.filter(x => x > 1).length;
+    12    │ - 1·<=·items.filter(x·=>·x·>·1).length;
+       12 │ + items.some(x·=>·x·>·1);
+    13 13 │   
+    14 14 │   items.findIndex(x => x > 1) !== -1;
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over findIndex(...) !== -1.
+  
+    12 │ 1 <= items.filter(x => x > 1).length;
+    13 │ 
+  > 14 │ items.findIndex(x => x > 1) !== -1;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    22 │ 
+    15 │ items.findLastIndex(x => x > 1) !== -1;
+    16 │ 
   
-  i .some() is more readable and semantically expressive than using .find() or .filter() just to check for element existence.
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .some() instead.
+  
+    12 12 │   1 <= items.filter(x => x > 1).length;
+    13 13 │   
+    14    │ - items.findIndex(x·=>·x·>·1)·!==·-1;
+       14 │ + items.some(x·=>·x·>·1);
+    15 15 │   items.findLastIndex(x => x > 1) !== -1;
+    16 16 │   
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over findLastIndex(...) !== -1.
+  
+    14 │ items.findIndex(x => x > 1) !== -1;
+  > 15 │ items.findLastIndex(x => x > 1) !== -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ if (items.find(x => x > 1)) {}
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .some() instead.
+  
+    13 13 │   
+    14 14 │   items.findIndex(x => x > 1) !== -1;
+    15    │ - items.findLastIndex(x·=>·x·>·1)·!==·-1;
+       15 │ + items.some(x·=>·x·>·1);
+    16 16 │   
+    17 17 │   if (items.find(x => x > 1)) {}
+  
+
+```
+
+```
+invalid.js:17:5 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over find-family used as boolean.
+  
+    15 │ items.findLastIndex(x => x > 1) !== -1;
+    16 │ 
+  > 17 │ if (items.find(x => x > 1)) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^
+    18 │ if (items.findLast(x => x > 1)) {}
+    19 │ 
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:5 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over find-family used as boolean.
+  
+    17 │ if (items.find(x => x > 1)) {}
+  > 18 │ if (items.findLast(x => x > 1)) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ cond ? (items.find(x => x > 1) ? "a" : "b") : "c";
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:9 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over find-family used as boolean.
+  
+    18 │ if (items.findLast(x => x > 1)) {}
+    19 │ 
+  > 20 │ cond ? (items.find(x => x > 1) ? "a" : "b") : "c";
+       │         ^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ items.find(x => x > 1) !== undefined;
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over find(...) existence comparison.
+  
+    20 │ cond ? (items.find(x => x > 1) ? "a" : "b") : "c";
+    21 │ 
+  > 22 │ items.find(x => x > 1) !== undefined;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ items.findLast(x => x > 1) !== undefined;
+    24 │ 
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over findLast(...) existence comparison.
+  
+    22 │ items.find(x => x > 1) !== undefined;
+  > 23 │ items.findLast(x => x > 1) !== undefined;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ items.find(x => x > 1) != null;
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over find(...) existence comparison.
+  
+    23 │ items.findLast(x => x > 1) !== undefined;
+    24 │ 
+  > 25 │ items.find(x => x > 1) != null;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ items.findLast(x => x > 1) != null;
+    27 │ 
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over findLast(...) existence comparison.
+  
+    25 │ items.find(x => x > 1) != null;
+  > 26 │ items.findLast(x => x > 1) != null;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
   
   i Use .some() when you only need to know if any element matches.
   
