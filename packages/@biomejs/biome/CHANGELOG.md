@@ -1,5 +1,25 @@
 # @biomejs/biome
 
+## 2.4.3
+
+### Patch Changes
+
+- [#9120](https://github.com/biomejs/biome/pull/9120) [`aa40fc2`](https://github.com/biomejs/biome/commit/aa40fc237a1379188edcbbbf4dc37fd7de7c58f5) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9109](https://github.com/biomejs/biome/issues/9109), where the GitHub reporter wasn't correctly enabled when `biome ci` runs on GitHub Actions.
+
+- [#9128](https://github.com/biomejs/biome/pull/9128) [`8ca3f7f`](https://github.com/biomejs/biome/commit/8ca3f7fcd1b0041fd7ade381032dfbb0f9693a41) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9107](https://github.com/biomejs/biome/issues/9107): The HTML parser can now correctly parse Astro directives (client/set/class/is/server), which fixes the formatting for Astro directives.
+
+- [#9124](https://github.com/biomejs/biome/pull/9124) [`f5b0e8d`](https://github.com/biomejs/biome/commit/f5b0e8d0761c08d79d6cb1ad8df33da8605f20a9) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#8882](https://github.com/biomejs/biome/issues/8882) and [#9108](https://github.com/biomejs/biome/issues/9108): The Astro frontmatter lexer now correctly identifies the closing `---` fence when the frontmatter contains multi-line block comments with quote characters, strings that mix quote types (e.g. `"it's"`), or escaped quote characters (e.g. `"\"`).
+
+- [#9142](https://github.com/biomejs/biome/pull/9142) [`3ca066b`](https://github.com/biomejs/biome/commit/3ca066bbb73cfbe1a1bcb1c9fc76f4a79966efc0) Thanks [@THernandez03](https://github.com/THernandez03)! - Fixed [#9141](https://github.com/biomejs/biome/issues/9141): The `noUnknownAttribute` rule no longer reports `closedby` as an unknown attribute on `<dialog>` elements.
+
+- [#9126](https://github.com/biomejs/biome/pull/9126) [`792013e`](https://github.com/biomejs/biome/commit/792013eb767188608d0b6dd4dfa24413832dcb93) Thanks [@ematipico](https://github.com/ematipico)! - Added missing Mocha globals to the `Test` domain: `context`, `run`, `setup`, `specify`, `suite`, `suiteSetup`, `suiteTeardown`, `teardown`, `xcontext`, `xdescribe`, `xit`, and `xspecify`. These are injected by Mocha's BDD and TDD interfaces and were previously flagged as undeclared variables in projects using Mocha.
+
+- [#8855](https://github.com/biomejs/biome/pull/8855) [`6918c9e`](https://github.com/biomejs/biome/commit/6918c9e2bf4da19b3ac9f772272bc1a28f454fc1) Thanks [@ruidosujeira](https://github.com/ruidosujeira)! - Fixed [#8840](https://github.com/biomejs/biome/issues/8840). Now the Biome CSS parser correctly parses `not + scroll-state` inside `@container` queries.
+
+- [#9111](https://github.com/biomejs/biome/pull/9111) [`4fb55cf`](https://github.com/biomejs/biome/commit/4fb55cf998a3d41c4451679fe359ebec47692f5d) Thanks [@Jayllyz](https://github.com/Jayllyz)! - Slightly improved performance of [`noIrregularWhitespace`](https://biomejs.dev/linter/rules/no-irregular-whitespace/) by adding early return optimization and simplifying character detection logic.
+
+- [#8975](https://github.com/biomejs/biome/pull/8975) [`086a0c5`](https://github.com/biomejs/biome/commit/086a0c5c35a147df13197642bead23aa7df18a84) Thanks [@FrankFMY](https://github.com/FrankFMY)! - Fixed [#8478](https://github.com/biomejs/biome/issues/8478): [`useDestructuring`](https://biomejs.dev/linter/rules/use-destructuring/) no longer suggests destructuring when the variable has a type annotation, like `const foo: string = object.foo`.
+
 ## 2.4.2
 
 ### Patch Changes

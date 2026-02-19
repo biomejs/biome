@@ -1,6 +1,6 @@
 {
   "name": "@biomejs/cli-linux-x64-musl",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",
