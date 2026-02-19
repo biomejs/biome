@@ -1241,13 +1241,8 @@ const SVELTE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![catch],
     T![then],
     T![snippet],
-    T![class],
-    T![in],
-    T![out],
-    T![transition],
-    T![animate],
-    T![bind]
-);
+)
+.union(SVELTE_DIRECTIVE_KEYWORDS);
 
 const SVELTE_DIRECTIVE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![bind],
