@@ -737,6 +737,10 @@ impl<'src> HtmlLexer<'src> {
                     }
                 }
                 IdentifierContext::Astro => {
+                    if byte == b':' && is_astro_directive_keyword_bytes(&buffer[..len]) {
+                        break;
+                    }
+
                     if is_attribute_name_byte_astro(byte) {
                         if len < BUFFER_SIZE {
                             buffer[len] = byte;
@@ -778,12 +782,12 @@ impl<'src> HtmlLexer<'src> {
         match &buffer[..len] {
             b"doctype" | b"DOCTYPE" => DOCTYPE_KW,
             b"html" | b"HTML" if context.is_doctype() => HTML_KW,
-            b"client" if context.is_astro() => CLIENT_KW,
-            b"set" if context.is_astro() => SET_KW,
-            b"class" if context.is_astro() => CLASS_KW,
-            b"is" if context.is_astro() => IS_KW,
-            b"server" if context.is_astro() => SERVER_KW,
-            b"define" if context.is_astro() => DEFINE_KW,
+            b"client" if context.is_astro() && self.current_byte() == Some(b':') => CLIENT_KW,
+            b"set" if context.is_astro() && self.current_byte() == Some(b':') => SET_KW,
+            b"class" if context.is_astro() && self.current_byte() == Some(b':') => CLASS_KW,
+            b"is" if context.is_astro() && self.current_byte() == Some(b':') => IS_KW,
+            b"server" if context.is_astro() && self.current_byte() == Some(b':') => SERVER_KW,
+            b"define" if context.is_astro() && self.current_byte() == Some(b':') => DEFINE_KW,
             _ => HTML_LITERAL,
         }
     }
@@ -1405,11 +1409,18 @@ fn is_attribute_name_byte(byte: u8) -> bool {
 }
 
 fn is_attribute_name_byte_astro(byte: u8) -> bool {
-    is_attribute_name_byte(byte) && byte != b':'
+    is_attribute_name_byte(byte)
 }
 
 fn is_attribute_name_byte_vue(byte: u8) -> bool {
     is_attribute_name_byte(byte) && byte != b':' && byte != b'.' && byte != b']' && byte != b'['
+}
+
+fn is_astro_directive_keyword_bytes(bytes: &[u8]) -> bool {
+    matches!(
+        bytes,
+        b"client" | b"set" | b"class" | b"is" | b"server" | b"define"
+    )
 }
 
 /// Identifiers can contain letters, numbers and `_`

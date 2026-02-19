@@ -134,14 +134,10 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
 /// will emit diagnostics. We want to allow them if they have no special meaning.
 #[inline(always)]
 fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
-    // Vue files use InsideTagWithDirectives for Vue-specific directive parsing (v-bind, :, @, etc.)
-    // Astro files use InsideTagAstro for Astro-specific directive parsing (client:, set:, etc.)
-    // Both contexts enable colon as a separate token
-    // Svelte uses regular InsideTag context as it has different directive syntax
+    // Only Vue files use InsideTagVue context, which has Vue-specific directive parsing (v-bind, :, @, etc.)
+    // Svelte and Astro use regular InsideTag context as they have different directive syntax
     if Vue.is_supported(p) {
         HtmlLexContext::InsideTagWithDirectives
-    } else if Astro.is_supported(p) {
-        HtmlLexContext::InsideTagAstro
     } else {
         HtmlLexContext::InsideTag
     }
