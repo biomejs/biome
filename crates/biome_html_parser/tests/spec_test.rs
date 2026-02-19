@@ -145,17 +145,3 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         insta::assert_snapshot!(file_name, snapshot);
     });
 }
-
-#[ignore]
-#[test]
-pub fn quick_test() {
-    let code = r#"{@debug something,}
-    "#;
-
-    let root = parse_html(code, (&HtmlFileSource::svelte()).into());
-    let syntax = root.syntax();
-    dbg!(&syntax, root.diagnostics(), root.has_errors());
-    if has_bogus_nodes_or_empty_slots(&syntax) {
-        panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
-    }
-}

@@ -5,7 +5,10 @@ mod vue;
 
 use crate::parser::HtmlParser;
 use crate::syntax::HtmlSyntaxFeatures::{Astro, DoubleTextExpressions, Svelte, Vue};
-use crate::syntax::astro::{parse_astro_fence, parse_astro_spread_or_expression};
+use crate::syntax::astro::{
+    is_at_astro_directive_keyword, is_at_astro_directive_start, parse_astro_directive,
+    parse_astro_fence, parse_astro_spread_or_expression,
+};
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
     is_at_svelte_directive_start, is_at_svelte_keyword, parse_attach_attribute,
@@ -124,7 +127,7 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_DIRECTIVE))
 }
 
-/// We need to treat `:`, `.` and `@` differently if we are in a Vue context.
+/// We need to treat `:`, `.` and `@` differently if we are in a Vue or Astro context.
 ///
 /// Normally, we would do this using [`HtmlSyntaxFeatures`], and we do this elsewhere.
 /// However, this makes it so that these characters are disallowed and using them
@@ -222,6 +225,10 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
 
     parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
+
+    if Astro.is_supported(p) {
+        p.re_lex(HtmlReLexContext::InsideTagAstro);
+    }
 
     AttributeList.parse_list(p);
 
@@ -445,6 +452,9 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 
             Present(m.complete(p, HTML_ATTRIBUTE))
         }
+        // Check for Astro directives before Vue colon shorthand
+        // This must come first because in Astro files, colons are lexed as separate tokens
+        _ if Astro.is_supported(p) && is_at_astro_directive_start(p) => parse_astro_directive(p),
         T![:] => HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
             p,
             parse_vue_v_bind_shorthand_directive,
@@ -476,14 +486,20 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         _ if p.cur_text().starts_with("v-") => {
             Vue.parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
         }
-        _ if is_at_svelte_directive_start(p) => {
-            Svelte.parse_exclusive_syntax(p, parse_svelte_directive, |p, m| {
+        _ if Svelte.is_supported(p) && is_at_svelte_directive_start(p) => Svelte
+            .parse_exclusive_syntax(p, parse_svelte_directive, |p, m| {
                 disabled_svelte(p, m.range(p))
-            })
-        }
+            }),
         _ => {
             let m = p.start();
-            parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
+            // we've already determined that this isn't a valid astro directive, so if it looks like one, we should remap it as a literal.
+            if Astro.is_supported(p) && is_at_astro_directive_keyword(p) {
+                let name = p.start();
+                p.bump_remap_with_context(HTML_LITERAL, inside_tag_context(p));
+                name.complete(p, HTML_ATTRIBUTE_NAME);
+            } else {
+                parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
+            }
 
             if p.at(T![=]) {
                 parse_attribute_initializer(p).ok();
@@ -502,6 +518,7 @@ fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
         T![@],
         T![#],
     ]) || (Svelte.is_supported(p) && p.at(T!["{@"]))
+        || (Astro.is_supported(p) && is_at_astro_directive_keyword(p))
 }
 
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
@@ -585,6 +602,10 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
                 expected_attribute,
             )
             .ok();
+
+        if Astro.is_supported(p) {
+            p.re_lex(HtmlReLexContext::InsideTagAstro);
+        }
     } else if p.at(T!["{{"]) {
         HtmlSyntaxFeatures::DoubleTextExpressions
             .parse_exclusive_syntax(
@@ -693,6 +714,7 @@ pub(crate) fn parse_single_text_expression(
         p.bump_remap_with_context(T!['}'], context);
         if context == HtmlLexContext::InsideTag
             || context == HtmlLexContext::InsideTagWithDirectives
+            || context == HtmlLexContext::InsideTagAstro
         {
             Present(m.complete(p, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION))
         } else {

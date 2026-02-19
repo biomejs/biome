@@ -1,0 +1,208 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<Component
+  client:load
+  class:list={classes}
+  set:text={text}
+  is:raw
+  define:vars={vars}
+  server:defer
+/>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlComponentName {
+                value_token: HTML_LITERAL@1..10 "Component" [] [],
+            },
+            attributes: HtmlAttributeList [
+                AstroClientDirective {
+                    client_token: CLIENT_KW@10..19 "client" [Newline("\n"), Whitespace("  ")] [],
+                    value: AstroDirectiveValue {
+                        colon_token_token: COLON@19..20 ":" [] [],
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@20..24 "load" [] [],
+                        },
+                        initializer: missing (optional),
+                    },
+                },
+                AstroClassDirective {
+                    class_token: CLASS_KW@24..32 "class" [Newline("\n"), Whitespace("  ")] [],
+                    value: AstroDirectiveValue {
+                        colon_token_token: COLON@32..33 ":" [] [],
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@33..37 "list" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@37..38 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@38..39 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@39..46 "classes" [] [],
+                                },
+                                r_curly_token: R_CURLY@46..47 "}" [] [],
+                            },
+                        },
+                    },
+                },
+                AstroSetDirective {
+                    set_token: SET_KW@47..53 "set" [Newline("\n"), Whitespace("  ")] [],
+                    value: AstroDirectiveValue {
+                        colon_token_token: COLON@53..54 ":" [] [],
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@54..58 "text" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@58..59 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@59..60 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@60..64 "text" [] [],
+                                },
+                                r_curly_token: R_CURLY@64..65 "}" [] [],
+                            },
+                        },
+                    },
+                },
+                AstroIsDirective {
+                    is_token: IS_KW@65..70 "is" [Newline("\n"), Whitespace("  ")] [],
+                    value: AstroDirectiveValue {
+                        colon_token_token: COLON@70..71 ":" [] [],
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@71..74 "raw" [] [],
+                        },
+                        initializer: missing (optional),
+                    },
+                },
+                AstroDefineDirective {
+                    define_token: DEFINE_KW@74..83 "define" [Newline("\n"), Whitespace("  ")] [],
+                    value: AstroDirectiveValue {
+                        colon_token_token: COLON@83..84 ":" [] [],
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@84..88 "vars" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@88..89 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@89..90 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@90..94 "vars" [] [],
+                                },
+                                r_curly_token: R_CURLY@94..95 "}" [] [],
+                            },
+                        },
+                    },
+                },
+                AstroServerDirective {
+                    server_token: SERVER_KW@95..104 "server" [Newline("\n"), Whitespace("  ")] [],
+                    value: AstroDirectiveValue {
+                        colon_token_token: COLON@104..105 ":" [] [],
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@105..110 "defer" [] [],
+                        },
+                        initializer: missing (optional),
+                    },
+                },
+            ],
+            slash_token: SLASH@110..112 "/" [Newline("\n")] [],
+            r_angle_token: R_ANGLE@112..113 ">" [] [],
+        },
+    ],
+    eof_token: EOF@113..114 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..114
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..113
+    0: HTML_SELF_CLOSING_ELEMENT@0..113
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_COMPONENT_NAME@1..10
+        0: HTML_LITERAL@1..10 "Component" [] []
+      2: HTML_ATTRIBUTE_LIST@10..110
+        0: ASTRO_CLIENT_DIRECTIVE@10..24
+          0: CLIENT_KW@10..19 "client" [Newline("\n"), Whitespace("  ")] []
+          1: ASTRO_DIRECTIVE_VALUE@19..24
+            0: COLON@19..20 ":" [] []
+            1: HTML_ATTRIBUTE_NAME@20..24
+              0: HTML_LITERAL@20..24 "load" [] []
+            2: (empty)
+        1: ASTRO_CLASS_DIRECTIVE@24..47
+          0: CLASS_KW@24..32 "class" [Newline("\n"), Whitespace("  ")] []
+          1: ASTRO_DIRECTIVE_VALUE@32..47
+            0: COLON@32..33 ":" [] []
+            1: HTML_ATTRIBUTE_NAME@33..37
+              0: HTML_LITERAL@33..37 "list" [] []
+            2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@37..47
+              0: EQ@37..38 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@38..47
+                0: L_CURLY@38..39 "{" [] []
+                1: HTML_TEXT_EXPRESSION@39..46
+                  0: HTML_LITERAL@39..46 "classes" [] []
+                2: R_CURLY@46..47 "}" [] []
+        2: ASTRO_SET_DIRECTIVE@47..65
+          0: SET_KW@47..53 "set" [Newline("\n"), Whitespace("  ")] []
+          1: ASTRO_DIRECTIVE_VALUE@53..65
+            0: COLON@53..54 ":" [] []
+            1: HTML_ATTRIBUTE_NAME@54..58
+              0: HTML_LITERAL@54..58 "text" [] []
+            2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@58..65
+              0: EQ@58..59 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@59..65
+                0: L_CURLY@59..60 "{" [] []
+                1: HTML_TEXT_EXPRESSION@60..64
+                  0: HTML_LITERAL@60..64 "text" [] []
+                2: R_CURLY@64..65 "}" [] []
+        3: ASTRO_IS_DIRECTIVE@65..74
+          0: IS_KW@65..70 "is" [Newline("\n"), Whitespace("  ")] []
+          1: ASTRO_DIRECTIVE_VALUE@70..74
+            0: COLON@70..71 ":" [] []
+            1: HTML_ATTRIBUTE_NAME@71..74
+              0: HTML_LITERAL@71..74 "raw" [] []
+            2: (empty)
+        4: ASTRO_DEFINE_DIRECTIVE@74..95
+          0: DEFINE_KW@74..83 "define" [Newline("\n"), Whitespace("  ")] []
+          1: ASTRO_DIRECTIVE_VALUE@83..95
+            0: COLON@83..84 ":" [] []
+            1: HTML_ATTRIBUTE_NAME@84..88
+              0: HTML_LITERAL@84..88 "vars" [] []
+            2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@88..95
+              0: EQ@88..89 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@89..95
+                0: L_CURLY@89..90 "{" [] []
+                1: HTML_TEXT_EXPRESSION@90..94
+                  0: HTML_LITERAL@90..94 "vars" [] []
+                2: R_CURLY@94..95 "}" [] []
+        5: ASTRO_SERVER_DIRECTIVE@95..110
+          0: SERVER_KW@95..104 "server" [Newline("\n"), Whitespace("  ")] []
+          1: ASTRO_DIRECTIVE_VALUE@104..110
+            0: COLON@104..105 ":" [] []
+            1: HTML_ATTRIBUTE_NAME@105..110
+              0: HTML_LITERAL@105..110 "defer" [] []
+            2: (empty)
+      3: SLASH@110..112 "/" [Newline("\n")] []
+      4: R_ANGLE@112..113 ">" [] []
+  4: EOF@113..114 "" [Newline("\n")] []
+
+```

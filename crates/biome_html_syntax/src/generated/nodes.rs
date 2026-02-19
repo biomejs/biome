@@ -20,6 +20,171 @@ use std::fmt::{Debug, Formatter};
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroClassDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroClassDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroClassDirectiveFields {
+        AstroClassDirectiveFields {
+            class_token: self.class_token(),
+            value: self.value(),
+        }
+    }
+    pub fn class_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AstroDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AstroClassDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroClassDirectiveFields {
+    pub class_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AstroDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroClientDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroClientDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroClientDirectiveFields {
+        AstroClientDirectiveFields {
+            client_token: self.client_token(),
+            value: self.value(),
+        }
+    }
+    pub fn client_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AstroDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AstroClientDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroClientDirectiveFields {
+    pub client_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AstroDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroDefineDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroDefineDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroDefineDirectiveFields {
+        AstroDefineDirectiveFields {
+            define_token: self.define_token(),
+            value: self.value(),
+        }
+    }
+    pub fn define_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AstroDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AstroDefineDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroDefineDirectiveFields {
+    pub define_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AstroDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroDirectiveValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroDirectiveValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroDirectiveValueFields {
+        AstroDirectiveValueFields {
+            colon_token_token: self.colon_token_token(),
+            name: self.name(),
+            initializer: self.initializer(),
+        }
+    }
+    pub fn colon_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<HtmlAttributeName> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+        support::node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AstroDirectiveValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroDirectiveValueFields {
+    pub colon_token_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<HtmlAttributeName>,
+    pub initializer: Option<HtmlAttributeInitializerClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AstroEmbeddedContent {
     pub(crate) syntax: SyntaxNode,
 }
@@ -98,6 +263,126 @@ pub struct AstroFrontmatterElementFields {
     pub l_fence_token: SyntaxResult<SyntaxToken>,
     pub content: SyntaxResult<AstroEmbeddedContent>,
     pub r_fence_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroIsDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroIsDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroIsDirectiveFields {
+        AstroIsDirectiveFields {
+            is_token: self.is_token(),
+            value: self.value(),
+        }
+    }
+    pub fn is_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AstroDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AstroIsDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroIsDirectiveFields {
+    pub is_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AstroDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroServerDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroServerDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroServerDirectiveFields {
+        AstroServerDirectiveFields {
+            server_token: self.server_token(),
+            value: self.value(),
+        }
+    }
+    pub fn server_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AstroDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AstroServerDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroServerDirectiveFields {
+    pub server_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AstroDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroSetDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroSetDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroSetDirectiveFields {
+        AstroSetDirectiveFields {
+            set_token: self.set_token(),
+            value: self.value(),
+        }
+    }
+    pub fn set_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AstroDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AstroSetDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroSetDirectiveFields {
+    pub set_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AstroDirectiveValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlAttribute {
@@ -3490,6 +3775,53 @@ pub struct VueVSlotShorthandDirectiveFields {
     pub initializer: Option<HtmlAttributeInitializerClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyAstroDirective {
+    AstroClassDirective(AstroClassDirective),
+    AstroClientDirective(AstroClientDirective),
+    AstroDefineDirective(AstroDefineDirective),
+    AstroIsDirective(AstroIsDirective),
+    AstroServerDirective(AstroServerDirective),
+    AstroSetDirective(AstroSetDirective),
+}
+impl AnyAstroDirective {
+    pub fn as_astro_class_directive(&self) -> Option<&AstroClassDirective> {
+        match &self {
+            Self::AstroClassDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_astro_client_directive(&self) -> Option<&AstroClientDirective> {
+        match &self {
+            Self::AstroClientDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_astro_define_directive(&self) -> Option<&AstroDefineDirective> {
+        match &self {
+            Self::AstroDefineDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_astro_is_directive(&self) -> Option<&AstroIsDirective> {
+        match &self {
+            Self::AstroIsDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_astro_server_directive(&self) -> Option<&AstroServerDirective> {
+        match &self {
+            Self::AstroServerDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_astro_set_directive(&self) -> Option<&AstroSetDirective> {
+        match &self {
+            Self::AstroSetDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyAstroFrontmatterElement {
     AstroBogusFrontmatter(AstroBogusFrontmatter),
     AstroFrontmatterElement(AstroFrontmatterElement),
@@ -3510,6 +3842,7 @@ impl AnyAstroFrontmatterElement {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlAttribute {
+    AnyAstroDirective(AnyAstroDirective),
     AnySvelteDirective(AnySvelteDirective),
     AnyVueDirective(AnyVueDirective),
     HtmlAttribute(HtmlAttribute),
@@ -3520,6 +3853,12 @@ pub enum AnyHtmlAttribute {
     SvelteAttachAttribute(SvelteAttachAttribute),
 }
 impl AnyHtmlAttribute {
+    pub fn as_any_astro_directive(&self) -> Option<&AnyAstroDirective> {
+        match &self {
+            Self::AnyAstroDirective(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_any_svelte_directive(&self) -> Option<&AnySvelteDirective> {
         match &self {
             Self::AnySvelteDirective(item) => Some(item),
@@ -4075,6 +4414,214 @@ impl AnyVueDirectiveArgument {
         }
     }
 }
+impl AstNode for AstroClassDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_CLASS_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_CLASS_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroClassDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroClassDirective")
+                .field(
+                    "class_token",
+                    &support::DebugSyntaxResult(self.class_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("AstroClassDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroClassDirective> for SyntaxNode {
+    fn from(n: AstroClassDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroClassDirective> for SyntaxElement {
+    fn from(n: AstroClassDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AstroClientDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_CLIENT_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_CLIENT_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroClientDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroClientDirective")
+                .field(
+                    "client_token",
+                    &support::DebugSyntaxResult(self.client_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("AstroClientDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroClientDirective> for SyntaxNode {
+    fn from(n: AstroClientDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroClientDirective> for SyntaxElement {
+    fn from(n: AstroClientDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AstroDefineDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_DEFINE_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_DEFINE_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroDefineDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroDefineDirective")
+                .field(
+                    "define_token",
+                    &support::DebugSyntaxResult(self.define_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("AstroDefineDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroDefineDirective> for SyntaxNode {
+    fn from(n: AstroDefineDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroDefineDirective> for SyntaxElement {
+    fn from(n: AstroDefineDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AstroDirectiveValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_DIRECTIVE_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_DIRECTIVE_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroDirectiveValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroDirectiveValue")
+                .field(
+                    "colon_token_token",
+                    &support::DebugSyntaxResult(self.colon_token_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AstroDirectiveValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroDirectiveValue> for SyntaxNode {
+    fn from(n: AstroDirectiveValue) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroDirectiveValue> for SyntaxElement {
+    fn from(n: AstroDirectiveValue) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for AstroEmbeddedContent {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4177,6 +4724,153 @@ impl From<AstroFrontmatterElement> for SyntaxNode {
 }
 impl From<AstroFrontmatterElement> for SyntaxElement {
     fn from(n: AstroFrontmatterElement) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AstroIsDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_IS_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_IS_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroIsDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroIsDirective")
+                .field("is_token", &support::DebugSyntaxResult(self.is_token()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("AstroIsDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroIsDirective> for SyntaxNode {
+    fn from(n: AstroIsDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroIsDirective> for SyntaxElement {
+    fn from(n: AstroIsDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AstroServerDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_SERVER_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_SERVER_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroServerDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroServerDirective")
+                .field(
+                    "server_token",
+                    &support::DebugSyntaxResult(self.server_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("AstroServerDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroServerDirective> for SyntaxNode {
+    fn from(n: AstroServerDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroServerDirective> for SyntaxElement {
+    fn from(n: AstroServerDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AstroSetDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_SET_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_SET_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroSetDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroSetDirective")
+                .field("set_token", &support::DebugSyntaxResult(self.set_token()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("AstroSetDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroSetDirective> for SyntaxNode {
+    fn from(n: AstroSetDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroSetDirective> for SyntaxElement {
+    fn from(n: AstroSetDirective) -> Self {
         n.syntax.into()
     }
 }
@@ -8245,6 +8939,118 @@ impl From<VueVSlotShorthandDirective> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl From<AstroClassDirective> for AnyAstroDirective {
+    fn from(node: AstroClassDirective) -> Self {
+        Self::AstroClassDirective(node)
+    }
+}
+impl From<AstroClientDirective> for AnyAstroDirective {
+    fn from(node: AstroClientDirective) -> Self {
+        Self::AstroClientDirective(node)
+    }
+}
+impl From<AstroDefineDirective> for AnyAstroDirective {
+    fn from(node: AstroDefineDirective) -> Self {
+        Self::AstroDefineDirective(node)
+    }
+}
+impl From<AstroIsDirective> for AnyAstroDirective {
+    fn from(node: AstroIsDirective) -> Self {
+        Self::AstroIsDirective(node)
+    }
+}
+impl From<AstroServerDirective> for AnyAstroDirective {
+    fn from(node: AstroServerDirective) -> Self {
+        Self::AstroServerDirective(node)
+    }
+}
+impl From<AstroSetDirective> for AnyAstroDirective {
+    fn from(node: AstroSetDirective) -> Self {
+        Self::AstroSetDirective(node)
+    }
+}
+impl AstNode for AnyAstroDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AstroClassDirective::KIND_SET
+        .union(AstroClientDirective::KIND_SET)
+        .union(AstroDefineDirective::KIND_SET)
+        .union(AstroIsDirective::KIND_SET)
+        .union(AstroServerDirective::KIND_SET)
+        .union(AstroSetDirective::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            ASTRO_CLASS_DIRECTIVE
+                | ASTRO_CLIENT_DIRECTIVE
+                | ASTRO_DEFINE_DIRECTIVE
+                | ASTRO_IS_DIRECTIVE
+                | ASTRO_SERVER_DIRECTIVE
+                | ASTRO_SET_DIRECTIVE
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            ASTRO_CLASS_DIRECTIVE => Self::AstroClassDirective(AstroClassDirective { syntax }),
+            ASTRO_CLIENT_DIRECTIVE => Self::AstroClientDirective(AstroClientDirective { syntax }),
+            ASTRO_DEFINE_DIRECTIVE => Self::AstroDefineDirective(AstroDefineDirective { syntax }),
+            ASTRO_IS_DIRECTIVE => Self::AstroIsDirective(AstroIsDirective { syntax }),
+            ASTRO_SERVER_DIRECTIVE => Self::AstroServerDirective(AstroServerDirective { syntax }),
+            ASTRO_SET_DIRECTIVE => Self::AstroSetDirective(AstroSetDirective { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::AstroClassDirective(it) => it.syntax(),
+            Self::AstroClientDirective(it) => it.syntax(),
+            Self::AstroDefineDirective(it) => it.syntax(),
+            Self::AstroIsDirective(it) => it.syntax(),
+            Self::AstroServerDirective(it) => it.syntax(),
+            Self::AstroSetDirective(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::AstroClassDirective(it) => it.into_syntax(),
+            Self::AstroClientDirective(it) => it.into_syntax(),
+            Self::AstroDefineDirective(it) => it.into_syntax(),
+            Self::AstroIsDirective(it) => it.into_syntax(),
+            Self::AstroServerDirective(it) => it.into_syntax(),
+            Self::AstroSetDirective(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyAstroDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AstroClassDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::AstroClientDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::AstroDefineDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::AstroIsDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::AstroServerDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::AstroSetDirective(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyAstroDirective> for SyntaxNode {
+    fn from(n: AnyAstroDirective) -> Self {
+        match n {
+            AnyAstroDirective::AstroClassDirective(it) => it.into_syntax(),
+            AnyAstroDirective::AstroClientDirective(it) => it.into_syntax(),
+            AnyAstroDirective::AstroDefineDirective(it) => it.into_syntax(),
+            AnyAstroDirective::AstroIsDirective(it) => it.into_syntax(),
+            AnyAstroDirective::AstroServerDirective(it) => it.into_syntax(),
+            AnyAstroDirective::AstroSetDirective(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyAstroDirective> for SyntaxElement {
+    fn from(n: AnyAstroDirective) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<AstroBogusFrontmatter> for AnyAstroFrontmatterElement {
     fn from(node: AstroBogusFrontmatter) -> Self {
         Self::AstroBogusFrontmatter(node)
@@ -8341,7 +9147,8 @@ impl From<SvelteAttachAttribute> for AnyHtmlAttribute {
 }
 impl AstNode for AnyHtmlAttribute {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnySvelteDirective::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyAstroDirective::KIND_SET
+        .union(AnySvelteDirective::KIND_SET)
         .union(AnyVueDirective::KIND_SET)
         .union(HtmlAttribute::KIND_SET)
         .union(HtmlAttributeDoubleTextExpression::KIND_SET)
@@ -8357,6 +9164,7 @@ impl AstNode for AnyHtmlAttribute {
             | HTML_BOGUS_ATTRIBUTE
             | HTML_SPREAD_ATTRIBUTE
             | SVELTE_ATTACH_ATTRIBUTE => true,
+            k if AnyAstroDirective::can_cast(k) => true,
             k if AnySvelteDirective::can_cast(k) => true,
             k if AnyVueDirective::can_cast(k) => true,
             _ => false,
@@ -8381,6 +9189,12 @@ impl AstNode for AnyHtmlAttribute {
                 Self::SvelteAttachAttribute(SvelteAttachAttribute { syntax })
             }
             _ => {
+                let syntax = match AnyAstroDirective::try_cast(syntax) {
+                    Ok(any_astro_directive) => {
+                        return Some(Self::AnyAstroDirective(any_astro_directive));
+                    }
+                    Err(syntax) => syntax,
+                };
                 let syntax = match AnySvelteDirective::try_cast(syntax) {
                     Ok(any_svelte_directive) => {
                         return Some(Self::AnySvelteDirective(any_svelte_directive));
@@ -8403,6 +9217,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlBogusAttribute(it) => it.syntax(),
             Self::HtmlSpreadAttribute(it) => it.syntax(),
             Self::SvelteAttachAttribute(it) => it.syntax(),
+            Self::AnyAstroDirective(it) => it.syntax(),
             Self::AnySvelteDirective(it) => it.syntax(),
             Self::AnyVueDirective(it) => it.syntax(),
         }
@@ -8415,6 +9230,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlBogusAttribute(it) => it.into_syntax(),
             Self::HtmlSpreadAttribute(it) => it.into_syntax(),
             Self::SvelteAttachAttribute(it) => it.into_syntax(),
+            Self::AnyAstroDirective(it) => it.into_syntax(),
             Self::AnySvelteDirective(it) => it.into_syntax(),
             Self::AnyVueDirective(it) => it.into_syntax(),
         }
@@ -8423,6 +9239,7 @@ impl AstNode for AnyHtmlAttribute {
 impl std::fmt::Debug for AnyHtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AnyAstroDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::AnySvelteDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::AnyVueDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlAttribute(it) => std::fmt::Debug::fmt(it, f),
@@ -8437,6 +9254,7 @@ impl std::fmt::Debug for AnyHtmlAttribute {
 impl From<AnyHtmlAttribute> for SyntaxNode {
     fn from(n: AnyHtmlAttribute) -> Self {
         match n {
+            AnyHtmlAttribute::AnyAstroDirective(it) => it.into_syntax(),
             AnyHtmlAttribute::AnySvelteDirective(it) => it.into_syntax(),
             AnyHtmlAttribute::AnyVueDirective(it) => it.into_syntax(),
             AnyHtmlAttribute::HtmlAttribute(it) => it.into_syntax(),
@@ -9810,6 +10628,11 @@ impl From<AnyVueDirectiveArgument> for SyntaxElement {
         node.into()
     }
 }
+impl std::fmt::Display for AnyAstroDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyAstroFrontmatterElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -9900,12 +10723,47 @@ impl std::fmt::Display for AnyVueDirectiveArgument {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AstroClassDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AstroClientDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AstroDefineDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AstroDirectiveValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AstroEmbeddedContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for AstroFrontmatterElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AstroIsDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AstroServerDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AstroSetDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -24,6 +24,117 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             | VUE_BOGUS_DIRECTIVE_ARGUMENT => {
                 RawSyntaxNode::new(kind, children.into_iter().map(Some))
             }
+            ASTRO_CLASS_DIRECTIVE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![class]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AstroDirectiveValue::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ASTRO_CLASS_DIRECTIVE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ASTRO_CLASS_DIRECTIVE, children)
+            }
+            ASTRO_CLIENT_DIRECTIVE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![client]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AstroDirectiveValue::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ASTRO_CLIENT_DIRECTIVE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ASTRO_CLIENT_DIRECTIVE, children)
+            }
+            ASTRO_DEFINE_DIRECTIVE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![define]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AstroDirectiveValue::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ASTRO_DEFINE_DIRECTIVE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ASTRO_DEFINE_DIRECTIVE, children)
+            }
+            ASTRO_DIRECTIVE_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [:]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlAttributeName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlAttributeInitializerClause::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ASTRO_DIRECTIVE_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ASTRO_DIRECTIVE_VALUE, children)
+            }
             ASTRO_EMBEDDED_CONTENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -75,6 +186,84 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(ASTRO_FRONTMATTER_ELEMENT, children)
+            }
+            ASTRO_IS_DIRECTIVE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![is]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AstroDirectiveValue::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ASTRO_IS_DIRECTIVE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ASTRO_IS_DIRECTIVE, children)
+            }
+            ASTRO_SERVER_DIRECTIVE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![server]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AstroDirectiveValue::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ASTRO_SERVER_DIRECTIVE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ASTRO_SERVER_DIRECTIVE, children)
+            }
+            ASTRO_SET_DIRECTIVE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![set]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AstroDirectiveValue::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ASTRO_SET_DIRECTIVE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ASTRO_SET_DIRECTIVE, children)
             }
             HTML_ATTRIBUTE => {
                 let mut elements = (&children).into_iter();

@@ -16,12 +16,40 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::HtmlSyntaxNode::kind(&node) {
+                $crate::HtmlSyntaxKind::ASTRO_CLASS_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::AstroClassDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ASTRO_CLIENT_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::AstroClientDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ASTRO_DEFINE_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::AstroDefineDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ASTRO_DIRECTIVE_VALUE => {
+                    let $pattern = unsafe { $crate::AstroDirectiveValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ASTRO_EMBEDDED_CONTENT => {
                     let $pattern = unsafe { $crate::AstroEmbeddedContent::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::ASTRO_FRONTMATTER_ELEMENT => {
                     let $pattern = unsafe { $crate::AstroFrontmatterElement::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ASTRO_IS_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::AstroIsDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ASTRO_SERVER_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::AstroServerDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ASTRO_SET_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::AstroSetDirective::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE => {
