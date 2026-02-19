@@ -19,14 +19,30 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```css,expect_diagnostic
+    /// ```css,expect_diagnostic,file=styles.css
     /// .unused { color: red; }
+    /// .used { color: blue; }
+    /// ```
+    ///
+    /// ```jsx,file=App.jsx
+    /// import "./styles.css";
+    /// export default () => <div className="used" />;
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```css
-    /// .button { color: red; }
+    /// ```css,file=styles.css
+    /// .button { color: blue; }
+    /// .container { padding: 1rem; }
+    /// ```
+    ///
+    /// ```jsx,file=App.jsx
+    /// import "./styles.css";
+    /// export default () => (
+    ///     <div className="container">
+    ///         <button className="button">Click</button>
+    ///     </div>
+    /// );
     /// ```
     ///
     pub NoUnusedStyles {
@@ -34,6 +50,7 @@ declare_lint_rule! {
         name: "noUnusedStyles",
         language: "css",
         recommended: false,
+        issue_number: Some("9156"),
         domains: &[RuleDomain::Project],
     }
 }

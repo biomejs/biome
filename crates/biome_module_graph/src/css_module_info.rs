@@ -1,7 +1,8 @@
 mod visitor;
 
+use biome_css_syntax::CssPseudoClassFunctionSelector;
 use biome_resolver::ResolvedPath;
-use biome_rowan::{Text, TextRange};
+use biome_rowan::{Text, TextRange, TextSize, TokenText};
 use indexmap::{IndexMap, IndexSet};
 use std::borrow::Borrow;
 use std::collections::BTreeSet;
@@ -9,7 +10,6 @@ use std::hash::{Hash, Hasher};
 use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 
-pub use biome_rowan::TokenText;
 pub(crate) use visitor::CssModuleVisitor;
 
 /// A CSS class name together with its source location.
@@ -176,4 +176,45 @@ pub struct SerializedCssModuleInfo {
 
     /// Set of all CSS class names defined in this file.
     pub classes: BTreeSet<String>,
+}
+
+/// Returns `true` if the given pseudo-class function selector is `:global(...)`.
+///
+/// This is used by CSS and HTML module visitors to skip class selectors that
+/// are globally scoped and cannot be traced to specific `class="..."` attribute
+/// references.
+pub(crate) fn is_global_pseudo(node: &CssPseudoClassFunctionSelector) -> bool {
+    node.name()
+        .ok()
+        .and_then(|name| name.value_token().ok())
+        .is_some_and(|token| token.text_trimmed() == "global")
+}
+
+/// Splits the inner text of a `class="foo bar"` attribute into individual
+/// [`CssClass`] entries.
+///
+/// Each entry holds the quote-stripped token text and a byte range relative
+/// to the start of that text.
+///
+/// This function is shared by the HTML and JS visitors for splitting
+/// whitespace-separated class names from attribute values.
+pub(crate) fn collect_class_tokens(inner: &TokenText, classes: &mut IndexSet<CssClass>) {
+    let content = inner.text();
+    let mut byte_offset: u32 = 0;
+
+    for word in content.split_ascii_whitespace() {
+        let word_offset = content[byte_offset as usize..]
+            .find(word)
+            .map_or(byte_offset, |pos| byte_offset + pos as u32);
+
+        let start = TextSize::from(word_offset);
+        let end = start + TextSize::from(word.len() as u32);
+
+        classes.insert(CssClass {
+            token: inner.clone(),
+            range: TextRange::new(start, end),
+        });
+
+        byte_offset = word_offset + word.len() as u32;
+    }
 }

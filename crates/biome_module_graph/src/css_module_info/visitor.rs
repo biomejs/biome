@@ -1,4 +1,4 @@
-use crate::css_module_info::{CssClass, CssImport, CssImports, CssModuleInfo};
+use crate::css_module_info::{CssClass, CssImport, CssImports, CssModuleInfo, is_global_pseudo};
 use crate::module_graph::ModuleGraphFsProxy;
 use biome_css_syntax::{
     AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssPseudoClassFunctionSelector,
@@ -47,7 +47,7 @@ impl<'a> CssModuleVisitor<'a> {
                     } else if let Some(pseudo_fn) =
                         CssPseudoClassFunctionSelector::cast(node.clone())
                     {
-                        if Self::is_global_pseudo(&pseudo_fn) {
+                        if is_global_pseudo(&pseudo_fn) {
                             global_depth += 1;
                         }
                     } else if global_depth == 0
@@ -58,7 +58,7 @@ impl<'a> CssModuleVisitor<'a> {
                 }
                 WalkEvent::Leave(node) => {
                     if let Some(pseudo_fn) = CssPseudoClassFunctionSelector::cast(node)
-                        && Self::is_global_pseudo(&pseudo_fn)
+                        && is_global_pseudo(&pseudo_fn)
                     {
                         global_depth = global_depth.saturating_sub(1);
                     }
@@ -67,14 +67,6 @@ impl<'a> CssModuleVisitor<'a> {
         }
 
         CssModuleInfo::new(imports, classes)
-    }
-
-    /// Returns true if this pseudo-class function selector is `:global(...)`.
-    fn is_global_pseudo(node: &CssPseudoClassFunctionSelector) -> bool {
-        node.name()
-            .ok()
-            .and_then(|name| name.value_token().ok())
-            .is_some_and(|token| token.text_trimmed() == "global")
     }
 
     /// Extracts the class name from a `CssClassSelector` and inserts a

@@ -1,10 +1,10 @@
-use crate::css_module_info::CssClass;
+use crate::css_module_info::{CssClass, collect_class_tokens, is_global_pseudo};
 use crate::html_module_info::HtmlModuleInfo;
 use crate::module_graph::ModuleGraphFsProxy;
 use biome_css_syntax::{AnyCssRoot, CssClassSelector, CssPseudoClassFunctionSelector};
 use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot};
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
-use biome_rowan::{AstNode, TextRange, TextSize, WalkEvent};
+use biome_rowan::{AstNode, TextRange, TextSize, TokenText, WalkEvent};
 use camino::Utf8Path;
 use indexmap::IndexSet;
 
@@ -166,6 +166,19 @@ pub(crate) fn collect_css_classes(css_root: &AnyCssRoot, classes: &mut IndexSet<
     }
 }
 
+/// Extracts the inner (quote-stripped) text from an HTML `class="..."`
+/// attribute value, if it is a static string literal.
+///
+/// Returns `None` if the value is not an `HtmlString` or has malformed structure.
+fn extract_html_class_attribute_inner(
+    value_node: &AnyHtmlAttributeInitializer,
+) -> Option<TokenText> {
+    let AnyHtmlAttributeInitializer::HtmlString(html_string) = value_node else {
+        return None;
+    };
+    html_string.inner_string_text().ok()
+}
+
 /// Splits a `class="foo bar baz"` attribute value into individual [`CssClass`]
 /// entries.
 ///
@@ -176,41 +189,7 @@ fn collect_class_attribute_tokens(
     value_node: &AnyHtmlAttributeInitializer,
     classes: &mut IndexSet<CssClass>,
 ) {
-    let AnyHtmlAttributeInitializer::HtmlString(html_string) = value_node else {
-        return;
-    };
-
-    // `inner_string_text` strips the surrounding quotes and returns a
-    // `TokenText` that is a sub-slice of the original token — no allocation.
-    let Ok(inner) = html_string.inner_string_text() else {
-        return;
-    };
-
-    let content = inner.text();
-    let mut byte_offset: u32 = 0;
-
-    for word in content.split_ascii_whitespace() {
-        // Find the word's start within `content`, searching from the last
-        // position to handle repeated class names correctly.
-        let word_offset = content[byte_offset as usize..]
-            .find(word)
-            .map_or(byte_offset, |pos| byte_offset + pos as u32);
-
-        let start = TextSize::from(word_offset);
-        let end = start + TextSize::from(word.len() as u32);
-
-        classes.insert(CssClass {
-            token: inner.clone(),
-            range: TextRange::new(start, end),
-        });
-
-        byte_offset = word_offset + word.len() as u32;
+    if let Some(inner) = extract_html_class_attribute_inner(value_node) {
+        collect_class_tokens(&inner, classes);
     }
-}
-
-fn is_global_pseudo(node: &CssPseudoClassFunctionSelector) -> bool {
-    node.name()
-        .ok()
-        .and_then(|name| name.value_token().ok())
-        .is_some_and(|token| token.text_trimmed() == "global")
 }

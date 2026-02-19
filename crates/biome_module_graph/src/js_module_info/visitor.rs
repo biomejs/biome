@@ -1,16 +1,16 @@
-use crate::css_module_info::CssClass;
+use crate::css_module_info::collect_class_tokens;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
-    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsxAttributeValue,
-    AnyTsIdentifierBinding, AnyTsModuleName, JsExportFromClause, JsExportNamedFromClause,
-    JsExportNamedSpecifierList, JsIdentifierBinding, JsVariableDeclaratorList, JsxAttribute,
-    TsExportAssignmentClause, unescape_js_string,
+    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsxAttributeName,
+    AnyJsxAttributeValue, AnyTsIdentifierBinding, AnyTsModuleName, JsExport, JsExportFromClause,
+    JsExportNamedFromClause, JsExportNamedSpecifierList, JsIdentifierBinding,
+    JsVariableDeclaratorList, JsxAttribute, TsExportAssignmentClause, unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, ScopeId, TypeData, TypeReference, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::{ResolveOptions, resolve};
-use biome_rowan::{AstNode, TextRange, TextSize, TokenText, WalkEvent};
+use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::Utf8Path;
 
 use crate::{
@@ -59,7 +59,7 @@ impl<'a> JsModuleVisitor<'a> {
                 WalkEvent::Enter(node) => {
                     if let Some(import) = AnyJsImportLike::cast_ref(&node) {
                         self.visit_import(import, &mut collector);
-                    } else if let Some(export) = biome_js_syntax::JsExport::cast_ref(&node) {
+                    } else if let Some(export) = JsExport::cast_ref(&node) {
                         self.visit_export(export, &mut collector);
                     } else if let Some(attr) = JsxAttribute::cast_ref(&node) {
                         self.visit_jsx_attribute(attr, &mut collector);
@@ -84,53 +84,35 @@ impl<'a> JsModuleVisitor<'a> {
     /// are collected; dynamic expressions are skipped to avoid false positives
     /// in `noUnusedStyles`.
     fn visit_jsx_attribute(&self, attr: JsxAttribute, collector: &mut JsModuleInfoCollector) {
-        let Ok(name_node) = attr.name() else { return };
+        if let Some(inner) = self.extract_jsx_class_attribute_inner(&attr) {
+            collect_class_tokens(&inner, &mut collector.referenced_classes);
+        }
+    }
+
+    /// Extracts the inner (quote-stripped) text from a JSX `class` or
+    /// `className` attribute, if it is a static string literal.
+    ///
+    /// Returns `None` if the attribute is not a class attribute, is not a
+    /// static string, or has malformed structure.
+    fn extract_jsx_class_attribute_inner(&self, attr: &JsxAttribute) -> Option<TokenText> {
+        let name_node = attr.name().ok()?;
         let name_text = match name_node {
-            biome_js_syntax::AnyJsxAttributeName::JsxName(n) => match n.value_token() {
-                Ok(t) => t.token_text_trimmed(),
-                Err(_) => return,
-            },
-            biome_js_syntax::AnyJsxAttributeName::JsxNamespaceName(_) => return,
+            AnyJsxAttributeName::JsxName(n) => n.value_token().ok()?.token_text_trimmed(),
+            AnyJsxAttributeName::JsxNamespaceName(_) => return None,
         };
         if name_text != "class" && name_text != "className" {
-            return;
+            return None;
         }
 
-        let Some(jsx_string) = attr
+        let jsx_string = attr
             .initializer()
             .and_then(|init| init.value().ok())
             .and_then(|val| match val {
                 AnyJsxAttributeValue::JsxString(s) => Some(s),
                 _ => None,
-            })
-        else {
-            return;
-        };
+            })?;
 
-        // `inner_string_text` strips the surrounding quotes and returns a
-        // `TokenText` that is a sub-slice of the original token — no allocation.
-        let Ok(inner) = jsx_string.inner_string_text() else {
-            return;
-        };
-
-        let content = inner.text();
-        let mut byte_offset: u32 = 0;
-
-        for class_name in content.split_ascii_whitespace() {
-            let word_offset = content[byte_offset as usize..]
-                .find(class_name)
-                .map_or(byte_offset, |pos| byte_offset + pos as u32);
-
-            let start = TextSize::from(word_offset);
-            let end = start + TextSize::from(class_name.len() as u32);
-
-            collector.referenced_classes.insert(CssClass {
-                token: inner.clone(),
-                range: TextRange::new(start, end),
-            });
-
-            byte_offset = word_offset + class_name.len() as u32;
-        }
+        jsx_string.inner_string_text().ok()
     }
 
     fn visit_import(&self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {
@@ -178,11 +160,7 @@ impl<'a> JsModuleVisitor<'a> {
         }
     }
 
-    fn visit_export(
-        &self,
-        node: biome_js_syntax::JsExport,
-        collector: &mut JsModuleInfoCollector,
-    ) -> Option<()> {
+    fn visit_export(&self, node: JsExport, collector: &mut JsModuleInfoCollector) -> Option<()> {
         match node.export_clause().ok()? {
             AnyJsExportClause::AnyJsDeclarationClause(node) => {
                 self.visit_export_declaration_clause(node, collector)

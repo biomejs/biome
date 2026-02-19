@@ -1015,15 +1015,40 @@ impl WorkspaceServer {
                         &[(path, js_root)],
                         infer_types,
                     )
-                } else if let (Some(css_root), Some(services)) = (
-                    SendNode::into_language_root::<AnyCssRoot>(root.clone()),
-                    services.as_css_services(),
-                ) {
+                } else if let Some(css_root) =
+                    SendNode::into_language_root::<AnyCssRoot>(root.clone())
+                {
+                    let semantic_model = services
+                        .as_css_services()
+                        .and_then(|s| s.semantic_model.as_ref());
                     self.module_graph.update_graph_for_css_paths(
                         self.fs.as_ref(),
                         &self.project_layout,
                         &[(path, css_root)],
-                        services.semantic_model.as_ref(),
+                        semantic_model,
+                    )
+                } else if let Some(html_root) =
+                    SendNode::into_language_root::<HtmlRoot>(root.clone())
+                {
+                    // Collect embedded CSS roots from the stored document's snippets.
+                    let embedded_css_roots: Vec<AnyCssRoot> = self
+                        .documents
+                        .pin()
+                        .get(path.as_path())
+                        .map(|doc| {
+                            doc.embedded_snippets
+                                .iter()
+                                .filter_map(|s| s.as_css_embedded_snippet())
+                                .map(|s| s.parse.tree())
+                                .collect()
+                        })
+                        .unwrap_or_default();
+                    self.module_graph.update_graph_for_html_paths(
+                        self.fs.as_ref(),
+                        &self.project_layout,
+                        path,
+                        html_root,
+                        &embedded_css_roots,
                     )
                 } else if let Some(html_root) =
                     SendNode::into_language_root::<HtmlRoot>(root.clone())

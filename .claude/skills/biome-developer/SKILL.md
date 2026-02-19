@@ -22,10 +22,12 @@ This skill provides general development best practices, common gotchas, and Biom
 - ✅ Understand the node hierarchy and parent-child relationships
 - ✅ Check both general cases AND specific types (e.g., Vue has both `VueDirective` and `VueV*ShorthandDirective`)
 - ✅ Verify your solution works for all relevant variant types, not just the first one you find
+- ✅ Extract helper functions that return `Option<T>` or `SyntaxResult<T>` instead of scattering early returns throughout the caller — this makes code more readable and composable
 
 **DON'T:**
 - ❌ Build the full Biome binary just to inspect syntax (expensive) - use parser crate's `quick_test` instead
 - ❌ Assume syntax patterns without inspecting the AST first
+- ❌ Write functions with many `let Ok(...) else { return }` scattered throughout when you can extract a helper that returns `Option<T>` instead
 
 **Example - Inspecting AST:**
 ```rust
@@ -42,6 +44,50 @@ pub fn quick_test() {
 ```
 
 Run: `just qt biome_html_parser`
+
+**Example - Extracting CST Navigation Logic:**
+```rust
+// WRONG: Many early returns scattered in the caller
+fn visit_attribute(&self, attr: JsxAttribute, collector: &mut Collector) {
+    let Ok(name_node) = attr.name() else { return };
+    let name_text = match name_node {
+        AnyJsxAttributeName::JsxName(n) => match n.value_token() {
+            Ok(t) => t.token_text_trimmed(),
+            Err(_) => return,
+        },
+        AnyJsxAttributeName::JsxNamespaceName(_) => return,
+    };
+    if name_text != "class" && name_text != "className" {
+        return;
+    }
+    let Some(jsx_string) = attr.initializer().and_then(|i| i.value().ok()) else {
+        return;
+    };
+    // ... do the real work
+}
+
+// CORRECT: Extract helper that returns Option<T>
+fn visit_attribute(&self, attr: JsxAttribute, collector: &mut Collector) {
+    if let Some(inner) = self.extract_class_attribute_inner(&attr) {
+        self.collect_classes(&inner, collector);
+    }
+}
+
+fn extract_class_attribute_inner(&self, attr: &JsxAttribute) -> Option<TokenText> {
+    let name_node = attr.name().ok()?;
+    let name_text = match name_node {
+        AnyJsxAttributeName::JsxName(n) => n.value_token().ok()?.token_text_trimmed(),
+        AnyJsxAttributeName::JsxNamespaceName(_) => return None,
+    };
+    if name_text != "class" && name_text != "className" {
+        return None;
+    }
+    let jsx_string = attr.initializer().and_then(|i| i.value().ok())?;
+    jsx_string.inner_string_text().ok()
+}
+```
+
+The helper uses `?` operator and `Option` combinators — much cleaner than scattered `else { return }` blocks. The caller now has a single `if let Some` that clearly expresses intent.
 
 ### String Extraction and Text Handling
 

@@ -94,6 +94,8 @@ invalid.css:5:1 lint/nursery/noUnusedStyles ━━━━━━━━━━━━
   
   i Either use this class somewhere or remove the selector.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -114,6 +116,8 @@ invalid.css:9:1 lint/nursery/noUnusedStyles ━━━━━━━━━━━━
   i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
   
   i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -136,6 +140,8 @@ invalid.css:15:1 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   
   i Either use this class somewhere or remove the selector.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -156,6 +162,8 @@ invalid.css:15:15 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
   
   i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -178,6 +186,8 @@ invalid.css:21:1 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   
   i Either use this class somewhere or remove the selector.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -198,6 +208,8 @@ invalid.css:21:16 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
   
   i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -220,6 +232,8 @@ invalid.css:27:1 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   
   i Either use this class somewhere or remove the selector.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -240,6 +254,8 @@ invalid.css:27:10 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
   
   i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -262,6 +278,8 @@ invalid.css:33:1 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   
   i Either use this class somewhere or remove the selector.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -282,6 +300,8 @@ invalid.css:33:6 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
   
   i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -304,6 +324,8 @@ invalid.css:39:1 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   
   i Either use this class somewhere or remove the selector.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -323,6 +345,8 @@ invalid.css:40:1 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
   
   i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -344,6 +368,8 @@ invalid.css:47:2 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   
   i Either use this class somewhere or remove the selector.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -363,6 +389,8 @@ invalid.css:55:2 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
   
   i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -385,6 +413,8 @@ invalid.css:62:5 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   
   i Either use this class somewhere or remove the selector.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -405,6 +435,8 @@ invalid.css:68:8 lint/nursery/noUnusedStyles ━━━━━━━━━━━�
   i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
   
   i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

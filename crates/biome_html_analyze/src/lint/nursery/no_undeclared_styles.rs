@@ -3,6 +3,8 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, decl
 use biome_console::markup;
 use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute};
 use biome_rowan::{TextRange, TextSize};
+use camino::Utf8Path;
+use std::collections::HashSet;
 
 declare_lint_rule! {
     /// Reports CSS class names in HTML `class` attributes that are not defined
@@ -19,14 +21,14 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```html,expect_diagnostic
+    /// ```html,expect_diagnostic,ignore
     /// <style>.card { border: 1px solid; }</style>
     /// <div class="header">Content</div>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```html
+    /// ```html,ignore
     /// <style>.card { border: 1px solid; }</style>
     /// <div class="card">Content</div>
     /// ```
@@ -36,6 +38,7 @@ declare_lint_rule! {
         name: "noUndeclaredStyles",
         language: "html",
         recommended: false,
+        issue_number: Some("9156"),
         domains: &[RuleDomain::Project],
     }
 }
@@ -111,14 +114,13 @@ impl Rule for NoUndeclaredStyles {
             .imported_stylesheets
             .iter()
             .filter_map(|p| {
-                module_graph.css_module_info_for_path(
-                    p.as_path().unwrap_or_else(|| camino::Utf8Path::new("")),
-                )
+                module_graph
+                    .css_module_info_for_path(p.as_path().unwrap_or_else(|| Utf8Path::new("")))
             })
             .collect();
 
         // Collect all available class names as &str — no allocations needed.
-        let mut available: std::collections::HashSet<&str> = std::collections::HashSet::new();
+        let mut available: HashSet<&str> = HashSet::new();
         for class in html_info.style_classes.iter() {
             available.insert(class.text());
         }

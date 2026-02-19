@@ -98,7 +98,7 @@ impl Rule for UseMyRuleName {
 Every diagnostic **must** follow the three pillars defined in `crates/biome_analyze/CONTRIBUTING.md`:
 
 | Pillar | Question answered | Implemented as |
-|--------|------------------|----------------|
+|---|---|---|
 | 1 | **What** is the error? | The `RuleDiagnostic` message (first argument to `markup!`) |
 | 2 | **Why** is it a problem? | A `.note()` explaining the consequence or rationale |
 | 3 | **What should the user do?** | A code action (`action` fn), or a second `.note()` if no fix is available |
@@ -264,6 +264,71 @@ Before committing:
 just f  # Format code
 just l  # Lint code
 ```
+
+## Documenting Rules
+
+### Multi-File Examples
+
+For rules that analyze relationships between multiple files (e.g., import cycles, cross-file dependencies, CSS class references), use the `file=<path>` property:
+
+```rust
+/// ### Invalid
+///
+/// ```js,expect_diagnostic,file=foo.js
+/// import { bar } from "./bar.js";
+/// export function foo() {
+///     return bar();
+/// }
+/// ```
+///
+/// ```js,expect_diagnostic,file=bar.js
+/// import { foo } from "./foo.js";
+/// export function bar() {
+///     return foo();
+/// }
+/// ```
+```
+
+**How it works:**
+- All files in a documentation section (`### Invalid` or `### Valid`) are collected into an in-memory file system
+- The module graph is automatically populated from these files
+- Each file with `expect_diagnostic` must emit exactly one diagnostic
+- Files without `expect_diagnostic` provide context but aren't expected to trigger the rule
+
+**Supported languages:**
+- ✅ JavaScript/TypeScript/JSX/TSX
+- ✅ CSS (module graph automatically populated from `file=` blocks)
+- ❌ HTML with `<style>` blocks (requires embedded snippet parsing - not yet implemented)
+
+### The `ignore` Directive
+
+Use `ignore` to exclude code blocks from automatic validation:
+
+```rust
+/// ```html,expect_diagnostic,ignore
+/// <style>.card { border: 1px solid; }</style>
+/// <div class="header">Content</div>
+/// ```
+```
+
+**When to use `ignore`:**
+- Rules that require features not yet available in rustdoc context (e.g., HTML embedded snippets)
+- Examples that need special parser configuration
+- Illustrative examples where automatic validation isn't critical
+
+**Important:** Even with `ignore`, you should have comprehensive snapshot tests in `tests/specs/`.
+
+### Code Block Property Order
+
+For consistency, properties should be ordered:
+```rust
+/// ```<language>[,expect_diagnostic][,(options|full_options|use_options)][,ignore][,file=path]
+```
+
+Examples:
+- `css,expect_diagnostic,file=styles.css`
+- `jsx,file=App.jsx`
+- `html,expect_diagnostic,ignore`
 
 ## Tips
 
