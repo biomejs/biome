@@ -100,38 +100,45 @@ pub(crate) fn analyze_and_snap(
     let mut code_fixes = Vec::new();
     let options = create_analyzer_options::<HtmlLanguage>(input_file, &mut diagnostics);
 
-    let (_, errors) = biome_html_analyze::analyze(&root, filter, &options, source_type, |event| {
-        if let Some(mut diag) = event.diagnostic() {
-            for action in event.actions() {
-                if check_action_type.is_suppression() {
-                    if action.is_suppression() {
+    let (_, errors) = biome_html_analyze::analyze(
+        &root,
+        filter,
+        &options,
+        source_type,
+        biome_html_analyze::HtmlAnalyzerServices::default(),
+        |event| {
+            if let Some(mut diag) = event.diagnostic() {
+                for action in event.actions() {
+                    if check_action_type.is_suppression() {
+                        if action.is_suppression() {
+                            check_code_action(input_file, input_code, source_type, &action);
+                            diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
+                        }
+                    } else if !action.is_suppression() {
                         check_code_action(input_file, input_code, source_type, &action);
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
-                } else if !action.is_suppression() {
-                    check_code_action(input_file, input_code, source_type, &action);
-                    diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
+
+                diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
+                return ControlFlow::Continue(());
             }
 
-            diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
-            return ControlFlow::Continue(());
-        }
-
-        for action in event.actions() {
-            if check_action_type.is_suppression() {
-                if action.category.matches("quickfix.suppressRule") {
+            for action in event.actions() {
+                if check_action_type.is_suppression() {
+                    if action.category.matches("quickfix.suppressRule") {
+                        check_code_action(input_file, input_code, source_type, &action);
+                        code_fixes.push(code_fix_to_string(input_code, action));
+                    }
+                } else if !action.category.matches("quickfix.suppressRule") {
                     check_code_action(input_file, input_code, source_type, &action);
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
-            } else if !action.category.matches("quickfix.suppressRule") {
-                check_code_action(input_file, input_code, source_type, &action);
-                code_fixes.push(code_fix_to_string(input_code, action));
             }
-        }
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));

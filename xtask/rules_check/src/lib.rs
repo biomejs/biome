@@ -515,22 +515,29 @@ fn assert_lint(
 
                 let options = test.create_analyzer_options::<HtmlLanguage>(config)?;
 
-                biome_html_analyze::analyze(&root, filter, &options, source, |signal| {
-                    if let Some(mut diag) = signal.diagnostic() {
-                        for action in signal.actions() {
-                            if !action.is_suppression() {
-                                diag = diag.add_code_suggestion(action.into());
+                biome_html_analyze::analyze(
+                    &root,
+                    filter,
+                    &options,
+                    source,
+                    biome_html_analyze::HtmlAnalyzerServices::default(),
+                    |signal| {
+                        if let Some(mut diag) = signal.diagnostic() {
+                            for action in signal.actions() {
+                                if !action.is_suppression() {
+                                    diag = diag.add_code_suggestion(action.into());
+                                }
                             }
+
+                            let error = diag
+                                .with_file_path(test.file_path())
+                                .with_file_source_code(code);
+                            diagnostics.write_diagnostic(error);
                         }
 
-                        let error = diag
-                            .with_file_path(test.file_path())
-                            .with_file_source_code(code);
-                        diagnostics.write_diagnostic(error);
-                    }
-
-                    ControlFlow::<()>::Continue(())
-                });
+                        ControlFlow::<()>::Continue(())
+                    },
+                );
             }
         }
         DocumentFileSource::Grit(..) => todo!("Grit analysis is not yet supported"),

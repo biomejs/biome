@@ -954,6 +954,105 @@ class Person {
 }
 
 #[test]
+fn debug_module_graph_mixed_project() {
+    let fs = MemoryFileSystem::default();
+
+    // CSS file that defines two classes. One is referenced from JSX via
+    // className, the other from HTML via class attribute.
+    fs.insert(
+        Utf8PathBuf::from("/project/styles.css"),
+        b".button { color: blue; } .container { margin: 0; }",
+    );
+
+    // JSX file: imports styles.css as a side-effect and uses className="button".
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        b"import \"./styles.css\";\nexport default () => <div className=\"button\" />;",
+    );
+
+    // HTML file: links the stylesheet and uses class="container".
+    fs.insert(
+        Utf8PathBuf::from("/project/page.html"),
+        b"<!DOCTYPE html><html><head><link rel=\"stylesheet\" href=\"./styles.css\"></head><body><div class=\"container\"></div></body></html>",
+    );
+
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/styles.css"),
+            content: FileContent::from_client(".button { color: blue; } .container { margin: 0; }"),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/App.jsx"),
+            content: FileContent::from_client(
+                "import \"./styles.css\";\nexport default () => <div className=\"button\" />;",
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/page.html"),
+            content: FileContent::from_client(
+                "<!DOCTYPE html><html><head><link rel=\"stylesheet\" href=\"./styles.css\"></head><body><div class=\"container\"></div></body></html>",
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    workspace
+        .update_module_graph(UpdateModuleGraphParams {
+            path: BiomePath::new("/project/styles.css"),
+            update_kind: UpdateKind::AddOrUpdate,
+            project_key,
+        })
+        .unwrap();
+
+    workspace
+        .update_module_graph(UpdateModuleGraphParams {
+            path: BiomePath::new("/project/App.jsx"),
+            update_kind: UpdateKind::AddOrUpdate,
+            project_key,
+        })
+        .unwrap();
+
+    workspace
+        .update_module_graph(UpdateModuleGraphParams {
+            path: BiomePath::new("/project/page.html"),
+            update_kind: UpdateKind::AddOrUpdate,
+            project_key,
+        })
+        .unwrap();
+
+    let result = workspace.get_module_graph(GetModuleGraphParams {}).unwrap();
+
+    // Collect into a BTreeMap so the snapshot is in deterministic path order.
+    let sorted: BTreeMap<_, _> = result.data.into_iter().collect();
+    assert_debug_snapshot!(sorted)
+}
+
+#[test]
 fn debug_module_graph() {
     let fs = MemoryFileSystem::default();
 

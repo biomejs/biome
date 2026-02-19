@@ -1,0 +1,44 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `App.jsx`
+
+```jsx
+import "./styles.css";
+export default () => (
+  <div className="btn active container alert warning">
+    <ul className="list"><li className="item" /></ul>
+  </div>
+);
+
+```
+
+## `styles.css`
+
+```css
+.btn.active {
+  background: blue;
+}
+.list > .item {
+  padding: 4px;
+}
+div.container {
+  max-width: 1200px;
+}
+:is(.alert, .warning) {
+  border: 1px solid;
+}
+.btn:hover {
+  color: darkblue;
+}
+.btn::before {
+  content: "";
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+```

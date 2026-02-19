@@ -1,0 +1,56 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 510
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "overrides": [
+    {
+      "includes": ["test.js"],
+      "formatter": { "lineWidth": 120 },
+      "javascript": { "formatter": { "quoteStyle": "single" } }
+    },
+    {
+      "includes": ["test2.js"],
+      "formatter": { "lineWidth": 120, "indentStyle": "space" },
+      "javascript": { "formatter": { "semicolons": "asNeeded" } }
+    },
+    {
+      "includes": ["test.css"],
+      "formatter": { "lineWidth": 120, "indentStyle": "space" },
+      "css": { "formatter": { "quoteStyle": "single" } }
+    }
+  ]
+}
+```
+
+## `test.css`
+
+```css
+[class="foo"] {
+  background-image: url("/path/to/file.jpg");
+}
+```
+
+## `test.js`
+
+```js
+const a = ['loreum', 'ipsum'];
+
+```
+
+## `test2.js`
+
+```js
+const a = ["loreum", "ipsum"]
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 3 files in <TIME>. Fixed 3 files.
+```

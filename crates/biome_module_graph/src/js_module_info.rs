@@ -6,13 +6,14 @@ mod scope;
 mod utils;
 mod visitor;
 
+use crate::css_module_info::CssClass;
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{BindingId, ImportSymbol, ResolvedTypeId, ScopeId, TypeData};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
 use camino::Utf8Path;
-use indexmap::IndexMap;
+use indexmap::{IndexMap, IndexSet};
 use rust_lapper::Lapper;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeSet;
@@ -127,6 +128,12 @@ impl JsModuleInfo {
                 .iter()
                 .map(|(text, _)| text.to_string())
                 .collect::<BTreeSet<_>>(),
+
+            referenced_classes: self
+                .referenced_classes
+                .iter()
+                .map(|c| c.text().to_string())
+                .collect::<BTreeSet<_>>(),
         }
     }
 }
@@ -210,6 +217,14 @@ pub struct JsModuleInfoInner {
 
     /// Whether type inference was enabled when this module info was created
     pub(crate) infer_types: bool,
+
+    /// CSS class names referenced in JSX `className` or `class` attributes
+    /// (static string literals only; dynamic values are excluded), together with
+    /// the source range of each individual class token in the attribute string.
+    ///
+    /// The [`TextRange`] in each [`CssClass`] is intended for LSP features such
+    /// as go-to-definition.
+    pub referenced_classes: IndexSet<CssClass>,
 }
 
 #[derive(Debug, Default)]
@@ -459,4 +474,7 @@ pub struct SerializedJsModuleInfo {
 
     /// Exported symbols.
     pub exports: BTreeSet<String>,
+
+    /// CSS class names referenced in JSX `className` or `class` attributes.
+    pub referenced_classes: BTreeSet<String>,
 }

@@ -65,6 +65,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                                 filter,
                                 &options,
                                 file_source,
+                                biome_html_analyze::HtmlAnalyzerServices::default(),
                                 |event| {
                                     black_box(event.diagnostic());
                                     black_box(event.actions());

@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 510
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": { "enabled": true },
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.html`
+
+```html
+<style>.card { border: 1px solid; } .btn:hover { color: darkblue; } .btn::before { content: ''; }</style>
+<div class="card">Inline style</div>
+<button class="btn">Pseudo-selector declared</button>
+
+```
+
+## `index.html`
+
+```html
+<!DOCTYPE html>
+<html>
+<head><link rel="stylesheet" href="./styles.css" /></head>
+<body><h1 class="hero">Linked stylesheet</h1></body>
+</html>
+
+```
+
+## `styles.css`
+
+```css
+.hero {
+  font-size: 2rem;
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 4 files in <TIME>. No fixes applied.
+```

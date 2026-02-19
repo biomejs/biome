@@ -1,0 +1,89 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `App.jsx`
+
+```jsx
+import "./styles.css";
+export default () => <div className="child foo mobile" />;
+
+```
+
+## `styles.css`
+
+```css
+.parent .child {
+  color: red;
+}
+.foo,
+.bar {
+  margin: 0;
+}
+@media (max-width: 768px) {
+  .mobile {
+    display: block;
+  }
+  .hidden {
+    display: none;
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+styles.css:1:1 lint/nursery/noUnusedStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class parent is not referenced in any HTML or JSX file.
+  
+  > 1 │ .parent .child { color: red; } .foo, .bar { margin: 0; } @media (max-width: 768px) { .mobile { display: block; } .hidden { display: none; } }
+      │ ^^^^^^^
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+styles.css:1:38 lint/nursery/noUnusedStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class bar is not referenced in any HTML or JSX file.
+  
+  > 1 │ .parent .child { color: red; } .foo, .bar { margin: 0; } @media (max-width: 768px) { .mobile { display: block; } .hidden { display: none; } }
+      │                                      ^^^^
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+styles.css:1:114 lint/nursery/noUnusedStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class hidden is not referenced in any HTML or JSX file.
+  
+  > 1 │ .parent .child { color: red; } .foo, .bar { margin: 0; } @media (max-width: 768px) { .mobile { display: block; } .hidden { display: none; } }
+      │                                                                                                                  ^^^^^^^
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 3 infos.
+```

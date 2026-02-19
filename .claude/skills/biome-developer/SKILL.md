@@ -46,13 +46,17 @@ Run: `just qt biome_html_parser`
 ### String Extraction and Text Handling
 
 **DO:**
-- ✅ Use `inner_string_text()` when extracting content from quoted strings (removes quotes)
+- ✅ Use `inner_string_text()` when extracting content from quoted strings — it strips the surrounding quotes and returns a `TokenText` backed by the same green token (no allocation)
 - ✅ Use `text_trimmed()` when you need the full token text without leading/trailing whitespace
 - ✅ Use `token_text_trimmed()` on nodes like `HtmlAttributeName` to get the text content
 - ✅ Verify whether values use `HtmlString` (quotes) or `HtmlTextExpression` (curly braces)
+- ✅ Use `TokenText::slice()` or `inner_string_text()` to get sub-ranges of a token — both return a `TokenText` backed by the same `GreenToken` (ref-count bump only, no heap allocation)
 
 **DON'T:**
 - ❌ Use `text_trimmed()` when you need `inner_string_text()` for extracting quoted string contents
+- ❌ Call `.text()` on a `SyntaxToken` — it returns raw text including surrounding trivia (whitespace, newlines). Always use `.text_trimmed()` instead.
+- ❌ Strip quotes manually with `&s[1..s.len()-1]` — use `inner_string_text()` instead; it is correct, allocation-free, and communicates intent
+- ❌ Use `word.to_string()` or `String::from(word)` to store individual words split out of a string token — store the `TokenText` of the whole token plus a token-relative `TextRange` instead (see below)
 
 **Example - String Extraction:**
 ```rust
@@ -65,6 +69,56 @@ let html_string = value.as_html_string()?;
 let inner_text = html_string.inner_string_text().ok()?;
 let content = inner_text.text(); // Returns: "handler"
 ```
+
+**Example - CSS class name extraction from `CssClassSelector`:**
+```rust
+// WRONG: .text() includes trivia
+let name = selector.name().ok()?.value_token().ok()?.text(); // may include whitespace
+
+// CORRECT: always use text_trimmed() on SyntaxToken
+let name: &str = selector.name().ok()?.value_token().ok()?.text_trimmed();
+// For owned value:
+let name: TokenText = selector.name().ok()?.value_token().ok()?.token_text_trimmed();
+```
+
+### Storing Split Token Words Without Allocation
+
+When you need to split a string token (e.g. `class="foo bar baz"`) into individual words and store each word, do **not** allocate a `String` per word. Instead, store the `TokenText` of the whole token and a `TextRange` that is **relative to the token text** (not the file).
+
+```rust
+// WRONG: allocates a String per word
+for word in content.split_ascii_whitespace() {
+    collected.push(word.to_string()); // heap allocation per word
+}
+
+// CORRECT: store token + token-relative range
+// Use inner_string_text() to get the quote-stripped TokenText first.
+let inner: TokenText = html_string.inner_string_text()?;
+let content = inner.text();
+let mut offset: u32 = 0;
+for word in content.split_ascii_whitespace() {
+    let word_offset = content[offset as usize..]
+        .find(word)
+        .map_or(offset, |pos| offset + pos as u32);
+    let start = TextSize::from(word_offset);
+    let end = start + TextSize::from(word.len() as u32);
+    collected.push(MyEntry {
+        token: inner.clone(), // refcount bump only
+        range: TextRange::new(start, end),
+    });
+    offset = word_offset + word.len() as u32;
+}
+
+// Later, to read the word back:
+fn text(&self) -> &str {
+    &self.token.text()[usize::from(self.range.start())..usize::from(self.range.end())]
+}
+```
+
+Key points:
+- `inner_string_text()` returns a `TokenText` whose `.text()` starts at byte 0 of the unquoted content. Word offsets within that are directly usable as token-relative ranges.
+- `TokenText::clone()` is a refcount bump on the underlying `GreenToken` — it does not copy string data.
+- To produce file-level diagnostic ranges from token-relative ranges, add the token's absolute file offset: `u32::from(value_token.text_trimmed_range().start()) + 1` (the `+1` skips the opening quote).
 
 ### Working with Embedded Languages
 
@@ -210,10 +264,20 @@ if let Some(directive) = VueDirective::cast_ref(&element) {
 
 | Method | Use When | Returns |
 | --- | --- | --- |
-| `inner_string_text()` | Extracting content from quoted strings | Content without quotes |
-| `text_trimmed()` | Getting token text without whitespace | Full token text |
-| `token_text_trimmed()` | Getting text from nodes like `HtmlAttributeName` | Node text content |
-| `text()` | Getting raw text | Exact text as written |
+| `inner_string_text()` | Extracting content from quoted strings | Content without quotes, as `TokenText` (no alloc) |
+| `text_trimmed()` | Getting token text without whitespace | `&str` — full token text |
+| `token_text_trimmed()` | Getting an owned, cloneable token text | `TokenText` — backed by green token |
+| `text()` | Getting raw text including trivia | `&str` — exact text as written |
+
+### `Text` vs `TokenText` vs `String`
+
+| Type | Size | Clone cost | Use when |
+| --- | --- | --- | --- |
+| `TokenText` | 16 bytes | Refcount bump | You have a `SyntaxToken` and want allocation-free ownership |
+| `Text` | 16 bytes | Refcount bump (token) or heap copy (owned) | Union of `TokenText` and an owned string — use when the source may not be a token |
+| `String` | 24 bytes | Heap copy | Only when you actually need an owned, mutable string (e.g. for a diagnostic message) |
+
+`Text` is the richer type: `From<TokenText>` is implemented, so a `TokenText` can always be cheaply wrapped in `Text`. When storing data extracted directly from a syntax token, prefer `TokenText` or the token+range pattern.
 
 ### Value Extraction Methods
 

@@ -5,7 +5,8 @@ expression: redactor(content)
 ## `input.css`
 
 ```css
-html {}
+html {
+}
 ```
 
 # Termination Message

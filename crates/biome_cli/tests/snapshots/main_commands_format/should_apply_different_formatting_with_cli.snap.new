@@ -1,0 +1,53 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 510
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "indentStyle": "space"
+  }
+}
+```
+
+## `input.css`
+
+```css
+html {
+}
+```
+
+## `input.js`
+
+```js
+const a = {
+        array: ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"],
+};
+
+```
+
+## `input.json`
+
+```json
+{
+  "array": [
+    "lorem ipsum",
+    "lorem ipsum",
+    "lorem ipsum",
+    "lorem ipsum",
+    "lorem ipsum",
+    "lorem ipsum",
+    "lorem ipsum"
+  ]
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 3 files in <TIME>. Fixed 3 files.
+```

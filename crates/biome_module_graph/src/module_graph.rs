@@ -8,22 +8,24 @@
 
 mod fs_proxy;
 
+pub(crate) use fs_proxy::ModuleGraphFsProxy;
 use std::{collections::BTreeSet, ops::Deref};
 
 use crate::css_module_info::{CssModuleInfo, CssModuleVisitor, SerializedCssModuleInfo};
+use crate::html_module_info::{HtmlModuleInfo, HtmlModuleVisitor, SerializedHtmlModuleInfo};
 use crate::{
     JsExport, JsModuleInfo, JsOwnExport, ModuleDiagnostic, SerializedJsModuleInfo,
     js_module_info::JsModuleVisitor,
 };
 use biome_css_syntax::AnyCssRoot;
 use biome_fs::BiomePath;
+use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::AnyJsRoot;
 use biome_js_type_info::ImportSymbol;
 use biome_jsdoc_comment::JsdocComment;
 use biome_project_layout::ProjectLayout;
 use biome_resolver::{FsWithResolverProxy, PathInfo};
 use camino::{Utf8Path, Utf8PathBuf};
-pub(crate) use fs_proxy::ModuleGraphFsProxy;
 use papaya::{HashMap, HashMapRef, LocalGuard};
 use rustc_hash::{FxBuildHasher, FxHashSet};
 
@@ -62,6 +64,105 @@ impl ModuleGraph {
             ModuleInfo::Js(module_info) => Some(module_info.clone()),
             _ => None,
         })
+    }
+
+    /// Returns the CSS module info for the given `path`, if it is a CSS file
+    /// tracked in the module graph.
+    pub fn css_module_info_for_path(&self, path: &Utf8Path) -> Option<CssModuleInfo> {
+        self.data.pin().get(path).and_then(|info| match info {
+            ModuleInfo::Css(module_info) => Some(module_info.clone()),
+            _ => None,
+        })
+    }
+
+    /// Returns the HTML module info for the given `path`, if it is an HTML file
+    /// tracked in the module graph.
+    pub fn html_module_info_for_path(&self, path: &Utf8Path) -> Option<HtmlModuleInfo> {
+        self.data.pin().get(path).and_then(|info| match info {
+            ModuleInfo::Html(module_info) => Some(module_info.clone()),
+            _ => None,
+        })
+    }
+
+    /// Returns all files that transitively import `path` (through CSS `@import`
+    /// chains and HTML `<link>` references).
+    ///
+    /// The returned set includes only JS/HTML files (potential class consumers),
+    /// not intermediate CSS files.
+    ///
+    /// This performs a breadth-first search over the import graph starting from
+    /// `path`, visiting each importer level by level before moving deeper. It is
+    /// intended to be called at lint time when the graph is fully built.
+    pub fn transitive_importers_of(&self, path: &Utf8Path) -> Vec<Utf8PathBuf> {
+        let data = self.data.pin();
+        let mut result = Vec::new();
+        let mut visited: FxHashSet<Utf8PathBuf> = FxHashSet::default();
+        let mut queue = std::collections::VecDeque::new();
+        queue.push_back(path.to_path_buf());
+
+        while let Some(current) = queue.pop_front() {
+            if !visited.insert(current.clone()) {
+                continue;
+            }
+
+            // Scan all entries in the module graph for files that import `current`.
+            for (file_path, module_info) in data.iter() {
+                if file_path == &current {
+                    continue;
+                }
+                let imports_current = match module_info {
+                    ModuleInfo::Js(js_info) => js_info
+                        .static_import_paths
+                        .values()
+                        .chain(js_info.dynamic_import_paths.values())
+                        .any(|p| p.as_path() == Some(current.as_path())),
+                    ModuleInfo::Css(css_info) => css_info
+                        .imports
+                        .values()
+                        .any(|p| p.resolved_path.as_path() == Some(current.as_path())),
+                    ModuleInfo::Html(html_info) => html_info
+                        .imported_stylesheets
+                        .iter()
+                        .any(|p| p.as_path() == Some(current.as_path())),
+                };
+
+                if imports_current && !visited.contains(file_path.as_path()) {
+                    // Collect JS/HTML as consumers; re-enqueue CSS for transitive traversal.
+                    match module_info {
+                        ModuleInfo::Js(_) | ModuleInfo::Html(_) => {
+                            result.push(file_path.clone());
+                        }
+                        ModuleInfo::Css(_) => {
+                            queue.push_back(file_path.clone());
+                        }
+                    }
+                }
+            }
+        }
+
+        result
+    }
+
+    /// Returns `true` if the given CSS `class_name` is referenced in any
+    /// JS or HTML file that transitively imports `css_path`.
+    pub fn is_class_referenced_by_importers(&self, css_path: &Utf8Path, class_name: &str) -> bool {
+        let importers = self.transitive_importers_of(css_path);
+        let data = self.data.pin();
+        for importer_path in &importers {
+            if let Some(module_info) = data.get(importer_path.as_path()) {
+                let referenced = match module_info {
+                    ModuleInfo::Js(js_info) => js_info.referenced_classes.contains(class_name),
+                    ModuleInfo::Html(html_info) => {
+                        html_info.referenced_classes.contains(class_name)
+                    }
+                    ModuleInfo::Css(_) => false,
+                };
+                if referenced {
+                    return true;
+                }
+            }
+        }
+        false
     }
 
     /// Returns the data of the module graph in test
@@ -180,6 +281,52 @@ impl ModuleGraph {
         (dependencies, diagnostics)
     }
 
+    /// Updates the module graph for a single HTML file.
+    ///
+    /// Collects CSS class names defined in embedded `<style>` blocks (from
+    /// already-parsed CSS ASTs — no re-parsing), CSS class names referenced in
+    /// `class` attributes, and external stylesheets linked via `<link>`.
+    pub fn update_graph_for_html_paths(
+        &self,
+        fs: &dyn FsWithResolverProxy,
+        project_layout: &ProjectLayout,
+        path: &BiomePath,
+        html_root: HtmlRoot,
+        embedded_css_roots: &[AnyCssRoot],
+    ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
+        // Register directory path info (same pattern as CSS/JS).
+        let path_info = self.path_info.pin();
+        let mut parent = path.parent();
+        while let Some(p) = parent {
+            let mut inserted = false;
+            path_info.get_or_insert_with(p.to_path_buf(), || {
+                inserted = true;
+                fs.path_info(p).ok()
+            });
+            if !inserted {
+                break;
+            }
+            parent = p.parent();
+        }
+
+        let fs_proxy = ModuleGraphFsProxy::new(fs, self, project_layout);
+        let directory = path.parent().unwrap_or(path);
+        let visitor = HtmlModuleVisitor::new(html_root, embedded_css_roots, directory, &fs_proxy);
+        let module = visitor.visit();
+
+        let mut dependencies = ModuleDependencies::default();
+        for resolved_path in &module.imported_stylesheets {
+            if let Some(p) = resolved_path.as_path() {
+                dependencies.insert(p.to_path_buf());
+            }
+        }
+
+        let modules = self.data.pin();
+        modules.insert(path.to_path_buf(), module.into());
+
+        (dependencies, vec![])
+    }
+
     pub fn update_graph_for_removed_paths(&self, removed_paths: &[&BiomePath]) {
         let modules = self.data.pin();
         // Clean up removed paths from the module graph and path info cache.
@@ -256,6 +403,7 @@ impl ModuleGraph {
 pub enum ModuleInfo {
     Js(JsModuleInfo),
     Css(CssModuleInfo),
+    Html(HtmlModuleInfo),
 }
 
 impl From<JsModuleInfo> for ModuleInfo {
@@ -270,6 +418,12 @@ impl From<CssModuleInfo> for ModuleInfo {
     }
 }
 
+impl From<HtmlModuleInfo> for ModuleInfo {
+    fn from(value: HtmlModuleInfo) -> Self {
+        Self::Html(value)
+    }
+}
+
 #[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
@@ -277,6 +431,7 @@ impl From<CssModuleInfo> for ModuleInfo {
 pub enum SerializedModuleInfo {
     Js(SerializedJsModuleInfo),
     Css(SerializedCssModuleInfo),
+    Html(SerializedHtmlModuleInfo),
 }
 
 impl SerializedModuleInfo {
@@ -293,6 +448,13 @@ impl SerializedModuleInfo {
             _ => None,
         }
     }
+
+    pub fn as_html_module_info(&self) -> Option<&SerializedHtmlModuleInfo> {
+        match self {
+            Self::Html(module) => Some(module),
+            _ => None,
+        }
+    }
 }
 
 impl ModuleInfo {
@@ -300,6 +462,7 @@ impl ModuleInfo {
         match self {
             Self::Js(module) => SerializedModuleInfo::Js(module.dump()),
             Self::Css(module) => SerializedModuleInfo::Css(module.dump()),
+            Self::Html(module) => SerializedModuleInfo::Html(module.dump()),
         }
     }
 
@@ -313,6 +476,13 @@ impl ModuleInfo {
     pub fn as_css_module_info(&self) -> Option<&CssModuleInfo> {
         match self {
             Self::Css(module) => Some(module),
+            _ => None,
+        }
+    }
+
+    pub fn as_html_module_info(&self) -> Option<&HtmlModuleInfo> {
+        match self {
+            Self::Html(module) => Some(module),
             _ => None,
         }
     }

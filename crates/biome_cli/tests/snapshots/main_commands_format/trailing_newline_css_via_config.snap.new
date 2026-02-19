@@ -1,0 +1,33 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 510
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "files": {
+    "includes": ["**/*.css"]
+  },
+  "css": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
+```
+
+## `test.css`
+
+```css
+.test {
+  color: red;
+}
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

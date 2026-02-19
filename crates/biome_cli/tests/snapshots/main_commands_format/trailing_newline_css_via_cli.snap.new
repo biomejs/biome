@@ -1,0 +1,18 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 510
+expression: redactor(content)
+---
+## `test.css`
+
+```css
+.test {
+  color: red;
+}
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

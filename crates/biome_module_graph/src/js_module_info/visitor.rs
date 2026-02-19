@@ -1,14 +1,16 @@
+use crate::css_module_info::CssClass;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
-    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyTsIdentifierBinding,
-    AnyTsModuleName, JsExportFromClause, JsExportNamedFromClause, JsExportNamedSpecifierList,
-    JsIdentifierBinding, JsVariableDeclaratorList, TsExportAssignmentClause, unescape_js_string,
+    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsxAttributeValue,
+    AnyTsIdentifierBinding, AnyTsModuleName, JsExportFromClause, JsExportNamedFromClause,
+    JsExportNamedSpecifierList, JsIdentifierBinding, JsVariableDeclaratorList, JsxAttribute,
+    TsExportAssignmentClause, unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, ScopeId, TypeData, TypeReference, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::{ResolveOptions, resolve};
-use biome_rowan::{AstNode, TokenText, WalkEvent};
+use biome_rowan::{AstNode, TextRange, TextSize, TokenText, WalkEvent};
 use camino::Utf8Path;
 
 use crate::{
@@ -59,6 +61,8 @@ impl<'a> JsModuleVisitor<'a> {
                         self.visit_import(import, &mut collector);
                     } else if let Some(export) = biome_js_syntax::JsExport::cast_ref(&node) {
                         self.visit_export(export, &mut collector);
+                    } else if let Some(attr) = JsxAttribute::cast_ref(&node) {
+                        self.visit_jsx_attribute(attr, &mut collector);
                     }
 
                     collector.push_node(&node);
@@ -70,6 +74,63 @@ impl<'a> JsModuleVisitor<'a> {
         }
 
         JsModuleInfo::new(collector, self.infer_types)
+    }
+
+    /// Collects static CSS class names from JSX `class` and `className`
+    /// attributes.
+    ///
+    /// Each [`CssClass`] holds the quote-stripped inner token text and a byte
+    /// range relative to the start of that text. Only static string literals
+    /// are collected; dynamic expressions are skipped to avoid false positives
+    /// in `noUnusedStyles`.
+    fn visit_jsx_attribute(&self, attr: JsxAttribute, collector: &mut JsModuleInfoCollector) {
+        let Ok(name_node) = attr.name() else { return };
+        let name_text = match name_node {
+            biome_js_syntax::AnyJsxAttributeName::JsxName(n) => match n.value_token() {
+                Ok(t) => t.token_text_trimmed(),
+                Err(_) => return,
+            },
+            biome_js_syntax::AnyJsxAttributeName::JsxNamespaceName(_) => return,
+        };
+        if name_text != "class" && name_text != "className" {
+            return;
+        }
+
+        let Some(jsx_string) = attr
+            .initializer()
+            .and_then(|init| init.value().ok())
+            .and_then(|val| match val {
+                AnyJsxAttributeValue::JsxString(s) => Some(s),
+                _ => None,
+            })
+        else {
+            return;
+        };
+
+        // `inner_string_text` strips the surrounding quotes and returns a
+        // `TokenText` that is a sub-slice of the original token — no allocation.
+        let Ok(inner) = jsx_string.inner_string_text() else {
+            return;
+        };
+
+        let content = inner.text();
+        let mut byte_offset: u32 = 0;
+
+        for class_name in content.split_ascii_whitespace() {
+            let word_offset = content[byte_offset as usize..]
+                .find(class_name)
+                .map_or(byte_offset, |pos| byte_offset + pos as u32);
+
+            let start = TextSize::from(word_offset);
+            let end = start + TextSize::from(class_name.len() as u32);
+
+            collector.referenced_classes.insert(CssClass {
+                token: inner.clone(),
+                range: TextRange::new(start, end),
+            });
+
+            byte_offset = word_offset + class_name.len() as u32;
+        }
     }
 
     fn visit_import(&self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {

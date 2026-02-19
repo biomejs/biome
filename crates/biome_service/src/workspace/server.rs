@@ -1025,6 +1025,29 @@ impl WorkspaceServer {
                         &[(path, css_root)],
                         services.semantic_model.as_ref(),
                     )
+                } else if let Some(html_root) =
+                    SendNode::into_language_root::<HtmlRoot>(root.clone())
+                {
+                    // Collect embedded CSS roots from the stored document's snippets.
+                    let embedded_css_roots: Vec<AnyCssRoot> = self
+                        .documents
+                        .pin()
+                        .get(path.as_path())
+                        .map(|doc| {
+                            doc.embedded_snippets
+                                .iter()
+                                .filter_map(|s| s.as_css_embedded_snippet())
+                                .map(|s| s.parse.tree())
+                                .collect()
+                        })
+                        .unwrap_or_default();
+                    self.module_graph.update_graph_for_html_paths(
+                        self.fs.as_ref(),
+                        &self.project_layout,
+                        path,
+                        html_root,
+                        &embedded_css_roots,
+                    )
                 } else {
                     Default::default()
                 }

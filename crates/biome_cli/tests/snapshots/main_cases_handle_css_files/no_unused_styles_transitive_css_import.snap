@@ -1,0 +1,52 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `App.jsx`
+
+```jsx
+import "./theme.css";
+export default () => <div className="base theme" />;
+
+```
+
+## `base.css`
+
+```css
+.base {
+  box-sizing: border-box;
+}
+```
+
+## `theme.css`
+
+```css
+@import "./base.css";
+.theme {
+  background: white;
+}
+```
+
+# Emitted Messages
+
+```block
+base.css:1:1 lint/nursery/noUnusedStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class base is not referenced in any HTML or JSX file.
+  
+  > 1 │ .base { box-sizing: border-box; }
+      │ ^^^^^
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+Found 1 info.
+```
