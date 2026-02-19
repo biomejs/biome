@@ -2396,12 +2396,12 @@ See https://biomejs.dev/linter/rules/use-lone-executable-definition
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
 	/**
 	* Enforce using named capture groups in regular expression.
-See https://biomejs.dev/linter/rules/use-named-capture-group
+See https://biomejs.dev/linter/rules/use-named-capture-group 
 	 */
 	useNamedCaptureGroup?: UseNamedCaptureGroupConfiguration;
 	/**
 	* Enforce valid describe() callback.
-See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback
+See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
 	 */
 	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
 	/**
@@ -8348,8 +8348,11 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
+	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
+	| "lint/nursery/useQwikMethodUsage"
+	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
