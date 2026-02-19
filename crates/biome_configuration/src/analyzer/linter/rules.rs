@@ -214,6 +214,7 @@ pub enum RuleName {
     NoImportantStyles,
     NoIncrementDecrement,
     NoInferrableTypes,
+    NoInlineStyles,
     NoInnerDeclarations,
     NoInteractiveElementToNoninteractiveRole,
     NoInvalidBuiltinInstantiation,
@@ -669,6 +670,7 @@ impl RuleName {
             Self::NoImportantStyles => "noImportantStyles",
             Self::NoIncrementDecrement => "noIncrementDecrement",
             Self::NoInferrableTypes => "noInferrableTypes",
+            Self::NoInlineStyles => "noInlineStyles",
             Self::NoInnerDeclarations => "noInnerDeclarations",
             Self::NoInteractiveElementToNoninteractiveRole => {
                 "noInteractiveElementToNoninteractiveRole"
@@ -1128,6 +1130,7 @@ impl RuleName {
             Self::NoImportantStyles => RuleGroup::Complexity,
             Self::NoIncrementDecrement => RuleGroup::Nursery,
             Self::NoInferrableTypes => RuleGroup::Style,
+            Self::NoInlineStyles => RuleGroup::Nursery,
             Self::NoInnerDeclarations => RuleGroup::Correctness,
             Self::NoInteractiveElementToNoninteractiveRole => RuleGroup::A11y,
             Self::NoInvalidBuiltinInstantiation => RuleGroup::Correctness,
@@ -1588,6 +1591,7 @@ impl std::str::FromStr for RuleName {
             "noImportantStyles" => Ok(Self::NoImportantStyles),
             "noIncrementDecrement" => Ok(Self::NoIncrementDecrement),
             "noInferrableTypes" => Ok(Self::NoInferrableTypes),
+            "noInlineStyles" => Ok(Self::NoInlineStyles),
             "noInnerDeclarations" => Ok(Self::NoInnerDeclarations),
             "noInteractiveElementToNoninteractiveRole" => {
                 Ok(Self::NoInteractiveElementToNoninteractiveRole)
