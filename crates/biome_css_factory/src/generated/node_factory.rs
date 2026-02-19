@@ -3378,7 +3378,7 @@ where
 }
 pub fn css_bracketed_value_list<I>(items: I) -> CssBracketedValueList
 where
-    I: IntoIterator<Item = AnyCssCustomIdentifier>,
+    I: IntoIterator<Item = AnyCssBracketedValueItem>,
     I::IntoIter: ExactSizeIterator,
 {
     CssBracketedValueList::unwrap_cast(SyntaxNode::new_detached(

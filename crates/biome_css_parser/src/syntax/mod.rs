@@ -15,7 +15,7 @@ use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{DeclarationOrRuleList, parse_declaration_or_rule_list_block};
 use crate::syntax::parse_error::{
     expected_any_rule, expected_component_value, expected_non_css_wide_keyword_identifier,
-    scss_only_syntax_error, tailwind_disabled,
+    inconsistent_scss_bracketed_list_separators, scss_only_syntax_error, tailwind_disabled,
 };
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
@@ -588,7 +588,7 @@ pub(crate) fn parse_bracketed_value(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['[']);
-    BracketedValueList.parse_list(p);
+    BracketedValueList::default().parse_list(p);
     p.expect(T![']']);
 
     Present(m.complete(p, CSS_BRACKETED_VALUE))
@@ -597,7 +597,43 @@ pub(crate) fn parse_bracketed_value(p: &mut CssParser) -> ParsedSyntax {
 /// The list parser for bracketed values.
 ///
 /// This parser is responsible for parsing a list of identifiers inside a bracketed value.
-pub(crate) struct BracketedValueList;
+#[derive(Default)]
+pub(crate) struct BracketedValueList {
+    separator: Option<BracketedValueSeparator>,
+    mixed_separators_reported: bool,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+enum BracketedValueSeparator {
+    Comma,
+    Slash,
+}
+
+impl BracketedValueSeparator {
+    fn from_current_token(p: &mut CssParser) -> Option<Self> {
+        if p.at(T![,]) {
+            Some(Self::Comma)
+        } else if p.at(T![/]) {
+            Some(Self::Slash)
+        } else {
+            None
+        }
+    }
+
+    fn bump(self, p: &mut CssParser) {
+        match self {
+            Self::Comma => p.bump(T![,]),
+            Self::Slash => p.bump(T![/]),
+        }
+    }
+
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Comma => "`,`",
+            Self::Slash => "`/`",
+        }
+    }
+}
 
 impl ParseNodeList for BracketedValueList {
     type Kind = CssSyntaxKind;
@@ -615,6 +651,10 @@ impl ParseNodeList for BracketedValueList {
                 },
                 |p, m| tailwind_disabled(p, m.range(p)),
             );
+        }
+
+        if let Some(separator) = BracketedValueSeparator::from_current_token(p) {
+            return self.parse_scss_bracketed_value_delimiter(p, separator);
         }
 
         parse_custom_identifier(p, CssLexContext::Regular)
@@ -637,6 +677,50 @@ impl ParseNodeList for BracketedValueList {
     }
 }
 
+impl BracketedValueList {
+    fn parse_scss_bracketed_value_delimiter(
+        &mut self,
+        p: &mut CssParser,
+        separator: BracketedValueSeparator,
+    ) -> ParsedSyntax {
+        // Preserve explicit separators inside bracketed values so Sass list
+        // separators survive parsing (e.g. `[a, b, c]`).
+        // Example: `$list: [a, b, c];`
+        // Docs: https://sass-lang.com/documentation/values/lists
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| {
+                let m = p.start();
+                self.report_mixed_separator_if_needed(p, separator);
+                separator.bump(p);
+                Present(m.complete(p, CSS_GENERIC_DELIMITER))
+            },
+            |p, m| scss_only_syntax_error(p, "Sass list separators", m.range(p)),
+        )
+    }
+
+    fn report_mixed_separator_if_needed(
+        &mut self,
+        p: &mut CssParser,
+        separator: BracketedValueSeparator,
+    ) {
+        let Some(previous_separator) = self.separator else {
+            self.separator = Some(separator);
+            return;
+        };
+
+        if previous_separator != separator && !self.mixed_separators_reported {
+            p.error(inconsistent_scss_bracketed_list_separators(
+                p,
+                previous_separator.as_str(),
+                separator.as_str(),
+                p.cur_range(),
+            ));
+            self.mixed_separators_reported = true;
+        }
+    }
+}
+
 /// Recovery strategy for bracketed value lists.
 ///
 /// This recovery strategy handles the recovery process when parsing bracketed value lists.
@@ -649,7 +733,9 @@ impl ParseRecovery for BracketedValueListRecovery {
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // If the next token is the end of the list or the next element, we're at a recovery point.
-        p.at(T![']']) || is_at_identifier(p)
+        p.at(T![']'])
+            || is_at_identifier(p)
+            || (CssSyntaxFeatures::Scss.is_supported(p) && (p.at(T![,]) || p.at(T![/])))
     }
 }
 

@@ -257,3 +257,20 @@ pub(crate) fn scss_only_syntax_error(
     )
         .with_hint(markup! { "SCSS only syntax" })
 }
+
+pub(crate) fn inconsistent_scss_bracketed_list_separators(
+    p: &CssParser,
+    expected: &str,
+    found: &str,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        format!(
+            "Mixed separators in SCSS bracketed lists are not supported. Expected {expected} but found {found}."
+        ),
+        range,
+    )
+    .with_hint(markup! {
+        "Use one separator style per bracketed list."
+    })
+}

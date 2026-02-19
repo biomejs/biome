@@ -1,0 +1,6 @@
+$brackets: [a, b, c];
+$lines: [full-start, main-start, main-end, full-end];
+
+.grid {
+  grid-column: [col-start] / [col-end];
+}

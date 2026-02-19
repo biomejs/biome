@@ -2128,7 +2128,11 @@ CssBracketedValue =
 		items: CssBracketedValueList
 	']'
 
-CssBracketedValueList = AnyCssCustomIdentifier*
+CssBracketedValueList = AnyCssBracketedValueItem*
+
+AnyCssBracketedValueItem =
+	AnyCssCustomIdentifier
+	| CssGenericDelimiter
 
 AnyCssCustomIdentifier =
 	CssCustomIdentifier
