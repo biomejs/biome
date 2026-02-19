@@ -913,10 +913,6 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssViewTransitionAtRuleDeclarator::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::SCSS_COLON_VALUE => {
-                    let $pattern = unsafe { $crate::ScssColonValue::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::SCSS_DECLARATION => {
                     let $pattern = unsafe { $crate::ScssDeclaration::new_unchecked(node) };
                     $body
@@ -931,10 +927,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::SCSS_NESTING_DECLARATION => {
                     let $pattern = unsafe { $crate::ScssNestingDeclaration::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::SCSS_PARENT_SELECTOR_VALUE => {
-                    let $pattern = unsafe { $crate::ScssParentSelectorValue::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_QUALIFIED_NAME => {
