@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
+info: graphql/issue_9131.graphql
+---
+
+# Input
+
+```graphql
+query sellerMetadata {
+  getSellerMetadata(
+    description: """First line
+
+Third line
+    Fourth line with indent"""
+  ) {
+    marketplaceId
+    sellerId
+  }
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Bracket spacing: true
+Quote style: Double Quotes
+Trailing newline: true
+-----
+
+```graphql
+query sellerMetadata {
+	getSellerMetadata(
+		description: """
+		First line
+
+		Third line
+		    Fourth line with indent
+		"""
+	) {
+		marketplaceId
+		sellerId
+	}
+}
+
+```

@@ -1,0 +1,11 @@
+query sellerMetadata {
+  getSellerMetadata(
+    description: """First line
+
+Third line
+    Fourth line with indent"""
+  ) {
+    marketplaceId
+    sellerId
+  }
+}
