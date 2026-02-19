@@ -219,6 +219,13 @@ impl<'source> HtmlTokenSource<'source> {
     pub fn re_lex(&mut self, mode: HtmlReLexContext) -> HtmlSyntaxKind {
         self.lexer.re_lex(mode)
     }
+
+    /// Signals to the lexer that the frontmatter decision has been made.
+    /// After this call, `---` in the `Regular` context is treated as plain
+    /// HTML text rather than a `FENCE` token.
+    pub fn set_after_frontmatter(&mut self, value: bool) {
+        self.lexer.lexer_mut().set_after_frontmatter(value);
+    }
 }
 
 impl TokenSource for HtmlTokenSource<'_> {

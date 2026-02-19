@@ -73,6 +73,13 @@ impl<'source> HtmlParser<'source> {
     pub fn re_lex(&mut self, context: HtmlReLexContext) -> HtmlSyntaxKind {
         self.source_mut().re_lex(context)
     }
+
+    /// Signals to the lexer that the frontmatter decision has been made.
+    /// After this call, `---` in the `Regular` context is treated as plain
+    /// HTML text rather than a `FENCE` token.
+    pub(crate) fn set_after_frontmatter(&mut self, value: bool) {
+        self.source.set_after_frontmatter(value);
+    }
 }
 
 pub struct HtmlParserCheckpoint {

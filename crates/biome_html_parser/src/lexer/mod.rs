@@ -30,6 +30,10 @@ pub(crate) struct HtmlLexer<'src> {
     preceding_line_break: bool,
     after_newline: bool,
     unicode_bom_length: usize,
+    /// Set to `true` after the Astro frontmatter closing fence (`---`) has been
+    /// consumed. Once set, the `Regular` context will no longer treat `---` as a
+    /// `FENCE` token, allowing `---` to appear as plain text in HTML content.
+    after_frontmatter: bool,
 }
 
 enum IdentifierContext {
@@ -62,7 +66,14 @@ impl<'src> HtmlLexer<'src> {
             after_newline: false,
             current_flags: TokenFlags::empty(),
             unicode_bom_length: 0,
+            after_frontmatter: false,
         }
+    }
+
+    /// Sets the `after_frontmatter` flag. When `true`, `---` in the `Regular`
+    /// context is treated as plain HTML text rather than a `FENCE` token.
+    pub fn set_after_frontmatter(&mut self, value: bool) {
+        self.after_frontmatter = value;
     }
 
     /// Consume a token in the [HtmlLexContext::InsideTag] context.
@@ -265,7 +276,9 @@ impl<'src> HtmlLexer<'src> {
             EXL if self.current() == T![<] => self.consume_byte(T![!]),
             SLH if self.current() == T![<] => self.consume_byte(T![/]),
             COM if self.current() == T![<] => self.consume_byte(T![,]),
-            MIN if self.at_frontmatter_edge() => self.consume_frontmatter_edge(),
+            MIN if !self.after_frontmatter && self.at_frontmatter_edge() => {
+                self.consume_frontmatter_edge()
+            }
             BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             BEO => {
                 if self.at_opening_double_text_expression() {
@@ -569,6 +582,7 @@ impl<'src> HtmlLexer<'src> {
             MIN => {
                 debug_assert!(self.at_frontmatter_edge());
                 self.advance(3);
+                self.after_frontmatter = true;
                 T![---]
             }
             _ => {
