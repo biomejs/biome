@@ -6120,25 +6120,6 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR, children)
             }
-            SCSS_COLON_VALUE => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && element.kind() == T ! [:]
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        SCSS_COLON_VALUE.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(SCSS_COLON_VALUE, children)
-            }
             SCSS_DECLARATION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
@@ -6284,25 +6265,6 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(SCSS_NESTING_DECLARATION, children)
-            }
-            SCSS_PARENT_SELECTOR_VALUE => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && element.kind() == T ! [&]
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        SCSS_PARENT_SELECTOR_VALUE.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(SCSS_PARENT_SELECTOR_VALUE, children)
             }
             SCSS_QUALIFIED_NAME => {
                 let mut elements = (&children).into_iter();

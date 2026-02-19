@@ -2976,12 +2976,6 @@ pub fn css_view_transition_at_rule_declarator(
         [Some(SyntaxElement::Token(view_transition_token))],
     ))
 }
-pub fn scss_colon_value(colon_token: SyntaxToken) -> ScssColonValue {
-    ScssColonValue::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_COLON_VALUE,
-        [Some(SyntaxElement::Token(colon_token))],
-    ))
-}
 pub fn scss_declaration(
     name: AnyScssDeclarationName,
     colon_token: SyntaxToken,
@@ -3059,12 +3053,6 @@ pub fn scss_nesting_declaration(
             Some(SyntaxElement::Node(value.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
         ],
-    ))
-}
-pub fn scss_parent_selector_value(amp_token: SyntaxToken) -> ScssParentSelectorValue {
-    ScssParentSelectorValue::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_PARENT_SELECTOR_VALUE,
-        [Some(SyntaxElement::Token(amp_token))],
     ))
 }
 pub fn scss_qualified_name(

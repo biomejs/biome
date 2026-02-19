@@ -1839,10 +1839,6 @@ AnyCssValue =
 	CssIdentifier
 	| CssCustomIdentifier
 	| CssDashedIdentifier
-	| ScssIdentifier
-	| ScssQualifiedName
-	| ScssParentSelectorValue
-	| ScssColonValue
 	| CssString
 	| CssNumber
 	| AnyCssDimension
@@ -1853,6 +1849,8 @@ AnyCssValue =
 	| CssUnicodeRange
 	| CssMetavariable
 	| TwValueThemeReference
+	| ScssIdentifier
+	| ScssQualifiedName
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -2510,16 +2508,6 @@ ScssNestingDeclaration =
 	':'
 	value: CssGenericComponentValueList
 	block: AnyCssDeclarationOrRuleBlock
-
-// $a: &;
-//     ^
-ScssParentSelectorValue =
-	'&'
-
-// $b: :;
-//     ^
-ScssColonValue =
-	':'
 
 // color: module.$var;
 //        ^^^^^^^^^^^

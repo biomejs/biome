@@ -6996,44 +6996,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssViewTransitionAtRuleD
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: view_transition_at_rule_declarator :: FormatCssViewTransitionAtRuleDeclarator :: default ())
     }
 }
-impl FormatRule<biome_css_syntax::ScssColonValue>
-    for crate::scss::auxiliary::colon_value::FormatScssColonValue
-{
-    type Context = CssFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_css_syntax::ScssColonValue,
-        f: &mut CssFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::ScssColonValue>::fmt(self, node, f)
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::ScssColonValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::ScssColonValue,
-        crate::scss::auxiliary::colon_value::FormatScssColonValue,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::scss::auxiliary::colon_value::FormatScssColonValue::default(),
-        )
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssColonValue {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::ScssColonValue,
-        crate::scss::auxiliary::colon_value::FormatScssColonValue,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::scss::auxiliary::colon_value::FormatScssColonValue::default(),
-        )
-    }
-}
 impl FormatRule<biome_css_syntax::ScssDeclaration>
     for crate::scss::auxiliary::declaration::FormatScssDeclaration
 {
@@ -7183,44 +7145,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssNestingDeclaration {
         FormatOwnedWithRule::new(
             self,
             crate::scss::auxiliary::nesting_declaration::FormatScssNestingDeclaration::default(),
-        )
-    }
-}
-impl FormatRule<biome_css_syntax::ScssParentSelectorValue>
-    for crate::scss::auxiliary::parent_selector_value::FormatScssParentSelectorValue
-{
-    type Context = CssFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_css_syntax::ScssParentSelectorValue,
-        f: &mut CssFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::ScssParentSelectorValue>::fmt(self, node, f)
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::ScssParentSelectorValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::ScssParentSelectorValue,
-        crate::scss::auxiliary::parent_selector_value::FormatScssParentSelectorValue,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::scss::auxiliary::parent_selector_value::FormatScssParentSelectorValue::default(),
-        )
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssParentSelectorValue {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::ScssParentSelectorValue,
-        crate::scss::auxiliary::parent_selector_value::FormatScssParentSelectorValue,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::scss::auxiliary::parent_selector_value::FormatScssParentSelectorValue::default(),
         )
     }
 }
