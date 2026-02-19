@@ -7,7 +7,7 @@ expression: snapshot
 
 ```css
 $brackets: [a, b, c];
-$lines: [full-start, main-start / main-end, full-end];
+$lines: [full-start, main-start, main-end, full-end];
 
 .grid {
   grid-column: [col-start] / [col-end];
@@ -75,26 +75,26 @@ CssRoot {
                             value: COMMA@41..43 "," [] [Whitespace(" ")],
                         },
                         CssCustomIdentifier {
-                            value_token: IDENT@43..54 "main-start" [] [Whitespace(" ")],
+                            value_token: IDENT@43..53 "main-start" [] [],
                         },
                         CssGenericDelimiter {
-                            value: SLASH@54..56 "/" [] [Whitespace(" ")],
+                            value: COMMA@53..55 "," [] [Whitespace(" ")],
                         },
                         CssCustomIdentifier {
-                            value_token: IDENT@56..64 "main-end" [] [],
+                            value_token: IDENT@55..63 "main-end" [] [],
                         },
                         CssGenericDelimiter {
-                            value: COMMA@64..66 "," [] [Whitespace(" ")],
+                            value: COMMA@63..65 "," [] [Whitespace(" ")],
                         },
                         CssCustomIdentifier {
-                            value_token: IDENT@66..74 "full-end" [] [],
+                            value_token: IDENT@65..73 "full-end" [] [],
                         },
                     ],
-                    r_brack_token: R_BRACK@74..75 "]" [] [],
+                    r_brack_token: R_BRACK@73..74 "]" [] [],
                 },
             ],
             modifiers: ScssVariableModifierList [],
-            semicolon_token: SEMICOLON@75..76 ";" [] [],
+            semicolon_token: SEMICOLON@74..75 ";" [] [],
         },
         CssQualifiedRule {
             prelude: CssSelectorList [
@@ -103,67 +103,67 @@ CssRoot {
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
-                            dot_token: DOT@76..79 "." [Newline("\n"), Newline("\n")] [],
+                            dot_token: DOT@75..78 "." [Newline("\n"), Newline("\n")] [],
                             name: CssCustomIdentifier {
-                                value_token: IDENT@79..84 "grid" [] [Whitespace(" ")],
+                                value_token: IDENT@78..83 "grid" [] [Whitespace(" ")],
                             },
                         },
                     ],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@84..85 "{" [] [],
+                l_curly_token: L_CURLY@83..84 "{" [] [],
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@85..99 "grid-column" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@84..98 "grid-column" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@99..101 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@98..100 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssBracketedValue {
-                                        l_brack_token: L_BRACK@101..102 "[" [] [],
+                                        l_brack_token: L_BRACK@100..101 "[" [] [],
                                         items: CssBracketedValueList [
                                             CssCustomIdentifier {
-                                                value_token: IDENT@102..111 "col-start" [] [],
+                                                value_token: IDENT@101..110 "col-start" [] [],
                                             },
                                         ],
-                                        r_brack_token: R_BRACK@111..113 "]" [] [Whitespace(" ")],
+                                        r_brack_token: R_BRACK@110..112 "]" [] [Whitespace(" ")],
                                     },
                                     CssGenericDelimiter {
-                                        value: SLASH@113..115 "/" [] [Whitespace(" ")],
+                                        value: SLASH@112..114 "/" [] [Whitespace(" ")],
                                     },
                                     CssBracketedValue {
-                                        l_brack_token: L_BRACK@115..116 "[" [] [],
+                                        l_brack_token: L_BRACK@114..115 "[" [] [],
                                         items: CssBracketedValueList [
                                             CssCustomIdentifier {
-                                                value_token: IDENT@116..123 "col-end" [] [],
+                                                value_token: IDENT@115..122 "col-end" [] [],
                                             },
                                         ],
-                                        r_brack_token: R_BRACK@123..124 "]" [] [],
+                                        r_brack_token: R_BRACK@122..123 "]" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@124..125 ";" [] [],
+                        semicolon_token: SEMICOLON@123..124 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@125..127 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@124..126 "}" [Newline("\n")] [],
             },
         },
     ],
-    eof_token: EOF@127..128 "" [Newline("\n")] [],
+    eof_token: EOF@126..127 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..128
+0: CSS_ROOT@0..127
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..127
+  1: CSS_ROOT_ITEM_LIST@0..126
     0: SCSS_DECLARATION@0..21
       0: SCSS_IDENTIFIER@0..9
         0: DOLLAR@0..1 "$" [] []
@@ -187,70 +187,70 @@ CssRoot {
           2: R_BRACK@19..20 "]" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@20..20
       4: SEMICOLON@20..21 ";" [] []
-    1: SCSS_DECLARATION@21..76
+    1: SCSS_DECLARATION@21..75
       0: SCSS_IDENTIFIER@21..28
         0: DOLLAR@21..23 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@23..28
           0: IDENT@23..28 "lines" [] []
       1: COLON@28..30 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@30..75
-        0: CSS_BRACKETED_VALUE@30..75
+      2: CSS_GENERIC_COMPONENT_VALUE_LIST@30..74
+        0: CSS_BRACKETED_VALUE@30..74
           0: L_BRACK@30..31 "[" [] []
-          1: CSS_BRACKETED_VALUE_LIST@31..74
+          1: CSS_BRACKETED_VALUE_LIST@31..73
             0: CSS_CUSTOM_IDENTIFIER@31..41
               0: IDENT@31..41 "full-start" [] []
             1: CSS_GENERIC_DELIMITER@41..43
               0: COMMA@41..43 "," [] [Whitespace(" ")]
-            2: CSS_CUSTOM_IDENTIFIER@43..54
-              0: IDENT@43..54 "main-start" [] [Whitespace(" ")]
-            3: CSS_GENERIC_DELIMITER@54..56
-              0: SLASH@54..56 "/" [] [Whitespace(" ")]
-            4: CSS_CUSTOM_IDENTIFIER@56..64
-              0: IDENT@56..64 "main-end" [] []
-            5: CSS_GENERIC_DELIMITER@64..66
-              0: COMMA@64..66 "," [] [Whitespace(" ")]
-            6: CSS_CUSTOM_IDENTIFIER@66..74
-              0: IDENT@66..74 "full-end" [] []
-          2: R_BRACK@74..75 "]" [] []
-      3: SCSS_VARIABLE_MODIFIER_LIST@75..75
-      4: SEMICOLON@75..76 ";" [] []
-    2: CSS_QUALIFIED_RULE@76..127
-      0: CSS_SELECTOR_LIST@76..84
-        0: CSS_COMPOUND_SELECTOR@76..84
-          0: CSS_NESTED_SELECTOR_LIST@76..76
+            2: CSS_CUSTOM_IDENTIFIER@43..53
+              0: IDENT@43..53 "main-start" [] []
+            3: CSS_GENERIC_DELIMITER@53..55
+              0: COMMA@53..55 "," [] [Whitespace(" ")]
+            4: CSS_CUSTOM_IDENTIFIER@55..63
+              0: IDENT@55..63 "main-end" [] []
+            5: CSS_GENERIC_DELIMITER@63..65
+              0: COMMA@63..65 "," [] [Whitespace(" ")]
+            6: CSS_CUSTOM_IDENTIFIER@65..73
+              0: IDENT@65..73 "full-end" [] []
+          2: R_BRACK@73..74 "]" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@74..74
+      4: SEMICOLON@74..75 ";" [] []
+    2: CSS_QUALIFIED_RULE@75..126
+      0: CSS_SELECTOR_LIST@75..83
+        0: CSS_COMPOUND_SELECTOR@75..83
+          0: CSS_NESTED_SELECTOR_LIST@75..75
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@76..84
-            0: CSS_CLASS_SELECTOR@76..84
-              0: DOT@76..79 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_CUSTOM_IDENTIFIER@79..84
-                0: IDENT@79..84 "grid" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@84..127
-        0: L_CURLY@84..85 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@85..125
-          0: CSS_DECLARATION_WITH_SEMICOLON@85..125
-            0: CSS_DECLARATION@85..124
-              0: CSS_GENERIC_PROPERTY@85..124
-                0: CSS_IDENTIFIER@85..99
-                  0: IDENT@85..99 "grid-column" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@99..101 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@101..124
-                  0: CSS_BRACKETED_VALUE@101..113
-                    0: L_BRACK@101..102 "[" [] []
-                    1: CSS_BRACKETED_VALUE_LIST@102..111
-                      0: CSS_CUSTOM_IDENTIFIER@102..111
-                        0: IDENT@102..111 "col-start" [] []
-                    2: R_BRACK@111..113 "]" [] [Whitespace(" ")]
-                  1: CSS_GENERIC_DELIMITER@113..115
-                    0: SLASH@113..115 "/" [] [Whitespace(" ")]
-                  2: CSS_BRACKETED_VALUE@115..124
-                    0: L_BRACK@115..116 "[" [] []
-                    1: CSS_BRACKETED_VALUE_LIST@116..123
-                      0: CSS_CUSTOM_IDENTIFIER@116..123
-                        0: IDENT@116..123 "col-end" [] []
-                    2: R_BRACK@123..124 "]" [] []
+          2: CSS_SUB_SELECTOR_LIST@75..83
+            0: CSS_CLASS_SELECTOR@75..83
+              0: DOT@75..78 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@78..83
+                0: IDENT@78..83 "grid" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@83..126
+        0: L_CURLY@83..84 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@84..124
+          0: CSS_DECLARATION_WITH_SEMICOLON@84..124
+            0: CSS_DECLARATION@84..123
+              0: CSS_GENERIC_PROPERTY@84..123
+                0: CSS_IDENTIFIER@84..98
+                  0: IDENT@84..98 "grid-column" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@98..100 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@100..123
+                  0: CSS_BRACKETED_VALUE@100..112
+                    0: L_BRACK@100..101 "[" [] []
+                    1: CSS_BRACKETED_VALUE_LIST@101..110
+                      0: CSS_CUSTOM_IDENTIFIER@101..110
+                        0: IDENT@101..110 "col-start" [] []
+                    2: R_BRACK@110..112 "]" [] [Whitespace(" ")]
+                  1: CSS_GENERIC_DELIMITER@112..114
+                    0: SLASH@112..114 "/" [] [Whitespace(" ")]
+                  2: CSS_BRACKETED_VALUE@114..123
+                    0: L_BRACK@114..115 "[" [] []
+                    1: CSS_BRACKETED_VALUE_LIST@115..122
+                      0: CSS_CUSTOM_IDENTIFIER@115..122
+                        0: IDENT@115..122 "col-end" [] []
+                    2: R_BRACK@122..123 "]" [] []
               1: (empty)
-            1: SEMICOLON@124..125 ";" [] []
-        2: R_CURLY@125..127 "}" [Newline("\n")] []
-  2: EOF@127..128 "" [Newline("\n")] []
+            1: SEMICOLON@123..124 ";" [] []
+        2: R_CURLY@124..126 "}" [Newline("\n")] []
+  2: EOF@126..127 "" [Newline("\n")] []
 
 ```
