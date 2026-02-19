@@ -254,8 +254,6 @@ invalid.js:14:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
     15 │ items.findLastIndex(x => x > 1) !== -1;
     16 │ 
   
-  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
-  
   i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -282,8 +280,6 @@ invalid.js:15:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     16 │ 
     17 │ if (items.find(x => x > 1)) {}
-  
-  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
   
   i Use .some() when you only need to know if any element matches.
   
@@ -313,8 +309,6 @@ invalid.js:17:5 lint/nursery/useArraySome ━━━━━━━━━━━━�
     18 │ if (items.findLast(x => x > 1)) {}
     19 │ 
   
-  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
-  
   i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -332,8 +326,6 @@ invalid.js:18:5 lint/nursery/useArraySome ━━━━━━━━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
     19 │ 
     20 │ cond ? (items.find(x => x > 1) ? "a" : "b") : "c";
-  
-  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
   
   i Use .some() when you only need to know if any element matches.
   
@@ -354,8 +346,6 @@ invalid.js:20:9 lint/nursery/useArraySome ━━━━━━━━━━━━�
     21 │ 
     22 │ items.find(x => x > 1) !== undefined;
   
-  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
-  
   i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -375,8 +365,6 @@ invalid.js:22:1 lint/nursery/useArraySome ━━━━━━━━━━━━�
     23 │ items.findLast(x => x > 1) !== undefined;
     24 │ 
   
-  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
-  
   i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -394,8 +382,6 @@ invalid.js:23:1 lint/nursery/useArraySome ━━━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     24 │ 
     25 │ items.find(x => x > 1) != null;
-  
-  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
   
   i Use .some() when you only need to know if any element matches.
   
@@ -416,8 +402,6 @@ invalid.js:25:1 lint/nursery/useArraySome ━━━━━━━━━━━━�
     26 │ items.findLast(x => x > 1) != null;
     27 │ 
   
-  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
-  
   i Use .some() when you only need to know if any element matches.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -434,8 +418,6 @@ invalid.js:26:1 lint/nursery/useArraySome ━━━━━━━━━━━━�
   > 26 │ items.findLast(x => x > 1) != null;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     27 │ 
-  
-  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
   
   i Use .some() when you only need to know if any element matches.
   

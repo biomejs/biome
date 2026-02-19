@@ -118,21 +118,22 @@ impl Rule for UseArraySome {
             }
         };
 
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                range,
-                markup! {
-                    "Prefer "<Emphasis>".some()"</Emphasis>" over "<Emphasis>{pattern}</Emphasis>"."
-                },
-            )
-            .note(markup! {
+        let mut diag = RuleDiagnostic::new(
+            rule_category!(),
+            range,
+            markup! {
+                "Prefer "<Emphasis>".some()"</Emphasis>" over "<Emphasis>{pattern}</Emphasis>"."
+            },
+        );
+        if pattern == "filter(...).length comparison" {
+            diag = diag.note(markup! {
                 "Using "<Emphasis>".filter()"</Emphasis>" followed by a length check iterates the entire array unnecessarily. "<Emphasis>".some()"</Emphasis>" stops at the first match."
-            })
-            .note(markup! {
-                "Use "<Emphasis>".some()"</Emphasis>" when you only need to know if any element matches."
-            }),
-        )
+            });
+        }
+        diag = diag.note(markup! {
+            "Use "<Emphasis>".some()"</Emphasis>" when you only need to know if any element matches."
+        });
+        Some(diag)
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
