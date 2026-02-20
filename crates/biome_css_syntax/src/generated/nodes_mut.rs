@@ -3551,6 +3551,14 @@ impl ScssNestingDeclaration {
         )
     }
 }
+impl ScssParentSelectorValue {
+    pub fn with_amp_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl ScssQualifiedName {
     pub fn with_module(self, element: CssIdentifier) -> Self {
         Self::unwrap_cast(

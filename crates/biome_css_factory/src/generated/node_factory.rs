@@ -3055,6 +3055,12 @@ pub fn scss_nesting_declaration(
         ],
     ))
 }
+pub fn scss_parent_selector_value(amp_token: SyntaxToken) -> ScssParentSelectorValue {
+    ScssParentSelectorValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PARENT_SELECTOR_VALUE,
+        [Some(SyntaxElement::Token(amp_token))],
+    ))
+}
 pub fn scss_qualified_name(
     module: CssIdentifier,
     dot_token: SyntaxToken,
