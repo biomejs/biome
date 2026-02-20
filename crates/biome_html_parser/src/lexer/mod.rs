@@ -759,7 +759,11 @@ impl<'src> HtmlLexer<'src> {
                     }
                 }
                 IdentifierContext::Vue => {
-                    if is_attribute_name_byte_vue(byte) {
+                    if byte == b':' && is_vue_directive_prefix_bytes(&buffer[..len]) {
+                        break;
+                    }
+
+                    if is_attribute_name_byte_vue(byte) || byte == b':' {
                         if len < BUFFER_SIZE {
                             buffer[len] = byte;
                             len += 1;
@@ -1428,6 +1432,10 @@ fn is_astro_directive_keyword_bytes(bytes: &[u8]) -> bool {
         bytes,
         b"client" | b"set" | b"class" | b"is" | b"server" | b"define"
     )
+}
+
+fn is_vue_directive_prefix_bytes(bytes: &[u8]) -> bool {
+    bytes.starts_with(b"v-")
 }
 
 /// Identifiers can contain letters, numbers and `_`
