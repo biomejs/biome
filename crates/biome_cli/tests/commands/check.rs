@@ -3532,6 +3532,51 @@ fn check_plugin_rewrite_no_write() {
 }
 
 #[test]
+fn check_plugin_rewrite_write_without_unsafe() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["useConsoleInfo.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("useConsoleInfo.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warning"),
+    $call => `console.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
+    );
+
+    // --write without --unsafe should NOT apply unsafe fixes
+    assert_file_contents(&fs, file_path, "console.log(\"hello\");\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_rewrite_write_without_unsafe",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn check_plugin_multiple_rewrites() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
