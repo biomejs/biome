@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["banRed.grit"],
+  "css": { "linter": { "enabled": true } },
+  "linter": {
+    "rules": { "recommended": false }
+  },
+  "formatter": { "enabled": false }
+}
+```
+
+## `banRed.grit`
+
+```grit
+language css
+
+`red` as $color where {
+    register_diagnostic(
+        span = $color,
+        message = "Avoid using red.",
+        severity = "warning"
+    ),
+    $color => `blue`
+}
+
+```
+
+## `file.css`
+
+```css
+a { color: blue; }
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

@@ -3784,3 +3784,109 @@ fn check_format_with_syntax_errors_when_flag_enabled() {
         result,
     ));
 }
+
+#[test]
+fn check_plugin_apply_rewrite_css() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["banRed.grit"],
+    "css": { "linter": { "enabled": true } },
+    "linter": {
+        "rules": { "recommended": false }
+    },
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("banRed.grit"),
+        br#"language css
+
+`red` as $color where {
+    register_diagnostic(
+        span = $color,
+        message = "Avoid using red.",
+        severity = "warning"
+    ),
+    $color => `blue`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("file.css");
+    fs.insert(file_path.into(), b"a { color: red; }\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "a { color: blue; }\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_apply_rewrite_css",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_apply_rewrite_json() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["fixVersion.grit"],
+    "json": { "linter": { "enabled": true } },
+    "linter": {
+        "rules": { "recommended": false }
+    },
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("fixVersion.grit"),
+        br#"language json
+
+`"1.0.0"` as $version where {
+    register_diagnostic(
+        span = $version,
+        message = "Update version.",
+        severity = "warning"
+    ),
+    $version => `"2.0.0"`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("package.json");
+    fs.insert(file_path.into(), b"{\"version\": \"1.0.0\"}\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "{\"version\": \"2.0.0\"}\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_apply_rewrite_json",
+        fs,
+        console,
+        result,
+    ));
+}
