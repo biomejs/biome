@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Added support for applying GritQL plugin rewrites as code actions. GritQL plugins that use the rewrite operator (`=>`) now produce fixable diagnostics that Biome can apply via `--write --unsafe`.
+Added support for applying GritQL plugin rewrites as code actions. GritQL plugins that use the rewrite operator (`=>`) now produce fixable diagnostics for JavaScript, CSS, and JSON files. All plugin rewrites are treated as unsafe fixes and require `--write --unsafe` to apply. Without `--unsafe`, the rewrite is shown as an "Unsafe fix" suggestion in the diagnostic output.
 
 **Example plugin** (`useConsoleInfo.grit`):
 ```grit
