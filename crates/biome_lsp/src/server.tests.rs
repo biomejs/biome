@@ -1842,6 +1842,79 @@ async fn plugin_load_error_show_message() -> Result<()> {
 }
 
 #[tokio::test]
+async fn plugin_rewrite_pull_diagnostics() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    let config = r#"{
+        "plugins": ["useConsoleInfo.grit"],
+        "linter": {
+            "rules": { "recommended": false }
+        }
+    }"#;
+
+    let plugin = br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(
+        span = $call,
+        message = "Use console.info instead of console.log.",
+        severity = "warning"
+    ),
+    $call => `console.info($msg)`
+}"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+    fs.insert(to_utf8_file_path_buf(uri!("useConsoleInfo.grit")), plugin);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    server
+        .open_named_document("console.log(\"hello\");", uri!("document.js"), "javascript")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    // Verify that the plugin diagnostic is emitted
+    if let Some(ServerNotification::PublishDiagnostics(params)) = &notification {
+        assert!(
+            !params.diagnostics.is_empty(),
+            "Expected at least one diagnostic"
+        );
+        let diag = &params.diagnostics[0];
+        assert_eq!(diag.severity, Some(lsp::DiagnosticSeverity::ERROR));
+        assert_eq!(
+            diag.code,
+            Some(lsp::NumberOrString::String(String::from("plugin")))
+        );
+        assert!(
+            diag.message.contains("console.info"),
+            "Diagnostic message should mention console.info, got: {}",
+            diag.message
+        );
+    } else {
+        panic!("Expected PublishDiagnostics, got {notification:?}");
+    }
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_diagnostics_for_css_files() -> Result<()> {
     let fs = MemoryFileSystem::default();
     let config = r#"{
