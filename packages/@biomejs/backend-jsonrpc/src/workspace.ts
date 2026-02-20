@@ -8850,6 +8850,10 @@ export type EmbeddingKind =
 	| {
 			Vue: {
 				/**
+				 * Whether this is a v-on event handler (e.g., @click="handler")
+				 */
+				event_handler: boolean;
+				/**
 				 * Where the bindings are defined
 				 */
 				is_source: boolean;
