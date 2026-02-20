@@ -627,6 +627,7 @@ fn parse_embedded_nodes(
                         embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
+                            event_handler: true,
                         });
                     if let Some((content, doc_source)) = parse_directive_string_value(
                         &initializer,
@@ -647,6 +648,7 @@ fn parse_embedded_nodes(
                         embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
+                            event_handler: false,
                         });
                     if let Some((content, doc_source)) = parse_directive_string_value(
                         &initializer,
@@ -667,6 +669,7 @@ fn parse_embedded_nodes(
                         embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
+                            event_handler: false,
                         });
                     if let Some((content, doc_source)) = parse_directive_string_value(
                         &initializer,
@@ -683,10 +686,15 @@ fn parse_embedded_nodes(
                 if let Some(directive) = VueDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                 {
+                    let is_v_on = directive
+                        .name_token()
+                        .map(|t| t.text_trimmed() == "v-on")
+                        .unwrap_or(false);
                     let file_source =
                         embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
+                            event_handler: is_v_on,
                         });
                     if let Some((content, doc_source)) = parse_directive_string_value(
                         &initializer,
@@ -934,6 +942,7 @@ pub(crate) fn parse_embedded_script(
                 file_source = file_source.with_embedding_kind(EmbeddingKind::Vue {
                     setup: element.is_script_with_setup_attribute(),
                     is_source: true,
+                    event_handler: false,
                 });
             }
             file_source
@@ -1195,6 +1204,7 @@ pub(crate) fn parse_vue_text_expression(
     let file_source = js_file_source.with_embedding_kind(EmbeddingKind::Vue {
         setup: false,
         is_source: false,
+        event_handler: false,
     });
     parse_text_expression(expression, cache, biome_path, settings, file_source)
 }

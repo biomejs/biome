@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<script setup>
+let counter = 0;
+</script>
+<template>
+  <!-- shorthand @click -->
+  <button type="button" @click="counter += 1">+</button>
+  <!-- longhand v-on:click -->
+  <button type="button" v-on:click="counter -= 1">-</button>
+</template>
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```
