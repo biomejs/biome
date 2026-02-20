@@ -1112,4 +1112,8 @@ impl ResolvedPath {
     pub fn from_path(path: impl Into<Utf8PathBuf>) -> Self {
         Self::new(Ok(path.into()))
     }
+
+    pub fn dump(&self) -> Option<String> {
+        self.as_path().map(|p| p.as_str().replace('\\', "/"))
+    }
 }

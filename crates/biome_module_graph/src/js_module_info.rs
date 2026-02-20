@@ -110,9 +110,7 @@ impl JsModuleInfo {
                 .map(|(specifier, JsImportPath { resolved_path, .. })| {
                     (
                         specifier.to_string(),
-                        resolved_path
-                            .as_ref()
-                            .map_or_else(|_| specifier.to_string(), ToString::to_string),
+                        resolved_path.dump().unwrap_or(specifier.to_string()),
                     )
                 })
                 .collect(),
