@@ -1109,23 +1109,15 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         if result.is_none() {
             // No tree mutation was applied. Check if there's a plugin text edit
             // to apply (plugin rewrites produce text edits, not tree mutations).
-            if let Some((range, edit)) = plugin_text_edit {
-                let old_text = tree.syntax().to_string();
-                let new_text = edit.new_string(&old_text);
-                if new_text != old_text {
-                    let options = params.settings.parse_options::<JsLanguage>(
-                        params.biome_path,
-                        &params.document_file_source,
-                    );
-                    let parse = biome_js_parser::parse(&new_text, file_source, options);
-                    tree = parse.tree();
-                    process_fix_all.record_text_edit_fix(
-                        range,
-                        tree.syntax().text_range_with_trivia().len().into(),
-                        Some(("plugin", "gritql")),
-                    )?;
-                    continue;
-                }
+            if let Some(new_text) = process_fix_all
+                .apply_plugin_text_edit(plugin_text_edit, &tree.syntax().to_string())?
+            {
+                let options = params
+                    .settings
+                    .parse_options::<JsLanguage>(params.biome_path, &params.document_file_source);
+                let parse = biome_js_parser::parse(&new_text, file_source, options);
+                tree = parse.tree();
+                continue;
             }
 
             return process_fix_all.finish(|| {

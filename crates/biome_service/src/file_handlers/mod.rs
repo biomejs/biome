@@ -49,6 +49,7 @@ use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
 use biome_string_case::StrLikeExtension;
+use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use either::Either;
 use grit::GritFileHandler;
@@ -870,6 +871,24 @@ impl<'a> ProcessFixAll<'a> {
             ));
         }
         Ok(())
+    }
+
+    /// Apply a plugin text edit if present and the text actually changed.
+    /// Returns `Some(new_text)` if the edit was applied, `None` otherwise.
+    pub(crate) fn apply_plugin_text_edit(
+        &mut self,
+        text_edit: Option<(TextRange, TextEdit)>,
+        current_text: &str,
+    ) -> Result<Option<String>, WorkspaceError> {
+        let Some((range, edit)) = text_edit else {
+            return Ok(None);
+        };
+        let new_text = edit.new_string(current_text);
+        if new_text == current_text {
+            return Ok(None);
+        }
+        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "gritql")))?;
+        Ok(Some(new_text))
     }
 
     /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`
