@@ -3822,6 +3822,98 @@ fn check_plugin_apply_rewrite_css() {
 }
 
 #[test]
+fn check_plugin_safe_fix_write() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["useConsoleInfo.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("useConsoleInfo.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warn", fix_kind = "safe"),
+    $call => `console.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
+    );
+
+    // --write without --unsafe should apply safe fixes
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "console.info(\"hello\");\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_safe_fix_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_safe_fix_no_write() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["useConsoleInfo.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("useConsoleInfo.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warn", fix_kind = "safe"),
+    $call => `console.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path.as_str()].as_slice()),
+    );
+
+    // Without --write, safe fixes should not be applied but shown as "Safe fix"
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "console.log(\"hello\");\n");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_safe_fix_no_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn check_plugin_apply_rewrite_json() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
