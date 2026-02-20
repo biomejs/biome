@@ -4,13 +4,7 @@ use crate::token_source::{
     HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt,
     TextExpressionKind,
 };
-use biome_html_syntax::HtmlSyntaxKind::{
-    ANIMATE_KW, AS_KW, ATTACH_KW, AWAIT_KW, BIND_KW, CATCH_KW, CLASS_KW, CLIENT_KW, COMMENT,
-    CONST_KW, DEBUG_KW, DEFINE_KW, DOCTYPE_KW, EACH_KW, ELSE_KW, EOF, ERROR_TOKEN, HTML_KW,
-    HTML_LITERAL, HTML_STRING_LITERAL, IDENT, IF_KW, IN_KW, IS_KW, KEY_KW, NEWLINE, OUT_KW,
-    RENDER_KW, SERVER_KW, SET_KW, SNIPPET_KW, STYLE_KW, THEN_KW, TOMBSTONE, TRANSITION_KW,
-    UNICODE_BOM, USE_KW, WHITESPACE,
-};
+use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};

@@ -9,24 +9,7 @@ use crate::syntax::{
     parse_single_text_expression_content,
 };
 use crate::token_source::{HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt};
-use biome_html_syntax::HtmlSyntaxKind::{
-    EOF, HTML_BOGUS_ELEMENT, HTML_ELEMENT_LIST, HTML_LITERAL, HTML_SPREAD_ATTRIBUTE, IDENT,
-    SVELTE_ANIMATE_DIRECTIVE, SVELTE_ATTACH_ATTRIBUTE, SVELTE_AWAIT_BLOCK,
-    SVELTE_AWAIT_CATCH_BLOCK, SVELTE_AWAIT_CATCH_CLAUSE, SVELTE_AWAIT_CLAUSES_LIST,
-    SVELTE_AWAIT_CLOSING_BLOCK, SVELTE_AWAIT_OPENING_BLOCK, SVELTE_AWAIT_THEN_BLOCK,
-    SVELTE_AWAIT_THEN_CLAUSE, SVELTE_BIND_DIRECTIVE, SVELTE_BINDING_ASSIGNMENT_BINDING_LIST,
-    SVELTE_BINDING_LIST, SVELTE_BOGUS_BLOCK, SVELTE_CLASS_DIRECTIVE, SVELTE_CONST_BLOCK,
-    SVELTE_CURLY_DESTRUCTURED_NAME, SVELTE_DEBUG_BLOCK, SVELTE_DIRECTIVE_MODIFIER,
-    SVELTE_DIRECTIVE_MODIFIER_LIST, SVELTE_DIRECTIVE_VALUE, SVELTE_EACH_AS_KEYED_ITEM,
-    SVELTE_EACH_BLOCK, SVELTE_EACH_CLOSING_BLOCK, SVELTE_EACH_INDEX, SVELTE_EACH_KEY,
-    SVELTE_EACH_KEYED_ITEM, SVELTE_EACH_OPENING_BLOCK, SVELTE_ELSE_CLAUSE, SVELTE_ELSE_IF_CLAUSE,
-    SVELTE_ELSE_IF_CLAUSE_LIST, SVELTE_HTML_BLOCK, SVELTE_IF_BLOCK, SVELTE_IF_CLOSING_BLOCK,
-    SVELTE_IF_OPENING_BLOCK, SVELTE_IN_DIRECTIVE, SVELTE_KEY_BLOCK, SVELTE_KEY_CLOSING_BLOCK,
-    SVELTE_KEY_OPENING_BLOCK, SVELTE_LITERAL, SVELTE_NAME, SVELTE_OUT_DIRECTIVE,
-    SVELTE_RENDER_BLOCK, SVELTE_REST_BINDING, SVELTE_SNIPPET_BLOCK, SVELTE_SNIPPET_CLOSING_BLOCK,
-    SVELTE_SNIPPET_OPENING_BLOCK, SVELTE_SQUARE_DESTRUCTURED_NAME, SVELTE_STYLE_DIRECTIVE,
-    SVELTE_TRANSITION_DIRECTIVE, SVELTE_USE_DIRECTIVE,
-};
+use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
@@ -1244,43 +1227,45 @@ impl ParseNodeList for ModifiersList {
 
 // #region Check functions
 
+const SVELTE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
+    T![if],
+    T![else],
+    T![each],
+    T![debug],
+    T![const],
+    T![attach],
+    T![render],
+    T![key],
+    T![as],
+    T![await],
+    T![catch],
+    T![then],
+    T![snippet],
+    T![class],
+    T![in],
+    T![out],
+    T![transition],
+    T![animate],
+    T![bind]
+);
+
+const SVELTE_DIRECTIVE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
+    T![bind],
+    T![transition],
+    T![in],
+    T![out],
+    T![class],
+    T![style],
+    T![use],
+    T![animate]
+);
+
 pub(crate) fn is_at_svelte_keyword(p: &HtmlParser) -> bool {
-    matches!(
-        p.cur(),
-        T![if]
-            | T![else]
-            | T![each]
-            | T![debug]
-            | T![const]
-            | T![attach]
-            | T![render]
-            | T![key]
-            | T![as]
-            | T![await]
-            | T![catch]
-            | T![then]
-            | T![snippet]
-            | T![class]
-            | T![in]
-            | T![out]
-            | T![transition]
-            | T![animate]
-            | T![bind]
-    )
+    p.at_ts(SVELTE_KEYWORDS)
 }
 
 fn is_at_svelte_directive_keyword(token: HtmlSyntaxKind) -> bool {
-    matches!(
-        token,
-        T![bind]
-            | T![transition]
-            | T![in]
-            | T![out]
-            | T![class]
-            | T![style]
-            | T![use]
-            | T![animate]
-    )
+    SVELTE_DIRECTIVE_KEYWORDS.contains(token)
 }
 
 fn is_at_else_opening_block(p: &mut HtmlParser) -> bool {
