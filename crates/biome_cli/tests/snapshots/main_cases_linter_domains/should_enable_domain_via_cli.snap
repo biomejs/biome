@@ -52,6 +52,30 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+test2.js:5:5 lint/nursery/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Test callback is missing an expect() assertion.
+  
+    3 │ 	beforeEach(() => {});
+    4 │     beforeEach(() => {});
+  > 5 │     test("bar", () => {
+      │     ^^^^^^^^^^^^^^^^^^^
+  > 6 │         someFn();
+  > 7 │     });
+      │     ^^
+    8 │ });
+    9 │     
+  
+  i Tests without assertions may pass even when the behavior is broken.
+  
+  i Add an assertion using expect() to verify the expected behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
 test1.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
@@ -92,4 +116,5 @@ test2.js:4:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━
 Checked 2 files in <TIME>. No fixes applied.
 Found 1 error.
 Found 1 warning.
+Found 1 info.
 ```

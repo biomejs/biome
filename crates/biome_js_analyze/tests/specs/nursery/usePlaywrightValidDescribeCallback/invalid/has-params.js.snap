@@ -1,0 +1,206 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: has-params.js
+---
+# Input
+```js
+/* should generate diagnostics */
+describe('suite', (done) => {});
+test.describe('suite', (done) => {});
+test.describe.only('suite', (done) => {});
+test.describe.skip('suite', (done) => {});
+test.describe.parallel('suite', (done) => {});
+test.describe.serial('suite', (done) => {});
+test.describe.parallel.only('suite', (done) => {});
+describe('suite', function(done) {});
+test.describe('suite', function(done) {});
+
+```
+
+# Diagnostics
+```
+has-params.js:2:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not have parameters.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ describe('suite', (done) => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ test.describe('suite', (done) => {});
+    4 │ test.describe.only('suite', (done) => {});
+  
+  i Describe callbacks are invoked without arguments by the test framework.
+  
+  i Remove parameters from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+has-params.js:3:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not have parameters.
+  
+    1 │ /* should generate diagnostics */
+    2 │ describe('suite', (done) => {});
+  > 3 │ test.describe('suite', (done) => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ test.describe.only('suite', (done) => {});
+    5 │ test.describe.skip('suite', (done) => {});
+  
+  i Describe callbacks are invoked without arguments by the test framework.
+  
+  i Remove parameters from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+has-params.js:4:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not have parameters.
+  
+    2 │ describe('suite', (done) => {});
+    3 │ test.describe('suite', (done) => {});
+  > 4 │ test.describe.only('suite', (done) => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ test.describe.skip('suite', (done) => {});
+    6 │ test.describe.parallel('suite', (done) => {});
+  
+  i Describe callbacks are invoked without arguments by the test framework.
+  
+  i Remove parameters from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+has-params.js:5:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not have parameters.
+  
+    3 │ test.describe('suite', (done) => {});
+    4 │ test.describe.only('suite', (done) => {});
+  > 5 │ test.describe.skip('suite', (done) => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ test.describe.parallel('suite', (done) => {});
+    7 │ test.describe.serial('suite', (done) => {});
+  
+  i Describe callbacks are invoked without arguments by the test framework.
+  
+  i Remove parameters from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+has-params.js:6:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not have parameters.
+  
+    4 │ test.describe.only('suite', (done) => {});
+    5 │ test.describe.skip('suite', (done) => {});
+  > 6 │ test.describe.parallel('suite', (done) => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ test.describe.serial('suite', (done) => {});
+    8 │ test.describe.parallel.only('suite', (done) => {});
+  
+  i Describe callbacks are invoked without arguments by the test framework.
+  
+  i Remove parameters from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+has-params.js:7:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not have parameters.
+  
+    5 │ test.describe.skip('suite', (done) => {});
+    6 │ test.describe.parallel('suite', (done) => {});
+  > 7 │ test.describe.serial('suite', (done) => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ test.describe.parallel.only('suite', (done) => {});
+    9 │ describe('suite', function(done) {});
+  
+  i Describe callbacks are invoked without arguments by the test framework.
+  
+  i Remove parameters from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+has-params.js:8:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not have parameters.
+  
+     6 │ test.describe.parallel('suite', (done) => {});
+     7 │ test.describe.serial('suite', (done) => {});
+   > 8 │ test.describe.parallel.only('suite', (done) => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ describe('suite', function(done) {});
+    10 │ test.describe('suite', function(done) {});
+  
+  i Describe callbacks are invoked without arguments by the test framework.
+  
+  i Remove parameters from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+has-params.js:9:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not have parameters.
+  
+     7 │ test.describe.serial('suite', (done) => {});
+     8 │ test.describe.parallel.only('suite', (done) => {});
+   > 9 │ describe('suite', function(done) {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ test.describe('suite', function(done) {});
+    11 │ 
+  
+  i Describe callbacks are invoked without arguments by the test framework.
+  
+  i Remove parameters from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+has-params.js:10:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not have parameters.
+  
+     8 │ test.describe.parallel.only('suite', (done) => {});
+     9 │ describe('suite', function(done) {});
+  > 10 │ test.describe('suite', function(done) {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i Describe callbacks are invoked without arguments by the test framework.
+  
+  i Remove parameters from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

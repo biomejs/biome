@@ -112,7 +112,7 @@ declare_lint_rule! {
     /// [Accessible SVGs](https://www.unimelb.edu.au/accessibility/techniques/accessible-svgs)
     ///
     pub NoSvgWithoutTitle {
-        version: "next",
+        version: "2.4.0",
         name: "noSvgWithoutTitle",
         language: "html",
         recommended: true,

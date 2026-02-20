@@ -116,6 +116,7 @@ pub(crate) mod syntax_component_without_multiplier;
 pub(crate) mod syntax_multiplier;
 pub(crate) mod syntax_type;
 pub(crate) mod type_function;
+pub(crate) mod unary_expression;
 pub(crate) mod unicode_codepoint;
 pub(crate) mod unicode_range;
 pub(crate) mod unicode_range_interval;

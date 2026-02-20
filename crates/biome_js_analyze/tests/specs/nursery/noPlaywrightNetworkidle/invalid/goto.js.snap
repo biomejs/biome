@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: goto.js
+---
+# Input
+```js
+/* should generate diagnostics */
+await page.goto('https://example.com', { waitUntil: 'networkidle' });
+
+
+
+```
+
+# Diagnostics
+```
+goto.js:2:7 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ await page.goto('https://example.com', { waitUntil: 'networkidle' });
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

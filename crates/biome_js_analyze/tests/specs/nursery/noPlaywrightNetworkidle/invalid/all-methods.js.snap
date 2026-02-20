@@ -1,0 +1,170 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: all-methods.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Test all methods that support networkidle option
+page.waitForLoadState("networkidle");
+
+page.waitForURL("http://example.com", { waitUntil: "networkidle" });
+
+page.goto("http://example.com", { waitUntil: "networkidle" });
+
+page.reload({ waitUntil: "networkidle" });
+
+page.setContent("<html></html>", { waitUntil: "networkidle" });
+
+page.goBack({ waitUntil: "networkidle" });
+
+page.goForward({ waitUntil: "networkidle" });
+
+```
+
+# Diagnostics
+```
+all-methods.js:3:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Test all methods that support networkidle option
+  > 3 │ page.waitForLoadState("networkidle");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ page.waitForURL("http://example.com", { waitUntil: "networkidle" });
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+all-methods.js:5:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+    3 │ page.waitForLoadState("networkidle");
+    4 │ 
+  > 5 │ page.waitForURL("http://example.com", { waitUntil: "networkidle" });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ page.goto("http://example.com", { waitUntil: "networkidle" });
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+all-methods.js:7:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+    5 │ page.waitForURL("http://example.com", { waitUntil: "networkidle" });
+    6 │ 
+  > 7 │ page.goto("http://example.com", { waitUntil: "networkidle" });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ page.reload({ waitUntil: "networkidle" });
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+all-methods.js:9:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+     7 │ page.goto("http://example.com", { waitUntil: "networkidle" });
+     8 │ 
+   > 9 │ page.reload({ waitUntil: "networkidle" });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ page.setContent("<html></html>", { waitUntil: "networkidle" });
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+all-methods.js:11:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+     9 │ page.reload({ waitUntil: "networkidle" });
+    10 │ 
+  > 11 │ page.setContent("<html></html>", { waitUntil: "networkidle" });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ page.goBack({ waitUntil: "networkidle" });
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+all-methods.js:13:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+    11 │ page.setContent("<html></html>", { waitUntil: "networkidle" });
+    12 │ 
+  > 13 │ page.goBack({ waitUntil: "networkidle" });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ page.goForward({ waitUntil: "networkidle" });
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+all-methods.js:15:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+    13 │ page.goBack({ waitUntil: "networkidle" });
+    14 │ 
+  > 15 │ page.goForward({ waitUntil: "networkidle" });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

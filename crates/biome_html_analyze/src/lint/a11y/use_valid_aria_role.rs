@@ -70,7 +70,7 @@ declare_lint_rule! {
     /// - [MDN: Using ARIA: Roles, states, and properties](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques)
     ///
     pub UseValidAriaRole {
-        version: "next",
+        version: "2.4.0",
         name: "useValidAriaRole",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("aria-role").same()],

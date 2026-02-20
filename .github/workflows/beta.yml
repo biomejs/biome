@@ -70,7 +70,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@509565405a8a987e73cf742e26b26dcc72c4b01a # v2.67.26
+        uses: taiki-e/install-action@288875dd3d64326724fa6d9593062d9f8ba0b131 # v2.67.30
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -124,7 +124,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.93.0-bullseye@sha256:3ebcc2d6d71fb93a2967e35723902c51dd87dbb36f66f795a58d7921553fbcd4
+      image: rust:1.93.1-bullseye@sha256:70a5d01614c818b1d5ec069c96d58517cdfa84d8aa314b4c859503c43424a984
 
     env:
       version: ${{ needs.version.outputs.version }}
@@ -227,7 +227,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
-          node-version: 24.13.0
+          node-version: 24.13.1
           registry-url: 'https://registry.npmjs.org'
 
       - name: Pin Corepack 0.20

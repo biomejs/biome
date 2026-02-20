@@ -865,7 +865,7 @@ pub fn css_font_palette_values_at_rule_declarator(
     ))
 }
 pub fn css_function(
-    name: CssIdentifier,
+    name: AnyCssFunctionName,
     l_paren_token: SyntaxToken,
     items: CssParameterList,
     r_paren_token: SyntaxToken,
@@ -2703,6 +2703,18 @@ impl CssTypeSelectorBuilder {
         ))
     }
 }
+pub fn css_unary_expression(
+    operator_token: SyntaxToken,
+    expression: AnyCssExpression,
+) -> CssUnaryExpression {
+    CssUnaryExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNARY_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
 pub fn css_unicode_codepoint(value_token: SyntaxToken) -> CssUnicodeCodepoint {
     CssUnicodeCodepoint::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_UNICODE_CODEPOINT,
@@ -3027,6 +3039,36 @@ pub fn scss_namespaced_identifier(
         ],
     ))
 }
+pub fn scss_nesting_declaration(
+    name: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: CssGenericComponentValueList,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> ScssNestingDeclaration {
+    ScssNestingDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_NESTING_DECLARATION,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_qualified_name(
+    module: CssIdentifier,
+    dot_token: SyntaxToken,
+    member: AnyScssModuleMember,
+) -> ScssQualifiedName {
+    ScssQualifiedName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_QUALIFIED_NAME,
+        [
+            Some(SyntaxElement::Node(module.into_syntax())),
+            Some(SyntaxElement::Token(dot_token)),
+            Some(SyntaxElement::Node(member.into_syntax())),
+        ],
+    ))
+}
 pub fn scss_variable_modifier(
     excl_token: SyntaxToken,
     value_token: SyntaxToken,
@@ -3336,7 +3378,7 @@ where
 }
 pub fn css_bracketed_value_list<I>(items: I) -> CssBracketedValueList
 where
-    I: IntoIterator<Item = AnyCssCustomIdentifier>,
+    I: IntoIterator<Item = AnyCssBracketedValueItem>,
     I::IntoIter: ExactSizeIterator,
 {
     CssBracketedValueList::unwrap_cast(SyntaxNode::new_detached(
