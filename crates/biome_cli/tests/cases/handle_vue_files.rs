@@ -1614,3 +1614,76 @@ fn no_comma_operator_not_triggered_in_v_for() {
         result,
     ));
 }
+
+#[test]
+fn no_assign_in_expressions_not_triggered_in_v_on() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script setup>
+let counter = 0;
+</script>
+<template>
+  <!-- shorthand @click -->
+  <button type="button" @click="counter += 1">+</button>
+  <!-- longhand v-on:click -->
+  <button type="button" v-on:click="counter -= 1">-</button>
+</template>"#
+            .as_bytes(),
+    );
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noAssignInExpressions", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_assign_in_expressions_not_triggered_in_v_on",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_assign_in_expressions_triggered_in_template_interpolation() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script setup>
+let counter = 0;
+</script>
+<template>
+  <p>{{ counter += 1 }}</p>
+</template>"#
+            .as_bytes(),
+    );
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noAssignInExpressions", file.as_str()].as_slice()),
+    );
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_assign_in_expressions_triggered_in_template_interpolation",
+        fs,
+        console,
+        result,
+    ));
+}

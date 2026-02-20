@@ -129,6 +129,8 @@ pub enum EmbeddingKind {
         setup: bool,
         /// Where the bindings are defined
         is_source: bool,
+        /// Whether this is a v-on event handler (e.g., @click="handler")
+        event_handler: bool,
     },
     Svelte {
         /// Where the bindings are defined
@@ -150,6 +152,15 @@ impl EmbeddingKind {
     }
     pub const fn is_vue_setup(&self) -> bool {
         matches!(self, Self::Vue { setup: true, .. })
+    }
+    pub const fn is_vue_event_handler(&self) -> bool {
+        matches!(
+            self,
+            Self::Vue {
+                event_handler: true,
+                ..
+            }
+        )
     }
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte { .. })
@@ -226,6 +237,7 @@ impl JsFileSource {
         Self::js_module().with_embedding_kind(EmbeddingKind::Vue {
             setup: false,
             is_source: true,
+            event_handler: false,
         })
     }
 
@@ -234,6 +246,7 @@ impl JsFileSource {
         Self::js_module().with_embedding_kind(EmbeddingKind::Vue {
             setup: true,
             is_source: true,
+            event_handler: false,
         })
     }
 
@@ -336,6 +349,11 @@ impl JsFileSource {
                 }
                 | EmbeddingKind::Astro { frontmatter: false }
         )
+    }
+
+    /// Returns true if this is a Vue event handler (v-on directive)
+    pub const fn is_vue_event_handler(&self) -> bool {
+        self.embedding_kind.is_vue_event_handler()
     }
 
     pub const fn as_embedding_kind(&self) -> &EmbeddingKind {
