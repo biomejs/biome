@@ -147,9 +147,7 @@ fn resolve_relative_path(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    // normalize_path ensures forward slashes for cross-platform consistency
-    let joined = normalize_path(&base_dir.join(path));
-    resolve_absolute_path_with_extension_aliases(joined, fs, options)
+    resolve_absolute_path_with_extension_aliases(base_dir.join(path), fs, options)
 }
 
 /// Resolve the directory `dir_path`.

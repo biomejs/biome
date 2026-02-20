@@ -126,8 +126,6 @@ mod tests {
         plugins.normalize_relative_paths(base_dir);
 
         let PluginConfiguration::Path(result) = &plugins.0[0];
-        // normalize_path always uses forward slashes for cross-platform consistency
-        let expected = "/abs/my-plugin.grit";
-        assert_eq!(result, expected);
+        assert_eq!(result, &absolute);
     }
 }
