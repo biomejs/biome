@@ -739,11 +739,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             if let Some(new_text) = process_fix_all
                 .apply_plugin_text_edit(plugin_text_edit, &tree.syntax().to_string())?
             {
-                let parse = biome_css_parser::parse_css(
-                    &new_text,
-                    file_source,
-                    CssParserOptions::default(),
-                );
+                let options = params
+                    .settings
+                    .parse_options::<CssLanguage>(params.biome_path, &params.document_file_source);
+                let parse = biome_css_parser::parse_css(&new_text, file_source, options);
                 tree = parse.tree();
                 continue;
             }
