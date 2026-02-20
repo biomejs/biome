@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mixed Content Test</title>
+</head>
+<body>
+    <article class="content">
+        <h1>Mixed Content <em>Stress</em> Test</h1>
+        
+        <p>
+            This paragraph contains <strong>bold</strong> text, <em>italic</em> text,
+            <a href="#">links</a>, and <code>inline code</code> all mixed together.
+            We also have <span class="highlight">spans</span> and <mark>marked</mark> text.
+            The goal is to stress the parser with frequent <sup>superscript</sup> and
+            <sub>subscript</sub> elements mixed with regular text content.
+        </p>
+        
+        <p>
+            Lorem <strong>ipsum</strong> dolor <em>sit</em> amet, <a href="#">consectetur</a>
+            adipiscing <code>elit</code>. Sed <span>do</span> eiusmod <mark>tempor</mark>
+            incididunt <sup>ut</sup> labore <sub>et</sub> dolore <strong>magna</strong>
+            aliqua. <em>Ut</em> enim <a href="#">ad</a> minim <code>veniam</code>,
+            quis <span>nostrud</span> exercitation <mark>ullamco</mark> laboris <sup>nisi</sup>
+            ut <sub>aliquip</sub> ex <strong>ea</strong> commodo <em>consequat</em>.
+            Duis <a href="#">aute</a> irure <code>dolor</code> in <span>reprehenderit</span>
+            in <mark>voluptate</mark> velit <sup>esse</sup> cillum <sub>dolore</sub>
+            eu <strong>fugiat</strong> nulla <em>pariatur</em>. Excepteur <a href="#">sint</a>
+            occaecat <code>cupidatat</code> non <span>proident</span>, sunt <mark>in</mark>
+            culpa <sup>qui</sup> officia <sub>deserunt</sub> mollit <strong>anim</strong>
+            id <em>est</em> laborum.
+        </p>
+        
+        <div class="mixed">
+            Text before <span>span1</span> text between <span>span2</span> more text
+            <strong>bold</strong> regular <em>italic</em> normal <code>code</code> plain
+            <a href="#">link1</a> separator <a href="#">link2</a> divider
+            <mark>highlight1</mark> middle <mark>highlight2</mark> end
+            <sup>sup1</sup> middle <sup>sup2</sup> text <sub>sub1</sub> gap <sub>sub2</sub>
+            <span>A</span><span>B</span><span>C</span><span>D</span><span>E</span>
+            <strong>1</strong><strong>2</strong><strong>3</strong>
+            <em>a</em><em>b</em><em>c</em>
+            <code>x</code><code>y</code><code>z</code>
+            text.
+        </div>
+        
+        <p>
+            Starting with text <span>then span</span> back to text <strong>then bold</strong>
+            more text <em>then italic</em> continuing <a href="#">then link</a> proceeding
+            <code>then code</code> moving on <mark>then mark</mark> advancing
+            <sup>then sup</sup> progressing <sub>then sub</sub> continuing
+            <span>span again</span> and <strong>bold again</strong> with <em>italic again</em>
+            plus <a href="#">link again</a> and <code>code again</code> mixed with
+            <mark>mark again</mark> and <sup>sup again</sup> with <sub>sub again</sub>.
+        </p>
+        
+        <ul>
+            <li>Item with <strong>bold</strong> text</li>
+            <li>Item with <em>italic</em> text</li>
+            <li>Item with <a href="#">link</a> text</li>
+            <li>Item with <code>code</code> text</li>
+            <li>Item with <span>span</span> text</li>
+            <li>Item with <mark>mark</mark> text</li>
+            <li>Item with <sup>sup</sup> text</li>
+            <li>Item with <sub>sub</sub> text</li>
+            <li>Item with <strong>bold</strong> and <em>italic</em> text</li>
+            <li>Item with <a href="#">link</a> and <code>code</code> text</li>
+            <li>Item with <span>span</span> and <mark>mark</mark> text</li>
+            <li>Item with <sup>sup</sup> and <sub>sub</sub> text</li>
+            <li>Item with <strong><em>nested</em></strong> elements</li>
+            <li>Item with <a href="#"><strong>link bold</strong></a> mixed</li>
+            <li>Item with <code><span>code span</span></code> nested</li>
+        </ul>
+        
+        <p>
+            <strong>Important:</strong> This is <em>critical</em> information about
+            <a href="#">our product</a>. Please read the <code>documentation</code>
+            carefully. <span class="note">Note:</span> This <mark>feature</mark> is
+            available in version <sup>2.0</sup> and <sub>above</sub>.
+        </p>
+        
+        <div>
+            Line one with <strong>bold</strong>.
+            Line two with <em>italic</em>.
+            Line three with <a href="#">link</a>.
+            Line four with <code>code</code>.
+            Line five with <span>span</span>.
+            Line six with <mark>mark</mark>.
+            Line seven with <sup>sup</sup>.
+            Line eight with <sub>sub</sub>.
+        </div>
+        
+        <p>
+            The <abbr title="HyperText Markup Language">HTML</abbr> specification
+            defines <dfn>elements</dfn> that can be <kbd>user-input</kbd> or
+            <samp>program-output</samp>. Variables like <var>x</var> and <var>y</var>
+            are common. Citations like <cite>Source Title</cite> appear inline.
+            Quotes like <q>inline quotation</q> are useful. Time like <time>14:30</time>
+            is precise. Data like <data value="123">one-two-three</data> has meaning.
+        </p>
+        
+        <p>
+            Contact <del>old@example.com</del> <ins>new@example.com</ins> for support.
+            This is <s>strikethrough</s> and this is <u>underlined</u>.
+            Small <small>print</small> and big <big>text</big> (deprecated but parsed).
+            BiDi <bdi>مرحبا</bdi> and override <bdo dir="rtl">Hello</bdo>.
+            Ruby <ruby>漢<rt>かん</rt>字<rt>じ</rt></ruby> annotations.
+        </p>
+        
+        <p>
+            Inline <wbr>word<wbr>break<wbr>opportunities help with long words.
+            Line breaks<br>force new lines.<br>Multiple<br>breaks<br>in<br>sequence.
+        </p>
+    </article>
+</body>
+</html>

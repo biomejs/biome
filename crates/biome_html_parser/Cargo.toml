@@ -26,6 +26,7 @@ biome_unicode_table = { workspace = true }
 tracing             = { workspace = true }
 
 [dev-dependencies]
+biome_string_case = { workspace = true }
 biome_test_utils  = { workspace = true }
 camino            = { workspace = true }
 criterion         = { package = "codspeed-criterion-compat", version = "*" }
