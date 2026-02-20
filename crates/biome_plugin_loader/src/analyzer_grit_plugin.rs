@@ -1,5 +1,7 @@
 use crate::{AnalyzerPlugin, PluginDiagnostic};
-use biome_analyze::{PluginActionData, PluginEvalResult, PluginTargetLanguage, RuleDiagnostic};
+use biome_analyze::{
+    PluginActionData, PluginDiagnosticEntry, PluginEvalResult, PluginTargetLanguage, RuleDiagnostic,
+};
 use biome_console::markup;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_diagnostics::{Severity, category};
@@ -134,30 +136,41 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                 }
 
                 // Convert rewrite effects to plugin actions.
-                let mut actions = Vec::new();
-                for effect in &result.effects {
-                    if let GritQueryEffect::Rewrite(rewrite) = effect {
-                        actions.push(PluginActionData {
+                let mut actions: Vec<_> = result
+                    .effects
+                    .iter()
+                    .filter_map(|effect| match effect {
+                        GritQueryEffect::Rewrite(rewrite) => Some(PluginActionData {
                             source_range,
                             original_text: original_text.clone(),
                             rewritten_text: rewrite.rewritten.content.clone(),
                             message: format!("Rewrite suggested by plugin `{name}`"),
-                        });
-                    }
-                }
+                        }),
+                        _ => None,
+                    })
+                    .collect();
 
-                PluginEvalResult {
-                    diagnostics,
-                    actions,
-                }
+                // Pair each diagnostic with its action by position.
+                let mut action_iter = actions.drain(..);
+                let entries = diagnostics
+                    .into_iter()
+                    .map(|diagnostic| PluginDiagnosticEntry {
+                        diagnostic,
+                        action: action_iter.next(),
+                    })
+                    .collect();
+
+                PluginEvalResult { entries }
             }
             Err(error) => PluginEvalResult {
-                diagnostics: vec![RuleDiagnostic::new(
-                    category!("plugin"),
-                    None::<TextRange>,
-                    markup!(<Emphasis>{name}</Emphasis>" errored: "<Error>{error.to_string()}</Error>),
-                )],
-                actions: Vec::new(),
+                entries: vec![PluginDiagnosticEntry {
+                    diagnostic: RuleDiagnostic::new(
+                        category!("plugin"),
+                        None::<TextRange>,
+                        markup!(<Emphasis>{name}</Emphasis>" errored: "<Error>{error.to_string()}</Error>),
+                    ),
+                    action: None,
+                }],
             },
         }
     }

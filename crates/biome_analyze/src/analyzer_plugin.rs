@@ -30,11 +30,17 @@ pub struct PluginActionData {
     pub message: String,
 }
 
-/// Result of evaluating a plugin, containing diagnostics and optional code actions.
+/// A diagnostic paired with its optional code action.
+#[derive(Debug)]
+pub struct PluginDiagnosticEntry {
+    pub diagnostic: RuleDiagnostic,
+    pub action: Option<PluginActionData>,
+}
+
+/// Result of evaluating a plugin, containing diagnostics paired with their actions.
 #[derive(Debug, Default)]
 pub struct PluginEvalResult {
-    pub diagnostics: Vec<RuleDiagnostic>,
-    pub actions: Vec<PluginActionData>,
+    pub entries: Vec<PluginDiagnosticEntry>,
 }
 
 /// Definition of an analyzer plugin.
@@ -129,16 +135,16 @@ where
             .evaluate(node.clone().into(), ctx.options.file_path.clone());
         rule_timer.stop();
 
-        let actions = eval_result.actions;
-        let signals = eval_result.diagnostics.into_iter().map(|diagnostic| {
-            let name = diagnostic
+        let signals = eval_result.entries.into_iter().map(|entry| {
+            let name = entry
+                .diagnostic
                 .subcategory
                 .clone()
                 .unwrap_or_else(|| "anonymous".into());
-            let text_range = diagnostic.span().unwrap_or_default();
+            let text_range = entry.diagnostic.span().unwrap_or_default();
 
-            let signal = PluginSignal::<L>::new(diagnostic)
-                .with_plugin_actions(actions.clone())
+            let signal = PluginSignal::<L>::new(entry.diagnostic)
+                .with_plugin_action(entry.action)
                 .with_root(node.clone());
 
             SignalEntry {

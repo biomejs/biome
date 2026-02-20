@@ -6,7 +6,9 @@ use boa_engine::object::builtins::JsFunction;
 use boa_engine::{JsNativeError, JsResult, JsString, JsValue};
 use camino::{Utf8Path, Utf8PathBuf};
 
-use biome_analyze::{AnalyzerPlugin, PluginEvalResult, PluginTargetLanguage, RuleDiagnostic};
+use biome_analyze::{
+    AnalyzerPlugin, PluginDiagnosticEntry, PluginEvalResult, PluginTargetLanguage, RuleDiagnostic,
+};
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_js_runtime::JsExecContext;
@@ -93,12 +95,14 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
             Ok(plugin) => plugin,
             Err(err) => {
                 return PluginEvalResult {
-                    diagnostics: vec![RuleDiagnostic::new(
-                        category!("plugin"),
-                        None::<TextRange>,
-                        markup!("Could not load the plugin: "<Error>{err.to_string()}</Error>),
-                    )],
-                    actions: Vec::new(),
+                    entries: vec![PluginDiagnosticEntry {
+                        diagnostic: RuleDiagnostic::new(
+                            category!("plugin"),
+                            None::<TextRange>,
+                            markup!("Could not load the plugin: "<Error>{err.to_string()}</Error>),
+                        ),
+                        action: None,
+                    }],
                 };
             }
         };
@@ -124,10 +128,15 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                 |_| plugin.ctx.pull_diagnostics(),
             );
 
-        PluginEvalResult {
-            diagnostics,
-            actions: Vec::new(),
-        }
+        let entries = diagnostics
+            .into_iter()
+            .map(|diagnostic| PluginDiagnosticEntry {
+                diagnostic,
+                action: None,
+            })
+            .collect();
+
+        PluginEvalResult { entries }
     }
 }
 
@@ -200,8 +209,8 @@ mod tests {
 
         let result1 = worker1.join().unwrap();
         let result2 = worker2.join().unwrap();
-        let mut diagnostics = result1.diagnostics;
-        diagnostics.extend(result2.diagnostics);
+        let mut diagnostics: Vec<_> = result1.entries.into_iter().map(|e| e.diagnostic).collect();
+        diagnostics.extend(result2.entries.into_iter().map(|e| e.diagnostic));
 
         assert_eq!(diagnostics.len(), 2);
         snap_diagnostics(

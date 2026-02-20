@@ -113,7 +113,7 @@ where
 /// directly converts via `AnalyzerDiagnostic::from(RuleDiagnostic)`.
 pub struct PluginSignal<L: Language> {
     diagnostic: RuleDiagnostic,
-    plugin_actions: Vec<PluginActionData>,
+    plugin_action: Option<PluginActionData>,
     root: Option<SyntaxNode<L>>,
 }
 
@@ -121,13 +121,13 @@ impl<L: Language> PluginSignal<L> {
     pub fn new(diagnostic: RuleDiagnostic) -> Self {
         Self {
             diagnostic,
-            plugin_actions: Vec::new(),
+            plugin_action: None,
             root: None,
         }
     }
 
-    pub fn with_plugin_actions(mut self, actions: Vec<PluginActionData>) -> Self {
-        self.plugin_actions = actions;
+    pub fn with_plugin_action(mut self, action: Option<PluginActionData>) -> Self {
+        self.plugin_action = action;
         self
     }
 
@@ -143,35 +143,25 @@ impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
     }
 
     fn actions(&self) -> AnalyzerActionIter<L> {
-        if self.plugin_actions.is_empty() {
+        let Some(action_data) = &self.plugin_action else {
             return AnalyzerActionIter::new(vec![]);
-        }
+        };
 
         let Some(root) = &self.root else {
             return AnalyzerActionIter::new(vec![]);
         };
 
-        let actions: Vec<_> = self
-            .plugin_actions
-            .iter()
-            .map(|action_data| {
-                let text_edit = TextEdit::from_unicode_words(
-                    &action_data.original_text,
-                    &action_data.rewritten_text,
-                );
+        let text_edit =
+            TextEdit::from_unicode_words(&action_data.original_text, &action_data.rewritten_text);
 
-                AnalyzerAction {
-                    rule_name: None,
-                    category: ActionCategory::QuickFix(Cow::Borrowed("plugin")),
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup!({ action_data.message }).to_owned(),
-                    mutation: BatchMutation::new(root.clone()),
-                    text_edit: Some((action_data.source_range, text_edit)),
-                }
-            })
-            .collect();
-
-        AnalyzerActionIter::new(actions)
+        AnalyzerActionIter::new(vec![AnalyzerAction {
+            rule_name: None,
+            category: ActionCategory::QuickFix(Cow::Borrowed("plugin")),
+            applicability: Applicability::MaybeIncorrect,
+            message: markup!({ action_data.message }).to_owned(),
+            mutation: BatchMutation::new(root.clone()),
+            text_edit: Some((action_data.source_range, text_edit)),
+        }])
     }
 
     fn transformations(&self) -> AnalyzerTransformationIter<L> {
