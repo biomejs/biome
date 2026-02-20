@@ -1,9 +1,7 @@
 mod declaration;
 
 use crate::parser::CssParser;
-use crate::syntax::{
-    CssSyntaxFeatures, is_nth_at_identifier, parse_regular_identifier,
-};
+use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::{
     SCSS_IDENTIFIER, SCSS_PARENT_SELECTOR_VALUE, SCSS_QUALIFIED_NAME,
 };
