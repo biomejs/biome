@@ -149,10 +149,10 @@ impl<'a> ModuleGraphSnapshot<'a> {
                         if !side_effect_paths.is_empty() {
                             content.push_str("\nSide-effect imports: [");
                             for (specifier, path) in &side_effect_paths {
-                                let resolved = path
-                                    .as_path()
-                                    .map(|p| p.as_str().replace('\\', "/"))
-                                    .unwrap_or_else(|| "<unresolved>".to_string());
+                                let resolved =
+                                    path.as_path().map_or("<unresolved>".to_string(), |p| {
+                                        p.as_str().replace('\\', "/")
+                                    });
                                 content.push_str(&format!("\n  \"{specifier}\" => {resolved},"));
                             }
                             content.push_str("\n]");
