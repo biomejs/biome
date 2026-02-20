@@ -44,9 +44,11 @@ pub(crate) fn linearize_binding<'a>(
             if matches!(effect.kind, EffectKind::Rewrite) {
                 if let Some(cached) = memo.get(br) {
                     if let Some(cached_text) = cached {
-                        let byte_range = binding
-                            .range(language)
-                            .ok_or_else(|| GritPatternError::new("expected binding to have a range for rewrite effect"))?;
+                        let byte_range = binding.range(language).ok_or_else(|| {
+                            GritPatternError::new(
+                                "expected binding to have a range for rewrite effect",
+                            )
+                        })?;
                         replacements.push((byte_range.start, byte_range.end, cached_text.clone()));
                         continue;
                     }
@@ -68,9 +70,9 @@ pub(crate) fn linearize_binding<'a>(
             memo.insert(br.clone(), Some(res.to_string()));
         }
 
-        let byte_range = binding
-            .range(language)
-            .ok_or_else(|| GritPatternError::new("expected binding to have a range for rewrite effect"))?;
+        let byte_range = binding.range(language).ok_or_else(|| {
+            GritPatternError::new("expected binding to have a range for rewrite effect")
+        })?;
         replacements.push((byte_range.start, byte_range.end, res.into_owned()));
     }
 
