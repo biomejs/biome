@@ -117,9 +117,7 @@ fn get_fixtures_path() -> Utf8PathBuf {
             .expect("couldn't find Cargo.lock")
             .to_path_buf();
     }
-    let fixtures = path.join("crates/biome_module_graph/tests/fixtures");
-    // Normalize to forward slashes for cross-platform consistency
-    normalize_path(&fixtures)
+    path.join("crates/biome_module_graph/tests/fixtures")
 }
 
 #[test]

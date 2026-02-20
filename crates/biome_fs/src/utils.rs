@@ -3,7 +3,6 @@ use std::{
     env,
     fs::{self, FileType},
     io::ErrorKind as IoErrorKind,
-    path,
 };
 
 use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
@@ -40,8 +39,10 @@ pub fn ensure_cache_dir() -> Utf8PathBuf {
 /// Normalizes the given `path` without requiring filesystem access.
 ///
 /// This only normalizes `.` and `..` entries, but does not resolve symlinks.
+/// The result always uses forward slashes as path separators for cross-platform consistency.
 pub fn normalize_path(path: &Utf8Path) -> Utf8PathBuf {
     let mut stack = Vec::new();
+    let mut has_root = false;
 
     for component in path.components() {
         match component {
@@ -57,18 +58,27 @@ pub fn normalize_path(path: &Utf8Path) -> Utf8PathBuf {
                 stack.push(prefix.as_str());
             }
             Utf8Component::RootDir => {
-                stack.push(path::MAIN_SEPARATOR_STR);
+                has_root = true;
             }
             Utf8Component::Normal(c) => stack.push(c),
         }
     }
 
-    let mut result = Utf8PathBuf::new();
-    for part in stack {
-        result.push(part);
+    // Build path string manually to ensure forward slashes on all platforms
+    if stack.is_empty() {
+        return if has_root {
+            Utf8PathBuf::from("/")
+        } else {
+            Utf8PathBuf::new()
+        };
     }
 
-    result
+    let mut result = String::new();
+    if has_root {
+        result.push('/');
+    }
+    result.push_str(&stack.join("/"));
+    Utf8PathBuf::from(result)
 }
 
 /// Expands symlinks by recursively following them up to [MAX_SYMLINK_DEPTH].
