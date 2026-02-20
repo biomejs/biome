@@ -715,6 +715,8 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             |signal| process_fix_all.process_signal(signal),
         );
 
+        let plugin_text_edit = action.as_ref().and_then(|a| a.text_edit.clone());
+
         let result = process_fix_all.process_action(action, |root| {
             tree = match JsonRoot::cast(root) {
                 Some(tree) => tree,
@@ -724,6 +726,14 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         })?;
 
         if result.is_none() {
+            if let Some(new_text) = process_fix_all
+                .apply_plugin_text_edit(plugin_text_edit, &tree.syntax().to_string())?
+            {
+                let parse = biome_json_parser::parse_json(&new_text, JsonParserOptions::default());
+                tree = parse.tree();
+                continue;
+            }
+
             return process_fix_all.finish(|| {
                 Ok(if params.should_format {
                     Either::Left(format_node(
