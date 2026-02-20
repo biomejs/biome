@@ -14,6 +14,7 @@ use crate::pattern_compiler::{
 use crate::variables::{VarRegistry, VariableLocations};
 use crate::{BuiltInFunction, CompileError};
 use biome_analyze::RuleDiagnostic;
+use biome_diagnostics::Applicability;
 use biome_grit_syntax::{GritRoot, GritRootExt};
 use camino::Utf8Path;
 use grit_pattern_matcher::constants::{
@@ -199,7 +200,7 @@ impl GritQuery {
 #[derive(Debug)]
 pub struct GritQueryResult {
     pub effects: Vec<GritQueryEffect>,
-    pub diagnostics: Vec<RuleDiagnostic>,
+    pub diagnostics: Vec<(RuleDiagnostic, Applicability)>,
     pub logs: AnalysisLogs,
 }
 
