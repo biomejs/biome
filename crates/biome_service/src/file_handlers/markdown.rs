@@ -2,7 +2,6 @@ use super::{
     Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath, ExtensionHandler,
     FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
 };
-use crate::WorkspaceError;
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, SettingsWithEditor, check_feature_activity,
@@ -12,10 +11,10 @@ use biome_analyze::AnalyzerOptions;
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::analyzer::linter::LinterEnabled;
 use biome_configuration::formatter::FormatterEnabled;
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
+use biome_formatter::{
+    IndentStyle, IndentWidth, LineEnding, LineWidth, SimpleFormatOptions, TrailingNewline,
+};
 use biome_fs::BiomePath;
-use biome_markdown_formatter::context::MarkdownFormatOptions;
-use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParseOptions, parse_markdown_with_cache};
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
 use biome_parser::{AnyParse, NodeParse};
@@ -29,8 +28,8 @@ pub struct MarkdownFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
-    pub enabled: Option<FormatterEnabled>,
     pub trailing_newline: Option<TrailingNewline>,
+    pub enabled: Option<FormatterEnabled>,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -49,9 +48,9 @@ impl ServiceLanguage for MarkdownLanguage {
     type FormatterSettings = MarkdownFormatterSettings;
     type LinterSettings = MarkdownLinterSettings;
     type AssistSettings = MarkdownAssistSettings;
-    type FormatOptions = MarkdownFormatOptions;
+    type FormatOptions = SimpleFormatOptions;
     type ParserSettings = ();
-    type ParserOptions = ();
+    type ParserOptions = MarkdownParseOptions;
     type EnvironmentSettings = ();
 
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
@@ -68,6 +67,7 @@ impl ServiceLanguage for MarkdownLanguage {
         _path: &BiomePath,
         _file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
+        MarkdownParseOptions::default()
     }
 
     fn resolve_format_options(
@@ -100,13 +100,13 @@ impl ServiceLanguage for MarkdownLanguage {
             .trailing_newline
             .or(global.trailing_newline)
             .unwrap_or_default();
-
-        MarkdownFormatOptions::default()
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width)
-            .with_line_ending(line_ending)
-            .with_trailing_newline(trailing_newline)
+        SimpleFormatOptions {
+            indent_style,
+            indent_width,
+            line_width,
+            line_ending,
+            trailing_newline,
+        }
     }
 
     fn resolve_analyzer_options(
@@ -178,14 +178,14 @@ impl ExtensionHandler for MarkdownFileHandler {
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
-                debug_formatter_ir: Some(debug_formatter_ir),
+                debug_formatter_ir: None,
                 debug_type_info: None,
                 debug_registered_types: None,
                 debug_semantic_model: None,
             },
             analyzer: Default::default(),
             formatter: FormatterCapabilities {
-                format: Some(format),
+                format: None,
                 format_range: None,
                 format_on_type: None,
                 format_embedded: None,
@@ -211,10 +211,11 @@ fn parse(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    _settings: &SettingsWithEditor,
+    settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let parse = parse_markdown_with_cache(text, cache, MarkdownParseOptions::default());
+    let options = settings.parse_options::<MarkdownLanguage>(_biome_path, &file_source);
+    let parse = parse_markdown_with_cache(text, cache, options);
     let any_parse =
         NodeParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics()).into();
 
@@ -230,38 +231,5 @@ fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeR
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
-    }
-}
-
-fn debug_formatter_ir(
-    biome_path: &BiomePath,
-    document_file_source: &DocumentFileSource,
-    parse: AnyParse,
-    settings: &SettingsWithEditor,
-) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<MarkdownLanguage>(biome_path, document_file_source);
-
-    let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
-
-    let root_element = formatted.into_document();
-    Ok(root_element.to_string())
-}
-
-#[tracing::instrument(level = "debug", skip(parse, settings))]
-fn format(
-    biome_path: &BiomePath,
-    document_file_source: &DocumentFileSource,
-    parse: AnyParse,
-    settings: &SettingsWithEditor,
-) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<MarkdownLanguage>(biome_path, document_file_source);
-
-    let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
-
-    match formatted.print() {
-        Ok(printed) => Ok(printed),
-        Err(error) => Err(WorkspaceError::FormatError(error.into())),
     }
 }
