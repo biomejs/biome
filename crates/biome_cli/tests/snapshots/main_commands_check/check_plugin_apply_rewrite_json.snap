@@ -24,7 +24,7 @@ language json
     register_diagnostic(
         span = $version,
         message = "Update version.",
-        severity = "warning"
+        severity = "warn"
     ),
     $version => `"2.0.0"`
 }

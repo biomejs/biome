@@ -3442,7 +3442,7 @@ fn check_plugin_apply_rewrite() {
         br#"language js
 
 `console.log($msg)` as $call where {
-    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warning"),
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warn"),
     $call => `console.info($msg)`
 }
 "#,
@@ -3487,7 +3487,7 @@ fn check_plugin_rewrite_no_write() {
         br#"language js
 
 `console.log($msg)` as $call where {
-    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warning"),
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warn"),
     $call => `console.info($msg)`
 }
 "#,
@@ -3502,7 +3502,7 @@ fn check_plugin_rewrite_no_write() {
         Args::from(["check", file_path.as_str()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_file_contents(&fs, file_path, "console.log(\"hello\");\n");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3532,7 +3532,7 @@ fn check_plugin_rewrite_write_without_unsafe() {
         br#"language js
 
 `console.log($msg)` as $call where {
-    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warning"),
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warn"),
     $call => `console.info($msg)`
 }
 "#,
@@ -3548,6 +3548,7 @@ fn check_plugin_rewrite_write_without_unsafe() {
     );
 
     // --write without --unsafe should NOT apply unsafe fixes
+    assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_file_contents(&fs, file_path, "console.log(\"hello\");\n");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3577,7 +3578,7 @@ fn check_plugin_multiple_rewrites() {
         br#"language js
 
 `console.log($msg)` as $call where {
-    register_diagnostic(span = $call, message = "Use logger.info instead of console.log.", severity = "warning"),
+    register_diagnostic(span = $call, message = "Use logger.info instead of console.log.", severity = "warn"),
     $call => `logger.info($msg)`
 }
 "#,
@@ -3793,7 +3794,7 @@ fn check_plugin_apply_rewrite_css() {
     register_diagnostic(
         span = $color,
         message = "Avoid using red.",
-        severity = "warning"
+        severity = "warn"
     ),
     $color => `blue`
 }
@@ -3846,7 +3847,7 @@ fn check_plugin_apply_rewrite_json() {
     register_diagnostic(
         span = $version,
         message = "Update version.",
-        severity = "warning"
+        severity = "warn"
     ),
     $version => `"2.0.0"`
 }

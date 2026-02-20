@@ -26,7 +26,7 @@ logger.info("!");
 language js
 
 `console.log($msg)` as $call where {
-    register_diagnostic(span = $call, message = "Use logger.info instead of console.log.", severity = "warning"),
+    register_diagnostic(span = $call, message = "Use logger.info instead of console.log.", severity = "warn"),
     $call => `logger.info($msg)`
 }
 

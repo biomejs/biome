@@ -1858,7 +1858,7 @@ async fn plugin_rewrite_pull_diagnostics() -> Result<()> {
     register_diagnostic(
         span = $call,
         message = "Use console.info instead of console.log.",
-        severity = "warning"
+        severity = "warn"
     ),
     $call => `console.info($msg)`
 }"#;
@@ -1893,7 +1893,7 @@ async fn plugin_rewrite_pull_diagnostics() -> Result<()> {
             "Expected at least one diagnostic"
         );
         let diag = &params.diagnostics[0];
-        assert_eq!(diag.severity, Some(lsp::DiagnosticSeverity::ERROR));
+        assert_eq!(diag.severity, Some(lsp::DiagnosticSeverity::WARNING));
         assert_eq!(
             diag.code,
             Some(lsp::NumberOrString::String(String::from("plugin")))

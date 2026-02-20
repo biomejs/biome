@@ -24,7 +24,7 @@ language css
     register_diagnostic(
         span = $color,
         message = "Avoid using red.",
-        severity = "warning"
+        severity = "warn"
     ),
     $color => `blue`
 }

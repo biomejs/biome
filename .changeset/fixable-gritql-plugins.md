@@ -9,7 +9,7 @@ Added support for applying GritQL plugin rewrites as code actions. GritQL plugin
 language js
 
 `console.log($msg)` as $call where {
-    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warning"),
+    register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warn"),
     $call => `console.info($msg)`
 }
 ```
