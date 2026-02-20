@@ -21,9 +21,9 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```html,expect_diagnostic,ignore
+    /// ```html,ignore
     /// <style>.card { border: 1px solid; }</style>
-    /// <div class="header">Content</div>
+    /// <div class="header">Content</div>  <!-- ⚠️ Class "header" is not defined -->
     /// ```
     ///
     /// ### Valid

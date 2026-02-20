@@ -346,8 +346,12 @@ pub fn get_css_added_paths<'a>(
                 return None;
             };
             let root = fs.read_file_from_path(path).ok().map(|content| {
-                let parsed =
-                    biome_css_parser::parse_css(&content, file_source, CssParserOptions::default());
+                let options = if file_source.is_css_modules() {
+                    CssParserOptions::default().allow_css_modules()
+                } else {
+                    CssParserOptions::default()
+                };
+                let parsed = biome_css_parser::parse_css(&content, file_source, options);
                 let diagnostics = parsed.diagnostics();
                 assert!(
                     diagnostics.is_empty(),

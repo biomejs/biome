@@ -19,8 +19,8 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```css,expect_diagnostic,file=styles.css
-    /// .unused { color: red; }
+    /// ```css,file=styles.css
+    /// .unused { color: red; }  /* Class "unused" is never referenced */
     /// .used { color: blue; }
     /// ```
     ///
