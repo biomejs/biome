@@ -493,6 +493,7 @@ AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
 	| ScssDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssBogus
 	| CssMetavariable
@@ -513,6 +514,7 @@ CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
 AnyCssDeclarationOrAtRule =
 	CssDeclarationWithSemicolon
 	| ScssDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
 
@@ -547,6 +549,7 @@ CssDeclarationList = AnyCssDeclaration*
 AnyCssDeclaration =
 	CssDeclarationWithSemicolon
 	| ScssDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 
 AnyCssRuleBlock =
@@ -1367,6 +1370,8 @@ CssPageAtRuleItemList = AnyCssPageAtRuleItem*
 
 AnyCssPageAtRuleItem =
 	CssDeclarationWithSemicolon
+	| ScssDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
 	| CssMarginAtRule
@@ -1845,6 +1850,7 @@ AnyCssValue =
 	| CssMetavariable
 	| TwValueThemeReference
 	| ScssIdentifier
+	| ScssQualifiedName
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1897,10 +1903,14 @@ AnyCssFunction =
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
 CssFunction =
-	name: CssIdentifier
+	name: AnyCssFunctionName
 	'('
 	items: CssParameterList
 	')'
+
+AnyCssFunctionName =
+	CssIdentifier
+	| ScssQualifiedName
 
 // https://drafts.csswg.org/css-values-4/#url-value
 // <url> = <url()> | <src()>
@@ -2076,6 +2086,7 @@ AnyCssIfTest =
 
 AnyCssExpression =
 	CssBinaryExpression
+	| CssUnaryExpression
 	| CssParenthesizedExpression
 	| CssListOfComponentValuesExpression
 	| CssCommaSeparatedValue
@@ -2093,6 +2104,10 @@ CssBinaryExpression =
 		'+' | '-' | '*' | '/'
 	)
 	right: AnyCssExpression
+
+CssUnaryExpression =
+	operator: ('+' | '-' | '*')
+	expression: AnyCssExpression
 
 CssParenthesizedExpression =
 	'(' expression: AnyCssExpression? ')'
@@ -2113,7 +2128,11 @@ CssBracketedValue =
 		items: CssBracketedValueList
 	']'
 
-CssBracketedValueList = AnyCssCustomIdentifier*
+CssBracketedValueList = AnyCssBracketedValueItem*
+
+AnyCssBracketedValueItem =
+	AnyCssCustomIdentifier
+	| CssGenericDelimiter
 
 AnyCssCustomIdentifier =
 	CssCustomIdentifier
@@ -2481,6 +2500,25 @@ ScssNamespacedIdentifier =
 	namespace: CssIdentifier
 	'.'
 	name: ScssIdentifier
+
+// font: { family: sans-serif; size: 12px; }
+// ^^^^
+ScssNestingDeclaration =
+	name: CssIdentifier
+	':'
+	value: CssGenericComponentValueList
+	block: AnyCssDeclarationOrRuleBlock
+
+// color: module.$var;
+//        ^^^^^^^^^^^
+ScssQualifiedName =
+	module: CssIdentifier
+	'.'
+	member: AnyScssModuleMember
+
+AnyScssModuleMember =
+	CssIdentifier
+	| ScssIdentifier
 
 // $var: 1 !default !global;
 //         ^^^^^^^^^^^^^^^^

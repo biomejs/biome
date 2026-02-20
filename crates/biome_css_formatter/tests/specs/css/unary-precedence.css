@@ -1,0 +1,5 @@
+.unary-precedence{
+  width:calc(-1 +2);
+  width:calc(+var(--x)+1px);
+  width:calc(- var(--y)*2);
+}

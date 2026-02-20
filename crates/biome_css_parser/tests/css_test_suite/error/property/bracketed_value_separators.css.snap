@@ -1,0 +1,387 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.a {
+  grid-template-columns: [full-start , main-start / main-end , full-end];
+  grid-column: [col-start] /[col-end];
+}
+
+.b {
+  content: [a, b / c];
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..3 "a" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@3..4 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@4..28 "grid-template-columns" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@28..30 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusSupportsCondition {
+                                                items: [
+                                                    L_BRACK@30..31 "[" [] [],
+                                                    CssBogus {
+                                                        items: [
+                                                            CssCustomIdentifier {
+                                                                value_token: IDENT@31..42 "full-start" [] [Whitespace(" ")],
+                                                            },
+                                                            CssBogus {
+                                                                items: [
+                                                                    COMMA@42..44 "," [] [Whitespace(" ")],
+                                                                ],
+                                                            },
+                                                            CssCustomIdentifier {
+                                                                value_token: IDENT@44..55 "main-start" [] [Whitespace(" ")],
+                                                            },
+                                                            CssBogus {
+                                                                items: [
+                                                                    SLASH@55..57 "/" [] [Whitespace(" ")],
+                                                                ],
+                                                            },
+                                                            CssCustomIdentifier {
+                                                                value_token: IDENT@57..66 "main-end" [] [Whitespace(" ")],
+                                                            },
+                                                            CssBogus {
+                                                                items: [
+                                                                    COMMA@66..68 "," [] [Whitespace(" ")],
+                                                                ],
+                                                            },
+                                                            CssCustomIdentifier {
+                                                                value_token: IDENT@68..76 "full-end" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                    R_BRACK@76..77 "]" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@77..78 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@78..92 "grid-column" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@92..94 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssBracketedValue {
+                                        l_brack_token: L_BRACK@94..95 "[" [] [],
+                                        items: CssBracketedValueList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@95..104 "col-start" [] [],
+                                            },
+                                        ],
+                                        r_brack_token: R_BRACK@104..106 "]" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@106..107 "/" [] [],
+                                    },
+                                    CssBracketedValue {
+                                        l_brack_token: L_BRACK@107..108 "[" [] [],
+                                        items: CssBracketedValueList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@108..115 "col-end" [] [],
+                                            },
+                                        ],
+                                        r_brack_token: R_BRACK@115..116 "]" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@116..117 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@117..119 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@119..122 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@122..124 "b" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@124..125 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@125..135 "content" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@135..137 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusSupportsCondition {
+                                                items: [
+                                                    L_BRACK@137..138 "[" [] [],
+                                                    CssBogus {
+                                                        items: [
+                                                            CssCustomIdentifier {
+                                                                value_token: IDENT@138..139 "a" [] [],
+                                                            },
+                                                            CssBogus {
+                                                                items: [
+                                                                    COMMA@139..141 "," [] [Whitespace(" ")],
+                                                                ],
+                                                            },
+                                                            CssCustomIdentifier {
+                                                                value_token: IDENT@141..143 "b" [] [Whitespace(" ")],
+                                                            },
+                                                            CssBogus {
+                                                                items: [
+                                                                    SLASH@143..145 "/" [] [Whitespace(" ")],
+                                                                ],
+                                                            },
+                                                            CssCustomIdentifier {
+                                                                value_token: IDENT@145..146 "c" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                    R_BRACK@146..147 "]" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@147..148 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@148..150 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@150..151 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..151
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..150
+    0: CSS_QUALIFIED_RULE@0..119
+      0: CSS_SELECTOR_LIST@0..3
+        0: CSS_COMPOUND_SELECTOR@0..3
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..3
+            0: CSS_CLASS_SELECTOR@0..3
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..3
+                0: IDENT@1..3 "a" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@3..119
+        0: L_CURLY@3..4 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@4..117
+          0: CSS_DECLARATION_WITH_SEMICOLON@4..78
+            0: CSS_DECLARATION@4..77
+              0: CSS_BOGUS_PROPERTY@4..77
+                0: CSS_IDENTIFIER@4..28
+                  0: IDENT@4..28 "grid-template-columns" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@28..30 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@30..77
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@30..77
+                    0: L_BRACK@30..31 "[" [] []
+                    1: CSS_BOGUS@31..76
+                      0: CSS_CUSTOM_IDENTIFIER@31..42
+                        0: IDENT@31..42 "full-start" [] [Whitespace(" ")]
+                      1: CSS_BOGUS@42..44
+                        0: COMMA@42..44 "," [] [Whitespace(" ")]
+                      2: CSS_CUSTOM_IDENTIFIER@44..55
+                        0: IDENT@44..55 "main-start" [] [Whitespace(" ")]
+                      3: CSS_BOGUS@55..57
+                        0: SLASH@55..57 "/" [] [Whitespace(" ")]
+                      4: CSS_CUSTOM_IDENTIFIER@57..66
+                        0: IDENT@57..66 "main-end" [] [Whitespace(" ")]
+                      5: CSS_BOGUS@66..68
+                        0: COMMA@66..68 "," [] [Whitespace(" ")]
+                      6: CSS_CUSTOM_IDENTIFIER@68..76
+                        0: IDENT@68..76 "full-end" [] []
+                    2: R_BRACK@76..77 "]" [] []
+              1: (empty)
+            1: SEMICOLON@77..78 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@78..117
+            0: CSS_DECLARATION@78..116
+              0: CSS_GENERIC_PROPERTY@78..116
+                0: CSS_IDENTIFIER@78..92
+                  0: IDENT@78..92 "grid-column" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@92..94 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@94..116
+                  0: CSS_BRACKETED_VALUE@94..106
+                    0: L_BRACK@94..95 "[" [] []
+                    1: CSS_BRACKETED_VALUE_LIST@95..104
+                      0: CSS_CUSTOM_IDENTIFIER@95..104
+                        0: IDENT@95..104 "col-start" [] []
+                    2: R_BRACK@104..106 "]" [] [Whitespace(" ")]
+                  1: CSS_GENERIC_DELIMITER@106..107
+                    0: SLASH@106..107 "/" [] []
+                  2: CSS_BRACKETED_VALUE@107..116
+                    0: L_BRACK@107..108 "[" [] []
+                    1: CSS_BRACKETED_VALUE_LIST@108..115
+                      0: CSS_CUSTOM_IDENTIFIER@108..115
+                        0: IDENT@108..115 "col-end" [] []
+                    2: R_BRACK@115..116 "]" [] []
+              1: (empty)
+            1: SEMICOLON@116..117 ";" [] []
+        2: R_CURLY@117..119 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@119..150
+      0: CSS_SELECTOR_LIST@119..124
+        0: CSS_COMPOUND_SELECTOR@119..124
+          0: CSS_NESTED_SELECTOR_LIST@119..119
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@119..124
+            0: CSS_CLASS_SELECTOR@119..124
+              0: DOT@119..122 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@122..124
+                0: IDENT@122..124 "b" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@124..150
+        0: L_CURLY@124..125 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@125..148
+          0: CSS_DECLARATION_WITH_SEMICOLON@125..148
+            0: CSS_DECLARATION@125..147
+              0: CSS_BOGUS_PROPERTY@125..147
+                0: CSS_IDENTIFIER@125..135
+                  0: IDENT@125..135 "content" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@135..137 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@137..147
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@137..147
+                    0: L_BRACK@137..138 "[" [] []
+                    1: CSS_BOGUS@138..146
+                      0: CSS_CUSTOM_IDENTIFIER@138..139
+                        0: IDENT@138..139 "a" [] []
+                      1: CSS_BOGUS@139..141
+                        0: COMMA@139..141 "," [] [Whitespace(" ")]
+                      2: CSS_CUSTOM_IDENTIFIER@141..143
+                        0: IDENT@141..143 "b" [] [Whitespace(" ")]
+                      3: CSS_BOGUS@143..145
+                        0: SLASH@143..145 "/" [] [Whitespace(" ")]
+                      4: CSS_CUSTOM_IDENTIFIER@145..146
+                        0: IDENT@145..146 "c" [] []
+                    2: R_BRACK@146..147 "]" [] []
+              1: (empty)
+            1: SEMICOLON@147..148 ";" [] []
+        2: R_CURLY@148..150 "}" [Newline("\n")] []
+  2: EOF@150..151 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+bracketed_value_separators.css:2:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Sass list separators are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ .a {
+  > 2 │   grid-template-columns: [full-start , main-start / main-end , full-end];
+      │                                      ^
+    3 │   grid-column: [col-start] /[col-end];
+    4 │ }
+  
+  i SCSS only syntax
+  
+bracketed_value_separators.css:2:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Sass list separators are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ .a {
+  > 2 │   grid-template-columns: [full-start , main-start / main-end , full-end];
+      │                                                   ^
+    3 │   grid-column: [col-start] /[col-end];
+    4 │ }
+  
+  i SCSS only syntax
+  
+bracketed_value_separators.css:2:62 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Sass list separators are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ .a {
+  > 2 │   grid-template-columns: [full-start , main-start / main-end , full-end];
+      │                                                              ^
+    3 │   grid-column: [col-start] /[col-end];
+    4 │ }
+  
+  i SCSS only syntax
+  
+bracketed_value_separators.css:7:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Sass list separators are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    6 │ .b {
+  > 7 │   content: [a, b / c];
+      │              ^
+    8 │ }
+    9 │ 
+  
+  i SCSS only syntax
+  
+bracketed_value_separators.css:7:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Sass list separators are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    6 │ .b {
+  > 7 │   content: [a, b / c];
+      │                  ^
+    8 │ }
+    9 │ 
+  
+  i SCSS only syntax
+  
+```

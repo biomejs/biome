@@ -2,7 +2,10 @@ use crate::parser::CssParser;
 use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::parse_error::{expected_declaration_item, scss_only_syntax_error};
 use crate::syntax::property::{is_at_any_property, parse_any_property};
-use crate::syntax::scss::{is_at_scss_declaration, parse_scss_declaration};
+use crate::syntax::scss::{
+    is_at_scss_declaration, is_at_scss_nesting_declaration, parse_scss_declaration,
+    parse_scss_nesting_declaration,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
@@ -19,7 +22,15 @@ impl ParseNodeList for DeclarationList {
     const LIST_KIND: Self::Kind = CSS_DECLARATION_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_any_declaration_with_semicolon(p)
+        if is_at_scss_nesting_declaration(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_nesting_declaration,
+                |p, marker| scss_only_syntax_error(p, "SCSS nesting declarations", marker.range(p)),
+            )
+        } else {
+            parse_any_declaration_with_semicolon(p)
+        }
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
