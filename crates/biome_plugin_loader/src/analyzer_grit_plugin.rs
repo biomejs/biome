@@ -4,7 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
-use biome_diagnostics::{Severity, category};
+use biome_diagnostics::{Applicability, Severity, category};
 use biome_fs::FileSystem;
 use biome_grit_patterns::{
     BuiltInFunction, CompilePatternOptions, GritBinding, GritExecContext, GritPattern, GritQuery,
@@ -33,7 +33,7 @@ impl AnalyzerGritPlugin {
             .with_extra_built_ins(vec![
                 BuiltInFunction::new(
                     "register_diagnostic",
-                    &["span", "message", "severity"],
+                    &["span", "message", "severity", "fix_kind"],
                     Box::new(register_diagnostic),
                 )
                 .as_predicate(),
@@ -109,33 +109,42 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                     .logs
                     .iter()
                     .map(|log| {
-                        RuleDiagnostic::new(
-                        category!("plugin"),
-                        log.range.map(from_grit_range),
-                        markup!(<Emphasis>{name}</Emphasis>" logged: "<Info>{log.message}</Info>),
-                    )
-                    .verbose()
+                        (
+                            RuleDiagnostic::new(
+                                category!("plugin"),
+                                log.range.map(from_grit_range),
+                                markup!(<Emphasis>{name}</Emphasis>" logged: "<Info>{log.message}</Info>),
+                            )
+                            .verbose(),
+                            Applicability::MaybeIncorrect,
+                        )
                     })
                     .chain(result.diagnostics)
-                    .map(|diagnostics| diagnostics.subcategory(name.to_string()))
+                    .map(|(diagnostic, applicability)| {
+                        (diagnostic.subcategory(name.to_string()), applicability)
+                    })
                     .collect();
 
                 if diagnostics
                     .iter()
-                    .any(|diagnostic| diagnostic.span().is_none())
+                    .any(|(diagnostic, _)| diagnostic.span().is_none())
                 {
-                    diagnostics.push(RuleDiagnostic::new(
-                        category!("plugin"),
-                        None::<TextRange>,
-                        markup!(
-                            "Plugin "<Emphasis>{name}</Emphasis>" reported one or more diagnostics, "
-                            "but it didn't specify a valid "<Emphasis>"span"</Emphasis>". "
-                            "Diagnostics have been shown without context."
+                    diagnostics.push((
+                        RuleDiagnostic::new(
+                            category!("plugin"),
+                            None::<TextRange>,
+                            markup!(
+                                "Plugin "<Emphasis>{name}</Emphasis>" reported one or more diagnostics, "
+                                "but it didn't specify a valid "<Emphasis>"span"</Emphasis>". "
+                                "Diagnostics have been shown without context."
+                            ),
                         ),
+                        Applicability::MaybeIncorrect,
                     ));
                 }
 
                 // Convert rewrite effects to plugin actions.
+                let default_applicability = Applicability::MaybeIncorrect;
                 let mut actions: Vec<_> = result
                     .effects
                     .iter()
@@ -145,6 +154,7 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                             original_text: original_text.clone(),
                             rewritten_text: rewrite.rewritten.content.clone(),
                             message: format!("Rewrite suggested by plugin `{name}`"),
+                            applicability: default_applicability,
                         }),
                         _ => None,
                     })
@@ -154,9 +164,12 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                 let mut action_iter = actions.drain(..);
                 let entries = diagnostics
                     .into_iter()
-                    .map(|diagnostic| PluginDiagnosticEntry {
-                        diagnostic,
-                        action: action_iter.next(),
+                    .map(|(diagnostic, applicability)| {
+                        let mut action = action_iter.next();
+                        if let Some(ref mut action) = action {
+                            action.applicability = applicability;
+                        }
+                        PluginDiagnosticEntry { diagnostic, action }
                     })
                     .collect();
 
@@ -188,11 +201,11 @@ fn register_diagnostic<'a>(
 ) -> Result<GritResolvedPattern<'a>, GritPatternError> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
 
-    let (span_node, message, severity) = match args.as_slice() {
-        [Some(span), Some(message), severity] => (span, message, severity),
+    let (span_node, message, severity, fix_kind) = match args.as_slice() {
+        [Some(span), Some(message), severity, fix_kind] => (span, message, severity, fix_kind),
         _ => {
             return Err(GritPatternError::new(
-                "register_diagnostic() takes 2 required arguments: span and message, and an optional severity",
+                "register_diagnostic() takes 2 required arguments: span and message, and optional severity and fix_kind",
             ));
         }
     };
@@ -227,8 +240,19 @@ fn register_diagnostic<'a>(
         .and_then(|severity| Severity::from_str(severity.as_ref()).ok())
         .unwrap_or(Severity::Error);
 
+    let applicability = fix_kind
+        .as_ref()
+        .and_then(|fix_kind| fix_kind.text(&state.files, &context.lang).ok())
+        .map_or(Applicability::MaybeIncorrect, |fix_kind| {
+            match fix_kind.as_ref() {
+                "safe" => Applicability::Always,
+                _ => Applicability::MaybeIncorrect,
+            }
+        });
+
     context.add_diagnostic(
         RuleDiagnostic::new(category!("plugin"), span, message).with_severity(severity),
+        applicability,
     );
 
     Ok(span_node.clone())

@@ -157,7 +157,7 @@ impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
         AnalyzerActionIter::new(vec![AnalyzerAction {
             rule_name: None,
             category: ActionCategory::QuickFix(Cow::Borrowed("plugin")),
-            applicability: Applicability::MaybeIncorrect,
+            applicability: action_data.applicability,
             message: markup!({ action_data.message }).to_owned(),
             mutation: BatchMutation::new(root.clone()),
             text_edit: Some((action_data.source_range, text_edit)),

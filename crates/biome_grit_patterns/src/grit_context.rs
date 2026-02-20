@@ -9,6 +9,7 @@ use crate::grit_target_node::GritTargetNode;
 use crate::grit_tree::GritTargetTree;
 use crate::linearization::apply_effects;
 use biome_analyze::RuleDiagnostic;
+use biome_diagnostics::Applicability;
 use biome_parser::AnyParse;
 use camino::Utf8PathBuf;
 use grit_pattern_matcher::constants::{GLOBAL_VARS_SCOPE_INDEX, NEW_FILES_INDEX};
@@ -55,11 +56,11 @@ pub struct GritExecContext<'a> {
     pub patterns: &'a [PatternDefinition<GritQueryContext>],
     pub predicates: &'a [PredicateDefinition<GritQueryContext>],
 
-    pub diagnostics: Mutex<Vec<RuleDiagnostic>>,
+    pub diagnostics: Mutex<Vec<(RuleDiagnostic, Applicability)>>,
 }
 
 impl GritExecContext<'_> {
-    pub fn add_diagnostic(&self, diagnostic: RuleDiagnostic) {
+    pub fn add_diagnostic(&self, diagnostic: RuleDiagnostic, applicability: Applicability) {
         let mut diagnostics = self.diagnostics.lock().unwrap();
         // Make sure we don't add multiple messages for the same span.
         // I think this happens when a node and its child(ren) both match the
@@ -68,13 +69,13 @@ impl GritExecContext<'_> {
         // Grit pattern matcher.
         if diagnostics
             .last()
-            .is_none_or(|last| last.span() != diagnostic.span())
+            .is_none_or(|(last, _)| last.span() != diagnostic.span())
         {
-            diagnostics.push(diagnostic);
+            diagnostics.push((diagnostic, applicability));
         }
     }
 
-    pub fn into_diagnostics(self) -> Vec<RuleDiagnostic> {
+    pub fn into_diagnostics(self) -> Vec<(RuleDiagnostic, Applicability)> {
         self.diagnostics.into_inner().unwrap()
     }
 }

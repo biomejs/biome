@@ -1,3 +1,4 @@
+use biome_diagnostics::Applicability;
 use biome_rowan::{
     AnySyntaxNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode, TextRange, WalkEvent,
 };
@@ -28,6 +29,8 @@ pub struct PluginActionData {
     pub rewritten_text: String,
     /// A message describing the action.
     pub message: String,
+    /// Whether this fix is safe or unsafe.
+    pub applicability: Applicability,
 }
 
 /// A diagnostic paired with its optional code action.
