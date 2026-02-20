@@ -98,7 +98,7 @@ impl Rule for UseMyRuleName {
 Every diagnostic **must** follow the three pillars defined in `crates/biome_analyze/CONTRIBUTING.md`:
 
 | Pillar | Question answered | Implemented as |
-|---|---|---|
+| --- | --- | --- |
 | 1 | **What** is the error? | The `RuleDiagnostic` message (first argument to `markup!`) |
 | 2 | **Why** is it a problem? | A `.note()` explaining the consequence or rationale |
 | 3 | **What should the user do?** | A code action (`action` fn), or a second `.note()` if no fix is available |

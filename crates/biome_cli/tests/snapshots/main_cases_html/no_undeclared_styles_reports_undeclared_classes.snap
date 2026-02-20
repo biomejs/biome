@@ -67,6 +67,8 @@ file.html:3:18 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   
   i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -87,6 +89,8 @@ file.html:4:18 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
   i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -109,6 +113,8 @@ file.html:4:31 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   
   i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -129,6 +135,8 @@ file.html:5:13 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
   i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -151,6 +159,8 @@ file.html:5:20 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   
   i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -171,6 +181,8 @@ file.html:5:27 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
   i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -193,6 +205,8 @@ file.html:7:16 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   
   i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -213,6 +227,8 @@ file.html:8:24 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
   i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
