@@ -2,8 +2,8 @@ use crate::categories::{
     SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
 };
 use crate::{
-    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, Queryable, RuleDiagnostic, RuleGroup,
-    ServiceBag, SuppressionAction,
+    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, PluginActionData, Queryable,
+    RuleDiagnostic, RuleGroup, ServiceBag, SuppressionAction,
     categories::ActionCategory,
     context::RuleContext,
     registry::{RuleLanguage, RuleRoot},
@@ -113,7 +113,7 @@ where
 /// directly converts via `AnalyzerDiagnostic::from(RuleDiagnostic)`.
 pub struct PluginSignal<L: Language> {
     diagnostic: RuleDiagnostic,
-    plugin_actions: Vec<crate::PluginActionData>,
+    plugin_actions: Vec<PluginActionData>,
     root: Option<SyntaxNode<L>>,
 }
 
@@ -126,7 +126,7 @@ impl<L: Language> PluginSignal<L> {
         }
     }
 
-    pub fn with_actions(mut self, actions: Vec<crate::PluginActionData>) -> Self {
+    pub fn with_plugin_actions(mut self, actions: Vec<PluginActionData>) -> Self {
         self.plugin_actions = actions;
         self
     }
@@ -162,7 +162,7 @@ impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
 
                 AnalyzerAction {
                     rule_name: None,
-                    category: ActionCategory::QuickFix(Cow::Borrowed("plugin.fix")),
+                    category: ActionCategory::QuickFix(Cow::Borrowed("plugin")),
                     applicability: Applicability::MaybeIncorrect,
                     message: markup!({ action_data.message }).to_owned(),
                     mutation: BatchMutation::new(root.clone()),

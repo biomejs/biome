@@ -138,7 +138,7 @@ where
             let text_range = diagnostic.span().unwrap_or_default();
 
             let signal = PluginSignal::<L>::new(diagnostic)
-                .with_actions(actions.clone())
+                .with_plugin_actions(actions.clone())
                 .with_root(node.clone());
 
             SignalEntry {
