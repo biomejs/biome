@@ -42,19 +42,20 @@ pub(crate) fn linearize_binding<'a>(
         if let Some(ref br) = binding_range {
             // Check memo cache for rewrites.
             if matches!(effect.kind, EffectKind::Rewrite) {
-                if let Some(cached) = memo.get(br) {
-                    if let Some(cached_text) = cached {
+                match memo.get(br) {
+                    Some(Some(cached_text)) => {
                         let byte_range = binding.range(language).ok_or_else(|| {
-                            GritPatternError::new(
-                                "expected binding to have a range for rewrite effect",
-                            )
+                            GritPatternError::new("expected binding to have a range")
                         })?;
                         replacements.push((byte_range.start, byte_range.end, cached_text.clone()));
                         continue;
                     }
-                } else {
-                    // Mark as "in progress" to prevent infinite recursion.
-                    memo.insert(br.clone(), None);
+                    // `None` marks an in-progress rewrite; skip to avoid recursive re-entry.
+                    Some(None) => continue,
+                    None => {
+                        // Mark as "in progress" to prevent infinite recursion.
+                        memo.insert(br.clone(), None);
+                    }
                 }
             }
         }
@@ -70,9 +71,9 @@ pub(crate) fn linearize_binding<'a>(
             memo.insert(br.clone(), Some(res.to_string()));
         }
 
-        let byte_range = binding.range(language).ok_or_else(|| {
-            GritPatternError::new("expected binding to have a range for rewrite effect")
-        })?;
+        let byte_range = binding
+            .range(language)
+            .ok_or_else(|| GritPatternError::new("expected binding to have a range"))?;
         replacements.push((byte_range.start, byte_range.end, res.into_owned()));
     }
 
@@ -80,7 +81,7 @@ pub(crate) fn linearize_binding<'a>(
     replacements.sort_by_key(|(start, _, _)| *start);
 
     // Walk source, copying gaps and inserting replacements.
-    let mut result = String::new();
+    let mut result = String::with_capacity(range.end as usize - range.start as usize);
     let mut cursor = range.start as usize;
 
     for (start, end, replacement) in &replacements {
@@ -119,7 +120,9 @@ pub(crate) fn apply_effects<'a>(
     }
 
     let mut memo: HashMap<CodeRange, Option<String>> = HashMap::new();
-    let range = CodeRange::new(0, source.len() as u32, source);
+    let len = u32::try_from(source.len())
+        .map_err(|_| GritPatternError::new("source file too large for GritQL linearization"))?;
+    let range = CodeRange::new(0, len, source);
 
     let result = linearize_binding(
         language, effects, files, &mut memo, source, range, None, logs,
