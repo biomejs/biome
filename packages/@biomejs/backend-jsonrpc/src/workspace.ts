@@ -2395,9 +2395,8 @@ See https://biomejs.dev/linter/rules/use-lone-executable-definition
 	 */
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
 	/**
-	/**
 	* Enforce valid describe() callback.
-See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback
+See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
 	 */
 	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
 	/**
