@@ -374,17 +374,17 @@ impl<'token> LiteralStringNormaliser<'token> {
     /// Returns the string without its quotes.
     fn raw_content(&self) -> &'token str {
         let content = self.get_token().text_trimmed();
-        
+
         // Bounds checking before byte indexing
         if content.len() < 2 {
             return "";
         }
-        
+
         // UTF-8 char boundary validation
         if !content.is_char_boundary(1) || !content.is_char_boundary(content.len() - 1) {
             return "";
         }
-        
+
         &content[1..content.len() - 1]
     }
 
@@ -595,23 +595,27 @@ mod tests {
         // that contain Windows-style CRLF line endings
         let quote = QuoteStyle::Double;
         let quote_properties = QuoteProperties::AsNeeded;
-        
+
         // Test case 1: String with CRLF in content
         let input_with_crlf = "\"use strict\r\n\"";
         let token = generate_syntax_token(input_with_crlf);
-        let string_token = FormatLiteralStringToken::new(&token, StringLiteralParentKind::Directive);
-        let mut string_cleaner = LiteralStringNormaliser::new(&string_token, quote, quote_properties);
-        
+        let string_token =
+            FormatLiteralStringToken::new(&token, StringLiteralParentKind::Directive);
+        let mut string_cleaner =
+            LiteralStringNormaliser::new(&string_token, quote, quote_properties);
+
         // Should not panic - this is the key assertion
         let result = string_cleaner.normalise_text(SourceFileKind::JavaScript);
         assert!(result.len() > 0, "Result should not be empty");
-        
+
         // Test case 2: Empty or near-empty strings (edge case)
         let empty_inputs = ["\"\"", "\"a\""];
         for input in empty_inputs {
             let token = generate_syntax_token(input);
-            let string_token = FormatLiteralStringToken::new(&token, StringLiteralParentKind::Expression);
-            let mut string_cleaner = LiteralStringNormaliser::new(&string_token, quote, quote_properties);
+            let string_token =
+                FormatLiteralStringToken::new(&token, StringLiteralParentKind::Expression);
+            let mut string_cleaner =
+                LiteralStringNormaliser::new(&string_token, quote, quote_properties);
             // Should not panic
             let _ = string_cleaner.normalise_text(SourceFileKind::JavaScript);
         }
