@@ -4,37 +4,38 @@ expression: valid.vue
 ---
 # Input
 ```html
+<!-- should not generate diagnostics -->
 <template>
-	<!-- ── Single defined class ──────────────────────────────────────────── -->
+	<!-- Single defined class -->
 	<div class="card">Single defined class</div>
 
-	<!-- ── Multiple classes, all defined ────────────────────────────────── -->
+	<!-- Multiple classes, all defined -->
 	<div class="header footer">Multiple defined classes</div>
 
-	<!-- ── Class defined inside @media query ────────────────────────────── -->
+	<!-- Class defined inside @media query -->
 	<div class="mobile">Responsive class</div>
 
-	<!-- ── Both parts of a descendant selector ───────────────────────────── -->
+	<!-- Both parts of a descendant selector -->
 	<div class="parent">
 		<span class="child">Nested</span>
 	</div>
 
-	<!-- ── Class defined alongside a pseudo-selector ─────────────────────── -->
+	<!-- Class defined alongside a pseudo-selector -->
 	<div class="button">Button with hover state</div>
 
-	<!-- ── Both classes from a combined selector ─────────────────────────── -->
+	<!-- Both classes from a combined selector -->
 	<div class="active highlighted">Combined selector classes</div>
 
-	<!-- ── Classes from a second <style> block ───────────────────────────── -->
+	<!-- Classes from a second <style> block -->
 	<div class="alpha beta">Classes from scoped style block</div>
 
-	<!-- ── Empty class attribute: no tokens to check ─────────────────────── -->
+	<!-- Empty class attribute: no tokens to check -->
 	<div class="">No classes</div>
 
-	<!-- ── Whitespace-only class attribute: splits to nothing ─────────────── -->
+	<!-- Whitespace-only class attribute: splits to nothing -->
 	<div class="   ">Only whitespace</div>
 
-	<!-- ── No style information at all: rule skips to avoid false positives ── -->
+	<!-- No style information at all: rule skips to avoid false positives -->
 	<div class="any-class">Unstyled section</div>
 </template>
 

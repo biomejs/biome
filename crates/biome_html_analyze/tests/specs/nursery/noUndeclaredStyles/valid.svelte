@@ -1,3 +1,4 @@
+<!-- should not generate diagnostics -->
 <style>
 	/* Single class */
 	.card { border: 1px solid; }
@@ -24,36 +25,36 @@
 	.alpha + .beta { margin-top: 8px; }
 </style>
 
-<!-- ── Single defined class ────────────────────────────────────────────── -->
+<!-- Single defined class -->
 <div class="card">Single defined class</div>
 
-<!-- ── Multiple classes, all defined ──────────────────────────────────── -->
+<!-- Multiple classes, all defined -->
 <div class="header footer">Multiple defined classes</div>
 
-<!-- ── Class defined inside @media ───────────────────────────────────── -->
+<!-- Class defined inside @media -->
 <div class="mobile">Responsive class</div>
 
-<!-- ── Both parts of a descendant selector are usable independently ───── -->
+<!-- Both parts of a descendant selector are usable independently -->
 <div class="parent">
 	<span class="child">Nested</span>
 </div>
 
-<!-- ── Class defined alongside a pseudo-selector ─────────────────────── -->
+<!-- Class defined alongside a pseudo-selector -->
 <div class="button">Button with hover state</div>
 
-<!-- ── Both classes from combined selector ───────────────────────────── -->
+<!-- Both classes from combined selector -->
 <div class="active highlighted">Combined selector classes</div>
 
-<!-- ── Both classes from adjacent sibling combinator ─────────────────── -->
+<!-- Both classes from adjacent sibling combinator -->
 <div class="alpha">
 	<div class="beta">Sibling</div>
 </div>
 
-<!-- ── Empty class attribute: no tokens to check ─────────────────────── -->
+<!-- Empty class attribute: no tokens to check -->
 <div class="">No classes</div>
 
-<!-- ── Whitespace-only class attribute: splits to nothing ─────────────── -->
+<!-- Whitespace-only class attribute: splits to nothing -->
 <div class="   ">Only whitespace</div>
 
-<!-- ── No style information at all: rule skips to avoid false positives ── -->
+<!-- No style information at all: rule skips to avoid false positives -->
 <div class="any-class">Unstyled section</div>

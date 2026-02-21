@@ -227,10 +227,49 @@ tests/specs/nursery/useMyRuleName/
 └── options.json        # Optional rule configuration
 ```
 
-Example `invalid.js`:
+**IMPORTANT: Magic Comments for Test Expectations**
+
+All test files MUST include magic comments at the top to set expectations:
+
+- **Valid tests** (should not generate diagnostics):
 ```javascript
+/* should not generate diagnostics */
+const allowed_name = 1;
+```
+
+- **Invalid tests** (should generate diagnostics):
+```javascript
+// should generate diagnostics
 const prohibited_name = 1;
 const another_prohibited = 2;
+```
+
+For HTML files:
+```html
+<!-- should not generate diagnostics -->
+<!doctype html>
+<html>...</html>
+```
+
+For languages that support both comment styles, use `/* */` or `//` as appropriate. The comment should be the very first line of the file.
+
+These magic comments:
+- Document the intent of the test file
+- Help reviewers understand what's expected
+- Serve as a quick reference when debugging test failures
+
+Example `invalid.js`:
+```javascript
+// should generate diagnostics
+const prohibited_name = 1;
+const another_prohibited = 2;
+```
+
+Example `valid.js`:
+```javascript
+/* should not generate diagnostics */
+const allowed_name = 1;
+const another_allowed = 2;
 ```
 
 Run snapshot tests:
