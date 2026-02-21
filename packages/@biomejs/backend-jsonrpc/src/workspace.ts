@@ -2450,6 +2450,11 @@ See https://biomejs.dev/linter/rules/use-vue-multi-word-component-names
 	 */
 	useVueMultiWordComponentNames?: UseVueMultiWordComponentNamesConfiguration;
 	/**
+	* Enforce that \<style> blocks in Vue SFCs have the scoped attribute.
+See https://biomejs.dev/linter/rules/use-vue-scoped-styles 
+	 */
+	useVueScopedStyles?: UseVueScopedStylesConfiguration;
+	/**
 	* Enforce that elements using v-for also specify a unique key.
 See https://biomejs.dev/linter/rules/use-vue-v-for-key 
 	 */
@@ -4273,6 +4278,9 @@ export type UseVueHyphenatedAttributesConfiguration =
 export type UseVueMultiWordComponentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMultiWordComponentNamesOptions;
+export type UseVueScopedStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueScopedStylesOptions;
 export type UseVueVForKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueVForKeyOptions;
@@ -5980,6 +5988,11 @@ export interface RuleWithUseVueMultiWordComponentNamesOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMultiWordComponentNamesOptions;
 }
+export interface RuleWithUseVueScopedStylesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueScopedStylesOptions;
+}
 export interface RuleWithUseVueVForKeyOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueVForKeyOptions;
@@ -7424,6 +7437,7 @@ export interface UseVueMultiWordComponentNamesOptions {
 	 */
 	ignores?: string[];
 }
+export type UseVueScopedStylesOptions = {};
 export type UseVueVForKeyOptions = {};
 export type UseVueValidTemplateRootOptions = {};
 export type UseVueValidVBindOptions = {};
@@ -8254,10 +8268,10 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
-	| "lint/nursery/useExpect"
 	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedMediaType"
 	| "lint/nursery/noDivRegex"
@@ -8287,7 +8301,6 @@ export type Category =
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
-	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -8325,6 +8338,7 @@ export type Category =
 	| "lint/nursery/useDestructuring"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
+	| "lint/nursery/useExpect"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
@@ -8351,6 +8365,7 @@ export type Category =
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
+	| "lint/nursery/useVueScopedStyles"
 	| "lint/nursery/useVueVForKey"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"

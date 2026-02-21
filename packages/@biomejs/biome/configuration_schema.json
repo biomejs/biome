@@ -6317,6 +6317,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueScopedStyles": {
+					"description": "Enforce that \\<style> blocks in Vue SFCs have the scoped attribute.\nSee https://biomejs.dev/linter/rules/use-vue-scoped-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueScopedStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueVForKey": {
 					"description": "Enforce that elements using v-for also specify a unique key.\nSee https://biomejs.dev/linter/rules/use-vue-v-for-key",
 					"anyOf": [
@@ -11054,6 +11061,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueScopedStylesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueScopedStylesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueVForKeyOptions": {
 			"type": "object",
 			"properties": {
@@ -14457,6 +14474,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueScopedStylesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueScopedStylesOptions" }
+			]
+		},
+		"UseVueScopedStylesOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseVueVForKeyConfiguration": {

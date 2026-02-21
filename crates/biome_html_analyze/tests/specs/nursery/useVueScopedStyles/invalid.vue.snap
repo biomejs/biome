@@ -1,0 +1,64 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<style>
+.foo { color: red; }
+</style>
+
+<style lang="scss">
+.foo { color: blue; }
+</style>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:1 lint/nursery/useVueScopedStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This <style> block is missing the scoped attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <style>
+      │ ^^^^^^^
+    4 │ .foo { color: red; }
+    5 │ </style>
+  
+  i In Vue, unscoped styles become global across the entire project. This can lead to unintended side effects and maintenance challenges. Adding the scoped attribute ensures that styles are scoped to this component, preventing style leakage and conflicts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the scoped attribute so the styles in will only apply to this component.
+  
+    3 │ <style·scoped>
+      │       +++++++ 
+
+```
+
+```
+invalid.vue:7:1 lint/nursery/useVueScopedStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This <style> block is missing the scoped attribute.
+  
+    5 │ </style>
+    6 │ 
+  > 7 │ <style lang="scss">
+      │ ^^^^^^^^^^^^^^^^^^^
+    8 │ .foo { color: blue; }
+    9 │ </style>
+  
+  i In Vue, unscoped styles become global across the entire project. This can lead to unintended side effects and maintenance challenges. Adding the scoped attribute ensures that styles are scoped to this component, preventing style leakage and conflicts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the scoped attribute so the styles in will only apply to this component.
+  
+    7 │ <style·lang="scss"·scoped>
+      │                   +++++++ 
+
+```
