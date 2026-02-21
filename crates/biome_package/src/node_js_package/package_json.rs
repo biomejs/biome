@@ -33,6 +33,9 @@ pub struct PackageJson {
     pub dev_dependencies: Dependencies,
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
+    /// The "bundleDependencies" field is an array of package names, it's not a map like the other dependencies fields
+    pub bundle_dependencies: BundleDependencies,
+    pub bundled_dependencies: BundleDependencies,
     pub license: Option<(Box<str>, TextRange)>,
 
     pub author: Option<Box<str>>,
@@ -191,6 +194,28 @@ impl Dependencies {
     }
 }
 
+#[derive(Debug, Default, Clone)]
+pub struct BundleDependencies(pub Box<[Box<str>]>);
+
+impl Deserializable for BundleDependencies {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        let values: Vec<Box<str>> = Deserializable::deserialize(ctx, value, name)?;
+        Some(Self(values.into_boxed_slice()))
+    }
+}
+
+impl BundleDependencies {
+    pub fn contains(&self, specifier: &str) -> bool {
+        self.0
+            .iter()
+            .any(|dependency| dependency.as_ref() == specifier)
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Version {
     SemVer(Range),
@@ -284,6 +309,16 @@ impl DeserializationVisitor for PackageJsonVisitor {
                 "optionalDependencies" => {
                     if let Some(deps) = Deserializable::deserialize(ctx, &value, &key_text) {
                         result.optional_dependencies = deps;
+                    }
+                }
+                "bundleDependencies" => {
+                    if let Some(deps) = Deserializable::deserialize(ctx, &value, &key_text) {
+                        result.bundle_dependencies = deps;
+                    }
+                }
+                "bundledDependencies" => {
+                    if let Some(deps) = Deserializable::deserialize(ctx, &value, &key_text) {
+                        result.bundled_dependencies = deps;
                     }
                 }
                 "type" => {

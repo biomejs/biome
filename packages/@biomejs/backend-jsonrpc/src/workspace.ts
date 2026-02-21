@@ -7091,6 +7091,10 @@ export type NoStringCaseMismatchOptions = {};
 export type NoSwitchDeclarationsOptions = {};
 export interface NoUndeclaredDependenciesOptions {
 	/**
+	 * If set to `false`, then the rule will show an error when `bundleDependencies` are imported. Defaults to `true`.
+	 */
+	bundleDependencies?: DependencyAvailability;
+	/**
 	 * If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
 	 */
 	devDependencies?: DependencyAvailability;
