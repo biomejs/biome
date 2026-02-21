@@ -1346,6 +1346,8 @@ name = "biome_markdown_syntax"
 version = "0.0.1"
 dependencies = [
  "biome_rowan",
+ "biome_string_case",
+ "camino",
  "schemars",
  "serde",
 ]
@@ -1622,6 +1624,8 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_markdown_parser",
+ "biome_markdown_syntax",
  "biome_module_graph",
  "biome_package",
  "biome_parser",

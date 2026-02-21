@@ -1,8 +1,11 @@
 #![deny(clippy::use_self)]
 
+pub mod file_source;
 #[macro_use]
 mod generated;
 mod syntax_node;
+
+pub use file_source::MdFileSource;
 
 pub use self::generated::*;
 use biome_rowan::{RawSyntaxKind, SyntaxKind, TriviaPieceKind};
