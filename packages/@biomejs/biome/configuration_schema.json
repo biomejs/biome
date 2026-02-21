@@ -6181,7 +6181,7 @@
 					]
 				},
 				"useExpect": {
-					"description": "Ensure that test functions contain at least one expect() assertion.\nSee https://biomejs.dev/linter/rules/use-expect",
+					"description": "Ensure that test functions contain at least one expect() or similar assertion.\nSee https://biomejs.dev/linter/rules/use-expect",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseExpectConfiguration" },
 						{ "type": "null" }
