@@ -21,7 +21,7 @@ pub type MarkdownLinterEnabled = Bool<true>;
 pub type MarkdownAssistEnabled = Bool<true>;
 pub type MarkdownParseInterpolation = Bool<false>;
 
-/// Options that changes how the Markdown formatter behaves
+/// Options that change how the Markdown formatter behaves
 #[derive(
     Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
 )]
