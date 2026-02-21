@@ -1,4 +1,4 @@
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
 use std::hash::Hash;
 use std::{fmt::Debug, sync::Arc};
@@ -23,6 +23,11 @@ pub trait AnalyzerPlugin: Debug + Send + Sync {
     fn query(&self) -> Vec<RawSyntaxKind>;
 
     fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic>;
+
+    /// Returns true if this plugin should run on the given file path.
+    fn applies_to_file(&self, _path: &Utf8Path) -> bool {
+        true
+    }
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
@@ -99,6 +104,10 @@ where
         // TODO: Integrate to [`VisitorContext::match_query`]?
         let kind = node.kind();
         if !self.query.contains(&kind) {
+            return;
+        }
+
+        if !self.plugin.applies_to_file(&ctx.options.file_path) {
             return;
         }
 

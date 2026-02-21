@@ -1474,6 +1474,7 @@ dependencies = [
  "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_fs",
+ "biome_glob",
  "biome_grit_patterns",
  "biome_js_parser",
  "biome_js_runtime",
