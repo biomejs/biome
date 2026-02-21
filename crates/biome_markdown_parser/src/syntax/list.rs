@@ -1620,8 +1620,9 @@ fn parse_first_line_blocks(
     });
 
     if is_thematic_break {
-        let _ = parse_thematic_break_block(p);
-        state.record_first_line_block();
+        if parse_thematic_break_block(p).is_present() {
+            state.record_first_line_block();
+        }
         return LoopAction::Continue;
     }
 
