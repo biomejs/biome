@@ -694,7 +694,7 @@ fn is_styled_tag(tag: Option<&AnyJsExpression>) -> bool {
 }
 
 fn is_graphql_tag(tag: Option<&AnyJsExpression>, template: &JsTemplateExpression) -> bool {
-    // gql``
+    // gql`` or graphql``
     if let Some(AnyJsExpression::JsIdentifierExpression(ident)) = tag
         && ident
             .name()
