@@ -13,7 +13,7 @@ use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 use std::mem;
 
-use crate::ScopeId;
+use crate::{ScopeId, SemanticFlavor};
 
 /// Events emitted by the [SemanticEventExtractor].
 /// These events are later made into the Semantic Model.
@@ -158,6 +158,21 @@ pub struct SemanticEventExtractor {
     /// Type parameters bound in a `infer T` clause.
     infers: Vec<TsTypeParameterName>,
     is_ambient_context: bool,
+    flavor: SemanticFlavor,
+}
+
+impl SemanticEventExtractor {
+    pub fn with_flavor(self, flavor: SemanticFlavor) -> Self {
+        Self {
+            stash: self.stash,
+            scopes: self.scopes,
+            scope_count: self.scope_count,
+            bindings: self.bindings,
+            infers: self.infers,
+            is_ambient_context: self.is_ambient_context,
+            flavor,
+        }
+    }
 }
 
 /// A binding name is either a type or a value.
@@ -727,6 +742,17 @@ impl SemanticEventExtractor {
             return;
         };
         let name = name_token.token_text_trimmed();
+        let (name, range) = if self.flavor == SemanticFlavor::Svelte {
+            // This is special Svelte syntax for dereferencing a store
+            if name.starts_with("$") {
+                let range = range.add_start(1.into());
+                (name.slice(range), range)
+            } else {
+                (name, range)
+            }
+        } else {
+            (name, range)
+        };
         match node {
             AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {
                 let Some(parent) = node.syntax().parent() else {
