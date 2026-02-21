@@ -29,10 +29,9 @@ expression: redactor(content)
 ## `test.css`
 
 ```css
-[class='foo'] {
-  background-image: url('/path/to/file.jpg');
+[class="foo"] {
+  background-image: url("/path/to/file.jpg");
 }
-
 ```
 
 ## `test.js`

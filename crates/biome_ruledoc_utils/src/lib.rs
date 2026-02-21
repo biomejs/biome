@@ -10,7 +10,8 @@ use biome_js_parser::JsFileSource;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_module_graph::ModuleGraph;
 use biome_project_layout::ProjectLayout;
-use biome_test_utils::get_added_js_paths;
+use biome_service::workspace::DocumentFileSource;
+use biome_test_utils::{get_added_js_paths, get_css_added_paths};
 use camino::Utf8PathBuf;
 
 pub use codeblock::*;
@@ -44,7 +45,8 @@ impl AnalyzerServicesBuilder {
         let fs = MemoryFileSystem::default();
         let layout = ProjectLayout::default();
 
-        let mut added_paths = Vec::with_capacity(files.len());
+        let mut js_paths = Vec::new();
+        let mut css_paths = Vec::new();
 
         for (path, src) in files {
             let path_buf = Utf8PathBuf::from(path);
@@ -72,16 +74,26 @@ impl AnalyzerServicesBuilder {
                     }
                     _ => unimplemented!("Unhandled manifest: {biome_path}"),
                 }
-            } else {
-                added_paths.push(biome_path);
+            } else if DocumentFileSource::from_well_known(&path_buf, false).is_javascript_like() {
+                js_paths.push(biome_path);
+            } else if DocumentFileSource::from_well_known(&path_buf, false).is_css_like() {
+                css_paths.push(biome_path);
             }
+            // Note: HTML files are not yet supported in rustdoc tests because they
+            // require embedded snippet parsing which isn't available in this context.
 
             fs.insert(path_buf, src);
         }
 
         let module_graph = ModuleGraph::default();
-        let added_paths = get_added_js_paths(&fs, &added_paths);
-        module_graph.update_graph_for_js_paths(&fs, &layout, &added_paths, true);
+
+        // Populate JS files
+        let js_added_paths = get_added_js_paths(&fs, &js_paths);
+        module_graph.update_graph_for_js_paths(&fs, &layout, &js_added_paths, true);
+
+        // Populate CSS files
+        let css_added_paths = get_css_added_paths(&fs, &css_paths);
+        module_graph.update_graph_for_css_paths(&fs, &layout, &css_added_paths, None);
 
         Self {
             module_graph: Arc::new(module_graph),

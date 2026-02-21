@@ -17,7 +17,9 @@ expression: redactor(content)
 ## `file.module.css`
 
 ```css
-.className { composes: other from './other.module.css'; }
+.className {
+  composes: other from "./other.module.css";
+}
 ```
 
 # Termination Message

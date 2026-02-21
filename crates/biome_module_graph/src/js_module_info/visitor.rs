@@ -1,9 +1,11 @@
+use crate::css_module_info::collect_class_tokens;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
-    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyTsIdentifierBinding,
-    AnyTsModuleName, JsExportFromClause, JsExportNamedFromClause, JsExportNamedSpecifierList,
-    JsIdentifierBinding, JsVariableDeclaratorList, TsExportAssignmentClause, unescape_js_string,
+    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsxAttributeName,
+    AnyJsxAttributeValue, AnyTsIdentifierBinding, AnyTsModuleName, JsExport, JsExportFromClause,
+    JsExportNamedFromClause, JsExportNamedSpecifierList, JsIdentifierBinding,
+    JsVariableDeclaratorList, JsxAttribute, TsExportAssignmentClause, unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, ScopeId, TypeData, TypeReference, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
@@ -57,8 +59,10 @@ impl<'a> JsModuleVisitor<'a> {
                 WalkEvent::Enter(node) => {
                     if let Some(import) = AnyJsImportLike::cast_ref(&node) {
                         self.visit_import(import, &mut collector);
-                    } else if let Some(export) = biome_js_syntax::JsExport::cast_ref(&node) {
+                    } else if let Some(export) = JsExport::cast_ref(&node) {
                         self.visit_export(export, &mut collector);
+                    } else if let Some(attr) = JsxAttribute::cast_ref(&node) {
+                        self.visit_jsx_attribute(attr, &mut collector);
                     }
 
                     collector.push_node(&node);
@@ -70,6 +74,45 @@ impl<'a> JsModuleVisitor<'a> {
         }
 
         JsModuleInfo::new(collector, self.infer_types)
+    }
+
+    /// Collects static CSS class names from JSX `class` and `className`
+    /// attributes.
+    ///
+    /// Each [`CssClass`] holds the quote-stripped inner token text and a byte
+    /// range relative to the start of that text. Only static string literals
+    /// are collected; dynamic expressions are skipped to avoid false positives
+    /// in `noUnusedStyles`.
+    fn visit_jsx_attribute(&self, attr: JsxAttribute, collector: &mut JsModuleInfoCollector) {
+        if let Some(inner) = self.extract_jsx_class_attribute_inner(&attr) {
+            collect_class_tokens(&inner, &mut collector.referenced_classes);
+        }
+    }
+
+    /// Extracts the inner (quote-stripped) text from a JSX `class` or
+    /// `className` attribute, if it is a static string literal.
+    ///
+    /// Returns `None` if the attribute is not a class attribute, is not a
+    /// static string, or has malformed structure.
+    fn extract_jsx_class_attribute_inner(&self, attr: &JsxAttribute) -> Option<TokenText> {
+        let name_node = attr.name().ok()?;
+        let name_text = match name_node {
+            AnyJsxAttributeName::JsxName(n) => n.value_token().ok()?.token_text_trimmed(),
+            AnyJsxAttributeName::JsxNamespaceName(_) => return None,
+        };
+        if name_text != "class" && name_text != "className" {
+            return None;
+        }
+
+        let jsx_string = attr
+            .initializer()
+            .and_then(|init| init.value().ok())
+            .and_then(|val| match val {
+                AnyJsxAttributeValue::JsxString(s) => Some(s),
+                _ => None,
+            })?;
+
+        jsx_string.inner_string_text().ok()
     }
 
     fn visit_import(&self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {
@@ -117,11 +160,7 @@ impl<'a> JsModuleVisitor<'a> {
         }
     }
 
-    fn visit_export(
-        &self,
-        node: biome_js_syntax::JsExport,
-        collector: &mut JsModuleInfoCollector,
-    ) -> Option<()> {
+    fn visit_export(&self, node: JsExport, collector: &mut JsModuleInfoCollector) -> Option<()> {
         match node.export_clause().ok()? {
             AnyJsExportClause::AnyJsDeclarationClause(node) => {
                 self.visit_export_declaration_clause(node, collector)

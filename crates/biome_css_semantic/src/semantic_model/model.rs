@@ -35,9 +35,15 @@ impl SemanticModel {
         self.root.to_language_root::<AnyCssRoot>()
     }
 
-    /// Returns a slice of all rules in the CSS document.
+    /// Returns a slice of all top-level rules in the CSS document.
     pub fn rules(&self) -> &[Rule] {
         &self.data.rules
+    }
+
+    /// Returns an iterator over all rules in the CSS document, including nested rules
+    /// (e.g., rules inside `@media`, `@supports`, or CSS nesting blocks).
+    pub fn all_rules(&self) -> impl Iterator<Item = &Rule> {
+        self.data.rules_by_id.values()
     }
 
     pub fn global_custom_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {

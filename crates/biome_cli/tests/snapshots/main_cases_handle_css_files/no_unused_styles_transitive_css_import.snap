@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `App.jsx`
+
+```jsx
+import "./theme.css";
+export default () => <div className="base theme" />;
+
+```
+
+## `base.css`
+
+```css
+.base {
+  box-sizing: border-box;
+}
+```
+
+## `theme.css`
+
+```css
+@import "./base.css";
+.theme {
+  background: white;
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+```

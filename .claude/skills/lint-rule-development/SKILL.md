@@ -74,17 +74,57 @@ impl Rule for UseMyRuleName {
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
+                // Pillar 1 — WHAT the error is.
                 markup! {
-                    "Avoid using this identifier."
+                    "This identifier "<Emphasis>"prohibited_name"</Emphasis>" is not allowed."
                 },
             )
+            // Pillar 2 — WHY it is triggered / why it is a problem.
             .note(markup! {
-                "This identifier is prohibited because..."
+                "Using this identifier leads to [specific problem]."
+            })
+            // Pillar 3 — WHAT the user should do to fix it.
+            // Use a code action instead when an automated fix is possible.
+            .note(markup! {
+                "Replace it with [alternative] or remove it entirely."
             }),
         )
     }
 }
 ```
+
+### The Three Diagnostic Pillars (REQUIRED)
+
+Every diagnostic **must** follow the three pillars defined in `crates/biome_analyze/CONTRIBUTING.md`:
+
+| Pillar | Question answered | Implemented as |
+| --- | --- | --- |
+| 1 | **What** is the error? | The `RuleDiagnostic` message (first argument to `markup!`) |
+| 2 | **Why** is it a problem? | A `.note()` explaining the consequence or rationale |
+| 3 | **What should the user do?** | A code action (`action` fn), or a second `.note()` if no fix is available |
+
+**Example from `noUnusedVariables`:**
+```rust
+RuleDiagnostic::new(
+    rule_category!(),
+    range,
+    // Pillar 1: what
+    markup! { "This variable "<Emphasis>{name}</Emphasis>" is unused." },
+)
+// Pillar 2: why
+.note(markup! {
+    "Unused variables are often the result of typos, incomplete refactors, or other sources of bugs."
+})
+// Pillar 3: what to do (here as a note; ideally a code action)
+.note(markup! {
+    "Remove the variable or use it."
+})
+```
+
+**Common mistakes to avoid:**
+- Combining pillars 2 and 3 into a single note — keep them separate.
+- Writing pillar 3 as the only note, skipping pillar 2.
+- Writing a pillar 1 message that already contains "why" — the message should stay short and factual; move the rationale to pillar 2.
 
 ### Using Semantic Model
 
@@ -187,10 +227,49 @@ tests/specs/nursery/useMyRuleName/
 └── options.json        # Optional rule configuration
 ```
 
-Example `invalid.js`:
+**IMPORTANT: Magic Comments for Test Expectations**
+
+All test files MUST include magic comments at the top to set expectations:
+
+- **Valid tests** (should not generate diagnostics):
 ```javascript
+/* should not generate diagnostics */
+const allowed_name = 1;
+```
+
+- **Invalid tests** (should generate diagnostics):
+```javascript
+// should generate diagnostics
 const prohibited_name = 1;
 const another_prohibited = 2;
+```
+
+For HTML files:
+```html
+<!-- should not generate diagnostics -->
+<!doctype html>
+<html>...</html>
+```
+
+For languages that support both comment styles, use `/* */` or `//` as appropriate. The comment should be the very first line of the file.
+
+These magic comments:
+- Document the intent of the test file
+- Help reviewers understand what's expected
+- Serve as a quick reference when debugging test failures
+
+Example `invalid.js`:
+```javascript
+// should generate diagnostics
+const prohibited_name = 1;
+const another_prohibited = 2;
+```
+
+Example `valid.js`:
+```javascript
+/* should not generate diagnostics */
+const allowed_name = 1;
+const another_allowed = 2;
 ```
 
 Run snapshot tests:
@@ -224,6 +303,71 @@ Before committing:
 just f  # Format code
 just l  # Lint code
 ```
+
+## Documenting Rules
+
+### Multi-File Examples
+
+For rules that analyze relationships between multiple files (e.g., import cycles, cross-file dependencies, CSS class references), use the `file=<path>` property:
+
+```rust
+/// ### Invalid
+///
+/// ```js,expect_diagnostic,file=foo.js
+/// import { bar } from "./bar.js";
+/// export function foo() {
+///     return bar();
+/// }
+/// ```
+///
+/// ```js,expect_diagnostic,file=bar.js
+/// import { foo } from "./foo.js";
+/// export function bar() {
+///     return foo();
+/// }
+/// ```
+```
+
+**How it works:**
+- All files in a documentation section (`### Invalid` or `### Valid`) are collected into an in-memory file system
+- The module graph is automatically populated from these files
+- Each file with `expect_diagnostic` must emit exactly one diagnostic
+- Files without `expect_diagnostic` provide context but aren't expected to trigger the rule
+
+**Supported languages:**
+- ✅ JavaScript/TypeScript/JSX/TSX
+- ✅ CSS (module graph automatically populated from `file=` blocks)
+- ❌ HTML with `<style>` blocks (requires embedded snippet parsing - not yet implemented)
+
+### The `ignore` Directive
+
+Use `ignore` to exclude code blocks from automatic validation:
+
+```rust
+/// ```html,expect_diagnostic,ignore
+/// <style>.card { border: 1px solid; }</style>
+/// <div class="header">Content</div>
+/// ```
+```
+
+**When to use `ignore`:**
+- Rules that require features not yet available in rustdoc context (e.g., HTML embedded snippets)
+- Examples that need special parser configuration
+- Illustrative examples where automatic validation isn't critical
+
+**Important:** Even with `ignore`, you should have comprehensive snapshot tests in `tests/specs/`.
+
+### Code Block Property Order
+
+For consistency, properties should be ordered:
+```rust
+/// ```<language>[,expect_diagnostic][,(options|full_options|use_options)][,ignore][,file=path]
+```
+
+Examples:
+- `css,expect_diagnostic,file=styles.css`
+- `jsx,file=App.jsx`
+- `html,expect_diagnostic,ignore`
 
 ## Tips
 

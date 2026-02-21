@@ -20,7 +20,7 @@ use biome_module_graph::{
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
-use biome_test_utils::get_added_js_paths;
+use biome_test_utils::{get_added_js_paths, get_css_added_paths};
 use camino::{Utf8Path, Utf8PathBuf};
 use walkdir::WalkDir;
 
@@ -2234,6 +2234,195 @@ function g() {
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs).with_resolver(resolver.as_ref());
 
     snapshot.assert_snapshot("test_widening_via_assignment_multiple_values");
+}
+
+/// Verifies that a JSX file that imports a CSS file shows:
+/// - the CSS import edge in `static_import_paths`
+/// - `referenced_classes` populated from `className="..."` attributes
+/// - the CSS module info showing the defined classes
+#[test]
+fn test_jsx_imports_css_file() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/styles.css".into(),
+        r#"
+.button {
+    color: red;
+}
+.header {
+    font-size: 24px;
+}
+"#,
+    );
+    fs.insert(
+        "/src/App.jsx".into(),
+        r#"
+import "./styles.css";
+
+export function App() {
+    return <div className="button header">Hello</div>;
+}
+"#,
+    );
+
+    let css_paths = [BiomePath::new("/src/styles.css")];
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+
+    let js_paths = [BiomePath::new("/src/App.jsx")];
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_css_paths(&fs, &ProjectLayout::default(), &css_roots, None);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &js_roots, false);
+
+    // Verify the JS module info has the CSS import edge resolved
+    let app_info = module_graph
+        .js_module_info_for_path(Utf8Path::new("/src/App.jsx"))
+        .expect("App.jsx must be in module graph");
+    assert!(
+        app_info
+            .static_import_paths
+            .values()
+            .any(|p| p.as_path() == Some(Utf8Path::new("/src/styles.css"))),
+        "App.jsx must have a resolved import edge to styles.css"
+    );
+
+    // Verify referenced_classes contains the JSX className values
+    assert!(
+        app_info.referenced_classes.contains("button"),
+        "App.jsx must reference class 'button'"
+    );
+    assert!(
+        app_info.referenced_classes.contains("header"),
+        "App.jsx must reference class 'header'"
+    );
+
+    // Verify the CSS module info has the defined classes
+    let css_info = module_graph
+        .css_module_info_for_path(Utf8Path::new("/src/styles.css"))
+        .expect("styles.css must be in module graph");
+    assert!(
+        css_info.classes.contains("button"),
+        "styles.css must define class 'button'"
+    );
+    assert!(
+        css_info.classes.contains("header"),
+        "styles.css must define class 'header'"
+    );
+
+    // Snapshot both files to capture the full module info.
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+    snapshot.assert_snapshot("test_jsx_imports_css_file");
+}
+
+/// Verifies that `is_class_referenced_by_importers` returns `true` for a class
+/// that is referenced in the importing JSX file, and `false` for a class that
+/// is defined in the CSS but never used.
+#[test]
+fn test_css_classes_referenced_by_jsx() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/styles.css".into(),
+        r#"
+.used { color: blue; }
+.unused { color: green; }
+"#,
+    );
+    fs.insert(
+        "/src/Component.jsx".into(),
+        r#"
+import "./styles.css";
+
+export function Component() {
+    return <div className="used" />;
+}
+"#,
+    );
+
+    let css_paths = [BiomePath::new("/src/styles.css")];
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+    let js_paths = [BiomePath::new("/src/Component.jsx")];
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_css_paths(&fs, &ProjectLayout::default(), &css_roots, None);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &js_roots, false);
+
+    assert!(
+        module_graph.is_class_referenced_by_importers(Utf8Path::new("/src/styles.css"), "used"),
+        "'used' class should be referenced by Component.jsx"
+    );
+    assert!(
+        !module_graph.is_class_referenced_by_importers(Utf8Path::new("/src/styles.css"), "unused"),
+        "'unused' class should not be referenced by any importer"
+    );
+}
+
+/// Verifies transitive CSS import chain:
+/// `App.jsx` → `theme.css` → `base.css`
+///
+/// `transitive_importers_of(base.css)` must include `App.jsx`, and
+/// `is_class_referenced_by_importers(base.css, "base")` must return `true`.
+#[test]
+fn test_transitive_css_import_chain() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/base.css".into(),
+        r#"
+.base { margin: 0; }
+.orphan { padding: 0; }
+"#,
+    );
+    fs.insert(
+        "/src/theme.css".into(),
+        r#"
+@import "./base.css";
+.theme { color: purple; }
+"#,
+    );
+    fs.insert(
+        "/src/App.jsx".into(),
+        r#"
+import "./theme.css";
+
+export function App() {
+    return <div className="base theme" />;
+}
+"#,
+    );
+
+    let css_paths = [
+        BiomePath::new("/src/base.css"),
+        BiomePath::new("/src/theme.css"),
+    ];
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+    let js_paths = [BiomePath::new("/src/App.jsx")];
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_css_paths(&fs, &ProjectLayout::default(), &css_roots, None);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &js_roots, false);
+
+    // Transitive importers of base.css must include App.jsx (via theme.css).
+    let importers = module_graph.transitive_importers_of(Utf8Path::new("/src/base.css"));
+    assert!(
+        importers
+            .iter()
+            .any(|p| p.as_path() == Utf8Path::new("/src/App.jsx")),
+        "App.jsx must be a transitive importer of base.css; got: {importers:?}"
+    );
+
+    // The 'base' class is used by App.jsx, so it should be considered referenced.
+    assert!(
+        module_graph.is_class_referenced_by_importers(Utf8Path::new("/src/base.css"), "base"),
+        "'base' class must be referenced transitively"
+    );
+
+    // The 'orphan' class is never used anywhere.
+    assert!(
+        !module_graph.is_class_referenced_by_importers(Utf8Path::new("/src/base.css"), "orphan"),
+        "'orphan' class must not be referenced"
+    );
 }
 
 fn find_files_recursively_in_directory(

@@ -1,0 +1,76 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+
+# `/src/styles.css`
+
+## Source
+
+```css
+.button {
+    color: red;
+}
+.header {
+    font-size: 24px;
+}
+```
+
+## Module Info
+
+```
+classes: [
+  button,
+  header,
+]
+imports: []
+```
+
+
+# `/src/App.jsx`
+
+## Source
+
+```jsx
+import "./styles.css";
+
+export function App() {
+	return <div className="button header">Hello</div>;
+}
+```
+
+## Module Info
+
+```
+Exports {
+  "App" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+}
+Imports {
+  No imports
+}
+Side-effect imports: [
+  "./styles.css" => /src/styles.css,
+]
+Referenced classes: [
+  button,
+  header,
+]
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: App,
+  Type: unknown,
+  Declaration kind: HoistedValue
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => unknown
+```

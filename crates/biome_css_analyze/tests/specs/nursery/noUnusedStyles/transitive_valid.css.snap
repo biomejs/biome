@@ -1,0 +1,15 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: transitive_valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+/* This file is imported by transitive_theme.css, which is imported by
+   transitive_valid.jsx. The .base class is referenced there. */
+.base {
+	box-sizing: border-box;
+}
+
+```

@@ -571,6 +571,8 @@ fn lint(params: LintParams) -> LintResults {
                 .and_then(|services| services.semantic_model.as_ref())
         }),
         file_source,
+        module_graph: Some(params.module_graph.clone()),
+        project_layout: Some(params.project_layout.clone()),
     };
     let (_, analyze_diagnostics) = analyze(
         &tree,
@@ -596,7 +598,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings,
         path,
-        module_graph: _,
+        module_graph,
         project_layout,
         language,
         only,
@@ -625,7 +627,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_skip(skip)
             .with_path(path.as_path())
             .with_enabled_selectors(rules)
-            .with_project_layout(project_layout)
+            .with_project_layout(project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -641,6 +643,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .as_css_services()
             .and_then(|services| services.semantic_model.as_ref()),
         file_source,
+        module_graph: Some(module_graph),
+        project_layout: Some(project_layout),
     };
 
     analyze(
@@ -714,6 +718,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 .as_css_services()
                 .and_then(|services| services.semantic_model.as_ref()),
             file_source,
+            module_graph: Some(params.module_graph.clone()),
+            project_layout: Some(params.project_layout.clone()),
         };
 
         let (action, _) = analyze(

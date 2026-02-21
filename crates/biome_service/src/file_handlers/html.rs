@@ -30,7 +30,7 @@ use biome_formatter::{
     LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_html_analyze::analyze;
+use biome_html_analyze::{HtmlAnalyzerServices, analyze};
 use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
@@ -1420,10 +1420,18 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
 
     let source_type = params.language.to_html_file_source().unwrap_or_default();
-    let (_, analyze_diagnostics) =
-        analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-            process_lint.process_signal(signal)
-        });
+    let html_services = HtmlAnalyzerServices {
+        module_graph: Some(params.module_graph.clone()),
+        project_layout: Some(params.project_layout.clone()),
+    };
+    let (_, analyze_diagnostics) = analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        source_type,
+        html_services,
+        |signal| process_lint.process_signal(signal),
+    );
 
     process_lint.into_result(
         params
@@ -1439,7 +1447,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings,
         path,
-        module_graph: _,
+        module_graph,
         project_layout,
         language,
         only,
@@ -1469,7 +1477,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_skip(skip)
             .with_path(path.as_path())
             .with_enabled_selectors(rules)
-            .with_project_layout(project_layout)
+            .with_project_layout(project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -1479,20 +1487,31 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-        actions.extend(signal.actions().into_code_action_iter().map(|item| {
-            CodeAction {
-                category: item.category.clone(),
-                rule_name: item
-                    .rule_name
-                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                suggestion: item.suggestion,
-                offset: action_offset,
-            }
-        }));
+    let html_services = HtmlAnalyzerServices {
+        module_graph: Some(module_graph),
+        project_layout: Some(project_layout),
+    };
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        source_type,
+        html_services,
+        |signal| {
+            actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                CodeAction {
+                    category: item.category.clone(),
+                    rule_name: item
+                        .rule_name
+                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                    suggestion: item.suggestion,
+                    offset: action_offset,
+                }
+            }));
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     PullActionsResult { actions }
 }
@@ -1538,9 +1557,18 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .to_html_file_source()
         .unwrap_or_default();
     loop {
-        let (action, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-            process_fix_all.process_signal(signal)
-        });
+        let html_services = HtmlAnalyzerServices {
+            module_graph: Some(params.module_graph.clone()),
+            project_layout: Some(params.project_layout.clone()),
+        };
+        let (action, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            source_type,
+            html_services,
+            |signal| process_fix_all.process_signal(signal),
+        );
         let result = process_fix_all.process_action(action, |root| {
             tree = match HtmlRoot::cast(root) {
                 Some(tree) => tree,

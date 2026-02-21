@@ -256,6 +256,53 @@ pub fn module_graph_for_test_file(
     Arc::new(module_graph)
 }
 
+/// Builds a module graph for a CSS test file by scanning the directory for all
+/// CSS and JS-like files, parsing them, and populating the module graph.
+///
+/// This enables project-domain CSS rules (e.g. `noUnusedStyles`) to work in
+/// spec tests by having both sides of the cross-file reference available:
+/// - CSS files provide class definitions.
+/// - JS/JSX files provide `className` references.
+pub fn module_graph_for_css_test_file(
+    input_file: &Utf8Path,
+    project_layout: &ProjectLayout,
+) -> Arc<ModuleGraph> {
+    let module_graph = ModuleGraph::default();
+
+    let dir = input_file.parent().unwrap().to_path_buf();
+    let fs = OsFileSystem::new(dir.clone());
+
+    // Collect and populate CSS paths.
+    let css_paths = get_css_like_paths_in_dir(Utf8Path::new(&dir));
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+    module_graph.update_graph_for_css_paths(&fs, project_layout, &css_roots, None);
+
+    // Also collect JS/JSX paths — they may contain `className` references.
+    let js_paths = get_js_like_paths_in_dir(Utf8Path::new(&dir));
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+    module_graph.update_graph_for_js_paths(&fs, project_layout, &js_roots, false);
+
+    Arc::new(module_graph)
+}
+
+fn get_css_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
+    std::fs::read_dir(dir)
+        .unwrap()
+        .flat_map(|path| {
+            let path = Utf8PathBuf::try_from(path.unwrap().path()).unwrap();
+            if path.is_dir() {
+                get_css_like_paths_in_dir(&path)
+            } else {
+                DocumentFileSource::from_well_known(&path, false)
+                    .is_css_like()
+                    .then(|| BiomePath::new(path))
+                    .into_iter()
+                    .collect()
+            }
+        })
+        .collect()
+}
+
 /// Loads and parses files from the file system to pass them to service methods.
 pub fn get_added_js_paths<'a>(
     fs: &dyn FileSystem,
@@ -299,8 +346,12 @@ pub fn get_css_added_paths<'a>(
                 return None;
             };
             let root = fs.read_file_from_path(path).ok().map(|content| {
-                let parsed =
-                    biome_css_parser::parse_css(&content, file_source, CssParserOptions::default());
+                let options = if file_source.is_css_modules() {
+                    CssParserOptions::default().allow_css_modules()
+                } else {
+                    CssParserOptions::default()
+                };
+                let parsed = biome_css_parser::parse_css(&content, file_source, options);
                 let diagnostics = parsed.diagnostics();
                 assert!(
                     diagnostics.is_empty(),

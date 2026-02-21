@@ -1,3 +1,5 @@
+use crate::css_module_info::CssClass;
+use indexmap::IndexSet;
 use std::{borrow::Cow, collections::BTreeSet, sync::Arc};
 
 use biome_js_semantic::{SemanticEvent, SemanticEventExtractor};
@@ -103,6 +105,10 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Whether to enable type inference when finalizing the module info
     infer_types: bool,
+
+    /// CSS class names referenced in JSX `className` or `class` attributes
+    /// (static string literals only), each with its source range.
+    pub(super) referenced_classes: IndexSet<CssClass>,
 }
 
 /// Intermediary representation for an exported symbol.
@@ -1136,6 +1142,7 @@ impl JsModuleInfo {
             types: collector.types.into(),
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
             infer_types: collector.infer_types,
+            referenced_classes: collector.referenced_classes,
         }))
     }
 }

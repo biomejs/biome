@@ -7,7 +7,6 @@ expression: redactor(content)
 ```css
 html {
 }
-
 ```
 
 # Emitted Messages

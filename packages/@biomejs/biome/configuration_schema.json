@@ -5049,6 +5049,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoUndeclaredStylesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUndeclaredStylesOptions" }
+			]
+		},
+		"NoUndeclaredStylesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUndeclaredVariablesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5330,6 +5340,16 @@
 			]
 		},
 		"NoUnusedPrivateClassMembersOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUnusedStylesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnusedStylesOptions" }
+			]
+		},
+		"NoUnusedStylesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6078,6 +6098,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUndeclaredStyles": {
+					"description": "Reports CSS class names in HTML class attributes that are not defined in any \\<style> block or linked stylesheet in the same file.\nSee https://biomejs.dev/linter/rules/no-undeclared-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUndeclaredStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownAttribute": {
 					"description": "Disallow unknown DOM properties.\nSee https://biomejs.dev/linter/rules/no-unknown-attribute",
 					"anyOf": [
@@ -6089,6 +6116,13 @@
 					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnusedStyles": {
+					"description": "Reports CSS class selectors that are never referenced in any JSX or HTML file.\nSee https://biomejs.dev/linter/rules/no-unused-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnusedStylesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9098,6 +9132,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUndeclaredStylesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUndeclaredStylesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUndeclaredVariablesOptions": {
 			"type": "object",
 			"properties": {
@@ -9315,6 +9358,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnusedPrivateClassMembersOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnusedStylesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnusedStylesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

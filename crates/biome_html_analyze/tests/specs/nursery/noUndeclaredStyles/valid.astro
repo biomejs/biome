@@ -1,0 +1,65 @@
+<!-- should not generate diagnostics -->
+---
+// Astro frontmatter (no relevance to this rule)
+const title = "Page";
+---
+
+<style>
+	/* Single class */
+	.card { border: 1px solid; }
+
+	/* Multiple classes */
+	.header { font-size: 2rem; }
+	.footer { font-size: 0.8rem; }
+
+	/* Class inside @media query */
+	@media (max-width: 768px) {
+		.mobile { display: block; }
+	}
+
+	/* Classes from nested selector (.parent .child — both collected) */
+	.parent .child { color: red; }
+
+	/* Class with pseudo-selector (.button is still collected) */
+	.button:hover { opacity: 0.8; }
+
+	/* Combined selector — both .active and .highlighted are collected */
+	.active.highlighted { background: yellow; }
+
+	/* Classes from adjacent sibling combinator */
+	.alpha + .beta { margin-top: 8px; }
+</style>
+
+<!-- Single defined class -->
+<div class="card">Single defined class</div>
+
+<!-- Multiple classes, all defined -->
+<div class="header footer">Multiple defined classes</div>
+
+<!-- Class defined inside @media -->
+<div class="mobile">Responsive class</div>
+
+<!-- Both parts of a descendant selector -->
+<div class="parent">
+	<span class="child">Nested</span>
+</div>
+
+<!-- Class defined alongside a pseudo-selector -->
+<div class="button">Button with hover state</div>
+
+<!-- Both classes from a combined selector -->
+<div class="active highlighted">Combined selector classes</div>
+
+<!-- Both classes from adjacent sibling combinator -->
+<div class="alpha">
+	<div class="beta">Sibling</div>
+</div>
+
+<!-- Empty class attribute: no tokens to check -->
+<div class="">No classes</div>
+
+<!-- Whitespace-only class attribute: splits to nothing -->
+<div class="   ">Only whitespace</div>
+
+<!-- No style information at all: rule skips to avoid false positives -->
+<div class="any-class">Unstyled section</div>
