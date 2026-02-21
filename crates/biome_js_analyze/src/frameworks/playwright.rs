@@ -221,8 +221,8 @@ fn is_expect_expression(expr: &AnyJsExpression) -> bool {
             if let Ok(object) = member.object() {
                 // Recursively check the object - this handles chained member expressions
                 // like expect(page).not where the object is itself a member expression
-                // TODO: This produces false negatives on Vitest's `expect.extend` and asymmetric matchers (expect.oneOf(), expect.stringContaining(), etc., including user defined ones.) as being assertions
-                // when they don't assert anything in and of themselves (only being useful when passed to an `expect` call).
+                // NB: This is overly permissive for certain Vitest constructs (ex: `expect.stringContaining()`)
+                // that do not assert anything in and of themselves (see issue #9174)
                 return is_expect_expression(&object);
             }
             false
