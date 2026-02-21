@@ -163,7 +163,12 @@ impl<'a> ModuleGraphSnapshot<'a> {
                             let mut classes: Vec<_> = data
                                 .referenced_classes
                                 .iter()
-                                .map(|c| c.text().to_string())
+                                .flat_map(|r| {
+                                    r.token
+                                        .text()
+                                        .split_ascii_whitespace()
+                                        .map(|s| s.to_string())
+                                })
                                 .collect();
                             classes.sort();
                             content.push_str("\nReferenced classes: [");
@@ -259,7 +264,12 @@ impl<'a> ModuleGraphSnapshot<'a> {
                         let mut ref_classes: Vec<_> = html_data
                             .referenced_classes
                             .iter()
-                            .map(|c| c.text().to_string())
+                            .flat_map(|r| {
+                                r.token
+                                    .text()
+                                    .split_ascii_whitespace()
+                                    .map(|s| s.to_string())
+                            })
                             .collect();
                         ref_classes.sort();
                         if ref_classes.is_empty() {

@@ -23,6 +23,15 @@
 	<!-- Classes from a second <style> block -->
 	<div class="alpha beta">Classes from scoped style block</div>
 
+	<!-- Case-insensitive attribute names -->
+	<div CLASS="card">Uppercase CLASS</div>
+	<div Class="header">Mixed case Class</div>
+
+	<!-- Components: should not check class names -->
+	<MyComponent class="undefined-class">Uppercase component</MyComponent>
+	<my-component class="another-undefined">Hyphenated component</my-component>
+	<Component.Item class="yet-another-undefined">Member component</Component.Item>
+
 	<!-- Empty class attribute: no tokens to check -->
 	<div class="">No classes</div>
 

@@ -562,6 +562,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) diagnostic_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
     pub(crate) snippet_services: Option<&'a DocumentServices>,
+    pub(crate) working_directory: Option<&'a Utf8Path>,
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
@@ -928,6 +929,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) categories: RuleCategories,
     pub(crate) action_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
+    pub(crate) working_directory: Option<&'a Utf8Path>,
 }
 
 pub(crate) struct UpdateSnippetsNodes {

@@ -6,14 +6,14 @@ mod scope;
 mod utils;
 mod visitor;
 
-use crate::css_module_info::CssClass;
+use crate::css_module_info::CssClassReference;
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{BindingId, ImportSymbol, ResolvedTypeId, ScopeId, TypeData};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
 use camino::Utf8Path;
-use indexmap::{IndexMap, IndexSet};
+use indexmap::IndexMap;
 use rust_lapper::Lapper;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeSet;
@@ -130,7 +130,12 @@ impl JsModuleInfo {
             referenced_classes: self
                 .referenced_classes
                 .iter()
-                .map(|c| c.text().to_string())
+                .flat_map(|r| {
+                    r.token
+                        .text()
+                        .split_ascii_whitespace()
+                        .map(|s| s.to_string())
+                })
                 .collect::<BTreeSet<_>>(),
         }
     }
@@ -216,13 +221,12 @@ pub struct JsModuleInfoInner {
     /// Whether type inference was enabled when this module info was created
     pub(crate) infer_types: bool,
 
-    /// CSS class names referenced in JSX `className` or `class` attributes
-    /// (static string literals only; dynamic values are excluded), together with
-    /// the source range of each individual class token in the attribute string.
+    /// CSS class references from JSX `className` or `class` attributes.
     ///
-    /// The [`TextRange`] in each [`CssClass`] is intended for LSP features such
-    /// as go-to-definition.
-    pub referenced_classes: IndexSet<CssClass>,
+    /// Each entry represents one attribute occurrence (e.g., `className="foo bar"`),
+    /// which may contain multiple space-separated class names.
+    /// Only static string literals are collected; dynamic values are excluded.
+    pub referenced_classes: Vec<CssClassReference>,
 }
 
 #[derive(Debug, Default)]

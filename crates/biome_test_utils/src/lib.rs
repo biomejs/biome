@@ -45,9 +45,12 @@ pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String
 
 pub fn create_analyzer_options<L: ServiceLanguage>(
     input_file: &Utf8Path,
+    working_directory: &Utf8Path,
     diagnostics: &mut Vec<String>,
 ) -> AnalyzerOptions {
-    let options = AnalyzerOptions::default().with_file_path(input_file.to_path_buf());
+    let options = AnalyzerOptions::default()
+        .with_file_path(input_file.to_path_buf())
+        .with_working_directory(working_directory);
     // We allow a test file to configure its rule using a special
     // file with the same name as the test but with extension ".options.json"
     // that configures that specific rule.
@@ -247,11 +250,17 @@ pub fn module_graph_for_test_file(
     let module_graph = ModuleGraph::default();
 
     let dir = input_file.parent().unwrap().to_path_buf();
-    let paths = get_js_like_paths_in_dir(&dir);
-    let fs = OsFileSystem::new(dir);
-    let paths = get_added_js_paths(&fs, &paths);
+    let fs = OsFileSystem::new(dir.clone());
 
-    module_graph.update_graph_for_js_paths(&fs, project_layout, &paths, true);
+    // Collect and populate JS/JSX/TS/TSX paths
+    let js_paths = get_js_like_paths_in_dir(&dir);
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+    module_graph.update_graph_for_js_paths(&fs, project_layout, &js_roots, true);
+
+    // Collect and populate CSS paths
+    let css_paths = get_css_like_paths_in_dir(&dir);
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+    module_graph.update_graph_for_css_paths(&fs, project_layout, &css_roots, None);
 
     Arc::new(module_graph)
 }

@@ -13,6 +13,19 @@ Use this skill when creating new lint rules or assist actions for Biome. It prov
 2. Ensure `cargo`, `just`, and `pnpm` are available
 3. Read `crates/biome_analyze/CONTRIBUTING.md` for in-depth concepts
 
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all lint rule code:
+- ❌ NO emojis in rustdoc comments
+- ❌ NO emojis in diagnostic messages
+- ❌ NO emojis in code action descriptions
+- ❌ NO emojis in test files or test comments
+- ❌ NO emojis anywhere in the rule implementation
+
+Keep all code and documentation professional and emoji-free.
+
 ## Common Workflows
 
 ### Create a New Lint Rule

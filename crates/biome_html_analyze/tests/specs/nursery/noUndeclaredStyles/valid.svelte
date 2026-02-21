@@ -50,6 +50,14 @@
 	<div class="beta">Sibling</div>
 </div>
 
+<!-- Case-insensitive attribute names -->
+<div CLASS="card">Uppercase CLASS</div>
+<div Class="footer">Mixed case Class</div>
+
+<!-- Components: should not check class names -->
+<MyComponent class="undefined-class">Uppercase component</MyComponent>
+<my-component class="another-undefined">Hyphenated component</my-component>
+
 <!-- Empty class attribute: no tokens to check -->
 <div class="">No classes</div>
 

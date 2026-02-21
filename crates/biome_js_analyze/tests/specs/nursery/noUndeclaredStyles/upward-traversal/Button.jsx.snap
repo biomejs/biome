@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: Button.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+export function Button() {
+	return <button className="btn-invalid">This class does not exist</button>;
+}
+
+```
+
+# Diagnostics
+```
+Button.jsx:4:28 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class btn-invalid is not defined in any imported stylesheet.
+
+    3 │ export function Button() {
+  > 4 │ 	return <button className="btn-invalid">This class does not exist</button>;
+      │ 	                          ^^^^^^^^^^^
+    5 │ }
+    6 │
+
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+
+  i tests/specs/nursery/noUndeclaredStyles/upward-traversal/Button.jsx
+        ... which is imported by tests/specs/nursery/noUndeclaredStyles/upward-traversal/Block.jsx
+        ... which is imported by tests/specs/nursery/noUndeclaredStyles/upward-traversal/Page.jsx
+        ... which is imported by tests/specs/nursery/noUndeclaredStyles/upward-traversal/App.jsx, which imports:
+            - tests/specs/nursery/noUndeclaredStyles/upward-traversal/app.css
+
+  i Either import a CSS file that defines this class or remove this class name.
+
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+
+
+```

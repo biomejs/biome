@@ -51,7 +51,8 @@ export function f(options: PostcssOptions) {
         .with_file_path(file_path.clone())
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
-        );
+        )
+        .with_working_directory(fs.working_directory.clone());
     let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));

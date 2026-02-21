@@ -13,6 +13,17 @@ Use `packages/prettier-compare/` to inspect any differences between Biome and Pr
 2. Use `bun` (the CLI is a Bun script) and ensure dependencies have been installed.
 3. Always pass `--rebuild` so the Biome WASM bundle matches your current Rust changes.
 
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all Prettier comparison code and output:
+- ❌ NO emojis in comparison scripts
+- ❌ NO emojis in test files
+- ❌ NO emojis in output or diagnostic messages
+
+Keep all code professional and emoji-free.
+
 ## Common workflows
 
 Snippets passed as CLI args:

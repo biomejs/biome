@@ -13,6 +13,50 @@ This skill provides general development best practices, common gotchas, and Biom
 - Understanding of Biome's architecture (parser, analyzer, formatter)
 - Development environment set up (see CONTRIBUTING.md)
 
+## Universal Code Standards
+
+### CRITICAL: No Emojis Policy
+
+**Emojis are absolutely BANNED in all code contributions.**
+
+This applies to:
+- ❌ Source code (Rust, JavaScript, TypeScript, etc.)
+- ❌ Code comments and documentation (inline comments, rustdoc, JSDoc, etc.)
+- ❌ Diagnostic messages and error text
+- ❌ Test files and test data
+- ❌ Commit messages
+- ❌ Pull request titles and descriptions
+- ❌ Any generated code or scaffolding
+- ❌ Configuration files and JSON data
+
+**Why:**
+- Professional codebase standards
+- Consistency across the project
+- Avoid encoding/rendering issues
+- Keep communication clear and technical
+
+**Examples:**
+
+```rust
+// ❌ WRONG - Contains emoji
+/// This function is super cool! 🚀
+fn calculate() { }
+
+// ✅ CORRECT - No emoji
+/// Calculates the optimal value using binary search.
+fn calculate() { }
+```
+
+```rust
+// ❌ WRONG - Emoji in diagnostic
+markup! { "This is not allowed! ⛔" }
+
+// ✅ CORRECT - Clear text
+markup! { "This syntax is not allowed." }
+```
+
+**Enforcement:** All agents and contributors must follow this rule. No exceptions.
+
 ## Common Gotchas and Best Practices
 
 ### Working with AST and Syntax Nodes

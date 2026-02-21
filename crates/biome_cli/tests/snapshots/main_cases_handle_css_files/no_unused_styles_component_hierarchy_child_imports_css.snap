@@ -2,40 +2,42 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `biome.json`
+## `App.jsx`
 
-```json
-{ "html": { "experimentalFullSupportEnabled": true } }
-```
-
-## `index.html`
-
-```html
-<!DOCTYPE html>
-<html>
-<head><link rel="stylesheet" href="./styles.css" /></head>
-<body><h1 class="hero">Hello</h1></body>
-</html>
+```jsx
+import Button from "./Button.jsx";
+export default () => <div><Button /></div>;
 
 ```
 
-## `styles.css`
+## `Button.jsx`
+
+```jsx
+import "./button.css";
+export default () => <button className="btn">Click</button>;
+
+```
+
+## `button.css`
 
 ```css
-.hero {
-  font-size: 2rem;
+.btn {
+  padding: 8px;
+}
+.unused {
+  margin: 0;
 }
 ```
 
 # Emitted Messages
 
 ```block
-styles.css:1:1 lint/nursery/noUnusedStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button.css:1:24 lint/nursery/noUnusedStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The CSS class hero is not referenced in any HTML or JSX file.
+  i The CSS class unused is not referenced in any HTML or JSX file.
   
-  > 1 │ .hero { font-size: 2rem; }
-      │ ^^^^^
+  > 1 │ .btn { padding: 8px; } .unused { margin: 0; }
+      │                        ^^^^^^^
   
   i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
   

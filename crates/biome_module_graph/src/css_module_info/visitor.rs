@@ -1,13 +1,12 @@
-use crate::css_module_info::{CssClass, CssImport, CssImports, CssModuleInfo, is_global_pseudo};
+use crate::css_module_info::{CssImport, CssImports, CssModuleInfo, is_global_pseudo};
 use crate::module_graph::ModuleGraphFsProxy;
 use biome_css_syntax::{
     AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssPseudoClassFunctionSelector,
 };
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
-use biome_rowan::{AstNode, Text, TextRange, TextSize, WalkEvent};
+use biome_rowan::{AstNode, Text, TokenText, WalkEvent};
 use camino::Utf8Path;
 use indexmap::IndexSet;
-use std::ops::DerefMut;
 
 pub const SUPPORTED_EXTENSIONS: &[&str] = &["css"];
 
@@ -32,7 +31,7 @@ impl<'a> CssModuleVisitor<'a> {
 
     pub(crate) fn visit(self) -> CssModuleInfo {
         let mut imports = CssImports::default();
-        let mut classes: IndexSet<CssClass> = IndexSet::default();
+        let mut classes: IndexSet<TokenText> = IndexSet::default();
         // Tracks nesting depth inside `:global(...)` pseudo-class selectors.
         // Class selectors inside `:global()` are globally scoped and cannot be
         // statically traced to specific `class="..."` references, so we skip them.
@@ -69,21 +68,15 @@ impl<'a> CssModuleVisitor<'a> {
         CssModuleInfo::new(imports, classes)
     }
 
-    /// Extracts the class name from a `CssClassSelector` and inserts a
-    /// [`CssClass`] into the set.
+    /// Extracts the class name from a `CssClassSelector` and inserts the
+    /// `TokenText` into the set.
     ///
-    /// The class name occupies the whole token, so the token-relative range
-    /// runs from `0` to the token's text length.
-    fn visit_class_selector(node: CssClassSelector, classes: &mut IndexSet<CssClass>) {
+    /// Each token represents a single class name (e.g., "header" from `.header`).
+    fn visit_class_selector(node: CssClassSelector, classes: &mut IndexSet<TokenText>) {
         if let Ok(name) = node.name()
             && let Ok(token) = name.value_token()
         {
-            let token_text = token.token_text_trimmed();
-            let len = u32::from(token_text.len());
-            classes.insert(CssClass {
-                token: token_text,
-                range: TextRange::new(TextSize::from(0), TextSize::from(len)),
-            });
+            classes.insert(token.token_text_trimmed());
         }
     }
 
@@ -95,7 +88,7 @@ impl<'a> CssModuleVisitor<'a> {
         let resolved_path = self.resolved_path_from_specifier(&specifier);
 
         let text: Text = specifier.into();
-        imports.deref_mut().insert(
+        imports.insert(
             text.clone(),
             CssImport {
                 specifier: text,

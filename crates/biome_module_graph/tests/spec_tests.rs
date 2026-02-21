@@ -2289,11 +2289,17 @@ export function App() {
 
     // Verify referenced_classes contains the JSX className values
     assert!(
-        app_info.referenced_classes.contains("button"),
+        app_info
+            .referenced_classes
+            .iter()
+            .any(|r| r.matches("button")),
         "App.jsx must reference class 'button'"
     );
     assert!(
-        app_info.referenced_classes.contains("header"),
+        app_info
+            .referenced_classes
+            .iter()
+            .any(|r| r.matches("header")),
         "App.jsx must reference class 'header'"
     );
 
@@ -2403,7 +2409,7 @@ export function App() {
     module_graph.update_graph_for_css_paths(&fs, &ProjectLayout::default(), &css_roots, None);
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &js_roots, false);
 
-    // Transitive importers of base.css must include App.jsx (via theme.css).
+    // CSS class consumers of base.css must include App.jsx (via theme.css).
     let importers = module_graph.transitive_importers_of(Utf8Path::new("/src/base.css"));
     assert!(
         importers
@@ -2422,6 +2428,418 @@ export function App() {
     assert!(
         !module_graph.is_class_referenced_by_importers(Utf8Path::new("/src/base.css"), "orphan"),
         "'orphan' class must not be referenced"
+    );
+}
+
+/// Verifies the real-world use case: single entry point importing main CSS,
+/// which imports multiple component CSS files.
+///
+/// App.tsx → app.css → components.css (defines .button)
+/// App.tsx uses className="button"
+///
+/// This test ensures that classes defined in deeply nested CSS files are
+/// correctly detected as used when referenced by the entry point.
+#[test]
+fn test_single_entry_point_with_nested_css_imports() {
+    let fs = MemoryFileSystem::default();
+
+    // Deeply nested CSS file defining component classes
+    fs.insert(
+        "/src/styles/components.css".into(),
+        r#"
+.button { background: blue; }
+.card { border: 1px solid; }
+.unused-component-class { color: red; }
+"#,
+    );
+
+    // Utility CSS file
+    fs.insert(
+        "/src/styles/utils.css".into(),
+        r#"
+.flex { display: flex; }
+.grid { display: grid; }
+"#,
+    );
+
+    // Main app CSS that imports other CSS files
+    fs.insert(
+        "/src/app.css".into(),
+        r#"
+@import "./styles/components.css";
+@import "./styles/utils.css";
+
+.app-container { width: 100%; }
+"#,
+    );
+
+    // Entry point that only imports app.css
+    fs.insert(
+        "/src/App.tsx".into(),
+        r#"
+import "./app.css";
+
+export function App() {
+    return (
+        <div className="app-container flex">
+            <button className="button">Click</button>
+            <div className="card">Content</div>
+        </div>
+    );
+}
+"#,
+    );
+
+    let css_paths = [
+        BiomePath::new("/src/styles/components.css"),
+        BiomePath::new("/src/styles/utils.css"),
+        BiomePath::new("/src/app.css"),
+    ];
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+    let js_paths = [BiomePath::new("/src/App.tsx")];
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_css_paths(&fs, &ProjectLayout::default(), &css_roots, None);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &js_roots, false);
+
+    // App.tsx should be found as consumer of components.css (via app.css)
+    let consumers =
+        module_graph.transitive_importers_of(Utf8Path::new("/src/styles/components.css"));
+    assert!(
+        consumers
+            .iter()
+            .any(|p| p.as_path() == Utf8Path::new("/src/App.tsx")),
+        "App.tsx must be a consumer of components.css; got: {consumers:?}"
+    );
+
+    // Classes used in App.tsx should be detected even from nested CSS
+    assert!(
+        module_graph.is_class_referenced_by_importers(
+            Utf8Path::new("/src/styles/components.css"),
+            "button"
+        ),
+        "'button' class from components.css should be detected as used"
+    );
+
+    assert!(
+        module_graph
+            .is_class_referenced_by_importers(Utf8Path::new("/src/styles/components.css"), "card"),
+        "'card' class from components.css should be detected as used"
+    );
+
+    // Unused class should not be detected
+    assert!(
+        !module_graph.is_class_referenced_by_importers(
+            Utf8Path::new("/src/styles/components.css"),
+            "unused-component-class"
+        ),
+        "'unused-component-class' should be detected as unused"
+    );
+
+    // Utils classes should also work
+    assert!(
+        module_graph
+            .is_class_referenced_by_importers(Utf8Path::new("/src/styles/utils.css"), "flex"),
+        "'flex' class from utils.css should be detected as used"
+    );
+
+    assert!(
+        !module_graph
+            .is_class_referenced_by_importers(Utf8Path::new("/src/styles/utils.css"), "grid"),
+        "'grid' class from utils.css should be detected as unused"
+    );
+}
+
+/// Verifies that multiple entry points can all access nested CSS classes.
+///
+/// components.css → app.css → App.tsx (uses .button)
+/// components.css → app.css → Dashboard.tsx (uses .card)
+///
+/// Both entry points import the same main CSS file.
+#[test]
+fn test_multiple_entry_points_sharing_css() {
+    let fs = MemoryFileSystem::default();
+
+    fs.insert(
+        "/src/components.css".into(),
+        r#"
+.button { background: blue; }
+.card { border: 1px solid; }
+.modal { position: fixed; }
+"#,
+    );
+
+    fs.insert(
+        "/src/app.css".into(),
+        r#"
+@import "./components.css";
+"#,
+    );
+
+    fs.insert(
+        "/src/App.tsx".into(),
+        r#"
+import "./app.css";
+
+export function App() {
+    return <button className="button">Click</button>;
+}
+"#,
+    );
+
+    fs.insert(
+        "/src/Dashboard.tsx".into(),
+        r#"
+import "./app.css";
+
+export function Dashboard() {
+    return <div className="card">Dashboard</div>;
+}
+"#,
+    );
+
+    let css_paths = [
+        BiomePath::new("/src/components.css"),
+        BiomePath::new("/src/app.css"),
+    ];
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+    let js_paths = [
+        BiomePath::new("/src/App.tsx"),
+        BiomePath::new("/src/Dashboard.tsx"),
+    ];
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_css_paths(&fs, &ProjectLayout::default(), &css_roots, None);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &js_roots, false);
+
+    // Both entry points should be found as consumers
+    let consumers = module_graph.transitive_importers_of(Utf8Path::new("/src/components.css"));
+    assert_eq!(
+        consumers.len(),
+        2,
+        "Expected 2 consumers of components.css; got: {consumers:?}"
+    );
+    assert!(
+        consumers
+            .iter()
+            .any(|p| p.as_path() == Utf8Path::new("/src/App.tsx")),
+        "App.tsx should be a consumer"
+    );
+    assert!(
+        consumers
+            .iter()
+            .any(|p| p.as_path() == Utf8Path::new("/src/Dashboard.tsx")),
+        "Dashboard.tsx should be a consumer"
+    );
+
+    // button used in App.tsx
+    assert!(
+        module_graph
+            .is_class_referenced_by_importers(Utf8Path::new("/src/components.css"), "button"),
+        "'button' should be detected as used"
+    );
+
+    // card used in Dashboard.tsx
+    assert!(
+        module_graph.is_class_referenced_by_importers(Utf8Path::new("/src/components.css"), "card"),
+        "'card' should be detected as used"
+    );
+
+    // modal not used anywhere
+    assert!(
+        !module_graph
+            .is_class_referenced_by_importers(Utf8Path::new("/src/components.css"), "modal"),
+        "'modal' should be detected as unused"
+    );
+}
+
+/// Verifies deep nesting: 3 levels of CSS imports.
+///
+/// App.tsx → main.css → theme.css → base.css (defines .primary)
+#[test]
+fn test_deeply_nested_css_import_chain() {
+    let fs = MemoryFileSystem::default();
+
+    fs.insert(
+        "/src/base.css".into(),
+        r#"
+.primary { color: blue; }
+.secondary { color: gray; }
+"#,
+    );
+
+    fs.insert(
+        "/src/theme.css".into(),
+        r#"
+@import "./base.css";
+"#,
+    );
+
+    fs.insert(
+        "/src/main.css".into(),
+        r#"
+@import "./theme.css";
+"#,
+    );
+
+    fs.insert(
+        "/src/App.tsx".into(),
+        r#"
+import "./main.css";
+
+export function App() {
+    return <button className="primary">Primary Button</button>;
+}
+"#,
+    );
+
+    let css_paths = [
+        BiomePath::new("/src/base.css"),
+        BiomePath::new("/src/theme.css"),
+        BiomePath::new("/src/main.css"),
+    ];
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+    let js_paths = [BiomePath::new("/src/App.tsx")];
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_css_paths(&fs, &ProjectLayout::default(), &css_roots, None);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &js_roots, false);
+
+    // App.tsx should be found even for deeply nested base.css
+    let consumers = module_graph.transitive_importers_of(Utf8Path::new("/src/base.css"));
+    assert!(
+        consumers
+            .iter()
+            .any(|p| p.as_path() == Utf8Path::new("/src/App.tsx")),
+        "App.tsx should be a consumer of base.css through 3-level import chain; got: {consumers:?}"
+    );
+
+    // primary used in App.tsx
+    assert!(
+        module_graph.is_class_referenced_by_importers(Utf8Path::new("/src/base.css"), "primary"),
+        "'primary' from deeply nested base.css should be detected as used"
+    );
+
+    // secondary not used
+    assert!(
+        !module_graph.is_class_referenced_by_importers(Utf8Path::new("/src/base.css"), "secondary"),
+        "'secondary' should be detected as unused"
+    );
+}
+
+/// Tests `collect_available_classes_for_js_file` for a JSX file that directly
+/// imports CSS.
+#[test]
+fn test_collect_available_classes_for_js_file() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/styles.css".into(),
+        r#"
+.button { color: blue; }
+.card { border: 1px solid; }
+"#,
+    );
+    fs.insert(
+        "/src/App.jsx".into(),
+        r#"
+import "./styles.css";
+
+export function App() {
+    return <div className="button">Hello</div>;
+}
+"#,
+    );
+
+    let css_paths = [BiomePath::new("/src/styles.css")];
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+    let js_paths = [BiomePath::new("/src/App.jsx")];
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_css_paths(&fs, &ProjectLayout::default(), &css_roots, None);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &js_roots, false);
+
+    let (classes, traversal) =
+        module_graph.collect_available_classes_for_js_file(Utf8Path::new("/src/App.jsx"));
+
+    // Should find both CSS classes
+    assert!(classes.contains("button"), "Should find .button class");
+    assert!(classes.contains("card"), "Should find .card class");
+
+    // Should have one traversal step (direct import)
+    assert_eq!(traversal.len(), 1, "Should have 1 CSS file in traversal");
+    assert_eq!(
+        traversal[0].css_path.as_str(),
+        "/src/styles.css",
+        "Should show styles.css in traversal"
+    );
+}
+
+/// Tests `collect_available_classes_for_js_file` with multiple CSS imports.
+#[test]
+fn test_collect_available_classes_for_js_file_multiple_css() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/buttons.css".into(),
+        r#"
+.btn { padding: 0.5rem; }
+.btn-primary { background: blue; }
+"#,
+    );
+    fs.insert(
+        "/src/layout.css".into(),
+        r#"
+.container { width: 100%; }
+.flex { display: flex; }
+"#,
+    );
+    fs.insert(
+        "/src/App.jsx".into(),
+        r#"
+import "./buttons.css";
+import "./layout.css";
+
+export function App() {
+    return <div className="container"><button className="btn">Click</button></div>;
+}
+"#,
+    );
+
+    let css_paths = [
+        BiomePath::new("/src/buttons.css"),
+        BiomePath::new("/src/layout.css"),
+    ];
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+    let js_paths = [BiomePath::new("/src/App.jsx")];
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_css_paths(&fs, &ProjectLayout::default(), &css_roots, None);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &js_roots, false);
+
+    let (classes, traversal) =
+        module_graph.collect_available_classes_for_js_file(Utf8Path::new("/src/App.jsx"));
+
+    // Should find all CSS classes from both imports
+    assert!(classes.contains("btn"), "Should find .btn class");
+    assert!(
+        classes.contains("btn-primary"),
+        "Should find .btn-primary class"
+    );
+    assert!(
+        classes.contains("container"),
+        "Should find .container class"
+    );
+    assert!(classes.contains("flex"), "Should find .flex class");
+
+    // Should have two CSS files in traversal
+    assert_eq!(
+        traversal.len(),
+        2,
+        "Should have 2 CSS files in traversal path"
     );
 }
 

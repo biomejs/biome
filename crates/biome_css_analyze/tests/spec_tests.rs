@@ -156,7 +156,9 @@ pub(crate) fn analyze_and_snap(
     plugins: AnalyzerPluginSlice,
 ) {
     let mut diagnostics = Vec::new();
-    let options = create_analyzer_options::<CssLanguage>(input_file, &mut diagnostics);
+    let working_directory = input_file.parent().unwrap_or(input_file);
+    let options =
+        create_analyzer_options::<CssLanguage>(input_file, working_directory, &mut diagnostics);
 
     let parsed = parse_css(input_code, source_type, parser_options);
     let root = parsed.tree();

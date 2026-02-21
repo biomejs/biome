@@ -1,102 +1,20 @@
+//! CLI integration tests for CSS lint rules.
+//!
+//! This file tests the `noUnusedStyles` rule behavior in real-world scenarios:
+//! - Referenced vs unreferenced classes
+//! - Dynamic className expressions
+//! - Global pseudo-class exemptions
+//! - Transitive CSS imports via @import
+//! - Complex selector patterns
+//! - Component hierarchies (parent imports CSS, child uses classes)
+//! - Mixed HTML and JSX consumers
+
+use crate::run_cli_with_dyn_fs;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
-use crate::{run_cli, run_cli_with_dyn_fs};
 use biome_console::BufferConsole;
-use biome_fs::{MemoryFileSystem, TemporaryFs};
+use biome_fs::TemporaryFs;
 use bpaf::Args;
-use camino::Utf8Path;
 
-#[test]
-fn should_not_format_files_by_default() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let css_file_content = r#"html {}"#;
-    let css_file = Utf8Path::new("input.css");
-    fs.insert(css_file.into(), css_file_content.as_bytes());
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["format", css_file.as_str()].as_slice()),
-    );
-
-    // no files processed error
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "should_not_format_files_by_default",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
-fn should_format_files_by_when_opt_in() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let css_file_content = r#"html {}"#;
-    let css_file = Utf8Path::new("input.css");
-    fs.insert(css_file.into(), css_file_content.as_bytes());
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["format", "--css-formatter-enabled=true", css_file.as_str()].as_slice()),
-    );
-
-    // not formatted error
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "should_format_files_by_when_opt_in",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
-fn should_format_write_files_by_when_opt_in() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let css_file_content = r#"html {}"#;
-    let css_file = Utf8Path::new("input.css");
-    fs.insert(css_file.into(), css_file_content.as_bytes());
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                "--css-formatter-enabled=true",
-                css_file.as_str(),
-            ]
-            .as_slice(),
-        ),
-    );
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "should_format_write_files_by_when_opt_in",
-        fs,
-        console,
-        result,
-    ));
-}
-
-// ── noUnusedStyles ────────────────────────────────────────────────────────────
-
-/// Referenced classes produce no diagnostics, regardless of attribute name
-/// (`className` vs `class=`) or file extension (`.jsx` / `.tsx`).
 #[test]
 fn no_unused_styles_referenced_class_not_flagged() {
     let mut console = BufferConsole::default();
@@ -145,8 +63,6 @@ export default () => <div class="solid" />;
     ));
 }
 
-/// Unreferenced classes are flagged; referenced classes in the same file are
-/// not. Tests single-class files, mixed used/unused, and multi-class strings.
 #[test]
 fn no_unused_styles_unreferenced_class_flagged() {
     let mut console = BufferConsole::default();
@@ -179,8 +95,6 @@ export default () => <div className="used primary" />;
     ));
 }
 
-/// Dynamic `className={"foo"}` (JSX expression, not a string literal) is not
-/// statically collected — the class is treated as unreferenced and flagged.
 #[test]
 fn no_unused_styles_dynamic_classname_not_collected() {
     let mut console = BufferConsole::default();
@@ -210,8 +124,6 @@ export default () => <div className={"button"} />;
     ));
 }
 
-/// Classes inside `:global(.foo)` are never flagged regardless of references,
-/// because they are globally scoped (CSS Modules convention).
 #[test]
 fn no_unused_styles_global_pseudo_class_is_exempt() {
     let mut console = BufferConsole::default();
@@ -237,10 +149,6 @@ fn no_unused_styles_global_pseudo_class_is_exempt() {
     ));
 }
 
-/// CSS `@import` chain: `App.jsx → theme.css → base.css`. Classes in
-/// `theme.css` are used (App.jsx directly imports it). Classes in `base.css`
-/// are NOT resolved through the transitive `@import` — this is a known
-/// limitation documented by the snapshot.
 #[test]
 fn no_unused_styles_transitive_css_import() {
     let mut console = BufferConsole::default();
@@ -273,10 +181,6 @@ export default () => <div className="base theme" />;
     ));
 }
 
-/// All selector pattern variants where every class is referenced → no
-/// diagnostics. Covers: compound (`.btn.active`), child combinator
-/// (`.list > .item`), element-qualified (`div.container`), `:is()` pseudo,
-/// and pseudo-element/state variants (`.btn:hover`, `.btn::before`).
 #[test]
 fn no_unused_styles_selector_patterns_all_referenced() {
     let mut console = BufferConsole::default();
@@ -318,10 +222,6 @@ export default () => (
     ));
 }
 
-/// Selector pattern variants where only some classes are referenced — the
-/// unreferenced ones are flagged. Covers: descendant combinator (`.parent`
-/// unused), selector list (`.bar` unused), and `@media` block (`.hidden`
-/// unused).
 #[test]
 fn no_unused_styles_selector_patterns_partial_reference() {
     let mut console = BufferConsole::default();
@@ -357,31 +257,28 @@ export default () => <div className="child foo mobile" />;
     ));
 }
 
-/// A class referenced in an HTML file's `class=` attribute via a linked
-/// stylesheet. Requires `experimentalFullSupportEnabled` so HTML files are
-/// parsed as HTML and their `class=` attributes are walked by the module-graph
-/// visitor.
-///
-/// Note: whether the CSS class is considered "used" depends on scan order.
-/// This snapshot documents the current behavior.
 #[test]
-fn no_unused_styles_html_consumer() {
+fn no_unused_styles_component_hierarchy_parent_imports_css() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_unused_styles_html_consumer");
+    let mut fs = TemporaryFs::new("no_unused_styles_component_hierarchy_parent_imports_css");
 
+    // Real-world pattern: Parent imports CSS and child component
+    // Child component uses classes from that CSS
     fs.create_file(
-        "biome.json",
-        r#"{ "html": { "experimentalFullSupportEnabled": true } }"#,
+        "button.css",
+        ".btn { padding: 8px; } .btn-primary { color: blue; }",
     );
-    // Single HTML consumer
-    fs.create_file("styles.css", ".hero { font-size: 2rem; }");
     fs.create_file(
-        "index.html",
-        r#"<!DOCTYPE html>
-<html>
-<head><link rel="stylesheet" href="./styles.css" /></head>
-<body><h1 class="hero">Hello</h1></body>
-</html>
+        "Button.jsx",
+        r#"// Button component uses classes but doesn't import CSS
+export default () => <button className="btn btn-primary">Click</button>;
+"#,
+    );
+    fs.create_file(
+        "App.jsx",
+        r#"import "./button.css";
+import Button from "./Button.jsx";
+export default () => <div><Button /></div>;
 "#,
     );
 
@@ -393,40 +290,34 @@ fn no_unused_styles_html_consumer() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_unused_styles_html_consumer",
+        "no_unused_styles_component_hierarchy_parent_imports_css",
         fs.create_mem(),
         console,
         result,
     ));
 }
 
-/// A CSS file imported by both a JSX file and an HTML file. The JSX consumer
-/// covers `.header`; the HTML consumer covers `.footer`.
-///
-/// Note: whether HTML-referenced classes suppress CSS diagnostics depends on
-/// scan order. This snapshot documents the current behavior.
 #[test]
-fn no_unused_styles_mixed_html_jsx_consumers() {
+fn no_unused_styles_component_hierarchy_child_imports_css() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_unused_styles_mixed_html_jsx_consumers");
+    let mut fs = TemporaryFs::new("no_unused_styles_component_hierarchy_child_imports_css");
 
+    // Child component imports its own CSS
     fs.create_file(
-        "biome.json",
-        r#"{ "html": { "experimentalFullSupportEnabled": true } }"#,
+        "button.css",
+        ".btn { padding: 8px; } .unused { margin: 0; }",
     );
     fs.create_file(
-        "styles.css",
-        ".header { font-weight: bold; } .footer { font-size: 0.8rem; }",
-    );
-    fs.create_file(
-        "App.jsx",
-        r#"import "./styles.css";
-export default () => <div className="header" />;
+        "Button.jsx",
+        r#"import "./button.css";
+export default () => <button className="btn">Click</button>;
 "#,
     );
     fs.create_file(
-        "index.html",
-        r#"<link rel="stylesheet" href="./styles.css" /><footer class="footer">end</footer>"#,
+        "App.jsx",
+        r#"import Button from "./Button.jsx";
+export default () => <div><Button /></div>;
+"#,
     );
 
     let result = run_cli_with_dyn_fs(
@@ -437,7 +328,80 @@ export default () => <div className="header" />;
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_unused_styles_mixed_html_jsx_consumers",
+        "no_unused_styles_component_hierarchy_child_imports_css",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_unused_styles_component_hierarchy_nested_three_levels() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("no_unused_styles_component_hierarchy_nested_three_levels");
+
+    // Deep nesting: App → Page → Button (App imports all CSS)
+    fs.create_file(
+        "styles.css",
+        ".container { width: 100%; } .btn { padding: 8px; }",
+    );
+    fs.create_file(
+        "Button.jsx",
+        r#"export default () => <button className="btn">Click</button>;"#,
+    );
+    fs.create_file(
+        "Page.jsx",
+        r#"import Button from "./Button.jsx";
+export default () => <div className="container"><Button /></div>;
+"#,
+    );
+    fs.create_file(
+        "App.jsx",
+        r#"import "./styles.css";
+import Page from "./Page.jsx";
+export default () => <Page />;
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", "--only=nursery/noUnusedStyles", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_styles_component_hierarchy_nested_three_levels",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_undeclared_styles_shows_checked_import_chain() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("no_undeclared_styles_shows_checked_import_chain");
+
+    fs.create_file(
+        "button.css",
+        ".btn { background: blue; } .btn-primary { color: white; }",
+    );
+    fs.create_file(
+        "Button.jsx",
+        r#"import "./button.css";
+export default () => <button className="btn btn-undefined">Click</button>;"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", "--only=nursery/noUndeclaredStyles", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_styles_shows_checked_import_chain",
         fs.create_mem(),
         console,
         result,

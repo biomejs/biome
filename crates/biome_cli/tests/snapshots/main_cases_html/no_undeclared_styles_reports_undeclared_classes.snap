@@ -54,7 +54,7 @@ expression: redactor(content)
 ```block
 file.html:3:18 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The CSS class header is not defined in any `<style>` block or linked stylesheet.
+  i The CSS class header is not defined in any available stylesheet.
   
     1 │ <style>.card { border: 1px solid; } .title { font-weight: bold; }</style>
     2 │ <style>.container { max-width: 1200px; } .btn { padding: 8px; }</style>
@@ -65,7 +65,7 @@ file.html:3:18 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
-  i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
@@ -77,7 +77,7 @@ file.html:3:18 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
 ```block
 file.html:4:18 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The CSS class header is not defined in any `<style>` block or linked stylesheet.
+  i The CSS class header is not defined in any available stylesheet.
   
     2 │ <style>.container { max-width: 1200px; } .btn { padding: 8px; }</style>
     3 │ <div class="card header">Single unknown</div>
@@ -88,7 +88,7 @@ file.html:4:18 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
-  i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
@@ -100,7 +100,7 @@ file.html:4:18 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
 ```block
 file.html:4:31 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The CSS class footer is not defined in any `<style>` block or linked stylesheet.
+  i The CSS class footer is not defined in any available stylesheet.
   
     2 │ <style>.container { max-width: 1200px; } .btn { padding: 8px; }</style>
     3 │ <div class="card header">Single unknown</div>
@@ -111,7 +111,7 @@ file.html:4:31 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
-  i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
@@ -123,7 +123,7 @@ file.html:4:31 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
 ```block
 file.html:5:13 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The CSS class header is not defined in any `<style>` block or linked stylesheet.
+  i The CSS class header is not defined in any available stylesheet.
   
     3 │ <div class="card header">Single unknown</div>
     4 │ <div class="card header title footer">Multi unknown</div>
@@ -134,7 +134,7 @@ file.html:5:13 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
-  i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
@@ -146,7 +146,7 @@ file.html:5:13 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
 ```block
 file.html:5:20 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The CSS class footer is not defined in any `<style>` block or linked stylesheet.
+  i The CSS class footer is not defined in any available stylesheet.
   
     3 │ <div class="card header">Single unknown</div>
     4 │ <div class="card header title footer">Multi unknown</div>
@@ -157,7 +157,7 @@ file.html:5:20 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
-  i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
@@ -169,7 +169,7 @@ file.html:5:20 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
 ```block
 file.html:5:27 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The CSS class unknown is not defined in any `<style>` block or linked stylesheet.
+  i The CSS class unknown is not defined in any available stylesheet.
   
     3 │ <div class="card header">Single unknown</div>
     4 │ <div class="card header title footer">Multi unknown</div>
@@ -180,7 +180,7 @@ file.html:5:27 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
-  i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
@@ -192,7 +192,7 @@ file.html:5:27 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
 ```block
 file.html:7:16 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The CSS class main-content is not defined in any `<style>` block or linked stylesheet.
+  i The CSS class main-content is not defined in any available stylesheet.
   
     5 │ <div class="header footer unknown">Multi-block unknown</div>
     6 │ <body class="container">
@@ -203,7 +203,7 @@ file.html:7:16 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
-  i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   
@@ -215,7 +215,7 @@ file.html:7:16 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
 ```block
 file.html:8:24 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The CSS class unknown-btn is not defined in any `<style>` block or linked stylesheet.
+  i The CSS class unknown-btn is not defined in any available stylesheet.
   
      6 │ <body class="container">
      7 │   <main class="main-content">
@@ -226,7 +226,7 @@ file.html:8:24 lint/nursery/noUndeclaredStyles ━━━━━━━━━━━
   
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
-  i Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name.
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
   

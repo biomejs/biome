@@ -1752,9 +1752,9 @@ impl Workspace for WorkspaceServer {
             pull_code_actions,
             inline_config,
         } = params;
-        let settings = self
+        let (working_directory, settings) = self
             .projects
-            .get_settings_based_on_path(project_key, &path)
+            .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let (parse, embedded_snippets, services) =
             self.get_parse_with_snippets_and_services(&path)?;
@@ -1793,6 +1793,7 @@ impl Workspace for WorkspaceServer {
                 diagnostic_offset: None,
                 document_services: &services,
                 snippet_services: None,
+                working_directory: Some(working_directory.as_path()),
             });
 
             let LintResults {
@@ -1827,6 +1828,7 @@ impl Workspace for WorkspaceServer {
                     diagnostic_offset: Some(embedded_node.content_offset()),
                     document_services: &services,
                     snippet_services: Some(snippet_services),
+                    working_directory: Some(working_directory.as_path()),
                 });
 
                 diagnostics.extend(results.diagnostics);
@@ -1991,9 +1993,9 @@ impl Workspace for WorkspaceServer {
             categories,
             inline_config,
         } = params;
-        let settings = self
+        let (working_directory, settings) = self
             .projects
-            .get_settings_based_on_path(project_key, &path)
+            .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let capabilities =
             self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
@@ -2024,6 +2026,7 @@ impl Workspace for WorkspaceServer {
             categories,
             action_offset: None,
             document_services: &services,
+            working_directory: Some(working_directory.as_path()),
         });
 
         for embedded_snippet in embedded_snippets {
@@ -2051,6 +2054,7 @@ impl Workspace for WorkspaceServer {
                 categories,
                 action_offset: Some(embedded_snippet.content_offset()),
                 document_services: &services,
+                working_directory: Some(working_directory.as_path()),
             });
 
             result.actions.extend(embedded_actions_result.actions);

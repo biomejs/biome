@@ -25,6 +25,16 @@ Use this skill when creating diagnostics - the error messages, warnings, and hin
 - Actionable: Always suggest how to fix
 - Show don't tell: Prefer code frames over textual explanations
 
+**CRITICAL: No Emojis in Diagnostics**
+
+Emojis are BANNED in all diagnostic messages, advice text, and error output:
+- ❌ NO emojis in diagnostic messages
+- ❌ NO emojis in advice notes
+- ❌ NO emojis in code frame annotations
+- ❌ NO emojis in log messages
+
+Keep all user-facing text professional and emoji-free.
+
 ## Common Workflows
 
 ### Create a Diagnostic Type

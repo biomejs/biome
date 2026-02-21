@@ -1396,6 +1396,7 @@ fn lint(params: LintParams) -> LintResults {
     let workspace_settings = &params.settings;
     let analyzer_options = workspace_settings.analyzer_options::<HtmlLanguage>(
         params.path,
+        None,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -1458,6 +1459,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services: _,
+        working_directory,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -1468,8 +1470,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let analyzer_options =
-        settings.analyzer_options::<HtmlLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<HtmlLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
@@ -1527,6 +1533,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<HtmlLanguage>(
         params.biome_path,
+        None,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );

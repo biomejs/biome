@@ -1,7 +1,8 @@
 mod visitor;
 
-use crate::css_module_info::CssClass;
+use crate::css_module_info::CssClassReference;
 use biome_resolver::ResolvedPath;
+use biome_rowan::TokenText;
 use indexmap::IndexSet;
 use std::collections::BTreeSet;
 use std::ops::Deref;
@@ -27,8 +28,8 @@ impl Deref for HtmlModuleInfo {
 
 impl HtmlModuleInfo {
     pub(crate) fn new(
-        style_classes: IndexSet<CssClass>,
-        referenced_classes: IndexSet<CssClass>,
+        style_classes: IndexSet<TokenText>,
+        referenced_classes: Vec<CssClassReference>,
         imported_stylesheets: Vec<ResolvedPath>,
     ) -> Self {
         let info = HtmlModuleInfoInner {
@@ -45,13 +46,18 @@ impl HtmlModuleInfo {
                 .0
                 .style_classes
                 .iter()
-                .map(|c| c.text().to_string())
+                .map(|token| token.text().to_string())
                 .collect(),
             referenced_classes: self
                 .0
                 .referenced_classes
                 .iter()
-                .map(|c| c.text().to_string())
+                .flat_map(|r| {
+                    r.token
+                        .text()
+                        .split_ascii_whitespace()
+                        .map(|s| s.to_string())
+                })
                 .collect(),
         }
     }
@@ -59,25 +65,19 @@ impl HtmlModuleInfo {
 
 #[derive(Clone, Debug)]
 pub struct HtmlModuleInfoInner {
-    /// CSS class names defined in `<style>` blocks within this HTML file,
-    /// together with their source locations.
+    /// CSS class names defined in `<style>` blocks within this HTML file.
     ///
     /// Collected by walking all `CssClassSelector` nodes in the embedded CSS
     /// ASTs (already parsed by the workspace server — no re-parsing needed).
     ///
-    /// The [`TextRange`](biome_rowan::TextRange) in each [`CssClass`] points to
-    /// the class selector token within the embedded stylesheet and is intended
-    /// for LSP features such as go-to-definition.
-    pub style_classes: IndexSet<CssClass>,
+    /// Each `TokenText` represents a single class name (e.g., "header" from `.header`).
+    pub style_classes: IndexSet<TokenText>,
 
-    /// CSS class names referenced in `class="..."` attributes within this
-    /// HTML file, together with the source range of each individual class
-    /// token in the attribute value.
+    /// CSS class references from `class="..."` attributes within this HTML file.
     ///
-    /// The [`TextRange`](biome_rowan::TextRange) in each [`CssClass`] can be
-    /// used by LSP features to locate the exact token within the attribute
-    /// string.
-    pub referenced_classes: IndexSet<CssClass>,
+    /// Each entry represents one attribute occurrence (e.g., `class="foo bar"`),
+    /// which may contain multiple space-separated class names.
+    pub referenced_classes: Vec<CssClassReference>,
 
     /// Resolved paths of external stylesheets linked via
     /// `<link rel="stylesheet" href="...">`.

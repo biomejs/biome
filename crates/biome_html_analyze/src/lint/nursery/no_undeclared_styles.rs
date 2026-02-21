@@ -1,10 +1,13 @@
 use crate::services::module_graph::HtmlModuleGraph;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute};
-use biome_rowan::{TextRange, TextSize};
-use camino::Utf8Path;
-use std::collections::HashSet;
+use biome_html_syntax::{
+    AnyHtmlAttributeInitializer, AnyHtmlTagName, HtmlAttribute, HtmlOpeningElement,
+    HtmlSelfClosingElement,
+};
+use biome_module_graph::CssTraversalStep;
+use biome_rowan::{AstNode, TextRange, TextSize};
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Reports CSS class names in HTML `class` attributes that are not defined
@@ -13,6 +16,12 @@ declare_lint_rule! {
     /// When an HTML file has `<style>` blocks or `<link rel="stylesheet">` elements,
     /// every class name used in `class="..."` attributes is checked against the
     /// available class definitions. Classes that are not defined are reported.
+    ///
+    /// Components (custom elements) are excluded from this check, as they may receive
+    /// class names as props or use scoped styling. A component is identified by:
+    /// - Tag names starting with an uppercase letter (e.g., `MyComponent`)
+    /// - Tag names containing a hyphen (e.g., `my-component`)
+    /// - Member expressions (e.g., `Component.Item`)
     ///
     /// If the file has no style information (no `<style>` blocks and no linked
     /// stylesheets), this rule does not emit diagnostics to avoid false positives.
@@ -23,7 +32,7 @@ declare_lint_rule! {
     ///
     /// ```html,ignore
     /// <style>.card { border: 1px solid; }</style>
-    /// <div class="header">Content</div>  <!-- ⚠️ Class "header" is not defined -->
+    /// <div class="header">Content</div>
     /// ```
     ///
     /// ### Valid
@@ -31,6 +40,11 @@ declare_lint_rule! {
     /// ```html,ignore
     /// <style>.card { border: 1px solid; }</style>
     /// <div class="card">Content</div>
+    /// ```
+    ///
+    /// ```html,ignore
+    /// <style>.card { border: 1px solid; }</style>
+    /// <MyComponent class="any-class">Components are not checked</MyComponent>
     /// ```
     ///
     pub NoUndeclaredStyles {
@@ -43,14 +57,6 @@ declare_lint_rule! {
     }
 }
 
-/// Stores the text range and name of an undeclared class.
-pub struct UndeclaredClass {
-    /// Range of this class name token within the source file.
-    pub range: TextRange,
-    /// The class name that was not found.
-    pub name: String,
-}
-
 impl Rule for NoUndeclaredStyles {
     type Query = HtmlModuleGraph<HtmlAttribute>;
     type State = UndeclaredClass;
@@ -59,99 +65,46 @@ impl Rule for NoUndeclaredStyles {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let attr = ctx.query();
-        let mut signals = Vec::new();
 
-        // Only care about `class="..."` attributes.
-        let Ok(name_node) = attr.name() else {
-            return signals;
+        let Some(class_data) = Self::extract_class_attribute(attr) else {
+            return Vec::new();
         };
-        let Ok(name_token) = name_node.value_token() else {
-            return signals;
-        };
-        if name_token.text_trimmed() != "class" {
-            return signals;
+
+        // Skip components (custom elements) in framework files.
+        if Self::is_component_element(attr) {
+            return Vec::new();
         }
-
-        // Get the attribute value string (without quotes).
-        let Some(initializer) = attr.initializer() else {
-            return signals;
-        };
-        let Ok(value) = initializer.value() else {
-            return signals;
-        };
-        let html_string = match value {
-            AnyHtmlAttributeInitializer::HtmlString(s) => s,
-            _ => return signals,
-        };
-        // `value_token` is needed only to obtain the token's absolute file
-        // offset so that diagnostic ranges point to the right location.
-        let Ok(value_token) = html_string.value_token() else {
-            return signals;
-        };
-        // `inner_string_text` strips the surrounding quotes and returns a
-        // `TokenText` backed by the same green token — no allocation.
-        let Ok(inner_text) = html_string.inner_string_text() else {
-            return signals;
-        };
 
         let module_graph = ctx.module_graph();
         let file_path = ctx.file_path();
 
-        let Some(html_info) = module_graph.html_module_info_for_path(file_path) else {
-            return signals;
-        };
+        // Collect all available CSS classes by traversing the import tree
+        let (available_classes, traversal_path) =
+            module_graph.collect_available_classes_from_import_tree(file_path);
 
         // If there's no style information available, skip this file entirely
         // to avoid all-false-positives on unstyled HTML files.
-        if html_info.style_classes.is_empty() && html_info.imported_stylesheets.is_empty() {
-            return signals;
+        if available_classes.is_empty() {
+            return Vec::new();
         }
-
-        // Collect CssModuleInfo handles for linked stylesheets. These are
-        // Arc-backed so cloning is cheap; we keep them alive so we can borrow
-        // &str from their class name Text values below.
-        let linked_css: Vec<_> = html_info
-            .imported_stylesheets
-            .iter()
-            .filter_map(|p| {
-                module_graph
-                    .css_module_info_for_path(p.as_path().unwrap_or_else(|| Utf8Path::new("")))
-            })
-            .collect();
-
-        // Collect all available class names as &str — no allocations needed.
-        let mut available: HashSet<&str> = HashSet::new();
-        for class in html_info.style_classes.iter() {
-            available.insert(class.text());
-        }
-        for css_info in &linked_css {
-            for class in css_info.classes.iter() {
-                available.insert(class.text());
-            }
-        }
-
-        // The inner content starts one byte into the token (after the opening
-        // quote). This gives the absolute file offset of the first character
-        // of the class list, which anchors the diagnostic ranges.
-        let inner_file_start: u32 = u32::from(value_token.text_trimmed_range().start()) + 1;
 
         // Check each class name in the attribute value.
-        let inner = inner_text.text();
+        let mut signals = Vec::new();
         let mut offset: u32 = 0;
-        for class_name in inner.split_ascii_whitespace() {
-            // Find where this class name starts within `inner` (searching
-            // forward from the previous position).
-            let class_offset = inner[offset as usize..]
+
+        for class_name in class_data.inner_text.split_ascii_whitespace() {
+            // Find where this class name starts within the inner text.
+            let class_offset = class_data.inner_text[offset as usize..]
                 .find(class_name)
                 .map_or(offset, |o| offset + o as u32);
 
-            if !available.contains(class_name) {
-                let start = TextSize::from(inner_file_start + class_offset);
+            if !available_classes.contains(class_name) {
+                let start = TextSize::from(class_data.inner_file_start + class_offset);
                 let end = start + TextSize::from(class_name.len() as u32);
                 signals.push(UndeclaredClass {
                     range: TextRange::new(start, end),
-                    // One allocation per actual diagnostic emitted (not per class checked).
                     name: class_name.to_string(),
+                    traversal_path: traversal_path.clone(),
                 });
             }
 
@@ -162,20 +115,133 @@ impl Rule for NoUndeclaredStyles {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let mut diag = RuleDiagnostic::new(
+            rule_category!(),
+            state.range,
+            markup! {
+                "The CSS class "<Emphasis>{&state.name}</Emphasis>" is not defined in any available stylesheet."
+            },
+        )
+        .note(markup! {
+            "Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended."
+        });
+
+        // Show the traversal path if we checked any CSS files
+        if !state.traversal_path.is_empty() {
+            // Build a formatted string showing all checked files
+            let mut checked_files = String::from("Checked the following CSS files:\n");
+            for step in &state.traversal_path {
+                let path_display = step.css_path.as_str();
+                if step.is_direct {
+                    checked_files.push_str(&format!(
+                        "  - {} (linked via <link rel=\"stylesheet\">)\n",
+                        path_display
+                    ));
+                } else {
+                    let parent_display = step.importer_path.as_str();
+                    checked_files.push_str(&format!(
+                        "  - {} (imported by {})\n",
+                        path_display, parent_display
+                    ));
+                }
+            }
+
+            diag = diag.note(markup! {
+                {checked_files}
+            });
+        }
+
         Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                state.range,
-                markup! {
-                    "The CSS class "<Emphasis>{&state.name}</Emphasis>" is not defined in any `<style>` block or linked stylesheet."
-                },
-            )
-            .note(markup! {
-                "Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended."
-            })
-            .note(markup! {
-                "Either define this class in a `<style>` block, link a stylesheet that contains it, or remove this class name."
+            diag.note(markup! {
+                "Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name."
             }),
         )
+    }
+}
+
+/// Stores the text range and name of an undeclared class.
+pub struct UndeclaredClass {
+    /// Range of this class name token within the source file.
+    pub range: TextRange,
+    /// The class name that was not found.
+    pub name: String,
+    /// The import tree traversal path showing which CSS files were checked.
+    pub traversal_path: Vec<CssTraversalStep>,
+}
+
+/// Helper to extract class attribute data needed for analysis.
+struct ClassAttributeData {
+    inner_text: String,
+    inner_file_start: u32,
+}
+
+impl NoUndeclaredStyles {
+    /// Checks if the attribute belongs to a component (custom element).
+    /// Components are identified by:
+    /// - Tag names with hyphens (e.g., my-component)
+    /// - Tag names starting with uppercase (e.g., MyComponent)
+    /// - HtmlComponentName nodes
+    fn is_component_element(attr: &HtmlAttribute) -> bool {
+        let Some(parent) = attr.syntax().parent() else {
+            return false;
+        };
+
+        // Try casting to opening or self-closing element
+        let tag_name = if let Some(opening) = HtmlOpeningElement::cast_ref(&parent) {
+            opening.name().ok()
+        } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&parent) {
+            self_closing.name().ok()
+        } else {
+            None
+        };
+
+        let Some(tag_name) = tag_name else {
+            return false;
+        };
+
+        match tag_name {
+            // Explicit component node type
+            AnyHtmlTagName::HtmlComponentName(_) => true,
+            // Member expressions like Component.Item
+            AnyHtmlTagName::HtmlMemberName(_) => true,
+            // Regular tag names - check for component patterns
+            AnyHtmlTagName::HtmlTagName(name) => {
+                let Ok(token) = name.value_token() else {
+                    return false;
+                };
+                let text = token.text_trimmed();
+
+                // Component if starts with uppercase or contains hyphen
+                text.chars().next().is_some_and(|c| c.is_uppercase()) || text.contains('-')
+            }
+        }
+    }
+
+    /// Extracts class attribute value and position if this is a valid class attribute.
+    fn extract_class_attribute(attr: &HtmlAttribute) -> Option<ClassAttributeData> {
+        let name_node = attr.name().ok()?;
+        let name_token = name_node.value_token().ok()?;
+
+        if name_token.text_trimmed().to_lowercase_cow() != "class" {
+            return None;
+        }
+
+        let initializer = attr.initializer()?;
+        let value = initializer.value().ok()?;
+        let html_string = match value {
+            AnyHtmlAttributeInitializer::HtmlString(s) => s,
+            _ => return None,
+        };
+
+        let value_token = html_string.value_token().ok()?;
+        let inner_text = html_string.inner_string_text().ok()?;
+
+        // The inner content starts one byte into the token (after the opening quote).
+        let inner_file_start = u32::from(value_token.text_trimmed_range().start()) + 1;
+
+        Some(ClassAttributeData {
+            inner_text: inner_text.text().to_string(),
+            inner_file_start,
+        })
     }
 }

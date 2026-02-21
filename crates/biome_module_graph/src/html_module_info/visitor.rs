@@ -1,11 +1,11 @@
-use crate::css_module_info::{CssClass, collect_class_tokens, is_global_pseudo};
+use crate::css_module_info::{CssClassReference, is_global_pseudo};
 use crate::html_module_info::HtmlModuleInfo;
 use crate::module_graph::ModuleGraphFsProxy;
 use biome_css_syntax::{AnyCssRoot, CssClassSelector, CssPseudoClassFunctionSelector};
 use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot};
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
-use biome_rowan::{AstNode, TextRange, TextSize, TokenText, WalkEvent};
-use camino::Utf8Path;
+use biome_rowan::{AstNode, TokenText, WalkEvent};
+use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexSet;
 
 pub const SUPPORTED_CSS_EXTENSIONS: &[&str] = &["css"];
@@ -13,6 +13,7 @@ pub const SUPPORTED_CSS_EXTENSIONS: &[&str] = &["css"];
 pub(crate) struct HtmlModuleVisitor<'a> {
     html_root: HtmlRoot,
     embedded_css_roots: &'a [AnyCssRoot],
+    file_path: Utf8PathBuf,
     directory: &'a Utf8Path,
     fs_proxy: &'a ModuleGraphFsProxy<'a>,
 }
@@ -21,20 +22,22 @@ impl<'a> HtmlModuleVisitor<'a> {
     pub(crate) fn new(
         html_root: HtmlRoot,
         embedded_css_roots: &'a [AnyCssRoot],
+        file_path: Utf8PathBuf,
         directory: &'a Utf8Path,
         fs_proxy: &'a ModuleGraphFsProxy<'a>,
     ) -> Self {
         Self {
             html_root,
             embedded_css_roots,
+            file_path,
             directory,
             fs_proxy,
         }
     }
 
     pub(crate) fn visit(self) -> HtmlModuleInfo {
-        let mut style_classes: IndexSet<CssClass> = IndexSet::default();
-        let mut referenced_classes: IndexSet<CssClass> = IndexSet::default();
+        let mut style_classes: IndexSet<TokenText> = IndexSet::default();
+        let mut referenced_classes: Vec<CssClassReference> = Vec::new();
         let mut imported_stylesheets: Vec<ResolvedPath> = Vec::new();
 
         // Collect CSS class names from already-parsed <style> block ASTs.
@@ -62,7 +65,7 @@ impl<'a> HtmlModuleVisitor<'a> {
     fn visit_html_element(
         &self,
         element: HtmlElement,
-        referenced_classes: &mut IndexSet<CssClass>,
+        referenced_classes: &mut Vec<CssClassReference>,
         imported_stylesheets: &mut Vec<ResolvedPath>,
     ) {
         let Ok(opening) = element.opening_element() else {
@@ -85,12 +88,15 @@ impl<'a> HtmlModuleVisitor<'a> {
             let name_text = name_token.text_trimmed();
 
             if name_text.eq_ignore_ascii_case("class") {
-                // Extract individual class tokens from class="foo bar baz", each
-                // with its precise byte range within the source file.
+                // Collect the class attribute reference
                 if let Some(initializer) = attr.initializer()
                     && let Ok(value_node) = initializer.value()
                 {
-                    collect_class_attribute_tokens(&value_node, referenced_classes);
+                    collect_class_attribute_reference(
+                        &value_node,
+                        &self.file_path,
+                        referenced_classes,
+                    );
                 }
             } else if name_text.eq_ignore_ascii_case("href") {
                 // Only care about href on <link rel="stylesheet"> elements
@@ -130,9 +136,8 @@ impl<'a> HtmlModuleVisitor<'a> {
 /// selectors, which are globally scoped and cannot be traced to specific
 /// `class="..."` attribute references.
 ///
-/// Each class name occupies the whole token, so the token-relative range runs
-/// from `0` to the token's text length.
-pub(crate) fn collect_css_classes(css_root: &AnyCssRoot, classes: &mut IndexSet<CssClass>) {
+/// Each `TokenText` represents a single class name (e.g., "header" from `.header`).
+pub(crate) fn collect_css_classes(css_root: &AnyCssRoot, classes: &mut IndexSet<TokenText>) {
     let mut global_depth: u32 = 0;
 
     for event in css_root.syntax().preorder() {
@@ -147,12 +152,7 @@ pub(crate) fn collect_css_classes(css_root: &AnyCssRoot, classes: &mut IndexSet<
                     && let Ok(name) = class_selector.name()
                     && let Ok(token) = name.value_token()
                 {
-                    let token_text = token.token_text_trimmed();
-                    let len = u32::from(token_text.len());
-                    classes.insert(CssClass {
-                        token: token_text,
-                        range: TextRange::new(TextSize::from(0), TextSize::from(len)),
-                    });
+                    classes.insert(token.token_text_trimmed());
                 }
             }
             WalkEvent::Leave(node) => {
@@ -179,17 +179,16 @@ fn extract_html_class_attribute_inner(
     html_string.inner_string_text().ok()
 }
 
-/// Splits a `class="foo bar baz"` attribute value into individual [`CssClass`]
-/// entries.
+/// Creates a `CssClassReference` from an HTML `class="..."` attribute value.
 ///
-/// Each entry holds the quote-stripped inner token text and a byte range
-/// relative to the start of that text. Applying the range to `token.text()`
-/// gives the class name as a `&str` with no allocation.
-fn collect_class_attribute_tokens(
+/// The reference stores the full attribute value token (e.g., "foo bar baz"),
+/// which may contain multiple space-separated class names.
+fn collect_class_attribute_reference(
     value_node: &AnyHtmlAttributeInitializer,
-    classes: &mut IndexSet<CssClass>,
+    file_path: &Utf8Path,
+    classes: &mut Vec<CssClassReference>,
 ) {
     if let Some(inner) = extract_html_class_attribute_inner(value_node) {
-        collect_class_tokens(&inner, classes);
+        classes.push(CssClassReference::new(inner, file_path.to_path_buf()));
     }
 }

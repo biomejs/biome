@@ -13,6 +13,18 @@ Use this skill when working with Biome's type inference system and module graph.
 2. Understand Biome's focus on IDE support and instant updates
 3. Familiarity with TypeScript type system concepts
 
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all type inference code:
+- ❌ NO emojis in code comments
+- ❌ NO emojis in rustdoc documentation
+- ❌ NO emojis in test files
+- ❌ NO emojis in debug output or error messages
+
+Keep all code professional and emoji-free.
+
 ## Key Concepts
 
 ### Module Graph Constraint

@@ -1,4 +1,4 @@
-use crate::css_module_info::collect_class_tokens;
+use crate::css_module_info::CssClassReference;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
@@ -11,7 +11,7 @@ use biome_js_type_info::{ImportSymbol, ScopeId, TypeData, TypeReference, TypeRes
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::{ResolveOptions, resolve};
 use biome_rowan::{AstNode, TokenText, WalkEvent};
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::{
     JsImport, JsImportPhase, JsModuleInfo, JsReexport, SUPPORTED_EXTENSIONS,
@@ -30,6 +30,7 @@ const EXTENSION_ALIASES: &[(&str, &[&str])] = &[
 
 pub(crate) struct JsModuleVisitor<'a> {
     root: AnyJsRoot,
+    file_path: Utf8PathBuf,
     directory: &'a Utf8Path,
     fs_proxy: &'a ModuleGraphFsProxy<'a>,
     infer_types: bool,
@@ -38,12 +39,14 @@ pub(crate) struct JsModuleVisitor<'a> {
 impl<'a> JsModuleVisitor<'a> {
     pub fn new(
         root: AnyJsRoot,
+        file_path: Utf8PathBuf,
         directory: &'a Utf8Path,
         fs_proxy: &'a ModuleGraphFsProxy,
         infer_types: bool,
     ) -> Self {
         Self {
             root,
+            file_path,
             directory,
             fs_proxy,
             infer_types,
@@ -76,16 +79,16 @@ impl<'a> JsModuleVisitor<'a> {
         JsModuleInfo::new(collector, self.infer_types)
     }
 
-    /// Collects static CSS class names from JSX `class` and `className`
+    /// Collects static CSS class references from JSX `class` and `className`
     /// attributes.
     ///
-    /// Each [`CssClass`] holds the quote-stripped inner token text and a byte
-    /// range relative to the start of that text. Only static string literals
-    /// are collected; dynamic expressions are skipped to avoid false positives
-    /// in `noUnusedStyles`.
+    /// Only static string literals are collected; dynamic expressions are
+    /// skipped to avoid false positives in `noUnusedStyles`.
     fn visit_jsx_attribute(&self, attr: JsxAttribute, collector: &mut JsModuleInfoCollector) {
         if let Some(inner) = self.extract_jsx_class_attribute_inner(&attr) {
-            collect_class_tokens(&inner, &mut collector.referenced_classes);
+            collector
+                .referenced_classes
+                .push(CssClassReference::new(inner, self.file_path.clone()));
         }
     }
 

@@ -13,6 +13,18 @@ Use this skill when implementing configurable options for lint rules. Covers def
 2. Options must follow [Technical Philosophy](https://biomejs.dev/internals/philosophy/#technical)
 3. Rule must be implemented before adding options
 
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all rule options code:
+- ❌ NO emojis in code comments
+- ❌ NO emojis in rustdoc documentation
+- ❌ NO emojis in JSON schema descriptions
+- ❌ NO emojis in test files (options.json, etc.)
+
+Keep all code professional and emoji-free.
+
 ## Common Workflows
 
 ### Define Rule Options Type
