@@ -1709,33 +1709,6 @@ fn parse_first_line_blocks(
 
 /// Parse an ATX heading on the first line of list item content.
 /// Returns `true` if a heading was parsed.
-///
-/// This mirrors `header::parse_header` once the list path has already:
-/// - consumed leading whitespace as skipped trivia,
-/// - validated the heading shape in lookahead, and
-/// - normalized `#` into either `T![#]` or remapped `MD_TEXTUAL_LITERAL`.
-///
-/// We intentionally do not call `parse_header` directly here because that path
-/// relies on `at_header`/`skip_line_indent`, while list first-line parsing uses
-/// list-specific virtual-line handling (`with_virtual_line_start`) and token
-/// remapping before entering this routine.
-fn parse_first_line_header_body(p: &mut MarkdownParser) {
-    let hash_list_m = p.start();
-    let hash_m = p.start();
-    if p.at(T![#]) {
-        p.bump(T![#]);
-    } else {
-        p.bump_remap(T![#]);
-    }
-    hash_m.complete(p, MD_HASH);
-    hash_list_m.complete(p, MD_HASH_LIST);
-
-    parse_header_content(p);
-    parse_trailing_hashes(p);
-}
-
-/// Parse an ATX heading on the first line of list item content.
-/// Returns `true` if a heading was parsed.
 fn parse_first_line_atx_heading(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> bool {
     let atx_heading_info = p.lookahead(|p| {
         while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
@@ -1774,7 +1747,21 @@ fn parse_first_line_atx_heading(p: &mut MarkdownParser, state: &mut ListItemLoop
     }
 
     let header_m = p.start();
-    parse_first_line_header_body(p);
+
+    // Can't reuse header::parse_hash_list(): in list context `#` may be lexed as
+    // MD_TEXTUAL_LITERAL and requires bump_remap. Keep in sync with parse_hash_list().
+    let hash_list_m = p.start();
+    let hash_m = p.start();
+    if p.at(T![#]) {
+        p.bump(T![#]);
+    } else {
+        p.bump_remap(T![#]);
+    }
+    hash_m.complete(p, MD_HASH);
+    hash_list_m.complete(p, MD_HASH_LIST);
+
+    parse_header_content(p);
+    parse_trailing_hashes(p);
 
     header_m.complete(p, MD_HEADER);
 
