@@ -35,7 +35,7 @@ use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 pub use crate::grit::{GritConfiguration, grit_configuration};
 use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
-use crate::markdown::{MarkdownConfiguration, markdown_configuration};
+pub use crate::markdown::{MarkdownConfiguration, markdown_configuration};
 use crate::max_size::MaxSize;
 use crate::vcs::{VcsConfiguration, vcs_configuration};
 pub use analyzer::{
