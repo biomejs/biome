@@ -13,7 +13,7 @@ mod language {
 }
 
 // TODO: Remove deadcode suppression when we have some tests
-#[allow(dead_code)]
+#[expect(dead_code)]
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
     let root_path = Utf8Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
 
