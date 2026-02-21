@@ -403,7 +403,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
                         .clone()),
                 Some(BTreeMap::from([(
                     "./b.ts".to_string(),
-                    "/project/b.ts".replace('/', std::path::MAIN_SEPARATOR_STR),
+                    "/project/b.ts",
                 )])),
             );
         }};
