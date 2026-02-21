@@ -141,9 +141,7 @@ impl FormatLiteralStringToken<'_> {
     /// ```
     /// Like this, we reduced the number of escaped quotes.
     fn compute_string_information(&self, chosen_quote: QuoteStyle) -> StringInformation {
-        // Normalize CRLF → LF to prevent byte index misalignment
-        let literal_normalized = self.token().text_trimmed().replace("\r\n", "\n");
-        let literal = literal_normalized.as_str();
+        let literal = self.token().text_trimmed();
         let alternate_quote = chosen_quote.other();
         let chosen_quote_byte = chosen_quote.as_byte();
         let alternate_quote_byte = alternate_quote.as_byte();
@@ -174,7 +172,7 @@ impl FormatLiteralStringToken<'_> {
             };
         }
 
-        // UTF-8 char boundary validation
+        // UTF-8 char boundary validation before slicing
         if !literal.is_char_boundary(1) || !literal.is_char_boundary(literal.len() - 1) {
             // Invalid UTF-8 boundaries - fall back to safe defaults
             return StringInformation {
