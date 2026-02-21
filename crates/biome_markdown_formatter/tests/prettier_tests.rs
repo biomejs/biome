@@ -4,7 +4,9 @@ use biome_markdown_formatter::{MarkdownFormatLanguage, context::MarkdownFormatOp
 use camino::Utf8Path;
 use std::env;
 
-mod language;
+mod language {
+    include!("language.rs");
+}
 
 tests_macros::gen_tests! {"tests/specs/prettier/markdown/**/*.{md}", crate::test_snapshot, ""}
 
