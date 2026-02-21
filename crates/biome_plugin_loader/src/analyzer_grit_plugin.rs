@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_diagnostics::{Severity, category};
 use biome_fs::FileSystem;
+use biome_glob::{CandidatePath, NormalizedGlob};
 use biome_grit_patterns::{
     BuiltInFunction, CompilePatternOptions, GritBinding, GritExecContext, GritPattern, GritQuery,
     GritQueryContext, GritQueryState, GritResolvedPattern, GritTargetFile, GritTargetLanguage,
@@ -18,14 +19,22 @@ use grit_pattern_matcher::{binding::Binding, pattern::ResolvedPattern};
 use grit_util::{AnalysisLogs, error::GritPatternError};
 use std::{borrow::Cow, fmt::Debug, str::FromStr, sync::Arc};
 
-/// Definition of an analyzer plugin.
+/// Definition of an analyzer plugin backed by a GritQL query.
 #[derive(Debug)]
 pub struct AnalyzerGritPlugin {
     grit_query: GritQuery,
+
+    /// Glob patterns that restrict which files this plugin runs on.
+    /// `None` means the plugin runs on all files.
+    includes: Option<Box<[NormalizedGlob]>>,
 }
 
 impl AnalyzerGritPlugin {
-    pub fn load(fs: &dyn FileSystem, path: &Utf8Path) -> Result<Self, PluginDiagnostic> {
+    pub fn load(
+        fs: &dyn FileSystem,
+        path: &Utf8Path,
+        includes: Option<&[NormalizedGlob]>,
+    ) -> Result<Self, PluginDiagnostic> {
         let source = fs.read_file_from_path(path)?;
         let options = CompilePatternOptions::default()
             .with_extra_built_ins(vec![
@@ -39,7 +48,10 @@ impl AnalyzerGritPlugin {
             .with_path(path);
         let grit_query = compile_pattern_with_options(&source, options)?;
 
-        Ok(Self { grit_query })
+        Ok(Self {
+            grit_query,
+            includes: includes.map(Into::into),
+        })
     }
 }
 
@@ -66,6 +78,13 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                 .map(|kind| kind.to_raw())
                 .collect(),
         }
+    }
+
+    fn applies_to_file(&self, path: &Utf8Path) -> bool {
+        let Some(includes) = &self.includes else {
+            return true;
+        };
+        CandidatePath::new(&path).matches_with_exceptions(includes)
     }
 
     fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
@@ -185,4 +204,39 @@ fn register_diagnostic<'a>(
     );
 
     Ok(span_node.clone())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_fs::MemoryFileSystem;
+
+    fn load_test_plugin(includes: Option<&[NormalizedGlob]>) -> AnalyzerGritPlugin {
+        let fs = MemoryFileSystem::default();
+        fs.insert("/test.grit".into(), r#"`hello`"#);
+        AnalyzerGritPlugin::load(&fs, Utf8Path::new("/test.grit"), includes).unwrap()
+    }
+
+    #[test]
+    fn applies_to_all_files_without_includes() {
+        let plugin = load_test_plugin(None);
+        assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));
+        assert!(plugin.applies_to_file(Utf8Path::new("test/foo.js")));
+    }
+
+    #[test]
+    fn applies_to_matching_files_with_includes() {
+        let globs: Vec<NormalizedGlob> = vec!["src/**/*.ts".parse().unwrap()];
+        let plugin = load_test_plugin(Some(&globs));
+        assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));
+        assert!(plugin.applies_to_file(Utf8Path::new("src/nested/file.ts")));
+    }
+
+    #[test]
+    fn rejects_non_matching_files_with_includes() {
+        let globs: Vec<NormalizedGlob> = vec!["src/**/*.ts".parse().unwrap()];
+        let plugin = load_test_plugin(Some(&globs));
+        assert!(!plugin.applies_to_file(Utf8Path::new("test/foo.ts")));
+        assert!(!plugin.applies_to_file(Utf8Path::new("src/main.js")));
+    }
 }

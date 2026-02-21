@@ -1474,6 +1474,7 @@ dependencies = [
  "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_fs",
+ "biome_glob",
  "biome_grit_patterns",
  "biome_js_parser",
  "biome_js_runtime",
@@ -1494,6 +1495,7 @@ dependencies = [
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
+ "serde_json",
  "windows 0.62.2",
 ]
 
