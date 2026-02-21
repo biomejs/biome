@@ -9,11 +9,17 @@ use biome_rule_options::use_expect::UseExpectOptions;
 use crate::frameworks::playwright::{contains_expect_call, get_test_callback, is_test_call};
 
 declare_lint_rule! {
-    /// Ensure that test functions contain at least one `expect()` assertion.
+    /// Ensure that test functions contain at least one `expect()` or similar assertion.
     ///
     /// Tests without assertions may pass even when behavior is broken, leading to
     /// false confidence in the test suite. This rule ensures that every test
-    /// validates some expected behavior using `expect()`.
+    /// validates some expected behavior using `expect()` or an allowed variant thereof.
+    /// 
+    /// ### Allowed `expect` variants
+    /// 
+    /// - [`assert`](https://www.chaijs.com/api/assert/)
+    /// - [`expectTypeOf`](https://github.com/mmkal/expect-type)
+    /// - [`assertType`](https://vitest.dev/api/assert-type)
     ///
     /// ## Examples
     ///
@@ -42,11 +48,21 @@ declare_lint_rule! {
     /// });
     /// ```
     /// 
-    /// [expect-type](https://github.com/mmkal/expect-type)'s `expectTypeOf` is considered a valid assertion,
-    /// for consumers using it to type-test TypeScript files:
+    /// Variant assertions are allowed:
+    /// ```js
+    /// it("returns bar when passed foo", () => {
+    ///   assert(myFunc("foo") === "bar", "didn't return bar");
+    /// });
+    /// ```
+    ///
     /// ```ts
     /// it("should allow passing 'foo' as an argument", () => {
-    ///   expectTypeOf<myFunc>().toBeCallableWith("foo");
+    ///   expectTypeOf(myFunc).toBeCallableWith("foo");
+    /// });
+    /// ```
+    /// ```ts
+    /// it("should have proper type", () => {
+    ///   assertType<(n: string) => string>(myFunc);
     /// });
     /// ```
     /// (This replicates the rule's behavior in eslint-plugin-vitest with `typecheck` set to `true`.)
