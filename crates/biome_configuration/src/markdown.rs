@@ -42,7 +42,7 @@ pub struct MarkdownFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
-    /// The size of the indentation applied to Markdown files. Default to 2.
+    /// The size of the indentation applied to Markdown files. Defaults to 2.
     #[bpaf(long("markdown-formatter-indent-width"), argument("NUMBER"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
