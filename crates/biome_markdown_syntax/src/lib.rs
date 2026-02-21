@@ -9,8 +9,6 @@ pub use file_source::MdFileSource;
 
 pub use self::generated::*;
 use biome_rowan::{RawSyntaxKind, SyntaxKind, TriviaPieceKind};
-pub use file_source::*;
-pub use syntax_node::*;
 
 impl From<u16> for MarkdownSyntaxKind {
     fn from(d: u16) -> Self {
