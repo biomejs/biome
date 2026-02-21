@@ -401,10 +401,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
                         .unwrap()
                         .static_import_paths
                         .clone()),
-                Some(BTreeMap::from([(
-                    "./b.ts".to_string(),
-                    "/project/b.ts",
-                )])),
+                Some(BTreeMap::from([("./b.ts".to_string(), "/project/b.ts",)])),
             );
         }};
     }
