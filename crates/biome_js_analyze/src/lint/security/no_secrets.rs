@@ -74,12 +74,13 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// The rule supports the following option:
+    /// The rule supports the following options:
     ///
     /// ```json,options
     /// {
     ///   "options": {
-    ///     "entropyThreshold": 41
+    ///     "entropyThreshold": 41,
+    ///     "allowedPatterns": ["cs_live_", "cs_test_"]
     ///   }
     /// }
     /// ```
@@ -104,6 +105,24 @@ declare_lint_rule! {
     ///   }
     /// }
     /// ```
+    ///
+    /// ### `allowedPatterns`
+    ///
+    /// A list of strings that are not considered secrets. Strings that contain any of
+    /// the provided patterns will be ignored. This is useful for ignoring non-secret
+    /// prefixes like Stripe's `cs_live_` and `cs_test_` identifiers that may trigger
+    /// false positives.
+    ///
+    /// > **Default:** `[]`
+    ///
+    /// Example ignoring Stripe-like prefixes:
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "allowedPatterns": ["cs_live_", "cs_test_", "pk_live_", "pk_test_"]
+    ///   }
+    /// }
+    /// ```
     pub NoSecrets {
         version: "1.9.0",
         name: "noSecrets",
@@ -125,6 +144,11 @@ impl Rule for NoSecrets {
         let text = token.text_trimmed();
 
         if text.len() < MIN_PATTERN_LEN {
+            return None;
+        }
+
+        let allowed_patterns = &ctx.options().allowed_patterns;
+        if !allowed_patterns.is_empty() && is_allowed_pattern(text, allowed_patterns) {
             return None;
         }
 
@@ -174,7 +198,7 @@ impl Rule for NoSecrets {
                 "Storing secrets in source code is a security risk. Consider the following steps:"
                 "\n1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree."
                 "\n2. If needed, use environment variables or a secure secret management system to store sensitive data."
-                "\n3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options "<Hyperlink href="https://biomejs.dev/linter/rules/no-secrets/#options">"in our docs."</Hyperlink>
+                "\n3. If this is a false positive, consider adding an inline disable comment, adjusting the entropy threshold, or adding the pattern to `allowedPatterns`. See options "<Hyperlink href="https://biomejs.dev/linter/rules/no-secrets/#options">"in our docs."</Hyperlink>
                 "\nThis rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: "<Hyperlink href="https://biomejs.dev/linter/rules/no-secrets/#recommendations">"https://biomejs.dev/linter/rules/no-secrets/#recommendations"</Hyperlink>
             })
         )
@@ -184,6 +208,10 @@ impl Rule for NoSecrets {
 const MIN_PATTERN_LEN: usize = 14;
 const DEFAULT_HIGH_ENTROPY_THRESHOLD: u16 = 41;
 const ENTROPY_PRECISION_MULTIPLIER: f64 = 10.0;
+
+fn is_allowed_pattern(text: &str, allowed_patterns: &[String]) -> bool {
+    allowed_patterns.iter().any(|pattern| text.contains(pattern.as_str()))
+}
 
 fn is_path(text: &str) -> bool {
     // Check for common path indicators
