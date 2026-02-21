@@ -8802,7 +8802,8 @@ export type DocumentFileSource =
 	| { Css: CssFileSource }
 	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
-	| { Grit: GritFileSource };
+	| { Grit: GritFileSource }
+	| { Markdown: MdFileSource };
 export interface JsFileSource {
 	/**
 	* Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
@@ -8836,6 +8837,9 @@ export interface HtmlFileSource {
 }
 export interface GritFileSource {
 	variant: GritVariant;
+}
+export interface MdFileSource {
+	variant: MarkdownVariant;
 }
 export type EmbeddingKind =
 	| "None"
@@ -8915,6 +8919,7 @@ export type HtmlVariant =
 	| "Vue"
 	| "Svelte";
 export type GritVariant = "Standard";
+export type MarkdownVariant = "Standard";
 export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
 export type HtmlTextExpressions = "None" | "Single" | "Double";
 export interface OpenFileResult {
