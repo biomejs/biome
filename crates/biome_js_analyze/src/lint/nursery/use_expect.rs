@@ -36,11 +36,20 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js
-    /// test("soft assertion", async ({ page }) => {
+    /// it("soft assertion", async ({ page }) => {
     ///     await page.goto("/");
     ///     await expect.soft(page.locator("h1")).toBeVisible();
     /// });
     /// ```
+    /// 
+    /// [expect-type](https://github.com/mmkal/expect-type)'s `expectTypeOf` is considered a valid assertion,
+    /// for consumers using it to type-test TypeScript files:
+    /// ```ts
+    /// it("should allow passing 'foo' as an argument", () => {
+    ///   expectTypeOf<myFunc>().toBeCallableWith("foo");
+    /// });
+    /// ```
+    /// (This replicates the rule's behavior in eslint-plugin-vitest with `typecheck` set to `true`.)
     ///
     pub UseExpect {
         version: "2.4.2",
