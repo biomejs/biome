@@ -141,7 +141,9 @@ impl FormatLiteralStringToken<'_> {
     /// ```
     /// Like this, we reduced the number of escaped quotes.
     fn compute_string_information(&self, chosen_quote: QuoteStyle) -> StringInformation {
-        let literal = self.token().text_trimmed();
+        // Normalize CRLF → LF to prevent byte index misalignment
+        let literal_normalized = self.token().text_trimmed().replace("\r\n", "\n");
+        let literal = literal_normalized.as_str();
         let alternate_quote = chosen_quote.other();
         let chosen_quote_byte = chosen_quote.as_byte();
         let alternate_quote_byte = alternate_quote.as_byte();
@@ -160,6 +162,31 @@ impl FormatLiteralStringToken<'_> {
                 .is_some_and(|c| c == chosen_quote_byte || c == alternate_quote_byte),
             "string must end with a quote"
         );
+
+        // Bounds checking before byte indexing
+        if literal.len() < 2 {
+            // Empty or single-character string - cannot extract quotes
+            // Fall back to safe defaults
+            return StringInformation {
+                current_quote: QuoteStyle::Double,
+                preferred_quote: chosen_quote,
+                raw_content_has_quotes: false,
+            };
+        }
+
+        // UTF-8 char boundary validation
+        if !literal.is_char_boundary(1) || !literal.is_char_boundary(literal.len() - 1) {
+            // Invalid UTF-8 boundaries - fall back to safe defaults
+            return StringInformation {
+                current_quote: literal
+                    .bytes()
+                    .next()
+                    .and_then(QuoteStyle::from_byte)
+                    .unwrap_or(QuoteStyle::Double),
+                preferred_quote: chosen_quote,
+                raw_content_has_quotes: false,
+            };
+        }
 
         let quoteless = &literal[1..literal.len() - 1];
         let (chosen_quote_count, alternate_quote_count) = quoteless.bytes().fold(
@@ -349,6 +376,17 @@ impl<'token> LiteralStringNormaliser<'token> {
     /// Returns the string without its quotes.
     fn raw_content(&self) -> &'token str {
         let content = self.get_token().text_trimmed();
+        
+        // Bounds checking before byte indexing
+        if content.len() < 2 {
+            return "";
+        }
+        
+        // UTF-8 char boundary validation
+        if !content.is_char_boundary(1) || !content.is_char_boundary(content.len() - 1) {
+            return "";
+        }
+        
         &content[1..content.len() - 1]
     }
 
@@ -549,6 +587,35 @@ mod tests {
                 AsToken::Member,
                 SourceFileKind::TypeScript,
             )
+        }
+    }
+
+    #[test]
+    fn test_crlf_line_endings_no_panic() {
+        // Regression test for #9180: UTF-8 byte indexing panic with CRLF line endings
+        // This test ensures the formatter doesn't panic when processing strings
+        // that contain Windows-style CRLF line endings
+        let quote = QuoteStyle::Double;
+        let quote_properties = QuoteProperties::AsNeeded;
+        
+        // Test case 1: String with CRLF in content
+        let input_with_crlf = "\"use strict\r\n\"";
+        let token = generate_syntax_token(input_with_crlf);
+        let string_token = FormatLiteralStringToken::new(&token, StringLiteralParentKind::Directive);
+        let mut string_cleaner = LiteralStringNormaliser::new(&string_token, quote, quote_properties);
+        
+        // Should not panic - this is the key assertion
+        let result = string_cleaner.normalise_text(SourceFileKind::JavaScript);
+        assert!(result.len() > 0, "Result should not be empty");
+        
+        // Test case 2: Empty or near-empty strings (edge case)
+        let empty_inputs = ["\"\"", "\"a\""];
+        for input in empty_inputs {
+            let token = generate_syntax_token(input);
+            let string_token = FormatLiteralStringToken::new(&token, StringLiteralParentKind::Expression);
+            let mut string_cleaner = LiteralStringNormaliser::new(&string_token, quote, quote_properties);
+            // Should not panic
+            let _ = string_cleaner.normalise_text(SourceFileKind::JavaScript);
         }
     }
 }
