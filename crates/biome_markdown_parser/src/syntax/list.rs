@@ -1343,7 +1343,7 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
         let is_blank = list_newline_is_blank_line(p);
         let result = apply_blank_line_action(p, state, action, is_blank);
         if !matches!(result, LoopAction::Break | LoopAction::Continue) {
-            unreachable!("classify_blank_line always produces Break or Continue");
+            unreachable!("apply_blank_line_action always produces Break or Continue");
         }
         return (result, false);
     }
@@ -2021,8 +2021,8 @@ fn parse_list_item_block_content(
         // First-line: block-level constructs
         match parse_first_line_blocks(p, &mut state, spaces_after_marker) {
             LoopAction::Continue => continue,
-            LoopAction::Break => break,
             LoopAction::FallThrough => {}
+            _ => unreachable!("parse_first_line_blocks does not return Break"),
         }
 
         // Continuation indent check
