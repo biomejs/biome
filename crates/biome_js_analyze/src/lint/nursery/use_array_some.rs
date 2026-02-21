@@ -58,15 +58,39 @@ declare_lint_rule! {
     }
 }
 
+/// The kind of pattern detected by the rule.
+#[derive(Clone, Copy)]
+pub enum DetectedPattern {
+    FilterLengthComparison,
+    FindIndexComparison,
+    FindLastIndexComparison,
+    FindExistenceComparison,
+    FindLastExistenceComparison,
+    FindFamilyAsBoolean,
+}
+
+impl DetectedPattern {
+    fn description(self) -> &'static str {
+        match self {
+            Self::FilterLengthComparison => "filter(...).length comparison",
+            Self::FindIndexComparison => "findIndex(...) !== -1",
+            Self::FindLastIndexComparison => "findLastIndex(...) !== -1",
+            Self::FindExistenceComparison => "find(...) existence comparison",
+            Self::FindLastExistenceComparison => "findLast(...) existence comparison",
+            Self::FindFamilyAsBoolean => "find-family used as boolean",
+        }
+    }
+}
+
 pub enum UseArraySomeState {
     Fix {
         call: JsCallExpression,
         replace_node: AnyJsExpression,
-        pattern: &'static str,
+        pattern: DetectedPattern,
     },
     Suggest {
         range: TextRange,
-        pattern: &'static str,
+        pattern: DetectedPattern,
     },
 }
 
@@ -99,7 +123,7 @@ impl Rule for UseArraySome {
         {
             return Some(UseArraySomeState::Suggest {
                 range: call.range(),
-                pattern: "find-family used as boolean",
+                pattern: DetectedPattern::FindFamilyAsBoolean,
             });
         }
 
@@ -117,15 +141,16 @@ impl Rule for UseArraySome {
                 *pattern
             }
         };
+        let description = pattern.description();
 
         let mut diag = RuleDiagnostic::new(
             rule_category!(),
             range,
             markup! {
-                "Prefer "<Emphasis>".some()"</Emphasis>" over "<Emphasis>{pattern}</Emphasis>"."
+                "Prefer "<Emphasis>".some()"</Emphasis>" over "<Emphasis>{description}</Emphasis>"."
             },
         );
-        if pattern == "filter(...).length comparison" {
+        if matches!(pattern, DetectedPattern::FilterLengthComparison) {
             diag = diag.note(markup! {
                 "Using "<Emphasis>".filter()"</Emphasis>" followed by a length check iterates the entire array unnecessarily. "<Emphasis>".some()"</Emphasis>" stops at the first match."
             });
@@ -217,7 +242,7 @@ fn detect_filter_length_pattern(call: &JsCallExpression) -> Option<UseArraySomeS
     matches.then_some(UseArraySomeState::Fix {
         call: call.clone(),
         replace_node: AnyJsExpression::JsBinaryExpression(comparison),
-        pattern: "filter(...).length comparison",
+        pattern: DetectedPattern::FilterLengthComparison,
     })
 }
 
@@ -246,9 +271,9 @@ fn detect_find_index_comparison_pattern(
         call: call.clone(),
         replace_node: AnyJsExpression::JsBinaryExpression(comparison),
         pattern: if method_name == "findLastIndex" {
-            "findLastIndex(...) !== -1"
+            DetectedPattern::FindLastIndexComparison
         } else {
-            "findIndex(...) !== -1"
+            DetectedPattern::FindIndexComparison
         },
     })
 }
@@ -277,9 +302,9 @@ fn detect_find_existence_comparison_pattern(
     (strict_undefined || loose_nullish).then_some(UseArraySomeState::Suggest {
         range: comparison.range(),
         pattern: if method_name == "findLast" {
-            "findLast(...) existence comparison"
+            DetectedPattern::FindLastExistenceComparison
         } else {
-            "find(...) existence comparison"
+            DetectedPattern::FindExistenceComparison
         },
     })
 }
