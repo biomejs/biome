@@ -49,8 +49,8 @@ use crate::syntax::html_block::{at_html_block, parse_html_block};
 use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::list_nesting_too_deep;
 use crate::syntax::quote::{
-    consume_quote_prefix, consume_quote_prefix_without_virtual, has_quote_prefix, parse_quote,
-    parse_quote_block_list,
+    at_quote_indented_code_start, consume_quote_prefix, consume_quote_prefix_without_virtual,
+    has_quote_prefix, parse_quote, parse_quote_block_list, skip_optional_marker_space,
 };
 use crate::syntax::thematic_break_block::parse_thematic_break_block;
 use crate::syntax::with_virtual_line_start;
@@ -1795,19 +1795,21 @@ fn parse_first_line_blockquote(p: &mut MarkdownParser, state: &mut ListItemLoopS
     p.state_mut().list_item_required_indent = 0;
 
     if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
-        p.bump_remap(T![>]);
         let quote_m = p.start();
+        p.bump_remap(T![>]);
         p.state_mut().block_quote_depth += 1;
 
-        if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == " " {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
-        }
-        p.state_mut().virtual_line_start = Some(p.cur_range().start());
+        let has_indented_code = at_quote_indented_code_start(p);
+        let marker_space = skip_optional_marker_space(p, has_indented_code);
+        p.set_virtual_line_start();
 
         parse_quote_block_list(p);
 
         p.state_mut().block_quote_depth -= 1;
-        quote_m.complete(p, MD_QUOTE);
+        let completed = quote_m.complete(p, MD_QUOTE);
+        let range = completed.range(p);
+        let indent = 1 + if marker_space { 1 } else { 0 };
+        p.record_quote_indent(range, indent);
 
         state.record_first_line_block();
         p.state_mut().virtual_line_start = prev_virtual;
