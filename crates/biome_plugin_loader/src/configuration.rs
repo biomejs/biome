@@ -187,4 +187,42 @@ mod tests {
         // includes should be unchanged
         assert!(plugins.0[0].includes().is_some());
     }
+
+    #[test]
+    fn deserialize_plain_string() {
+        let config: PluginConfiguration = serde_json::from_str(r#""my-plugin.grit""#).unwrap();
+        assert_eq!(config.path(), "my-plugin.grit");
+        assert!(config.includes().is_none());
+    }
+
+    #[test]
+    fn deserialize_object_with_includes() {
+        let config: PluginConfiguration =
+            serde_json::from_str(r#"{ "path": "my-plugin.grit", "includes": ["src/**/*.ts"] }"#)
+                .unwrap();
+        assert_eq!(config.path(), "my-plugin.grit");
+        assert_eq!(config.includes().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn deserialize_object_without_includes() {
+        let config: PluginConfiguration =
+            serde_json::from_str(r#"{ "path": "my-plugin.grit" }"#).unwrap();
+        assert_eq!(config.path(), "my-plugin.grit");
+        assert!(config.includes().is_none());
+    }
+
+    #[test]
+    fn deserialize_plugins_list_mixed() {
+        let plugins: Plugins = serde_json::from_str(
+            r#"["simple.grit", { "path": "scoped.grit", "includes": ["src/**"] }]"#,
+        )
+        .unwrap();
+        assert_eq!(plugins.0.len(), 2);
+        assert!(matches!(plugins.0[0], PluginConfiguration::Path(_)));
+        assert!(matches!(
+            plugins.0[1],
+            PluginConfiguration::PathWithOptions(_)
+        ));
+    }
 }

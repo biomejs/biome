@@ -205,3 +205,38 @@ fn register_diagnostic<'a>(
 
     Ok(span_node.clone())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_fs::MemoryFileSystem;
+
+    fn load_test_plugin(includes: Option<&[NormalizedGlob]>) -> AnalyzerGritPlugin {
+        let fs = MemoryFileSystem::default();
+        fs.insert("/test.grit".into(), r#"`hello`"#);
+        AnalyzerGritPlugin::load(&fs, Utf8Path::new("/test.grit"), includes).unwrap()
+    }
+
+    #[test]
+    fn applies_to_all_files_without_includes() {
+        let plugin = load_test_plugin(None);
+        assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));
+        assert!(plugin.applies_to_file(Utf8Path::new("test/foo.js")));
+    }
+
+    #[test]
+    fn applies_to_matching_files_with_includes() {
+        let globs: Vec<NormalizedGlob> = vec!["src/**/*.ts".parse().unwrap()];
+        let plugin = load_test_plugin(Some(&globs));
+        assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));
+        assert!(plugin.applies_to_file(Utf8Path::new("src/nested/file.ts")));
+    }
+
+    #[test]
+    fn rejects_non_matching_files_with_includes() {
+        let globs: Vec<NormalizedGlob> = vec!["src/**/*.ts".parse().unwrap()];
+        let plugin = load_test_plugin(Some(&globs));
+        assert!(!plugin.applies_to_file(Utf8Path::new("test/foo.ts")));
+        assert!(!plugin.applies_to_file(Utf8Path::new("src/main.js")));
+    }
+}
