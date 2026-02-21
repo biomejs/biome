@@ -1,0 +1,112 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div out:>Invalid</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteOutDirective {
+                        out_token: OUT_KW@5..8 "out" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@8..9 ":" [] [],
+                            property: missing (required),
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@10..17 "Invalid" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@17..18 "<" [] [],
+                slash_token: SLASH@18..19 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@19..22 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@22..23 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@23..24 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..24
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..23
+    0: HTML_ELEMENT@0..23
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..9
+          0: SVELTE_OUT_DIRECTIVE@5..9
+            0: OUT_KW@5..8 "out" [] []
+            1: SVELTE_DIRECTIVE_VALUE@8..9
+              0: COLON@8..9 ":" [] []
+              1: (empty)
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@9..9
+              3: (empty)
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..17
+        0: HTML_CONTENT@10..17
+          0: HTML_LITERAL@10..17 "Invalid" [] []
+      2: HTML_CLOSING_ELEMENT@17..23
+        0: L_ANGLE@17..18 "<" [] []
+        1: SLASH@18..19 "/" [] []
+        2: HTML_TAG_NAME@19..22
+          0: HTML_LITERAL@19..22 "div" [] []
+        3: R_ANGLE@22..23 ">" [] []
+  4: EOF@23..24 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+out_missing_name.svelte:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ <div out:>Invalid</div>
+      │          ^^^^^^^^^^^^^^
+  > 2 │ 
+      │ 
+  
+  i Expected one of:
+  
+  - name
+  - closing block
+  
+```

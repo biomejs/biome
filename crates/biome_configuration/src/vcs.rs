@@ -123,7 +123,7 @@ impl FromStr for VcsClientKind {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "git" => Ok(Self::Git),
-            _ => Err("Value not supported for VcsClientKind"),
+            _ => Err("Value not supported for clientKind."),
         }
     }
 }

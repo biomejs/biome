@@ -18,7 +18,9 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
         let bracket_same_line = f.options().bracket_same_line().value();
         let self_close_void_elements = f.options().self_close_void_elements();
         let name = name?;
-        let is_canonical_html_element = should_lowercase_html_tag(f, &name);
+        let is_canonical_html_element = name
+            .as_html_tag_name()
+            .is_some_and(|name| should_lowercase_html_tag(f, name));
 
         write!(f, [l_angle_token.format(), name.format()])?;
 
@@ -62,7 +64,9 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                     }
                 }
                 // We remove the slash only from void elements
-                else if node.is_void_element()? && self_close_void_elements.is_never() {
+                else if node.is_void_element().unwrap_or_default()
+                    && self_close_void_elements.is_never()
+                {
                     if let Some(slash_token) = &slash_token {
                         write!(f, [format_removed(slash_token)])?;
                     }

@@ -1,0 +1,82 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Backtick in info string should not open fence:
+``` lang`uage`
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..46 "Backtick in info string should not open fence:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@46..47 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@47..50 "```" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@50..55 " lang" [] [],
+                },
+                MdInlineCode {
+                    l_tick_token: BACKTICK@55..56 "`" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@56..60 "uage" [] [],
+                        },
+                    ],
+                    r_tick_token: BACKTICK@60..61 "`" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@61..62 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@62..62 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..62
+  0: (empty)
+  1: MD_BLOCK_LIST@0..62
+    0: MD_PARAGRAPH@0..62
+      0: MD_INLINE_ITEM_LIST@0..62
+        0: MD_TEXTUAL@0..46
+          0: MD_TEXTUAL_LITERAL@0..46 "Backtick in info string should not open fence:" [] []
+        1: MD_TEXTUAL@46..47
+          0: MD_TEXTUAL_LITERAL@46..47 "\n" [] []
+        2: MD_TEXTUAL@47..50
+          0: MD_TEXTUAL_LITERAL@47..50 "```" [] []
+        3: MD_TEXTUAL@50..55
+          0: MD_TEXTUAL_LITERAL@50..55 " lang" [] []
+        4: MD_INLINE_CODE@55..61
+          0: BACKTICK@55..56 "`" [] []
+          1: MD_INLINE_ITEM_LIST@56..60
+            0: MD_TEXTUAL@56..60
+              0: MD_TEXTUAL_LITERAL@56..60 "uage" [] []
+          2: BACKTICK@60..61 "`" [] []
+        5: MD_TEXTUAL@61..62
+          0: MD_TEXTUAL_LITERAL@61..62 "\n" [] []
+      1: (empty)
+  2: EOF@62..62 "" [] []
+
+```

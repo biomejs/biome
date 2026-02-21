@@ -27,7 +27,12 @@ impl Rule for OrganizeImports {
         };
         let mut result = Vec::new();
         for member in root.json_member_list().into_iter().flatten() {
-            let Ok(name) = member.name().and_then(|n| n.inner_string_text()) else {
+            let Some(name) = member
+                .name()
+                .ok()
+                .and_then(|n| n.inner_string_text())
+                .and_then(|r| r.ok())
+            else {
                 continue;
             };
             match name.text() {
@@ -43,7 +48,12 @@ impl Rule for OrganizeImports {
                             continue;
                         };
                         for member in override_item.json_member_list().into_iter().flatten() {
-                            let Ok(name) = member.name().and_then(|n| n.inner_string_text()) else {
+                            let Some(name) = member
+                                .name()
+                                .ok()
+                                .and_then(|n| n.inner_string_text())
+                                .and_then(|r| r.ok())
+                            else {
                                 continue;
                             };
                             if name.text() == "organizeImports" {
@@ -77,7 +87,7 @@ impl Rule for OrganizeImports {
         let indent = member.syntax().first_token()?.indentation_trivia_pieces();
 
         let action_member = make::json_member(
-            make::json_member_name(make::json_string_literal("organizeImports")),
+            make::json_member_name(make::json_string_literal("organizeImports")).into(),
             make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
             make::json_string_value(
                 make::json_string_literal(on_or_off)
@@ -86,7 +96,7 @@ impl Rule for OrganizeImports {
             .into(),
         );
         let source_member = make::json_member(
-            make::json_member_name(make::json_string_literal("source")),
+            make::json_member_name(make::json_string_literal("source")).into(),
             make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
             make::json_object_value(
                 make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
@@ -96,7 +106,7 @@ impl Rule for OrganizeImports {
             .into(),
         );
         let actions_member = make::json_member(
-            make::json_member_name(make::json_string_literal("actions")),
+            make::json_member_name(make::json_string_literal("actions")).into(),
             make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
             make::json_object_value(
                 make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
@@ -108,7 +118,8 @@ impl Rule for OrganizeImports {
         let assist_member = make::json_member(
             make::json_member_name(
                 make::json_string_literal("assist").prepend_trivia_pieces(indent.clone()),
-            ),
+            )
+            .into(),
             make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
             AnyJsonValue::JsonObjectValue(make::json_object_value(
                 make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
@@ -137,8 +148,10 @@ fn is_organize_imports_enabled(organize_imports_member: &JsonMember) -> bool {
         for member_val in object.json_member_list().into_iter().flatten() {
             if member_val
                 .name()
+                .ok()
                 .and_then(|val| val.inner_string_text())
-                .is_ok_and(|val| val.text() == "enabled")
+                .and_then(|r| r.ok())
+                .is_some_and(|val| val.text() == "enabled")
                 && let Ok(AnyJsonValue::JsonBooleanValue(enabled)) = member_val.value()
                 && let Ok(enabled) = enabled.value_token()
             {

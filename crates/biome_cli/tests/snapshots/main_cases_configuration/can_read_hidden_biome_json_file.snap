@@ -1,0 +1,91 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `.biome.json`
+
+```json
+{
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  }
+}
+```
+
+## `src/index.js`
+
+```js
+a['b']  =  42;
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/index.js:1:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+  > 1 │ a['b']  =  42;
+      │   ^^^
+  
+  i Unsafe fix: Use a literal key instead.
+  
+  - a['b']··=··42;
+  + a.b··=··42;
+  
+
+```
+
+```block
+.biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   {
+    2   │ - ··"javascript":·{
+    3   │ - ····"formatter":·{
+    4   │ - ······"quoteStyle":·"single"
+    5   │ - ····}
+    6   │ - ··}
+    7   │ - }
+      2 │ + → "javascript":·{
+      3 │ + → → "formatter":·{
+      4 │ + → → → "quoteStyle":·"single"
+      5 │ + → → }
+      6 │ + → }
+      7 │ + }
+      8 │ + 
+  
+
+```
+
+```block
+src/index.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - a['b']··=··42;
+      1 │ + a['b']·=·42;
+      2 │ + 
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 2 errors.
+Found 1 info.
+```

@@ -16,13 +16,13 @@ importers:
         version: 0.5.2
       '@changesets/cli':
         specifier: 2.29.8
-        version: 2.29.8(@types/node@24.10.11)
+        version: 2.29.8(@types/node@24.10.13)
       '@types/node':
-        specifier: 24.10.11
-        version: 24.10.11
+        specifier: 24.10.13
+        version: 24.10.13
       tombi:
-        specifier: 0.7.27
-        version: 0.7.27
+        specifier: 0.7.28
+        version: 0.7.28
 
   benchmark:
     devDependencies:
@@ -64,55 +64,55 @@ importers:
         version: 4.0.18(@types/node@24.10.9)(happy-dom@20.4.0)(jiti@2.6.1)(yaml@2.8.2)
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-win32-x64
 
   packages/@biomejs/biome:
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.3.15
+        specifier: 2.4.4
         version: link:../cli-win32-x64
 
   packages/@biomejs/cli-darwin-arm64: {}
@@ -147,10 +147,10 @@ importers:
         version: 5.9.3
       vite:
         specifier: 7.3.1
-        version: 7.3.1(@types/node@24.10.11)(jiti@2.6.1)(yaml@2.8.2)
+        version: 7.3.1(@types/node@24.10.13)(jiti@2.6.1)(yaml@2.8.2)
       vitest:
         specifier: 4.0.18
-        version: 4.0.18(@types/node@24.10.11)(happy-dom@20.4.0)(jiti@2.6.1)(yaml@2.8.2)
+        version: 4.0.18(@types/node@24.10.13)(happy-dom@20.4.0)(jiti@2.6.1)(yaml@2.8.2)
 
   packages/@biomejs/plugin-api:
     dependencies:
@@ -909,54 +909,54 @@ packages:
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
 
-  '@tombi-toml/cli-darwin-arm64@0.7.27':
-    resolution: {integrity: sha512-ExSFmxFNM390pZaLBSJdUkCfl81uDWH5m21FMvqq2TMvG2ncVLYXNwaS5S3s7EcuIoYSHgHKzycXcKxgQbWrVg==}
+  '@tombi-toml/cli-darwin-arm64@0.7.28':
+    resolution: {integrity: sha512-65vVqEOX7HPubaf+bXFfgkgPhs/jwfzkCunkemrPjFEftkapXONeJw3F/D2x1caMM3w+CPhGdSB2+UBx4OwhIQ==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@tombi-toml/cli-darwin-x64@0.7.27':
-    resolution: {integrity: sha512-EWMkaxS1tvcf+2t/90V3QPEIWMzmIWagKvnkcdlAi+03OLOYVTx4QqHgVWuuJVyIp+cERcX+xLLP8i2C6Bgmzw==}
+  '@tombi-toml/cli-darwin-x64@0.7.28':
+    resolution: {integrity: sha512-O/nCxLMaxxoe6zKyCKwP1WArsSfksiphaPYEotbpugYXP6wFHDiup8yaKjZEEyzbrU0tJltBJGqVIoPR1C5m2w==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@tombi-toml/cli-linux-arm64-musl@0.7.27':
-    resolution: {integrity: sha512-ndLkosw5Qg0tJN5AtOoSTVnZykuBhXKyJtGglPlmYAt8UWKZ8QsUe4CcNmRY+n/Do7p/GRl1HY1+qAxJk4QCyg==}
+  '@tombi-toml/cli-linux-arm64-musl@0.7.28':
+    resolution: {integrity: sha512-flB0N00QgWmcO/yE/PiHtU+1VL+28VYnxEDOZ/LBjEW5WbMv2RXfTJ5H6OnpRiTTN+hDp4WYBebOXHjlhGwZ1w==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@tombi-toml/cli-linux-arm64@0.7.27':
-    resolution: {integrity: sha512-C7tVg+PlyP0ZtgC6QegCKVcQFagwYLRreg+Si7JsjmDkYImX5ZX7iCiNQ0ygZxdibwQnF6lOADr5tayqhUojNg==}
+  '@tombi-toml/cli-linux-arm64@0.7.28':
+    resolution: {integrity: sha512-wKOrxLZ00Npx+stBJ9aXoFtyp9PbPYTCwRzHqHiV0GNomjD7+FJh/Kz9NCn+3bVA1NsDRqhvUTKKlYw1d/NALw==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-linux-x64-musl@0.7.27':
-    resolution: {integrity: sha512-8tqg90a28ZdOLNNTysNp94frAWQ25qMppYU2QFmxQvzvRL/ZJo4lDN2gFywRyeoSd5BjY48Hjhdz2AH6PmxIug==}
+  '@tombi-toml/cli-linux-x64-musl@0.7.28':
+    resolution: {integrity: sha512-Ag8fSPgJCkPC9i8yhSZO3yDIlgD1YdqUXHlDQE8ErY83PX0cBM4eKPPAgklVywBphcyF5zOMyp+EK+0oOJ1CrQ==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@tombi-toml/cli-linux-x64@0.7.27':
-    resolution: {integrity: sha512-/e7yjzb0Vw/Q3DgtRYXBTulkHoUmcwxGEZBYE5t1BhuIuGxRwPIALEBJ7cCIQmIKrfkGxmzeh+p3HnnDeIMrJQ==}
+  '@tombi-toml/cli-linux-x64@0.7.28':
+    resolution: {integrity: sha512-gO/Wd29KwPyx0RGjpJw/W9ItEjiA/WEcsAgti7bpf0ROyc8Z6VAMkZPMNahQXKXfrEaxiSIx08pIaTEBPy6dHA==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-win32-arm64@0.7.27':
-    resolution: {integrity: sha512-8ylZ2ZUbxyIWWab9ciaxKaaSaYdNWPxoO9XaG5DywvDOMBDMSsEWK+anc8jhKAcfxJSJbOEk8JTYpL4qyL5Euw==}
+  '@tombi-toml/cli-win32-arm64@0.7.28':
+    resolution: {integrity: sha512-GMgzZkY3U1BKCQ+4L3BciBDdzoVdRboqaMfeU6Jd35jfAEi5vNf8dG9YzQ1H0pEwZ85XRVHwbK+MUQJNrhFwIw==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@tombi-toml/cli-win32-x64@0.7.27':
-    resolution: {integrity: sha512-pE3jYL2htamP8iSEPPC/WerbyWbdr6hOBv6TdZW7tXe+BklAc1WxEZ+MfJpD6626QPrhvUh0uFx4yZui9pKppg==}
+  '@tombi-toml/cli-win32-x64@0.7.28':
+    resolution: {integrity: sha512-3rQGdLIkRbIjdSJJ9+OqW6Lwxq/1jMRVNTx41RzCc/D6E/29okjoIntSsLcwMjgwJ7wBjjeNWMOmO+WCayXRTg==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [win32]
@@ -982,8 +982,8 @@ packages:
   '@types/node@22.19.7':
     resolution: {integrity: sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw==}
 
-  '@types/node@24.10.11':
-    resolution: {integrity: sha512-/Af7O8r1frCVgOz0I62jWUtMohJ0/ZQU/ZoketltOJPZpnb17yoNc9BSoVuV9qlaIXJiPNOpsfq4ByFajSArNQ==}
+  '@types/node@24.10.13':
+    resolution: {integrity: sha512-oH72nZRfDv9lADUBSo104Aq7gPHpQZc4BTx38r9xf9pg5LfP6EzSyH2n7qFmmxRQXh7YlUXODcYsg6PuTDSxGg==}
 
   '@types/node@24.10.9':
     resolution: {integrity: sha512-ne4A0IpG3+2ETuREInjPNhUGis1SFjv1d5asp8MzEAGtOZeTeHVDOYqOgqfhvseqg/iXty2hjBf1zAOb7RNiNw==}
@@ -2030,8 +2030,8 @@ packages:
     resolution: {integrity: sha512-6udB24Q737UD/SDsKAHI9FCRP7Bqc9D/MQUV02ORQg5iskjtLJlZJNdN4kKtcdtwCeWIwIHDGaUsTsCCAa8sFQ==}
     engines: {node: '>=10'}
 
-  tombi@0.7.27:
-    resolution: {integrity: sha512-mBu62WJViCmhddorjRwXz1p5HoZKoFY5Ub6G7XNNGmcZuAzk4Z+Bmy3LpIhS71gIaclav8oXhaaIR7BqdKsgpw==}
+  tombi@0.7.28:
+    resolution: {integrity: sha512-rD63mkFgP93qiqtSdiSMyLoN9iOUjiAgThmr+i4OnY7X7vqtbbaS6N074mfCw7A4+DbpWDEtaptmoB+UD36nWQ==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -2299,7 +2299,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@changesets/cli@2.29.8(@types/node@24.10.11)':
+  '@changesets/cli@2.29.8(@types/node@24.10.13)':
     dependencies:
       '@changesets/apply-release-plan': 7.0.14
       '@changesets/assemble-release-plan': 6.0.9
@@ -2315,7 +2315,7 @@ snapshots:
       '@changesets/should-skip-package': 0.1.2
       '@changesets/types': 6.1.0
       '@changesets/write': 0.4.0
-      '@inquirer/external-editor': 1.0.3(@types/node@24.10.11)
+      '@inquirer/external-editor': 1.0.3(@types/node@24.10.13)
       '@manypkg/get-packages': 1.1.3
       ansi-colors: 4.1.3
       ci-info: 3.9.0
@@ -2601,12 +2601,12 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.2': {}
 
-  '@inquirer/external-editor@1.0.3(@types/node@24.10.11)':
+  '@inquirer/external-editor@1.0.3(@types/node@24.10.13)':
     dependencies:
       chardet: 2.1.1
       iconv-lite: 0.7.0
     optionalDependencies:
-      '@types/node': 24.10.11
+      '@types/node': 24.10.13
 
   '@jimp/core@1.6.0':
     dependencies:
@@ -2965,28 +2965,28 @@ snapshots:
 
   '@tokenizer/token@0.3.0': {}
 
-  '@tombi-toml/cli-darwin-arm64@0.7.27':
+  '@tombi-toml/cli-darwin-arm64@0.7.28':
     optional: true
 
-  '@tombi-toml/cli-darwin-x64@0.7.27':
+  '@tombi-toml/cli-darwin-x64@0.7.28':
     optional: true
 
-  '@tombi-toml/cli-linux-arm64-musl@0.7.27':
+  '@tombi-toml/cli-linux-arm64-musl@0.7.28':
     optional: true
 
-  '@tombi-toml/cli-linux-arm64@0.7.27':
+  '@tombi-toml/cli-linux-arm64@0.7.28':
     optional: true
 
-  '@tombi-toml/cli-linux-x64-musl@0.7.27':
+  '@tombi-toml/cli-linux-x64-musl@0.7.28':
     optional: true
 
-  '@tombi-toml/cli-linux-x64@0.7.27':
+  '@tombi-toml/cli-linux-x64@0.7.28':
     optional: true
 
-  '@tombi-toml/cli-win32-arm64@0.7.27':
+  '@tombi-toml/cli-win32-arm64@0.7.28':
     optional: true
 
-  '@tombi-toml/cli-win32-x64@0.7.27':
+  '@tombi-toml/cli-win32-x64@0.7.28':
     optional: true
 
   '@types/chai@5.2.2':
@@ -3007,7 +3007,7 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
-  '@types/node@24.10.11':
+  '@types/node@24.10.13':
     dependencies:
       undici-types: 7.16.0
 
@@ -3025,7 +3025,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 24.10.11
+      '@types/node': 24.10.13
 
   '@typescript-eslint/eslint-plugin@8.54.0(@typescript-eslint/parser@8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
@@ -3127,13 +3127,13 @@ snapshots:
       chai: 6.2.1
       tinyrainbow: 3.0.3
 
-  '@vitest/mocker@4.0.18(vite@7.3.1(@types/node@24.10.11)(jiti@2.6.1)(yaml@2.8.2))':
+  '@vitest/mocker@4.0.18(vite@7.3.1(@types/node@24.10.13)(jiti@2.6.1)(yaml@2.8.2))':
     dependencies:
       '@vitest/spy': 4.0.18
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.1(@types/node@24.10.11)(jiti@2.6.1)(yaml@2.8.2)
+      vite: 7.3.1(@types/node@24.10.13)(jiti@2.6.1)(yaml@2.8.2)
 
   '@vitest/mocker@4.0.18(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(yaml@2.8.2))':
     dependencies:
@@ -3560,7 +3560,7 @@ snapshots:
 
   happy-dom@20.4.0:
     dependencies:
-      '@types/node': 24.10.11
+      '@types/node': 24.10.13
       '@types/whatwg-mimetype': 3.0.2
       '@types/ws': 8.18.1
       entities: 4.5.0
@@ -4089,16 +4089,16 @@ snapshots:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
 
-  tombi@0.7.27:
+  tombi@0.7.28:
     optionalDependencies:
-      '@tombi-toml/cli-darwin-arm64': 0.7.27
-      '@tombi-toml/cli-darwin-x64': 0.7.27
-      '@tombi-toml/cli-linux-arm64': 0.7.27
-      '@tombi-toml/cli-linux-arm64-musl': 0.7.27
-      '@tombi-toml/cli-linux-x64': 0.7.27
-      '@tombi-toml/cli-linux-x64-musl': 0.7.27
-      '@tombi-toml/cli-win32-arm64': 0.7.27
-      '@tombi-toml/cli-win32-x64': 0.7.27
+      '@tombi-toml/cli-darwin-arm64': 0.7.28
+      '@tombi-toml/cli-darwin-x64': 0.7.28
+      '@tombi-toml/cli-linux-arm64': 0.7.28
+      '@tombi-toml/cli-linux-arm64-musl': 0.7.28
+      '@tombi-toml/cli-linux-x64': 0.7.28
+      '@tombi-toml/cli-linux-x64-musl': 0.7.28
+      '@tombi-toml/cli-win32-arm64': 0.7.28
+      '@tombi-toml/cli-win32-x64': 0.7.28
 
   tr46@0.0.3: {}
 
@@ -4139,7 +4139,7 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  vite@7.3.1(@types/node@24.10.11)(jiti@2.6.1)(yaml@2.8.2):
+  vite@7.3.1(@types/node@24.10.13)(jiti@2.6.1)(yaml@2.8.2):
     dependencies:
       esbuild: 0.27.2
       fdir: 6.5.0(picomatch@4.0.3)
@@ -4148,7 +4148,7 @@ snapshots:
       rollup: 4.46.2
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 24.10.11
+      '@types/node': 24.10.13
       fsevents: 2.3.3
       jiti: 2.6.1
       yaml: 2.8.2
@@ -4167,10 +4167,10 @@ snapshots:
       jiti: 2.6.1
       yaml: 2.8.2
 
-  vitest@4.0.18(@types/node@24.10.11)(happy-dom@20.4.0)(jiti@2.6.1)(yaml@2.8.2):
+  vitest@4.0.18(@types/node@24.10.13)(happy-dom@20.4.0)(jiti@2.6.1)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.18
-      '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@24.10.11)(jiti@2.6.1)(yaml@2.8.2))
+      '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@24.10.13)(jiti@2.6.1)(yaml@2.8.2))
       '@vitest/pretty-format': 4.0.18
       '@vitest/runner': 4.0.18
       '@vitest/snapshot': 4.0.18
@@ -4187,10 +4187,10 @@ snapshots:
       tinyexec: 1.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vite: 7.3.1(@types/node@24.10.11)(jiti@2.6.1)(yaml@2.8.2)
+      vite: 7.3.1(@types/node@24.10.13)(jiti@2.6.1)(yaml@2.8.2)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 24.10.11
+      '@types/node': 24.10.13
       happy-dom: 20.4.0
     transitivePeerDependencies:
       - jiti

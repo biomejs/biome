@@ -17,7 +17,7 @@ publish              = true
 biome_rowan       = { workspace = true, features = ["serde"] }
 biome_string_case = { workspace = true }
 camino            = { workspace = true }
-dirs              = { workspace = true }
+directories       = { workspace = true }
 schemars          = { workspace = true, optional = true }
 serde             = { workspace = true, features = ["derive"] }
 

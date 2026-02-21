@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: jsdoc.js
+---
+# Input
+```js
+/**
+ * test
+ */
+
+```
+
+# Diagnostics
+```
+jsdoc.js:4:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty source is not allowed.
+  
+    2 │  * test
+    3 │  */
+  > 4 │ 
+      │ 
+  
+  i Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it.
+  
+
+```

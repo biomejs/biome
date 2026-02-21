@@ -1,0 +1,67 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Paragraph that should NOT be interrupted.
+2. This stays in paragraph because 2 cannot interrupt.
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..41 "Paragraph that should NOT be interrupted." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@41..42 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@42..44 "2." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@44..96 " This stays in paragraph because 2 cannot interrupt." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@96..97 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@97..97 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..97
+  0: (empty)
+  1: MD_BLOCK_LIST@0..97
+    0: MD_PARAGRAPH@0..97
+      0: MD_INLINE_ITEM_LIST@0..97
+        0: MD_TEXTUAL@0..41
+          0: MD_TEXTUAL_LITERAL@0..41 "Paragraph that should NOT be interrupted." [] []
+        1: MD_TEXTUAL@41..42
+          0: MD_TEXTUAL_LITERAL@41..42 "\n" [] []
+        2: MD_TEXTUAL@42..44
+          0: MD_TEXTUAL_LITERAL@42..44 "2." [] []
+        3: MD_TEXTUAL@44..96
+          0: MD_TEXTUAL_LITERAL@44..96 " This stays in paragraph because 2 cannot interrupt." [] []
+        4: MD_TEXTUAL@96..97
+          0: MD_TEXTUAL_LITERAL@96..97 "\n" [] []
+      1: (empty)
+  2: EOF@97..97 "" [] []
+
+```

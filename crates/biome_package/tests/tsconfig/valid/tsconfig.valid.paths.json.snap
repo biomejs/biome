@@ -37,6 +37,8 @@ TsConfigJson {
         ),
         paths_base: "<PREFIX>/tsconfig/valid/src",
         type_roots: None,
+        jsx_factory: None,
+        jsx_fragment_factory: None,
     },
     references: [],
 }

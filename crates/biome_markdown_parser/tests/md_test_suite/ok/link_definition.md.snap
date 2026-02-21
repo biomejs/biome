@@ -1,0 +1,306 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+[example]: https://example.com
+
+[foo]: /url
+
+ [one-space]: /url
+
+  [two-spaces]: /url
+
+   [three-spaces]: /url
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@0..1 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..8 "example" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@8..9 "]" [] [],
+            colon_token: COLON@9..10 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@10..11 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@11..30 "https://example.com" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@30..31 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@31..32 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@32..33 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@33..36 "foo" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@36..37 "]" [] [],
+            colon_token: COLON@37..38 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@38..39 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@39..43 "/url" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@43..44 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@44..45 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@45..47 "[" [Skipped(" ")] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@47..50 "one" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@50..51 "-" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@51..56 "space" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@56..57 "]" [] [],
+            colon_token: COLON@57..58 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@58..59 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@59..63 "/url" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@63..64 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@64..65 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@65..68 "[" [Skipped(" "), Skipped(" ")] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@68..71 "two" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@71..72 "-" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@72..78 "spaces" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@78..79 "]" [] [],
+            colon_token: COLON@79..80 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@80..81 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@81..85 "/url" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@85..86 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@86..87 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@87..91 "[" [Skipped(" "), Skipped(" "), Skipped(" ")] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@91..96 "three" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@96..97 "-" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@97..103 "spaces" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@103..104 "]" [] [],
+            colon_token: COLON@104..105 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@105..106 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@106..110 "/url" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@110..111 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@111..111 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..111
+  0: (empty)
+  1: MD_BLOCK_LIST@0..111
+    0: MD_LINK_REFERENCE_DEFINITION@0..30
+      0: L_BRACK@0..1 "[" [] []
+      1: MD_LINK_LABEL@1..8
+        0: MD_INLINE_ITEM_LIST@1..8
+          0: MD_TEXTUAL@1..8
+            0: MD_TEXTUAL_LITERAL@1..8 "example" [] []
+      2: R_BRACK@8..9 "]" [] []
+      3: COLON@9..10 ":" [] []
+      4: MD_LINK_DESTINATION@10..30
+        0: MD_INLINE_ITEM_LIST@10..30
+          0: MD_TEXTUAL@10..11
+            0: MD_TEXTUAL_LITERAL@10..11 " " [] []
+          1: MD_TEXTUAL@11..30
+            0: MD_TEXTUAL_LITERAL@11..30 "https://example.com" [] []
+      5: (empty)
+    1: MD_NEWLINE@30..31
+      0: NEWLINE@30..31 "\n" [] []
+    2: MD_NEWLINE@31..32
+      0: NEWLINE@31..32 "\n" [] []
+    3: MD_LINK_REFERENCE_DEFINITION@32..43
+      0: L_BRACK@32..33 "[" [] []
+      1: MD_LINK_LABEL@33..36
+        0: MD_INLINE_ITEM_LIST@33..36
+          0: MD_TEXTUAL@33..36
+            0: MD_TEXTUAL_LITERAL@33..36 "foo" [] []
+      2: R_BRACK@36..37 "]" [] []
+      3: COLON@37..38 ":" [] []
+      4: MD_LINK_DESTINATION@38..43
+        0: MD_INLINE_ITEM_LIST@38..43
+          0: MD_TEXTUAL@38..39
+            0: MD_TEXTUAL_LITERAL@38..39 " " [] []
+          1: MD_TEXTUAL@39..43
+            0: MD_TEXTUAL_LITERAL@39..43 "/url" [] []
+      5: (empty)
+    4: MD_NEWLINE@43..44
+      0: NEWLINE@43..44 "\n" [] []
+    5: MD_NEWLINE@44..45
+      0: NEWLINE@44..45 "\n" [] []
+    6: MD_LINK_REFERENCE_DEFINITION@45..63
+      0: L_BRACK@45..47 "[" [Skipped(" ")] []
+      1: MD_LINK_LABEL@47..56
+        0: MD_INLINE_ITEM_LIST@47..56
+          0: MD_TEXTUAL@47..50
+            0: MD_TEXTUAL_LITERAL@47..50 "one" [] []
+          1: MD_TEXTUAL@50..51
+            0: MD_TEXTUAL_LITERAL@50..51 "-" [] []
+          2: MD_TEXTUAL@51..56
+            0: MD_TEXTUAL_LITERAL@51..56 "space" [] []
+      2: R_BRACK@56..57 "]" [] []
+      3: COLON@57..58 ":" [] []
+      4: MD_LINK_DESTINATION@58..63
+        0: MD_INLINE_ITEM_LIST@58..63
+          0: MD_TEXTUAL@58..59
+            0: MD_TEXTUAL_LITERAL@58..59 " " [] []
+          1: MD_TEXTUAL@59..63
+            0: MD_TEXTUAL_LITERAL@59..63 "/url" [] []
+      5: (empty)
+    7: MD_NEWLINE@63..64
+      0: NEWLINE@63..64 "\n" [] []
+    8: MD_NEWLINE@64..65
+      0: NEWLINE@64..65 "\n" [] []
+    9: MD_LINK_REFERENCE_DEFINITION@65..85
+      0: L_BRACK@65..68 "[" [Skipped(" "), Skipped(" ")] []
+      1: MD_LINK_LABEL@68..78
+        0: MD_INLINE_ITEM_LIST@68..78
+          0: MD_TEXTUAL@68..71
+            0: MD_TEXTUAL_LITERAL@68..71 "two" [] []
+          1: MD_TEXTUAL@71..72
+            0: MD_TEXTUAL_LITERAL@71..72 "-" [] []
+          2: MD_TEXTUAL@72..78
+            0: MD_TEXTUAL_LITERAL@72..78 "spaces" [] []
+      2: R_BRACK@78..79 "]" [] []
+      3: COLON@79..80 ":" [] []
+      4: MD_LINK_DESTINATION@80..85
+        0: MD_INLINE_ITEM_LIST@80..85
+          0: MD_TEXTUAL@80..81
+            0: MD_TEXTUAL_LITERAL@80..81 " " [] []
+          1: MD_TEXTUAL@81..85
+            0: MD_TEXTUAL_LITERAL@81..85 "/url" [] []
+      5: (empty)
+    10: MD_NEWLINE@85..86
+      0: NEWLINE@85..86 "\n" [] []
+    11: MD_NEWLINE@86..87
+      0: NEWLINE@86..87 "\n" [] []
+    12: MD_LINK_REFERENCE_DEFINITION@87..110
+      0: L_BRACK@87..91 "[" [Skipped(" "), Skipped(" "), Skipped(" ")] []
+      1: MD_LINK_LABEL@91..103
+        0: MD_INLINE_ITEM_LIST@91..103
+          0: MD_TEXTUAL@91..96
+            0: MD_TEXTUAL_LITERAL@91..96 "three" [] []
+          1: MD_TEXTUAL@96..97
+            0: MD_TEXTUAL_LITERAL@96..97 "-" [] []
+          2: MD_TEXTUAL@97..103
+            0: MD_TEXTUAL_LITERAL@97..103 "spaces" [] []
+      2: R_BRACK@103..104 "]" [] []
+      3: COLON@104..105 ":" [] []
+      4: MD_LINK_DESTINATION@105..110
+        0: MD_INLINE_ITEM_LIST@105..110
+          0: MD_TEXTUAL@105..106
+            0: MD_TEXTUAL_LITERAL@105..106 " " [] []
+          1: MD_TEXTUAL@106..110
+            0: MD_TEXTUAL_LITERAL@106..110 "/url" [] []
+      5: (empty)
+    13: MD_NEWLINE@110..111
+      0: NEWLINE@110..111 "\n" [] []
+  2: EOF@111..111 "" [] []
+
+```

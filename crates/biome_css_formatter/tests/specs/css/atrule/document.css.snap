@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/document.css
 ---
+
 # Input
 
 ```css
@@ -45,6 +46,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
@@ -75,6 +77,7 @@ Quote style: Double Quotes
 		}
 	}
 }
+
 ```
 
 # Lines exceeding max width of 80 characters

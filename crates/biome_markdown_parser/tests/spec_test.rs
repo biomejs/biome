@@ -132,17 +132,65 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     });
 }
 
-#[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"
-your test code
-"#;
+    use biome_markdown_parser::document_to_html;
+    use biome_markdown_syntax::MdDocument;
+    use biome_rowan::AstNode;
 
-    let root = parse_markdown(code);
-    let syntax = root.syntax();
-    dbg!(&syntax, root.diagnostics(), root.has_errors());
-    if has_bogus_nodes_or_empty_slots(&syntax) {
-        panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
+    fn test_example(num: u32, input: &str, expected: &str) {
+        let root = parse_markdown(input);
+        let doc = MdDocument::cast(root.syntax())
+            .unwrap_or_else(|| panic!("Example {:03}: parse failed", num));
+        let html = document_to_html(
+            &doc,
+            root.list_tightness(),
+            root.list_item_indents(),
+            root.quote_indents(),
+        );
+
+        assert_eq!(expected, html, "Example {:03} failed", num);
     }
+
+    test_example(
+        7,
+        "-\t\tfoo\n",
+        "<ul>\n<li>\n<pre><code>  foo\n</code></pre>\n</li>\n</ul>\n",
+    );
+    test_example(
+        42,
+        "- `one\n- two`\n",
+        "<ul>\n<li>`one</li>\n<li>two`</li>\n</ul>\n",
+    );
+    test_example(
+        61,
+        "- Foo\n- * * *\n",
+        "<ul>\n<li>Foo</li>\n<li>\n<hr />\n</li>\n</ul>\n",
+    );
+    test_example(
+        66,
+        "# foo *bar* \\*baz\\*\n",
+        "<h1>foo <em>bar</em> *baz*</h1>\n",
+    );
+    test_example(73, "### foo ###     \n", "<h3>foo</h3>\n");
+    test_example(
+        93,
+        "> foo\nbar\n===\n",
+        "<blockquote>\n<p>foo\nbar\n===</p>\n</blockquote>\n",
+    );
+    test_example(
+        223,
+        "aaa\n             bbb\n                                       ccc\n",
+        "<p>aaa\nbbb\nccc</p>\n",
+    );
+    test_example(
+        259,
+        "   > > 1.  one\n>>\n>>     two\n",
+        "<blockquote>\n<blockquote>\n<ol>\n<li>\n<p>one</p>\n<p>two</p>\n</li>\n</ol>\n</blockquote>\n</blockquote>\n",
+    );
+    test_example(
+        9991,
+        "![a & b < c](url)\n",
+        "<p><img src=\"url\" alt=\"a &amp; b &lt; c\" /></p>\n",
+    );
 }

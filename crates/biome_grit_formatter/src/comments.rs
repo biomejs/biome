@@ -1,6 +1,7 @@
 use crate::GritFormatContext;
+use biome_diagnostics_categories::category;
 
-use biome_formatter::comments::CommentKind;
+use biome_formatter::comments::{CommentKind, CommentPlacement, DecoratedComment};
 use biome_formatter::{
     FormatResult, FormatRule,
     comments::{CommentStyle, Comments, SourceComment, is_doc_comment},
@@ -8,8 +9,9 @@ use biome_formatter::{
     prelude::{Formatter, align, format_once, hard_line_break, text},
     write,
 };
-use biome_grit_syntax::GritLanguage;
-use biome_rowan::TextLen;
+use biome_grit_syntax::{GritLanguage, GritRoot};
+use biome_rowan::{AstNode, TextLen, TextSize};
+use biome_suppression::{SuppressionKind, parse_suppression_comment};
 
 pub type GritComments = Comments<GritLanguage>;
 
@@ -19,8 +21,20 @@ pub struct GritCommentStyle;
 impl CommentStyle for GritCommentStyle {
     type Language = GritLanguage;
 
-    fn is_suppression(_text: &str) -> bool {
-        false
+    fn is_suppression(text: &str) -> bool {
+        parse_suppression_comment(text)
+            .filter_map(Result::ok)
+            .filter(|suppression| suppression.kind == SuppressionKind::Classic)
+            .flat_map(|suppression| suppression.categories)
+            .any(|(key, ..)| key == category!("format"))
+    }
+
+    fn is_global_suppression(text: &str) -> bool {
+        parse_suppression_comment(text)
+            .filter_map(Result::ok)
+            .filter(|suppression| suppression.kind == SuppressionKind::All)
+            .flat_map(|suppression| suppression.categories)
+            .any(|(key, ..)| key == category!("format"))
     }
 
     fn get_comment_kind(
@@ -31,9 +45,9 @@ impl CommentStyle for GritCommentStyle {
 
     fn place_comment(
         &self,
-        comment: biome_formatter::comments::DecoratedComment<Self::Language>,
-    ) -> biome_formatter::comments::CommentPlacement<Self::Language> {
-        biome_formatter::comments::CommentPlacement::Default(comment)
+        comment: DecoratedComment<Self::Language>,
+    ) -> CommentPlacement<Self::Language> {
+        handle_global_suppression(comment)
     }
 }
 
@@ -79,4 +93,27 @@ impl FormatRule<SourceComment<GritLanguage>> for FormatGritLeadingComment {
             write!(f, [comment.piece().as_piece()])
         }
     }
+}
+
+fn handle_global_suppression(
+    comment: DecoratedComment<GritLanguage>,
+) -> CommentPlacement<GritLanguage> {
+    let node = comment.enclosing_node();
+
+    if node.text_range_with_trivia().start() == TextSize::from(0) {
+        let has_global_suppression = node.first_leading_trivia().is_some_and(|trivia| {
+            trivia
+                .pieces()
+                .filter(|piece| piece.is_comments())
+                .any(|piece| GritCommentStyle::is_global_suppression(piece.text()))
+        });
+        let root = node.ancestors().find_map(GritRoot::cast);
+        if let Some(root) = root
+            && has_global_suppression
+        {
+            return CommentPlacement::leading(root.syntax().clone(), comment);
+        }
+    }
+
+    CommentPlacement::Default(comment)
 }

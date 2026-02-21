@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/declaration/bracketed-values.scss
+---
+
+# Input
+
+```scss
+$brackets:[a,b,c];
+$lines:[full-start  ,  main-start,main-end
+, full-end];
+
+.grid{grid-column:[col-start]/[col-end];}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Trailing newline: true
+-----
+
+```scss
+$brackets: [a, b, c];
+$lines: [full-start, main-start, main-end, full-end];
+
+.grid {
+	grid-column: [col-start] / [col-end];
+}
+
+```

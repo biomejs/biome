@@ -1,0 +1,62 @@
+@function no-dash-name() {}
+@function --missing-param-dashes(param-with-default: rem) {}
+@function --missing-param-dashes(param-with-type type(*)) {}
+@function --bogus-param-type(--param ###: rem) {}
+@function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
+
+/* Missing function name */
+@function () {}
+
+/* Missing parentheses */
+@function --test {}
+@function --test( {}
+@function --test --param) {}
+
+/* Missing/invalid body */
+@function --test()
+@function --test();
+
+/* Empty default value (colon with nothing after) */
+@function --empty-default(--param:) {}
+@function --empty-default2(--param: , --other) {}
+
+/* Invalid returns clause */
+@function --bad-returns() returns {}
+@function --bad-returns2() returns ### {}
+@function --bad-returns3() returns <> {}
+
+/* Parameter list issues */
+@function --double-comma(--a,, --b) {}
+@function --leading-comma(, --param) {}
+@function --just-comma(,) {}
+@function --just-colon(:) {}
+
+/* Invalid parameter names */
+@function --numeric-param(123) {}
+@function --at-param(@foo) {}
+
+/* Type after default value (wrong order) */
+@function --wrong-order(--param: 10px <length>) {}
+
+/* Unclosed type syntax */
+@function --unclosed-type(--param <string) {}
+@function --empty-type(--param <>) {}
+
+/* Multiple colons/defaults */
+@function --double-default(--param: 1: 2) {}
+
+/* Misspelled returns */
+@function --misspelled() return <number> {}
+
+/* Extra tokens after valid parts */
+@function --extra-after-type(--param <string> garbage: 1) {}
+@function --extra-after-returns() returns <number> extra {}
+
+/* Nested @function (if not allowed) */
+@function --outer() {
+  @function --inner() {}
+}
+
+/* Special characters in names */
+@function --has spaces() {}
+@function --has@at() {}

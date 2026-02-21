@@ -13,7 +13,7 @@ pub(crate) fn disabled_interpolation(p: &HtmlParser, range: TextRange) -> ParseD
     p.err_builder("Text expressions aren't supported.", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.interpolation"</Emphasis>" option."))
 }
 
-pub(crate) fn disabled_svelte_prop(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+pub(crate) fn disabled_svelte(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("This looks like Svelte syntax, but this is not a Svelte file.", range).with_hint(markup!("Remove it or rename this file to have the "<Emphasis>".svelte"</Emphasis>" file extension."))
 }
 
@@ -105,6 +105,10 @@ pub(crate) fn expected_svelte_closing_block(p: &HtmlParser, range: TextRange) ->
     p.err_builder("Expected a closing block, instead found none.", range)
 }
 
+pub(crate) fn expected_name(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expect_one_of(&["name", "closing block"], range).into_diagnostic(p)
+}
+
 pub(crate) fn disabled_vue(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file?", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.vue"</Emphasis>" option."))
 }
@@ -116,4 +120,17 @@ pub(crate) fn expected_vue_directive_argument(p: &HtmlParser, range: TextRange) 
 pub(crate) fn expected_expression(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Expected an expression, instead none was found.", range)
         .into_diagnostic(p)
+}
+
+pub(crate) fn expected_svelte_property(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected a property, instead none was found.", range)
+        .into_diagnostic(p)
+}
+
+pub(crate) fn expected_valid_directive(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected a valid directive, which should be followed by ':' and a value.",
+        range,
+    )
+    .into_diagnostic(p)
 }

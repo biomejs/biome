@@ -11,7 +11,10 @@ use crate::syntax::at_rule::error::{
 use crate::syntax::at_rule::feature::{expected_any_query_feature, parse_any_query_feature};
 use crate::syntax::block::parse_conditional_block;
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
-use crate::syntax::{is_at_declaration, parse_custom_identifier, parse_declaration};
+use crate::syntax::value::function::is_nth_at_function;
+use crate::syntax::{
+    is_at_declaration, parse_any_value, parse_custom_identifier, parse_declaration,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecovery;
@@ -199,6 +202,20 @@ fn is_at_container_not_query(p: &mut CssParser) -> bool {
     p.at(T![not])
 }
 
+#[inline]
+fn is_at_container_scroll_state_query(p: &mut CssParser) -> bool {
+    is_nth_at_function(p, 0) && p.cur_text().eq_ignore_ascii_case("scroll-state")
+}
+
+#[inline]
+fn parse_container_scroll_state_query(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_container_scroll_state_query(p) {
+        return Absent;
+    }
+
+    parse_any_value(p)
+}
+
 /// Parses a negated container query using the `not(...)` syntax.
 ///
 /// # Example
@@ -233,6 +250,8 @@ pub(crate) fn parse_any_container_query_in_parens(p: &mut CssParser) -> ParsedSy
         parse_container_query_in_parens(p)
     } else if is_at_container_size_feature_in_parens(p) {
         parse_container_size_feature_in_parens(p)
+    } else if is_at_container_scroll_state_query(p) {
+        parse_container_scroll_state_query(p)
     } else {
         Absent
     }
@@ -240,7 +259,10 @@ pub(crate) fn parse_any_container_query_in_parens(p: &mut CssParser) -> ParsedSy
 
 #[inline]
 fn is_at_container_query_in_parens(p: &mut CssParser) -> bool {
-    p.at(T!['(']) && (p.nth_at(1, T![not]) || p.nth_at(1, T!['(']))
+    p.at(T!['('])
+        && (p.nth_at(1, T![not])
+            || p.nth_at(1, T!['('])
+            || (p.nth_at(1, T![ident]) && p.nth_at(2, T!['('])))
 }
 
 /// Parses a parenthesized container query.

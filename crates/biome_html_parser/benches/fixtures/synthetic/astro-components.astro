@@ -1,0 +1,249 @@
+<!-- Astro Components Benchmark - Stresses PascalCase tags, namespaced components, and directives -->
+
+<!-- Standard HTML elements mixed with components -->
+<div class="container">
+  <Header title="My Site" />
+  
+  <!-- PascalCase component repetition -->
+  <Card title="Card 1" description="First card content here" />
+  <Card title="Card 2" description="Second card content here" />
+  <Card title="Card 3" description="Third card content here" />
+  <Card title="Card 4" description="Fourth card content here" />
+  <Card title="Card 5" description="Fifth card content here" />
+  
+  <!-- Components with client directives -->
+  <InteractiveButton client:load />
+  <InteractiveButton client:idle />
+  <InteractiveButton client:visible />
+  <InteractiveButton client:media="(max-width: 600px)" />
+  <InteractiveButton client:only="react" />
+  
+  <!-- Namespaced components -->
+  <UI.Button variant="primary" size="large" />
+  <UI.Button variant="secondary" size="medium" />
+  <UI.Button variant="ghost" size="small" />
+  <UI.Card elevation={1}>
+    <UI.CardHeader title="Header" />
+    <UI.CardBody>
+      <p>Card body content</p>
+    </UI.CardBody>
+    <UI.CardFooter>
+      <UI.Button>Action</UI.Button>
+    </UI.CardFooter>
+  </UI.Card>
+  
+  <!-- Deeply nested namespaced components -->
+  <Layout.Grid>
+    <Layout.Row>
+      <Layout.Col span={6}>
+        <Components.Card />
+      </Layout.Col>
+      <Layout.Col span={6}>
+        <Components.Card />
+      </Layout.Col>
+    </Layout.Row>
+    <Layout.Row>
+      <Layout.Col span={4}>
+        <Components.Badge />
+      </Layout.Col>
+      <Layout.Col span={4}>
+        <Components.Badge />
+      </Layout.Col>
+      <Layout.Col span={4}>
+        <Components.Badge />
+      </Layout.Col>
+    </Layout.Row>
+  </Layout.Grid>
+  
+  <!-- Complex client directive combinations -->
+  <ReactComponent client:load client:delay={200} />
+  <VueComponent client:idle client:delay={100} />
+  <SvelteComponent client:visible client:media="(min-width: 768px)" />
+  <SolidComponent client:only="solid-js" />
+  <PreactComponent client:load client:idle />
+  <AlpineComponent client:load />
+  <LitComponent client:visible />
+  
+  <!-- set:* directives for styling -->
+  <div set:html="<p>Raw HTML content</p>" />
+  <span set:text="Plain text content" />
+  <CustomElement set:html={htmlString} />
+  <AnotherElement set:text={textContent} />
+  
+  <!-- Multiple directives on single element -->
+  <ComplexComponent 
+    client:load 
+    client:delay={500}
+    data-testid="complex"
+    class:list={['class1', 'class2']}
+  />
+  
+  <!-- Island architecture pattern -->
+  <IslandWrapper>
+    <SearchWidget client:idle />
+    <CartWidget client:visible />
+    <UserMenu client:load />
+    <Notifications client:visible />
+    <ChatWidget client:idle />
+  </IslandWrapper>
+  
+  <!-- More PascalCase components with various props -->
+  <HeroSection 
+    title="Welcome"
+    subtitle="To our amazing site"
+    cta={{ text: "Get Started", href: "/start" }}
+  />
+  
+  <FeatureGrid>
+    <FeatureCard icon="star" title="Feature 1" />
+    <FeatureCard icon="heart" title="Feature 2" />
+    <FeatureCard icon="bolt" title="Feature 3" />
+    <FeatureCard icon="shield" title="Feature 4" />
+    <FeatureCard icon="rocket" title="Feature 5" />
+    <FeatureCard icon="gem" title="Feature 6" />
+  </FeatureGrid>
+  
+  <!-- Form components with client directives -->
+  <Form.Container>
+    <Form.Input type="text" name="username" client:load />
+    <Form.Input type="email" name="email" client:load />
+    <Form.Textarea name="message" rows={5} client:visible />
+    <Form.Select name="country" client:idle>
+      <option value="us">United States</option>
+      <option value="uk">United Kingdom</option>
+      <option value="ca">Canada</option>
+    </Form.Select>
+    <Form.Checkbox name="subscribe" client:load />
+    <Form.Button type="submit" variant="primary" client:load />
+  </Form.Container>
+  
+  <!-- Navigation components -->
+  <Navigation.Bar>
+    <Navigation.Logo src="/logo.svg" />
+    <Navigation.Links>
+      <Navigation.Link href="/" client:load>Home</Navigation.Link>
+      <Navigation.Link href="/about" client:load>About</Navigation.Link>
+      <Navigation.Link href="/contact" client:load>Contact</Navigation.Link>
+    </Navigation.Links>
+    <Navigation.Actions>
+      <SearchButton client:idle />
+      <ThemeToggle client:load />
+    </Navigation.Actions>
+  </Navigation.Bar>
+  
+  <!-- Media components -->
+  <Media.Player src="/video.mp4" client:visible>
+    <Media.Controls client:load />
+    <Media.Track src="/captions.vtt" kind="captions" />
+  </Media.Player>
+  
+  <Media.Gallery>
+    <Media.Image src="/img1.jpg" alt="Image 1" client:visible />
+    <Media.Image src="/img2.jpg" alt="Image 2" client:visible />
+    <Media.Image src="/img3.jpg" alt="Image 3" client:visible />
+    <Media.Image src="/img4.jpg" alt="Image 4" client:visible />
+  </Media.Gallery>
+  
+  <!-- E-commerce components -->
+  <Shop.ProductCard 
+    id="prod-1"
+    name="Product Name"
+    price={29.99}
+    image="/product.jpg"
+    client:visible
+  />
+  
+  <Shop.Cart client:load>
+    <Shop.CartItem 
+      productId="prod-1"
+      quantity={2}
+      client:visible
+    />
+    <Shop.CartItem 
+      productId="prod-2"
+      quantity={1}
+      client:visible
+    />
+    <Shop.CartSummary client:load />
+  </Shop.Cart>
+  
+  <!-- Modal and overlay components -->
+  <Overlay.Modal client:load>
+    <Overlay.ModalHeader title="Modal Title" />
+    <Overlay.ModalBody>
+      <p>Modal content goes here</p>
+    </Overlay.ModalBody>
+    <Overlay.ModalFooter>
+      <Overlay.Button action="close">Cancel</Overlay.Button>
+      <Overlay.Button action="confirm" variant="primary">Confirm</Overlay.Button>
+    </Overlay.ModalFooter>
+  </Overlay.Modal>
+  
+  <Overlay.Tooltip content="Helpful tip" client:visible>
+    <Overlay.TooltipTrigger>Hover me</Overlay.TooltipTrigger>
+  </Overlay.Tooltip>
+  
+  <!-- Data visualization components -->
+  <Charts.LineChart data={chartData} client:visible />
+  <Charts.BarChart data={barData} client:visible />
+  <Charts.PieChart data={pieData} client:visible />
+  <Charts.ScatterPlot data={scatterData} client:idle />
+  
+  <!-- Table components -->
+  <Data.Table client:load>
+    <Data.TableHead>
+      <Data.TableRow>
+        <Data.TableHeader>Name</Data.TableHeader>
+        <Data.TableHeader>Email</Data.TableHeader>
+        <Data.TableHeader>Status</Data.TableHeader>
+      </Data.TableRow>
+    </Data.TableHead>
+    <Data.TableBody>
+      <Data.TableRow>
+        <Data.TableCell>John Doe</Data.TableCell>
+        <Data.TableCell>john@example.com</Data.TableCell>
+        <Data.TableCell>Active</Data.TableCell>
+      </Data.TableRow>
+    </Data.TableBody>
+  </Data.Table>
+  
+  <!-- Tab and accordion components -->
+  <UI.Tabs client:load>
+    <UI.TabList>
+      <UI.Tab>Tab 1</UI.Tab>
+      <UI.Tab>Tab 2</UI.Tab>
+      <UI.Tab>Tab 3</UI.Tab>
+    </UI.TabList>
+    <UI.TabPanels>
+      <UI.TabPanel>Content 1</UI.TabPanel>
+      <UI.TabPanel>Content 2</UI.TabPanel>
+      <UI.TabPanel>Content 3</UI.TabPanel>
+    </UI.TabPanels>
+  </UI.Tabs>
+  
+  <UI.Accordion client:load>
+    <UI.AccordionItem>
+      <UI.AccordionTrigger>Section 1</UI.AccordionTrigger>
+      <UI.AccordionContent>Content for section 1</UI.AccordionContent>
+    </UI.AccordionItem>
+    <UI.AccordionItem>
+      <UI.AccordionTrigger>Section 2</UI.AccordionTrigger>
+      <UI.AccordionContent>Content for section 2</UI.AccordionContent>
+    </UI.AccordionItem>
+  </UI.Accordion>
+  
+  <!-- Footer components -->
+  <Footer.Wrapper>
+    <Footer.Links>
+      <Footer.Link href="/privacy">Privacy</Footer.Link>
+      <Footer.Link href="/terms">Terms</Footer.Link>
+      <Footer.Link href="/sitemap">Sitemap</Footer.Link>
+    </Footer.Links>
+    <Footer.Social>
+      <Footer.SocialLink platform="twitter" href="https://twitter.com" client:load />
+      <Footer.SocialLink platform="github" href="https://github.com" client:load />
+      <Footer.SocialLink platform="discord" href="https://discord.com" client:load />
+    </Footer.Social>
+    <Footer.Copyright year={2024} />
+  </Footer.Wrapper>
+</div>

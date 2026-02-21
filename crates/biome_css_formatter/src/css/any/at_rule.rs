@@ -17,6 +17,7 @@ impl FormatRule<AnyCssAtRule> for FormatAnyCssAtRule {
             AnyCssAtRule::CssFontFaceAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssFontFeatureValuesAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssFontPaletteValuesAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssFunctionAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssImportAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssKeyframesAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssLayerAtRule(node) => node.format().fmt(f),

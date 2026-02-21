@@ -1,8 +1,8 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: attributes/multiline/break.html
-snapshot_kind: text
 ---
+
 # Input
 
 ```html
@@ -27,10 +27,12 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```html
 <div foo="bar" disabled bar="foo"></div>
+
 ```
 
 ## Output 1
@@ -45,6 +47,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```html
@@ -53,4 +56,5 @@ Self close void elements: never
 	disabled
 	bar="foo"
 ></div>
+
 ```

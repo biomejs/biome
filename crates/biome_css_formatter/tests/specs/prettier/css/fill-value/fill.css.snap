@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/fill-value/fill.css
 ---
+
 # Input
 
 ```css
@@ -18,7 +19,7 @@ div {
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,11 +1,6 @@
+@@ -1,11 +1,4 @@
  div {
 -  border-left: 1px solid
 -    mix($warningBackgroundColors, $warningBorderColors, 50%);
@@ -30,9 +31,7 @@ div {
 -    Arial,
 -    sans-serif;
 +  border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
-+  $
-+  fontFamily:
-+    "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
++  $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
  }
 ```
 
@@ -41,9 +40,7 @@ div {
 ```css
 div {
   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
-  $
-  fontFamily:
-    "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 ```
 
@@ -51,58 +48,40 @@ div {
 ```
 fill.css:2:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     1 │ div {
   > 2 │   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
-      │                              ^
+      │                              ^^^^^^^^^^^^^^^^^^^^^^^^
     3 │   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
     4 │ }
   
-fill.css:2:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `warningBackgroundColors`
-  
-    1 │ div {
-  > 2 │   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
-      │                               ^^^^^^^^^^^^^^^^^^^^^^^
-    3 │   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
-    4 │ }
-  
-  i Remove warningBackgroundColors
+  i SCSS only syntax
   
 fill.css:2:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     1 │ div {
   > 2 │   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
-      │                                                        ^
+      │                                                        ^^^^^^^^^^^^^^^^^^^^
     3 │   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
     4 │ }
   
-fill.css:2:57 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `warningBorderColors`
-  
-    1 │ div {
-  > 2 │   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
-      │                                                         ^^^^^^^^^^^^^^^^^^^
-    3 │   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
-    4 │ }
-  
-  i Remove warningBorderColors
+  i SCSS only syntax
   
 fill.css:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × SCSS variable declarations are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     1 │ div {
     2 │   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
   > 3 │   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
-      │   ^
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ }
     5 │ 
+  
+  i SCSS only syntax
   
 
 ```
@@ -110,4 +89,5 @@ fill.css:3:3 parse ━━━━━━━━━━━━━━━━━━━━�
 # Lines exceeding max width of 80 characters
 ```
     2:   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
+    3:   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
 ```

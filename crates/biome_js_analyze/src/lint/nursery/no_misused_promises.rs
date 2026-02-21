@@ -88,7 +88,7 @@ declare_lint_rule! {
         recommended: true,
         sources: &[RuleSource::EslintTypeScript("no-misused-promises").same()],
         fix_kind: FixKind::Unsafe,
-        domains: &[RuleDomain::Project],
+        domains: &[RuleDomain::Types],
     }
 }
 

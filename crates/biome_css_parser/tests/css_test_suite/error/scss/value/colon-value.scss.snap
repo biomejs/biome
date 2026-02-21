@@ -1,0 +1,90 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+$sep: :;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssBogus {
+            items: [
+                ScssIdentifier {
+                    dollar_token: DOLLAR@0..1 "$" [] [],
+                    name: CssIdentifier {
+                        value_token: IDENT@1..4 "sep" [] [],
+                    },
+                },
+                COLON@4..6 ":" [] [Whitespace(" ")],
+                CssBogus {
+                    items: [
+                        CssBogusPropertyValue {
+                            items: [
+                                COLON@6..7 ":" [] [],
+                            ],
+                        },
+                    ],
+                },
+                ScssVariableModifierList [],
+                SEMICOLON@7..8 ";" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@8..9 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..9
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..8
+    0: CSS_BOGUS@0..8
+      0: SCSS_IDENTIFIER@0..4
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..4
+          0: IDENT@1..4 "sep" [] []
+      1: COLON@4..6 ":" [] [Whitespace(" ")]
+      2: CSS_BOGUS@6..7
+        0: CSS_BOGUS_PROPERTY_VALUE@6..7
+          0: COLON@6..7 ":" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@7..7
+      4: SEMICOLON@7..8 ";" [] []
+  2: EOF@8..9 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+colon-value.scss:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ $sep: :;
+      │       ^
+    2 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+```

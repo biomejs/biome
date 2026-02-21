@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/string/quoteSingle/properties_quotes.js
 ---
+
 # Input
 
 ```js
@@ -74,6 +75,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -121,6 +123,7 @@ const x = {
 	"¾¾¾¾": "test1",
 	"①": "test2",
 };
+
 ```
 
 ## Output 1
@@ -141,6 +144,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -188,4 +192,5 @@ const x = {
 	'¾¾¾¾': 'test1',
 	'①': 'test2',
 };
+
 ```

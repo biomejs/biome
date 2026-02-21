@@ -20,7 +20,8 @@ pub struct RuleContext<'a, R: Rule> {
     preferred_jsx_quote: PreferredQuote,
     preferred_indentation: PreferredIndentation,
     jsx_runtime: Option<JsxRuntime>,
-    css_modules: bool,
+    jsx_factory: Option<&'a str>,
+    jsx_fragment_factory: Option<&'a str>,
 }
 
 impl<'a, R> RuleContext<'a, R>
@@ -39,7 +40,8 @@ where
         preferred_jsx_quote: PreferredQuote,
         preferred_indentation: PreferredIndentation,
         jsx_runtime: Option<JsxRuntime>,
-        css_modules: bool,
+        jsx_factory: Option<&'a str>,
+        jsx_fragment_factory: Option<&'a str>,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
@@ -54,7 +56,8 @@ where
             preferred_jsx_quote,
             preferred_indentation,
             jsx_runtime,
-            css_modules,
+            jsx_factory,
+            jsx_fragment_factory,
         })
     }
 
@@ -155,6 +158,16 @@ where
         self.jsx_runtime.expect("jsx_runtime should be provided")
     }
 
+    /// Returns the JSX factory identifier (e.g., "h" or "React")
+    pub fn jsx_factory(&self) -> Option<&str> {
+        self.jsx_factory
+    }
+
+    /// Returns the JSX fragment factory identifier (e.g., "Fragment")
+    pub fn jsx_fragment_factory(&self) -> Option<&str> {
+        self.jsx_fragment_factory
+    }
+
     /// Checks whether the provided text belongs to globals
     pub fn is_global(&self, text: &str) -> bool {
         self.globals.iter().any(|global| global.as_ref() == text)
@@ -185,10 +198,6 @@ where
     /// Returns the preferred indentation style that should be when providing code actions.
     pub fn preferred_indentation(&self) -> PreferredIndentation {
         self.preferred_indentation
-    }
-
-    pub fn is_css_modules(&self) -> bool {
-        self.css_modules
     }
 
     /// Attempts to retrieve a service from the current context

@@ -207,6 +207,9 @@ pub struct JsModuleInfoInner {
 
     /// Diagnostics emitted during the resolution of the module
     pub(crate) diagnostics: Vec<ModuleDiagnostic>,
+
+    /// Whether type inference was enabled when this module info was created
+    pub(crate) infer_types: bool,
 }
 
 #[derive(Debug, Default)]

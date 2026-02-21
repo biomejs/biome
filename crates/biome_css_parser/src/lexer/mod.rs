@@ -3,7 +3,7 @@
 mod tests;
 
 use crate::CssParserOptions;
-use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextSize};
+use biome_css_syntax::{CssFileSource, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -76,6 +76,8 @@ pub(crate) struct CssLexer<'src> {
 
     /// `true` if there has been a line break between the last non-trivia token and the next non-trivia token.
     after_newline: bool,
+    /// `true` if there has been trivia between the last non-trivia token and the next non-trivia token.
+    after_whitespace: bool,
 
     /// If the source starts with a Unicode BOM, this is the number of bytes for that token.
     unicode_bom_length: usize,
@@ -94,6 +96,8 @@ pub(crate) struct CssLexer<'src> {
     diagnostics: Vec<ParseDiagnostic>,
 
     options: CssParserOptions,
+
+    source_type: CssFileSource,
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -143,10 +147,15 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
 
         self.current_flags
             .set(TokenFlags::PRECEDING_LINE_BREAK, self.after_newline);
+        self.current_flags
+            .set(TokenFlags::PRECEDING_WHITESPACE, self.after_whitespace);
         self.current_kind = kind;
 
         if !kind.is_trivia() {
             self.after_newline = false;
+            self.after_whitespace = false;
+        } else if kind == Self::WHITESPACE {
+            self.after_whitespace = true;
         }
 
         kind
@@ -167,6 +176,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
             current_flags,
             current_kind,
             after_line_break,
+            after_whitespace,
             unicode_bom_length,
             diagnostics_pos,
         } = checkpoint;
@@ -178,6 +188,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         self.current_start = current_start;
         self.current_flags = current_flags;
         self.after_newline = after_line_break;
+        self.after_whitespace = after_whitespace;
         self.unicode_bom_length = unicode_bom_length;
         self.diagnostics.truncate(diagnostics_pos as usize);
     }
@@ -209,6 +220,7 @@ impl<'src> CssLexer<'src> {
         Self {
             source,
             after_newline: false,
+            after_whitespace: false,
             unicode_bom_length: 0,
             current_kind: TOMBSTONE,
             current_start: TextSize::from(0),
@@ -216,11 +228,19 @@ impl<'src> CssLexer<'src> {
             position: 0,
             diagnostics: vec![],
             options: CssParserOptions::default(),
+            source_type: CssFileSource::default(),
         }
     }
 
     pub(crate) fn with_options(self, options: CssParserOptions) -> Self {
         Self { options, ..self }
+    }
+
+    pub(crate) fn with_source_type(self, source_type: CssFileSource) -> Self {
+        Self {
+            source_type,
+            ..self
+        }
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
@@ -327,6 +347,7 @@ impl<'src> CssLexer<'src> {
                 self.advance(1);
                 self.consume_byte(T!["$="])
             }
+            DOL => self.consume_byte(T![$]),
             UNI if self.options.is_metavariable_enabled() && self.is_metavariable_start() => {
                 self.consume_metavariable(GRIT_METAVARIABLE)
             }
@@ -749,6 +770,8 @@ impl<'src> CssLexer<'src> {
             b"dir" => DIR_KW,
             b"global" => GLOBAL_KW,
             b"local" => LOCAL_KW,
+            b"slotted" => SLOTTED_KW,
+            b"deep" => DEEP_KW,
             b"-moz-any" => ANY_KW,
             b"-webkit-any" => ANY_KW,
             b"past" => PAST_KW,
@@ -915,6 +938,10 @@ impl<'src> CssLexer<'src> {
             b"if" => IF_KW,
             b"else" => ELSE_KW,
             b"url" => URL_KW,
+            b"attr" => ATTR_KW,
+            b"type" => TYPE_KW,
+            b"raw-string" => RAW_STRING_KW,
+            b"number" => NUMBER_KW,
             b"src" => SRC_KW,
             b"scope" => SCOPE_KW,
             b"import" => IMPORT_KW,
@@ -931,6 +958,8 @@ impl<'src> CssLexer<'src> {
             b"composes" => COMPOSES_KW,
             b"position-try" => POSITION_TRY_KW,
             b"view-transition" => VIEW_TRANSITION_KW,
+            b"function" => FUNCTION_KW,
+            b"returns" => RETURNS_KW,
             // Tailwind CSS 4.0 keywords
             b"theme" => THEME_KW,
             b"utility" => UTILITY_KW,
@@ -1091,17 +1120,29 @@ impl<'src> CssLexer<'src> {
                 self.advance(2);
 
                 let mut has_newline = false;
+                let is_scss = self.source_type.is_scss();
+                let mut depth = 1u32;
 
                 while let Some(chr) = self.current_byte() {
                     match chr {
+                        b'/' if is_scss && self.peek_byte() == Some(b'*') => {
+                            self.advance(2);
+                            depth = depth.saturating_add(1);
+                        }
                         b'*' if self.peek_byte() == Some(b'/') => {
                             self.advance(2);
 
-                            if has_newline {
-                                self.after_newline = true;
-                                return MULTILINE_COMMENT;
-                            } else {
-                                return COMMENT;
+                            if is_scss {
+                                depth = depth.saturating_sub(1);
+                            }
+
+                            if !is_scss || depth == 0 {
+                                if has_newline {
+                                    self.after_newline = true;
+                                    return MULTILINE_COMMENT;
+                                } else {
+                                    return COMMENT;
+                                }
                             }
                         }
                         b'\n' | b'\r' => {
@@ -1127,7 +1168,7 @@ impl<'src> CssLexer<'src> {
                     COMMENT
                 }
             }
-            Some(b'/') if self.options.allow_wrong_line_comments => {
+            Some(b'/') if self.options.allow_wrong_line_comments || self.source_type.is_scss() => {
                 self.advance(2);
 
                 while let Some(chr) = self.current_byte() {
@@ -1406,6 +1447,7 @@ impl<'src> LexerWithCheckpoint<'src> for CssLexer<'src> {
             current_flags: self.current_flags,
             current_kind: self.current_kind,
             after_line_break: self.after_newline,
+            after_whitespace: self.after_whitespace,
             unicode_bom_length: self.unicode_bom_length,
             diagnostics_pos: self.diagnostics.len() as u32,
         }

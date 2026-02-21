@@ -126,5 +126,3 @@ class C { method() { var x; } }
 ```cjs
 class C { static { var x; } }
 ```
-
-

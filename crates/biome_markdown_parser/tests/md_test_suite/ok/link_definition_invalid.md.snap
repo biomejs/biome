@@ -1,0 +1,332 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+These should NOT be parsed as link reference definitions.
+They should fall back to paragraph parsing.
+
+Unterminated angle bracket destination:
+[unterminated-angle]: <http://example.com
+
+Trailing text after destination:
+[trailing-text]: /url trailing garbage
+
+Trailing text after title:
+[trailing-after-title]: /url "title" extra
+
+Empty label is invalid:
+[]: /url
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..57 "These should NOT be parsed as link reference definitions." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@57..58 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@58..101 "They should fall back to paragraph parsing." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@101..102 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@102..103 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@103..142 "Unterminated angle bracket destination:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@142..143 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@143..144 "[" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@144..156 "unterminated" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@156..157 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@157..162 "angle" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@162..163 "]" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@163..164 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@164..165 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@165..166 "<" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@166..184 "http://example.com" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@184..185 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@185..186 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@186..218 "Trailing text after destination:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@218..219 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@219..220 "[" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@220..228 "trailing" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@228..229 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@229..233 "text" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@233..234 "]" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@234..235 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@235..257 " /url trailing garbage" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@257..258 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@258..259 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@259..285 "Trailing text after title:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@285..286 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@286..287 "[" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@287..295 "trailing" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@295..296 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@296..301 "after" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@301..302 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@302..307 "title" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@307..308 "]" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@308..309 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@309..328 " /url \"title\" extra" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@328..329 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@329..330 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@330..353 "Empty label is invalid:" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@353..354 "\n" [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@354..355 "[" [] [],
+                    text: MdInlineItemList [],
+                    r_brack_token: R_BRACK@355..356 "]" [] [],
+                    label: missing (optional),
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@356..357 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@357..362 " /url" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@362..363 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@363..363 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..363
+  0: (empty)
+  1: MD_BLOCK_LIST@0..363
+    0: MD_PARAGRAPH@0..102
+      0: MD_INLINE_ITEM_LIST@0..102
+        0: MD_TEXTUAL@0..57
+          0: MD_TEXTUAL_LITERAL@0..57 "These should NOT be parsed as link reference definitions." [] []
+        1: MD_TEXTUAL@57..58
+          0: MD_TEXTUAL_LITERAL@57..58 "\n" [] []
+        2: MD_TEXTUAL@58..101
+          0: MD_TEXTUAL_LITERAL@58..101 "They should fall back to paragraph parsing." [] []
+        3: MD_TEXTUAL@101..102
+          0: MD_TEXTUAL_LITERAL@101..102 "\n" [] []
+      1: (empty)
+    1: MD_NEWLINE@102..103
+      0: NEWLINE@102..103 "\n" [] []
+    2: MD_PARAGRAPH@103..185
+      0: MD_INLINE_ITEM_LIST@103..185
+        0: MD_TEXTUAL@103..142
+          0: MD_TEXTUAL_LITERAL@103..142 "Unterminated angle bracket destination:" [] []
+        1: MD_TEXTUAL@142..143
+          0: MD_TEXTUAL_LITERAL@142..143 "\n" [] []
+        2: MD_TEXTUAL@143..144
+          0: MD_TEXTUAL_LITERAL@143..144 "[" [] []
+        3: MD_TEXTUAL@144..156
+          0: MD_TEXTUAL_LITERAL@144..156 "unterminated" [] []
+        4: MD_TEXTUAL@156..157
+          0: MD_TEXTUAL_LITERAL@156..157 "-" [] []
+        5: MD_TEXTUAL@157..162
+          0: MD_TEXTUAL_LITERAL@157..162 "angle" [] []
+        6: MD_TEXTUAL@162..163
+          0: MD_TEXTUAL_LITERAL@162..163 "]" [] []
+        7: MD_TEXTUAL@163..164
+          0: MD_TEXTUAL_LITERAL@163..164 ":" [] []
+        8: MD_TEXTUAL@164..165
+          0: MD_TEXTUAL_LITERAL@164..165 " " [] []
+        9: MD_TEXTUAL@165..166
+          0: MD_TEXTUAL_LITERAL@165..166 "<" [] []
+        10: MD_TEXTUAL@166..184
+          0: MD_TEXTUAL_LITERAL@166..184 "http://example.com" [] []
+        11: MD_TEXTUAL@184..185
+          0: MD_TEXTUAL_LITERAL@184..185 "\n" [] []
+      1: (empty)
+    3: MD_NEWLINE@185..186
+      0: NEWLINE@185..186 "\n" [] []
+    4: MD_PARAGRAPH@186..258
+      0: MD_INLINE_ITEM_LIST@186..258
+        0: MD_TEXTUAL@186..218
+          0: MD_TEXTUAL_LITERAL@186..218 "Trailing text after destination:" [] []
+        1: MD_TEXTUAL@218..219
+          0: MD_TEXTUAL_LITERAL@218..219 "\n" [] []
+        2: MD_TEXTUAL@219..220
+          0: MD_TEXTUAL_LITERAL@219..220 "[" [] []
+        3: MD_TEXTUAL@220..228
+          0: MD_TEXTUAL_LITERAL@220..228 "trailing" [] []
+        4: MD_TEXTUAL@228..229
+          0: MD_TEXTUAL_LITERAL@228..229 "-" [] []
+        5: MD_TEXTUAL@229..233
+          0: MD_TEXTUAL_LITERAL@229..233 "text" [] []
+        6: MD_TEXTUAL@233..234
+          0: MD_TEXTUAL_LITERAL@233..234 "]" [] []
+        7: MD_TEXTUAL@234..235
+          0: MD_TEXTUAL_LITERAL@234..235 ":" [] []
+        8: MD_TEXTUAL@235..257
+          0: MD_TEXTUAL_LITERAL@235..257 " /url trailing garbage" [] []
+        9: MD_TEXTUAL@257..258
+          0: MD_TEXTUAL_LITERAL@257..258 "\n" [] []
+      1: (empty)
+    5: MD_NEWLINE@258..259
+      0: NEWLINE@258..259 "\n" [] []
+    6: MD_PARAGRAPH@259..329
+      0: MD_INLINE_ITEM_LIST@259..329
+        0: MD_TEXTUAL@259..285
+          0: MD_TEXTUAL_LITERAL@259..285 "Trailing text after title:" [] []
+        1: MD_TEXTUAL@285..286
+          0: MD_TEXTUAL_LITERAL@285..286 "\n" [] []
+        2: MD_TEXTUAL@286..287
+          0: MD_TEXTUAL_LITERAL@286..287 "[" [] []
+        3: MD_TEXTUAL@287..295
+          0: MD_TEXTUAL_LITERAL@287..295 "trailing" [] []
+        4: MD_TEXTUAL@295..296
+          0: MD_TEXTUAL_LITERAL@295..296 "-" [] []
+        5: MD_TEXTUAL@296..301
+          0: MD_TEXTUAL_LITERAL@296..301 "after" [] []
+        6: MD_TEXTUAL@301..302
+          0: MD_TEXTUAL_LITERAL@301..302 "-" [] []
+        7: MD_TEXTUAL@302..307
+          0: MD_TEXTUAL_LITERAL@302..307 "title" [] []
+        8: MD_TEXTUAL@307..308
+          0: MD_TEXTUAL_LITERAL@307..308 "]" [] []
+        9: MD_TEXTUAL@308..309
+          0: MD_TEXTUAL_LITERAL@308..309 ":" [] []
+        10: MD_TEXTUAL@309..328
+          0: MD_TEXTUAL_LITERAL@309..328 " /url \"title\" extra" [] []
+        11: MD_TEXTUAL@328..329
+          0: MD_TEXTUAL_LITERAL@328..329 "\n" [] []
+      1: (empty)
+    7: MD_NEWLINE@329..330
+      0: NEWLINE@329..330 "\n" [] []
+    8: MD_PARAGRAPH@330..363
+      0: MD_INLINE_ITEM_LIST@330..363
+        0: MD_TEXTUAL@330..353
+          0: MD_TEXTUAL_LITERAL@330..353 "Empty label is invalid:" [] []
+        1: MD_TEXTUAL@353..354
+          0: MD_TEXTUAL_LITERAL@353..354 "\n" [] []
+        2: MD_REFERENCE_LINK@354..356
+          0: L_BRACK@354..355 "[" [] []
+          1: MD_INLINE_ITEM_LIST@355..355
+          2: R_BRACK@355..356 "]" [] []
+          3: (empty)
+        3: MD_TEXTUAL@356..357
+          0: MD_TEXTUAL_LITERAL@356..357 ":" [] []
+        4: MD_TEXTUAL@357..362
+          0: MD_TEXTUAL_LITERAL@357..362 " /url" [] []
+        5: MD_TEXTUAL@362..363
+          0: MD_TEXTUAL_LITERAL@362..363 "\n" [] []
+      1: (empty)
+  2: EOF@363..363 "" [] []
+
+```

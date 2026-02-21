@@ -1,0 +1,99 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```vue
+<template>
+  <AvatarPrimitive.Fallback />
+</template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@10..14 "<" [Newline("\n"), Whitespace("  ")] [],
+                    name: HtmlMemberName {
+                        object: HtmlComponentName {
+                            value_token: HTML_LITERAL@14..29 "AvatarPrimitive" [] [],
+                        },
+                        dot_token: DOT@29..30 "." [] [],
+                        member: HtmlTagName {
+                            value_token: HTML_LITERAL@30..39 "Fallback" [] [Whitespace(" ")],
+                        },
+                    },
+                    attributes: HtmlAttributeList [],
+                    slash_token: SLASH@39..40 "/" [] [],
+                    r_angle_token: R_ANGLE@40..41 ">" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@41..43 "<" [Newline("\n")] [],
+                slash_token: SLASH@43..44 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@44..52 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@52..53 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@53..54 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..54
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..53
+    0: HTML_ELEMENT@0..53
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: HTML_LITERAL@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..41
+        0: HTML_SELF_CLOSING_ELEMENT@10..41
+          0: L_ANGLE@10..14 "<" [Newline("\n"), Whitespace("  ")] []
+          1: HTML_MEMBER_NAME@14..39
+            0: HTML_COMPONENT_NAME@14..29
+              0: HTML_LITERAL@14..29 "AvatarPrimitive" [] []
+            1: DOT@29..30 "." [] []
+            2: HTML_TAG_NAME@30..39
+              0: HTML_LITERAL@30..39 "Fallback" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@39..39
+          3: SLASH@39..40 "/" [] []
+          4: R_ANGLE@40..41 ">" [] []
+      2: HTML_CLOSING_ELEMENT@41..53
+        0: L_ANGLE@41..43 "<" [Newline("\n")] []
+        1: SLASH@43..44 "/" [] []
+        2: HTML_TAG_NAME@44..52
+          0: HTML_LITERAL@44..52 "template" [] []
+        3: R_ANGLE@52..53 ">" [] []
+  4: EOF@53..54 "" [Newline("\n")] []
+
+```

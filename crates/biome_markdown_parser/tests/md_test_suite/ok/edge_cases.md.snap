@@ -1,0 +1,577 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+#NoSpaceHeading
+
+##AlsoNoSpace
+
+foo --- bar is not a thematic break
+
+inline ~~~ tilde is not a fence
+
+    *code with* inline markers
+
+    more code **here** too
+
+#	Tab after hash is valid heading
+
+##	Multiple hashes with tab
+
+Paragraph here
+    # not heading due to 4+ spaces
+    - not list due to 4+ spaces
+    > not quote due to 4+ spaces
+continues as paragraph
+
+Another para
+   # this IS a heading (only 3 spaces)
+
+Para with indented fence
+    ```
+    not a code fence
+    ```
+still the same paragraph
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..1 "#" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@1..15 "NoSpaceHeading" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@15..16 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@16..17 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@17..19 "##" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@19..30 "AlsoNoSpace" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@31..32 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@32..36 "foo " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@36..37 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@37..38 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@38..39 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@39..67 " bar is not a thematic break" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@67..68 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@68..69 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@69..76 "inline " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@76..79 "~~~" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@79..100 " tilde is not a fence" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@100..101 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@101..102 "\n" [] [],
+        },
+        MdIndentCodeBlock {
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@102..107 "*" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@107..116 "code with" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@116..117 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@117..132 " inline markers" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@132..133 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@133..134 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@134..148 "more code " [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@148..150 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@150..154 "here" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@154..156 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@156..160 " too" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@160..161 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@161..162 "\n" [] [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@162..163 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@163..195 "\tTab after hash is valid heading" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@195..196 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@196..197 "\n" [] [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@197..199 "##" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@199..224 "\tMultiple hashes with tab" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@224..225 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@225..226 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@226..240 "Paragraph here" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@240..241 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@241..246 "#" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@246..267 " not heading due to 4" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@267..268 "+" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@268..275 " spaces" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@275..276 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@276..281 "-" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@281..299 " not list due to 4" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@299..300 "+" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@300..307 " spaces" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@307..308 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@308..313 ">" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@313..332 " not quote due to 4" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@332..333 "+" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@333..340 " spaces" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@340..341 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@341..363 "continues as paragraph" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@363..364 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@364..365 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@365..377 "Another para" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@377..378 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@378..382 "#" [Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@382..401 " this IS a heading " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@401..402 "(" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@402..415 "only 3 spaces" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@415..416 ")" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@416..417 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@417..418 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@418..442 "Para with indented fence" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@442..443 "\n" [] [],
+                },
+                MdInlineCode {
+                    l_tick_token: BACKTICK@443..450 "```" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@450..451 "\n" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@451..471 "    not a code fence" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@471..472 "\n" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@472..476 "    " [] [],
+                        },
+                    ],
+                    r_tick_token: BACKTICK@476..479 "```" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@479..480 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@480..504 "still the same paragraph" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@504..505 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@505..505 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..505
+  0: (empty)
+  1: MD_BLOCK_LIST@0..505
+    0: MD_PARAGRAPH@0..16
+      0: MD_INLINE_ITEM_LIST@0..16
+        0: MD_TEXTUAL@0..1
+          0: MD_TEXTUAL_LITERAL@0..1 "#" [] []
+        1: MD_TEXTUAL@1..15
+          0: MD_TEXTUAL_LITERAL@1..15 "NoSpaceHeading" [] []
+        2: MD_TEXTUAL@15..16
+          0: MD_TEXTUAL_LITERAL@15..16 "\n" [] []
+      1: (empty)
+    1: MD_NEWLINE@16..17
+      0: NEWLINE@16..17 "\n" [] []
+    2: MD_PARAGRAPH@17..31
+      0: MD_INLINE_ITEM_LIST@17..31
+        0: MD_TEXTUAL@17..19
+          0: MD_TEXTUAL_LITERAL@17..19 "##" [] []
+        1: MD_TEXTUAL@19..30
+          0: MD_TEXTUAL_LITERAL@19..30 "AlsoNoSpace" [] []
+        2: MD_TEXTUAL@30..31
+          0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
+      1: (empty)
+    3: MD_NEWLINE@31..32
+      0: NEWLINE@31..32 "\n" [] []
+    4: MD_PARAGRAPH@32..68
+      0: MD_INLINE_ITEM_LIST@32..68
+        0: MD_TEXTUAL@32..36
+          0: MD_TEXTUAL_LITERAL@32..36 "foo " [] []
+        1: MD_TEXTUAL@36..37
+          0: MD_TEXTUAL_LITERAL@36..37 "-" [] []
+        2: MD_TEXTUAL@37..38
+          0: MD_TEXTUAL_LITERAL@37..38 "-" [] []
+        3: MD_TEXTUAL@38..39
+          0: MD_TEXTUAL_LITERAL@38..39 "-" [] []
+        4: MD_TEXTUAL@39..67
+          0: MD_TEXTUAL_LITERAL@39..67 " bar is not a thematic break" [] []
+        5: MD_TEXTUAL@67..68
+          0: MD_TEXTUAL_LITERAL@67..68 "\n" [] []
+      1: (empty)
+    5: MD_NEWLINE@68..69
+      0: NEWLINE@68..69 "\n" [] []
+    6: MD_PARAGRAPH@69..101
+      0: MD_INLINE_ITEM_LIST@69..101
+        0: MD_TEXTUAL@69..76
+          0: MD_TEXTUAL_LITERAL@69..76 "inline " [] []
+        1: MD_TEXTUAL@76..79
+          0: MD_TEXTUAL_LITERAL@76..79 "~~~" [] []
+        2: MD_TEXTUAL@79..100
+          0: MD_TEXTUAL_LITERAL@79..100 " tilde is not a fence" [] []
+        3: MD_TEXTUAL@100..101
+          0: MD_TEXTUAL_LITERAL@100..101 "\n" [] []
+      1: (empty)
+    7: MD_NEWLINE@101..102
+      0: NEWLINE@101..102 "\n" [] []
+    8: MD_INDENT_CODE_BLOCK@102..161
+      0: MD_INLINE_ITEM_LIST@102..161
+        0: MD_TEXTUAL@102..107
+          0: MD_TEXTUAL_LITERAL@102..107 "*" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+        1: MD_TEXTUAL@107..116
+          0: MD_TEXTUAL_LITERAL@107..116 "code with" [] []
+        2: MD_TEXTUAL@116..117
+          0: MD_TEXTUAL_LITERAL@116..117 "*" [] []
+        3: MD_TEXTUAL@117..132
+          0: MD_TEXTUAL_LITERAL@117..132 " inline markers" [] []
+        4: MD_TEXTUAL@132..133
+          0: MD_TEXTUAL_LITERAL@132..133 "\n" [] []
+        5: MD_TEXTUAL@133..134
+          0: MD_TEXTUAL_LITERAL@133..134 "\n" [] []
+        6: MD_TEXTUAL@134..148
+          0: MD_TEXTUAL_LITERAL@134..148 "more code " [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+        7: MD_TEXTUAL@148..150
+          0: MD_TEXTUAL_LITERAL@148..150 "**" [] []
+        8: MD_TEXTUAL@150..154
+          0: MD_TEXTUAL_LITERAL@150..154 "here" [] []
+        9: MD_TEXTUAL@154..156
+          0: MD_TEXTUAL_LITERAL@154..156 "**" [] []
+        10: MD_TEXTUAL@156..160
+          0: MD_TEXTUAL_LITERAL@156..160 " too" [] []
+        11: MD_TEXTUAL@160..161
+          0: MD_TEXTUAL_LITERAL@160..161 "\n" [] []
+    9: MD_NEWLINE@161..162
+      0: NEWLINE@161..162 "\n" [] []
+    10: MD_HEADER@162..195
+      0: MD_HASH_LIST@162..163
+        0: MD_HASH@162..163
+          0: HASH@162..163 "#" [] []
+      1: MD_PARAGRAPH@163..195
+        0: MD_INLINE_ITEM_LIST@163..195
+          0: MD_TEXTUAL@163..195
+            0: MD_TEXTUAL_LITERAL@163..195 "\tTab after hash is valid heading" [] []
+        1: (empty)
+      2: MD_HASH_LIST@195..195
+    11: MD_NEWLINE@195..196
+      0: NEWLINE@195..196 "\n" [] []
+    12: MD_NEWLINE@196..197
+      0: NEWLINE@196..197 "\n" [] []
+    13: MD_HEADER@197..224
+      0: MD_HASH_LIST@197..199
+        0: MD_HASH@197..199
+          0: HASH@197..199 "##" [] []
+      1: MD_PARAGRAPH@199..224
+        0: MD_INLINE_ITEM_LIST@199..224
+          0: MD_TEXTUAL@199..224
+            0: MD_TEXTUAL_LITERAL@199..224 "\tMultiple hashes with tab" [] []
+        1: (empty)
+      2: MD_HASH_LIST@224..224
+    14: MD_NEWLINE@224..225
+      0: NEWLINE@224..225 "\n" [] []
+    15: MD_NEWLINE@225..226
+      0: NEWLINE@225..226 "\n" [] []
+    16: MD_PARAGRAPH@226..364
+      0: MD_INLINE_ITEM_LIST@226..364
+        0: MD_TEXTUAL@226..240
+          0: MD_TEXTUAL_LITERAL@226..240 "Paragraph here" [] []
+        1: MD_TEXTUAL@240..241
+          0: MD_TEXTUAL_LITERAL@240..241 "\n" [] []
+        2: MD_TEXTUAL@241..246
+          0: MD_TEXTUAL_LITERAL@241..246 "#" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+        3: MD_TEXTUAL@246..267
+          0: MD_TEXTUAL_LITERAL@246..267 " not heading due to 4" [] []
+        4: MD_TEXTUAL@267..268
+          0: MD_TEXTUAL_LITERAL@267..268 "+" [] []
+        5: MD_TEXTUAL@268..275
+          0: MD_TEXTUAL_LITERAL@268..275 " spaces" [] []
+        6: MD_TEXTUAL@275..276
+          0: MD_TEXTUAL_LITERAL@275..276 "\n" [] []
+        7: MD_TEXTUAL@276..281
+          0: MD_TEXTUAL_LITERAL@276..281 "-" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+        8: MD_TEXTUAL@281..299
+          0: MD_TEXTUAL_LITERAL@281..299 " not list due to 4" [] []
+        9: MD_TEXTUAL@299..300
+          0: MD_TEXTUAL_LITERAL@299..300 "+" [] []
+        10: MD_TEXTUAL@300..307
+          0: MD_TEXTUAL_LITERAL@300..307 " spaces" [] []
+        11: MD_TEXTUAL@307..308
+          0: MD_TEXTUAL_LITERAL@307..308 "\n" [] []
+        12: MD_TEXTUAL@308..313
+          0: MD_TEXTUAL_LITERAL@308..313 ">" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+        13: MD_TEXTUAL@313..332
+          0: MD_TEXTUAL_LITERAL@313..332 " not quote due to 4" [] []
+        14: MD_TEXTUAL@332..333
+          0: MD_TEXTUAL_LITERAL@332..333 "+" [] []
+        15: MD_TEXTUAL@333..340
+          0: MD_TEXTUAL_LITERAL@333..340 " spaces" [] []
+        16: MD_TEXTUAL@340..341
+          0: MD_TEXTUAL_LITERAL@340..341 "\n" [] []
+        17: MD_TEXTUAL@341..363
+          0: MD_TEXTUAL_LITERAL@341..363 "continues as paragraph" [] []
+        18: MD_TEXTUAL@363..364
+          0: MD_TEXTUAL_LITERAL@363..364 "\n" [] []
+      1: (empty)
+    17: MD_NEWLINE@364..365
+      0: NEWLINE@364..365 "\n" [] []
+    18: MD_PARAGRAPH@365..378
+      0: MD_INLINE_ITEM_LIST@365..378
+        0: MD_TEXTUAL@365..377
+          0: MD_TEXTUAL_LITERAL@365..377 "Another para" [] []
+        1: MD_TEXTUAL@377..378
+          0: MD_TEXTUAL_LITERAL@377..378 "\n" [] []
+      1: (empty)
+    19: MD_HEADER@378..416
+      0: MD_HASH_LIST@378..382
+        0: MD_HASH@378..382
+          0: HASH@378..382 "#" [Skipped(" "), Skipped(" "), Skipped(" ")] []
+      1: MD_PARAGRAPH@382..416
+        0: MD_INLINE_ITEM_LIST@382..416
+          0: MD_TEXTUAL@382..401
+            0: MD_TEXTUAL_LITERAL@382..401 " this IS a heading " [] []
+          1: MD_TEXTUAL@401..402
+            0: MD_TEXTUAL_LITERAL@401..402 "(" [] []
+          2: MD_TEXTUAL@402..415
+            0: MD_TEXTUAL_LITERAL@402..415 "only 3 spaces" [] []
+          3: MD_TEXTUAL@415..416
+            0: MD_TEXTUAL_LITERAL@415..416 ")" [] []
+        1: (empty)
+      2: MD_HASH_LIST@416..416
+    20: MD_NEWLINE@416..417
+      0: NEWLINE@416..417 "\n" [] []
+    21: MD_NEWLINE@417..418
+      0: NEWLINE@417..418 "\n" [] []
+    22: MD_PARAGRAPH@418..505
+      0: MD_INLINE_ITEM_LIST@418..505
+        0: MD_TEXTUAL@418..442
+          0: MD_TEXTUAL_LITERAL@418..442 "Para with indented fence" [] []
+        1: MD_TEXTUAL@442..443
+          0: MD_TEXTUAL_LITERAL@442..443 "\n" [] []
+        2: MD_INLINE_CODE@443..479
+          0: BACKTICK@443..450 "```" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
+          1: MD_INLINE_ITEM_LIST@450..476
+            0: MD_TEXTUAL@450..451
+              0: MD_TEXTUAL_LITERAL@450..451 "\n" [] []
+            1: MD_TEXTUAL@451..471
+              0: MD_TEXTUAL_LITERAL@451..471 "    not a code fence" [] []
+            2: MD_TEXTUAL@471..472
+              0: MD_TEXTUAL_LITERAL@471..472 "\n" [] []
+            3: MD_TEXTUAL@472..476
+              0: MD_TEXTUAL_LITERAL@472..476 "    " [] []
+          2: BACKTICK@476..479 "```" [] []
+        3: MD_TEXTUAL@479..480
+          0: MD_TEXTUAL_LITERAL@479..480 "\n" [] []
+        4: MD_TEXTUAL@480..504
+          0: MD_TEXTUAL_LITERAL@480..504 "still the same paragraph" [] []
+        5: MD_TEXTUAL@504..505
+          0: MD_TEXTUAL_LITERAL@504..505 "\n" [] []
+      1: (empty)
+  2: EOF@505..505 "" [] []
+
+```

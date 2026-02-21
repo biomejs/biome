@@ -1,16 +1,13 @@
+use super::*;
+use crate::settings::ModuleGraphResolutionKind;
+use crate::test_utils::setup_workspace_and_open_project;
 use biome_configuration::{
     FormatterConfiguration, JsConfiguration,
     javascript::{JsFormatterConfiguration, JsParserConfiguration},
 };
-use biome_deserialize::json::deserialize_from_json_str;
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
-use biome_json_parser::JsonParserOptions;
 use biome_rowan::TextSize;
-
-use crate::test_utils::setup_workspace_and_open_project;
-
-use super::*;
 
 #[test]
 fn commonjs_file_rejects_import_statement() {
@@ -40,6 +37,7 @@ fn commonjs_file_rejects_import_statement() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -93,6 +91,7 @@ fn store_embedded_nodes_with_current_ranges() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -154,6 +153,7 @@ fn format_html_with_scripts_and_css() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -161,6 +161,7 @@ fn format_html_with_scripts_and_css() {
         .format_file(FormatFileParams {
             path: Utf8PathBuf::from("/project/file.html").into(),
             project_key,
+            inline_config: None,
         })
         .unwrap();
 
@@ -241,6 +242,7 @@ function Foo({cond}) {
             configuration,
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -261,6 +263,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -271,6 +274,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -294,6 +298,7 @@ function Foo({cond}) {
     match workspace.format_file(FormatFileParams {
         project_key,
         path: BiomePath::new("/project/a.js"),
+        inline_config: None,
     }) {
         Ok(printed) => {
             insta::assert_snapshot!(printed.as_code(), @r###"
@@ -354,6 +359,7 @@ function Foo({cond}) {
             configuration,
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -374,6 +380,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -384,6 +391,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -407,6 +415,7 @@ function Foo({cond}) {
     match workspace.format_file(FormatFileParams {
         project_key,
         path: BiomePath::new("/project/a.jsx"),
+        inline_config: None,
     }) {
         Ok(printed) => {
             insta::assert_snapshot!(printed.as_code(), @r###"
@@ -449,6 +458,7 @@ fn pull_diagnostics_and_actions_for_js_file() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -460,6 +470,7 @@ fn pull_diagnostics_and_actions_for_js_file() {
             enabled_rules: vec![],
             project_key,
             categories: Default::default(),
+            inline_config: None,
         })
         .unwrap();
 
@@ -475,66 +486,147 @@ fn pull_diagnostics_and_actions_for_js_file() {
 }
 
 #[test]
-fn extends_root_resolves_globs_from_project_root() {
-    const NESTED_CONFIGURATION: &str = r#"
-    {
-      "extends": "//",
-      "files": {
-        "includes": ["./packages/pkg-a/src/**"]
-      }
-    }
-    "#;
+fn format_js_with_embedded_css() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Foo = styled.div`
+  display:
+    flex;
+  color : red ;
+`;
+
+const Bar = styled(Component)`
+  display:
+    flex;
+  color : red ;
+`;"#;
 
     let fs = MemoryFileSystem::default();
-    fs.insert(
-        Utf8PathBuf::from("/project/packages/pkg-a/src/index.ts"),
-        b"const a = 1;",
-    );
-    fs.insert(
-        Utf8PathBuf::from("/project/packages/pkg-a/tests/index.ts"),
-        b"const a = 1;",
-    );
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
 
-    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
-
-    let configuration = deserialize_from_json_str::<Configuration>(
-        NESTED_CONFIGURATION,
-        JsonParserOptions::default().with_allow_comments(),
-        "biome.jsonc",
-    )
-    .into_deserialized()
-    .expect("valid nested config");
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
 
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
-            configuration,
-            workspace_directory: Some(BiomePath::new("/project/packages/pkg-a")),
-            extended_configurations: Default::default(),
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
-    let src_is_ignored = workspace
-        .is_path_ignored(PathIsIgnoredParams {
+    workspace
+        .open_file(OpenFileParams {
             project_key,
-            path: BiomePath::new("/project/packages/pkg-a/src/index.ts"),
-            features: FeatureName::empty(),
-            ignore_kind: IgnoreKind::Path,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
-    let tests_is_ignored = workspace
-        .is_path_ignored(PathIsIgnoredParams {
+    let result = workspace
+        .format_file(FormatFileParams {
             project_key,
-            path: BiomePath::new("/project/packages/pkg-a/tests/index.ts"),
-            features: FeatureName::empty(),
-            ignore_kind: IgnoreKind::Path,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
         })
         .unwrap();
 
-    assert!(
-        !src_is_ignored,
-        "src file should be included when glob is resolved from project root"
-    );
-    assert!(tests_is_ignored, "file outside includes should be ignored");
+    insta::assert_snapshot!(result.as_code(), @r"
+    const Foo = styled.div`
+    	display: flex;
+    	color: red;
+    `;
+
+    const Bar = styled(Component)`
+    	display: flex;
+    	color: red;
+    `;
+    ");
+}
+
+#[test]
+fn format_js_with_embedded_graphql() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Foo = gql`
+  query PeopleCount {
+  people(
+       id: $peopleId){
+       totalCount
+       }}
+`;
+
+const Bar = graphql(`
+  query PeopleCount {
+  people(
+       id: $peopleId){
+       totalCount
+       }}
+`);"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r"
+    const Foo = gql`
+    	query PeopleCount {
+    		people(id: $peopleId) {
+    			totalCount
+    		}
+    	}
+    `;
+
+    const Bar = graphql(`
+    	query PeopleCount {
+    		people(id: $peopleId) {
+    			totalCount
+    		}
+    	}
+    `);
+    ");
 }

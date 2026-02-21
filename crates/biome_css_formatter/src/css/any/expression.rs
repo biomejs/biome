@@ -9,8 +9,10 @@ impl FormatRule<AnyCssExpression> for FormatAnyCssExpression {
     fn fmt(&self, node: &AnyCssExpression, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssExpression::CssBinaryExpression(node) => node.format().fmt(f),
+            AnyCssExpression::CssCommaSeparatedValue(node) => node.format().fmt(f),
             AnyCssExpression::CssListOfComponentValuesExpression(node) => node.format().fmt(f),
             AnyCssExpression::CssParenthesizedExpression(node) => node.format().fmt(f),
+            AnyCssExpression::CssUnaryExpression(node) => node.format().fmt(f),
         }
     }
 }

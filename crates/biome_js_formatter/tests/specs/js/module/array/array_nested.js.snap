@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/array/array_nested.js
 ---
+
 # Input
 
 ```js
@@ -72,6 +73,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -132,4 +134,5 @@ let o1 = [
 	{ a, b },
 	{ a, b, c },
 ];
+
 ```

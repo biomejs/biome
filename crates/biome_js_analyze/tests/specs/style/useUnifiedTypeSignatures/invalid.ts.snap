@@ -169,6 +169,17 @@ declare function f9(x: number): void;
 declare function f10(this: string): void;
 declare function f10(this: number): void;
 
+function tuple([a, b]: [string, string]): void;
+function tuple([c, d]: [number, string]): void;
+
+function f({ a, b }: Record<string, string>): void;
+function f({ c, d }: Record<string, number>): void;
+function f(foo: Record<string, any>): void {}
+
+// Merges latter 2 type parameters into 1
+function fizzbuzz([a]: SomeType<string>, { c }: Record<"c", void>): void;
+function fizzbuzz([a]: SomeType<string>, { c }: Record<"c", number>): void;
+
 ```
 
 # Diagnostics
@@ -911,6 +922,86 @@ invalid.ts:163:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
         162 │ + //·Merges·"this"·params.
         163 │ + declare·function·f10(this:·number·|·string):·void;
     165 164 │   
+    166 165 │   function tuple([a, b]: [string, string]): void;
+  
+
+```
+
+```
+invalid.ts:166:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Multiple similar overload signatures are hard to read and maintain.
+  
+    164 │ declare function f10(this: number): void;
+    165 │ 
+  > 166 │ function tuple([a, b]: [string, string]): void;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    167 │ function tuple([c, d]: [number, string]): void;
+    168 │ 
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    163 163 │   declare function f10(this: string): void;
+    164 164 │   declare function f10(this: number): void;
+    165     │ - 
+    166     │ - function·tuple([a,·b]:·[string,·string]):·void;
+    167     │ - function·tuple([c,·d]:·[number,·string]):·void;
+        165 │ + function·tuple([c,·d]:·[number,·string]·|·[string,·string]):·void;
+    168 166 │   
+    169 167 │   function f({ a, b }: Record<string, string>): void;
+  
+
+```
+
+```
+invalid.ts:169:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Multiple similar overload signatures are hard to read and maintain.
+  
+    167 │ function tuple([c, d]: [number, string]): void;
+    168 │ 
+  > 169 │ function f({ a, b }: Record<string, string>): void;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    170 │ function f({ c, d }: Record<string, number>): void;
+    171 │ function f(foo: Record<string, any>): void {}
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    166 166 │   function tuple([a, b]: [string, string]): void;
+    167 167 │   function tuple([c, d]: [number, string]): void;
+    168     │ - 
+    169     │ - function·f({·a,·b·}:·Record<string,·string>):·void;
+    170     │ - function·f({·c,·d·}:·Record<string,·number>):·void;
+        168 │ + function·f({·c,·d·}:·Record<string,·number>·|·Record<string,·string>):·void;
+    171 169 │   function f(foo: Record<string, any>): void {}
+    172 170 │   
+  
+
+```
+
+```
+invalid.ts:174:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Multiple similar overload signatures are hard to read and maintain.
+  
+    173 │ // Merges latter 2 type parameters into 1
+  > 174 │ function fizzbuzz([a]: SomeType<string>, { c }: Record<"c", void>): void;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    175 │ function fizzbuzz([a]: SomeType<string>, { c }: Record<"c", number>): void;
+    176 │ 
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    170 170 │   function f({ c, d }: Record<string, number>): void;
+    171 171 │   function f(foo: Record<string, any>): void {}
+    172     │ - 
+    173     │ - //·Merges·latter·2·type·parameters·into·1
+    174     │ - function·fizzbuzz([a]:·SomeType<string>,·{·c·}:·Record<"c",·void>):·void;
+    175     │ - function·fizzbuzz([a]:·SomeType<string>,·{·c·}:·Record<"c",·number>):·void;
+        172 │ + 
+        173 │ + //·Merges·latter·2·type·parameters·into·1
+        174 │ + function·fizzbuzz([a]:·SomeType<string>,·{·c·}:·Record<"c",·number>·|·Record<"c",·void>):·void;
+    176 175 │   
   
 
 ```

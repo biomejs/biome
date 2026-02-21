@@ -1,0 +1,98 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<iframe />
+<iframe></iframe>
+<iframe title></iframe>
+<iframe title=""></iframe>
+<IFRAME></IFRAME>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a title attribute when using iframe elements.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <iframe />
+      │ ^^^^^^^^^^
+    3 │ <iframe></iframe>
+    4 │ <iframe title></iframe>
+  
+  i Screen readers rely on the title set on an iframe to describe the content being displayed.
+  
+
+```
+
+```
+invalid.html:3:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a title attribute when using iframe elements.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <iframe />
+  > 3 │ <iframe></iframe>
+      │ ^^^^^^^^^^^^^^^^^
+    4 │ <iframe title></iframe>
+    5 │ <iframe title=""></iframe>
+  
+  i Screen readers rely on the title set on an iframe to describe the content being displayed.
+  
+
+```
+
+```
+invalid.html:4:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a title attribute when using iframe elements.
+  
+    2 │ <iframe />
+    3 │ <iframe></iframe>
+  > 4 │ <iframe title></iframe>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <iframe title=""></iframe>
+    6 │ <IFRAME></IFRAME>
+  
+  i Screen readers rely on the title set on an iframe to describe the content being displayed.
+  
+
+```
+
+```
+invalid.html:5:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a title attribute when using iframe elements.
+  
+    3 │ <iframe></iframe>
+    4 │ <iframe title></iframe>
+  > 5 │ <iframe title=""></iframe>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <IFRAME></IFRAME>
+    7 │ 
+  
+  i Screen readers rely on the title set on an iframe to describe the content being displayed.
+  
+
+```
+
+```
+invalid.html:6:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a title attribute when using iframe elements.
+  
+    4 │ <iframe title></iframe>
+    5 │ <iframe title=""></iframe>
+  > 6 │ <IFRAME></IFRAME>
+      │ ^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Screen readers rely on the title set on an iframe to describe the content being displayed.
+  
+
+```

@@ -11,6 +11,7 @@ impl FormatRule<AnyJsonValue> for FormatAnyJsonValue {
             AnyJsonValue::JsonArrayValue(node) => node.format().fmt(f),
             AnyJsonValue::JsonBogusValue(node) => node.format().fmt(f),
             AnyJsonValue::JsonBooleanValue(node) => node.format().fmt(f),
+            AnyJsonValue::JsonMetavariable(node) => node.format().fmt(f),
             AnyJsonValue::JsonNullValue(node) => node.format().fmt(f),
             AnyJsonValue::JsonNumberValue(node) => node.format().fmt(f),
             AnyJsonValue::JsonObjectValue(node) => node.format().fmt(f),

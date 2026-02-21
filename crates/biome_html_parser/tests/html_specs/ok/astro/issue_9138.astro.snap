@@ -1,0 +1,95 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 145
+expression: snapshot
+---
+
+## Input
+
+```astro
+---
+const test = `
+
+---
+
+`
+---
+
+<h1>---Hi</h1>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..27 "const test = `\n\n---\n\n`\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@27..30 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@30..33 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@33..35 "h1" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@35..36 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@36..41 "---Hi" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@41..42 "<" [] [],
+                slash_token: SLASH@42..43 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@43..45 "h1" [] [],
+                },
+                r_angle_token: R_ANGLE@45..46 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@46..47 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..47
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..30
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..27
+      0: HTML_LITERAL@3..27 "const test = `\n\n---\n\n`\n" [Newline("\n")] []
+    2: FENCE@27..30 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@30..46
+    0: HTML_ELEMENT@30..46
+      0: HTML_OPENING_ELEMENT@30..36
+        0: L_ANGLE@30..33 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@33..35
+          0: HTML_LITERAL@33..35 "h1" [] []
+        2: HTML_ATTRIBUTE_LIST@35..35
+        3: R_ANGLE@35..36 ">" [] []
+      1: HTML_ELEMENT_LIST@36..41
+        0: HTML_CONTENT@36..41
+          0: HTML_LITERAL@36..41 "---Hi" [] []
+      2: HTML_CLOSING_ELEMENT@41..46
+        0: L_ANGLE@41..42 "<" [] []
+        1: SLASH@42..43 "/" [] []
+        2: HTML_TAG_NAME@43..45
+          0: HTML_LITERAL@43..45 "h1" [] []
+        3: R_ANGLE@45..46 ">" [] []
+  4: EOF@46..47 "" [Newline("\n")] []
+
+```

@@ -1,0 +1,25 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.json`
+
+```json
+{
+    "name": "test",
+    "version": "1.0.0"
+}
+```
+
+# Emitted Messages
+
+```block
+file.json:2:13 search ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  2 │     "name": "test",
+
+```
+
+```block
+Searched 1 file in <TIME>. Found 1 match.
+```

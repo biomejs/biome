@@ -1,0 +1,30 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "files": {
+    "includes": ["**/*.js"]
+  },
+  "javascript": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+const a = 1;
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

@@ -11,6 +11,33 @@ xdescribe('foo', () => {});
 xit('foo', () => {});
 xtest('foo', () => {});
 
+// Playwright: fixme annotations
+test.fixme("needs fixing", async () => {});
+it.fixme("it needs fixing", async () => {});
+describe.fixme("fixme suite", () => {});
+
+// Playwright: test.describe patterns
+test.describe.skip("skipped suite", () => {});
+test.describe.fixme("fixme suite", () => {});
+test.describe.parallel.skip("parallel skip", () => {});
+test.describe.serial.skip("serial skip", () => {});
+test.describe.parallel.fixme("parallel fixme", () => {});
+test.describe.serial.fixme("serial fixme", () => {});
+
+// Playwright: step patterns
+test("test with skipped step", async () => {
+    await test.step.skip("skipped step", async () => {});
+    await test.step.fixme("fixme step", async () => {});
+});
+
+// Bracket notation
+test["skip"]("bracket notation", async () => {});
+
+// Bare test.skip() with no arguments
+test("bare skip", async () => {
+    test.skip();
+});
+
 ```
 
 # Diagnostics
@@ -30,8 +57,11 @@ invalid.js:1:10 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━�
   
   i Unsafe fix: Enable the test.
   
-    1 │ describe.skip("test",·()·=>·{});
-      │         -----                   
+     1    │ - describe.skip("test",·()·=>·{});
+        1 │ + describe("test",·()·=>·{});
+     2  2 │   it.skip("test", () => {});
+     3  3 │   test.skip("test", () => {});
+  
 
 ```
 
@@ -52,8 +82,12 @@ invalid.js:2:4 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━
   
   i Unsafe fix: Enable the test.
   
-    2 │ it.skip("test",·()·=>·{});
-      │   -----                   
+     1  1 │   describe.skip("test", () => {});
+     2    │ - it.skip("test",·()·=>·{});
+        2 │ + it("test",·()·=>·{});
+     3  3 │   test.skip("test", () => {});
+     4  4 │   xdescribe('foo', () => {});
+  
 
 ```
 
@@ -75,8 +109,13 @@ invalid.js:3:6 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━
   
   i Unsafe fix: Enable the test.
   
-    3 │ test.skip("test",·()·=>·{});
-      │     -----                   
+     1  1 │   describe.skip("test", () => {});
+     2  2 │   it.skip("test", () => {});
+     3    │ - test.skip("test",·()·=>·{});
+        3 │ + test("test",·()·=>·{});
+     4  4 │   xdescribe('foo', () => {});
+     5  5 │   xit('foo', () => {});
+  
 
 ```
 
@@ -98,12 +137,12 @@ invalid.js:4:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━
   
   i Unsafe fix: Enable the test.
   
-    2 2 │   it.skip("test", () => {});
-    3 3 │   test.skip("test", () => {});
-    4   │ - xdescribe('foo',·()·=>·{});
-      4 │ + describe('foo',·()·=>·{});
-    5 5 │   xit('foo', () => {});
-    6 6 │   xtest('foo', () => {});
+     2  2 │   it.skip("test", () => {});
+     3  3 │   test.skip("test", () => {});
+     4    │ - xdescribe('foo',·()·=>·{});
+        4 │ + describe('foo',·()·=>·{});
+     5  5 │   xit('foo', () => {});
+     6  6 │   xtest('foo', () => {});
   
 
 ```
@@ -126,12 +165,12 @@ invalid.js:5:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━
   
   i Unsafe fix: Enable the test.
   
-    3 3 │   test.skip("test", () => {});
-    4 4 │   xdescribe('foo', () => {});
-    5   │ - xit('foo',·()·=>·{});
-      5 │ + it('foo',·()·=>·{});
-    6 6 │   xtest('foo', () => {});
-    7 7 │   
+     3  3 │   test.skip("test", () => {});
+     4  4 │   xdescribe('foo', () => {});
+     5    │ - xit('foo',·()·=>·{});
+        5 │ + it('foo',·()·=>·{});
+     6  6 │   xtest('foo', () => {});
+     7  7 │   
   
 
 ```
@@ -146,6 +185,7 @@ invalid.js:6:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━
   > 6 │ xtest('foo', () => {});
       │ ^^^^^
     7 │ 
+    8 │ // Playwright: fixme annotations
   
   i Disabling tests is useful when debugging or creating placeholder while working.
   
@@ -153,11 +193,368 @@ invalid.js:6:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━
   
   i Unsafe fix: Enable the test.
   
-    4 4 │   xdescribe('foo', () => {});
-    5 5 │   xit('foo', () => {});
-    6   │ - xtest('foo',·()·=>·{});
-      6 │ + test('foo',·()·=>·{});
-    7 7 │   
+     4  4 │   xdescribe('foo', () => {});
+     5  5 │   xit('foo', () => {});
+     6    │ - xtest('foo',·()·=>·{});
+        6 │ + test('foo',·()·=>·{});
+     7  7 │   
+     8  8 │   // Playwright: fixme annotations
+  
+
+```
+
+```
+invalid.js:9:6 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+     8 │ // Playwright: fixme annotations
+   > 9 │ test.fixme("needs fixing", async () => {});
+       │      ^^^^^
+    10 │ it.fixme("it needs fixing", async () => {});
+    11 │ describe.fixme("fixme suite", () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+     7  7 │   
+     8  8 │   // Playwright: fixme annotations
+     9    │ - test.fixme("needs·fixing",·async·()·=>·{});
+        9 │ + test("needs·fixing",·async·()·=>·{});
+    10 10 │   it.fixme("it needs fixing", async () => {});
+    11 11 │   describe.fixme("fixme suite", () => {});
+  
+
+```
+
+```
+invalid.js:10:4 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+     8 │ // Playwright: fixme annotations
+     9 │ test.fixme("needs fixing", async () => {});
+  > 10 │ it.fixme("it needs fixing", async () => {});
+       │    ^^^^^
+    11 │ describe.fixme("fixme suite", () => {});
+    12 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+     8  8 │   // Playwright: fixme annotations
+     9  9 │   test.fixme("needs fixing", async () => {});
+    10    │ - it.fixme("it·needs·fixing",·async·()·=>·{});
+       10 │ + it("it·needs·fixing",·async·()·=>·{});
+    11 11 │   describe.fixme("fixme suite", () => {});
+    12 12 │   
+  
+
+```
+
+```
+invalid.js:11:10 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+     9 │ test.fixme("needs fixing", async () => {});
+    10 │ it.fixme("it needs fixing", async () => {});
+  > 11 │ describe.fixme("fixme suite", () => {});
+       │          ^^^^^
+    12 │ 
+    13 │ // Playwright: test.describe patterns
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+     9  9 │   test.fixme("needs fixing", async () => {});
+    10 10 │   it.fixme("it needs fixing", async () => {});
+    11    │ - describe.fixme("fixme·suite",·()·=>·{});
+       11 │ + describe("fixme·suite",·()·=>·{});
+    12 12 │   
+    13 13 │   // Playwright: test.describe patterns
+  
+
+```
+
+```
+invalid.js:14:15 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    13 │ // Playwright: test.describe patterns
+  > 14 │ test.describe.skip("skipped suite", () => {});
+       │               ^^^^
+    15 │ test.describe.fixme("fixme suite", () => {});
+    16 │ test.describe.parallel.skip("parallel skip", () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    12 12 │   
+    13 13 │   // Playwright: test.describe patterns
+    14    │ - test.describe.skip("skipped·suite",·()·=>·{});
+       14 │ + test.describe("skipped·suite",·()·=>·{});
+    15 15 │   test.describe.fixme("fixme suite", () => {});
+    16 16 │   test.describe.parallel.skip("parallel skip", () => {});
+  
+
+```
+
+```
+invalid.js:15:15 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    13 │ // Playwright: test.describe patterns
+    14 │ test.describe.skip("skipped suite", () => {});
+  > 15 │ test.describe.fixme("fixme suite", () => {});
+       │               ^^^^^
+    16 │ test.describe.parallel.skip("parallel skip", () => {});
+    17 │ test.describe.serial.skip("serial skip", () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    13 13 │   // Playwright: test.describe patterns
+    14 14 │   test.describe.skip("skipped suite", () => {});
+    15    │ - test.describe.fixme("fixme·suite",·()·=>·{});
+       15 │ + test.describe("fixme·suite",·()·=>·{});
+    16 16 │   test.describe.parallel.skip("parallel skip", () => {});
+    17 17 │   test.describe.serial.skip("serial skip", () => {});
+  
+
+```
+
+```
+invalid.js:16:24 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    14 │ test.describe.skip("skipped suite", () => {});
+    15 │ test.describe.fixme("fixme suite", () => {});
+  > 16 │ test.describe.parallel.skip("parallel skip", () => {});
+       │                        ^^^^
+    17 │ test.describe.serial.skip("serial skip", () => {});
+    18 │ test.describe.parallel.fixme("parallel fixme", () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    14 14 │   test.describe.skip("skipped suite", () => {});
+    15 15 │   test.describe.fixme("fixme suite", () => {});
+    16    │ - test.describe.parallel.skip("parallel·skip",·()·=>·{});
+       16 │ + test.describe.parallel("parallel·skip",·()·=>·{});
+    17 17 │   test.describe.serial.skip("serial skip", () => {});
+    18 18 │   test.describe.parallel.fixme("parallel fixme", () => {});
+  
+
+```
+
+```
+invalid.js:17:22 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    15 │ test.describe.fixme("fixme suite", () => {});
+    16 │ test.describe.parallel.skip("parallel skip", () => {});
+  > 17 │ test.describe.serial.skip("serial skip", () => {});
+       │                      ^^^^
+    18 │ test.describe.parallel.fixme("parallel fixme", () => {});
+    19 │ test.describe.serial.fixme("serial fixme", () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    15 15 │   test.describe.fixme("fixme suite", () => {});
+    16 16 │   test.describe.parallel.skip("parallel skip", () => {});
+    17    │ - test.describe.serial.skip("serial·skip",·()·=>·{});
+       17 │ + test.describe.serial("serial·skip",·()·=>·{});
+    18 18 │   test.describe.parallel.fixme("parallel fixme", () => {});
+    19 19 │   test.describe.serial.fixme("serial fixme", () => {});
+  
+
+```
+
+```
+invalid.js:18:24 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    16 │ test.describe.parallel.skip("parallel skip", () => {});
+    17 │ test.describe.serial.skip("serial skip", () => {});
+  > 18 │ test.describe.parallel.fixme("parallel fixme", () => {});
+       │                        ^^^^^
+    19 │ test.describe.serial.fixme("serial fixme", () => {});
+    20 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    16 16 │   test.describe.parallel.skip("parallel skip", () => {});
+    17 17 │   test.describe.serial.skip("serial skip", () => {});
+    18    │ - test.describe.parallel.fixme("parallel·fixme",·()·=>·{});
+       18 │ + test.describe.parallel("parallel·fixme",·()·=>·{});
+    19 19 │   test.describe.serial.fixme("serial fixme", () => {});
+    20 20 │   
+  
+
+```
+
+```
+invalid.js:19:22 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    17 │ test.describe.serial.skip("serial skip", () => {});
+    18 │ test.describe.parallel.fixme("parallel fixme", () => {});
+  > 19 │ test.describe.serial.fixme("serial fixme", () => {});
+       │                      ^^^^^
+    20 │ 
+    21 │ // Playwright: step patterns
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    17 17 │   test.describe.serial.skip("serial skip", () => {});
+    18 18 │   test.describe.parallel.fixme("parallel fixme", () => {});
+    19    │ - test.describe.serial.fixme("serial·fixme",·()·=>·{});
+       19 │ + test.describe.serial("serial·fixme",·()·=>·{});
+    20 20 │   
+    21 21 │   // Playwright: step patterns
+  
+
+```
+
+```
+invalid.js:23:21 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    21 │ // Playwright: step patterns
+    22 │ test("test with skipped step", async () => {
+  > 23 │     await test.step.skip("skipped step", async () => {});
+       │                     ^^^^
+    24 │     await test.step.fixme("fixme step", async () => {});
+    25 │ });
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    21 21 │   // Playwright: step patterns
+    22 22 │   test("test with skipped step", async () => {
+    23    │ - ····await·test.step.skip("skipped·step",·async·()·=>·{});
+       23 │ + ····await·test.step("skipped·step",·async·()·=>·{});
+    24 24 │       await test.step.fixme("fixme step", async () => {});
+    25 25 │   });
+  
+
+```
+
+```
+invalid.js:24:21 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    22 │ test("test with skipped step", async () => {
+    23 │     await test.step.skip("skipped step", async () => {});
+  > 24 │     await test.step.fixme("fixme step", async () => {});
+       │                     ^^^^^
+    25 │ });
+    26 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    22 22 │   test("test with skipped step", async () => {
+    23 23 │       await test.step.skip("skipped step", async () => {});
+    24    │ - ····await·test.step.fixme("fixme·step",·async·()·=>·{});
+       24 │ + ····await·test.step("fixme·step",·async·()·=>·{});
+    25 25 │   });
+    26 26 │   
+  
+
+```
+
+```
+invalid.js:28:6 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    27 │ // Bracket notation
+  > 28 │ test["skip"]("bracket notation", async () => {});
+       │      ^^^^^^
+    29 │ 
+    30 │ // Bare test.skip() with no arguments
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    28 │ test["skip"]("bracket·notation",·async·()·=>·{});
+       │     --------                                     
+
+```
+
+```
+invalid.js:32:10 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    30 │ // Bare test.skip() with no arguments
+    31 │ test("bare skip", async () => {
+  > 32 │     test.skip();
+       │          ^^^^
+    33 │ });
+    34 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    30 30 │   // Bare test.skip() with no arguments
+    31 31 │   test("bare skip", async () => {
+    32    │ - ····test.skip();
+       32 │ + ····test();
+    33 33 │   });
+    34 34 │   
   
 
 ```

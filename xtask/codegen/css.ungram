@@ -63,12 +63,32 @@ CssBogusUnicodeRangeValue = SyntaxElement*
 CssBogusSupportsCondition = SyntaxElement*
 CssBogusIfBranch = SyntaxElement*
 CssBogusIfTest = SyntaxElement*
+CssBogusSyntax = SyntaxElement*
+CssBogusSyntaxSingleComponent = SyntaxElement*
+CssBogusAttrName = SyntaxElement*
+CssBogusFunctionParameter = SyntaxElement*
+CssBogusType = SyntaxElement*
 CssBogusIfTestBooleanExpr = SyntaxElement*
+
+AnyCssRoot =
+	CssRoot
+	| CssSnippetRoot
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
-	rules: CssRuleList
+	items: CssRootItemList
 	eof: 'EOF'
+
+CssSnippetRoot =
+	items: CssDeclarationOrRuleList
+	eof: 'EOF'
+
+CssRootItemList = AnyCssRootItem*
+
+AnyCssRootItem =
+	AnyCssRule
+	| ScssDeclaration
+	| CssBogus
 
 CssRuleList = AnyCssRule*
 
@@ -472,6 +492,8 @@ CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
+	| ScssDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssBogus
 	| CssMetavariable
@@ -491,6 +513,8 @@ CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
 
 AnyCssDeclarationOrAtRule =
 	CssDeclarationWithSemicolon
+	| ScssDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
 
@@ -524,6 +548,8 @@ CssDeclarationList = AnyCssDeclaration*
 
 AnyCssDeclaration =
 	CssDeclarationWithSemicolon
+	| ScssDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 
 AnyCssRuleBlock =
@@ -653,6 +679,7 @@ AnyCssAtRule =
 	| CssValueAtRule
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
+	| CssFunctionAtRule
 	// Tailwind CSS 4.0 at rules
 	| TwThemeAtRule
 	| TwSourceAtRule
@@ -688,6 +715,7 @@ AnyCssAtRuleDeclarator =
 	| CssSupportsAtRuleDeclarator
 	| CssScopeAtRuleDeclarator
 	| CssStartingStyleAtRuleDeclarator
+	| CssFunctionAtRuleDeclarator
 
 // Conditional block declarator nodes
 CssMediaAtRuleDeclarator =
@@ -736,6 +764,14 @@ CssPositionTryAtRuleDeclarator =
 
 CssViewTransitionAtRuleDeclarator =
 	'view-transition'
+
+CssFunctionAtRuleDeclarator =
+	'function'
+	name: CssDashedIdentifier
+	'('
+	parameters: CssFunctionParameterList
+	')'
+	returns: CssReturnsStatement?
 
 // @charset "UTF-8";
 // ^^^^^^^^^^^^^^^^^
@@ -914,6 +950,7 @@ AnyCssContainerQueryInParens =
 	CssContainerQueryInParens
 	| CssContainerSizeFeatureInParens
 	| CssContainerStyleQueryInParens
+	| AnyCssValue // general-enclosed
 
 // ( <container-query> )
 // @container name (width <= 500px) and ((width <= 500px) or (width <= 500px)) {  }
@@ -1333,6 +1370,8 @@ CssPageAtRuleItemList = AnyCssPageAtRuleItem*
 
 AnyCssPageAtRuleItem =
 	CssDeclarationWithSemicolon
+	| ScssDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
 	| CssMarginAtRule
@@ -1741,6 +1780,55 @@ CssViewTransitionAtRule =
 	declarator: CssViewTransitionAtRuleDeclarator
 	block: AnyCssDeclarationBlock
 
+// https://drafts.csswg.org/css-mixins-1/#function-rule
+// @function <function-token> <function-parameter>#? ) [ returns <css-type> ]? { <declaration-list> }
+//
+// @function --transparent(--color, --alpha) { }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssFunctionAtRule =
+	declarator: CssFunctionAtRuleDeclarator
+	block: CssDeclarationOrAtRuleBlock
+
+// <function-parameter>#?
+//
+/// @function --transparent(--color, --alpha) { }
+//                          ^^^^^^^^^^^^^^^^
+CssFunctionParameterList = AnyCssFunctionParameter (',' AnyCssFunctionParameter)*
+
+AnyCssFunctionParameter =
+	CssFunctionParameter
+	| CssBogusFunctionParameter
+
+// <css-type>
+//
+// @function --transparent(--color <color>, --alpha <number>) { }
+//                                 ^^^^^^^          ^^^^^^^^
+AnyCssType =
+	CssTypeFunction
+	| AnyCssSyntaxComponent
+	| CssBogusType
+
+// @function --transparent(--color <color>: red, --alpha <number>: 0.5) { }
+//                         ^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^
+CssFunctionParameter =
+	name: CssDashedIdentifier
+	type:  AnyCssType?
+	default_value: CssFunctionParameterDefaultValue?
+
+// @function --transparent(--color <color>: red, --alpha <number>: 0.5) { }
+//                                        ^^^^^                  ^^^^^
+CssFunctionParameterDefaultValue =
+	':'
+	value: AnyCssValue
+
+// returns <css-type>
+//
+// @function --transparent(--color <color>: red, --alpha <number>: 0.5) returns <color> { }
+//                                                                      ^^^^^^^^^^^^^^^
+CssReturnsStatement =
+	'returns'
+	type: AnyCssType
+
 ///////////////
 // AUXILIARY
 ///////////////
@@ -1751,6 +1839,9 @@ AnyCssValue =
 	CssIdentifier
 	| CssCustomIdentifier
 	| CssDashedIdentifier
+	| ScssIdentifier
+	| ScssQualifiedName
+	| ScssParentSelectorValue
 	| CssString
 	| CssNumber
 	| AnyCssDimension
@@ -1808,14 +1899,19 @@ AnyCssFunction =
 	CssFunction
 	| CssUrlFunction
 	| CssIfFunction
+	| CssAttrFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
 CssFunction =
-	name: CssIdentifier
+	name: AnyCssFunctionName
 	'('
 	items: CssParameterList
 	')'
+
+AnyCssFunctionName =
+	CssIdentifier
+	| ScssQualifiedName
 
 // https://drafts.csswg.org/css-values-4/#url-value
 // <url> = <url()> | <src()>
@@ -1991,10 +2087,17 @@ AnyCssIfTest =
 
 AnyCssExpression =
 	CssBinaryExpression
+	| CssUnaryExpression
 	| CssParenthesizedExpression
 	| CssListOfComponentValuesExpression
+	| CssCommaSeparatedValue
 
 CssListOfComponentValuesExpression = CssComponentValueList
+
+CssCommaSeparatedValue =
+	'{'
+	items: CssGenericComponentValueList
+	'}'
 
 CssBinaryExpression =
 	left: AnyCssExpression
@@ -2003,6 +2106,9 @@ CssBinaryExpression =
 	)
 	right: AnyCssExpression
 
+CssUnaryExpression =
+	operator: ('+' | '-' | '*')
+	expression: AnyCssExpression
 
 CssParenthesizedExpression =
 	'(' expression: AnyCssExpression? ')'
@@ -2023,7 +2129,11 @@ CssBracketedValue =
 		items: CssBracketedValueList
 	']'
 
-CssBracketedValueList = AnyCssCustomIdentifier*
+CssBracketedValueList = AnyCssBracketedValueItem*
+
+AnyCssBracketedValueItem =
+	AnyCssCustomIdentifier
+	| CssGenericDelimiter
 
 AnyCssCustomIdentifier =
 	CssCustomIdentifier
@@ -2073,6 +2183,172 @@ CssUrlValueRaw = value: 'css_url_value_raw_literal'
 // https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-css/grammar.js
 CssMetavariable = value: 'grit_metavariable'
 
+// https://drafts.csswg.org/css-values-5/#attr-notation
+// attr() = attr( <attr-name> <attr-type>? , <declaration-value>?)
+//
+// <attr-name> = [ <ident-token>? '|' ]? <ident-token>
+// <attr-type> = type( <syntax> ) | raw-string | number | <attr-unit>
+//
+// attr(data-test type(*), rem);
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssAttrFunction =
+	name: 'attr'
+	'('
+	attr_name: CssAttrNameList
+	attr_type: AnyCssAttrType?
+	fallback_value: CssAttrFallbackValue?
+	')'
+
+// [ <ident-token>? '|' ]? <ident-token>
+// attr(data-test | data-test-2 | data-test-3)
+//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssAttrNameList = (AnyCssAttrName  ('|' AnyCssAttrName)*)
+
+AnyCssAttrName =
+	CssIdentifier
+	| CssBogusAttrName
+
+// Literal value that can be used as a type in the attr() function.
+// attr(data-test raw-string)
+//                ^^^^^^^^^^
+CssRawStringDeclarator =
+	'raw-string'
+
+// Literal value that can be used as a type in the attr() function.
+// attr(data-test number)
+//                ^^^^^
+CssNumberDeclarator =
+	'number'
+
+// attr(data-test rem);
+//                ^^^
+AnyCssAttrUnit =
+	 CssRegularAttrUnit
+	| CssUnknownAttrUnit
+
+// A known CSS unit name such as "px", "rem", "em".
+CssRegularAttrUnit =
+	unit: 'ident'
+
+// A fallback node for unrecognized attr unit names.
+CssUnknownAttrUnit =
+	unit: 'ident'
+
+AnyCssAttrType =
+	CssRawStringDeclarator
+	| CssTypeFunction
+	| CssNumberDeclarator
+	| AnyCssAttrUnit
+
+// attr(data-test type(*), rem);
+//                       ^^^^^
+CssAttrFallbackValue =
+	','
+	value: CssGenericComponentValueList
+
+// type( <syntax> )
+CssTypeFunction =
+	name: 'type'
+	'('
+	type: AnyCssSyntax
+	')'
+
+// type(*)
+//      ^
+CssUniversalSyntax =
+	'*'
+
+// https://drafts.csswg.org/css-values-5/#typedef-syntax
+// <syntax> = '*' | <syntax-component> [ <syntax-combinator> <syntax-component> ]* | <syntax-string>
+// <syntax-component> = <syntax-single-component> <syntax-multiplier>?
+//                    | '<' transform-list '>'
+// <syntax-single-component> = '<' <syntax-type-name> '>' | <ident>
+// <syntax-type-name> = angle | color | custom-ident | image | integer
+//                    | length | length-percentage | number
+//                    | percentage | resolution | string | time
+//                    | url | transform-function
+// <syntax-combinator> = '|'
+// <syntax-multiplier> = [ '#' | '+' ]
+//
+// <syntax-string> = <string>
+AnyCssSyntax =
+	CssUniversalSyntax
+	| CssSyntaxComponentList
+	| AnyCssSyntaxComponent
+	| CssString
+	| CssBogusSyntax
+
+// <syntax-component> [ <syntax-combinator> <syntax-component> ]*
+//
+// type(<ident> | auto)
+//      ^^^^^^^^^^^^^^
+CssSyntaxComponentList = AnyCssSyntaxComponent ('|' AnyCssSyntaxComponent)*
+
+// <syntax-single-component> <syntax-multiplier>? | '<' transform-list '>'
+//
+// type(<ident># | <transform-list>)
+//      ^^^^^^^^   ^^^^^^^^^^^^^^^^
+AnyCssSyntaxComponent =
+	CssSyntaxComponentWithoutMultiplier
+	| CssSyntaxComponent
+
+// <transform-list> is treated differently from other syntax components
+// type(<transform-list>)
+//      ^^^^^^^^^^^^^^^^
+CssSyntaxComponentWithoutMultiplier =
+	'<'
+	type_name: 'ident'
+	'>'
+
+// <syntax-single-component> <syntax-multiplier>?
+//
+// type(<ident>#)
+//      ^^^^^^^^
+CssSyntaxComponent =
+	component: AnyCssSyntaxSingleComponent
+	multiplier: CssSyntaxMultiplier?
+
+//'<' <syntax-type-name> '>' | <ident>
+//
+// type(<ident> | auto)
+//      ^^^^^^^   ^^^^
+AnyCssSyntaxSingleComponent =
+	CssSyntaxType
+	| CssIdentifier
+	| CssBogusSyntaxSingleComponent
+
+// '<' <syntax-type-name> '>'
+//
+// type(<ident>)
+//      ^^^^^^^
+AnyCssSyntaxTypeName =
+	CssRegularSyntaxTypeName
+	| CssUnknownSyntaxTypeName
+
+// A known syntax type name such as "angle", "color", "custom-ident"
+// See https://drafts.csswg.org/css-values-5/#typedef-syntax for the complete set
+// type(<ident>)
+//       ^^^^^
+CssRegularSyntaxTypeName =
+	name: 'ident'
+
+// A fallback node for unrecognized syntax type names.
+// type(<unknown>)
+//       ^^^^^^^
+CssUnknownSyntaxTypeName =
+	name: 'ident'
+
+// type(<ident>)
+//      ^^^^^^^
+CssSyntaxType =
+	'<'
+	type_name: AnyCssSyntaxTypeName
+	'>'
+
+// type(<number># | <string>+)
+//              ^           ^
+CssSyntaxMultiplier =
+	multiplier: ('#' | '+')
 
 // Tailwind
 
@@ -2199,3 +2475,67 @@ TwPluginAtRule =
 TwSlotAtRule =
 	'slot'
 	';'
+
+/////////////
+// SCSS
+/////////////
+
+// $variable: value;
+// ^^^^^^^^^^^^^^^^^
+ScssDeclaration =
+	name: AnyScssDeclarationName
+	':'
+	value: CssGenericComponentValueList
+	modifiers: ScssVariableModifierList
+	';'?
+
+// $var: 1
+// ^^^^
+AnyScssDeclarationName =
+	ScssIdentifier
+	| ScssNamespacedIdentifier
+
+// ns.$var: 1;
+// ^^^^^^^
+ScssNamespacedIdentifier =
+	namespace: CssIdentifier
+	'.'
+	name: ScssIdentifier
+
+// font: { family: sans-serif; size: 12px; }
+// ^^^^
+ScssNestingDeclaration =
+	name: CssIdentifier
+	':'
+	value: CssGenericComponentValueList
+	block: AnyCssDeclarationOrRuleBlock
+
+// $a: &;
+//     ^
+ScssParentSelectorValue =
+	'&'
+
+// color: module.$var;
+//        ^^^^^^^^^^^
+ScssQualifiedName =
+	module: CssIdentifier
+	'.'
+	member: AnyScssModuleMember
+
+AnyScssModuleMember =
+	CssIdentifier
+	| ScssIdentifier
+
+// $var: 1 !default !global;
+//         ^^^^^^^^^^^^^^^^
+ScssVariableModifierList = ScssVariableModifier*
+
+// $var: 1 !default;
+//         ^^^^^^^^
+ScssVariableModifier =
+	'!'
+	value: ('default' | 'global')
+
+// $var: 1;
+// ^^^^
+ScssIdentifier = dollar: '$' name: CssIdentifier

@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: click.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+test('example', async ({ page }) => {
+    await page.click('button');
+    await page.waitForSelector('.result');
+});
+
+
+```

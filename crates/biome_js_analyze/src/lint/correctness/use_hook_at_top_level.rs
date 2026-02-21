@@ -53,12 +53,24 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// function notAHook() {
+    ///     useEffect();
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
     /// function Component1() {
     ///     useEffect();
     /// }
+    /// ```
+    ///
+    /// ```js
+    /// test("the hook", () => {
+    ///     renderHook(() => useHook());
+    /// });
     /// ```
     ///
     pub UseHookAtTopLevel {
@@ -86,6 +98,16 @@ impl AnyJsFunctionOrMethod {
         }
 
         false
+    }
+
+    fn is_function_expression(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyJsFunction(
+                AnyJsFunction::JsArrowFunctionExpression(_)
+                    | AnyJsFunction::JsFunctionExpression(_)
+            )
+        )
     }
 
     fn name(&self) -> Option<Text> {
@@ -119,6 +141,8 @@ pub enum SuggestionKind {
     EarlyReturn(TextRange),
     Nested,
     Recursive,
+    TopLevel,
+    ComponentOrHook,
 }
 
 /// Verifies whether the call expression is at the top level of the component,
@@ -243,6 +267,13 @@ fn is_nested_function_inside_component_or_hook(function: &AnyJsFunctionOrMethod)
         AnyJsFunctionOrMethod::cast(node)
             .is_some_and(|enclosing_function| enclosing_function.is_react_component_or_hook())
     })
+}
+
+fn is_top_level_call(call: &JsCallExpression) -> bool {
+    !call
+        .syntax()
+        .ancestors()
+        .any(|node| AnyJsFunctionOrMethod::can_cast(node.kind()))
 }
 
 /// Model for tracking which function calls are preceded by an early return.
@@ -444,6 +475,42 @@ impl Rule for UseHookAtTopLevel {
             return None;
         }
 
+        // Check if the hook is in the ignore list
+        if let Some(ignore) = ctx.options().ignore.as_ref()
+            && let Ok(callee) = call.callee()
+        {
+            // Extract the hook name (handles both `useHook` and `obj.useHook`)
+            let hook_name = if let Some(identifier) = callee.as_js_identifier_expression() {
+                identifier
+                    .name()
+                    .ok()
+                    .and_then(|name| name.value_token().ok())
+                    .map(|token| token.token_text_trimmed())
+            } else if let Some(member_expression) = callee.as_js_static_member_expression() {
+                member_expression
+                    .member()
+                    .ok()
+                    .and_then(|member| member.value_token().ok())
+                    .map(|token| token.token_text_trimmed())
+            } else {
+                None
+            };
+
+            if let Some(name) = hook_name
+                && ignore.contains(name.text())
+            {
+                return None;
+            }
+        }
+
+        if is_top_level_call(call) {
+            return Some(Suggestion {
+                hook_name_range: get_hook_name_range()?,
+                path: vec![call.syntax().text_range_with_trivia()],
+                kind: SuggestionKind::TopLevel,
+            });
+        }
+
         let model = ctx.semantic_model();
         let early_returns = ctx.early_returns_model();
 
@@ -521,6 +588,16 @@ impl Rule for UseHookAtTopLevel {
             }
         }
 
+        if enclosing_function_if_call_is_at_top_level(call).is_some_and(|function| {
+            !function.is_react_component_or_hook() && !function.is_function_expression()
+        }) {
+            return Some(Suggestion {
+                hook_name_range: get_hook_name_range()?,
+                path: vec![call.syntax().text_range_with_trivia()],
+                kind: SuggestionKind::ComponentOrHook,
+            });
+        }
+
         None
     }
 
@@ -537,6 +614,13 @@ impl Rule for UseHookAtTopLevel {
                 "unconditionally from the top-level component."
             },
             SuggestionKind::Recursive => markup! { "This hook is being called recursively." },
+            SuggestionKind::TopLevel => markup! {
+                "This hook is being called at the module level, but all hooks must be called from "
+                "within a hook or component."
+            },
+            SuggestionKind::ComponentOrHook => markup! {
+                "This hook is being called from within a function or method that is not a hook or component."
+            },
             _ if path.len() <= 1 => markup! {
                 "This hook is being called conditionally, but all hooks must be called in the "
                 "exact same order in every component render."
@@ -562,13 +646,18 @@ impl Rule for UseHookAtTopLevel {
             diag = diag.detail(
                 *range,
                 markup! { "Hooks should not be called after an early return." },
-            )
+            );
         }
 
-        let mut diag = diag.note(markup! {
-            "For React to preserve state between calls, hooks needs to be called "
-            "unconditionally and always in the same order."
-        });
+        diag = match kind {
+            SuggestionKind::TopLevel | SuggestionKind::ComponentOrHook => diag.note(markup! {
+                "Move the hook call into the top level of a hook or component in order to use it."
+            }),
+            _ => diag.note(markup! {
+                "For React to preserve state between calls, hooks needs to be called "
+                "unconditionally and always in the same order."
+            }),
+        };
 
         if matches!(kind, SuggestionKind::Recursive) {
             diag = diag.note(markup! {
@@ -577,8 +666,8 @@ impl Rule for UseHookAtTopLevel {
             });
         }
 
-        let diag = diag.note(markup! {
-            "See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level"
+        diag = diag.note(markup! {
+            "See https://react.dev/reference/rules/rules-of-hooks"
         });
         Some(diag)
     }

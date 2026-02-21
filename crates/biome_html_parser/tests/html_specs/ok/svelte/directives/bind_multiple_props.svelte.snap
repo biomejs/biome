@@ -1,0 +1,293 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<input bind:value={text} bind:selectionStart={start} bind:selectionEnd={end} />
+<video bind:currentTime={time} bind:paused={isPaused} bind:volume={volume}></video>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                SvelteBindDirective {
+                    bind_token: BIND_KW@7..11 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@11..12 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@12..17 "value" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@17..18 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@18..19 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@19..23 "text" [] [],
+                                },
+                                r_curly_token: R_CURLY@23..25 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+                SvelteBindDirective {
+                    bind_token: BIND_KW@25..29 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@29..30 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@30..44 "selectionStart" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@44..45 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@45..46 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@46..51 "start" [] [],
+                                },
+                                r_curly_token: R_CURLY@51..53 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+                SvelteBindDirective {
+                    bind_token: BIND_KW@53..57 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@57..58 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@58..70 "selectionEnd" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@70..71 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@71..72 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@72..75 "end" [] [],
+                                },
+                                r_curly_token: R_CURLY@75..77 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@77..78 "/" [] [],
+            r_angle_token: R_ANGLE@78..79 ">" [] [],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@79..81 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@81..87 "video" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteBindDirective {
+                        bind_token: BIND_KW@87..91 "bind" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@91..92 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@92..103 "currentTime" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@103..104 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@104..105 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@105..109 "time" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@109..111 "}" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    },
+                    SvelteBindDirective {
+                        bind_token: BIND_KW@111..115 "bind" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@115..116 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@116..122 "paused" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@122..123 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@123..124 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@124..132 "isPaused" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@132..134 "}" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    },
+                    SvelteBindDirective {
+                        bind_token: BIND_KW@134..138 "bind" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@138..139 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@139..145 "volume" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@145..146 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@146..147 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@147..153 "volume" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@153..154 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@154..155 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@155..156 "<" [] [],
+                slash_token: SLASH@156..157 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@157..162 "video" [] [],
+                },
+                r_angle_token: R_ANGLE@162..163 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@163..164 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..164
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..163
+    0: HTML_SELF_CLOSING_ELEMENT@0..79
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..7
+        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@7..77
+        0: SVELTE_BIND_DIRECTIVE@7..25
+          0: BIND_KW@7..11 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@11..25
+            0: COLON@11..12 ":" [] []
+            1: SVELTE_NAME@12..17
+              0: IDENT@12..17 "value" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@17..17
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@17..25
+              0: EQ@17..18 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@18..25
+                0: L_CURLY@18..19 "{" [] []
+                1: HTML_TEXT_EXPRESSION@19..23
+                  0: HTML_LITERAL@19..23 "text" [] []
+                2: R_CURLY@23..25 "}" [] [Whitespace(" ")]
+        1: SVELTE_BIND_DIRECTIVE@25..53
+          0: BIND_KW@25..29 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@29..53
+            0: COLON@29..30 ":" [] []
+            1: SVELTE_NAME@30..44
+              0: IDENT@30..44 "selectionStart" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@44..44
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@44..53
+              0: EQ@44..45 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@45..53
+                0: L_CURLY@45..46 "{" [] []
+                1: HTML_TEXT_EXPRESSION@46..51
+                  0: HTML_LITERAL@46..51 "start" [] []
+                2: R_CURLY@51..53 "}" [] [Whitespace(" ")]
+        2: SVELTE_BIND_DIRECTIVE@53..77
+          0: BIND_KW@53..57 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@57..77
+            0: COLON@57..58 ":" [] []
+            1: SVELTE_NAME@58..70
+              0: IDENT@58..70 "selectionEnd" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@70..70
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@70..77
+              0: EQ@70..71 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@71..77
+                0: L_CURLY@71..72 "{" [] []
+                1: HTML_TEXT_EXPRESSION@72..75
+                  0: HTML_LITERAL@72..75 "end" [] []
+                2: R_CURLY@75..77 "}" [] [Whitespace(" ")]
+      3: SLASH@77..78 "/" [] []
+      4: R_ANGLE@78..79 ">" [] []
+    1: HTML_ELEMENT@79..163
+      0: HTML_OPENING_ELEMENT@79..155
+        0: L_ANGLE@79..81 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@81..87
+          0: HTML_LITERAL@81..87 "video" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@87..154
+          0: SVELTE_BIND_DIRECTIVE@87..111
+            0: BIND_KW@87..91 "bind" [] []
+            1: SVELTE_DIRECTIVE_VALUE@91..111
+              0: COLON@91..92 ":" [] []
+              1: SVELTE_NAME@92..103
+                0: IDENT@92..103 "currentTime" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@103..103
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@103..111
+                0: EQ@103..104 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@104..111
+                  0: L_CURLY@104..105 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@105..109
+                    0: HTML_LITERAL@105..109 "time" [] []
+                  2: R_CURLY@109..111 "}" [] [Whitespace(" ")]
+          1: SVELTE_BIND_DIRECTIVE@111..134
+            0: BIND_KW@111..115 "bind" [] []
+            1: SVELTE_DIRECTIVE_VALUE@115..134
+              0: COLON@115..116 ":" [] []
+              1: SVELTE_NAME@116..122
+                0: IDENT@116..122 "paused" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@122..122
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@122..134
+                0: EQ@122..123 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@123..134
+                  0: L_CURLY@123..124 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@124..132
+                    0: HTML_LITERAL@124..132 "isPaused" [] []
+                  2: R_CURLY@132..134 "}" [] [Whitespace(" ")]
+          2: SVELTE_BIND_DIRECTIVE@134..154
+            0: BIND_KW@134..138 "bind" [] []
+            1: SVELTE_DIRECTIVE_VALUE@138..154
+              0: COLON@138..139 ":" [] []
+              1: SVELTE_NAME@139..145
+                0: IDENT@139..145 "volume" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@145..145
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@145..154
+                0: EQ@145..146 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@146..154
+                  0: L_CURLY@146..147 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@147..153
+                    0: HTML_LITERAL@147..153 "volume" [] []
+                  2: R_CURLY@153..154 "}" [] []
+        3: R_ANGLE@154..155 ">" [] []
+      1: HTML_ELEMENT_LIST@155..155
+      2: HTML_CLOSING_ELEMENT@155..163
+        0: L_ANGLE@155..156 "<" [] []
+        1: SLASH@156..157 "/" [] []
+        2: HTML_TAG_NAME@157..162
+          0: HTML_LITERAL@157..162 "video" [] []
+        3: R_ANGLE@162..163 ">" [] []
+  4: EOF@163..164 "" [Newline("\n")] []
+
+```

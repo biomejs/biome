@@ -1,0 +1,2 @@
+- `real/` contains pages from real websites, saved as HTML files with no modifications.
+- `synthetic/` contains HTML files that were created specifically for testing purposes.

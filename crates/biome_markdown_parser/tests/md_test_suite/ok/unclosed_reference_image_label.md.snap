@@ -1,0 +1,81 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+This has ![alt][unclosed label
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..9 "This has " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@9..10 "!" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@10..11 "[" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@11..14 "alt" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@14..15 "]" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@15..16 "[" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@16..30 "unclosed label" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@31..31 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..31
+  0: (empty)
+  1: MD_BLOCK_LIST@0..31
+    0: MD_PARAGRAPH@0..31
+      0: MD_INLINE_ITEM_LIST@0..31
+        0: MD_TEXTUAL@0..9
+          0: MD_TEXTUAL_LITERAL@0..9 "This has " [] []
+        1: MD_TEXTUAL@9..10
+          0: MD_TEXTUAL_LITERAL@9..10 "!" [] []
+        2: MD_TEXTUAL@10..11
+          0: MD_TEXTUAL_LITERAL@10..11 "[" [] []
+        3: MD_TEXTUAL@11..14
+          0: MD_TEXTUAL_LITERAL@11..14 "alt" [] []
+        4: MD_TEXTUAL@14..15
+          0: MD_TEXTUAL_LITERAL@14..15 "]" [] []
+        5: MD_TEXTUAL@15..16
+          0: MD_TEXTUAL_LITERAL@15..16 "[" [] []
+        6: MD_TEXTUAL@16..30
+          0: MD_TEXTUAL_LITERAL@16..30 "unclosed label" [] []
+        7: MD_TEXTUAL@30..31
+          0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
+      1: (empty)
+  2: EOF@31..31 "" [] []
+
+```

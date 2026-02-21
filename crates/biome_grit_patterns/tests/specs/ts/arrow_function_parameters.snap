@@ -1,6 +1,5 @@
 ---
 source: crates/biome_grit_patterns/tests/spec_tests.rs
-assertion_line: 94
 expression: arrow_function_parameters
 ---
 SnapshotResult {

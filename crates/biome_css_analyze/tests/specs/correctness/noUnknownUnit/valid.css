@@ -70,3 +70,8 @@ a { background-image: image-set(url('first.png') calc(1x * 1), url('second.png')
 @media ( resOLution:  2x) {}
 a { image-resolution: 1x; }
 a { width: 8ic; }
+a: { --test: attr(data-test rem); }
+a: { --test: attr(data-test %); }
+a: { --test: attr(data-test type(*)); }
+a: { --test: attr(data-test type(length)); }
+a: { --test: attr(data-test type(<color>)); }

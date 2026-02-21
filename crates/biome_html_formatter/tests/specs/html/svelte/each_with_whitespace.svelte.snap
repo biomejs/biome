@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: svelte/each_with_whitespace.svelte
 ---
+
 # Input
 
 ```svelte
@@ -36,6 +37,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```svelte
@@ -50,4 +52,5 @@ Self close void elements: never
 {#each items as item (item.id)}
 	<div>{item}</div>
 {/each}
+
 ```

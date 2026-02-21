@@ -26,3 +26,4 @@ a { background: /* comment */ image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x
 a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
 @font-face { color: U+0100-024F; }
 a { unicode-range: U+0100-024F; }
+a { --test: attr(data-test unknown); }

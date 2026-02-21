@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: non-async-context.js
+---
+# Input
+```js
+/* should generate diagnostics but NOT autofix (not in async context) */
+test('example', ({ page }) => {
+    expect(page.locator('body')).toBeVisible();
+});
+
+/* sync function expression callback — should diagnose but NOT autofix */
+test('example', function({ page }) {
+    expect(page.locator('body')).toBeVisible();
+});
+
+```
+
+# Diagnostics
+```
+non-async-context.js:3:5 lint/nursery/noPlaywrightMissingAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    1 │ /* should generate diagnostics but NOT autofix (not in async context) */
+    2 │ test('example', ({ page }) => {
+  > 3 │     expect(page.locator('body')).toBeVisible();
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ });
+    5 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+non-async-context.js:8:5 lint/nursery/noPlaywrightMissingAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+     6 │ /* sync function expression callback — should diagnose but NOT autofix */
+     7 │ test('example', function({ page }) {
+   > 8 │     expect(page.locator('body')).toBeVisible();
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ });
+    10 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

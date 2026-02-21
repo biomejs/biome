@@ -1,9 +1,29 @@
-use crate::{AnyJsonValue, JsonMember, JsonMemberName, JsonSyntaxToken, inner_string_text};
+use crate::{
+    AnyJsonMemberName, AnyJsonValue, JsonMember, JsonMemberName, JsonSyntaxToken, inner_string_text,
+};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, TokenText};
 
 impl JsonMemberName {
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
         Ok(inner_string_text(&self.value_token()?))
+    }
+}
+
+impl AnyJsonMemberName {
+    /// Returns the inner string text if this is a [JsonMemberName], [None] otherwise
+    pub fn inner_string_text(&self) -> Option<SyntaxResult<TokenText>> {
+        match self {
+            Self::JsonMemberName(name) => Some(name.inner_string_text()),
+            _ => None,
+        }
+    }
+
+    /// Returns the value token if this is a [JsonMemberName], [None] otherwise
+    pub fn value_token(&self) -> Option<SyntaxResult<crate::JsonSyntaxToken>> {
+        match self {
+            Self::JsonMemberName(name) => Some(name.value_token()),
+            _ => None,
+        }
     }
 }
 

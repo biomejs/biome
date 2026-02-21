@@ -18,7 +18,8 @@ use biome_js_syntax::{
     JsVariableDeclarator, JsWhileStatement, TsInterfaceDeclaration, TsMappedType,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
-use biome_suppression::parse_suppression_comment;
+use biome_suppression::{SuppressionKind, parse_suppression_comment};
+use biome_text_size::TextSize;
 
 pub type JsComments = Comments<JsLanguage>;
 
@@ -79,6 +80,15 @@ impl CommentStyle for JsCommentStyle {
     fn is_suppression(text: &str) -> bool {
         parse_suppression_comment(text)
             .filter_map(Result::ok)
+            .filter(|suppression| suppression.kind == SuppressionKind::Classic)
+            .flat_map(|suppression| suppression.categories)
+            .any(|(key, ..)| key == category!("format"))
+    }
+
+    fn is_global_suppression(text: &str) -> bool {
+        parse_suppression_comment(text)
+            .filter_map(Result::ok)
+            .filter(|suppression| suppression.kind == SuppressionKind::All)
             .flat_map(|suppression| suppression.categories)
             .any(|(key, ..)| key == category!("format"))
     }
@@ -100,7 +110,8 @@ impl CommentStyle for JsCommentStyle {
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
         match comment.text_position() {
-            CommentTextPosition::EndOfLine => handle_typecast_comment(comment)
+            CommentTextPosition::EndOfLine => handle_global_suppression(comment)
+                .or_else(handle_typecast_comment)
                 .or_else(handle_function_comment)
                 .or_else(handle_conditional_comment)
                 .or_else(handle_if_statement_comment)
@@ -121,7 +132,8 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_import_export_specifier_comment)
                 .or_else(handle_import_named_clause_comments)
                 .or_else(handle_array_expression),
-            CommentTextPosition::OwnLine => handle_member_expression_comment(comment)
+            CommentTextPosition::OwnLine => handle_global_suppression(comment)
+                .or_else(handle_member_expression_comment)
                 .or_else(handle_function_comment)
                 .or_else(handle_if_statement_comment)
                 .or_else(handle_while_comment)
@@ -602,7 +614,8 @@ fn handle_method_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlacem
 fn handle_root_comments(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
     if let Some(root) = AnyJsRoot::cast_ref(comment.enclosing_node()) {
         let is_blank = match &root {
-            AnyJsRoot::JsExpressionSnipped(_) => false,
+            AnyJsRoot::JsExpressionSnippet(_) => false,
+            AnyJsRoot::JsExpressionTemplateRoot(_) => false,
             AnyJsRoot::JsModule(module) => {
                 module.directives().is_empty() && module.items().is_empty()
             }
@@ -1361,6 +1374,29 @@ fn handle_array_expression(comment: DecoratedComment<JsLanguage>) -> CommentPlac
     } else {
         CommentPlacement::Default(comment)
     }
+}
+
+fn handle_global_suppression(
+    comment: DecoratedComment<JsLanguage>,
+) -> CommentPlacement<JsLanguage> {
+    let node = comment.enclosing_node();
+
+    if node.text_range_with_trivia().start() == TextSize::from(0) {
+        let has_global_suppression = node.first_leading_trivia().is_some_and(|trivia| {
+            trivia
+                .pieces()
+                .filter(|piece| piece.is_comments())
+                .any(|piece| JsCommentStyle::is_global_suppression(piece.text()))
+        });
+        let root = node.ancestors().find_map(AnyJsRoot::cast);
+        if let Some(root) = root
+            && has_global_suppression
+        {
+            return CommentPlacement::leading(root.syntax().clone(), comment);
+        }
+    }
+
+    CommentPlacement::Default(comment)
 }
 
 fn place_leading_statement_comment(

@@ -1,0 +1,112 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div transition:>Invalid</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteTransitionDirective {
+                        transition_token: TRANSITION_KW@5..15 "transition" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@15..16 ":" [] [],
+                            property: missing (required),
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@16..17 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@17..24 "Invalid" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@24..25 "<" [] [],
+                slash_token: SLASH@25..26 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@26..29 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@29..30 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@30..31 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..31
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..30
+    0: HTML_ELEMENT@0..30
+      0: HTML_OPENING_ELEMENT@0..17
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..16
+          0: SVELTE_TRANSITION_DIRECTIVE@5..16
+            0: TRANSITION_KW@5..15 "transition" [] []
+            1: SVELTE_DIRECTIVE_VALUE@15..16
+              0: COLON@15..16 ":" [] []
+              1: (empty)
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@16..16
+              3: (empty)
+        3: R_ANGLE@16..17 ">" [] []
+      1: HTML_ELEMENT_LIST@17..24
+        0: HTML_CONTENT@17..24
+          0: HTML_LITERAL@17..24 "Invalid" [] []
+      2: HTML_CLOSING_ELEMENT@24..30
+        0: L_ANGLE@24..25 "<" [] []
+        1: SLASH@25..26 "/" [] []
+        2: HTML_TAG_NAME@26..29
+          0: HTML_LITERAL@26..29 "div" [] []
+        3: R_ANGLE@29..30 ">" [] []
+  4: EOF@30..31 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+transition_missing_name.svelte:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ <div transition:>Invalid</div>
+      │                 ^^^^^^^^^^^^^^
+  > 2 │ 
+      │ 
+  
+  i Expected one of:
+  
+  - name
+  - closing block
+  
+```

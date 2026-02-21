@@ -1732,41 +1732,41 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedSpecifier {
         )
     }
 }
-impl FormatRule<biome_js_syntax::JsExpressionSnipped>
-    for crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped
+impl FormatRule<biome_js_syntax::JsExpressionSnippet>
+    for crate::js::auxiliary::expression_snippet::FormatJsExpressionSnippet
 {
     type Context = JsFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_js_syntax::JsExpressionSnipped,
+        node: &biome_js_syntax::JsExpressionSnippet,
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_js_syntax::JsExpressionSnipped>::fmt(self, node, f)
+        FormatNodeRule::<biome_js_syntax::JsExpressionSnippet>::fmt(self, node, f)
     }
 }
-impl AsFormat<JsFormatContext> for biome_js_syntax::JsExpressionSnipped {
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsExpressionSnippet {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExpressionSnipped,
-        crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped,
+        biome_js_syntax::JsExpressionSnippet,
+        crate::js::auxiliary::expression_snippet::FormatJsExpressionSnippet,
     >;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
-            crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped::default(),
+            crate::js::auxiliary::expression_snippet::FormatJsExpressionSnippet::default(),
         )
     }
 }
-impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExpressionSnipped {
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExpressionSnippet {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExpressionSnipped,
-        crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped,
+        biome_js_syntax::JsExpressionSnippet,
+        crate::js::auxiliary::expression_snippet::FormatJsExpressionSnippet,
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
-            crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped::default(),
+            crate::js::auxiliary::expression_snippet::FormatJsExpressionSnippet::default(),
         )
     }
 }
@@ -1805,6 +1805,46 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExpressionStatement {
         FormatOwnedWithRule::new(
             self,
             crate::js::statements::expression_statement::FormatJsExpressionStatement::default(),
+        )
+    }
+}
+impl FormatRule<biome_js_syntax::JsExpressionTemplateRoot>
+    for crate::js::auxiliary::expression_template_root::FormatJsExpressionTemplateRoot
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsExpressionTemplateRoot,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsExpressionTemplateRoot>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsExpressionTemplateRoot {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsExpressionTemplateRoot,
+        crate::js::auxiliary::expression_template_root::FormatJsExpressionTemplateRoot,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::auxiliary::expression_template_root::FormatJsExpressionTemplateRoot::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExpressionTemplateRoot {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsExpressionTemplateRoot,
+        crate::js::auxiliary::expression_template_root::FormatJsExpressionTemplateRoot,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::auxiliary::expression_template_root::FormatJsExpressionTemplateRoot::default(
+            ),
         )
     }
 }

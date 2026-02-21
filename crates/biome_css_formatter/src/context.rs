@@ -1,7 +1,7 @@
 use crate::CssCommentStyle;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
-    TransformSourceMap,
+    TrailingNewline, TransformSourceMap,
 };
 use biome_formatter::{IndentWidth, QuoteStyle, prelude::*};
 
@@ -62,6 +62,8 @@ pub struct CssFormatOptions {
     line_ending: LineEnding,
     line_width: LineWidth,
     quote_style: QuoteStyle,
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    trailing_newline: TrailingNewline,
     _file_source: CssFileSource,
 }
 
@@ -74,6 +76,7 @@ impl CssFormatOptions {
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             quote_style: QuoteStyle::default(),
+            trailing_newline: TrailingNewline::default(),
         }
     }
 
@@ -102,6 +105,11 @@ impl CssFormatOptions {
         self
     }
 
+    pub fn with_trailing_newline(mut self, trailing_newline: TrailingNewline) -> Self {
+        self.trailing_newline = trailing_newline;
+        self
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -122,8 +130,16 @@ impl CssFormatOptions {
         self.quote_style = quote_style;
     }
 
+    pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
+        self.trailing_newline = trailing_newline;
+    }
+
     pub fn quote_style(&self) -> QuoteStyle {
         self.quote_style
+    }
+
+    pub fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
     }
 }
 
@@ -144,6 +160,10 @@ impl FormatOptions for CssFormatOptions {
         self.line_ending
     }
 
+    fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::from(self)
     }
@@ -155,6 +175,7 @@ impl fmt::Display for CssFormatOptions {
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
-        writeln!(f, "Quote style: {}", self.quote_style)
+        writeln!(f, "Quote style: {}", self.quote_style)?;
+        writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
     }
 }

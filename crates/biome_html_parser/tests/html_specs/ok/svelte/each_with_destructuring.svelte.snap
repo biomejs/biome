@@ -1,0 +1,569 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{#each items as { id, name }}
+  <div>{id}: {name}</div>
+{/each}
+
+{#each users as { name, email }, i}
+  <div>{i}: {name} ({email})</div>
+{/each}
+
+{#each products as [id, title]}
+  <div>{id}: {title}</div>
+{/each}
+
+{#each items as { id, ...rest }}
+  <div>{id}</div>
+{/each}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                each_token: EACH_KW@2..6 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@6..13 " items " [] [],
+                },
+                item: SvelteEachAsKeyedItem {
+                    as_token: AS_KW@13..16 "as" [] [Whitespace(" ")],
+                    name: SvelteCurlyDestructuredName {
+                        l_curly_token: L_CURLY@16..18 "{" [] [Whitespace(" ")],
+                        names: SvelteBindingAssignmentBindingList [
+                            SvelteName {
+                                ident_token: IDENT@18..20 "id" [] [],
+                            },
+                            COMMA@20..22 "," [] [Whitespace(" ")],
+                            SvelteName {
+                                ident_token: IDENT@22..27 "name" [] [Whitespace(" ")],
+                            },
+                        ],
+                        r_curly_token: R_CURLY@27..28 "}" [] [],
+                    },
+                    index: missing (optional),
+                    key: missing (optional),
+                },
+                r_curly_token: R_CURLY@28..29 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@29..33 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@33..36 "div" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@36..37 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@37..38 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@38..40 "id" [] [],
+                            },
+                            r_curly_token: R_CURLY@40..41 "}" [] [],
+                        },
+                        HtmlContent {
+                            value_token: HTML_LITERAL@41..43 ":" [] [Whitespace(" ")],
+                        },
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@43..44 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@44..48 "name" [] [],
+                            },
+                            r_curly_token: R_CURLY@48..49 "}" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@49..50 "<" [] [],
+                        slash_token: SLASH@50..51 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@51..54 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@54..55 ">" [] [],
+                    },
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@55..58 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@58..62 "each" [] [],
+                r_curly_token: R_CURLY@62..63 "}" [] [],
+            },
+        },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@63..67 "{#" [Newline("\n"), Newline("\n")] [],
+                each_token: EACH_KW@67..71 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@71..78 " users " [] [],
+                },
+                item: SvelteEachAsKeyedItem {
+                    as_token: AS_KW@78..81 "as" [] [Whitespace(" ")],
+                    name: SvelteCurlyDestructuredName {
+                        l_curly_token: L_CURLY@81..83 "{" [] [Whitespace(" ")],
+                        names: SvelteBindingAssignmentBindingList [
+                            SvelteName {
+                                ident_token: IDENT@83..87 "name" [] [],
+                            },
+                            COMMA@87..89 "," [] [Whitespace(" ")],
+                            SvelteName {
+                                ident_token: IDENT@89..95 "email" [] [Whitespace(" ")],
+                            },
+                        ],
+                        r_curly_token: R_CURLY@95..96 "}" [] [],
+                    },
+                    index: SvelteEachIndex {
+                        comma_token: COMMA@96..98 "," [] [Whitespace(" ")],
+                        value: SvelteName {
+                            ident_token: IDENT@98..99 "i" [] [],
+                        },
+                    },
+                    key: missing (optional),
+                },
+                r_curly_token: R_CURLY@99..100 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@100..104 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@104..107 "div" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@107..108 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@108..109 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@109..110 "i" [] [],
+                            },
+                            r_curly_token: R_CURLY@110..111 "}" [] [],
+                        },
+                        HtmlContent {
+                            value_token: HTML_LITERAL@111..113 ":" [] [Whitespace(" ")],
+                        },
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@113..114 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@114..118 "name" [] [],
+                            },
+                            r_curly_token: R_CURLY@118..120 "}" [] [Whitespace(" ")],
+                        },
+                        HtmlContent {
+                            value_token: HTML_LITERAL@120..121 "(" [] [],
+                        },
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@121..122 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@122..127 "email" [] [],
+                            },
+                            r_curly_token: R_CURLY@127..128 "}" [] [],
+                        },
+                        HtmlContent {
+                            value_token: HTML_LITERAL@128..129 ")" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@129..130 "<" [] [],
+                        slash_token: SLASH@130..131 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@131..134 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@134..135 ">" [] [],
+                    },
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@135..138 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@138..142 "each" [] [],
+                r_curly_token: R_CURLY@142..143 "}" [] [],
+            },
+        },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@143..147 "{#" [Newline("\n"), Newline("\n")] [],
+                each_token: EACH_KW@147..151 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@151..161 " products " [] [],
+                },
+                item: SvelteEachAsKeyedItem {
+                    as_token: AS_KW@161..164 "as" [] [Whitespace(" ")],
+                    name: SvelteSquareDestructuredName {
+                        l_brack_token: L_BRACKET@164..165 "[" [] [],
+                        names: SvelteBindingAssignmentBindingList [
+                            SvelteName {
+                                ident_token: IDENT@165..167 "id" [] [],
+                            },
+                            COMMA@167..169 "," [] [Whitespace(" ")],
+                            SvelteName {
+                                ident_token: IDENT@169..174 "title" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACKET@174..175 "]" [] [],
+                    },
+                    index: missing (optional),
+                    key: missing (optional),
+                },
+                r_curly_token: R_CURLY@175..176 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@176..180 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@180..183 "div" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@183..184 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@184..185 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@185..187 "id" [] [],
+                            },
+                            r_curly_token: R_CURLY@187..188 "}" [] [],
+                        },
+                        HtmlContent {
+                            value_token: HTML_LITERAL@188..190 ":" [] [Whitespace(" ")],
+                        },
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@190..191 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@191..196 "title" [] [],
+                            },
+                            r_curly_token: R_CURLY@196..197 "}" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@197..198 "<" [] [],
+                        slash_token: SLASH@198..199 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@199..202 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@202..203 ">" [] [],
+                    },
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@203..206 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@206..210 "each" [] [],
+                r_curly_token: R_CURLY@210..211 "}" [] [],
+            },
+        },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@211..215 "{#" [Newline("\n"), Newline("\n")] [],
+                each_token: EACH_KW@215..219 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@219..226 " items " [] [],
+                },
+                item: SvelteEachAsKeyedItem {
+                    as_token: AS_KW@226..229 "as" [] [Whitespace(" ")],
+                    name: SvelteCurlyDestructuredName {
+                        l_curly_token: L_CURLY@229..231 "{" [] [Whitespace(" ")],
+                        names: SvelteBindingAssignmentBindingList [
+                            SvelteName {
+                                ident_token: IDENT@231..233 "id" [] [],
+                            },
+                            COMMA@233..235 "," [] [Whitespace(" ")],
+                            SvelteRestBinding {
+                                dotdotdot_token: DOT3@235..238 "..." [] [],
+                                name: SvelteName {
+                                    ident_token: IDENT@238..243 "rest" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                        r_curly_token: R_CURLY@243..244 "}" [] [],
+                    },
+                    index: missing (optional),
+                    key: missing (optional),
+                },
+                r_curly_token: R_CURLY@244..245 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@245..249 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@249..252 "div" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@252..253 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@253..254 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@254..256 "id" [] [],
+                            },
+                            r_curly_token: R_CURLY@256..257 "}" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@257..258 "<" [] [],
+                        slash_token: SLASH@258..259 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@259..262 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@262..263 ">" [] [],
+                    },
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@263..266 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@266..270 "each" [] [],
+                r_curly_token: R_CURLY@270..271 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@271..272 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..272
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..271
+    0: SVELTE_EACH_BLOCK@0..63
+      0: SVELTE_EACH_OPENING_BLOCK@0..29
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: EACH_KW@2..6 "each" [] []
+        2: HTML_TEXT_EXPRESSION@6..13
+          0: HTML_LITERAL@6..13 " items " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@13..28
+          0: AS_KW@13..16 "as" [] [Whitespace(" ")]
+          1: SVELTE_CURLY_DESTRUCTURED_NAME@16..28
+            0: L_CURLY@16..18 "{" [] [Whitespace(" ")]
+            1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@18..27
+              0: SVELTE_NAME@18..20
+                0: IDENT@18..20 "id" [] []
+              1: COMMA@20..22 "," [] [Whitespace(" ")]
+              2: SVELTE_NAME@22..27
+                0: IDENT@22..27 "name" [] [Whitespace(" ")]
+            2: R_CURLY@27..28 "}" [] []
+          2: (empty)
+          3: (empty)
+        4: R_CURLY@28..29 "}" [] []
+      1: HTML_ELEMENT_LIST@29..55
+        0: HTML_ELEMENT@29..55
+          0: HTML_OPENING_ELEMENT@29..37
+            0: L_ANGLE@29..33 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@33..36
+              0: HTML_LITERAL@33..36 "div" [] []
+            2: HTML_ATTRIBUTE_LIST@36..36
+            3: R_ANGLE@36..37 ">" [] []
+          1: HTML_ELEMENT_LIST@37..49
+            0: HTML_SINGLE_TEXT_EXPRESSION@37..41
+              0: L_CURLY@37..38 "{" [] []
+              1: HTML_TEXT_EXPRESSION@38..40
+                0: HTML_LITERAL@38..40 "id" [] []
+              2: R_CURLY@40..41 "}" [] []
+            1: HTML_CONTENT@41..43
+              0: HTML_LITERAL@41..43 ":" [] [Whitespace(" ")]
+            2: HTML_SINGLE_TEXT_EXPRESSION@43..49
+              0: L_CURLY@43..44 "{" [] []
+              1: HTML_TEXT_EXPRESSION@44..48
+                0: HTML_LITERAL@44..48 "name" [] []
+              2: R_CURLY@48..49 "}" [] []
+          2: HTML_CLOSING_ELEMENT@49..55
+            0: L_ANGLE@49..50 "<" [] []
+            1: SLASH@50..51 "/" [] []
+            2: HTML_TAG_NAME@51..54
+              0: HTML_LITERAL@51..54 "div" [] []
+            3: R_ANGLE@54..55 ">" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@55..63
+        0: SV_CURLY_SLASH@55..58 "{/" [Newline("\n")] []
+        1: EACH_KW@58..62 "each" [] []
+        2: R_CURLY@62..63 "}" [] []
+    1: SVELTE_EACH_BLOCK@63..143
+      0: SVELTE_EACH_OPENING_BLOCK@63..100
+        0: SV_CURLY_HASH@63..67 "{#" [Newline("\n"), Newline("\n")] []
+        1: EACH_KW@67..71 "each" [] []
+        2: HTML_TEXT_EXPRESSION@71..78
+          0: HTML_LITERAL@71..78 " users " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@78..99
+          0: AS_KW@78..81 "as" [] [Whitespace(" ")]
+          1: SVELTE_CURLY_DESTRUCTURED_NAME@81..96
+            0: L_CURLY@81..83 "{" [] [Whitespace(" ")]
+            1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@83..95
+              0: SVELTE_NAME@83..87
+                0: IDENT@83..87 "name" [] []
+              1: COMMA@87..89 "," [] [Whitespace(" ")]
+              2: SVELTE_NAME@89..95
+                0: IDENT@89..95 "email" [] [Whitespace(" ")]
+            2: R_CURLY@95..96 "}" [] []
+          2: SVELTE_EACH_INDEX@96..99
+            0: COMMA@96..98 "," [] [Whitespace(" ")]
+            1: SVELTE_NAME@98..99
+              0: IDENT@98..99 "i" [] []
+          3: (empty)
+        4: R_CURLY@99..100 "}" [] []
+      1: HTML_ELEMENT_LIST@100..135
+        0: HTML_ELEMENT@100..135
+          0: HTML_OPENING_ELEMENT@100..108
+            0: L_ANGLE@100..104 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@104..107
+              0: HTML_LITERAL@104..107 "div" [] []
+            2: HTML_ATTRIBUTE_LIST@107..107
+            3: R_ANGLE@107..108 ">" [] []
+          1: HTML_ELEMENT_LIST@108..129
+            0: HTML_SINGLE_TEXT_EXPRESSION@108..111
+              0: L_CURLY@108..109 "{" [] []
+              1: HTML_TEXT_EXPRESSION@109..110
+                0: HTML_LITERAL@109..110 "i" [] []
+              2: R_CURLY@110..111 "}" [] []
+            1: HTML_CONTENT@111..113
+              0: HTML_LITERAL@111..113 ":" [] [Whitespace(" ")]
+            2: HTML_SINGLE_TEXT_EXPRESSION@113..120
+              0: L_CURLY@113..114 "{" [] []
+              1: HTML_TEXT_EXPRESSION@114..118
+                0: HTML_LITERAL@114..118 "name" [] []
+              2: R_CURLY@118..120 "}" [] [Whitespace(" ")]
+            3: HTML_CONTENT@120..121
+              0: HTML_LITERAL@120..121 "(" [] []
+            4: HTML_SINGLE_TEXT_EXPRESSION@121..128
+              0: L_CURLY@121..122 "{" [] []
+              1: HTML_TEXT_EXPRESSION@122..127
+                0: HTML_LITERAL@122..127 "email" [] []
+              2: R_CURLY@127..128 "}" [] []
+            5: HTML_CONTENT@128..129
+              0: HTML_LITERAL@128..129 ")" [] []
+          2: HTML_CLOSING_ELEMENT@129..135
+            0: L_ANGLE@129..130 "<" [] []
+            1: SLASH@130..131 "/" [] []
+            2: HTML_TAG_NAME@131..134
+              0: HTML_LITERAL@131..134 "div" [] []
+            3: R_ANGLE@134..135 ">" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@135..143
+        0: SV_CURLY_SLASH@135..138 "{/" [Newline("\n")] []
+        1: EACH_KW@138..142 "each" [] []
+        2: R_CURLY@142..143 "}" [] []
+    2: SVELTE_EACH_BLOCK@143..211
+      0: SVELTE_EACH_OPENING_BLOCK@143..176
+        0: SV_CURLY_HASH@143..147 "{#" [Newline("\n"), Newline("\n")] []
+        1: EACH_KW@147..151 "each" [] []
+        2: HTML_TEXT_EXPRESSION@151..161
+          0: HTML_LITERAL@151..161 " products " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@161..175
+          0: AS_KW@161..164 "as" [] [Whitespace(" ")]
+          1: SVELTE_SQUARE_DESTRUCTURED_NAME@164..175
+            0: L_BRACKET@164..165 "[" [] []
+            1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@165..174
+              0: SVELTE_NAME@165..167
+                0: IDENT@165..167 "id" [] []
+              1: COMMA@167..169 "," [] [Whitespace(" ")]
+              2: SVELTE_NAME@169..174
+                0: IDENT@169..174 "title" [] []
+            2: R_BRACKET@174..175 "]" [] []
+          2: (empty)
+          3: (empty)
+        4: R_CURLY@175..176 "}" [] []
+      1: HTML_ELEMENT_LIST@176..203
+        0: HTML_ELEMENT@176..203
+          0: HTML_OPENING_ELEMENT@176..184
+            0: L_ANGLE@176..180 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@180..183
+              0: HTML_LITERAL@180..183 "div" [] []
+            2: HTML_ATTRIBUTE_LIST@183..183
+            3: R_ANGLE@183..184 ">" [] []
+          1: HTML_ELEMENT_LIST@184..197
+            0: HTML_SINGLE_TEXT_EXPRESSION@184..188
+              0: L_CURLY@184..185 "{" [] []
+              1: HTML_TEXT_EXPRESSION@185..187
+                0: HTML_LITERAL@185..187 "id" [] []
+              2: R_CURLY@187..188 "}" [] []
+            1: HTML_CONTENT@188..190
+              0: HTML_LITERAL@188..190 ":" [] [Whitespace(" ")]
+            2: HTML_SINGLE_TEXT_EXPRESSION@190..197
+              0: L_CURLY@190..191 "{" [] []
+              1: HTML_TEXT_EXPRESSION@191..196
+                0: HTML_LITERAL@191..196 "title" [] []
+              2: R_CURLY@196..197 "}" [] []
+          2: HTML_CLOSING_ELEMENT@197..203
+            0: L_ANGLE@197..198 "<" [] []
+            1: SLASH@198..199 "/" [] []
+            2: HTML_TAG_NAME@199..202
+              0: HTML_LITERAL@199..202 "div" [] []
+            3: R_ANGLE@202..203 ">" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@203..211
+        0: SV_CURLY_SLASH@203..206 "{/" [Newline("\n")] []
+        1: EACH_KW@206..210 "each" [] []
+        2: R_CURLY@210..211 "}" [] []
+    3: SVELTE_EACH_BLOCK@211..271
+      0: SVELTE_EACH_OPENING_BLOCK@211..245
+        0: SV_CURLY_HASH@211..215 "{#" [Newline("\n"), Newline("\n")] []
+        1: EACH_KW@215..219 "each" [] []
+        2: HTML_TEXT_EXPRESSION@219..226
+          0: HTML_LITERAL@219..226 " items " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@226..244
+          0: AS_KW@226..229 "as" [] [Whitespace(" ")]
+          1: SVELTE_CURLY_DESTRUCTURED_NAME@229..244
+            0: L_CURLY@229..231 "{" [] [Whitespace(" ")]
+            1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@231..243
+              0: SVELTE_NAME@231..233
+                0: IDENT@231..233 "id" [] []
+              1: COMMA@233..235 "," [] [Whitespace(" ")]
+              2: SVELTE_REST_BINDING@235..243
+                0: DOT3@235..238 "..." [] []
+                1: SVELTE_NAME@238..243
+                  0: IDENT@238..243 "rest" [] [Whitespace(" ")]
+            2: R_CURLY@243..244 "}" [] []
+          2: (empty)
+          3: (empty)
+        4: R_CURLY@244..245 "}" [] []
+      1: HTML_ELEMENT_LIST@245..263
+        0: HTML_ELEMENT@245..263
+          0: HTML_OPENING_ELEMENT@245..253
+            0: L_ANGLE@245..249 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@249..252
+              0: HTML_LITERAL@249..252 "div" [] []
+            2: HTML_ATTRIBUTE_LIST@252..252
+            3: R_ANGLE@252..253 ">" [] []
+          1: HTML_ELEMENT_LIST@253..257
+            0: HTML_SINGLE_TEXT_EXPRESSION@253..257
+              0: L_CURLY@253..254 "{" [] []
+              1: HTML_TEXT_EXPRESSION@254..256
+                0: HTML_LITERAL@254..256 "id" [] []
+              2: R_CURLY@256..257 "}" [] []
+          2: HTML_CLOSING_ELEMENT@257..263
+            0: L_ANGLE@257..258 "<" [] []
+            1: SLASH@258..259 "/" [] []
+            2: HTML_TAG_NAME@259..262
+              0: HTML_LITERAL@259..262 "div" [] []
+            3: R_ANGLE@262..263 ">" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@263..271
+        0: SV_CURLY_SLASH@263..266 "{/" [Newline("\n")] []
+        1: EACH_KW@266..270 "each" [] []
+        2: R_CURLY@270..271 "}" [] []
+  4: EOF@271..272 "" [Newline("\n")] []
+
+```

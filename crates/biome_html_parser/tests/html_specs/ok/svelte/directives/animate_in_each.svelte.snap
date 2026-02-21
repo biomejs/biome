@@ -1,0 +1,247 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{#each todos.filter(t => !t.done) as todo (todo.id)}
+  <div animate:flip={{ duration: 200 }}>
+    <input type="checkbox" bind:checked={todo.done} />
+    {todo.text}
+  </div>
+{/each}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                each_token: EACH_KW@2..6 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@6..34 " todos.filter(t => !t.done) " [] [],
+                },
+                item: SvelteEachAsKeyedItem {
+                    as_token: AS_KW@34..37 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@37..42 "todo" [] [Whitespace(" ")],
+                    },
+                    index: missing (optional),
+                    key: SvelteEachKey {
+                        l_paren_token: L_PAREN@42..43 "(" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@43..50 "todo.id" [] [],
+                        },
+                        r_paren_token: R_PAREN@50..51 ")" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@51..52 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@52..56 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@56..60 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            SvelteAnimateDirective {
+                                animate_token: ANIMATE_KW@60..67 "animate" [] [],
+                                value: SvelteDirectiveValue {
+                                    colon_token: COLON@67..68 ":" [] [],
+                                    property: SvelteName {
+                                        ident_token: IDENT@68..72 "flip" [] [],
+                                    },
+                                    modifiers: SvelteDirectiveModifierList [],
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@72..73 "=" [] [],
+                                        value: HtmlAttributeSingleTextExpression {
+                                            l_curly_token: L_CURLY@73..74 "{" [] [],
+                                            expression: HtmlTextExpression {
+                                                html_literal_token: HTML_LITERAL@74..91 "{ duration: 200 }" [] [],
+                                            },
+                                            r_curly_token: R_CURLY@91..92 "}" [] [],
+                                        },
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@92..93 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSelfClosingElement {
+                            l_angle_token: L_ANGLE@93..99 "<" [Newline("\n"), Whitespace("    ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@99..105 "input" [] [Whitespace(" ")],
+                            },
+                            attributes: HtmlAttributeList [
+                                HtmlAttribute {
+                                    name: HtmlAttributeName {
+                                        value_token: HTML_LITERAL@105..109 "type" [] [],
+                                    },
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@109..110 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@110..121 "\"checkbox\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                },
+                                SvelteBindDirective {
+                                    bind_token: BIND_KW@121..125 "bind" [] [],
+                                    value: SvelteDirectiveValue {
+                                        colon_token: COLON@125..126 ":" [] [],
+                                        property: SvelteName {
+                                            ident_token: IDENT@126..133 "checked" [] [],
+                                        },
+                                        modifiers: SvelteDirectiveModifierList [],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@133..134 "=" [] [],
+                                            value: HtmlAttributeSingleTextExpression {
+                                                l_curly_token: L_CURLY@134..135 "{" [] [],
+                                                expression: HtmlTextExpression {
+                                                    html_literal_token: HTML_LITERAL@135..144 "todo.done" [] [],
+                                                },
+                                                r_curly_token: R_CURLY@144..146 "}" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    },
+                                },
+                            ],
+                            slash_token: SLASH@146..147 "/" [] [],
+                            r_angle_token: R_ANGLE@147..148 ">" [] [],
+                        },
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@148..154 "{" [Newline("\n"), Whitespace("    ")] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@154..163 "todo.text" [] [],
+                            },
+                            r_curly_token: R_CURLY@163..164 "}" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@164..168 "<" [Newline("\n"), Whitespace("  ")] [],
+                        slash_token: SLASH@168..169 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@169..172 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@172..173 ">" [] [],
+                    },
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@173..176 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@176..180 "each" [] [],
+                r_curly_token: R_CURLY@180..181 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@181..182 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..182
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..181
+    0: SVELTE_EACH_BLOCK@0..181
+      0: SVELTE_EACH_OPENING_BLOCK@0..52
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: EACH_KW@2..6 "each" [] []
+        2: HTML_TEXT_EXPRESSION@6..34
+          0: HTML_LITERAL@6..34 " todos.filter(t => !t.done) " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@34..51
+          0: AS_KW@34..37 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@37..42
+            0: IDENT@37..42 "todo" [] [Whitespace(" ")]
+          2: (empty)
+          3: SVELTE_EACH_KEY@42..51
+            0: L_PAREN@42..43 "(" [] []
+            1: HTML_TEXT_EXPRESSION@43..50
+              0: HTML_LITERAL@43..50 "todo.id" [] []
+            2: R_PAREN@50..51 ")" [] []
+        4: R_CURLY@51..52 "}" [] []
+      1: HTML_ELEMENT_LIST@52..173
+        0: HTML_ELEMENT@52..173
+          0: HTML_OPENING_ELEMENT@52..93
+            0: L_ANGLE@52..56 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@56..60
+              0: HTML_LITERAL@56..60 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@60..92
+              0: SVELTE_ANIMATE_DIRECTIVE@60..92
+                0: ANIMATE_KW@60..67 "animate" [] []
+                1: SVELTE_DIRECTIVE_VALUE@67..92
+                  0: COLON@67..68 ":" [] []
+                  1: SVELTE_NAME@68..72
+                    0: IDENT@68..72 "flip" [] []
+                  2: SVELTE_DIRECTIVE_MODIFIER_LIST@72..72
+                  3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@72..92
+                    0: EQ@72..73 "=" [] []
+                    1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@73..92
+                      0: L_CURLY@73..74 "{" [] []
+                      1: HTML_TEXT_EXPRESSION@74..91
+                        0: HTML_LITERAL@74..91 "{ duration: 200 }" [] []
+                      2: R_CURLY@91..92 "}" [] []
+            3: R_ANGLE@92..93 ">" [] []
+          1: HTML_ELEMENT_LIST@93..164
+            0: HTML_SELF_CLOSING_ELEMENT@93..148
+              0: L_ANGLE@93..99 "<" [Newline("\n"), Whitespace("    ")] []
+              1: HTML_TAG_NAME@99..105
+                0: HTML_LITERAL@99..105 "input" [] [Whitespace(" ")]
+              2: HTML_ATTRIBUTE_LIST@105..146
+                0: HTML_ATTRIBUTE@105..121
+                  0: HTML_ATTRIBUTE_NAME@105..109
+                    0: HTML_LITERAL@105..109 "type" [] []
+                  1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@109..121
+                    0: EQ@109..110 "=" [] []
+                    1: HTML_STRING@110..121
+                      0: HTML_STRING_LITERAL@110..121 "\"checkbox\"" [] [Whitespace(" ")]
+                1: SVELTE_BIND_DIRECTIVE@121..146
+                  0: BIND_KW@121..125 "bind" [] []
+                  1: SVELTE_DIRECTIVE_VALUE@125..146
+                    0: COLON@125..126 ":" [] []
+                    1: SVELTE_NAME@126..133
+                      0: IDENT@126..133 "checked" [] []
+                    2: SVELTE_DIRECTIVE_MODIFIER_LIST@133..133
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@133..146
+                      0: EQ@133..134 "=" [] []
+                      1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@134..146
+                        0: L_CURLY@134..135 "{" [] []
+                        1: HTML_TEXT_EXPRESSION@135..144
+                          0: HTML_LITERAL@135..144 "todo.done" [] []
+                        2: R_CURLY@144..146 "}" [] [Whitespace(" ")]
+              3: SLASH@146..147 "/" [] []
+              4: R_ANGLE@147..148 ">" [] []
+            1: HTML_SINGLE_TEXT_EXPRESSION@148..164
+              0: L_CURLY@148..154 "{" [Newline("\n"), Whitespace("    ")] []
+              1: HTML_TEXT_EXPRESSION@154..163
+                0: HTML_LITERAL@154..163 "todo.text" [] []
+              2: R_CURLY@163..164 "}" [] []
+          2: HTML_CLOSING_ELEMENT@164..173
+            0: L_ANGLE@164..168 "<" [Newline("\n"), Whitespace("  ")] []
+            1: SLASH@168..169 "/" [] []
+            2: HTML_TAG_NAME@169..172
+              0: HTML_LITERAL@169..172 "div" [] []
+            3: R_ANGLE@172..173 ">" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@173..181
+        0: SV_CURLY_SLASH@173..176 "{/" [Newline("\n")] []
+        1: EACH_KW@176..180 "each" [] []
+        2: R_CURLY@180..181 "}" [] []
+  4: EOF@181..182 "" [Newline("\n")] []
+
+```

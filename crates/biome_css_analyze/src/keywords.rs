@@ -770,6 +770,7 @@ pub const FUNCTION_KEYWORDS: &[&str] = &[
     "translatez",
     "type",
     "url",
+    "v-bind", // Vue.js specific
     "var",
     "view",
     "xywh",

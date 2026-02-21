@@ -5,11 +5,11 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_root;
 use biome_css_factory::CssSyntaxFactory;
-use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssFileSource, CssLanguage, CssSyntaxNode};
 pub use biome_parser::prelude::*;
 use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
 use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset};
-pub use parser::CssParserOptions;
+pub use parser::{CssModulesKind, CssParserOptions};
 
 mod lexer;
 mod parser;
@@ -24,18 +24,19 @@ pub(crate) type CssLosslessTreeSink<'source> =
 pub(crate) type CssOffsetLosslessTreeSink<'source> =
     biome_parser::tree_sink::OffsetLosslessTreeSink<'source, CssLanguage, CssSyntaxFactory>;
 
-pub fn parse_css(source: &str, options: CssParserOptions) -> CssParse {
+pub fn parse_css(source: &str, source_type: CssFileSource, options: CssParserOptions) -> CssParse {
     let mut cache = NodeCache::default();
-    parse_css_with_cache(source, &mut cache, options)
+    parse_css_with_cache(source, source_type, &mut cache, options)
 }
 
 /// Parses the provided string as CSS program using the provided node cache.
 pub fn parse_css_with_cache(
     source: &str,
+    source_type: CssFileSource,
     cache: &mut NodeCache,
     options: CssParserOptions,
 ) -> CssParse {
-    let mut parser = CssParser::new(source, options);
+    let mut parser = CssParser::new(source, source_type, options);
 
     parse_root(&mut parser);
 
@@ -68,13 +69,13 @@ impl CssParse {
     /// # use biome_rowan::{AstNode, AstNodeList, SyntaxError};
     ///
     /// # fn main() -> Result<(), SyntaxError> {
-    /// use biome_css_syntax::CssSyntaxKind;
+    /// use biome_css_syntax::{CssFileSource, CssSyntaxKind};
     /// use biome_css_parser::CssParserOptions;
-    /// let parse = parse_css(r#""#, CssParserOptions::default());
+    /// let parse = parse_css(r#""#, CssFileSource::css(), CssParserOptions::default());
     ///
-    /// let root_value = parse.tree().rules();
+    /// let root_value = parse.tree().as_css_root().unwrap().items();
     ///
-    /// assert_eq!(root_value.syntax().kind(), CssSyntaxKind::CSS_RULE_LIST);
+    /// assert_eq!(root_value.syntax().kind(), CssSyntaxKind::CSS_ROOT_ITEM_LIST);
     ///
     /// # Ok(())
     /// # }
@@ -104,8 +105,8 @@ impl CssParse {
     ///
     /// # Panics
     /// Panics if the node represented by this parse result mismatches.
-    pub fn tree(&self) -> CssRoot {
-        CssRoot::unwrap_cast(self.syntax())
+    pub fn tree(&self) -> AnyCssRoot {
+        AnyCssRoot::unwrap_cast(self.syntax())
     }
 }
 
@@ -160,8 +161,8 @@ impl CssOffsetParse {
     ///
     /// # Panics
     /// Panics if the node represented by this parse result mismatches.
-    pub fn tree(&self) -> CssRoot {
-        CssRoot::unwrap_cast(self.root.inner().clone())
+    pub fn tree(&self) -> AnyCssRoot {
+        AnyCssRoot::unwrap_cast(self.root.inner().clone())
     }
 
     /// Get the base offset applied to this parse result
@@ -201,23 +202,26 @@ impl From<CssOffsetParse> for AnyParse {
 /// # Examples
 /// ```
 /// use biome_css_parser::{CssParserOptions, parse_css_with_offset};
+/// use biome_css_syntax::CssFileSource;
 /// use biome_rowan::TextSize;
 ///
 /// // Parsing embedded CSS starting at position 50 in an HTML document
 /// let css_code = "body { color: red; }";
+/// let source_type = CssFileSource::css();
 /// let offset = TextSize::from(50);
-/// let parse = parse_css_with_offset(css_code, offset, CssParserOptions::default());
+/// let parse = parse_css_with_offset(css_code, source_type, offset, CssParserOptions::default());
 ///
 /// // All text ranges in the resulting AST will be offset by 50
 /// assert_eq!(parse.base_offset(), offset);
 /// ```
 pub fn parse_css_with_offset(
     source: &str,
+    source_type: CssFileSource,
     base_offset: biome_rowan::TextSize,
     options: CssParserOptions,
 ) -> CssOffsetParse {
     let mut cache = NodeCache::default();
-    parse_css_with_offset_and_cache(source, base_offset, &mut cache, options)
+    parse_css_with_offset_and_cache(source, source_type, base_offset, &mut cache, options)
 }
 
 /// Parses CSS code with an offset and cache for embedded content.
@@ -226,11 +230,12 @@ pub fn parse_css_with_offset(
 /// when parsing multiple embedded CSS blocks.
 pub fn parse_css_with_offset_and_cache(
     source: &str,
+    source_type: CssFileSource,
     base_offset: biome_rowan::TextSize,
     cache: &mut NodeCache,
     options: CssParserOptions,
 ) -> CssOffsetParse {
-    let mut parser = CssParser::new(source, options);
+    let mut parser = CssParser::new(source, source_type, options);
 
     parse_root(&mut parser);
 
@@ -247,6 +252,7 @@ pub fn parse_css_with_offset_and_cache(
 mod tests {
     use crate::{CssParserOptions, parse_css};
     use crate::{parse_css_with_cache, parse_css_with_offset};
+    use biome_css_syntax::CssFileSource;
     use biome_rowan::TextSize;
 
     #[test]
@@ -254,15 +260,21 @@ mod tests {
         let src = r#"
 "#;
 
-        let _css = parse_css(src, CssParserOptions::default());
+        let _css = parse_css(src, CssFileSource::css(), CssParserOptions::default());
     }
 
     #[test]
     fn test_css_offset_parsing_basic() {
         let css_code = "body { color: red; }";
+        let source_type = CssFileSource::css();
         let base_offset = TextSize::from(75);
 
-        let parse = parse_css_with_offset(css_code, base_offset, CssParserOptions::default());
+        let parse = parse_css_with_offset(
+            css_code,
+            source_type,
+            base_offset,
+            CssParserOptions::default(),
+        );
 
         // Verify no parsing errors
         assert!(!parse.has_errors(), "Parse should not have errors");
@@ -285,15 +297,21 @@ mod tests {
     #[test]
     fn test_css_offset_parsing_vs_regular_parsing() {
         let css_code = ".container { width: 100%; margin: 0 auto; }";
+        let source_type = CssFileSource::css();
         let base_offset = TextSize::from(25);
 
         // Parse with offset
-        let offset_parse =
-            parse_css_with_offset(css_code, base_offset, CssParserOptions::default());
+        let offset_parse = parse_css_with_offset(
+            css_code,
+            source_type,
+            base_offset,
+            CssParserOptions::default(),
+        );
 
         // Parse normally
         let normal_parse = parse_css_with_cache(
             css_code,
+            source_type,
             &mut biome_rowan::NodeCache::default(),
             CssParserOptions::default(),
         );

@@ -25,9 +25,10 @@ expression: redactor(content)
 
 ```html
 <script type="module">
+	import _ from "lodash";
 	import z from "zod";
 
-	const _schema = z.object({}).optional().nullable();
+	const schema = z.object({}).optional().nullable();
 </script>
 <style>
 	#id .class div {
@@ -52,21 +53,25 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.html:7:48 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.html:9:2 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
-    6 │         </script>
-  > 7 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
-      │                                                ^^^^^^^^^^^^^^^^
-    8 │ 
+     7 │ <style>#id .class div {
+     8 │ 	background-color: red;
+   > 9 │ 	background-color: red;
+       │ 	^^^^^^^^^^^^^^^^
+    10 │ } </style>
+    11 │ 
   
   i background-color is already defined here.
   
-    6 │         </script>
-  > 7 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
-      │                         ^^^^^^^^^^^^^^^^
-    8 │ 
+     6 │         </script>
+     7 │ <style>#id .class div {
+   > 8 │ 	background-color: red;
+       │ 	^^^^^^^^^^^^^^^^
+     9 │ 	background-color: red;
+    10 │ } </style>
   
   i Remove or rename the duplicate property to ensure consistent styling.
   

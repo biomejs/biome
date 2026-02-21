@@ -1,0 +1,16 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+# Emitted Messages
+
+```block
+Bootstraps a new biome project. Creates a configuration file with some defaults.
+
+Usage: init [--jsonc]
+
+Available options:
+        --jsonc  Tells Biome to emit a `biome.jsonc` file.
+    -h, --help   Prints help information
+
+```

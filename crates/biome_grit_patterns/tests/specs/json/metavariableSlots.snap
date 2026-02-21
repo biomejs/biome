@@ -1,0 +1,15 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: metavariableSlots
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "2:3-2:17",
+        "3:3-3:21",
+        "4:3-6:4",
+        "5:5-5:23",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

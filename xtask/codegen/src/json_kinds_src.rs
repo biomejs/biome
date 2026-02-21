@@ -21,6 +21,7 @@ pub const JSON_KINDS_SRC: KindsSrc = KindsSrc {
         "IDENT",
         "COMMENT",
         "MULTILINE_COMMENT",
+        "GRIT_METAVARIABLE",
     ],
     nodes: &[
         "JSON_ROOT",
@@ -34,9 +35,11 @@ pub const JSON_KINDS_SRC: KindsSrc = KindsSrc {
         "JSON_MEMBER",
         "JSON_MEMBER_NAME",
         "JSON_ARRAY_ELEMENT_LIST",
+        // Grit metavariable node
+        "JSON_METAVARIABLE",
         // Bogus nodes
         "JSON_BOGUS",
-        "JSON_BOGUS_MEMBER_NAME",
+        "JSON_BOGUS_NAME",
         "JSON_BOGUS_VALUE",
     ],
 };

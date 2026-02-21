@@ -24,3 +24,13 @@ pub fn json_string_literal(text: &str) -> JsonSyntaxToken {
         [],
     )
 }
+
+/// Create a new number literal token with no attached trivia
+pub fn json_number_literal(value: impl ToString) -> JsonSyntaxToken {
+    JsonSyntaxToken::new_detached(
+        JsonSyntaxKind::JSON_NUMBER_LITERAL,
+        &value.to_string(),
+        [],
+        [],
+    )
+}

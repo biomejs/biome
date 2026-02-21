@@ -10,7 +10,7 @@ use biome_js_parser::JsFileSource;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_module_graph::ModuleGraph;
 use biome_project_layout::ProjectLayout;
-use biome_test_utils::get_added_paths;
+use biome_test_utils::get_added_js_paths;
 use camino::Utf8PathBuf;
 
 pub use codeblock::*;
@@ -80,8 +80,8 @@ impl AnalyzerServicesBuilder {
         }
 
         let module_graph = ModuleGraph::default();
-        let added_paths = get_added_paths(&fs, &added_paths);
-        module_graph.update_graph_for_js_paths(&fs, &layout, &added_paths);
+        let added_paths = get_added_js_paths(&fs, &added_paths);
+        module_graph.update_graph_for_js_paths(&fs, &layout, &added_paths, true);
 
         Self {
             module_graph: Arc::new(module_graph),

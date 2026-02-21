@@ -1,16 +1,19 @@
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
-    DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler, FormatterCapabilities,
-    LintParams, LintResults, ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions,
-    ProcessFixAll, ProcessLint, SearchCapabilities, search,
+    DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler, FormatEmbedNode,
+    FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
+    ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint,
+    SearchCapabilities, UpdateSnippetsNodes, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
 use crate::file_handlers::FixAllParams;
 use crate::settings::{
-    OverrideSettings, Settings, check_feature_activity, check_override_feature_activity,
+    OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
+    check_override_feature_activity,
 };
-use crate::workspace::{DocumentFileSource, PullDiagnosticsAndActionsResult};
+use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
+use crate::workspace::{DocumentFileSource, EmbeddedSnippet, PullDiagnosticsAndActionsResult};
 use crate::{
     WorkspaceError,
     settings::{FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage},
@@ -26,15 +29,21 @@ use biome_configuration::javascript::{
     JsGritMetavariable, JsLinterConfiguration, JsLinterEnabled, JsParserConfiguration,
     JsxEverywhere, JsxRuntime, UnsafeParameterDecoratorsEnabled,
 };
+use biome_css_parser::parse_css_with_offset_and_cache;
+use biome_css_syntax::{CssFileSource, CssLanguage, EmbeddingKind};
+use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatError, IndentStyle,
-    IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatElement, FormatError,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
+use biome_graphql_parser::parse_graphql_with_offset_and_cache;
+use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
     ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
 };
+use biome_js_factory::make::ident;
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
     ArrowParentheses, JsFormatOptions, OperatorLinebreak, QuoteProperties, Semicolons,
@@ -43,20 +52,25 @@ use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
-    AnyJsRoot, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
-    JsLanguage, JsSyntaxNode, JsVariableDeclarator, TextRange, TextSize, TokenAtOffset,
+    AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments,
+    JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
+    JsLanguage, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression, JsVariableDeclarator,
+    TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 use biome_module_graph::ModuleGraph;
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache, WalkEvent};
+use biome_rowan::{
+    AstNode, AstNodeList, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode,
+    WalkEvent,
+};
 use camino::Utf8Path;
 use either::Either;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
 use std::sync::Arc;
-use tracing::{debug, debug_span, error, trace_span};
+use tracing::{debug, debug_span, error, instrument, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -77,6 +91,7 @@ pub struct JsFormatterSettings {
     pub attribute_position: Option<AttributePosition>,
     pub expand: Option<Expand>,
     pub operator_linebreak: Option<OperatorLinebreak>,
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl From<JsFormatterConfiguration> for JsFormatterSettings {
@@ -98,6 +113,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             line_ending: value.line_ending,
             expand: value.expand,
             operator_linebreak: value.operator_linebreak,
+            trailing_newline: value.trailing_newline,
         }
     }
 }
@@ -265,6 +281,12 @@ impl ServiceLanguage for JsLanguage {
                 .unwrap_or_default(),
         )
         .with_expand(language.expand.or(global.expand).unwrap_or_default())
+        .with_trailing_newline(
+            language
+                .trailing_newline
+                .or(global.trailing_newline)
+                .unwrap_or_default(),
+        )
         .with_operator_linebreak(language.operator_linebreak.unwrap_or_default());
 
         overrides.override_js_format_options(path, options)
@@ -486,7 +508,7 @@ impl ExtensionHandler for JsFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
-                parse_embedded_nodes: None,
+                parse_embedded_nodes: Some(parse_embedded_nodes),
             },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
@@ -501,14 +523,14 @@ impl ExtensionHandler for JsFileHandler {
                 code_actions: Some(code_actions),
                 fix_all: Some(fix_all),
                 rename: Some(rename),
-                update_snippets: None,
+                update_snippets: Some(update_snippets),
                 pull_diagnostics_and_actions: Some(pull_diagnostics_and_actions),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
-                format_embedded: None,
+                format_embedded: Some(format_embedded),
             },
             search: SearchCapabilities {
                 search: Some(search),
@@ -517,19 +539,19 @@ impl ExtensionHandler for JsFileHandler {
     }
 }
 
-pub fn formatter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+pub fn formatter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.formatter_enabled_for_file_path::<JsLanguage>(path)
 }
 
-pub fn linter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+pub fn linter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.linter_enabled_for_file_path::<JsLanguage>(path)
 }
 
-pub fn assist_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+pub fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.assist_enabled_for_file_path::<JsLanguage>(path)
 }
 
-pub fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
+pub fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
@@ -537,7 +559,7 @@ fn parse(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let options = settings.parse_options::<JsLanguage>(biome_path, &file_source);
@@ -548,6 +570,148 @@ fn parse(
         any_parse: parse.into(),
         language: None,
     }
+}
+
+fn parse_embedded_nodes(
+    root: &AnyParse,
+    biome_path: &BiomePath,
+    _file_source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
+    cache: &mut NodeCache,
+    _builder: &mut EmbeddedBuilder,
+) -> ParseEmbedResult {
+    if !settings
+        .as_ref()
+        .experimental_js_embedded_snippets_enabled()
+    {
+        return ParseEmbedResult { nodes: vec![] };
+    }
+
+    let mut nodes = Vec::new();
+    let js_root: AnyJsRoot = root.tree();
+
+    // Walk through all JS elements looking for template expressions
+    for node in js_root.syntax().descendants() {
+        let Some(expr) = JsTemplateExpression::cast_ref(&node) else {
+            continue;
+        };
+
+        if let Some((content, file_source)) =
+            parse_template_expression(expr, cache, biome_path, settings)
+        {
+            nodes.push((content.into(), file_source))
+        }
+    }
+
+    ParseEmbedResult { nodes }
+}
+
+fn parse_template_expression(
+    expr: JsTemplateExpression,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    // TODO: Interpolations are not supported yet.
+    if expr.elements().len() != 1 {
+        return None;
+    }
+
+    let Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)) = expr.elements().first() else {
+        return None;
+    };
+
+    let tag = expr.tag();
+    if is_styled_tag(tag.as_ref()) {
+        let file_source = DocumentFileSource::Css(
+            CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
+        );
+        let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+        let content = chunk.template_chunk_token().ok()?;
+        let parse = parse_css_with_offset_and_cache(
+            content.text(),
+            file_source.to_css_file_source().unwrap_or_default(),
+            content.text_range().start(),
+            cache,
+            options,
+        );
+
+        let snippet = EmbeddedSnippet::new(
+            parse.into(),
+            chunk.range(),
+            content.text_range(),
+            content.text_range().start(),
+        );
+
+        Some((snippet, file_source))
+    } else if is_graphql_tag(tag.as_ref(), &expr) {
+        let file_source = DocumentFileSource::Graphql(GraphqlFileSource::graphql());
+        let content = chunk.template_chunk_token().ok()?;
+        let parse = parse_graphql_with_offset_and_cache(
+            content.text(),
+            content.text_range().start(),
+            cache,
+        );
+
+        let snippet = EmbeddedSnippet::new(
+            parse.into(),
+            chunk.range(),
+            content.text_range(),
+            content.text_range().start(),
+        );
+
+        Some((snippet, file_source))
+    } else {
+        None
+    }
+}
+
+fn is_styled_tag(tag: Option<&AnyJsExpression>) -> bool {
+    // css``
+    if let Some(AnyJsExpression::JsIdentifierExpression(ident)) = tag
+        && ident.name().is_ok_and(|name| name.has_name("css"))
+    {
+        return true;
+    }
+
+    // styled.div``
+    if let Some(AnyJsExpression::JsStaticMemberExpression(expr)) = tag
+        && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = expr.object()
+        && ident.name().is_ok_and(|name| name.has_name("styled"))
+    {
+        return true;
+    }
+
+    // styled(Component)``
+    if let Some(AnyJsExpression::JsCallExpression(expr)) = tag
+        && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = expr.callee()
+        && ident.name().is_ok_and(|name| name.has_name("styled"))
+    {
+        return true;
+    }
+
+    false
+}
+
+fn is_graphql_tag(tag: Option<&AnyJsExpression>, template: &JsTemplateExpression) -> bool {
+    // gql``
+    if let Some(AnyJsExpression::JsIdentifierExpression(ident)) = tag
+        && ident.name().is_ok_and(|name| name.has_name("gql"))
+    {
+        return true;
+    }
+
+    // graphql(``)
+    if let Some(list) = template.parent::<JsCallArgumentList>()
+        && let Some(args) = list.parent::<JsCallArguments>()
+        && let Some(call) = args.parent::<JsCallExpression>()
+        && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = call.callee()
+        && ident.name().is_ok_and(|name| name.has_name("graphql"))
+    {
+        return true;
+    }
+
+    false
 }
 
 fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
@@ -607,12 +771,12 @@ fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(path, document_file_source);
 
     let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
+    let formatted = format_node(options, &tree, false)?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
@@ -741,7 +905,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         params.suppression_reason.as_deref(),
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(params.only)
             .with_skip(params.skip)
             .with_path(params.path.as_path())
@@ -757,8 +921,18 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     };
 
     let mut process_lint = ProcessLint::new(&params);
-    let services =
+
+    let mut services =
         JsAnalyzerServices::from((params.module_graph, params.project_layout, file_source));
+
+    if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
+        services.set_embedded_bindings(embedded_bindings.bindings)
+    }
+
+    if let Some(value_refs) = params.document_services.embedded_value_references() {
+        services.set_embedded_value_references(value_refs.references)
+    }
+
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,
@@ -802,7 +976,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
             .with_only(only)
             .with_skip(skip)
             .with_path(path.as_path())
@@ -857,14 +1031,17 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut tree: AnyJsRoot = params.parse.tree();
 
     // Compute final rules (taking `overrides` into account)
-    let rules = params.settings.as_linter_rules(params.biome_path.as_path());
+    let rules = params
+        .settings
+        .as_ref()
+        .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
         params.biome_path,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(params.only)
             .with_skip(params.skip)
             .with_path(params.biome_path.as_path())
@@ -894,11 +1071,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     );
 
     loop {
-        let services = JsAnalyzerServices::from((
+        let mut services = JsAnalyzerServices::from((
             params.module_graph.clone(),
             params.project_layout.clone(),
             file_source,
         ));
+
+        if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
+            services.set_embedded_bindings(embedded_bindings.bindings)
+        }
+
+        if let Some(value_refs) = params.document_services.embedded_value_references() {
+            services.set_embedded_value_references(value_refs.references)
+        }
 
         let (action, _) = analyze(
             &tree,
@@ -926,6 +1111,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             &params.document_file_source,
                         ),
                         tree.syntax(),
+                        false,
                     ))
                 } else {
                     Either::Right(tree.syntax().to_string())
@@ -939,12 +1125,12 @@ pub(crate) fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
     debug!("{:?}", &options);
     let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
+    let formatted = format_node(options, &tree, false)?;
     match formatted.print() {
         Ok(printed) => Ok(printed),
         Err(error) => {
@@ -959,7 +1145,7 @@ pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
@@ -974,7 +1160,7 @@ pub(crate) fn format_on_type(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(path, document_file_source);
@@ -1007,6 +1193,60 @@ pub(crate) fn format_on_type(
     Ok(printed)
 }
 
+fn format_embedded(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: &SettingsWithEditor,
+    embedded_nodes: Vec<FormatEmbedNode>,
+) -> Result<Printed, WorkspaceError> {
+    let tree = parse.syntax();
+    let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
+    let mut formatted = format_node(options, &tree, true)?;
+
+    formatted.format_embedded(move |range| {
+        let mut iter = embedded_nodes.iter();
+        let node = iter.find(|node| node.range == range)?;
+
+        let wrap_document = |document: Document| {
+            // TODO: Option to disable indent here?
+            let elements = vec![
+                FormatElement::Line(LineMode::Hard),
+                FormatElement::Tag(Tag::StartIndent),
+                FormatElement::Line(LineMode::Hard),
+                FormatElement::Interned(Interned::new(document.into_elements())),
+                FormatElement::Tag(Tag::EndIndent),
+            ];
+            Document::new(elements)
+        };
+
+        match node.source {
+            DocumentFileSource::Css(_) => {
+                let css_options = settings.format_options::<CssLanguage>(biome_path, &node.source);
+                let node = node.node.clone().embedded_syntax::<CssLanguage>();
+                let formatted =
+                    biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
+                Some(wrap_document(formatted.into_document()))
+            }
+            DocumentFileSource::Graphql(_) => {
+                let graphql_options =
+                    settings.format_options::<GraphqlLanguage>(biome_path, &node.source);
+                let node = node.node.clone().embedded_syntax::<GraphqlLanguage>();
+                let formatted =
+                    biome_graphql_formatter::format_node_with_offset(graphql_options, &node)
+                        .ok()?;
+                Some(wrap_document(formatted.into_document()))
+            }
+            _ => None,
+        }
+    });
+
+    match formatted.print() {
+        Ok(printed) => Ok(printed),
+        Err(error) => Err(WorkspaceError::FormatError(error.into())),
+    }
+}
+
 pub(crate) fn pull_diagnostics_and_actions(
     params: DiagnosticsAndActionsParams,
 ) -> PullDiagnosticsAndActionsResult {
@@ -1030,7 +1270,7 @@ pub(crate) fn pull_diagnostics_and_actions(
     let analyzer_options =
         settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
             .with_only(only)
             .with_skip(skip)
             .with_path(path.as_path())
@@ -1105,4 +1345,35 @@ fn rename(
             RenameError::CannotFindDeclaration(new_name),
         ))
     }
+}
+
+#[instrument(level = "debug", skip_all)]
+fn update_snippets(
+    root: AnyParse,
+    new_snippets: Vec<UpdateSnippetsNodes>,
+) -> Result<SendNode, WorkspaceError> {
+    let tree: AnyJsRoot = root.tree();
+    let mut mutation = BatchMutation::new(tree.syntax().clone());
+    let iterator = tree
+        .syntax()
+        .descendants()
+        .filter_map(JsTemplateChunkElement::cast);
+
+    for element in iterator {
+        let Some(snippet) = new_snippets
+            .iter()
+            .find(|snippet| snippet.range == element.range())
+        else {
+            continue;
+        };
+
+        if let Ok(value_token) = element.template_chunk_token() {
+            let new_token = ident(snippet.new_code.as_str());
+            mutation.replace_token(value_token, new_token);
+        }
+    }
+
+    let root = mutation.commit();
+
+    Ok(root.as_send().unwrap())
 }

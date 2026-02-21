@@ -1,3 +1,4 @@
+use crate::html::lists::element_list::FormatHtmlElementList;
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_html_syntax::{SvelteEachBlock, SvelteEachBlockFields};
@@ -12,7 +13,11 @@ impl FormatNodeRule<SvelteEachBlock> for FormatSvelteEachBlock {
             closing_block,
         } = node.as_fields();
 
-        write!(f, [opening_block.format(), children.format(),])?;
+        write!(f, [opening_block.format(),])?;
+
+        FormatHtmlElementList::default()
+            .with_multiline()
+            .fmt(&children, f)?;
 
         if let Some(else_clause) = else_clause {
             write!(f, [else_clause.format()])?;

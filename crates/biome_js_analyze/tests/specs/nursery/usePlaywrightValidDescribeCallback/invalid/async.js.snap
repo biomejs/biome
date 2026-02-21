@@ -1,0 +1,250 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: async.js
+---
+# Input
+```js
+/* should generate diagnostics */
+describe('suite', async () => {});
+test.describe('suite', async () => {});
+test.describe.only('suite', async () => {});
+test.describe.skip('suite', async () => {});
+test.describe.parallel('suite', async () => {});
+test.describe.serial('suite', async () => {});
+test.describe.parallel.only('suite', async () => {});
+test.describe.serial.only('suite', async () => {});
+describe('suite', async function() {});
+test.describe('suite', async function() {});
+test.describe.fixme('suite', async () => {});
+
+```
+
+# Diagnostics
+```
+async.js:2:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ describe('suite', async () => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ test.describe('suite', async () => {});
+    4 │ test.describe.only('suite', async () => {});
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+async.js:3:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+    1 │ /* should generate diagnostics */
+    2 │ describe('suite', async () => {});
+  > 3 │ test.describe('suite', async () => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ test.describe.only('suite', async () => {});
+    5 │ test.describe.skip('suite', async () => {});
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+async.js:4:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+    2 │ describe('suite', async () => {});
+    3 │ test.describe('suite', async () => {});
+  > 4 │ test.describe.only('suite', async () => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ test.describe.skip('suite', async () => {});
+    6 │ test.describe.parallel('suite', async () => {});
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+async.js:5:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+    3 │ test.describe('suite', async () => {});
+    4 │ test.describe.only('suite', async () => {});
+  > 5 │ test.describe.skip('suite', async () => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ test.describe.parallel('suite', async () => {});
+    7 │ test.describe.serial('suite', async () => {});
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+async.js:6:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+    4 │ test.describe.only('suite', async () => {});
+    5 │ test.describe.skip('suite', async () => {});
+  > 6 │ test.describe.parallel('suite', async () => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ test.describe.serial('suite', async () => {});
+    8 │ test.describe.parallel.only('suite', async () => {});
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+async.js:7:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+    5 │ test.describe.skip('suite', async () => {});
+    6 │ test.describe.parallel('suite', async () => {});
+  > 7 │ test.describe.serial('suite', async () => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ test.describe.parallel.only('suite', async () => {});
+    9 │ test.describe.serial.only('suite', async () => {});
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+async.js:8:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+     6 │ test.describe.parallel('suite', async () => {});
+     7 │ test.describe.serial('suite', async () => {});
+   > 8 │ test.describe.parallel.only('suite', async () => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ test.describe.serial.only('suite', async () => {});
+    10 │ describe('suite', async function() {});
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+async.js:9:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+     7 │ test.describe.serial('suite', async () => {});
+     8 │ test.describe.parallel.only('suite', async () => {});
+   > 9 │ test.describe.serial.only('suite', async () => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ describe('suite', async function() {});
+    11 │ test.describe('suite', async function() {});
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+async.js:10:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+     8 │ test.describe.parallel.only('suite', async () => {});
+     9 │ test.describe.serial.only('suite', async () => {});
+  > 10 │ describe('suite', async function() {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ test.describe('suite', async function() {});
+    12 │ test.describe.fixme('suite', async () => {});
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+async.js:11:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+     9 │ test.describe.serial.only('suite', async () => {});
+    10 │ describe('suite', async function() {});
+  > 11 │ test.describe('suite', async function() {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ test.describe.fixme('suite', async () => {});
+    13 │ 
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+async.js:12:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+    10 │ describe('suite', async function() {});
+    11 │ test.describe('suite', async function() {});
+  > 12 │ test.describe.fixme('suite', async () => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

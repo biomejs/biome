@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/no-semi/class.ts
 ---
+
 # Input
 
 ```ts
@@ -83,6 +84,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -138,6 +140,7 @@ declare module test {
 		[computed];
 	}
 }
+
 ```
 
 ## Output 1
@@ -158,6 +161,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -213,4 +217,5 @@ declare module test {
 		[computed]
 	}
 }
+
 ```

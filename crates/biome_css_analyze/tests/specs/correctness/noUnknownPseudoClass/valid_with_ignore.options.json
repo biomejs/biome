@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnknownPseudoClass": {
+          "level": "error",
+          "options": {
+            "ignore": [
+              "custom-pseudo-class",
+              "MyCustomPseudoClass",
+              "another-custom-pseudo-class"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

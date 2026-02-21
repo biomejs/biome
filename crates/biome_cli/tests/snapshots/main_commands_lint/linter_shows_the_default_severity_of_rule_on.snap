@@ -59,6 +59,7 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - noHeadElement
   - noImplicitBoolean
   - noInferrableTypes
+  - noJsxLiterals
   - noMagicNumbers
   - noNamespace
   - noNegationElse
@@ -84,6 +85,7 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useCollapsedIf
   - useComponentExportOnlyModules
   - useConsistentArrayType
+  - useConsistentArrowReturn
   - useConsistentBuiltinInstantiation
   - useConsistentCurlyBraces
   - useConsistentMemberAccessibility

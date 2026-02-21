@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: with-options.js
+---
+# Input
+```js
+/* should generate diagnostics */
+await page.click('button');
+await page.waitForNavigation({ waitUntil: 'networkidle' });
+
+
+```
+
+# Diagnostics
+```
+with-options.js:3:7 lint/nursery/noPlaywrightWaitForNavigation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of page.waitForNavigation().
+  
+    1 │ /* should generate diagnostics */
+    2 │ await page.click('button');
+  > 3 │ await page.waitForNavigation({ waitUntil: 'networkidle' });
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i waitForNavigation() is deprecated because it can be unreliable.
+  
+  i Use page.waitForURL() or page.waitForLoadState() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

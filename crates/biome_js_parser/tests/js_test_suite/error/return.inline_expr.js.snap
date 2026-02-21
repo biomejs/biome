@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+return x
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsBogusExpression {
+        items: [
+            RETURN_KW@0..7 "return" [] [Whitespace(" ")],
+            IDENT@7..8 "x" [] [],
+        ],
+    },
+    eof_token: EOF@8..9 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..9
+  0: JS_BOGUS_EXPRESSION@0..8
+    0: RETURN_KW@0..7 "return" [] [Whitespace(" ")]
+    1: IDENT@7..8 "x" [] []
+  1: EOF@8..9 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+return.inline_expr.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+  > 1 │ return x
+      │ ^^^^^^
+    2 │ 
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+```

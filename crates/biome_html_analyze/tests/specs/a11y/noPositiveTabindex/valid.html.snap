@@ -1,0 +1,15 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<div tabindex="0"></div>
+<div tabindex="-1"></div>
+<button tabindex="0"></button>
+<a href="#" tabindex="-1"></a>
+<input tabindex="0" />
+<div></div>
+
+```

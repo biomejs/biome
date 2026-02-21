@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/object/object.js
 ---
+
 # Input
 
 ```js
@@ -66,6 +67,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -101,4 +103,5 @@ const y = {
 
 // https://github.com/biomejs/biome/issues/5682
 const { foo, bar = [], baz: { disabled } = { disabled: false } } = props;
+
 ```

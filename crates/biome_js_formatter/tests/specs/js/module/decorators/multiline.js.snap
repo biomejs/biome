@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/decorators/multiline.js
 ---
+
 # Input
 
 ```js
@@ -47,6 +48,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -61,4 +63,5 @@ class Foo {
 
 	@decorator({}) method() {}
 }
+
 ```

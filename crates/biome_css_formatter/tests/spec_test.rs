@@ -1,6 +1,7 @@
 use biome_configuration::css::CssFormatterConfiguration;
 use biome_configuration::{Configuration, CssConfiguration};
 use biome_css_formatter::{CssFormatLanguage, context::CssFormatOptions};
+use biome_css_syntax::CssFileSource;
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_service::workspace::UpdateSettingsParams;
 use camino::Utf8Path;
@@ -43,6 +44,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
             },
             workspace_directory: None,
             extended_configurations: vec![],
+            module_graph_resolution_kind: Default::default(),
         })
     };
 
@@ -50,8 +52,9 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
         return;
     };
 
+    let source_type: CssFileSource = test_file.input_file().as_path().try_into().unwrap();
     let options = CssFormatOptions::default();
-    let language = language::CssTestFormatLanguage::default();
+    let language = language::CssTestFormatLanguage::new(source_type);
 
     let snapshot = SpecSnapshot::new(
         test_file,

@@ -1,0 +1,83 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<Component.A.B.C />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlMemberName {
+                object: HtmlMemberName {
+                    object: HtmlMemberName {
+                        object: HtmlComponentName {
+                            value_token: HTML_LITERAL@1..10 "Component" [] [],
+                        },
+                        dot_token: DOT@10..11 "." [] [],
+                        member: HtmlTagName {
+                            value_token: HTML_LITERAL@11..12 "A" [] [],
+                        },
+                    },
+                    dot_token: DOT@12..13 "." [] [],
+                    member: HtmlTagName {
+                        value_token: HTML_LITERAL@13..14 "B" [] [],
+                    },
+                },
+                dot_token: DOT@14..15 "." [] [],
+                member: HtmlTagName {
+                    value_token: HTML_LITERAL@15..17 "C" [] [Whitespace(" ")],
+                },
+            },
+            attributes: HtmlAttributeList [],
+            slash_token: SLASH@17..18 "/" [] [],
+            r_angle_token: R_ANGLE@18..19 ">" [] [],
+        },
+    ],
+    eof_token: EOF@19..20 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..20
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..19
+    0: HTML_SELF_CLOSING_ELEMENT@0..19
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_MEMBER_NAME@1..17
+        0: HTML_MEMBER_NAME@1..14
+          0: HTML_MEMBER_NAME@1..12
+            0: HTML_COMPONENT_NAME@1..10
+              0: HTML_LITERAL@1..10 "Component" [] []
+            1: DOT@10..11 "." [] []
+            2: HTML_TAG_NAME@11..12
+              0: HTML_LITERAL@11..12 "A" [] []
+          1: DOT@12..13 "." [] []
+          2: HTML_TAG_NAME@13..14
+            0: HTML_LITERAL@13..14 "B" [] []
+        1: DOT@14..15 "." [] []
+        2: HTML_TAG_NAME@15..17
+          0: HTML_LITERAL@15..17 "C" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@17..17
+      3: SLASH@17..18 "/" [] []
+      4: R_ANGLE@18..19 ">" [] []
+  4: EOF@19..20 "" [Newline("\n")] []
+
+```

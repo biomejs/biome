@@ -1,0 +1,129 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div class:={isActive}>Invalid</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusElement {
+            items: [
+                HtmlBogus {
+                    items: [
+                        L_ANGLE@0..1 "<" [] [],
+                        HtmlTagName {
+                            value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                        },
+                        HtmlBogus {
+                            items: [
+                                SvelteClassDirective {
+                                    class_token: CLASS_KW@5..10 "class" [] [],
+                                    value: SvelteDirectiveValue {
+                                        colon_token: COLON@10..11 ":" [] [],
+                                        property: missing (required),
+                                        modifiers: SvelteDirectiveModifierList [],
+                                        initializer: missing (optional),
+                                    },
+                                },
+                                HtmlBogusElement {
+                                    items: [
+                                        EQ@11..12 "=" [] [],
+                                        L_CURLY@12..13 "{" [] [],
+                                        HTML_LITERAL@13..30 "isActive}>Invalid" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                HtmlElementList [],
+                HtmlClosingElement {
+                    l_angle_token: L_ANGLE@30..31 "<" [] [],
+                    slash_token: SLASH@31..32 "/" [] [],
+                    name: HtmlTagName {
+                        value_token: HTML_LITERAL@32..35 "div" [] [],
+                    },
+                    r_angle_token: R_ANGLE@35..36 ">" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@36..37 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..37
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..36
+    0: HTML_BOGUS_ELEMENT@0..36
+      0: HTML_BOGUS@0..30
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_BOGUS@5..30
+          0: SVELTE_CLASS_DIRECTIVE@5..11
+            0: CLASS_KW@5..10 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..11
+              0: COLON@10..11 ":" [] []
+              1: (empty)
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@11..11
+              3: (empty)
+          1: HTML_BOGUS_ELEMENT@11..30
+            0: EQ@11..12 "=" [] []
+            1: L_CURLY@12..13 "{" [] []
+            2: HTML_LITERAL@13..30 "isActive}>Invalid" [] []
+      1: HTML_ELEMENT_LIST@30..30
+      2: HTML_CLOSING_ELEMENT@30..36
+        0: L_ANGLE@30..31 "<" [] []
+        1: SLASH@31..32 "/" [] []
+        2: HTML_TAG_NAME@32..35
+          0: HTML_LITERAL@32..35 "div" [] []
+        3: R_ANGLE@35..36 ">" [] []
+  4: EOF@36..37 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+class_missing_name.svelte:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The directive can't be empty.
+  
+  > 1 │ <div class:={isActive}>Invalid</div>
+      │            
+    2 │ 
+  
+class_missing_name.svelte:1:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+  > 1 │ <div class:={isActive}>Invalid</div>
+      │                               ^
+    2 │ 
+  
+  i Expected an attribute here.
+  
+  > 1 │ <div class:={isActive}>Invalid</div>
+      │                               ^
+    2 │ 
+  
+```

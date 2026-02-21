@@ -1,8 +1,8 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: elements/whitespace/ignore/long-content.html
-snapshot_kind: text
 ---
+
 # Input
 
 ```html
@@ -27,6 +27,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```html
@@ -42,6 +43,7 @@ Self close void elements: never
 	nostra, per inceptos himenaeos. Ut nec dapibus est. Maecenas orci purus,
 	blandit eu faucibus eu, lacinia id turpis.</span
 >
+
 ```
 
 ## Output 1
@@ -56,6 +58,7 @@ Bracket same line: false
 Whitespace sensitivity: ignore
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```html
@@ -71,4 +74,5 @@ Self close void elements: never
 	nostra, per inceptos himenaeos. Ut nec dapibus est. Maecenas orci purus,
 	blandit eu faucibus eu, lacinia id turpis.
 </span>
+
 ```

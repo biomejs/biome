@@ -2,6 +2,7 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -30,7 +31,7 @@ a:is(:not(:hover)) {}
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssComplexSelector {
@@ -1339,7 +1340,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..552
   0: (empty)
-  1: CSS_RULE_LIST@0..551
+  1: CSS_ROOT_ITEM_LIST@0..551
     0: CSS_QUALIFIED_RULE@0..13
       0: CSS_SELECTOR_LIST@0..11
         0: CSS_COMPLEX_SELECTOR@0..11

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -11,6 +10,16 @@ a {
 
 a {
   my-property: 1;
+}
+
+.invalid-use-of-return {
+	result: 1;
+}
+
+@function --test-fn() {
+  bad-prop: blue;
+  /* should be valid in function body */
+  result: 1;
 }
 
 ```
@@ -44,6 +53,42 @@ invalid.css:6:3 lint/correctness/noUnknownProperty ━━━━━━━━━�
       │   ^^^^^^^^^^^
     7 │ }
     8 │ 
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.css:10:2 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+     9 │ .invalid-use-of-return {
+  > 10 │ 	result: 1;
+       │ 	^^^^^^
+    11 │ }
+    12 │ 
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.css:14:3 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    13 │ @function --test-fn() {
+  > 14 │   bad-prop: blue;
+       │   ^^^^^^^^
+    15 │   /* should be valid in function body */
+    16 │   result: 1;
   
   i See CSS Specifications and browser specific properties for more details.
   

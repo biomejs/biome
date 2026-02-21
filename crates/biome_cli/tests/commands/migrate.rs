@@ -6,28 +6,6 @@ use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
-fn migrate_help() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["migrate", "--help"].as_slice()),
-    );
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "migrate_help",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn migrate_config_up_to_date() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

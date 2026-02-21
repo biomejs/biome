@@ -13,7 +13,7 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
-      - uses: DavidAnson/markdownlint-cli2-action@3575d252479e6880664c22c8d81ff0dc79ef5c22
+      - uses: DavidAnson/markdownlint-cli2-action@36bf2f53fe58e6d4c086a1b420ee3f704d00cedc
         with:
           globs: |
             **/*.md
@@ -23,4 +23,5 @@ jobs:
             #xtask/coverage
             #target
             #crates/biome_markdown_parser/tests
+            #crates/biome_markdown_formatter/tests
             #crates/biome_js_formatter/report*.md

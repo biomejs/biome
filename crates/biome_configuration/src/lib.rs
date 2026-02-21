@@ -45,8 +45,7 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::{KeyValuePair, markup};
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValidator, DeserializableValue,
-    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Deserialized, Text,
-    TextRange,
+    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Text, TextRange,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
@@ -474,8 +473,8 @@ impl Deserializable for Schema {
                                         .with_range(range)
                                         .with_custom_severity(Severity::Information)
                                         .with_note(markup!(
-                                        {KeyValuePair("Expected", markup!({VERSION}))}
-                                        {KeyValuePair("Found", markup!({config_version_str}))}
+                                        {KeyValuePair::new("Expected", markup!({VERSION}))}
+                                        {KeyValuePair::new("Found", markup!({config_version_str}))}
                                     ))
                                         .with_note(markup!("Run the command "<Emphasis>"biome migrate"</Emphasis>" to migrate the configuration file."))
                                 )
@@ -672,16 +671,6 @@ impl biome_deserialize::Deserializable for FilesConfiguration {
 
         value.deserialize(ctx, Visitor, name)
     }
-}
-
-#[derive(Debug)]
-pub struct ConfigurationPayload {
-    /// The result of the deserialization
-    pub deserialized: Deserialized<Configuration>,
-    /// The path of where the `biome.json` or `biome.jsonc` file was found. This contains the file name.
-    pub configuration_file_path: Utf8PathBuf,
-    /// The base path where the external configuration in a package should be resolved from
-    pub external_resolution_base_path: Utf8PathBuf,
 }
 
 #[derive(Debug, Default, PartialEq, Clone, Eq, Hash)]

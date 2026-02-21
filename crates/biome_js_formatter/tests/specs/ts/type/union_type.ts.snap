@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/type/union_type.ts
 ---
+
 # Input
 
 ```ts
@@ -280,6 +281,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -617,4 +619,5 @@ type Foo =
 	| A
 	// B
 	| B;
+
 ```

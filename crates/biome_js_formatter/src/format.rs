@@ -12,7 +12,7 @@ impl Format for biome_js_syntax::JsModule {
         self.format_node(formatter)
     }
 }
-impl Format for biome_js_syntax::JsExpressionSnipped {
+impl Format for biome_js_syntax::JsExpressionSnippet {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/object/string.json
 ---
+
 # Input
 
 ```json
@@ -29,6 +30,7 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```json
@@ -37,6 +39,7 @@ Bracket spacing: true
 	"/ & \/": "\/\\\"\uCAFE\uBABE\uAB98\uFCDE\ubcda\uef4A\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}|;:',./<>?",
 	"slash": "/ & \/"
 }
+
 ```
 
 # Lines exceeding max width of 80 characters

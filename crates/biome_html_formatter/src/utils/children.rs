@@ -4,12 +4,12 @@ use std::{
 };
 
 use biome_formatter::{
-    Buffer, Format, FormatElement, FormatResult, format_args, prelude::*, write,
+    Buffer, Format, FormatElement, FormatResult, comments::CommentStyle, prelude::*,
 };
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement};
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlClosingElement};
 use biome_rowan::{AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText};
 
-use crate::{HtmlFormatter, context::HtmlFormatContext};
+use crate::{HtmlFormatter, comments::HtmlCommentStyle, context::HtmlFormatContext};
 
 pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = [b' ', b'\n', b'\t', b'\r'];
 
@@ -58,6 +58,11 @@ impl HtmlWord {
 
     pub(crate) fn is_single_character(&self) -> bool {
         self.text.chars().count() == 1
+    }
+
+    #[expect(dead_code)]
+    pub(crate) fn text(&self) -> &str {
+        &self.text
     }
 }
 
@@ -129,51 +134,14 @@ pub(crate) enum HtmlChild {
 }
 
 impl HtmlChild {
-    #[expect(dead_code)]
-    pub(crate) const fn is_any_line(&self) -> bool {
-        matches!(self, Self::EmptyLine | Self::Newline)
-    }
-}
-
-/// Creates either a space using an expression child and a string literal,
-/// or a regular space, depending on whether the group breaks or not.
-///
-/// ```html
-///  <div> Winter Light </div>;
-///
-///  <div>
-///    Winter Light
-///    Through A Glass Darkly
-///    The Silence
-///    Seventh Seal
-///    Wild Strawberries
-///  </div>
-/// ```
-#[derive(Default)]
-pub(crate) struct HtmlSpace;
-
-impl Format<HtmlFormatContext> for HtmlSpace {
-    fn fmt(&self, formatter: &mut HtmlFormatter) -> FormatResult<()> {
-        write![
-            formatter,
-            [
-                if_group_breaks(&format_args![HtmlRawSpace, soft_line_break()]),
-                if_group_fits_on_line(&space())
-            ]
-        ]
-    }
-}
-
-pub(crate) struct HtmlRawSpace;
-
-impl Format<HtmlFormatContext> for HtmlRawSpace {
-    fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
-        write!(f, [token(" ")])
+    pub(crate) const fn is_any_whitespace(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::EmptyLine | Self::Newline)
     }
 }
 
 pub(crate) fn html_split_children<I>(
     children: I,
+    closing_element: Option<&HtmlClosingElement>,
     f: &mut HtmlFormatter,
 ) -> SyntaxResult<Vec<HtmlChild>>
 where
@@ -330,7 +298,12 @@ where
                             .slice(TextRange::at(relative_start, word.text_len()));
                         let source_position = value_token.text_range().start() + relative_start;
 
-                        builder.entry(HtmlChild::Comment(HtmlWord::new(text, source_position)));
+                        // Skip suppression comments here - they will be formatted as part of the
+                        // verbatim output for the next (suppressed) element. This prevents the
+                        // comment from being printed twice.
+                        if !HtmlCommentStyle::is_suppression(text.text()) {
+                            builder.entry(HtmlChild::Comment(HtmlWord::new(text, source_position)));
+                        }
                     }
                 }
                 prev_chunk_was_comment = matches!(chunk, (_, HtmlTextChunk::Comment(_)));
@@ -424,6 +397,37 @@ where
             }
 
             prev_child_was_content = false;
+        }
+    }
+
+    // Include trailing whitespace from the closing element's l_angle_token leading trivia.
+    // We do this because it makes handling whitespace sensitivity easier. We take the full content
+    // of what is within the element so that we can properly classify what whitespace is meaningful
+    // and what isn't.
+    //
+    // The reason this is necessary is because the trivia adjacent to the closing tag is attached to
+    // the closing tag's leading trivia, not the content's trailing trivia.
+    if let Some(closing_element) = closing_element
+        && let Ok(l_angle_token) = closing_element.l_angle_token()
+    {
+        let leading_trivia = l_angle_token.leading_trivia();
+        let mut newline_count = 0;
+        let mut has_whitespace = false;
+
+        for piece in leading_trivia.pieces() {
+            if piece.is_newline() {
+                newline_count += 1;
+            } else if piece.is_whitespace() {
+                has_whitespace = true;
+            }
+        }
+
+        if newline_count >= 2 {
+            builder.entry(HtmlChild::EmptyLine);
+        } else if newline_count == 1 {
+            builder.entry(HtmlChild::Newline);
+        } else if has_whitespace {
+            builder.entry(HtmlChild::Whitespace);
         }
     }
 

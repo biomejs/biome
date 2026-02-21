@@ -1,0 +1,396 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Nested: **bold *and italic* text**
+
+Overlapping: *foo**bar**baz*
+
+Rule of 3: ***bold italic***
+
+Multiple runs: *a **b** c*
+
+Not emphasis: * not * emphasis *
+
+Intraword: foo*bar*baz
+
+Intraword underscore: foo_bar_baz
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..8 "Nested: " [] [],
+                },
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_STAR@8..10 "**" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@10..15 "bold " [] [],
+                        },
+                        MdInlineItalic {
+                            l_fence: STAR@15..16 "*" [] [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@16..26 "and italic" [] [],
+                                },
+                            ],
+                            r_fence: STAR@26..27 "*" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@27..32 " text" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_STAR@32..34 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@34..35 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@35..36 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@36..49 "Overlapping: " [] [],
+                },
+                MdInlineItalic {
+                    l_fence: STAR@49..50 "*" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@50..53 "foo" [] [],
+                        },
+                        MdInlineEmphasis {
+                            l_fence: DOUBLE_STAR@53..55 "**" [] [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@55..58 "bar" [] [],
+                                },
+                            ],
+                            r_fence: DOUBLE_STAR@58..60 "**" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@60..63 "baz" [] [],
+                        },
+                    ],
+                    r_fence: STAR@63..64 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@64..65 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@65..66 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@66..77 "Rule of 3: " [] [],
+                },
+                MdInlineItalic {
+                    l_fence: STAR@77..78 "*" [] [],
+                    content: MdInlineItemList [
+                        MdInlineEmphasis {
+                            l_fence: DOUBLE_STAR@78..80 "**" [] [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@80..91 "bold italic" [] [],
+                                },
+                            ],
+                            r_fence: DOUBLE_STAR@91..93 "**" [] [],
+                        },
+                    ],
+                    r_fence: STAR@93..94 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@94..95 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@95..96 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@96..111 "Multiple runs: " [] [],
+                },
+                MdInlineItalic {
+                    l_fence: STAR@111..112 "*" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@112..114 "a " [] [],
+                        },
+                        MdInlineEmphasis {
+                            l_fence: DOUBLE_STAR@114..116 "**" [] [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@116..117 "b" [] [],
+                                },
+                            ],
+                            r_fence: DOUBLE_STAR@117..119 "**" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@119..121 " c" [] [],
+                        },
+                    ],
+                    r_fence: STAR@121..122 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@122..123 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@123..124 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@124..138 "Not emphasis: " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@138..139 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@139..144 " not " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@144..145 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@145..155 " emphasis " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@155..156 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@156..157 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@157..158 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@158..172 "Intraword: foo" [] [],
+                },
+                MdInlineItalic {
+                    l_fence: STAR@172..173 "*" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@173..176 "bar" [] [],
+                        },
+                    ],
+                    r_fence: STAR@176..177 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@177..180 "baz" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@180..181 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@181..182 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@182..207 "Intraword underscore: foo" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@207..208 "_" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@208..211 "bar" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@211..212 "_" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@212..215 "baz" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@215..216 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@216..216 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..216
+  0: (empty)
+  1: MD_BLOCK_LIST@0..216
+    0: MD_PARAGRAPH@0..35
+      0: MD_INLINE_ITEM_LIST@0..35
+        0: MD_TEXTUAL@0..8
+          0: MD_TEXTUAL_LITERAL@0..8 "Nested: " [] []
+        1: MD_INLINE_EMPHASIS@8..34
+          0: DOUBLE_STAR@8..10 "**" [] []
+          1: MD_INLINE_ITEM_LIST@10..32
+            0: MD_TEXTUAL@10..15
+              0: MD_TEXTUAL_LITERAL@10..15 "bold " [] []
+            1: MD_INLINE_ITALIC@15..27
+              0: STAR@15..16 "*" [] []
+              1: MD_INLINE_ITEM_LIST@16..26
+                0: MD_TEXTUAL@16..26
+                  0: MD_TEXTUAL_LITERAL@16..26 "and italic" [] []
+              2: STAR@26..27 "*" [] []
+            2: MD_TEXTUAL@27..32
+              0: MD_TEXTUAL_LITERAL@27..32 " text" [] []
+          2: DOUBLE_STAR@32..34 "**" [] []
+        2: MD_TEXTUAL@34..35
+          0: MD_TEXTUAL_LITERAL@34..35 "\n" [] []
+      1: (empty)
+    1: MD_NEWLINE@35..36
+      0: NEWLINE@35..36 "\n" [] []
+    2: MD_PARAGRAPH@36..65
+      0: MD_INLINE_ITEM_LIST@36..65
+        0: MD_TEXTUAL@36..49
+          0: MD_TEXTUAL_LITERAL@36..49 "Overlapping: " [] []
+        1: MD_INLINE_ITALIC@49..64
+          0: STAR@49..50 "*" [] []
+          1: MD_INLINE_ITEM_LIST@50..63
+            0: MD_TEXTUAL@50..53
+              0: MD_TEXTUAL_LITERAL@50..53 "foo" [] []
+            1: MD_INLINE_EMPHASIS@53..60
+              0: DOUBLE_STAR@53..55 "**" [] []
+              1: MD_INLINE_ITEM_LIST@55..58
+                0: MD_TEXTUAL@55..58
+                  0: MD_TEXTUAL_LITERAL@55..58 "bar" [] []
+              2: DOUBLE_STAR@58..60 "**" [] []
+            2: MD_TEXTUAL@60..63
+              0: MD_TEXTUAL_LITERAL@60..63 "baz" [] []
+          2: STAR@63..64 "*" [] []
+        2: MD_TEXTUAL@64..65
+          0: MD_TEXTUAL_LITERAL@64..65 "\n" [] []
+      1: (empty)
+    3: MD_NEWLINE@65..66
+      0: NEWLINE@65..66 "\n" [] []
+    4: MD_PARAGRAPH@66..95
+      0: MD_INLINE_ITEM_LIST@66..95
+        0: MD_TEXTUAL@66..77
+          0: MD_TEXTUAL_LITERAL@66..77 "Rule of 3: " [] []
+        1: MD_INLINE_ITALIC@77..94
+          0: STAR@77..78 "*" [] []
+          1: MD_INLINE_ITEM_LIST@78..93
+            0: MD_INLINE_EMPHASIS@78..93
+              0: DOUBLE_STAR@78..80 "**" [] []
+              1: MD_INLINE_ITEM_LIST@80..91
+                0: MD_TEXTUAL@80..91
+                  0: MD_TEXTUAL_LITERAL@80..91 "bold italic" [] []
+              2: DOUBLE_STAR@91..93 "**" [] []
+          2: STAR@93..94 "*" [] []
+        2: MD_TEXTUAL@94..95
+          0: MD_TEXTUAL_LITERAL@94..95 "\n" [] []
+      1: (empty)
+    5: MD_NEWLINE@95..96
+      0: NEWLINE@95..96 "\n" [] []
+    6: MD_PARAGRAPH@96..123
+      0: MD_INLINE_ITEM_LIST@96..123
+        0: MD_TEXTUAL@96..111
+          0: MD_TEXTUAL_LITERAL@96..111 "Multiple runs: " [] []
+        1: MD_INLINE_ITALIC@111..122
+          0: STAR@111..112 "*" [] []
+          1: MD_INLINE_ITEM_LIST@112..121
+            0: MD_TEXTUAL@112..114
+              0: MD_TEXTUAL_LITERAL@112..114 "a " [] []
+            1: MD_INLINE_EMPHASIS@114..119
+              0: DOUBLE_STAR@114..116 "**" [] []
+              1: MD_INLINE_ITEM_LIST@116..117
+                0: MD_TEXTUAL@116..117
+                  0: MD_TEXTUAL_LITERAL@116..117 "b" [] []
+              2: DOUBLE_STAR@117..119 "**" [] []
+            2: MD_TEXTUAL@119..121
+              0: MD_TEXTUAL_LITERAL@119..121 " c" [] []
+          2: STAR@121..122 "*" [] []
+        2: MD_TEXTUAL@122..123
+          0: MD_TEXTUAL_LITERAL@122..123 "\n" [] []
+      1: (empty)
+    7: MD_NEWLINE@123..124
+      0: NEWLINE@123..124 "\n" [] []
+    8: MD_PARAGRAPH@124..157
+      0: MD_INLINE_ITEM_LIST@124..157
+        0: MD_TEXTUAL@124..138
+          0: MD_TEXTUAL_LITERAL@124..138 "Not emphasis: " [] []
+        1: MD_TEXTUAL@138..139
+          0: MD_TEXTUAL_LITERAL@138..139 "*" [] []
+        2: MD_TEXTUAL@139..144
+          0: MD_TEXTUAL_LITERAL@139..144 " not " [] []
+        3: MD_TEXTUAL@144..145
+          0: MD_TEXTUAL_LITERAL@144..145 "*" [] []
+        4: MD_TEXTUAL@145..155
+          0: MD_TEXTUAL_LITERAL@145..155 " emphasis " [] []
+        5: MD_TEXTUAL@155..156
+          0: MD_TEXTUAL_LITERAL@155..156 "*" [] []
+        6: MD_TEXTUAL@156..157
+          0: MD_TEXTUAL_LITERAL@156..157 "\n" [] []
+      1: (empty)
+    9: MD_NEWLINE@157..158
+      0: NEWLINE@157..158 "\n" [] []
+    10: MD_PARAGRAPH@158..181
+      0: MD_INLINE_ITEM_LIST@158..181
+        0: MD_TEXTUAL@158..172
+          0: MD_TEXTUAL_LITERAL@158..172 "Intraword: foo" [] []
+        1: MD_INLINE_ITALIC@172..177
+          0: STAR@172..173 "*" [] []
+          1: MD_INLINE_ITEM_LIST@173..176
+            0: MD_TEXTUAL@173..176
+              0: MD_TEXTUAL_LITERAL@173..176 "bar" [] []
+          2: STAR@176..177 "*" [] []
+        2: MD_TEXTUAL@177..180
+          0: MD_TEXTUAL_LITERAL@177..180 "baz" [] []
+        3: MD_TEXTUAL@180..181
+          0: MD_TEXTUAL_LITERAL@180..181 "\n" [] []
+      1: (empty)
+    11: MD_NEWLINE@181..182
+      0: NEWLINE@181..182 "\n" [] []
+    12: MD_PARAGRAPH@182..216
+      0: MD_INLINE_ITEM_LIST@182..216
+        0: MD_TEXTUAL@182..207
+          0: MD_TEXTUAL_LITERAL@182..207 "Intraword underscore: foo" [] []
+        1: MD_TEXTUAL@207..208
+          0: MD_TEXTUAL_LITERAL@207..208 "_" [] []
+        2: MD_TEXTUAL@208..211
+          0: MD_TEXTUAL_LITERAL@208..211 "bar" [] []
+        3: MD_TEXTUAL@211..212
+          0: MD_TEXTUAL_LITERAL@211..212 "_" [] []
+        4: MD_TEXTUAL@212..215
+          0: MD_TEXTUAL_LITERAL@212..215 "baz" [] []
+        5: MD_TEXTUAL@215..216
+          0: MD_TEXTUAL_LITERAL@215..216 "\n" [] []
+      1: (empty)
+  2: EOF@216..216 "" [] []
+
+```
