@@ -62,6 +62,16 @@ impl FormatOptions for MarkdownFormatOptions {
 }
 
 impl MarkdownFormatOptions {
+    pub fn new() -> Self {
+        Self {
+            indent_style: IndentStyle::default(),
+            indent_width: IndentWidth::default(),
+            line_ending: LineEnding::default(),
+            line_width: LineWidth::default(),
+            trailing_newline: TrailingNewline::default(),
+        }
+    }
+
     pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
         self.indent_style = indent_style;
         self
@@ -74,6 +84,16 @@ impl MarkdownFormatOptions {
 
     pub fn with_line_width(mut self, line_width: LineWidth) -> Self {
         self.line_width = line_width;
+        self
+    }
+
+    pub fn with_line_ending(mut self, line_ending: LineEnding) -> Self {
+        self.line_ending = line_ending;
+        self
+    }
+
+    pub fn with_trailing_newline(mut self, trailing_newline: TrailingNewline) -> Self {
+        self.trailing_newline = trailing_newline;
         self
     }
 }

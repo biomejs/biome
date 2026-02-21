@@ -3,7 +3,6 @@
 pub mod file_source;
 #[macro_use]
 mod generated;
-mod file_source;
 mod syntax_node;
 
 pub use file_source::MdFileSource;

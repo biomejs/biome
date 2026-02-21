@@ -2,7 +2,6 @@ use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
 
-<<<<<<< HEAD
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
@@ -63,10 +62,5 @@ impl TryFrom<&Utf8Path> for MdFileSource {
         // We assume the file extensions are case-insensitive
         // and we use the lowercase form of them for pattern matching
         Self::try_from_extension(&extension.to_ascii_lowercase_cow())
-=======
-impl MarkdownFileSource {
-    pub fn new(_path: &str) -> Self {
-        Self {}
->>>>>>> 8dc2296603 (Clean up)
     }
 }

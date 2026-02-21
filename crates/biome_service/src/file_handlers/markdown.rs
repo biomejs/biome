@@ -11,10 +11,9 @@ use biome_analyze::AnalyzerOptions;
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::analyzer::linter::LinterEnabled;
 use biome_configuration::formatter::FormatterEnabled;
-use biome_formatter::{
-    IndentStyle, IndentWidth, LineEnding, LineWidth, SimpleFormatOptions, TrailingNewline,
-};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
 use biome_fs::BiomePath;
+use biome_markdown_formatter::context::MarkdownFormatOptions;
 use biome_markdown_parser::{MarkdownParseOptions, parse_markdown_with_cache};
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
 use biome_parser::{AnyParse, NodeParse};
@@ -48,7 +47,7 @@ impl ServiceLanguage for MarkdownLanguage {
     type FormatterSettings = MarkdownFormatterSettings;
     type LinterSettings = MarkdownLinterSettings;
     type AssistSettings = MarkdownAssistSettings;
-    type FormatOptions = SimpleFormatOptions;
+    type FormatOptions = MarkdownFormatOptions;
     type ParserSettings = ();
     type ParserOptions = MarkdownParseOptions;
     type EnvironmentSettings = ();
@@ -100,13 +99,12 @@ impl ServiceLanguage for MarkdownLanguage {
             .trailing_newline
             .or(global.trailing_newline)
             .unwrap_or_default();
-        SimpleFormatOptions {
-            indent_style,
-            indent_width,
-            line_width,
-            line_ending,
-            trailing_newline,
-        }
+        MarkdownFormatOptions::new()
+            .with_indent_style(indent_style)
+            .with_indent_width(indent_width)
+            .with_line_width(line_width)
+            .with_line_ending(line_ending)
+            .with_trailing_newline(trailing_newline)
     }
 
     fn resolve_analyzer_options(
