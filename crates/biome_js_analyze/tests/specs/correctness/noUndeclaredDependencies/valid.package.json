@@ -18,5 +18,11 @@
 	},
 	"optionalDependencies": {
 		"optional-dep": "1.0.0"
-	}
+	},
+	"bundleDependencies": [
+		"bundle-dep"
+	],
+	"bundledDependencies": [
+		"bundled-dep"
+	]
 }

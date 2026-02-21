@@ -19,6 +19,8 @@ import { fontFamily } from "tailwindcss/defaultTheme";
 
 import "peer-dep";
 import "optional-dep";
+import "bundle-dep";
+import "bundled-dep";
 
 import "my-package"
 
