@@ -1329,9 +1329,7 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
             let m = p.start();
             p.bump(NEWLINE);
             m.complete(p, MD_NEWLINE);
-            if has_quote_prefix(p, quote_depth) {
-                consume_quote_prefix(p, quote_depth);
-            }
+            consume_quote_prefix(p, quote_depth);
             consume_blank_line(p);
             state.record_blank();
             state.first_line = false;
@@ -1343,7 +1341,7 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
     if !state.first_line && p.at(NEWLINE) && !p.at_blank_line() && !newline_has_quote_prefix {
         let action = classify_blank_line(p, state.required_indent, state.marker_indent);
         let is_blank = list_newline_is_blank_line(p);
-        let result = apply_blank_line_action(p, state, action, is_blank, false);
+        let result = apply_blank_line_action(p, state, action, is_blank);
         if !matches!(result, LoopAction::Break | LoopAction::Continue) {
             unreachable!("classify_blank_line always produces Break or Continue");
         }
@@ -1407,8 +1405,7 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
                 state.last_was_blank = true;
                 state.first_line = false;
                 return (LoopAction::Continue, line_has_quote_prefix);
-            }
-            if next_indent < state.required_indent {
+            } else {
                 return (LoopAction::Break, line_has_quote_prefix);
             }
         }
@@ -1438,7 +1435,6 @@ fn apply_blank_line_action(
     state: &mut ListItemLoopState,
     action: BlankLineAction,
     is_blank: bool,
-    _marker_line_break: bool,
 ) -> LoopAction {
     match action {
         BlankLineAction::ContinueItem => {
@@ -1809,7 +1805,7 @@ fn parse_first_line_blockquote(p: &mut MarkdownParser, state: &mut ListItemLoopS
     p.state_mut().virtual_line_start = Some(p.cur_range().start());
     p.state_mut().list_item_required_indent = 0;
 
-    if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
+    let parsed = if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
         let quote_m = p.start();
         p.bump_remap(T![>]);
         p.state_mut().block_quote_depth += 1;
@@ -1827,23 +1823,21 @@ fn parse_first_line_blockquote(p: &mut MarkdownParser, state: &mut ListItemLoopS
         p.record_quote_indent(range, indent);
 
         state.record_first_line_block();
-        p.state_mut().virtual_line_start = prev_virtual;
-        p.state_mut().list_item_required_indent = prev_required;
-        return true;
-    }
-
-    // T![>] case: parse_quote can handle it directly
-    let parsed = parse_quote(p);
-    if parsed.is_present() {
-        state.record_first_line_block();
-        p.state_mut().virtual_line_start = prev_virtual;
-        p.state_mut().list_item_required_indent = prev_required;
-        return true;
-    }
+        true
+    } else {
+        // T![>] case: parse_quote can handle it directly
+        let parsed = parse_quote(p);
+        if parsed.is_present() {
+            state.record_first_line_block();
+            true
+        } else {
+            false
+        }
+    };
 
     p.state_mut().virtual_line_start = prev_virtual;
     p.state_mut().list_item_required_indent = prev_required;
-    false
+    parsed
 }
 
 /// After the first line, verify indent level for continuation.
