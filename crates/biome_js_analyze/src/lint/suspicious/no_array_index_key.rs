@@ -6,9 +6,9 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsMemberExpression, AnyJsTemplateElement,
-    JsBinaryExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, JsFormalParameter,
-    JsObjectExpression, JsObjectMemberList, JsParameterList, JsParameters, JsPropertyObjectMember,
-    JsReferenceIdentifier, JsxAttribute,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsFormalParameter, JsObjectExpression,
+    JsObjectMemberList, JsParameterList, JsParameters, JsPropertyObjectMember, JsReferenceIdentifier,
+    JsxAttribute,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_array_index_key::NoArrayIndexKeyOptions;
@@ -137,90 +137,76 @@ impl Rule for NoArrayIndexKey {
             return None;
         }
 
-        let model = ctx.model();
         let reference = node.as_js_expression()?;
 
-        let mut capture_array_index = None;
+        let model = ctx.model();
+        let mut candidates = Vec::new();
+        collect_reference_identifiers(reference, &mut candidates);
 
-        match reference {
-            AnyJsExpression::JsIdentifierExpression(identifier_expression) => {
-                capture_array_index = Some(identifier_expression.name().ok()?);
-            }
-            AnyJsExpression::JsTemplateExpression(template_expression) => {
-                let template_elements = template_expression.elements();
-                for element in template_elements {
-                    if let AnyJsTemplateElement::JsTemplateElement(template_element) = element {
-                        let cap_index_value = template_element
-                            .expression()
-                            .ok()?
-                            .as_js_identifier_expression()?
-                            .name()
-                            .ok();
-                        capture_array_index = cap_index_value;
-                    }
-                }
-            }
-            AnyJsExpression::JsBinaryExpression(binary_expression) => {
-                let _ = cap_array_index_value(&binary_expression, &mut capture_array_index);
-            }
-            _ => {}
-        };
+        for reference in candidates {
+            // Given the reference identifier retrieved from the key property,
+            // find the declaration and ensure it resolves to the parameter of a function,
+            // and navigate up to the closest call expression.
+            let Some(parameter) = model
+                .binding(&reference)
+                .and_then(|declaration| declaration.syntax().parent())
+                .and_then(JsFormalParameter::cast)
+            else {
+                continue;
+            };
 
-        let reference = capture_array_index?;
+            let Some(function) = parameter
+                .parent::<JsParameterList>()
+                .and_then(|list| list.parent::<JsParameters>())
+                .and_then(|parameters| parameters.parent::<AnyJsFunction>())
+            else {
+                continue;
+            };
 
-        // Given the reference identifier retrieved from the key property,
-        // find the declaration and ensure it resolves to the parameter of a function,
-        // and navigate up to the closest call expression
-        let parameter = model
-            .binding(&reference)
-            .and_then(|declaration| declaration.syntax().parent())
-            .and_then(JsFormalParameter::cast)?;
-        let function = parameter
-            .parent::<JsParameterList>()
-            .and_then(|list| list.parent::<JsParameters>())
-            .and_then(|parameters| parameters.parent::<AnyJsFunction>())?;
-        let call_expression = function
-            .parent::<JsCallArgumentList>()
-            .and_then(|arguments| arguments.parent::<JsCallArguments>())
-            .and_then(|arguments| arguments.parent::<JsCallExpression>())?;
-
-        // Check if the caller is an array method and the parameter is the array index of that method
-        let is_array_method_index = is_array_method_index(&parameter, &call_expression)?;
-
-        if !is_array_method_index {
-            return None;
-        }
-
-        if node.is_property_object_member() {
-            let object_expression = node
-                .parent::<JsObjectMemberList>()
-                .and_then(|list| list.parent::<JsObjectExpression>())?;
-
-            // Check if the object expression is passed to a `React.cloneElement` call
-            let call_expression = object_expression
+            let Some(call_expression) = function
                 .parent::<JsCallArgumentList>()
-                .and_then(|list| list.parent::<JsCallArguments>())
-                .and_then(|arguments| arguments.parent::<JsCallExpression>())?;
-            let callee = call_expression.callee().ok()?.omit_parentheses();
+                .and_then(|arguments| arguments.parent::<JsCallArguments>())
+                .and_then(|arguments| arguments.parent::<JsCallExpression>())
+            else {
+                continue;
+            };
 
-            if is_react_call_api(&callee, model, ReactLibrary::React, "cloneElement") {
+            // Check if the caller is an array method and the parameter is the array index of that method.
+            if !is_array_method_index(&parameter, &call_expression)? {
+                continue;
+            }
+
+            if node.is_property_object_member() {
+                let object_expression = node
+                    .parent::<JsObjectMemberList>()
+                    .and_then(|list| list.parent::<JsObjectExpression>())?;
+
+                // Check if the object expression is passed to a `React.cloneElement` call.
+                let call_expression = object_expression
+                    .parent::<JsCallArgumentList>()
+                    .and_then(|list| list.parent::<JsCallArguments>())
+                    .and_then(|arguments| arguments.parent::<JsCallExpression>())?;
+                let callee = call_expression.callee().ok()?.omit_parentheses();
+
+                if is_react_call_api(&callee, model, ReactLibrary::React, "cloneElement") {
+                    let binding = parameter.binding().ok()?;
+                    let binding_origin = binding.as_any_js_binding()?.as_js_identifier_binding()?;
+                    return Some(NoArrayIndexKeyState {
+                        binding_origin: binding_origin.range(),
+                        incorrect_prop: reference.range(),
+                    });
+                }
+            } else {
                 let binding = parameter.binding().ok()?;
                 let binding_origin = binding.as_any_js_binding()?.as_js_identifier_binding()?;
-                Some(NoArrayIndexKeyState {
+                return Some(NoArrayIndexKeyState {
                     binding_origin: binding_origin.range(),
                     incorrect_prop: reference.range(),
-                })
-            } else {
-                None
+                });
             }
-        } else {
-            let binding = parameter.binding().ok()?;
-            let binding_origin = binding.as_any_js_binding()?.as_js_identifier_binding()?;
-            Some(NoArrayIndexKeyState {
-                binding_origin: binding_origin.range(),
-                incorrect_prop: reference.range(),
-            })
         }
+
+        None
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -280,29 +266,35 @@ fn is_array_method_index(
     }
 }
 
-fn cap_array_index_value(
-    binary_expression: &JsBinaryExpression,
-    capture_array_index: &mut Option<JsReferenceIdentifier>,
-) -> Option<()> {
-    let left = binary_expression.left().ok()?;
-    let right = binary_expression.right().ok()?;
-
-    // recursive call if left or right again are binary_expressions
-    if let Some(left_binary) = left.as_js_binary_expression() {
-        cap_array_index_value(left_binary, capture_array_index);
-    };
-
-    if let Some(right_binary) = right.as_js_binary_expression() {
-        cap_array_index_value(right_binary, capture_array_index);
-    };
-
-    if let Some(left_expression) = left.as_js_identifier_expression() {
-        *capture_array_index = left_expression.name().ok();
-    };
-
-    if let Some(right_expression) = right.as_js_identifier_expression() {
-        *capture_array_index = right_expression.name().ok();
-    };
-
-    Some(())
+fn collect_reference_identifiers(expression: AnyJsExpression, references: &mut Vec<JsReferenceIdentifier>) {
+    match expression {
+        AnyJsExpression::JsIdentifierExpression(identifier_expression) => {
+            if let Ok(reference) = identifier_expression.name() {
+                references.push(reference);
+            }
+        }
+        AnyJsExpression::JsTemplateExpression(template_expression) => {
+            for element in template_expression.elements() {
+                if let AnyJsTemplateElement::JsTemplateElement(template_element) = element {
+                    if let Ok(expression) = template_element.expression() {
+                        collect_reference_identifiers(expression, references);
+                    }
+                }
+            }
+        }
+        AnyJsExpression::JsBinaryExpression(binary_expression) => {
+            if let Ok(left) = binary_expression.left() {
+                collect_reference_identifiers(left, references);
+            }
+            if let Ok(right) = binary_expression.right() {
+                collect_reference_identifiers(right, references);
+            }
+        }
+        AnyJsExpression::JsParenthesizedExpression(parenthesized_expression) => {
+            if let Ok(expression) = parenthesized_expression.expression() {
+                collect_reference_identifiers(expression, references);
+            }
+        }
+        _ => {}
+    }
 }
