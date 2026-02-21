@@ -772,9 +772,11 @@ dependencies = [
  "biome_string_case",
  "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "grit-pattern-matcher",
  "grit-util",
  "insta",
+ "mimalloc",
  "path-absolutize",
  "rand 0.8.5",
  "regex",
@@ -783,6 +785,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]

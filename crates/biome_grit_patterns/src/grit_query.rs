@@ -68,29 +68,39 @@ pub struct GritQuery {
 }
 
 impl GritQuery {
-    pub fn execute(&self, file: GritTargetFile) -> GritResult<GritQueryResult> {
-        let file_owners = FileOwners::new();
-        let files = vec![file];
-        let file_ptr = FilePtr::new(0, 0);
-        let context = GritExecContext {
+    fn make_exec_context<'a>(
+        &'a self,
+        files: &'a [GritTargetFile],
+        file_owners: &'a FileOwners<GritTargetTree>,
+    ) -> GritExecContext<'a> {
+        GritExecContext {
             lang: self.language.clone(),
             name: self.name.as_deref(),
-            loadable_files: &files,
-            files: &file_owners,
+            loadable_files: files,
+            files: file_owners,
             built_ins: &self.built_ins,
             functions: &self.definitions.functions,
             patterns: &self.definitions.patterns,
             predicates: &self.definitions.predicates,
             diagnostics: Mutex::new(Vec::new()),
-        };
+        }
+    }
 
+    fn make_initial_state<'a>(&self, files: &'a [GritTargetFile]) -> State<'a, GritQueryContext> {
         let var_registry = VarRegistry::from_locations(&self.variable_locations);
-
         let paths: Vec<_> = files.iter().map(|file| file.path.as_std_path()).collect();
         let file_registry = FileRegistry::new_from_paths(paths);
+        State::new(var_registry.into(), file_registry)
+    }
+
+    pub fn execute(&self, file: GritTargetFile) -> GritResult<GritQueryResult> {
+        let file_owners = FileOwners::new();
+        let files = vec![file];
+        let file_ptr = FilePtr::new(0, 0);
+        let context = self.make_exec_context(&files, &file_owners);
+        let mut state = self.make_initial_state(&files);
         let binding = FilePattern::Single(file_ptr);
 
-        let mut state = State::new(var_registry.into(), file_registry);
         let mut logs = Vec::new().into();
 
         let mut effects: Vec<GritQueryEffect> = Vec::new();
@@ -162,28 +172,16 @@ impl GritQuery {
         let file_owners = FileOwners::new();
         let files = vec![file];
         let file_ptr = FilePtr::new(0, 0);
-        let context = GritExecContext {
-            lang: self.language.clone(),
-            name: self.name.as_deref(),
-            loadable_files: &files,
-            files: &file_owners,
-            built_ins: &self.built_ins,
-            functions: &self.definitions.functions,
-            patterns: &self.definitions.patterns,
-            predicates: &self.definitions.predicates,
-            diagnostics: Mutex::new(Vec::new()),
-        };
-
-        let var_registry = VarRegistry::from_locations(&self.variable_locations);
-        let paths: Vec<_> = files.iter().map(|file| file.path.as_std_path()).collect();
-        let file_registry = FileRegistry::new_from_paths(paths);
-        let mut state = State::new(var_registry.into(), file_registry);
+        let context = self.make_exec_context(&files, &file_owners);
+        let mut state = self.make_initial_state(&files);
 
         // Load file (creates FileOwner in file_owners, loads into state.files).
         let grit_file = GritFile::Ptr(file_ptr);
         context.load_file(&grit_file, &mut state, &mut logs)?;
 
-        // Bind global variables (replicate FilePattern::execute behavior).
+        // Replicate the global-variable binding from `FilePattern::execute` in
+        // `grit-pattern-matcher` (crate `grit-pattern-matcher`, module `pattern/file_pattern.rs`).
+        // If the upstream binding logic changes, this block must be updated to match.
         let name_val = grit_file.name(&state.files);
         let program_val = grit_file.binding(&state.files);
         let abs_path_val = grit_file.absolute_path(&state.files, &context.lang)?;

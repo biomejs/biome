@@ -159,6 +159,10 @@ pub struct BatchPluginVisitor<L: Language> {
     /// Used to skip subtrees that fall entirely outside the analysis range
     /// (see the `ctx.range` check in `visit`).
     skip_subtree: Option<SyntaxNode<L>>,
+
+    /// Cached per-plugin results of `applies_to_file`. Populated lazily on
+    /// first `WalkEvent::Enter` — the file path is constant for the entire walk.
+    applicable: Option<Vec<bool>>,
 }
 
 impl<L> BatchPluginVisitor<L>
@@ -191,6 +195,7 @@ where
             plugins: all_plugins,
             kind_to_plugins,
             skip_subtree: None,
+            applicable: None,
         }
     }
 }
@@ -237,13 +242,19 @@ where
             return;
         };
 
-        for &idx in plugin_indices {
-            let plugin = &self.plugins[idx];
+        let applicable = self.applicable.get_or_insert_with(|| {
+            self.plugins
+                .iter()
+                .map(|p| p.applies_to_file(&ctx.options.file_path))
+                .collect()
+        });
 
-            if !plugin.applies_to_file(&ctx.options.file_path) {
+        for &idx in plugin_indices {
+            if !applicable[idx] {
                 continue;
             }
 
+            let plugin = &self.plugins[idx];
             let rule_timer = profiling::start_plugin_rule("plugin");
             let diagnostics = plugin.evaluate(node.clone().into(), ctx.options.file_path.clone());
             rule_timer.stop();

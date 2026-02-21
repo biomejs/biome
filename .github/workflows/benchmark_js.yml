@@ -1,4 +1,4 @@
-name: Benchmarks JS
+name: Benchmarks JS/GritQL
 
 on:
   workflow_dispatch:
