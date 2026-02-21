@@ -6,6 +6,7 @@ mod generated;
 mod syntax_node;
 
 pub use file_source::MdFileSource;
+pub use syntax_node::*;
 
 pub use self::generated::*;
 use biome_rowan::{RawSyntaxKind, SyntaxKind, TriviaPieceKind};
