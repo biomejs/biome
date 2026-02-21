@@ -66,6 +66,7 @@ declare_lint_rule! {
     /// - `devDependencies`: If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
     /// - `peerDependencies`: If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.
     /// - `optionalDependencies`: If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.
+    /// - `bundleDependencies`: If set to `false`, then the rule will show an error when `bundleDependencies` are imported. Defaults to `true`.
     ///
     /// You can set the options like this:
     ///
@@ -74,7 +75,8 @@ declare_lint_rule! {
     ///   "options": {
     ///     "devDependencies": false,
     ///     "peerDependencies": false,
-    ///     "optionalDependencies": false
+    ///     "optionalDependencies": false,
+    ///     "bundleDependencies": false
     ///   }
     /// }
     /// ```
@@ -86,9 +88,8 @@ declare_lint_rule! {
     ///
     /// ### Example using the `devDependencies` option
     ///
-    /// In this example, only test files can use dependencies in the
-    /// `devDependencies` section. `dependencies`, `peerDependencies`, and
-    /// `optionalDependencies` are always available.
+    /// In this example, only test files can use dependencies in the `devDependencies` section. 
+    /// `dependencies`, `peerDependencies`, `optionalDependencies` and `bundleDependencies` are always available.
     ///
     /// ```json,options
     /// {
@@ -133,6 +134,7 @@ pub struct RuleState {
     is_dev_dependency_available: bool,
     is_peer_dependency_available: bool,
     is_optional_dependency_available: bool,
+    is_bundle_dependency_available: bool,
 }
 
 impl Rule for NoUndeclaredDependencies {
@@ -165,12 +167,18 @@ impl Rule for NoUndeclaredDependencies {
             .optional_dependencies
             .as_ref()
             .is_none_or(|dep| dep.is_available(path));
+        let is_bundle_dependency_available = ctx
+            .options()
+            .bundle_dependencies
+            .as_ref()
+            .is_none_or(|dep| dep.is_available(path));
 
         let is_available = |package_name| {
             ctx.is_dependency(package_name)
                 || (is_dev_dependency_available && ctx.is_dev_dependency(package_name))
                 || (is_peer_dependency_available && ctx.is_peer_dependency(package_name))
                 || (is_optional_dependency_available && ctx.is_optional_dependency(package_name))
+                || (is_bundle_dependency_available && ctx.is_bundle_dependency(package_name))
         };
 
         let token_text = node.inner_string_text()?;
@@ -206,6 +214,7 @@ impl Rule for NoUndeclaredDependencies {
             is_dev_dependency_available,
             is_peer_dependency_available,
             is_optional_dependency_available,
+            is_bundle_dependency_available,
         })
     }
 
@@ -215,6 +224,7 @@ impl Rule for NoUndeclaredDependencies {
             is_dev_dependency_available,
             is_peer_dependency_available,
             is_optional_dependency_available,
+            is_bundle_dependency_available,
         } = state;
 
         let Some(package_path) = ctx.package_path.as_ref() else {
@@ -252,6 +262,8 @@ impl Rule for NoUndeclaredDependencies {
             Some("peerDependencies")
         } else if ctx.is_optional_dependency(package_name) && !is_optional_dependency_available {
             Some("optionalDependencies")
+        } else if ctx.is_bundle_dependency(package_name) && !is_bundle_dependency_available {
+            Some("bundleDependencies")
         } else {
             None
         };
