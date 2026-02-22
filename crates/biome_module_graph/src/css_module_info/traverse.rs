@@ -1,4 +1,5 @@
 use crate::ModuleInfo;
+use biome_console::markup;
 use biome_rowan::TokenText;
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexSet;
@@ -204,29 +205,32 @@ struct RootTreeNode<'a> {
 
 impl<'a> biome_console::fmt::Display for RootTreeNode<'a> {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        use biome_console::markup;
-
         let display_path = RelativePath {
             path: &self.node.file_path,
             working_directory: self.working_directory,
         };
-        fmt.write_markup(markup! {{display_path}" (this file)\n"})?;
+        fmt.write_markup(markup! {{display_path}" (this file)"})?;
 
-        let has_parents = !self.node.parent_components.is_empty();
-        let has_imports = !self.node.css_imports.is_empty();
-
-        if has_parents {
-            let group = ImportedByGroup {
-                parents: &self.node.parent_components,
-                working_directory: self.working_directory,
-                is_last: !has_imports,
-            };
-            fmt.write_markup(markup! {{group}})?;
+        // Show imports inline if present
+        if !self.node.css_imports.is_empty() {
+            fmt.write_str(" -> which imports ")?;
+            for (i, css_path) in self.node.css_imports.iter().enumerate() {
+                if i > 0 {
+                    fmt.write_str(", ")?;
+                }
+                let css_display = RelativePath {
+                    path: css_path,
+                    working_directory: self.working_directory,
+                };
+                fmt.write_markup(markup! {{css_display}})?;
+            }
         }
 
-        if has_imports {
-            let group = ImportsGroup {
-                imports: &self.node.css_imports,
+        fmt.write_str("\n")?;
+
+        if !self.node.parent_components.is_empty() {
+            let group = ImportedByGroup {
+                parents: &self.node.parent_components,
                 working_directory: self.working_directory,
                 is_last: true,
             };
@@ -251,47 +255,26 @@ impl<'a> biome_console::fmt::Display for ImportedByGroup<'a> {
         let branch = if self.is_last { "└─ " } else { "├─ " };
         fmt.write_markup(markup! {"  "{branch}"imported by:\n"})?;
 
-        let prefix = if self.is_last { "    " } else { "  │ " };
+        // Prefix for items: use pipe if this group is not the last sibling, spaces if it is
+        let prefix = if self.is_last {
+            "    ".to_string()
+        } else {
+            "  │ ".to_string()
+        };
 
-        for (i, parent) in self.parents.iter().enumerate() {
-            let is_last_parent = i == self.parents.len() - 1;
+        // Sort parents by file path for deterministic output
+        let mut sorted_parents: Vec<_> = self.parents.iter().collect();
+        sorted_parents.sort_by_key(|p| &p.file_path);
+
+        for (i, parent) in sorted_parents.iter().enumerate() {
+            let is_last_parent = i == sorted_parents.len() - 1;
             let item = TreeItem {
                 node: parent,
                 working_directory: self.working_directory,
-                prefix,
+                prefix: prefix.clone(),
                 is_last: is_last_parent,
             };
             fmt.write_markup(markup! {{item}})?;
-        }
-
-        Ok(())
-    }
-}
-
-/// "imports:" group
-struct ImportsGroup<'a> {
-    imports: &'a [Utf8PathBuf],
-    working_directory: Option<&'a Utf8Path>,
-    is_last: bool,
-}
-
-impl<'a> biome_console::fmt::Display for ImportsGroup<'a> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        use biome_console::markup;
-
-        let branch = if self.is_last { "└─ " } else { "├─ " };
-        fmt.write_markup(markup! {"  "{branch}"imports:\n"})?;
-
-        let prefix = if self.is_last { "    " } else { "  │ " };
-
-        for (i, css_path) in self.imports.iter().enumerate() {
-            let is_last_css = i == self.imports.len() - 1;
-            let branch = if is_last_css { "└─ " } else { "├─ " };
-            let css_display = RelativePath {
-                path: css_path,
-                working_directory: self.working_directory,
-            };
-            fmt.write_markup(markup! {{prefix}{branch}"• "{css_display}"\n"})?;
         }
 
         Ok(())
@@ -302,319 +285,61 @@ impl<'a> biome_console::fmt::Display for ImportsGroup<'a> {
 struct TreeItem<'a> {
     node: &'a ImportTreeNode,
     working_directory: Option<&'a Utf8Path>,
-    prefix: &'a str,
+    prefix: String,
     is_last: bool,
 }
 
 impl<'a> biome_console::fmt::Display for TreeItem<'a> {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        use biome_console::markup;
-
         let branch = if self.is_last { "└─ " } else { "├─ " };
         let display_path = RelativePath {
             path: &self.node.file_path,
             working_directory: self.working_directory,
         };
-        fmt.write_markup(markup! {{self.prefix}{branch}"• "{display_path}"\n"})?;
 
-        // Calculate child prefix for nested content
-        let child_prefix = Prefix {
-            parent: self.prefix,
-            is_last: self.is_last,
-        };
+        // Write the file path
+        fmt.write_markup(markup! {{self.prefix}{branch}"• "{display_path}})?;
 
-        // Show nested parent components recursively (imported by chain)
-        if !self.node.parent_components.is_empty() {
-            let nested_parents = NestedImportedByGroup {
-                parents: &self.node.parent_components,
-                working_directory: self.working_directory,
-                parent_prefix: self.prefix,
-                parent_is_last: self.is_last,
-                is_last: self.node.css_imports.is_empty(),
-            };
-            fmt.write_markup(markup! {{nested_parents}})?;
-        }
-
-        // Show nested imports for this component
+        // Show imports inline if present
         if !self.node.css_imports.is_empty() {
-            let nested_imports = NestedImportsGroup {
-                imports: &self.node.css_imports,
-                working_directory: self.working_directory,
-                parent_prefix: self.prefix,
-                parent_is_last: self.is_last,
-            };
-            fmt.write_markup(markup! {{nested_imports}})?;
-        }
-
-        Ok(())
-    }
-}
-
-/// Nested "imported by:" group (shown under a tree item)
-struct NestedImportedByGroup<'a> {
-    parents: &'a [ImportTreeNode],
-    working_directory: Option<&'a Utf8Path>,
-    parent_prefix: &'a str,
-    parent_is_last: bool,
-    is_last: bool,
-}
-
-impl<'a> biome_console::fmt::Display for NestedImportedByGroup<'a> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        use biome_console::markup;
-
-        let child_prefix = Prefix {
-            parent: self.parent_prefix,
-            is_last: self.parent_is_last,
-        };
-
-        let branch = if self.is_last { "└─ " } else { "├─ " };
-        fmt.write_markup(markup! {{child_prefix}{branch}"imported by:\n"})?;
-
-        let item_prefix = NestedItemPrefix {
-            parent: self.parent_prefix,
-            parent_is_last: self.parent_is_last,
-            group_is_last: self.is_last,
-        };
-
-        for (i, parent) in self.parents.iter().enumerate() {
-            let is_last_parent = i == self.parents.len() - 1;
-            let item = NestedTreeItem {
-                node: parent,
-                working_directory: self.working_directory,
-                prefix: &item_prefix,
-                is_last: is_last_parent,
-            };
-            fmt.write_markup(markup! {{item}})?;
-        }
-
-        Ok(())
-    }
-}
-
-/// Nested imports group (shown under a tree item)
-struct NestedImportsGroup<'a> {
-    imports: &'a [Utf8PathBuf],
-    working_directory: Option<&'a Utf8Path>,
-    parent_prefix: &'a str,
-    parent_is_last: bool,
-}
-
-impl<'a> biome_console::fmt::Display for NestedImportsGroup<'a> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        use biome_console::markup;
-
-        let child_prefix = Prefix {
-            parent: self.parent_prefix,
-            is_last: self.parent_is_last,
-        };
-
-        fmt.write_markup(markup! {{child_prefix}"└─ imports:\n"})?;
-
-        let item_prefix = ItemPrefix {
-            parent: self.parent_prefix,
-            parent_is_last: self.parent_is_last,
-        };
-
-        for (i, css_path) in self.imports.iter().enumerate() {
-            let is_last_css = i == self.imports.len() - 1;
-            let item_branch = if is_last_css { "└─ " } else { "├─ " };
-            let css_display = RelativePath {
-                path: css_path,
-                working_directory: self.working_directory,
-            };
-            fmt.write_markup(markup! {{item_prefix}{item_branch}"• "{css_display}"\n"})?;
-        }
-
-        Ok(())
-    }
-}
-
-/// Display wrapper for tree prefixes
-struct Prefix<'a> {
-    parent: &'a str,
-    is_last: bool,
-}
-
-impl<'a> biome_console::fmt::Display for Prefix<'a> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        fmt.write_str(self.parent)?;
-        fmt.write_str(if self.is_last { "  " } else { "│ " })
-    }
-}
-
-/// Display wrapper for item prefixes
-struct ItemPrefix<'a> {
-    parent: &'a str,
-    parent_is_last: bool,
-}
-
-impl<'a> biome_console::fmt::Display for ItemPrefix<'a> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        fmt.write_str(self.parent)?;
-        fmt.write_str(if self.parent_is_last {
-            "    "
-        } else {
-            "│   "
-        })
-    }
-}
-
-/// Nested item prefix (for items under nested groups)
-struct NestedItemPrefix<'a> {
-    parent: &'a str,
-    parent_is_last: bool,
-    group_is_last: bool,
-}
-
-impl<'a> biome_console::fmt::Display for NestedItemPrefix<'a> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        fmt.write_str(self.parent)?;
-        fmt.write_str(if self.parent_is_last { "  " } else { "│ " })?;
-        fmt.write_str(if self.group_is_last { "  " } else { "│ " })
-    }
-}
-
-/// Nested tree item (shown under nested groups)
-struct NestedTreeItem<'a> {
-    node: &'a ImportTreeNode,
-    working_directory: Option<&'a Utf8Path>,
-    prefix: &'a NestedItemPrefix<'a>,
-    is_last: bool,
-}
-
-impl<'a> biome_console::fmt::Display for NestedTreeItem<'a> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        use biome_console::markup;
-
-        let branch = if self.is_last { "└─ " } else { "├─ " };
-        let display_path = RelativePath {
-            path: &self.node.file_path,
-            working_directory: self.working_directory,
-        };
-        fmt.write_markup(markup! {{self.prefix}{branch}"• "{display_path}"\n"})?;
-
-        // Recursively show this item's parents and imports
-        if !self.node.parent_components.is_empty() || !self.node.css_imports.is_empty() {
-            let deeper_nested = DeeperNestedContent {
-                node: self.node,
-                working_directory: self.working_directory,
-                base_prefix: self.prefix,
-                item_is_last: self.is_last,
-            };
-            fmt.write_markup(markup! {{deeper_nested}})?;
-        }
-
-        Ok(())
-    }
-}
-
-/// Content nested even deeper (for recursive parent/import chains)
-struct DeeperNestedContent<'a> {
-    node: &'a ImportTreeNode,
-    working_directory: Option<&'a Utf8Path>,
-    base_prefix: &'a NestedItemPrefix<'a>,
-    item_is_last: bool,
-}
-
-impl<'a> biome_console::fmt::Display for DeeperNestedContent<'a> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        use biome_console::markup;
-
-        // Build prefix for the deeper level
-        let deeper_prefix = DeeperPrefix {
-            base: self.base_prefix,
-            item_is_last: self.item_is_last,
-        };
-
-        let has_parents = !self.node.parent_components.is_empty();
-        let has_imports = !self.node.css_imports.is_empty();
-
-        // Show imported by chain
-        if has_parents {
-            let branch = if has_imports { "├─ " } else { "└─ " };
-            fmt.write_markup(markup! {{deeper_prefix}{branch}"imported by:\n"})?;
-
-            let item_list_prefix = DeeperItemListPrefix {
-                base: self.base_prefix,
-                item_is_last: self.item_is_last,
-                group_is_last: !has_imports,
-            };
-
-            for (i, parent) in self.node.parent_components.iter().enumerate() {
-                let is_last_parent = i == self.node.parent_components.len() - 1;
-                let item = NestedTreeItem {
-                    node: parent,
-                    working_directory: self.working_directory,
-                    prefix: &item_list_prefix,
-                    is_last: is_last_parent,
-                };
-                fmt.write_markup(markup! {{item}})?;
-            }
-        }
-
-        // Show imports
-        if has_imports {
-            fmt.write_markup(markup! {{deeper_prefix}"└─ imports:\n"})?;
-
-            let item_list_prefix = DeeperItemListPrefix {
-                base: self.base_prefix,
-                item_is_last: self.item_is_last,
-                group_is_last: true,
-            };
-
+            fmt.write_str(" -> which imports ")?;
             for (i, css_path) in self.node.css_imports.iter().enumerate() {
-                let is_last_css = i == self.node.css_imports.len() - 1;
-                let css_branch = if is_last_css { "└─ " } else { "├─ " };
+                if i > 0 {
+                    fmt.write_str(", ")?;
+                }
                 let css_display = RelativePath {
                     path: css_path,
                     working_directory: self.working_directory,
                 };
-                fmt.write_markup(markup! {{item_list_prefix}{css_branch}"• "{css_display}"\n"})?;
+                fmt.write_markup(markup! {{css_display}})?;
+            }
+        }
+
+        fmt.write_str("\n")?;
+
+        // Show nested parent components recursively (imported by chain)
+        if !self.node.parent_components.is_empty() {
+            let child_prefix = format!("{}{}", self.prefix, if self.is_last { "  " } else { "│ " });
+            fmt.write_markup(markup! {{child_prefix}"└─ imported by:\n"})?;
+
+            let item_prefix = format!("{}  ", child_prefix);
+
+            // Sort parents by file path for deterministic output
+            let mut sorted_parents: Vec<_> = self.node.parent_components.iter().collect();
+            sorted_parents.sort_by_key(|p| &p.file_path);
+
+            for (i, parent) in sorted_parents.iter().enumerate() {
+                let is_last_parent = i == sorted_parents.len() - 1;
+                let parent_item = TreeItem {
+                    node: parent,
+                    working_directory: self.working_directory,
+                    prefix: item_prefix.clone(),
+                    is_last: is_last_parent,
+                };
+                fmt.write_markup(markup! {{parent_item}})?;
             }
         }
 
         Ok(())
-    }
-}
-
-/// Prefix for deeper nested levels
-struct DeeperPrefix<'a> {
-    base: &'a NestedItemPrefix<'a>,
-    item_is_last: bool,
-}
-
-impl<'a> biome_console::fmt::Display for DeeperPrefix<'a> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        use biome_console::markup;
-        fmt.write_markup(markup! {{self.base}})?;
-        fmt.write_str(if self.item_is_last { "  " } else { "│ " })
-    }
-}
-
-/// Prefix for item lists in deeper levels
-struct DeeperItemListPrefix<'a> {
-    base: &'a NestedItemPrefix<'a>,
-    item_is_last: bool,
-    group_is_last: bool,
-}
-
-impl<'a> biome_console::fmt::Display for DeeperItemListPrefix<'a> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        use biome_console::markup;
-        fmt.write_markup(markup! {{self.base}})?;
-        fmt.write_str(if self.item_is_last { "  " } else { "│ " })?;
-        fmt.write_str(if self.group_is_last { "  " } else { "│ " })
-    }
-}
-
-impl<'a> biome_console::fmt::Display for ItemPrefix<'a> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        fmt.write_str(self.parent)?;
-        fmt.write_str(if self.parent_is_last {
-            "    "
-        } else {
-            "│   "
-        })
     }
 }

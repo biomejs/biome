@@ -494,8 +494,6 @@ impl ModuleGraph {
             };
 
             if imports_current {
-                visited.insert(file_path.clone());
-
                 // Collect CSS imports from this parent
                 let css_imports: Vec<Utf8PathBuf> = match module_info {
                     crate::ModuleInfo::Js(js_info) => js_info
@@ -520,8 +518,13 @@ impl ModuleGraph {
                     crate::ModuleInfo::Css(_) => Vec::new(),
                 };
 
+                // Clone visited set for this branch to allow the same node in different branches
+                // while still preventing cycles within a branch
+                let mut branch_visited = visited.clone();
+                branch_visited.insert(file_path.clone());
+
                 // Recursively build this parent's tree
-                let parent_components = self.build_parent_nodes(file_path, visited);
+                let parent_components = self.build_parent_nodes(file_path, &mut branch_visited);
 
                 parents.push(ImportTreeNode {
                     file_path: file_path.clone(),

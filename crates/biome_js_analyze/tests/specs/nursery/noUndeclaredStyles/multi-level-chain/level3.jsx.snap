@@ -29,11 +29,12 @@ level3.jsx:7:32 lint/nursery/noUndeclaredStyles ━━━━━━━━━━�
   
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
-  i tests/specs/nursery/noUndeclaredStyles/multi-level-chain/level3.jsx, which imports:
-            - tests/specs/nursery/noUndeclaredStyles/multi-level-chain/level3.css
-    tests/specs/nursery/noUndeclaredStyles/multi-level-chain/level3.jsx
-        ... which is imported by tests/specs/nursery/noUndeclaredStyles/multi-level-chain/level4.jsx, which imports:
-            - tests/specs/nursery/noUndeclaredStyles/multi-level-chain/level4.css
+  i Checked import tree:
+    
+    level3.jsx (this file) -> which imports level3.css
+      └─ imported by:
+        └─ • level4.jsx -> which imports level4.css
+  
   
   i Either import a CSS file that defines this class or remove this class name.
   

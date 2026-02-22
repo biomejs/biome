@@ -28,8 +28,10 @@ invalid.jsx:6:28 lint/nursery/noUndeclaredStyles ━━━━━━━━━━�
   
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
-  i tests/specs/nursery/noUndeclaredStyles/invalid.jsx, which imports:
-            - tests/specs/nursery/noUndeclaredStyles/button.css
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
   
   i Either import a CSS file that defines this class or remove this class name.
   

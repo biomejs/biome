@@ -40,12 +40,6 @@ impl SemanticModel {
         &self.data.rules
     }
 
-    /// Returns an iterator over all rules in the CSS document, including nested rules
-    /// (e.g., rules inside `@media`, `@supports`, or CSS nesting blocks).
-    pub fn all_rules(&self) -> impl Iterator<Item = &Rule> {
-        self.data.rules_by_id.values()
-    }
-
     pub fn global_custom_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {
         &self.data.global_custom_variables
     }
