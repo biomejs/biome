@@ -12,9 +12,9 @@ categories.workspace = true
 publish              = false
 
 [[bench]]
-harness            = false
-name               = "grit_query"
-required-features  = ["testing"]
+harness           = false
+name              = "grit_query"
+required-features = ["testing"]
 
 [dependencies]
 biome_analyze        = { workspace = true }
