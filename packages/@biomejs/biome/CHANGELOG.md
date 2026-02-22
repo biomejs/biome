@@ -1,5 +1,30 @@
 # @biomejs/biome
 
+## 2.4.5
+
+### Patch Changes
+
+- [#9063](https://github.com/biomejs/biome/pull/9063) [`3d0648f`](https://github.com/biomejs/biome/commit/3d0648f95a0f7a3fd8ddff58d57a239e68183fe1) Thanks [@taga3s](https://github.com/taga3s)! - Added the nursery rule [`noVueRefAsOperand`](https://biomejs.dev/linter/rules/no-vue-ref-as-operand/). This rule disallows cases where a ref is used as an operand.
+
+  The following code is now flagged:
+
+  ```js
+  import { ref } from "vue";
+
+  const count = ref(0);
+  count++; // Should be: count.value++
+  ```
+
+  ```js
+  import { ref } from "vue";
+
+  const ok = ref(false);
+  if (ok) {
+    // Should be: if (ok.value)
+    //
+  }
+  ```
+
 ## 2.4.4
 
 ### Patch Changes
