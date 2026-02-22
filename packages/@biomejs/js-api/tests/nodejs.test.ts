@@ -32,4 +32,46 @@ describe("Biome for Node.js", () => {
 			"Unknown property is not allowed.",
 		);
 	});
+
+	it("should parse GritQL patterns", () => {
+		const pattern = "`const $x = 1;`";
+
+		const patternId = biome.parsePattern(pattern, "JavaScript");
+		expect(patternId).toBeDefined();
+		expect(typeof patternId).toBe("string");
+
+		biome.dropPattern(patternId);
+	});
+
+	it("should search GritQL patterns", () => {
+		const code = "const x = 1; const y = 2;";
+		const pattern = "`const $x = 1;`";
+
+		const patternId = biome.parsePattern(pattern, "JavaScript");
+
+		const matches = biome.searchPattern(projectKey, "test.js", code, patternId);
+		expect(matches).toBeDefined();
+		expect(Array.isArray(matches)).toBe(true);
+
+		biome.dropPattern(patternId);
+	});
+
+	it("should search CSS GritQL patterns", () => {
+		const code = "div { color: green; }";
+		const pattern = "`color: $x`";
+
+		const patternId = biome.parsePattern(pattern, "CSS");
+
+		const matches = biome.searchPattern(
+			projectKey,
+			"test.css",
+			code,
+			patternId,
+		);
+		expect(matches).toBeDefined();
+		expect(Array.isArray(matches)).toBe(true);
+		expect(matches.length).toBeGreaterThan(0);
+
+		biome.dropPattern(patternId);
+	});
 });
