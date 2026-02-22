@@ -2016,7 +2016,7 @@ impl JsCallExpression {
     /// 5. The third argument, if present, can be:
     ///    - A number literal for timeout duration, OR
     ///    - The callback function when the second argument is TestOptions
-    /// 6. Function expressions must have zero or one parameters
+    /// 6. Function expressions in 3-argument patterns must have zero or one parameters
     ///
     /// [call expression]: crate::JsCallExpression
     /// [callee]: crate::AnyJsExpression
