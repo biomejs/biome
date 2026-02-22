@@ -496,6 +496,41 @@ fn bump_textual_link_def(p: &mut MarkdownParser) {
     p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::LinkDefinition);
     item.complete(p, MD_TEXTUAL);
 }
+
+/// Controls whether tokens are consumed with CST node creation (Parse)
+/// or silently advanced (Scan, for lookahead validation).
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+enum BumpMode {
+    /// Lookahead: advance without creating CST nodes.
+    Scan,
+    /// Real parse: wrap each token in MD_TEXTUAL CST nodes.
+    Parse,
+}
+
+impl BumpMode {
+    fn bump_token(self, p: &mut MarkdownParser) {
+        match self {
+            Self::Scan => {
+                p.bump_link_definition();
+            }
+            Self::Parse => {
+                bump_textual_link_def(p);
+            }
+        }
+    }
+
+    fn bump_separator(self, p: &mut MarkdownParser) {
+        match self {
+            Self::Scan => {
+                skip_link_def_separator_tokens(p);
+            }
+            Self::Parse => {
+                bump_link_def_separator(p);
+            }
+        }
+    }
+}
+
 fn is_whitespace_token(p: &MarkdownParser) -> bool {
     let text = p.cur_text();
     !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
@@ -583,13 +618,28 @@ enum DestinationScanResult {
 }
 
 fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationScanResult {
+    destination_tokens_core(p, BumpMode::Scan)
+}
+
+fn destination_tokens_core(p: &mut MarkdownParser, mode: BumpMode) -> DestinationScanResult {
     const MAX_PAREN_DEPTH: i32 = MAX_LINK_DESTINATION_PAREN_DEPTH;
-    // Skip leading whitespace to match parse_inline_link_destination_tokens behavior
-    while is_title_separator_token(p) {
-        skip_link_def_separator_tokens(p);
+
+    // Parse mode: re-lex into LinkDefinition context (scan caller does this externally).
+    if mode == BumpMode::Parse {
+        p.re_lex_link_definition();
     }
+
+    // Scan mode: skip leading whitespace before angle bracket check.
+    // Parse mode: whitespace is skipped only in the raw path below.
+    if mode == BumpMode::Scan {
+        while is_title_separator_token(p) {
+            mode.bump_separator(p);
+        }
+    }
+
+    // Enclosed destination: <url>
     if p.at(L_ANGLE) {
-        p.bump_link_definition();
+        mode.bump_token(p);
         let mut pending_escape = false;
         loop {
             if p.at(EOF) || p.at(NEWLINE) {
@@ -604,10 +654,10 @@ fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSca
                     ) {
                         return DestinationScanResult::Invalid;
                     }
-                    p.bump_link_definition();
+                    mode.bump_token(p);
                     continue;
                 }
-                p.bump_link_definition();
+                mode.bump_token(p);
                 return DestinationScanResult::Valid;
             }
             if !validate_link_destination_text(
@@ -617,12 +667,21 @@ fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSca
             ) {
                 return DestinationScanResult::Invalid;
             }
-            p.bump_link_definition();
+            mode.bump_token(p);
         }
     }
 
+    // Raw destination (no angle brackets)
     let mut paren_depth: i32 = 0;
     let mut pending_escape = false;
+
+    // Parse mode: skip leading whitespace in raw path.
+    if mode == BumpMode::Parse {
+        while is_title_separator_token(p) {
+            mode.bump_separator(p);
+        }
+    }
+
     while !p.at(EOF) && !p.at(NEWLINE) {
         if is_whitespace_token(p) {
             break;
@@ -634,16 +693,12 @@ fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSca
         match try_update_paren_depth(text, paren_depth, MAX_PAREN_DEPTH) {
             ParenDepthResult::Ok(next_depth) => {
                 paren_depth = next_depth;
-                p.bump_link_definition();
+                mode.bump_token(p);
             }
             ParenDepthResult::DepthExceeded => {
-                // Paren depth exceeded - destination is truncated at this point.
-                // Per CommonMark/cmark, the link is still valid but closed here.
                 return DestinationScanResult::DepthExceeded;
             }
             ParenDepthResult::UnmatchedClose => {
-                // Unmatched closing paren - destination ends here normally.
-                // The `)` belongs to the enclosing construct (inline link closer).
                 break;
             }
         }
@@ -662,38 +717,7 @@ fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSca
 }
 
 fn scan_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
-    let Some(close_char) = close_char else {
-        return;
-    };
-
-    let text = p.cur_text();
-    let is_complete = text.len() >= 2 && ends_with_unescaped_close(text, close_char);
-
-    p.bump_link_definition();
-    if is_complete {
-        return;
-    }
-
-    loop {
-        // Stop on EOF or blank line (titles cannot span blank lines per CommonMark)
-        if p.at(EOF) || p.at_blank_line() {
-            return;
-        }
-
-        // Continue through single newlines (titles can span non-blank lines)
-        if p.at(NEWLINE) {
-            skip_link_def_separator_tokens(p);
-            continue;
-        }
-
-        let text = p.cur_text();
-        if ends_with_unescaped_close(text, close_char) {
-            p.bump_link_definition();
-            return;
-        }
-
-        p.bump_link_definition();
-    }
+    title_content_core(p, close_char, BumpMode::Scan);
 }
 
 fn skip_link_def_separator_tokens(p: &mut MarkdownParser) {
@@ -719,83 +743,7 @@ fn bump_link_def_separator(p: &mut MarkdownParser) {
 }
 
 fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationScanResult {
-    p.re_lex_link_definition();
-    const MAX_PAREN_DEPTH: i32 = MAX_LINK_DESTINATION_PAREN_DEPTH;
-
-    if p.at(L_ANGLE) {
-        bump_textual_link_def(p);
-        let mut pending_escape = false;
-        loop {
-            if p.at(EOF) || p.at(NEWLINE) {
-                return DestinationScanResult::Invalid;
-            }
-            if p.at(R_ANGLE) {
-                if pending_escape {
-                    if !validate_link_destination_text(
-                        p.cur_text(),
-                        LinkDestinationKind::Enclosed,
-                        &mut pending_escape,
-                    ) {
-                        return DestinationScanResult::Invalid;
-                    }
-                    bump_textual_link_def(p);
-                    continue;
-                }
-                bump_textual_link_def(p);
-                return DestinationScanResult::Valid;
-            }
-            if !validate_link_destination_text(
-                p.cur_text(),
-                LinkDestinationKind::Enclosed,
-                &mut pending_escape,
-            ) {
-                return DestinationScanResult::Invalid;
-            }
-            bump_textual_link_def(p);
-        }
-    }
-
-    let mut paren_depth: i32 = 0;
-    let mut pending_escape = false;
-    while is_title_separator_token(p) {
-        bump_link_def_separator(p);
-    }
-    while !p.at(EOF) && !p.at(NEWLINE) {
-        if is_whitespace_token(p) {
-            break;
-        }
-
-        let text = p.cur_text();
-        if !validate_link_destination_text(text, LinkDestinationKind::Raw, &mut pending_escape) {
-            return DestinationScanResult::Invalid;
-        }
-        match try_update_paren_depth(text, paren_depth, MAX_PAREN_DEPTH) {
-            ParenDepthResult::Ok(next_depth) => {
-                paren_depth = next_depth;
-                bump_textual_link_def(p);
-            }
-            ParenDepthResult::DepthExceeded => {
-                // Paren depth exceeded - destination is truncated at this point.
-                return DestinationScanResult::DepthExceeded;
-            }
-            ParenDepthResult::UnmatchedClose => {
-                // Unmatched closing paren - destination ends here normally.
-                // The `)` belongs to the enclosing construct (inline link closer).
-                break;
-            }
-        }
-    }
-    if p.at(EOF) {
-        return DestinationScanResult::Invalid;
-    }
-    if p.at(NEWLINE) {
-        return if p.at_blank_line() {
-            DestinationScanResult::Invalid
-        } else {
-            DestinationScanResult::Valid
-        };
-    }
-    DestinationScanResult::Valid
+    destination_tokens_core(p, BumpMode::Parse)
 }
 
 fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
@@ -811,7 +759,7 @@ fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
     }
 }
 
-fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
+fn title_content_core(p: &mut MarkdownParser, close_char: Option<char>, mode: BumpMode) {
     let Some(close_char) = close_char else {
         return;
     };
@@ -819,7 +767,7 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
     let text = p.cur_text();
     let is_complete = text.len() >= 2 && ends_with_unescaped_close(text, close_char);
 
-    bump_textual_link_def(p);
+    mode.bump_token(p);
     if is_complete {
         return;
     }
@@ -832,18 +780,22 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
 
         // Continue through single newlines (titles can span non-blank lines)
         if p.at(NEWLINE) {
-            bump_link_def_separator(p);
+            mode.bump_separator(p);
             continue;
         }
 
         let text = p.cur_text();
         if ends_with_unescaped_close(text, close_char) {
-            bump_textual_link_def(p);
+            mode.bump_token(p);
             return;
         }
 
-        bump_textual_link_def(p);
+        mode.bump_token(p);
     }
+}
+
+fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
+    title_content_core(p, close_char, BumpMode::Parse);
 }
 
 /// Parse inline image (`![alt](url)`).
