@@ -2370,12 +2370,20 @@ mod test {
             extract_call_expression("test.skip.sequential.only.todo.each([])(name, () => {});");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
 
+        // Positive cases for TesOptions pattern
         let call_expression = extract_call_expression("test('foo', { retry: 3 }, () => {})");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
 
         let call_expression =
             extract_call_expression("describe.only('bar', { timeout: 42*1000 }, () => {})");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        // Negative cases for TestOptions pattern
+        let call_expression = extract_call_expression("test('foo', { retry: 3 })");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(false));
+
+        let call_expression = extract_call_expression("test('foo', { retry: 3 }, 42)");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(false));
     }
 
     #[test]
