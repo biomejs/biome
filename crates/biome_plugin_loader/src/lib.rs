@@ -71,7 +71,7 @@ impl BiomePlugin {
             .extension()
             .is_some_and(|extension| extension == "js" || extension == "mjs")
         {
-            let plugin = AnalyzerJsPlugin::load(fs.clone(), &plugin_path)?;
+            let plugin = AnalyzerJsPlugin::load(fs.clone(), &plugin_path, includes)?;
             return Ok((
                 Self {
                     analyzer_plugins: vec![Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>)],

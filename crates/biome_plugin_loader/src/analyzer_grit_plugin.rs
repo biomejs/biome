@@ -84,7 +84,7 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
         let Some(includes) = &self.includes else {
             return true;
         };
-        CandidatePath::new(&path).matches_with_exceptions(includes)
+        CandidatePath::new(path).matches_with_exceptions(includes)
     }
 
     fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
@@ -238,5 +238,16 @@ mod tests {
         let plugin = load_test_plugin(Some(&globs));
         assert!(!plugin.applies_to_file(Utf8Path::new("test/foo.ts")));
         assert!(!plugin.applies_to_file(Utf8Path::new("src/main.js")));
+    }
+
+    #[test]
+    fn applies_with_negated_glob_exclusion() {
+        let globs: Vec<NormalizedGlob> = vec![
+            "src/**/*.ts".parse().unwrap(),
+            "!**/*.test.ts".parse().unwrap(),
+        ];
+        let plugin = load_test_plugin(Some(&globs));
+        assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));
+        assert!(!plugin.applies_to_file(Utf8Path::new("src/foo.test.ts")));
     }
 }

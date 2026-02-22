@@ -9,6 +9,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use biome_analyze::{AnalyzerPlugin, PluginTargetLanguage, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::category;
+use biome_glob::{CandidatePath, NormalizedGlob};
 use biome_js_runtime::JsExecContext;
 use biome_js_syntax::AnyJsRoot;
 use biome_resolver::FsWithResolverProxy;
@@ -46,6 +47,10 @@ pub struct AnalyzerJsPlugin {
     fs: Arc<dyn FsWithResolverProxy>,
     path: Utf8PathBuf,
     loaded: ThreadLocalCell<LoadedPlugin>,
+
+    /// Glob patterns that restrict which files this plugin runs on.
+    /// `None` means the plugin runs on all files.
+    includes: Option<Box<[NormalizedGlob]>>,
 }
 
 impl Debug for AnalyzerJsPlugin {
@@ -60,6 +65,7 @@ impl AnalyzerJsPlugin {
     pub fn load(
         fs: Arc<dyn FsWithResolverProxy>,
         path: &Utf8Path,
+        includes: Option<&[NormalizedGlob]>,
     ) -> Result<Self, PluginDiagnostic> {
         // Load the plugin in the main thread here to catch errors while loading.
         load_plugin(fs.clone(), path)?;
@@ -68,6 +74,7 @@ impl AnalyzerJsPlugin {
             fs,
             path: path.to_owned(),
             loaded: ThreadLocalCell::new(),
+            includes: includes.map(Into::into),
         })
     }
 }
@@ -75,6 +82,13 @@ impl AnalyzerJsPlugin {
 impl AnalyzerPlugin for AnalyzerJsPlugin {
     fn language(&self) -> PluginTargetLanguage {
         PluginTargetLanguage::JavaScript
+    }
+
+    fn applies_to_file(&self, path: &Utf8Path) -> bool {
+        let Some(includes) = &self.includes else {
+            return true;
+        };
+        CandidatePath::new(path).matches_with_exceptions(includes)
     }
 
     fn query(&self) -> Vec<RawSyntaxKind> {
@@ -160,7 +174,7 @@ mod tests {
         );
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
-        let plugin = Arc::new(AnalyzerJsPlugin::load(fs.clone(), "/plugin.js".into()).unwrap());
+        let plugin = Arc::new(AnalyzerJsPlugin::load(fs.clone(), "/plugin.js".into(), None).unwrap());
 
         let worker1 = {
             let plugin = plugin.clone();
