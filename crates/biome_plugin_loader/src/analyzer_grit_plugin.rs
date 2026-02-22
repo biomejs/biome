@@ -26,6 +26,7 @@ pub struct AnalyzerGritPlugin {
 
     /// Glob patterns that restrict which files this plugin runs on.
     /// `None` means the plugin runs on all files.
+    /// `Some(&[])` (an empty list) means the plugin never runs on any file.
     includes: Option<Box<[NormalizedGlob]>>,
 }
 
