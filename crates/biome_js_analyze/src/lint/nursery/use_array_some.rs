@@ -69,19 +69,6 @@ pub enum DetectedPattern {
     FindFamilyAsBoolean,
 }
 
-impl DetectedPattern {
-    fn description(self) -> &'static str {
-        match self {
-            Self::FilterLengthComparison => "filter(...).length comparison",
-            Self::FindIndexComparison => "findIndex(...) !== -1",
-            Self::FindLastIndexComparison => "findLastIndex(...) !== -1",
-            Self::FindExistenceComparison => "find(...) existence comparison",
-            Self::FindLastExistenceComparison => "findLast(...) existence comparison",
-            Self::FindFamilyAsBoolean => "find-family used as boolean",
-        }
-    }
-}
-
 pub enum UseArraySomeState {
     Fix {
         call: JsCallExpression,
@@ -141,7 +128,14 @@ impl Rule for UseArraySome {
                 *pattern
             }
         };
-        let description = pattern.description();
+        let description = match pattern {
+            DetectedPattern::FilterLengthComparison => "filter(...).length comparison",
+            DetectedPattern::FindIndexComparison => "findIndex(...) !== -1",
+            DetectedPattern::FindLastIndexComparison => "findLastIndex(...) !== -1",
+            DetectedPattern::FindExistenceComparison => "find(...) existence comparison",
+            DetectedPattern::FindLastExistenceComparison => "findLast(...) existence comparison",
+            DetectedPattern::FindFamilyAsBoolean => "find-family used as boolean",
+        };
 
         let mut diag = RuleDiagnostic::new(
             rule_category!(),
