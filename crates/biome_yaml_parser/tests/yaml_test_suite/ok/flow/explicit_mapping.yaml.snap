@@ -25,21 +25,21 @@ YamlRoot {
             node: YamlFlowInBlockNode {
                 flow_start_token: FLOW_START@0..0 "" [] [],
                 flow: YamlFlowJsonNode {
-                    properties: missing (optional),
+                    properties: YamlPropertyList [],
                     content: YamlFlowMapping {
                         l_curly_token: L_CURLY@0..1 "{" [] [],
                         entries: YamlFlowMapEntryList [
                             YamlFlowMapExplicitEntry {
                                 question_mark_token: QUESTION@1..6 "?" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
                                 key: YamlFlowYamlNode {
-                                    properties: missing (optional),
+                                    properties: YamlPropertyList [],
                                     content: YamlPlainScalar {
                                         value_token: PLAIN_LITERAL@6..7 "a" [] [],
                                     },
                                 },
                                 colon_token: COLON@7..9 ":" [] [Whitespace(" ")],
                                 value: YamlFlowYamlNode {
-                                    properties: missing (optional),
+                                    properties: YamlPropertyList [],
                                     content: YamlPlainScalar {
                                         value_token: PLAIN_LITERAL@9..10 "b" [] [],
                                     },
@@ -51,7 +51,7 @@ YamlRoot {
                                 key: missing (optional),
                                 colon_token: COLON@16..18 ":" [] [Whitespace(" ")],
                                 value: YamlFlowYamlNode {
-                                    properties: missing (optional),
+                                    properties: YamlPropertyList [],
                                     content: YamlPlainScalar {
                                         value_token: PLAIN_LITERAL@18..19 "d" [] [],
                                     },
@@ -96,19 +96,19 @@ YamlRoot {
       3: YAML_FLOW_IN_BLOCK_NODE@0..33
         0: FLOW_START@0..0 "" [] []
         1: YAML_FLOW_JSON_NODE@0..33
-          0: (empty)
+          0: YAML_PROPERTY_LIST@0..0
           1: YAML_FLOW_MAPPING@0..33
             0: L_CURLY@0..1 "{" [] []
             1: YAML_FLOW_MAP_ENTRY_LIST@1..31
               0: YAML_FLOW_MAP_EXPLICIT_ENTRY@1..10
                 0: QUESTION@1..6 "?" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
                 1: YAML_FLOW_YAML_NODE@6..7
-                  0: (empty)
+                  0: YAML_PROPERTY_LIST@6..6
                   1: YAML_PLAIN_SCALAR@6..7
                     0: PLAIN_LITERAL@6..7 "a" [] []
                 2: COLON@7..9 ":" [] [Whitespace(" ")]
                 3: YAML_FLOW_YAML_NODE@9..10
-                  0: (empty)
+                  0: YAML_PROPERTY_LIST@9..9
                   1: YAML_PLAIN_SCALAR@9..10
                     0: PLAIN_LITERAL@9..10 "b" [] []
               1: COMMA@10..11 "," [] []
@@ -117,7 +117,7 @@ YamlRoot {
                 1: (empty)
                 2: COLON@16..18 ":" [] [Whitespace(" ")]
                 3: YAML_FLOW_YAML_NODE@18..19
-                  0: (empty)
+                  0: YAML_PROPERTY_LIST@18..18
                   1: YAML_PLAIN_SCALAR@18..19
                     0: PLAIN_LITERAL@18..19 "d" [] []
               3: COMMA@19..20 "," [] []

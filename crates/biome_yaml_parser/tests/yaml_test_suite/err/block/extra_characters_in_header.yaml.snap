@@ -17,18 +17,20 @@ YamlRoot {
             bom_token: missing (optional),
             directives: YamlDirectiveList [],
             dashdashdash_token: missing (optional),
-            node: YamlLiteralScalar {
-                properties: missing (optional),
-                bitwise_or_token: PIPE@0..2 "|" [] [Whitespace(" ")],
-                headers: YamlBlockHeaderList [
-                    YamlBogusBlockHeader {
-                        items: [
-                            ERROR_TOKEN@2..6 "bb a" [] [],
-                        ],
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlLiteralScalar {
+                    bitwise_or_token: PIPE@0..2 "|" [] [Whitespace(" ")],
+                    headers: YamlBlockHeaderList [
+                        YamlBogusBlockHeader {
+                            items: [
+                                ERROR_TOKEN@2..6 "bb a" [] [],
+                            ],
+                        },
+                    ],
+                    content: YamlBlockContent {
+                        value_token: BLOCK_CONTENT_LITERAL@6..7 "\n" [] [],
                     },
-                ],
-                content: YamlBlockContent {
-                    value_token: BLOCK_CONTENT_LITERAL@6..7 "\n" [] [],
                 },
             },
             dotdotdot_token: missing (optional),
@@ -47,14 +49,15 @@ YamlRoot {
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
       2: (empty)
-      3: YAML_LITERAL_SCALAR@0..7
-        0: (empty)
-        1: PIPE@0..2 "|" [] [Whitespace(" ")]
-        2: YAML_BLOCK_HEADER_LIST@2..6
-          0: YAML_BOGUS_BLOCK_HEADER@2..6
-            0: ERROR_TOKEN@2..6 "bb a" [] []
-        3: YAML_BLOCK_CONTENT@6..7
-          0: BLOCK_CONTENT_LITERAL@6..7 "\n" [] []
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..7
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_LITERAL_SCALAR@0..7
+          0: PIPE@0..2 "|" [] [Whitespace(" ")]
+          1: YAML_BLOCK_HEADER_LIST@2..6
+            0: YAML_BOGUS_BLOCK_HEADER@2..6
+              0: ERROR_TOKEN@2..6 "bb a" [] []
+          2: YAML_BLOCK_CONTENT@6..7
+            0: BLOCK_CONTENT_LITERAL@6..7 "\n" [] []
       4: (empty)
   1: EOF@7..7 "" [] []
 

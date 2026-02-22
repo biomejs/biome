@@ -20,7 +20,7 @@ YamlRoot {
             node: YamlFlowInBlockNode {
                 flow_start_token: FLOW_START@0..0 "" [] [],
                 flow: YamlFlowYamlNode {
-                    properties: missing (optional),
+                    properties: YamlPropertyList [],
                     content: YamlPlainScalar {
                         value_token: PLAIN_LITERAL@0..13 "simple_plain\n" [] [],
                     },
@@ -46,7 +46,7 @@ YamlRoot {
       3: YAML_FLOW_IN_BLOCK_NODE@0..13
         0: FLOW_START@0..0 "" [] []
         1: YAML_FLOW_YAML_NODE@0..13
-          0: (empty)
+          0: YAML_PROPERTY_LIST@0..0
           1: YAML_PLAIN_SCALAR@0..13
             0: PLAIN_LITERAL@0..13 "simple_plain\n" [] []
         2: FLOW_END@13..13 "" [] []

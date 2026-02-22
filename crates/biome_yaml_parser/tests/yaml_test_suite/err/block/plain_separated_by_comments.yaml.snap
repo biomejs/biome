@@ -19,38 +19,40 @@ YamlRoot {
             bom_token: missing (optional),
             directives: YamlDirectiveList [],
             dashdashdash_token: missing (optional),
-            node: YamlBlockMapping {
-                mapping_start_token: MAPPING_START@0..0 "" [] [],
-                properties: missing (optional),
-                entries: YamlBlockMapEntryList [
-                    YamlBlockMapImplicitEntry {
-                        key: YamlFlowYamlNode {
-                            properties: missing (optional),
-                            content: YamlPlainScalar {
-                                value_token: PLAIN_LITERAL@0..1 "a" [] [],
-                            },
-                        },
-                        colon_token: COLON@1..2 ":" [] [],
-                        value: YamlFlowInBlockNode {
-                            flow_start_token: FLOW_START@2..5 "" [Newline("\n"), Whitespace("  ")] [],
-                            flow: YamlFlowYamlNode {
-                                properties: missing (optional),
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockMapping {
+                    mapping_start_token: MAPPING_START@0..0 "" [] [],
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
                                 content: YamlPlainScalar {
-                                    value_token: PLAIN_LITERAL@5..25 "plain " [] [Comments("# separated by")],
+                                    value_token: PLAIN_LITERAL@0..1 "a" [] [],
                                 },
                             },
-                            flow_end_token: FLOW_END@25..25 "" [] [],
+                            colon_token: COLON@1..2 ":" [] [],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@2..5 "" [Newline("\n"), Whitespace("  ")] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@5..25 "plain " [] [Comments("# separated by")],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@25..25 "" [] [],
+                            },
                         },
-                    },
-                    YamlBogusBlockMapEntry {
-                        items: [
-                            FLOW_START@25..28 "" [Newline("\n"), Whitespace("  ")] [],
-                            PLAIN_LITERAL@28..35 "comment" [] [],
-                            FLOW_END@35..35 "" [] [],
-                        ],
-                    },
-                ],
-                mapping_end_token: MAPPING_END@35..36 "" [Newline("\n")] [],
+                        YamlBogusBlockMapEntry {
+                            items: [
+                                FLOW_START@25..28 "" [Newline("\n"), Whitespace("  ")] [],
+                                PLAIN_LITERAL@28..35 "comment" [] [],
+                                FLOW_END@35..35 "" [] [],
+                            ],
+                        },
+                    ],
+                    mapping_end_token: MAPPING_END@35..36 "" [Newline("\n")] [],
+                },
             },
             dotdotdot_token: missing (optional),
         },
@@ -68,28 +70,29 @@ YamlRoot {
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
       2: (empty)
-      3: YAML_BLOCK_MAPPING@0..36
-        0: MAPPING_START@0..0 "" [] []
-        1: (empty)
-        2: YAML_BLOCK_MAP_ENTRY_LIST@0..35
-          0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..25
-            0: YAML_FLOW_YAML_NODE@0..1
-              0: (empty)
-              1: YAML_PLAIN_SCALAR@0..1
-                0: PLAIN_LITERAL@0..1 "a" [] []
-            1: COLON@1..2 ":" [] []
-            2: YAML_FLOW_IN_BLOCK_NODE@2..25
-              0: FLOW_START@2..5 "" [Newline("\n"), Whitespace("  ")] []
-              1: YAML_FLOW_YAML_NODE@5..25
-                0: (empty)
-                1: YAML_PLAIN_SCALAR@5..25
-                  0: PLAIN_LITERAL@5..25 "plain " [] [Comments("# separated by")]
-              2: FLOW_END@25..25 "" [] []
-          1: YAML_BOGUS_BLOCK_MAP_ENTRY@25..35
-            0: FLOW_START@25..28 "" [Newline("\n"), Whitespace("  ")] []
-            1: PLAIN_LITERAL@28..35 "comment" [] []
-            2: FLOW_END@35..35 "" [] []
-        3: MAPPING_END@35..36 "" [Newline("\n")] []
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..36
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_BLOCK_MAPPING@0..36
+          0: MAPPING_START@0..0 "" [] []
+          1: YAML_BLOCK_MAP_ENTRY_LIST@0..35
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..25
+              0: YAML_FLOW_YAML_NODE@0..1
+                0: YAML_PROPERTY_LIST@0..0
+                1: YAML_PLAIN_SCALAR@0..1
+                  0: PLAIN_LITERAL@0..1 "a" [] []
+              1: COLON@1..2 ":" [] []
+              2: YAML_FLOW_IN_BLOCK_NODE@2..25
+                0: FLOW_START@2..5 "" [Newline("\n"), Whitespace("  ")] []
+                1: YAML_FLOW_YAML_NODE@5..25
+                  0: YAML_PROPERTY_LIST@5..5
+                  1: YAML_PLAIN_SCALAR@5..25
+                    0: PLAIN_LITERAL@5..25 "plain " [] [Comments("# separated by")]
+                2: FLOW_END@25..25 "" [] []
+            1: YAML_BOGUS_BLOCK_MAP_ENTRY@25..35
+              0: FLOW_START@25..28 "" [Newline("\n"), Whitespace("  ")] []
+              1: PLAIN_LITERAL@28..35 "comment" [] []
+              2: FLOW_END@35..35 "" [] []
+          2: MAPPING_END@35..36 "" [Newline("\n")] []
       4: (empty)
   1: EOF@36..36 "" [] []
 
