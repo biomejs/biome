@@ -369,7 +369,7 @@ fn is_emit_call_in_setup(callee_expr: &AnyJsExpression, model: &SemanticModel) -
             if let Ok(member) = static_member_expr.member()
                 && let Some(member_name) = member.as_js_name()
                 && let Ok(member_name) = member_name.value_token()
-                && member_name.token_text_trimmed() == "emit"
+                && member_name.text_trimmed() == "emit"
                 && let Ok(object) = static_member_expr.object()
                 && let Some(ident) = object.as_js_identifier_expression()
                 && let Ok(reference) = ident.name()
