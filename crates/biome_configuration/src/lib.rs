@@ -170,11 +170,6 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub html: Option<HtmlConfiguration>,
 
-    /// Specific configuration for the Markdown language
-    #[bpaf(external(markdown_configuration), optional)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub markdown: Option<MarkdownConfiguration>,
-
     /// A list of granular patterns that should be applied only to a sub set of files
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
