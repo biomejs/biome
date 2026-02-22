@@ -1,7 +1,4 @@
-use biome_grit_parser::parse_grit;
-use biome_grit_patterns::{GritQuery, GritTargetFile, GritTargetLanguage};
-use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsFileSource;
+use biome_grit_patterns::testing::{compile_js_query, make_js_file};
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 
 #[cfg(target_os = "windows")]
@@ -18,22 +15,6 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[cfg(all(target_env = "musl", target_os = "linux", target_arch = "aarch64"))]
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
-
-fn compile_js_query(source: &str) -> GritQuery {
-    let parsed = parse_grit(source);
-    GritQuery::from_node(
-        parsed.tree(),
-        None,
-        GritTargetLanguage::JsTargetLanguage(biome_grit_patterns::JsTargetLanguage),
-        Vec::new(),
-    )
-    .expect("compile failed")
-}
-
-fn make_js_file(code: &str) -> GritTargetFile {
-    let parsed = parse(code, JsFileSource::js_module(), JsParserOptions::default());
-    GritTargetFile::new("test.js", parsed.into())
-}
 
 /// Sample JS code with multiple patterns to match against.
 const JS_CODE: &str = r#"

@@ -143,11 +143,12 @@ impl GritQuery {
         let anchor_kinds = self.anchor_kinds();
         let inner = extract_contains_inner(&self.pattern);
 
-        if anchor_kinds.is_empty() || inner.is_none() {
+        let Some(inner) = inner else {
+            return self.execute(file);
+        };
+        if anchor_kinds.is_empty() {
             return self.execute(file);
         }
-
-        let inner = inner.unwrap();
         // Create tree independently of state to avoid borrow conflicts.
         // from_cached_parse_result wraps the existing parsed tree — O(1).
         let mut logs: AnalysisLogs = Vec::new().into();
@@ -535,7 +536,12 @@ fn extract_anchor_kinds(pattern: &Pattern<GritQueryContext>) -> Vec<GritTargetSy
             .flat_map(|step| extract_anchor_kinds(&step.pattern))
             .collect(),
         Pattern::File(file) => extract_anchor_kinds(&file.body),
-        Pattern::Contains(contains) => extract_anchor_kinds(&contains.contains),
+        Pattern::Contains(contains) => {
+            if contains.until.is_some() {
+                return vec![];
+            }
+            extract_anchor_kinds(&contains.contains)
+        }
         Pattern::Bubble(bubble) => extract_anchor_kinds(bubble.pattern_def.pattern()),
         Pattern::Where(where_pat) => {
             let mut kinds = extract_anchor_kinds(&where_pat.pattern);
@@ -627,7 +633,12 @@ fn extract_contains_inner(
             .first()
             .and_then(|step| extract_contains_inner(&step.pattern)),
         Pattern::File(file) => extract_contains_inner(&file.body),
-        Pattern::Contains(contains) => Some(&contains.contains),
+        Pattern::Contains(contains) => {
+            if contains.until.is_some() {
+                return None;
+            }
+            Some(&contains.contains)
+        }
         // NOTE: returns only the first Contains found. extract_anchor_kinds
         // collects from ALL And branches, so there may be an asymmetry when
         // multiple Contains exist. See the matching NOTE there.
@@ -640,30 +651,7 @@ fn extract_contains_inner(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use biome_grit_parser::parse_grit;
-    use biome_js_parser::{JsParserOptions, parse};
-    use biome_js_syntax::JsFileSource;
-
-    fn compile_js_query(source: &str) -> GritQuery {
-        let parsed = parse_grit(source);
-        assert!(
-            parsed.diagnostics().is_empty(),
-            "parse error: {:?}",
-            parsed.diagnostics()
-        );
-        GritQuery::from_node(
-            parsed.tree(),
-            None,
-            GritTargetLanguage::JsTargetLanguage(crate::JsTargetLanguage),
-            Vec::new(),
-        )
-        .expect("compile failed")
-    }
-
-    fn make_js_file(code: &str) -> GritTargetFile {
-        let parsed = parse(code, JsFileSource::js_module(), JsParserOptions::default());
-        GritTargetFile::new("test.js", parsed.into())
-    }
+    use crate::testing::{compile_js_query, make_js_file};
 
     // -- extract_anchor_kinds tests --
 
@@ -769,9 +757,8 @@ mod tests {
         let full_result = query.execute(make_js_file(code)).expect("execute failed");
 
         assert_eq!(
-            opt_result.effects.len(),
-            full_result.effects.len(),
-            "optimized and full execute should find same number of matches"
+            opt_result.effects, full_result.effects,
+            "optimized and full execute should produce identical effects"
         );
     }
 
@@ -789,9 +776,8 @@ mod tests {
         let full_result = query.execute(make_js_file(code)).expect("execute failed");
 
         assert_eq!(
-            opt_result.effects.len(),
-            full_result.effects.len(),
-            "where-clause: optimized and full should match"
+            opt_result.effects, full_result.effects,
+            "where-clause: optimized and full should produce identical effects"
         );
     }
 
@@ -822,7 +808,9 @@ mod tests {
             .expect("optimized failed");
         let full_result = query.execute(make_js_file(code)).expect("execute failed");
 
-        assert!(opt_result.effects.is_empty(), "no console.log in code");
-        assert_eq!(opt_result.effects.len(), full_result.effects.len());
+        assert_eq!(
+            opt_result.effects, full_result.effects,
+            "no-match: optimized and full should produce identical effects"
+        );
     }
 }
