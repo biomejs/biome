@@ -86,7 +86,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
     }
 
     fn applies_to_file(&self, path: &Utf8Path) -> bool {
-        file_matches_includes(&self.includes, path)
+        file_matches_includes(self.includes.as_deref(), path)
     }
 
     fn query(&self) -> Vec<RawSyntaxKind> {

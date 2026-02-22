@@ -81,7 +81,7 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
     }
 
     fn applies_to_file(&self, path: &Utf8Path) -> bool {
-        file_matches_includes(&self.includes, path)
+        file_matches_includes(self.includes.as_deref(), path)
     }
 
     fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {

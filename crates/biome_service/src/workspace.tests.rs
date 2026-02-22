@@ -861,6 +861,10 @@ fn correctly_scope_plugin_with_includes() {
             "/project/lib/bar.ts",
             b"const a = Object.assign({ foo: 'bar' });",
         ),
+        (
+            "/project/src/foo.test.ts",
+            b"const a = Object.assign({ foo: 'bar' });",
+        ),
     ];
 
     let fs = MemoryFileSystem::default();
@@ -885,6 +889,7 @@ fn correctly_scope_plugin_with_includes() {
                         path: "./plugin_a.grit".to_string(),
                         includes: Some(vec![
                             biome_glob::NormalizedGlob::from_str("**/src/**/*.ts").unwrap(),
+                            biome_glob::NormalizedGlob::from_str("!**/*.test.ts").unwrap(),
                         ]),
                     },
                 )])),
@@ -908,7 +913,12 @@ fn correctly_scope_plugin_with_includes() {
 
     // src/foo.ts should trigger the plugin (matches includes)
     // lib/bar.ts should NOT trigger the plugin (doesn't match includes)
-    for (path, expect_diagnosis_count) in [("/project/src/foo.ts", 1), ("/project/lib/bar.ts", 0)]
+    // src/foo.test.ts should NOT trigger the plugin (excluded by negated glob)
+    for (path, expect_diagnosis_count) in [
+        ("/project/src/foo.ts", 1),
+        ("/project/lib/bar.ts", 0),
+        ("/project/src/foo.test.ts", 0),
+    ]
     {
         workspace
             .open_file(OpenFileParams {
