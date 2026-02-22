@@ -568,7 +568,7 @@ fn parse(
     let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
     ParseResult {
         any_parse: parse.into(),
-        language: None,
+        language: Some(file_source.into()),
     }
 }
 
@@ -922,8 +922,18 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
 
-    let mut services =
-        JsAnalyzerServices::from((params.module_graph, params.project_layout, file_source));
+    // Use snippet services (for embedded JS) if present, else document services.
+    let effective_services = params.snippet_services.unwrap_or(params.document_services);
+    let semantic_model = effective_services
+        .as_js_services()
+        .and_then(|s| s.semantic_model.clone());
+
+    let mut services = JsAnalyzerServices::from((
+        params.module_graph,
+        params.project_layout,
+        file_source,
+        semantic_model,
+    ));
 
     if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
         services.set_embedded_bindings(embedded_bindings.bindings)
@@ -932,7 +942,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     if let Some(value_refs) = params.document_services.embedded_value_references() {
         services.set_embedded_value_references(value_refs.references)
     }
-
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,
@@ -967,7 +976,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         plugins,
         categories,
         action_offset,
-        document_services: _,
+        document_services,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -996,8 +1005,11 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             actions: Vec::new(),
         };
     };
-
-    let services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
+    let semantic_model = document_services
+        .as_js_services()
+        .and_then(|s| s.semantic_model.clone());
+    let services =
+        JsAnalyzerServices::from((module_graph, project_layout, source_type, semantic_model));
 
     debug!("Javascript runs the analyzer");
     analyze(
@@ -1264,7 +1276,7 @@ pub(crate) fn pull_diagnostics_and_actions(
         enabled_selectors,
         plugins,
         diagnostic_offset,
-        document_services: _,
+        document_services,
     } = params;
     let tree = parse.tree();
     let analyzer_options =
@@ -1290,8 +1302,11 @@ pub(crate) fn pull_diagnostics_and_actions(
             diagnostics: Vec::new(),
         };
     };
-
-    let services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
+    let semantic_model = document_services
+        .as_js_services()
+        .and_then(|s| s.semantic_model.clone());
+    let services =
+        JsAnalyzerServices::from((module_graph, project_layout, source_type, semantic_model));
     let mut process_pull_diagnostics_and_actions =
         ProcessDiagnosticsAndActions::new(diagnostic_offset);
     analyze(

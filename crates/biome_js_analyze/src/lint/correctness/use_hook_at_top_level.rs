@@ -408,6 +408,7 @@ impl FromServices for FunctionCallServices {
         let early_returns: &EarlyReturnsModel = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["EarlyReturnsModel"]))?;
+
         Ok(Self {
             early_returns: early_returns.clone(),
             semantic_services: SemanticServices::from_services(rule_key, rule_metadata, services)?,

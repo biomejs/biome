@@ -98,7 +98,7 @@ impl Rule for NoImportAssign {
                 let model = ctx.model();
                 for reference in ident_binding.all_writes(model) {
                     invalid_assign_list.push((
-                        JsIdentifierAssignment::cast_ref(reference.syntax())?,
+                        JsIdentifierAssignment::cast_ref(&reference.syntax())?,
                         ident_binding.clone(),
                     ));
                 }

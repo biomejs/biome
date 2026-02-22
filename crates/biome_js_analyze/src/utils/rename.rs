@@ -253,7 +253,7 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
             }
 
             let reference_syntax = reference.syntax();
-            let Some(id_usage) = AnyJsIdentifierUsage::cast_ref(reference_syntax) else {
+            let Some(id_usage) = AnyJsIdentifierUsage::cast_ref(&reference_syntax) else {
                 continue;
             };
             let Ok(prev_ref_token) = id_usage.value_token() else {

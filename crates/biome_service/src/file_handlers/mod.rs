@@ -605,7 +605,6 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) diagnostic_offset: Option<TextSize>,
-    #[expect(unused)]
     pub(crate) document_services: &'a DocumentServices,
 }
 

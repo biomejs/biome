@@ -6,6 +6,7 @@
 
 use std::sync::Arc;
 
+use crate::services::semantic::SemanticModelBuilderVisitor;
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, Queryable, RuleKey, RuleMetadata,
     ServiceBag, ServicesDiagnostic, SyntaxVisitor,
@@ -14,8 +15,6 @@ use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_package::TurboJson;
 use biome_rowan::AstNode;
-
-use crate::services::semantic::SemanticModelBuilderVisitor;
 
 /// Holds all turbo.json(c) configurations that apply to a file.
 ///

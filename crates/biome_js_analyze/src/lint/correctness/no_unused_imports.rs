@@ -18,11 +18,10 @@ use biome_js_factory::make;
 use biome_js_factory::make::{js_identifier_binding, js_module, js_module_item_list};
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration,
-    AnyJsExportClause, AnyJsExportNamedSpecifier, AnyJsImportClause, AnyJsModuleItem,
-    AnyJsNamedImportSpecifier, AnyJsObjectMember, AnyTsTypeMember, EmbeddingKind, JsExport,
-    JsFileSource, JsLanguage, JsNamedImportSpecifiers, JsStaticMemberAssignment, JsSyntaxNode, T,
-    TsEnumMember,
+    AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportClause,
+    AnyJsExportNamedSpecifier, AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImportSpecifier,
+    AnyJsObjectMember, AnyTsTypeMember, EmbeddingKind, JsExport, JsFileSource, JsLanguage,
+    JsNamedImportSpecifiers, JsStaticMemberAssignment, JsSyntaxNode, T, TsEnumMember,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
@@ -225,6 +224,7 @@ impl FromServices for JsDocTypeServices {
         let jsdoc_types: &JsDocTypeModel = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["JsDocTypeModel"]))?;
+
         Ok(Self {
             jsdoc_types: jsdoc_types.clone(),
             semantic_services: SemanticServices::from_services(rule_key, rule_metadata, services)?,
@@ -468,10 +468,7 @@ impl Rule for NoUnusedImports {
                 // This does not apply to embedded scripts (Vue, Svelte, Astro),
                 // which are already in a module context.
                 let source_type = ctx.source_type::<JsFileSource>();
-                let is_embedded = !matches!(
-                    source_type.as_embedding_kind(),
-                    EmbeddingKind::None
-                );
+                let is_embedded = !matches!(source_type.as_embedding_kind(), EmbeddingKind::None);
                 let needs_export_empty = !is_embedded
                     && source_type.language().is_typescript()
                     && root.as_js_module().is_some_and(|module| {
@@ -504,10 +501,7 @@ impl Rule for NoUnusedImports {
                             .build(),
                         ),
                     );
-                    mutation.replace_element(
-                        parent.into(),
-                        export_empty.syntax().clone().into(),
-                    );
+                    mutation.replace_element(parent.into(), export_empty.syntax().clone().into());
                 } else {
                     mutation.remove_element(parent.into());
                 }

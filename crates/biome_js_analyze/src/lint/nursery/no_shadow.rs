@@ -133,7 +133,7 @@ fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBi
 
     let name = get_binding_name(&binding)?;
     let binding_hoisted_scope = model
-        .scope_hoisted_to(binding.syntax())
+        .scope_hoisted_to(&binding.syntax())
         .unwrap_or(binding.scope());
 
     for upper in binding_hoisted_scope.ancestors().skip(1) {
@@ -160,10 +160,10 @@ fn evaluate_shadowing(model: &SemanticModel, binding: &Binding, upper_binding: &
     }
     if is_declaration(binding) && is_declaration(upper_binding) {
         let binding_hoisted_scope = model
-            .scope_hoisted_to(binding.syntax())
+            .scope_hoisted_to(&binding.syntax())
             .unwrap_or(binding.scope());
         let upper_binding_hoisted_scope = model
-            .scope_hoisted_to(upper_binding.syntax())
+            .scope_hoisted_to(&upper_binding.syntax())
             .unwrap_or(upper_binding.scope());
         if binding_hoisted_scope == upper_binding_hoisted_scope {
             // redeclarations are not shadowing, they get caught by `noRedeclare`

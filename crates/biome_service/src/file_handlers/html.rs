@@ -9,7 +9,9 @@ use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
-use crate::workspace::{CodeAction, CssDocumentServices, DocumentServices, EmbeddedSnippet};
+use crate::workspace::{
+    CodeAction, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
+};
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
     WorkspaceError,
@@ -427,8 +429,8 @@ fn parse_embedded_nodes(
                                 settings,
                                 builder,
                             );
-                            if let Some((content, file_source)) = result {
-                                nodes.push((content.into(), file_source.into()));
+                            if let Some((content, js_services, file_source)) = result {
+                                nodes.push(((content, js_services).into(), file_source.into()));
                             }
                         } else if script_type.is_json() {
                             let result = parse_embedded_json(
@@ -500,8 +502,8 @@ fn parse_embedded_nodes(
                         settings,
                         builder,
                     );
-                    if let Some((content, file_source)) = result {
-                        nodes.push((content.into(), file_source));
+                    if let Some((content, js_services, file_source)) = result {
+                        nodes.push(((content, js_services).into(), file_source));
                     }
                 }
 
@@ -524,8 +526,8 @@ fn parse_embedded_nodes(
                                 settings,
                                 builder,
                             );
-                            if let Some((content, file_source)) = result {
-                                nodes.push((content.into(), file_source.into()));
+                            if let Some((content, js_services, file_source)) = result {
+                                nodes.push(((content, js_services).into(), file_source.into()));
                             }
                         } else if script_type.is_json() {
                             let result = parse_embedded_json(
@@ -578,9 +580,9 @@ fn parse_embedded_nodes(
                             settings,
                             builder,
                         );
-                        if let Some((content, file_source)) = result {
+                        if let Some((content, js_services, file_source)) = result {
                             embedded_file_source = file_source;
-                            nodes.push((content.into(), file_source.into()));
+                            nodes.push(((content, js_services).into(), file_source.into()));
                         }
                     } else if script_type.is_json() {
                         let result =
@@ -733,9 +735,9 @@ fn parse_embedded_nodes(
                             settings,
                             builder,
                         );
-                        if let Some((content, file_source)) = result {
+                        if let Some((content, js_services, file_source)) = result {
                             embedded_file_source = file_source;
-                            nodes.push((content.into(), file_source.into()));
+                            nodes.push(((content, js_services).into(), file_source.into()));
                         }
                     } else if script_type.is_json() {
                         let result =
@@ -890,7 +892,11 @@ pub(crate) fn parse_astro_embedded_script(
     path: &BiomePath,
     settings: &SettingsWithEditor,
     builder: &mut EmbeddedBuilder,
-) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+) -> Option<(
+    EmbeddedSnippet<JsLanguage>,
+    DocumentServices,
+    DocumentFileSource,
+)> {
     let content = element.content_token()?;
     let file_source =
         JsFileSource::ts().with_embedding_kind(EmbeddingKind::Astro { frontmatter: true });
@@ -905,15 +911,23 @@ pub(crate) fn parse_astro_embedded_script(
     );
     builder.visit_js_source_snippet(&parse.tree());
 
-    Some((
-        EmbeddedSnippet::new(
-            parse.into(),
-            element.range(),
-            content.text_trimmed_range(),
-            content.text_range().start(),
-        ),
-        document_file_source,
-    ))
+    let snippet = EmbeddedSnippet::new(
+        parse.into(),
+        element.range(),
+        content.text_trimmed_range(),
+        content.text_range().start(),
+    );
+
+    let js_services =
+        if settings.as_ref().is_linter_enabled() || settings.as_ref().is_assist_enabled() {
+            JsDocumentServices::default()
+                .with_js_semantic_model(&snippet.tree())
+                .into()
+        } else {
+            DocumentServices::none()
+        };
+
+    Some((snippet, js_services, document_file_source))
 }
 
 pub(crate) fn parse_embedded_script(
@@ -923,7 +937,7 @@ pub(crate) fn parse_embedded_script(
     html_file_source: &HtmlFileSource,
     settings: &SettingsWithEditor,
     builder: &mut EmbeddedBuilder,
-) -> Option<(EmbeddedSnippet<JsLanguage>, JsFileSource)> {
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentServices, JsFileSource)> {
     if element.is_javascript_tag() {
         let file_source = if html_file_source.is_svelte() || html_file_source.is_vue() {
             let mut file_source = if element.is_typescript_lang() {
@@ -989,7 +1003,17 @@ pub(crate) fn parse_embedded_script(
                 content.text_range().start(),
             ))
         })?;
-        Some((embedded_content, file_source))
+
+        let js_services =
+            if settings.as_ref().is_linter_enabled() || settings.as_ref().is_assist_enabled() {
+                JsDocumentServices::default()
+                    .with_js_semantic_model(&embedded_content.tree())
+                    .into()
+            } else {
+                DocumentServices::none()
+            };
+
+        Some((embedded_content, js_services, file_source))
     } else {
         None
     }

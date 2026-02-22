@@ -428,7 +428,7 @@ fn parse(
 
     ParseResult {
         any_parse: parse.into(),
-        language: None,
+        language: Some(file_source),
     }
 }
 
@@ -709,10 +709,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     loop {
         let css_services = CssAnalyzerServices {
-            semantic_model: params
-                .document_services
-                .as_css_services()
-                .and_then(|services| services.semantic_model.as_ref()),
+            semantic_model: None,
             file_source,
         };
 

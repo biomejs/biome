@@ -7,6 +7,7 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
@@ -214,8 +215,14 @@ pub(crate) fn analyze_and_snap(
     } else {
         Default::default()
     };
+    let semantic_model = semantic_model(&root, SemanticModelOptions::default());
 
-    let services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
+    let services = JsAnalyzerServices::from((
+        module_graph,
+        project_layout,
+        source_type,
+        Some(semantic_model),
+    ));
 
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {

@@ -27,3 +27,4 @@ pub type JsSyntaxElementChildren = biome_rowan::SyntaxElementChildren<JsLanguage
 pub type JsSyntaxList = biome_rowan::SyntaxList<JsLanguage>;
 pub type JsSyntaxTrivia = biome_rowan::syntax::SyntaxTrivia<JsLanguage>;
 pub type JsSyntaxNodeWithOffset = biome_rowan::SyntaxNodeWithOffset<JsLanguage>;
+pub type JsSyntaxNodePtr = biome_rowan::SyntaxNodePtr<JsLanguage>;

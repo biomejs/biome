@@ -94,6 +94,7 @@ impl AnalyzerServicesBuilder {
             self.module_graph.clone(),
             self.project_layout.clone(),
             file_source,
+            None,
         ))
     }
 }
