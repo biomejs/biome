@@ -315,18 +315,19 @@ fn check_static_member_access(
         return Some(static_member_expr.range())
     }
 
-    if !is_valid_static_member(&member) {
+    if !is_value_static_member(&member) {
         return Some(ident_expr.range())
     }
 
     None
 }
 
-fn is_valid_static_member(member: &AnyJsName) -> bool {
+/// Check if a static member is `.value` 
+fn is_value_static_member(member: &AnyJsName) -> bool {
     member
         .as_js_name()
         .and_then(|m| m.value_token().ok())
-        .is_some_and(|m| m.token_text_trimmed() == "value")
+        .is_some_and(|m| m.text_trimmed() == "value")
 }
 
 /// Check if a static member is accessing a valid property on a ref created by `toRefs()`.
@@ -336,7 +337,7 @@ fn is_valid_static_member_wrapped_in_to_refs(
 ) -> bool {
     // Destructured refs: `const { foo } = toRefs(obj); foo.value`
     if ident_binding.is_under_pattern_binding().is_some_and(|v| v) {
-        return is_valid_static_member(member)
+        return is_value_static_member(member)
     }
 
     // Direct refs: `const refs = toRefs(obj); refs.foo.value`
@@ -345,7 +346,7 @@ fn is_valid_static_member_wrapped_in_to_refs(
         .grand_parent()
         .and_then(|grand_parent| grand_parent.cast::<JsStaticMemberExpression>())
         .and_then(|grand_parent_expr| grand_parent_expr.member().ok())
-        .is_some_and(|m| is_valid_static_member(&m))
+        .is_some_and(|m| is_value_static_member(&m))
 }
 
 /// Check if emit is used in setup context
