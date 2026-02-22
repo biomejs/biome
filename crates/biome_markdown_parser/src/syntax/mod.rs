@@ -851,6 +851,24 @@ fn classify_quote_break_after_newline(
     })
 }
 
+/// Check if the current position is a paragraph break (setext underline,
+/// thematic break, fence, or block interrupt).
+///
+/// This shared predicate consolidates the duplicate break-condition checks
+/// in [`handle_inline_newline`] and [`inline_list_source_len`].
+fn at_paragraph_break(p: &mut MarkdownParser, has_content: bool) -> bool {
+    if has_content && p.at(MD_SETEXT_UNDERLINE_LITERAL) && allow_setext_heading(p) {
+        return true;
+    }
+    if has_content && p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p) {
+        return true;
+    }
+    if line_starts_with_fence(p) {
+        return true;
+    }
+    at_block_interrupt(p) || textual_looks_like_list_marker(p)
+}
+
 enum InlineNewlineAction {
     Break,
     Continue,
@@ -932,14 +950,6 @@ fn handle_inline_newline(p: &mut MarkdownParser, has_content: bool) -> InlineNew
         }
     }
 
-    // Check if we're at a setext heading underline (already past indent)
-    if has_content && p.at(MD_SETEXT_UNDERLINE_LITERAL) && allow_setext_heading(p) {
-        return InlineNewlineAction::Break;
-    }
-    if has_content && p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p) {
-        return InlineNewlineAction::Break;
-    }
-
     // If we're inside a list item and the next line meets the required indent,
     // check for block interrupts after skipping that indent. This allows
     // nested list markers like "\t - baz" to break out of the paragraph.
@@ -980,26 +990,16 @@ fn handle_inline_newline(p: &mut MarkdownParser, has_content: bool) -> InlineNew
         }
     }
 
-    // Check for block-level constructs that can interrupt paragraphs
-    if line_starts_with_fence(p) {
-        return InlineNewlineAction::Break;
-    }
+    // Check for block-level constructs that can interrupt paragraphs.
+    // Textual fence tokens (e.g. "```") may not be caught by line_starts_with_fence
+    // because the lexer emits them as MD_TEXTUAL_LITERAL in inline context.
     if p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text.starts_with("```") || text.starts_with("~~~") {
             return InlineNewlineAction::Break;
         }
     }
-    if at_block_interrupt(p) {
-        return InlineNewlineAction::Break;
-    }
-
-    // Also check for list markers that appear as textual content.
-    // Inside inline content, '-' is lexed as MD_TEXTUAL_LITERAL, not MINUS,
-    // so at_block_interrupt won't detect them. Per CommonMark §5.1, list
-    // items can interrupt paragraphs (bullet lists always, ordered lists
-    // only if they start with 1).
-    if textual_looks_like_list_marker(p) {
+    if at_paragraph_break(p, has_content) {
         return InlineNewlineAction::Break;
     }
 
@@ -1231,23 +1231,11 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
                     consume_quote_prefix_without_virtual(p, quote_depth);
                 }
 
-                if p.at(MD_SETEXT_UNDERLINE_LITERAL) && allow_setext_heading(p) {
-                    break;
-                }
-
-                if p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p) {
-                    break;
-                }
-
                 if quote_depth > 0 && p.at(R_ANGLE) && !has_quote_prefix(p, quote_depth) {
                     consume_partial_quote_prefix_lookahead(p, quote_depth, &mut len);
                 }
 
-                if line_starts_with_fence(p) {
-                    break;
-                }
-
-                if at_block_interrupt(p) {
+                if at_paragraph_break(p, true) {
                     break;
                 }
 
