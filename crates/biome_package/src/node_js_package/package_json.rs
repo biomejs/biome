@@ -33,7 +33,6 @@ pub struct PackageJson {
     pub dev_dependencies: Dependencies,
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
-    /// The "bundleDependencies" field is an array of package names, it's not a map like the other dependencies fields
     pub bundle_dependencies: BundleDependencies,
     pub bundled_dependencies: BundleDependencies,
     pub license: Option<(Box<str>, TextRange)>,
@@ -197,14 +196,52 @@ impl Dependencies {
 #[derive(Debug, Default, Clone)]
 pub struct BundleDependencies(pub Box<[Box<str>]>);
 
+/// The "bundleDependencies" field is usually an array of package names (not a map like the other dependencies fields).
+/// It can also be a boolean (`true` to mean “bundle everything”).
 impl Deserializable for BundleDependencies {
     fn deserialize(
         ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        let values: Vec<Box<str>> = Deserializable::deserialize(ctx, value, name)?;
-        Some(Self(values.into_boxed_slice()))
+        struct Visitor;
+
+        impl DeserializationVisitor for Visitor {
+            type Output = BundleDependencies;
+
+            const EXPECTED_TYPE: DeserializableTypes =
+                DeserializableTypes::ARRAY.union(DeserializableTypes::BOOL);
+
+            fn visit_array(
+                self,
+                ctx: &mut impl DeserializationContext,
+                items: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
+                _range: TextRange,
+                name: &str,
+            ) -> Option<Self::Output> {
+                let values = items
+                    .filter_map(|item| {
+                        let item = item?;
+                        Deserializable::deserialize(ctx, &item, name)
+                    })
+                    .collect::<Vec<Box<str>>>();
+
+                Some(BundleDependencies(values.into_boxed_slice()))
+            }
+
+            fn visit_bool(
+                self,
+                _ctx: &mut impl DeserializationContext,
+                _value: bool,
+                _range: TextRange,
+                _name: &str,
+            ) -> Option<Self::Output> {
+                // Allow boolean value and treat it as “no explicit list”.
+                Some(BundleDependencies::default())
+            }
+        }
+
+        value.deserialize(ctx, Visitor, name)
     }
 }
 
@@ -426,5 +463,24 @@ mod tests {
         let result = parse_range("~0.x.0");
 
         assert_eq!(result, Ok(Version::Literal("~0.x.0".to_string())));
+    }
+
+    #[test]
+    fn parse_package_json_bundle_dependencies_field_with_bool() {
+        let deserialized = deserialize_from_json_str::<PackageJson>(
+            r#"{
+    "name": "@shared/format",
+    "bundleDependencies": true,
+    "bundledDependencies": false
+}"#,
+            JsonParserOptions::default(),
+            "",
+        );
+        let (package_json, errors) = deserialized.consume();
+        assert!(errors.is_empty());
+
+        let package_json = package_json.expect("parsing must have succeeded");
+        assert!(package_json.bundle_dependencies.0.is_empty());
+        assert!(package_json.bundled_dependencies.0.is_empty());
     }
 }
