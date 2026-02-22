@@ -9,8 +9,15 @@ use biome_diagnostics::Error;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_json_value::JsonValue;
+use biome_rowan::AstNodeList;
 use biome_text_size::TextRange;
+use biome_yaml_parser::parse_yaml;
+use biome_yaml_syntax::{
+    AnyYamlBlockMapEntry, AnyYamlBlockNode, AnyYamlFlowNode, AnyYamlJsonContent,
+    AnyYamlMappingImplicitKey, YamlBlockMapping,
+};
 use camino::Utf8Path;
+use rustc_hash::FxHashMap;
 use std::{ops::Deref, str::FromStr};
 
 /// Deserialized `package.json`.
@@ -33,6 +40,13 @@ pub struct PackageJson {
     pub dev_dependencies: Dependencies,
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
+    /// Optional pnpm workspace catalogs (`catalog:` and `catalogs:`) resolved from
+    /// a `pnpm-workspace.yaml`. When present, dependency versions declared as
+    /// `catalog:` or `catalog:<name>` are looked up via `Catalogs`; when `None`,
+    /// no catalog resolution is applied and literal versions are used. This field
+    /// is typically populated by parsing the workspace file rather than
+    /// directly from `package.json`.
+    pub catalog: Option<Catalogs>,
     pub license: Option<(Box<str>, TextRange)>,
 
     pub author: Option<Box<str>>,
@@ -93,7 +107,12 @@ impl PackageJson {
             .chain(self.peer_dependencies.iter());
         for (dependency_name, dependency_version) in iter {
             if dependency_name.as_ref() == specifier
-                && Version::from(dependency_version.as_ref()).satisfies(range)
+                && dependency_satisfies(
+                    specifier,
+                    dependency_version.as_ref(),
+                    self.catalog.as_ref(),
+                    range,
+                )
             {
                 return true;
             }
@@ -101,6 +120,271 @@ impl PackageJson {
 
         false
     }
+
+    /// Extract catalog entries from a pnpm workspace file, supporting both the
+    /// default `catalog:` and named catalogs under `catalogs:`.
+    pub fn parse_pnpm_workspace_catalog(source: &str) -> Option<Catalogs> {
+        let parsed = parse_yaml(source);
+        if parsed.has_errors() {
+            return None;
+        }
+
+        let mut catalogs = Catalogs::default();
+        let root = parsed.tree();
+        let document = root
+            .documents()
+            .into_iter()
+            .find_map(|doc| doc.as_yaml_document().cloned())?;
+        let top_node = document.node()?;
+        let mapping = as_catalog_block_mapping(&top_node)?;
+
+        for entry in mapping.entries() {
+            let Some((key, value_node)) = parse_catalog_mapping_entry(entry) else {
+                continue;
+            };
+
+            match key.as_ref() {
+                "catalog" => {
+                    if let Some(deps_map) = as_catalog_block_mapping(&value_node) {
+                        let deps = collect_catalog_dependencies(&deps_map);
+                        if !deps.is_empty() {
+                            catalogs.default = Some(deps);
+                        }
+                    }
+                }
+                "catalogs" => {
+                    if let Some(named_map) = as_catalog_block_mapping(&value_node) {
+                        for catalog_entry in named_map.entries() {
+                            let Some((name, catalog_node)) =
+                                parse_catalog_mapping_entry(catalog_entry)
+                            else {
+                                continue;
+                            };
+
+                            if let Some(deps_map) = as_catalog_block_mapping(&catalog_node) {
+                                let deps = collect_catalog_dependencies(&deps_map);
+                                if !deps.is_empty() {
+                                    catalogs.named.insert(name, deps);
+                                }
+                            }
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        if catalogs.is_empty() {
+            None
+        } else {
+            Some(catalogs)
+        }
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct Catalogs {
+    /// Dependencies listed under the top-level `catalog:` key in pnpm-workspace.yaml.
+    pub default: Option<Dependencies>,
+    /// Named catalogs listed under `catalogs:` in pnpm-workspace.yaml, keyed by catalog name.
+    pub named: FxHashMap<Box<str>, Dependencies>,
+}
+
+impl Catalogs {
+    fn is_empty(&self) -> bool {
+        self.default.is_none() && self.named.is_empty()
+    }
+
+    fn lookup<'a>(&'a self, specifier: &str, catalog_name: Option<&str>) -> Option<&'a str> {
+        if let Some(name) = catalog_name {
+            return self.named.get(name).and_then(|deps| deps.get(specifier));
+        }
+
+        self.default.as_ref().and_then(|deps| deps.get(specifier))
+    }
+}
+
+/// Parses a catalog mapping entry into a `(key, value node)` pair, keeping only
+/// scalar keys and cloning the value node; returns `None` when the key or value
+/// is missing or non-scalar.
+fn parse_catalog_mapping_entry(
+    entry: AnyYamlBlockMapEntry,
+) -> Option<(Box<str>, AnyYamlBlockNode)> {
+    if let Some(explicit) = entry.as_yaml_block_map_explicit_entry() {
+        let key = explicit.key()?;
+        let value = explicit.value()?.clone();
+        return extract_catalog_scalar_from_block_node(&key).map(|key| (key, value));
+    }
+
+    if let Some(implicit) = entry.as_yaml_block_map_implicit_entry() {
+        let key = extract_catalog_scalar_from_implicit_key(&implicit.key()?)?;
+        let value = implicit.value()?.clone();
+        return Some((key, value));
+    }
+
+    None
+}
+
+/// Narrows a block node to a `YamlBlockMapping` if it represents a mapping.
+fn as_catalog_block_mapping(node: &AnyYamlBlockNode) -> Option<YamlBlockMapping> {
+    node.as_any_yaml_block_in_block_node()?
+        .as_yaml_block_mapping()
+        .cloned()
+}
+
+/// Builds `Dependencies` from a YAML mapping, reading only scalar
+/// `key: value` pairs and skipping any complex structures.
+fn collect_catalog_dependencies(mapping: &YamlBlockMapping) -> Dependencies {
+    let mut deps = Vec::new();
+    for entry in mapping.entries() {
+        if let Some((name, version_node)) = parse_catalog_mapping_entry(entry)
+            && let Some(version) = extract_catalog_scalar_from_block_node(&version_node)
+        {
+            deps.push((name, version));
+        }
+    }
+
+    Dependencies(deps.into_boxed_slice())
+}
+
+/// Extracts a scalar string from an implicit mapping key (flow YAML/JSON node).
+fn extract_catalog_scalar_from_implicit_key(key: &AnyYamlMappingImplicitKey) -> Option<Box<str>> {
+    if let Some(flow_yaml) = key.as_yaml_flow_yaml_node() {
+        return flow_yaml
+            .content()?
+            .value_token()
+            .ok()
+            .and_then(|token| normalize_catalog_scalar_text(token.text()));
+    }
+
+    if let Some(flow_json) = key.as_yaml_flow_json_node()
+        && let Some(content) = flow_json.content()
+    {
+        return match content {
+            AnyYamlJsonContent::YamlDoubleQuotedScalar(scalar) => scalar
+                .value_token()
+                .ok()
+                .and_then(|token| normalize_catalog_scalar_text(token.text())),
+            AnyYamlJsonContent::YamlSingleQuotedScalar(scalar) => scalar
+                .value_token()
+                .ok()
+                .and_then(|token| normalize_catalog_scalar_text(token.text())),
+            AnyYamlJsonContent::YamlFlowMapping(_) | AnyYamlJsonContent::YamlFlowSequence(_) => {
+                None
+            }
+        };
+    }
+
+    None
+}
+
+/// Extracts a scalar string from a flow node (plain/double/single quoted).
+fn extract_catalog_scalar_from_flow_node(node: &AnyYamlFlowNode) -> Option<Box<str>> {
+    if let Some(flow_yaml) = node.as_yaml_flow_yaml_node() {
+        return flow_yaml
+            .content()?
+            .value_token()
+            .ok()
+            .and_then(|token| normalize_catalog_scalar_text(token.text()));
+    }
+
+    if let Some(flow_json) = node.as_yaml_flow_json_node()
+        && let Some(content) = flow_json.content()
+    {
+        return match content {
+            AnyYamlJsonContent::YamlDoubleQuotedScalar(scalar) => scalar
+                .value_token()
+                .ok()
+                .and_then(|token| normalize_catalog_scalar_text(token.text())),
+            AnyYamlJsonContent::YamlSingleQuotedScalar(scalar) => scalar
+                .value_token()
+                .ok()
+                .and_then(|token| normalize_catalog_scalar_text(token.text())),
+            AnyYamlJsonContent::YamlFlowMapping(_) | AnyYamlJsonContent::YamlFlowSequence(_) => {
+                None
+            }
+        };
+    }
+
+    None
+}
+
+/// Extracts a scalar string from a block node when represented as a flow scalar
+/// in block context. Returns `None` for mapping/sequence content.
+fn extract_catalog_scalar_from_block_node(node: &AnyYamlBlockNode) -> Option<Box<str>> {
+    if let Some(flow) = node.as_yaml_flow_in_block_node() {
+        let flow_node = flow.flow().ok()?;
+        return extract_catalog_scalar_from_flow_node(&flow_node);
+    }
+
+    if let Some(block) = node.as_any_yaml_block_in_block_node()
+        && let Some(mapping) = block.as_yaml_block_mapping()
+        && mapping.entries().is_empty()
+    {
+        return None;
+    }
+
+    None
+}
+
+/// Trims whitespace and surrounding quotes from a scalar token, returning `None`
+/// for empty values after normalization.
+fn normalize_catalog_scalar_text(value: &str) -> Option<Box<str>> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+
+    let without_quotes = if trimmed.len() >= 2
+        && ((trimmed.starts_with('"') && trimmed.ends_with('"'))
+            || (trimmed.starts_with('\'') && trimmed.ends_with('\'')))
+    {
+        &trimmed[1..trimmed.len() - 1]
+    } else {
+        trimmed
+    };
+
+    if without_quotes.is_empty() {
+        None
+    } else {
+        Some(without_quotes.to_owned().into_boxed_str())
+    }
+}
+
+/// Checks if a manifest dependency satisfies a semver range, resolving pnpm
+/// `catalog:` specifiers (default or named) through the provided `Catalogs`.
+fn dependency_satisfies(
+    specifier: &str,
+    version: &str,
+    catalog: Option<&Catalogs>,
+    range: &str,
+) -> bool {
+    let resolved_version = resolve_dependency_version(specifier, version, catalog);
+
+    Version::from(resolved_version).satisfies(range)
+}
+
+/// Resolves a dependency version, expanding pnpm `catalog:` references (default
+/// or named) using the provided `Catalogs`. Falls back to the literal version
+/// string if no catalog match is found.
+fn resolve_dependency_version<'a>(
+    specifier: &str,
+    version: &'a str,
+    catalog: Option<&'a Catalogs>,
+) -> &'a str {
+    if let (Some(catalogs), Some(rest)) = (catalog, version.strip_prefix("catalog:")) {
+        let (catalog_name, package_name) = if rest.is_empty() {
+            (None, specifier)
+        } else {
+            (Some(rest), specifier)
+        };
+
+        if let Some(mapped_version) = catalogs.lookup(package_name, catalog_name) {
+            return mapped_version;
+        }
+    }
+
+    version
 }
 
 impl Manifest for PackageJson {
@@ -188,6 +472,14 @@ impl Deref for Dependencies {
 impl Dependencies {
     pub fn contains(&self, specifier: &str) -> bool {
         self.0.iter().any(|(k, _)| k.as_ref() == specifier)
+    }
+
+    /// Returns the version string for a dependency if present.
+    pub fn get(&self, specifier: &str) -> Option<&str> {
+        self.0
+            .iter()
+            .find(|(k, _)| k.as_ref() == specifier)
+            .map(|(_, v)| v.as_ref())
     }
 }
 
@@ -391,5 +683,115 @@ mod tests {
         let result = parse_range("~0.x.0");
 
         assert_eq!(result, Ok(Version::Literal("~0.x.0".to_string())));
+    }
+
+    #[test]
+    fn matches_dependency_with_pnpm_catalog() {
+        let package_json = PackageJson {
+            dependencies: Dependencies(Box::new([("react".into(), "catalog:".into())])),
+            catalog: Some(Catalogs {
+                default: Some(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
+                named: FxHashMap::default(),
+            }),
+            ..Default::default()
+        };
+
+        assert!(package_json.matches_dependency("react", ">=19.0.0"));
+    }
+
+    #[test]
+    fn matches_dependency_with_named_pnpm_catalog() {
+        let package_json = PackageJson {
+            dependencies: Dependencies(Box::new([("react".into(), "catalog:react19".into())])),
+            catalog: Some(Catalogs {
+                default: None,
+                named: FxHashMap::from_iter([(
+                    "react19".into(),
+                    Dependencies(Box::new([("react".into(), "19.0.0".into())])),
+                )]),
+            }),
+            ..Default::default()
+        };
+
+        assert!(package_json.matches_dependency("react", ">=19.0.0"));
+    }
+
+    #[test]
+    fn parse_pnpm_workspace_catalog_minimal() {
+        let yaml = r#"
+packages:
+  - "packages/*"
+catalog:
+  react: 19.0.0
+  "react-dom": "^19.0.0"
+"#;
+
+        let catalog =
+            PackageJson::parse_pnpm_workspace_catalog(yaml).expect("catalog should be parsed");
+
+        let default = catalog.default.expect("default catalog");
+        assert_eq!(default.get("react"), Some("19.0.0"));
+        assert_eq!(default.get("react-dom"), Some("^19.0.0"));
+        assert!(catalog.named.is_empty());
+    }
+
+    #[test]
+    fn parse_pnpm_workspace_catalog_named() {
+        let yaml = r#"
+packages:
+  - "packages/*"
+catalogs:
+  react19:
+    react: 19.0.0
+    "react-dom": "^19.0.0"
+"#;
+
+        let catalog =
+            PackageJson::parse_pnpm_workspace_catalog(yaml).expect("catalog should be parsed");
+
+        let named = catalog.named.get("react19").expect("react19 catalog");
+        assert_eq!(named.get("react"), Some("19.0.0"));
+        assert_eq!(named.get("react-dom"), Some("^19.0.0"));
+    }
+
+    #[test]
+    fn parse_pnpm_workspace_catalog_default_and_named() {
+        let yaml = r#"
+packages:
+  - "packages/*"
+catalog:
+  react: 19.0.0
+catalogs:
+  legacy:
+    react: 18.3.1
+"#;
+
+        let catalog =
+            PackageJson::parse_pnpm_workspace_catalog(yaml).expect("catalog should be parsed");
+
+        let default = catalog.default.expect("default catalog");
+        assert_eq!(default.get("react"), Some("19.0.0"));
+
+        let legacy = catalog.named.get("legacy").expect("legacy catalog");
+        assert_eq!(legacy.get("react"), Some("18.3.1"));
+    }
+
+    #[test]
+    fn resolve_dependency_version_prefers_named_catalog() {
+        let catalog = Catalogs {
+            default: Some(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
+            named: FxHashMap::from_iter([(
+                "legacy".into(),
+                Dependencies(Box::new([("react".into(), "18.3.1".into())])),
+            )]),
+        };
+
+        let resolved_default =
+            super::resolve_dependency_version("react", "catalog:", Some(&catalog));
+        assert_eq!(resolved_default, "19.0.0");
+
+        let resolved_named =
+            super::resolve_dependency_version("react", "catalog:legacy", Some(&catalog));
+        assert_eq!(resolved_named, "18.3.1");
     }
 }

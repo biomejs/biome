@@ -53,7 +53,7 @@ use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
-use biome_package::PackageType;
+use biome_package::{Catalogs, PackageJson, PackageType};
 use biome_parser::AnyParse;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_plugin_loader::{PluginConfiguration, Plugins};
@@ -933,6 +933,26 @@ impl WorkspaceServer {
         Ok(is_ignored)
     }
 
+    /// Attempts to load pnpm workspace catalogs by searching for a
+    /// `pnpm-workspace.yaml` starting from the given path and walking up its
+    /// ancestors.
+    fn load_pnpm_workspace_catalog(&self, start_dir: &Utf8Path) -> Option<Catalogs> {
+        for dir in start_dir.ancestors() {
+            let workspace_file = dir.join("pnpm-workspace.yaml");
+            if !self.fs.path_is_file(&workspace_file) {
+                continue;
+            }
+
+            if let Ok(content) = self.fs.read_file_from_path(&workspace_file)
+                && let Some(catalog) = PackageJson::parse_pnpm_workspace_catalog(&content)
+            {
+                return Some(catalog);
+            }
+        }
+
+        None
+    }
+
     /// Updates the [ProjectLayout] for the given `path`.
     #[instrument(level = "debug", skip(self))]
     fn update_project_layout(
@@ -947,10 +967,23 @@ impl WorkspaceServer {
                 .map(|parent| parent.to_path_buf())
                 .ok_or_else(WorkspaceError::not_found)?;
 
+            let pnpm_catalog = self.load_pnpm_workspace_catalog(&package_path);
+
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root, _) => {
                     self.project_layout
-                        .insert_serialized_node_manifest(package_path, root);
+                        .insert_serialized_node_manifest(package_path.clone(), root);
+
+                    if let Some(catalogs) = pnpm_catalog
+                        && let Some(mut manifest) = self
+                            .project_layout
+                            .get_node_manifest_for_package(&package_path)
+                        && manifest.catalog.is_none()
+                    {
+                        manifest.catalog = Some(catalogs);
+                        self.project_layout
+                            .insert_node_manifest(package_path.clone(), manifest);
+                    }
                 }
                 UpdateKind::Removed => {
                     self.project_layout.remove_package(&package_path);
@@ -970,6 +1003,27 @@ impl WorkspaceServer {
                 UpdateKind::Removed => {
                     self.project_layout
                         .remove_tsconfig_from_package(&package_path);
+                }
+            }
+        } else if filename.is_some_and(|filename| filename == "pnpm-workspace.yaml") {
+            let workspace_root = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .unwrap_or_default();
+            let pnpm_catalog = self.load_pnpm_workspace_catalog(&workspace_root);
+
+            for package_path in self.project_layout.package_paths() {
+                if !package_path.starts_with(&workspace_root) {
+                    continue;
+                }
+
+                if let Some(mut manifest) = self
+                    .project_layout
+                    .get_node_manifest_for_package(&package_path)
+                {
+                    manifest.catalog.clone_from(&pnpm_catalog);
+                    self.project_layout
+                        .insert_node_manifest(package_path.clone(), manifest);
                 }
             }
         } else if let Some(turbo_filename) =
