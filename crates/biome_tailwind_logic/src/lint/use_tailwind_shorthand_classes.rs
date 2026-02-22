@@ -164,7 +164,7 @@ pub fn analyze_tailwind_shorthand(source: &str) -> Vec<TailwindShorthandViolatio
         let important = full.excl_token().is_some();
         let candidate = full.candidate().ok()?;
         if let Some(func) = candidate.as_tw_functional_candidate() {
-            let base = &source[func.base_token().ok()?.text_range()];
+            let base = &source[func.base_token().ok()?.text_trimmed_range()];
             let value_node = func.value().ok()?;
             let value_range = value_node.syntax().text_range();
             let value = &source[value_range];
@@ -212,7 +212,7 @@ pub fn analyze_tailwind_shorthand(source: &str) -> Vec<TailwindShorthandViolatio
                 ))
             }
         } else if let Some(st) = candidate.as_tw_static_candidate() {
-            let base = &source[st.base_token().ok()?.text_range()];
+            let base = &source[st.base_token().ok()?.text_trimmed_range()];
             Some((
                 base,
                 GroupKey {
