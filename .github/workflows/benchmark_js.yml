@@ -17,6 +17,7 @@ on:
       - 'crates/biome_formatter/**/*.rs'
       - 'crates/biome_rowan/**/*.rs'
       - 'crates/biome_parser/**/*.rs'
+      - 'crates/biome_grit_patterns/**/*.rs'
   push:
     branches:
       - main
@@ -30,6 +31,7 @@ on:
       - 'crates/biome_formatter/**/*.rs'
       - 'crates/biome_rowan/**/*.rs'
       - 'crates/biome_parser/**/*.rs'
+      - 'crates/biome_grit_patterns/**/*.rs'
 
 env:
   RUST_LOG: info
@@ -47,6 +49,7 @@ jobs:
           - biome_js_parser
           - biome_js_formatter
           - biome_js_analyze
+          - biome_grit_patterns
 
     steps:
 

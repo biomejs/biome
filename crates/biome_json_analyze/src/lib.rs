@@ -14,8 +14,8 @@ use crate::suppression_action::JsonSuppressionAction;
 pub use biome_analyze::ExtendedConfigurationProvider;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, AnalyzerSuppression,
-    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage,
-    PluginVisitor, RuleAction, RuleRegistry, to_analyzer_suppressions,
+    BatchPluginVisitor, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
+    PluginTargetLanguage, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
 use biome_diagnostics::Error;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, TextRange};
@@ -132,15 +132,19 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    for plugin in plugins {
-        // SAFETY: The plugin target language is correctly checked here.
+    let json_plugins: Vec<_> = plugins
+        .iter()
+        .filter(|p| p.language() == PluginTargetLanguage::Json)
+        .cloned()
+        .collect();
+
+    if !json_plugins.is_empty() {
+        // SAFETY: All plugins have been verified to target JSON above.
         unsafe {
-            if plugin.language() == PluginTargetLanguage::Json {
-                analyzer.add_visitor(
-                    Phases::Syntax,
-                    Box::new(PluginVisitor::new_unchecked(plugin.clone())),
-                )
-            }
+            analyzer.add_visitor(
+                Phases::Syntax,
+                Box::new(BatchPluginVisitor::new_unchecked(&json_plugins)),
+            );
         }
     }
 
