@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-compound-assignment.vue
+---
+# Input
+```ts
+import { ref } from 'vue'
+let foo = ref(0)
+let baz = 0
+
+foo += 1
+foo -= 1
+baz += foo
+baz -= foo
+
+```
+
+# Diagnostics
+```
+invalid-compound-assignment.vue:5:1 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    3 │ let baz = 0
+    4 │ 
+  > 5 │ foo += 1
+      │ ^^^
+    6 │ foo -= 1
+    7 │ baz += foo
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-compound-assignment.vue:6:1 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    5 │ foo += 1
+  > 6 │ foo -= 1
+      │ ^^^
+    7 │ baz += foo
+    8 │ baz -= foo
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-compound-assignment.vue:7:8 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    5 │ foo += 1
+    6 │ foo -= 1
+  > 7 │ baz += foo
+      │        ^^^
+    8 │ baz -= foo
+    9 │ 
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-compound-assignment.vue:8:8 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    6 │ foo -= 1
+    7 │ baz += foo
+  > 8 │ baz -= foo
+      │        ^^^
+    9 │ 
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

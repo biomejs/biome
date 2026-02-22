@@ -233,6 +233,7 @@ define_categories! {
     "lint/nursery/noUselessReturn": "https://biomejs.dev/linter/rules/no-useless-return",
     "lint/nursery/noVueArrowFuncInWatch": "https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch",
     "lint/nursery/noVueOptionsApi": "https://biomejs.dev/linter/rules/no-vue-options-api",
+    "lint/nursery/noVueRefAsOperand": "https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
     "lint/nursery/noVueVIfWithVFor": "https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for",
     "lint/nursery/useArraySortCompare": "https://biomejs.dev/linter/rules/use-array-sort-compare",
     "lint/nursery/useAwaitThenable": "https://biomejs.dev/linter/rules/use-await-thenable",

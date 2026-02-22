@@ -1,0 +1,44 @@
+/* should not generate diagnostics */
+
+<script>
+import { ref, shallowRef } from 'vue'
+
+const foo = ref(true)
+var a = other || foo // ignore left
+var b = other && foo // ignore left
+
+let bar = ref(true) // ignore not const
+var a = bar || other
+var b = bar || other
+
+const foo1 = ref(0)
+const bar1 = ref(0)
+var baz = x ? foo1 : bar1 // ignore consequence and alternate
+
+const foo2 = ref(true)
+const bar2 = ref(false)
+if (some) {foo2} else {bar2} // ignore consequence and alternate
+
+const foo3 = ref(0)
+function func(foo) {}
+func(foo3) // ignore function argument
+
+let count = not_ref(0)
+count++
+
+// Probably wrong, but not checked by this rule.
+const {value} = ref(0)
+value++
+
+// Ignore shallowRef
+const foo4 = shallowRef({})
+foo4[bar] = 123
+
+// Unexpected usage
+const count2 = ref
+count2++
+
+const foo5 = ref(0)
+function tag(arr, ...args) {}
+tag`${foo5}` // ignore tagged template
+</script>

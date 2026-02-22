@@ -2306,6 +2306,11 @@ See https://biomejs.dev/linter/rules/no-vue-options-api
 	 */
 	noVueOptionsApi?: NoVueOptionsApiConfiguration;
 	/**
+	* Disallow the use of value wrapped by ref()(Composition API) as operand.
+See https://biomejs.dev/linter/rules/no-vue-ref-as-operand 
+	 */
+	noVueRefAsOperand?: NoVueRefAsOperandConfiguration;
+	/**
 	* Disallow using v-if and v-for directives on the same element.
 See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for 
 	 */
@@ -4189,6 +4194,9 @@ export type NoVueArrowFuncInWatchConfiguration =
 export type NoVueOptionsApiConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueOptionsApiOptions;
+export type NoVueRefAsOperandConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueRefAsOperandOptions;
 export type NoVueVIfWithVForConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVIfWithVForOptions;
@@ -5861,6 +5869,10 @@ export interface RuleWithNoVueOptionsApiOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueOptionsApiOptions;
 }
+export interface RuleWithNoVueRefAsOperandOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueRefAsOperandOptions;
+}
 export interface RuleWithNoVueVIfWithVForOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVIfWithVForOptions;
@@ -7321,6 +7333,7 @@ export type NoUnnecessaryConditionsOptions = {};
 export type NoUselessReturnOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueOptionsApiOptions = {};
+export type NoVueRefAsOperandOptions = {};
 export type NoVueVIfWithVForOptions = {};
 export type UseArraySortCompareOptions = {};
 export type UseAwaitThenableOptions = {};
@@ -8314,6 +8327,7 @@ export type Category =
 	| "lint/nursery/noUselessReturn"
 	| "lint/nursery/noVueArrowFuncInWatch"
 	| "lint/nursery/noVueOptionsApi"
+	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVIfWithVFor"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useAwaitThenable"
