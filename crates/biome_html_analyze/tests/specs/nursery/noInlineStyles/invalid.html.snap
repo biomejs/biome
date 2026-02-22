@@ -1,0 +1,147 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- Invalid cases - should trigger the rule -->
+
+<div style="color: red;"></div>
+
+<button style="background: blue; color: white;">Click</button>
+
+<p style="margin: 0; padding: 10px;">Paragraph</p>
+
+<span style="">Empty inline style</span>
+
+<img style="width: 100px;" src="image.png" alt="Image">
+
+<a style="text-decoration: none;" href="#">Link</a>
+
+```
+
+# Diagnostics
+```
+invalid.html:3:6 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style attribute.
+  
+    1 │ <!-- Invalid cases - should trigger the rule -->
+    2 │ 
+  > 3 │ <div style="color: red;"></div>
+      │      ^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ <button style="background: blue; color: white;">Click</button>
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:5:9 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style attribute.
+  
+    3 │ <div style="color: red;"></div>
+    4 │ 
+  > 5 │ <button style="background: blue; color: white;">Click</button>
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <p style="margin: 0; padding: 10px;">Paragraph</p>
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:7:4 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style attribute.
+  
+    5 │ <button style="background: blue; color: white;">Click</button>
+    6 │ 
+  > 7 │ <p style="margin: 0; padding: 10px;">Paragraph</p>
+      │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ <span style="">Empty inline style</span>
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:9:7 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style attribute.
+  
+     7 │ <p style="margin: 0; padding: 10px;">Paragraph</p>
+     8 │ 
+   > 9 │ <span style="">Empty inline style</span>
+       │       ^^^^^^^^
+    10 │ 
+    11 │ <img style="width: 100px;" src="image.png" alt="Image">
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:11:6 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style attribute.
+  
+     9 │ <span style="">Empty inline style</span>
+    10 │ 
+  > 11 │ <img style="width: 100px;" src="image.png" alt="Image">
+       │      ^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ <a style="text-decoration: none;" href="#">Link</a>
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:13:4 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style attribute.
+  
+    11 │ <img style="width: 100px;" src="image.png" alt="Image">
+    12 │ 
+  > 13 │ <a style="text-decoration: none;" href="#">Link</a>
+       │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
