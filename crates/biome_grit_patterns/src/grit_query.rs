@@ -198,6 +198,10 @@ impl GritQuery {
             .last_mut()
             .unwrap()[ABSOLUTE_PATH_INDEX]
             .value = Some(abs_path_val);
+        state.bindings[GLOBAL_VARS_SCOPE_INDEX as usize]
+            .last_mut()
+            .unwrap()[NEW_FILES_INDEX]
+            .value = Some(GritResolvedPattern::from_list_parts([].into_iter()));
 
         // Execute inner pattern (Bubble) at each anchor-kind node.
         let mut matched = false;
