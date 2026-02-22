@@ -1,6 +1,6 @@
 use self::{
     css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
-    unknown::UnknownFileHandler,
+    tailwind::TailwindFileHandler, unknown::UnknownFileHandler,
 };
 use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};
@@ -72,6 +72,7 @@ pub(crate) mod javascript;
 pub(crate) mod json;
 pub(crate) mod markdown;
 pub mod svelte;
+pub(crate) mod tailwind;
 mod unknown;
 pub mod vue;
 
@@ -87,6 +88,8 @@ pub enum DocumentFileSource {
     Html(HtmlFileSource),
     Grit(GritFileSource),
     Markdown(MdFileSource),
+    /// Tailwind class-list snippet (embedded, never a top-level file source)
+    Tailwind,
     // Ignore files
     Ignore,
     #[default]
@@ -405,6 +408,7 @@ impl DocumentFileSource {
             | Self::Html(_)
             | Self::Grit(_)
             | Self::Markdown(_) => true,
+            Self::Tailwind => false,
             Self::Ignore => false,
             Self::Unknown => false,
         }
@@ -421,6 +425,7 @@ impl DocumentFileSource {
             | Self::Html(_)
             | Self::Grit(_)
             | Self::Markdown(_) => true,
+            Self::Tailwind => false,
             Self::Ignore => true,
             Self::Unknown => false,
         }
@@ -436,6 +441,7 @@ impl DocumentFileSource {
             | Self::Json(_)
             | Self::Grit(_)
             | Self::Markdown(_)
+            | Self::Tailwind
             | Self::Ignore
             | Self::Unknown => false,
         }
@@ -471,6 +477,7 @@ impl std::fmt::Display for DocumentFileSource {
             Self::Html(_) => write!(fmt, "HTML"),
             Self::Grit(_) => write!(fmt, "Grit"),
             Self::Markdown(_) => write!(fmt, "Markdown"),
+            Self::Tailwind => write!(fmt, "Tailwind"),
             Self::Ignore => write!(fmt, "Ignore"),
             Self::Unknown => write!(fmt, "Unknown"),
         }
@@ -1078,6 +1085,7 @@ pub(crate) struct Features {
     grit: GritFileHandler,
     markdown: MarkdownFileHandler,
     ignore: IgnoreFileHandler,
+    tailwind: TailwindFileHandler,
 }
 
 impl Features {
@@ -1095,6 +1103,7 @@ impl Features {
             markdown: MarkdownFileHandler {},
             ignore: IgnoreFileHandler {},
             unknown: UnknownFileHandler::default(),
+            tailwind: TailwindFileHandler,
         }
     }
 
@@ -1114,6 +1123,7 @@ impl Features {
             DocumentFileSource::Html(_) => self.html.capabilities(),
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
             DocumentFileSource::Markdown(_) => self.markdown.capabilities(),
+            DocumentFileSource::Tailwind => self.tailwind.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }

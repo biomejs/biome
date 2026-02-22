@@ -14,6 +14,7 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_json_syntax::JsonLanguage;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, SyntaxNodeWithOffset, TextRange, TextSize};
+use biome_tailwind_syntax::TailwindLanguage;
 use std::marker::PhantomData;
 
 #[derive(Debug, Clone)]
@@ -21,6 +22,7 @@ pub enum AnyEmbeddedSnippet {
     Js(EmbeddedSnippet<JsLanguage>, DocumentServices),
     Css(EmbeddedSnippet<CssLanguage>, DocumentServices),
     Json(EmbeddedSnippet<JsonLanguage>, DocumentServices),
+    Tailwind(EmbeddedSnippet<TailwindLanguage>, DocumentServices),
 }
 
 impl From<(EmbeddedSnippet<JsLanguage>, DocumentServices)> for AnyEmbeddedSnippet {
@@ -47,6 +49,18 @@ impl From<EmbeddedSnippet<JsonLanguage>> for AnyEmbeddedSnippet {
     }
 }
 
+impl From<(EmbeddedSnippet<TailwindLanguage>, DocumentServices)> for AnyEmbeddedSnippet {
+    fn from(content: (EmbeddedSnippet<TailwindLanguage>, DocumentServices)) -> Self {
+        Self::Tailwind(content.0, content.1)
+    }
+}
+
+impl From<EmbeddedSnippet<TailwindLanguage>> for AnyEmbeddedSnippet {
+    fn from(content: EmbeddedSnippet<TailwindLanguage>) -> Self {
+        Self::Tailwind(content, DocumentServices::none())
+    }
+}
+
 impl AnyEmbeddedSnippet {
     pub const fn is_js(&self) -> bool {
         matches!(self, Self::Js(..))
@@ -54,6 +68,10 @@ impl AnyEmbeddedSnippet {
 
     pub const fn is_css(&self) -> bool {
         matches!(self, Self::Css(..))
+    }
+
+    pub const fn is_tailwind(&self) -> bool {
+        matches!(self, Self::Tailwind(..))
     }
 
     pub fn as_js_embedded_snippet(&self) -> Option<&EmbeddedSnippet<JsLanguage>> {
@@ -80,11 +98,20 @@ impl AnyEmbeddedSnippet {
         }
     }
 
+    pub fn as_tailwind_embedded_snippet(&self) -> Option<&EmbeddedSnippet<TailwindLanguage>> {
+        if let Self::Tailwind(content, _) = self {
+            Some(content)
+        } else {
+            None
+        }
+    }
+
     pub fn content_range(&self) -> TextRange {
         match self {
             Self::Js(node, _) => node.content_range,
             Self::Css(node, _) => node.content_range,
             Self::Json(node, _) => node.content_range,
+            Self::Tailwind(node, _) => node.content_range,
         }
     }
 
@@ -93,6 +120,7 @@ impl AnyEmbeddedSnippet {
             Self::Js(node, _) => node.element_range,
             Self::Css(node, _) => node.element_range,
             Self::Json(node, _) => node.element_range,
+            Self::Tailwind(node, _) => node.element_range,
         }
     }
 
@@ -101,6 +129,7 @@ impl AnyEmbeddedSnippet {
             Self::Js(node, _) => node.parse.clone(),
             Self::Css(node, _) => node.parse.clone(),
             Self::Json(node, _) => node.parse.clone(),
+            Self::Tailwind(node, _) => node.parse.clone(),
         }
     }
 
@@ -109,6 +138,7 @@ impl AnyEmbeddedSnippet {
             Self::Js(node, _) => node.file_source_index,
             Self::Css(node, _) => node.file_source_index,
             Self::Json(node, _) => node.file_source_index,
+            Self::Tailwind(node, _) => node.file_source_index,
         }
     }
 
@@ -117,6 +147,7 @@ impl AnyEmbeddedSnippet {
             Self::Js(node, _) => node.file_source_index = index,
             Self::Css(node, _) => node.file_source_index = index,
             Self::Json(node, _) => node.file_source_index = index,
+            Self::Tailwind(node, _) => node.file_source_index = index,
         }
     }
 
@@ -125,6 +156,7 @@ impl AnyEmbeddedSnippet {
             Self::Js(node, _) => node.content_offset,
             Self::Css(node, _) => node.content_offset,
             Self::Json(node, _) => node.content_offset,
+            Self::Tailwind(node, _) => node.content_offset,
         }
     }
 
@@ -133,6 +165,7 @@ impl AnyEmbeddedSnippet {
             Self::Js(node, _) => node.into_serde_diagnostics(),
             Self::Css(node, _) => node.into_serde_diagnostics(),
             Self::Json(node, _) => node.into_serde_diagnostics(),
+            Self::Tailwind(node, _) => node.into_serde_diagnostics(),
         }
     }
 
@@ -141,6 +174,7 @@ impl AnyEmbeddedSnippet {
             Self::Js(_, services) => services,
             Self::Css(_, services) => services,
             Self::Json(_, services) => services,
+            Self::Tailwind(_, services) => services,
         }
     }
 }

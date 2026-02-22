@@ -13,7 +13,9 @@ use crate::settings::{
     check_override_feature_activity,
 };
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
-use crate::workspace::{DocumentFileSource, EmbeddedSnippet, PullDiagnosticsAndActionsResult};
+use crate::workspace::{
+    AnyEmbeddedSnippet, DocumentFileSource, EmbeddedSnippet, PullDiagnosticsAndActionsResult,
+};
 use crate::{
     WorkspaceError,
     settings::{FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage},
@@ -52,10 +54,11 @@ use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments,
-    JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
-    JsLanguage, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression, JsVariableDeclarator,
-    TextRange, TextSize, TokenAtOffset,
+    AnyJsCallArgument, AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsCallArgumentList,
+    JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource,
+    JsFunctionDeclaration, JsLanguage, JsStringLiteralExpression, JsSyntaxNode,
+    JsTemplateChunkElement, JsTemplateExpression, JsVariableDeclarator, JsxAttribute,
+    JsxOpeningElement, JsxSelfClosingElement, TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 use biome_module_graph::ModuleGraph;
@@ -64,6 +67,8 @@ use biome_rowan::{
     AstNode, AstNodeList, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode,
     WalkEvent,
 };
+use biome_tailwind_parser::parse_tailwind_with_offset_and_cache;
+use biome_tailwind_syntax::TailwindLanguage;
 use camino::Utf8Path;
 use either::Either;
 use serde::{Deserialize, Serialize};
@@ -603,7 +608,120 @@ fn parse_embedded_nodes(
         }
     }
 
+    // Extract Tailwind class strings from JSX attributes and function calls
+    let config = settings.as_ref().tailwind_class_detection_config();
+    let attr_names = config.attribute_names.clone();
+    let fn_names = config.function_names.clone();
+
+    for node in js_root.syntax().descendants() {
+        // JSX opening element: <div className="...">
+        if let Some(opening) = JsxOpeningElement::cast_ref(&node) {
+            for attr_name in &attr_names {
+                if let Some(snippets) = extract_tailwind_from_jsx_attribute(
+                    opening.find_attribute_by_name(attr_name),
+                    cache,
+                ) {
+                    nodes.extend(snippets);
+                }
+            }
+        }
+        // JSX self-closing element: <div className="..." />
+        else if let Some(self_closing) = JsxSelfClosingElement::cast_ref(&node) {
+            for attr_name in &attr_names {
+                if let Some(snippets) = extract_tailwind_from_jsx_attribute(
+                    self_closing.find_attribute_by_name(attr_name),
+                    cache,
+                ) {
+                    nodes.extend(snippets);
+                }
+            }
+        }
+        // Function call: cn("...", "...") / twMerge("...") / clsx("...") / tw("...")
+        else if let Some(call_expr) = JsCallExpression::cast_ref(&node) {
+            for fn_name in &fn_names {
+                if is_tailwind_function_call(&call_expr, fn_name) {
+                    if let Ok(args) = call_expr.arguments() {
+                        for arg in args.args() {
+                            if let Ok(AnyJsCallArgument::AnyJsExpression(expr)) = arg
+                                && let Some(string_lit) = expr
+                                    .as_any_js_literal_expression()
+                                    .and_then(|lit| lit.as_js_string_literal_expression())
+                                && let Some(snippet) =
+                                    extract_tailwind_from_string_literal(string_lit, cache)
+                            {
+                                nodes.push(snippet);
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
     ParseEmbedResult { nodes }
+}
+
+/// Extracts a Tailwind embedded snippet from a JSX attribute value, if the attribute
+/// has a string literal value (e.g., `className="flex p-4"`).
+fn extract_tailwind_from_jsx_attribute(
+    attribute: Option<JsxAttribute>,
+    cache: &mut NodeCache,
+) -> Option<Vec<(AnyEmbeddedSnippet, DocumentFileSource)>> {
+    let attribute = attribute?;
+    let initializer = attribute.initializer()?;
+    let value = initializer.value().ok()?;
+    let jsx_string = value.as_jsx_string()?;
+    let token = jsx_string.value_token().ok()?;
+    // Skip the opening quote character.
+    let inner_offset = token.text_trimmed_range().start() + TextSize::from(1);
+    let inner_text = jsx_string.inner_string_text().ok()?;
+    let parse = parse_tailwind_with_offset_and_cache(inner_text.text(), inner_offset, cache);
+    let element_range = attribute.range();
+    let token_range = token.text_trimmed_range();
+    let snippet = EmbeddedSnippet::<TailwindLanguage>::new(
+        parse.into(),
+        element_range,
+        token_range,
+        inner_offset,
+    );
+    Some(vec![(snippet.into(), DocumentFileSource::Tailwind)])
+}
+
+/// Extracts a Tailwind embedded snippet from a JS string literal expression
+/// used as a call argument (e.g., `cn("flex p-4")`).
+fn extract_tailwind_from_string_literal(
+    string_lit: &JsStringLiteralExpression,
+    cache: &mut NodeCache,
+) -> Option<(AnyEmbeddedSnippet, DocumentFileSource)> {
+    let token = string_lit.value_token().ok()?;
+    // Skip the opening quote character.
+    let inner_offset = token.text_trimmed_range().start() + TextSize::from(1);
+    let inner_text = string_lit.inner_string_text().ok()?;
+    let parse = parse_tailwind_with_offset_and_cache(inner_text.text(), inner_offset, cache);
+    let element_range = string_lit.range();
+    let token_range = token.text_trimmed_range();
+    let snippet = EmbeddedSnippet::<TailwindLanguage>::new(
+        parse.into(),
+        element_range,
+        token_range,
+        inner_offset,
+    );
+    Some((snippet.into(), DocumentFileSource::Tailwind))
+}
+
+/// Returns `true` if `call_expr` is a direct call to a function named `fn_name`.
+fn is_tailwind_function_call(call_expr: &JsCallExpression, fn_name: &str) -> bool {
+    call_expr
+        .callee()
+        .ok()
+        .and_then(|callee| match callee {
+            AnyJsExpression::JsIdentifierExpression(ident) => {
+                ident.name().ok().map(|r| r.has_name(fn_name))
+            }
+            _ => None,
+        })
+        .unwrap_or(false)
 }
 
 fn parse_template_expression(

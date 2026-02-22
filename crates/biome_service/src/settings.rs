@@ -42,6 +42,7 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_plugin_loader::Plugins;
+use biome_tailwind_syntax::TailwindLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
@@ -80,6 +81,10 @@ pub struct Settings {
 
     // TODO: remove once embedded snippets support is stable
     pub experimental_js_embedded_snippets_enabled: Option<ExperimentalEmbeddedSnippetsEnabled>,
+
+    /// Configuration controlling which HTML/JSX attributes and JS function calls are
+    /// treated as Tailwind class lists during embedded-snippet extraction.
+    pub tailwind_class_detection: TailwindClassDetectionConfig,
 }
 
 impl Settings {
@@ -93,6 +98,11 @@ impl Settings {
         self.experimental_js_embedded_snippets_enabled
             .unwrap_or_default()
             .value()
+    }
+
+    /// Returns the configuration controlling Tailwind class string detection.
+    pub fn tailwind_class_detection_config(&self) -> &TailwindClassDetectionConfig {
+        &self.tailwind_class_detection
     }
 
     pub fn source(&self) -> Option<Configuration> {
@@ -669,6 +679,29 @@ pub struct OverrideFilesSettings {
     pub max_size: Option<MaxSize>,
 }
 
+/// Configuration controlling which strings are detected as Tailwind class lists.
+///
+/// Hard-coded defaults; the struct is `pub` so it can be exposed in user-facing
+/// configuration later (once `biome_configuration` is extended for Tailwind).
+#[derive(Clone, Debug)]
+pub struct TailwindClassDetectionConfig {
+    /// HTML/JSX attribute names treated as Tailwind class lists.
+    /// Default: `["class", "className"]`
+    pub attribute_names: Vec<String>,
+    /// JS function names whose string arguments are treated as Tailwind class lists.
+    /// Default: `["cn", "twMerge", "clsx", "tw"]`
+    pub function_names: Vec<String>,
+}
+
+impl Default for TailwindClassDetectionConfig {
+    fn default() -> Self {
+        Self {
+            attribute_names: vec!["class".into(), "className".into()],
+            function_names: vec!["cn".into(), "twMerge".into(), "clsx".into(), "tw".into()],
+        }
+    }
+}
+
 /// Static map of language names to language-specific settings
 #[derive(Clone, Debug, Default)]
 pub struct LanguageListSettings {
@@ -679,6 +712,7 @@ pub struct LanguageListSettings {
     pub html: LanguageSettings<HtmlLanguage>,
     pub grit: LanguageSettings<GritLanguage>,
     pub markdown: LanguageSettings<MarkdownLanguage>,
+    pub tailwind: LanguageSettings<TailwindLanguage>,
 }
 
 impl From<JsConfiguration> for LanguageSettings<JsLanguage> {

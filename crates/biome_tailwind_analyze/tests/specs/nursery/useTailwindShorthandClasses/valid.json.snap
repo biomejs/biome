@@ -1,0 +1,48 @@
+---
+source: crates/biome_tailwind_analyze/tests/spec_tests.rs
+expression: valid.json
+---
+# Input
+```tw
+mx-2 -my-2
+```
+
+# Input
+```tw
+p-2 pl-4
+```
+
+# Input
+```tw
+hover:size-4
+```
+
+# Input
+```tw
+border
+```
+
+# Input
+```tw
+truncate
+```
+
+# Input
+```tw
+ml-2 mr-3
+```
+
+# Input
+```tw
+hover:ml-2 focus:mr-2
+```
+
+# Input
+```tw
+mx-2 mr-2
+```
+
+# Input
+```tw
+pt-2 mr-3
+```

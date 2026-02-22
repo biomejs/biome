@@ -1,0 +1,14 @@
+[
+  "ml-2 mr-2",
+  "pl-2 pr-2 pt-2 pb-2",
+  "hover:w-4 hover:h-4",
+  "border-x border-y",
+  "overflow-hidden text-ellipsis whitespace-nowrap",
+  "ml-2 mr-2 text-blue-500 font-bold",
+  "mr-3 ml-3",
+  "pt-1 pr-1 pb-1 pl-1",
+  "border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8",
+  "hover:w-10 hover:h-10 bg-gray-100 p-4",
+  "-mt-2 -mb-2",
+  "pl-6 pr-6 py-6"
+]

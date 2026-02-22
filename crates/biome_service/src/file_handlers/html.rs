@@ -45,9 +45,10 @@ use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
     AnySvelteDirective, AstroEmbeddedContent, HtmlAttributeInitializerClause,
     HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlLanguage, HtmlRoot,
-    HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression, HtmlTextExpressions, HtmlVariant,
-    SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock, SvelteKeyBlock, VueDirective,
-    VueVBindShorthandDirective, VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    HtmlSelfClosingElement, HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression,
+    HtmlTextExpressions, HtmlVariant, SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock,
+    SvelteKeyBlock, VueDirective, VueVBindShorthandDirective, VueVOnShorthandDirective,
+    VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
@@ -55,6 +56,8 @@ use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, BatchMutation, NodeCache, SendNode, TextSize};
+use biome_tailwind_parser::parse_tailwind_with_offset_and_cache;
+use biome_tailwind_syntax::TailwindLanguage;
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
@@ -415,6 +418,12 @@ fn parse_embedded_nodes(
         return ParseEmbedResult::default();
     };
 
+    let tailwind_attr_names = settings
+        .as_ref()
+        .tailwind_class_detection_config()
+        .attribute_names
+        .clone();
+
     match file_source.variant() {
         HtmlVariant::Standard(text_expression) => {
             for element in html_root.syntax().descendants() {
@@ -490,6 +499,31 @@ fn parse_embedded_nodes(
                     HtmlTextExpressions::None => {}
                 }
             }
+
+            // Extract Tailwind class attributes from all elements
+            for element in html_root.syntax().descendants() {
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Ok(opening) = html_element.opening_element() {
+                        for (content, tw_source) in parse_tailwind_class_attributes(
+                            &opening.attributes(),
+                            html_element.range(),
+                            cache,
+                            &tailwind_attr_names,
+                        ) {
+                            nodes.push((content.into(), tw_source));
+                        }
+                    }
+                } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element) {
+                    for (content, tw_source) in parse_tailwind_class_attributes(
+                        &self_closing.attributes(),
+                        self_closing.range(),
+                        cache,
+                        &tailwind_attr_names,
+                    ) {
+                        nodes.push((content.into(), tw_source));
+                    }
+                }
+            }
         }
 
         HtmlVariant::Astro => {
@@ -551,6 +585,31 @@ fn parse_embedded_nodes(
                         if let Some((content, services, file_source)) = result {
                             nodes.push(((content, services).into(), file_source));
                         }
+                    }
+                }
+            }
+
+            // Extract Tailwind class attributes from all elements
+            for element in html_root.syntax().descendants() {
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Ok(opening) = html_element.opening_element() {
+                        for (content, tw_source) in parse_tailwind_class_attributes(
+                            &opening.attributes(),
+                            html_element.range(),
+                            cache,
+                            &tailwind_attr_names,
+                        ) {
+                            nodes.push((content.into(), tw_source));
+                        }
+                    }
+                } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element) {
+                    for (content, tw_source) in parse_tailwind_class_attributes(
+                        &self_closing.attributes(),
+                        self_closing.range(),
+                        cache,
+                        &tailwind_attr_names,
+                    ) {
+                        nodes.push((content.into(), tw_source));
                     }
                 }
             }
@@ -706,6 +765,31 @@ fn parse_embedded_nodes(
                         file_source,
                     ) {
                         nodes.push((content.into(), doc_source));
+                    }
+                }
+            }
+
+            // Extract Tailwind class attributes from all elements
+            for element in html_root.syntax().descendants() {
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Ok(opening) = html_element.opening_element() {
+                        for (content, tw_source) in parse_tailwind_class_attributes(
+                            &opening.attributes(),
+                            html_element.range(),
+                            cache,
+                            &tailwind_attr_names,
+                        ) {
+                            nodes.push((content.into(), tw_source));
+                        }
+                    }
+                } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element) {
+                    for (content, tw_source) in parse_tailwind_class_attributes(
+                        &self_closing.attributes(),
+                        self_closing.range(),
+                        cache,
+                        &tailwind_attr_names,
+                    ) {
+                        nodes.push((content.into(), tw_source));
                     }
                 }
             }
@@ -877,6 +961,31 @@ fn parse_embedded_nodes(
                         file_source,
                     ) {
                         nodes.push((content.into(), doc_source));
+                    }
+                }
+            }
+
+            // Extract Tailwind class attributes from all elements
+            for element in html_root.syntax().descendants() {
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Ok(opening) = html_element.opening_element() {
+                        for (content, tw_source) in parse_tailwind_class_attributes(
+                            &opening.attributes(),
+                            html_element.range(),
+                            cache,
+                            &tailwind_attr_names,
+                        ) {
+                            nodes.push((content.into(), tw_source));
+                        }
+                    }
+                } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element) {
+                    for (content, tw_source) in parse_tailwind_class_attributes(
+                        &self_closing.attributes(),
+                        self_closing.range(),
+                        cache,
+                        &tailwind_attr_names,
+                    ) {
+                        nodes.push((content.into(), tw_source));
                     }
                 }
             }
@@ -1231,6 +1340,54 @@ pub(crate) fn parse_vue_text_expression(
         event_handler: false,
     });
     parse_text_expression(expression, cache, biome_path, settings, file_source)
+}
+
+/// Extracts Tailwind class strings from HTML element attributes and parses them as Tailwind snippets.
+///
+/// Checks each attribute name in `attribute_names` against the element's attributes.
+/// If a matching attribute with a string value is found, the value is parsed as Tailwind.
+pub(crate) fn parse_tailwind_class_attributes(
+    element_attributes: &biome_html_syntax::HtmlAttributeList,
+    element_range: biome_rowan::TextRange,
+    cache: &mut NodeCache,
+    attribute_names: &[String],
+) -> Vec<(EmbeddedSnippet<TailwindLanguage>, DocumentFileSource)> {
+    let mut results = Vec::new();
+    for attr_name in attribute_names {
+        let Some(attribute) = element_attributes.find_by_name(attr_name) else {
+            continue;
+        };
+        let Some(initializer) = attribute.initializer() else {
+            continue;
+        };
+        let Ok(value) = initializer.value() else {
+            continue;
+        };
+        let Some(html_string) = value.as_html_string() else {
+            continue;
+        };
+        let Ok(content_token) = html_string.value_token() else {
+            continue;
+        };
+        let Ok(inner_text) = html_string.inner_string_text() else {
+            continue;
+        };
+        let text = inner_text.text();
+
+        // Skip empty strings
+        if text.is_empty() {
+            continue;
+        }
+
+        // Calculate offset: start of token + 1 (to skip opening quote)
+        let token_range = content_token.text_trimmed_range();
+        let inner_offset = token_range.start() + TextSize::from(1);
+
+        let parse = parse_tailwind_with_offset_and_cache(text, inner_offset, cache);
+        let snippet = EmbeddedSnippet::new(parse.into(), element_range, token_range, inner_offset);
+        results.push((snippet, DocumentFileSource::Tailwind));
+    }
+    results
 }
 
 /// Parses a directive attribute's string value as JavaScript

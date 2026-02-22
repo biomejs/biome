@@ -1,0 +1,11 @@
+[
+  "mx-2 -my-2",
+  "p-2 pl-4",
+  "hover:size-4",
+  "border",
+  "truncate",
+  "ml-2 mr-3",
+  "hover:ml-2 focus:mr-2",
+  "mx-2 mr-2",
+  "pt-2 mr-3"
+]
