@@ -160,6 +160,42 @@ mod tests {
         });
     }
 
+    fn load_test_plugin(includes: Option<&[NormalizedGlob]>) -> AnalyzerJsPlugin {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "/plugin.js".into(),
+            r#"import { registerDiagnostic } from "@biomejs/plugin-api";
+            export default function useMyPlugin() {
+                registerDiagnostic("information", "Hello, world!");
+            }"#,
+        );
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        AnalyzerJsPlugin::load(fs, "/plugin.js".into(), includes).unwrap()
+    }
+
+    #[test]
+    fn applies_to_all_files_without_includes() {
+        let plugin = load_test_plugin(None);
+        assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));
+        assert!(plugin.applies_to_file(Utf8Path::new("test/foo.js")));
+    }
+
+    #[test]
+    fn applies_to_matching_files_with_includes() {
+        let globs: Vec<NormalizedGlob> = vec!["src/**/*.ts".parse().unwrap()];
+        let plugin = load_test_plugin(Some(&globs));
+        assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));
+        assert!(plugin.applies_to_file(Utf8Path::new("src/nested/file.ts")));
+    }
+
+    #[test]
+    fn rejects_non_matching_files_with_includes() {
+        let globs: Vec<NormalizedGlob> = vec!["src/**/*.ts".parse().unwrap()];
+        let plugin = load_test_plugin(Some(&globs));
+        assert!(!plugin.applies_to_file(Utf8Path::new("test/foo.ts")));
+        assert!(!plugin.applies_to_file(Utf8Path::new("src/main.js")));
+    }
+
     #[test]
     fn evaluate_in_worker_threads() {
         let fs = MemoryFileSystem::default();
