@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/spec/example-15.md
+---
+# Input
+
+```md
+<!-- placeholder for continuous thematic breaks not being treated as yaml -->
+
+ ***
+  ***
+   ***
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,5 @@
+ <!-- placeholder for continuous thematic breaks not being treated as yaml -->
+ 
+----
+-
+----
+-
+----
++ ***
++  ***
++   ***
+```
+
+# Output
+
+```md
+<!-- placeholder for continuous thematic breaks not being treated as yaml -->
+
+ ***
+  ***
+   ***
+```

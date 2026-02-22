@@ -1,0 +1,95 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/word/escape.md
+---
+# Input
+
+```md
+hello \* world _ ~~ ya
+
+escape & html < entity > foo
+
+qweqwe \\ \ \1 123123
+
+asd &amp; asd &#132; 123
+
+123_123_123
+
+456 _ 456 _ 456
+
+123*123*123
+
+123 * 123 * 123
+
+## 类的 prototype 属性和\_\_proto\_\_属性
+
+123&#0;123
+
+123&#35;123
+
+123&#992;123
+
+123&#x1F609;123
+
+123&#X22;123
+
+123&#98765432;123
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-hello \* world \_ ~~ ya
++hello \* world _ ~~ ya
+ 
+ escape & html < entity > foo
+ 
+@@ -12,7 +12,7 @@
+ 
+ 123*123*123
+ 
+-123 _ 123 _ 123
++123 * 123 * 123
+ 
+ ## 类的 prototype 属性和\_\_proto\_\_属性
+ 
+```
+
+# Output
+
+```md
+hello \* world _ ~~ ya
+
+escape & html < entity > foo
+
+qweqwe \\ \ \1 123123
+
+asd &amp; asd &#132; 123
+
+123_123_123
+
+456 _ 456 _ 456
+
+123*123*123
+
+123 * 123 * 123
+
+## 类的 prototype 属性和\_\_proto\_\_属性
+
+123&#0;123
+
+123&#35;123
+
+123&#992;123
+
+123&#x1F609;123
+
+123&#X22;123
+
+123&#98765432;123
+```

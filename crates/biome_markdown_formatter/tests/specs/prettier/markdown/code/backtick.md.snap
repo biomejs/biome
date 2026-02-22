@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/code/backtick.md
+---
+# Input
+
+```md
+``````````
+
+```js
+console.log("hello world!");
+```
+
+``````````
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+-````
++``````````
+ 
+ ```js
+ console.log("hello world!");
+ ```
+ 
+-````
++``````````
+```
+
+# Output
+
+```md
+``````````
+
+```js
+console.log("hello world!");
+```
+
+``````````
+```

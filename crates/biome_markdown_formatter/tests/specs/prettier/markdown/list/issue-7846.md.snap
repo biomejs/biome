@@ -1,0 +1,60 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/issue-7846.md
+---
+# Input
+
+```md
+- a a  
+   b b  
+    c c  
+   d d  
+  e e
+
+1.  a a a  
+   b b b  
+  c c c  
+   d d d  
+    e e e
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,11 +1,11 @@
+ - a a  
+    b b  
+-   c c  
++    c c  
+    d d  
+   e e
+ 
+ 1.  a a a  
+-     b b b  
+-    c c c  
+-     d d d  
+-     e e e
++   b b b  
++  c c c  
++   d d d  
++    e e e
+\ No newline at end of file
+```
+
+# Output
+
+```md
+- a a  
+   b b  
+    c c  
+   d d  
+  e e
+
+1.  a a a  
+   b b b  
+  c c c  
+   d d d  
+    e e e```

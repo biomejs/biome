@@ -1,0 +1,626 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/markdown/test-case.md
+---
+# Input
+
+```md
+[View raw (TEST.md)](https://raw.github.com/adamschwartz/github-markdown-kitchen-sink/master/README.md)
+
+This is a paragraph.
+
+    This is a paragraph.
+
+
+
+Header 1
+========
+
+Header 2
+--------
+
+    Header 1
+    ========
+
+    Header 2
+    --------
+
+
+
+# Header 1
+## Header 2
+### Header 3
+#### Header 4
+##### Header 5
+###### Header 6
+
+    # Header 1
+    ## Header 2
+    ### Header 3
+    #### Header 4
+    ##### Header 5
+    ###### Header 6
+
+
+
+# Header 1 #
+## Header 2 ##
+### Header 3 ###
+#### Header 4 ####
+##### Header 5 #####
+###### Header 6 ######
+
+    # Header 1 #
+    ## Header 2 ##
+    ### Header 3 ###
+    #### Header 4 ####
+    ##### Header 5 #####
+    ###### Header 6 ######
+
+
+
+> Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+
+    > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+
+
+
+> ## This is a header.
+> 1. This is the first list item.
+> 2. This is the second list item.
+>
+> Here's some example code:
+>
+>     Markdown.generate();
+
+    > ## This is a header.
+    > 1. This is the first list item.
+    > 2. This is the second list item.
+    >
+    > Here's some example code:
+    >
+    >     Markdown.generate();
+
+
+
+
+- Red
+- Green
+- Blue
+
+
++ Red
++ Green
++ Blue
+
+
+* Red
+* Green
+* Blue
+
+
+```markdown
+- Red
+- Green
+- Blue
+
++ Red
++ Green
++ Blue
+
+* Red
+* Green
+* Blue
+```
+
+
+
+1. Buy flour and salt
+1. Mix together with water
+1. Bake
+
+```markdown
+1. Buy flour and salt
+1. Mix together with water
+1. Bake
+```
+
+
+
+Paragraph:
+
+    Code
+
+<!-- -->
+
+    Paragraph:
+
+        Code
+
+
+
+* * *
+
+***
+
+*****
+
+- - -
+
+---------------------------------------
+
+    * * *
+
+    ***
+
+    *****
+
+    - - -
+
+    ---------------------------------------
+
+
+
+This is [an example](http://example.com "Example") link.
+
+[This link](http://example.com) has no title attr.
+
+These is [an] [example] of two shortcut reference-style links.
+
+This is [an example][id] reference-style link.
+
+[id]: http://example.com "Optional Title"
+
+    This is [an example](http://example.com "Example") link.
+
+    [This link](http://example.com) has no title attr.
+
+    These is [an] [example] of two shortcut reference-style links.
+
+    This is [an example][id] reference-style link.
+
+    [id]: http://example.com "Optional Title"
+
+
+
+*single asterisks*
+
+_single underscores_
+
+**double asterisks**
+
+__double underscores__
+
+    *single asterisks*
+
+    _single underscores_
+
+    **double asterisks**
+
+    __double underscores__
+
+
+
+This paragraph has some `code` in it.
+
+    This paragraph has some `code` in it.
+
+
+
+![Alt Text](http://placehold.it/200x50 "Image Title")
+
+    ![Alt Text](http://placehold.it/200x50 "Image Title")
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -4,26 +4,27 @@
+ 
+     This is a paragraph.
+ 
+-# Header 1
+ 
+-## Header 2
+ 
++Header 1
++========
++
++Header 2
++--------
++
+     Header 1
+     ========
+ 
+     Header 2
+     --------
+ 
+-# Header 1
+ 
+-## Header 2
+ 
++# Header 1
++## Header 2
+ ### Header 3
+-
+ #### Header 4
+-
+ ##### Header 5
+-
+ ###### Header 6
+ 
+     # Header 1
+@@ -33,17 +34,14 @@
+     ##### Header 5
+     ###### Header 6
+ 
+-# Header 1
+ 
+-## Header 2
+ 
+-### Header 3
+-
+-#### Header 4
+-
+-##### Header 5
+-
+-###### Header 6
++# Header 1 #
++## Header 2 ##
++### Header 3 ###
++#### Header 4 ####
++##### Header 5 #####
++###### Header 6 ######
+ 
+     # Header 1 #
+     ## Header 2 ##
+@@ -52,12 +50,15 @@
+     ##### Header 5 #####
+     ###### Header 6 ######
+ 
++
++
+ > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+ 
+     > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+ 
++
++
+ > ## This is a header.
+->
+ > 1. This is the first list item.
+ > 2. This is the second list item.
+ >
+@@ -73,17 +74,23 @@
+     >
+     >     Markdown.generate();
+ 
++
++
++
+ - Red
+ - Green
+ - Blue
+ 
++
+++ Red
+++ Green
+++ Blue
++
++
+ * Red
+ * Green
+ * Blue
+ 
+-- Red
+-- Green
+-- Blue
+ 
+ ```markdown
+ - Red
+@@ -99,6 +106,8 @@
+ * Blue
+ ```
+ 
++
++
+ 1. Buy flour and salt
+ 1. Mix together with water
+ 1. Bake
+@@ -109,6 +118,8 @@
+ 1. Bake
+ ```
+ 
++
++
+ Paragraph:
+ 
+     Code
+@@ -119,16 +130,18 @@
+ 
+         Code
+ 
+----
+ 
+----
+ 
+----
++* * *
+ 
+----
++***
+ 
+----
++*****
+ 
++- - -
++
++---------------------------------------
++
+     * * *
+ 
+     ***
+@@ -139,6 +152,8 @@
+ 
+     ---------------------------------------
+ 
++
++
+ This is [an example](http://example.com "Example") link.
+ 
+ [This link](http://example.com) has no title attr.
+@@ -159,13 +174,15 @@
+ 
+     [id]: http://example.com "Optional Title"
+ 
+-_single asterisks_
+ 
++
++*single asterisks*
++
+ _single underscores_
+ 
+ **double asterisks**
+ 
+-**double underscores**
++__double underscores__
+ 
+     *single asterisks*
+ 
+@@ -175,10 +192,14 @@
+ 
+     __double underscores__
+ 
++
++
+ This paragraph has some `code` in it.
+ 
+     This paragraph has some `code` in it.
+ 
++
++
+ ![Alt Text](http://placehold.it/200x50 "Image Title")
+ 
+     ![Alt Text](http://placehold.it/200x50 "Image Title")
+```
+
+# Output
+
+```md
+[View raw (TEST.md)](https://raw.github.com/adamschwartz/github-markdown-kitchen-sink/master/README.md)
+
+This is a paragraph.
+
+    This is a paragraph.
+
+
+
+Header 1
+========
+
+Header 2
+--------
+
+    Header 1
+    ========
+
+    Header 2
+    --------
+
+
+
+# Header 1
+## Header 2
+### Header 3
+#### Header 4
+##### Header 5
+###### Header 6
+
+    # Header 1
+    ## Header 2
+    ### Header 3
+    #### Header 4
+    ##### Header 5
+    ###### Header 6
+
+
+
+# Header 1 #
+## Header 2 ##
+### Header 3 ###
+#### Header 4 ####
+##### Header 5 #####
+###### Header 6 ######
+
+    # Header 1 #
+    ## Header 2 ##
+    ### Header 3 ###
+    #### Header 4 ####
+    ##### Header 5 #####
+    ###### Header 6 ######
+
+
+
+> Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+
+    > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+
+
+
+> ## This is a header.
+> 1. This is the first list item.
+> 2. This is the second list item.
+>
+> Here's some example code:
+>
+>     Markdown.generate();
+
+    > ## This is a header.
+    > 1. This is the first list item.
+    > 2. This is the second list item.
+    >
+    > Here's some example code:
+    >
+    >     Markdown.generate();
+
+
+
+
+- Red
+- Green
+- Blue
+
+
++ Red
++ Green
++ Blue
+
+
+* Red
+* Green
+* Blue
+
+
+```markdown
+- Red
+- Green
+- Blue
+
++ Red
++ Green
++ Blue
+
+* Red
+* Green
+* Blue
+```
+
+
+
+1. Buy flour and salt
+1. Mix together with water
+1. Bake
+
+```markdown
+1. Buy flour and salt
+1. Mix together with water
+1. Bake
+```
+
+
+
+Paragraph:
+
+    Code
+
+<!-- -->
+
+    Paragraph:
+
+        Code
+
+
+
+* * *
+
+***
+
+*****
+
+- - -
+
+---------------------------------------
+
+    * * *
+
+    ***
+
+    *****
+
+    - - -
+
+    ---------------------------------------
+
+
+
+This is [an example](http://example.com "Example") link.
+
+[This link](http://example.com) has no title attr.
+
+These is [an] [example] of two shortcut reference-style links.
+
+This is [an example][id] reference-style link.
+
+[id]: http://example.com "Optional Title"
+
+    This is [an example](http://example.com "Example") link.
+
+    [This link](http://example.com) has no title attr.
+
+    These is [an] [example] of two shortcut reference-style links.
+
+    This is [an example][id] reference-style link.
+
+    [id]: http://example.com "Optional Title"
+
+
+
+*single asterisks*
+
+_single underscores_
+
+**double asterisks**
+
+__double underscores__
+
+    *single asterisks*
+
+    _single underscores_
+
+    **double asterisks**
+
+    __double underscores__
+
+
+
+This paragraph has some `code` in it.
+
+    This paragraph has some `code` in it.
+
+
+
+![Alt Text](http://placehold.it/200x50 "Image Title")
+
+    ![Alt Text](http://placehold.it/200x50 "Image Title")
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: [View raw (TEST.md)](https://raw.github.com/adamschwartz/github-markdown-kitchen-sink/master/README.md)
+   55: > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+   57:     > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+```

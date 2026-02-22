@@ -1,0 +1,144 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/codeblock.md
+---
+# Input
+
+```md
+1. ol01
+
+    ```js
+    const a = 1;
+
+
+    const b = 2;
+    ```
+
+2. ol02
+
+    ```js
+    const a = 1;
+
+
+    const b = 2;
+    ```
+
+- ul01
+
+    ```js
+    const a = 1;
+
+
+    const b = 2;
+    ```
+
+- ul02
+
+    ```js
+    const a = 1;
+
+
+    const b = 2;
+    ```
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,35 +1,35 @@
+ 1. ol01
+ 
+-   ```js
+-   const a = 1;
++    ```js
++    const a = 1;
+ 
+ 
+-   const b = 2;
+-   ```
++    const b = 2;
++    ```
+ 
+ 2. ol02
+ 
+-   ```js
+-   const a = 1;
++    ```js
++    const a = 1;
+ 
+ 
+-   const b = 2;
+-   ```
++    const b = 2;
++    ```
+ 
+ - ul01
+ 
+-  ```js
+-  const a = 1;
++    ```js
++    const a = 1;
+ 
+ 
+-  const b = 2;
+-  ```
++    const b = 2;
++    ```
+ 
+ - ul02
+ 
+-  ```js
+-  const a = 1;
++    ```js
++    const a = 1;
+ 
+ 
+-  const b = 2;
+-  ```
++    const b = 2;
++    ```
+```
+
+# Output
+
+```md
+1. ol01
+
+    ```js
+    const a = 1;
+
+
+    const b = 2;
+    ```
+
+2. ol02
+
+    ```js
+    const a = 1;
+
+
+    const b = 2;
+    ```
+
+- ul01
+
+    ```js
+    const a = 1;
+
+
+    const b = 2;
+    ```
+
+- ul02
+
+    ```js
+    const a = 1;
+
+
+    const b = 2;
+    ```
+```

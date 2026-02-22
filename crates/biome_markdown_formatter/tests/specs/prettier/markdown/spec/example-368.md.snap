@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/spec/example-368.md
+---
+# Input
+
+```md
+**Gomphocarpus (*Gomphocarpus physocarpus*, syn.
+*Asclepias physocarpa*)**
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+-**Gomphocarpus (_Gomphocarpus physocarpus_, syn.
+-_Asclepias physocarpa_)**
++**Gomphocarpus (*Gomphocarpus physocarpus*, syn.
++*Asclepias physocarpa*)**
+```
+
+# Output
+
+```md
+**Gomphocarpus (*Gomphocarpus physocarpus*, syn.
+*Asclepias physocarpa*)**
+```

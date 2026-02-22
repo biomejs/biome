@@ -1,0 +1,64 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/table/empty-table/empty-table.md
+---
+# Input
+
+```md
+Text
+
+| Specify the selected option : | Option 1 |
+|:--| --- |
+
+Text
+
+|    Should print as compact table when --proseWrap=never|a long long long long long long long long long long long long long head|
+|---|--:|
+
+Text
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,11 +1,11 @@
+ Text
+ 
+ | Specify the selected option : | Option 1 |
+-| :---------------------------- | -------- |
++|:--| --- |
+ 
+ Text
+ 
+-| Should print as compact table when --proseWrap=never | a long long long long long long long long long long long long long head |
+-| ---------------------------------------------------- | ----------------------------------------------------------------------: |
++|    Should print as compact table when --proseWrap=never|a long long long long long long long long long long long long long head|
++|---|--:|
+ 
+ Text
+```
+
+# Output
+
+```md
+Text
+
+| Specify the selected option : | Option 1 |
+|:--| --- |
+
+Text
+
+|    Should print as compact table when --proseWrap=never|a long long long long long long long long long long long long long head|
+|---|--:|
+
+Text
+```
+
+# Lines exceeding max width of 80 characters
+```
+    8: |    Should print as compact table when --proseWrap=never|a long long long long long long long long long long long long long head|
+```

@@ -1,0 +1,78 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/linkReference/case-and-space/case-and-space.md
+---
+# Input
+
+```md
+# `linkReference`
+
+[   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
+
+# `imageReference`
+
+![   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
+
+# `definition`
+
+[   See   `AsyncGeneratorFunction`   ]: ./index.html
+
+# `footnoteReference`
+
+[^See`AsyncGeneratorFunction`]
+
+# `footnoteDefinition`
+
+[^See`AsyncGeneratorFunction`]: ./index.html
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,14 +1,14 @@
+ # `linkReference`
+ 
+-[ See `AsyncGeneratorFunction` ][ See `AsyncGeneratorFunction` ]
++[   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
+ 
+ # `imageReference`
+ 
+-![   See   `AsyncGeneratorFunction`   ][ See `AsyncGeneratorFunction` ]
++![   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
+ 
+ # `definition`
+ 
+-[ See `AsyncGeneratorFunction` ]: ./index.html
++[   See   `AsyncGeneratorFunction`   ]: ./index.html
+ 
+ # `footnoteReference`
+ 
+```
+
+# Output
+
+```md
+# `linkReference`
+
+[   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
+
+# `imageReference`
+
+![   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
+
+# `definition`
+
+[   See   `AsyncGeneratorFunction`   ]: ./index.html
+
+# `footnoteReference`
+
+[^See`AsyncGeneratorFunction`]
+
+# `footnoteDefinition`
+
+[^See`AsyncGeneratorFunction`]: ./index.html
+```

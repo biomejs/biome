@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/front-matter/custom-parser.md
+---
+# Input
+
+```md
+---mycustomparser
+- hello:    world
+-         123
+---
+
+__123__
+**456**
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,5 +3,5 @@
+ -         123
+ ---
+ 
+-**123**
++__123__
+ **456**
+```
+
+# Output
+
+```md
+---mycustomparser
+- hello:    world
+-         123
+---
+
+__123__
+**456**
+```

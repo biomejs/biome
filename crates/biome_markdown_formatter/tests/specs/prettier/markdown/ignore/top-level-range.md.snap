@@ -1,0 +1,77 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/ignore/top-level-range.md
+---
+# Input
+
+```md
+<!-- prettier-ignore-start -->
+<!-- some tool start (this should be ignored) -->
+
+| some | table |
+| - | - |
+| 1 | a |
+| 2 | b |
+
+<!-- some tool end -->
+<!-- prettier-ignore-end -->
+
+> <!-- prettier-ignore-start -->
+> <!-- some tool start (this shouldn't be ignored) -->
+>
+> | some | table |
+> | - | - |
+> | 1 | a |
+> | 2 | b |
+>
+> <!-- some tool end -->
+> <!-- prettier-ignore-end -->
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -13,9 +13,9 @@
+ > <!-- some tool start (this shouldn't be ignored) -->
+ >
+ > | some | table |
+-> | ---- | ----- |
+-> | 1    | a     |
+-> | 2    | b     |
++> | - | - |
++> | 1 | a |
++> | 2 | b |
+ >
+ > <!-- some tool end -->
+ > <!-- prettier-ignore-end -->
+```
+
+# Output
+
+```md
+<!-- prettier-ignore-start -->
+<!-- some tool start (this should be ignored) -->
+
+| some | table |
+| - | - |
+| 1 | a |
+| 2 | b |
+
+<!-- some tool end -->
+<!-- prettier-ignore-end -->
+
+> <!-- prettier-ignore-start -->
+> <!-- some tool start (this shouldn't be ignored) -->
+>
+> | some | table |
+> | - | - |
+> | 1 | a |
+> | 2 | b |
+>
+> <!-- some tool end -->
+> <!-- prettier-ignore-end -->
+```

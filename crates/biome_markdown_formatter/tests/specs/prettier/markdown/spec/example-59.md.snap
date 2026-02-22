@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/spec/example-59.md
+---
+# Input
+
+```md
+`Foo
+----
+`
+
+<a title="a lot
+---
+of dashes"/>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+-## `Foo
+-
++`Foo
++----
+ `
+ 
+-## <a title="a lot
+-
++<a title="a lot
++---
+ of dashes"/>
+```
+
+# Output
+
+```md
+`Foo
+----
+`
+
+<a title="a lot
+---
+of dashes"/>
+```

@@ -14,10 +14,23 @@ biome_formatter        = { workspace = true }
 biome_markdown_factory = { workspace = true }
 biome_markdown_syntax  = { workspace = true }
 biome_rowan            = { workspace = true }
+schemars               = { workspace = true, optional = true }
+serde                  = { workspace = true, features = ["derive"], optional = true }
 
 [dev-dependencies]
+biome_configuration   = { workspace = true }
+biome_formatter_test  = { workspace = true }
+biome_fs              = { path = "../biome_fs" }
 biome_markdown_parser = { workspace = true }
 biome_parser          = { workspace = true }
+biome_service         = { path = "../biome_service" }
+camino                = { workspace = true }
+countme               = { workspace = true, features = ["enable"] }
+tests_macros          = { path = "../tests_macros" }
+
+[features]
+schema = ["dep:schemars", "serde"]
+serde  = ["dep:serde"]
 
 [lints]
 workspace = true

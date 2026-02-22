@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/loose.md
+---
+# Input
+
+```md
+- 123
+
+  - abc
+
+- 456
+
+  - def
+
+- 789
+
+  - ghi
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,11 @@
+ - 123
++
+   - abc
+ 
+ - 456
++
+   - def
+ 
+ - 789
++
+   - ghi
+```
+
+# Output
+
+```md
+- 123
+
+  - abc
+
+- 456
+
+  - def
+
+- 789
+
+  - ghi
+```
