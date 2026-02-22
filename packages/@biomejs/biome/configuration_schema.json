@@ -6253,6 +6253,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNullishCoalescing": {
+					"description": "Enforce using nullish coalescing operator (??) instead of logical or (||).\nSee https://biomejs.dev/linter/rules/use-nullish-coalescing",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNullishCoalescingConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"usePlaywrightValidDescribeCallback": {
 					"description": "Enforce valid describe() callback.\nSee https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback",
 					"anyOf": [
@@ -10586,6 +10593,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseNullishCoalescingOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseNullishCoalescingOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseNumberNamespaceOptions": {
 			"type": "object",
 			"properties": {
@@ -13819,6 +13836,23 @@
 		},
 		"UseNodejsImportProtocolOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseNullishCoalescingConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseNullishCoalescingOptions" }
+			]
+		},
+		"UseNullishCoalescingOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreConditionalTests": {
+					"description": "Whether to ignore `||` expressions in conditional test positions\n(if/while/for/do-while/ternary conditions).\n\nWhen `true` (the default), the rule will not report `||` expressions\nthat appear in places where the falsy-checking behavior may be intentional.\n\nDefault: `true`",
+					"type": ["boolean", "null"],
+					"default": null
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseNumberNamespaceConfiguration": {

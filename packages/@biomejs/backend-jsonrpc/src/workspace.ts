@@ -2400,6 +2400,11 @@ See https://biomejs.dev/linter/rules/use-lone-executable-definition
 	 */
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
 	/**
+	* Enforce using nullish coalescing operator (??) instead of logical or (||).
+See https://biomejs.dev/linter/rules/use-nullish-coalescing 
+	 */
+	useNullishCoalescing?: UseNullishCoalescingConfiguration;
+	/**
 	* Enforce valid describe() callback.
 See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
 	 */
@@ -4248,6 +4253,9 @@ export type UseLoneAnonymousOperationConfiguration =
 export type UseLoneExecutableDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneExecutableDefinitionOptions;
+export type UseNullishCoalescingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNullishCoalescingOptions;
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
@@ -5942,6 +5950,11 @@ export interface RuleWithUseLoneExecutableDefinitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneExecutableDefinitionOptions;
 }
+export interface RuleWithUseNullishCoalescingOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseNullishCoalescingOptions;
+}
 export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
 	options?: UsePlaywrightValidDescribeCallbackOptions;
@@ -7379,6 +7392,18 @@ export interface UseInputNameOptions {
 }
 export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
+export interface UseNullishCoalescingOptions {
+	/**
+	* Whether to ignore `||` expressions in conditional test positions
+(if/while/for/do-while/ternary conditions).
+
+When `true` (the default), the rule will not report `||` expressions
+that appear in places where the falsy-checking behavior may be intentional.
+
+Default: `true` 
+	 */
+	ignoreConditionalTests?: boolean;
+}
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseRegexpExecOptions = {};
 export interface UseRequiredScriptsOptions {
@@ -8349,6 +8374,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
+	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
