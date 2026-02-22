@@ -26,7 +26,7 @@ use biome_analyze::{AnalyzerPlugin, AnalyzerPluginVec};
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::normalize_path;
-use biome_glob::NormalizedGlob;
+use biome_glob::{CandidatePath, NormalizedGlob};
 use biome_json_parser::JsonParserOptions;
 use biome_resolver::FsWithResolverProxy;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -42,6 +42,7 @@ impl BiomePlugin {
     ///
     /// The base path is used to resolve relative paths.
     /// The optional `includes` patterns restrict which files the plugin runs on.
+    /// Note: `Some(&[])` (empty includes) means the plugin never matches any file.
     pub fn load(
         fs: Arc<dyn FsWithResolverProxy>,
         plugin_path: &str,
@@ -125,6 +126,20 @@ impl BiomePlugin {
 
         Ok((plugin, plugin_path))
     }
+}
+
+/// Checks whether a file path matches the plugin's `includes` globs.
+///
+/// Returns `true` if `includes` is `None` (no restriction).
+/// When `includes` is `Some`, delegates to `CandidatePath::matches_with_exceptions`.
+pub(crate) fn file_matches_includes(
+    includes: &Option<Box<[NormalizedGlob]>>,
+    path: &Utf8Path,
+) -> bool {
+    let Some(includes) = includes else {
+        return true;
+    };
+    CandidatePath::new(path).matches_with_exceptions(includes)
 }
 
 #[cfg(test)]

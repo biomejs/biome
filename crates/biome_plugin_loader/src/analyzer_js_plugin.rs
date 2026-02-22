@@ -9,7 +9,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use biome_analyze::{AnalyzerPlugin, PluginTargetLanguage, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::category;
-use biome_glob::{CandidatePath, NormalizedGlob};
+use biome_glob::NormalizedGlob;
 use biome_js_runtime::JsExecContext;
 use biome_js_syntax::AnyJsRoot;
 use biome_resolver::FsWithResolverProxy;
@@ -17,6 +17,7 @@ use biome_rowan::{AnySyntaxNode, AstNode, RawSyntaxKind, SyntaxKind};
 use biome_text_size::TextRange;
 
 use crate::PluginDiagnostic;
+use crate::file_matches_includes;
 use crate::thread_local::ThreadLocalCell;
 
 /// Already loaded plugin in a thread.
@@ -85,10 +86,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
     }
 
     fn applies_to_file(&self, path: &Utf8Path) -> bool {
-        let Some(includes) = &self.includes else {
-            return true;
-        };
-        CandidatePath::new(path).matches_with_exceptions(includes)
+        file_matches_includes(&self.includes, path)
     }
 
     fn query(&self) -> Vec<RawSyntaxKind> {

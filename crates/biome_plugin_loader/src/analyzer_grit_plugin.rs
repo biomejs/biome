@@ -1,10 +1,10 @@
-use crate::{AnalyzerPlugin, PluginDiagnostic};
+use crate::{AnalyzerPlugin, PluginDiagnostic, file_matches_includes};
 use biome_analyze::{PluginTargetLanguage, RuleDiagnostic};
 use biome_console::markup;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_diagnostics::{Severity, category};
 use biome_fs::FileSystem;
-use biome_glob::{CandidatePath, NormalizedGlob};
+use biome_glob::NormalizedGlob;
 use biome_grit_patterns::{
     BuiltInFunction, CompilePatternOptions, GritBinding, GritExecContext, GritPattern, GritQuery,
     GritQueryContext, GritQueryState, GritResolvedPattern, GritTargetFile, GritTargetLanguage,
@@ -81,10 +81,7 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
     }
 
     fn applies_to_file(&self, path: &Utf8Path) -> bool {
-        let Some(includes) = &self.includes else {
-            return true;
-        };
-        CandidatePath::new(path).matches_with_exceptions(includes)
+        file_matches_includes(&self.includes, path)
     }
 
     fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
@@ -249,5 +246,16 @@ mod tests {
         let plugin = load_test_plugin(Some(&globs));
         assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));
         assert!(!plugin.applies_to_file(Utf8Path::new("src/foo.test.ts")));
+    }
+
+    #[test]
+    fn glob_does_not_match_absolute_paths_without_prefix() {
+        let globs: Vec<NormalizedGlob> = vec!["src/**/*.ts".parse().unwrap()];
+        let plugin = load_test_plugin(Some(&globs));
+        // Relative paths match as expected
+        assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));
+        // Absolute paths do NOT match a relative glob — this is expected behavior.
+        // Users should use `**/src/**/*.ts` for absolute path matching.
+        assert!(!plugin.applies_to_file(Utf8Path::new("/project/src/main.ts")));
     }
 }
