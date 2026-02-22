@@ -1397,8 +1397,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
     /// It loops over the domains of the current rule, and check each domain specify
     /// a dependency.
-    ///
-    /// Returns `true` if the rule was enabled, `false` otherwise
     fn record_rule_from_manifest<R, L>(&mut self, rule_filter: RuleFilter<'static>)
     where
         L: biome_rowan::Language,
@@ -1419,16 +1417,20 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         }
 
         let no_only = self.only.is_some_and(|only| only.is_empty());
-        let no_domains = self
-            .settings
-            .as_linter_domains(path)
-            .is_none_or(|d| d.is_empty());
-        if !(no_only && no_domains) {
+        if !no_only {
             return;
         }
 
+        let domains = self.settings.as_linter_domains(path);
         if let Some(manifest) = &self.package_json {
             for domain in R::METADATA.domains {
+                if domains
+                    .as_ref()
+                    .is_some_and(|domains| domains.contains_key(domain))
+                {
+                    continue;
+                }
+
                 let matches_a_dependency = domain
                     .manifest_dependencies()
                     .iter()
