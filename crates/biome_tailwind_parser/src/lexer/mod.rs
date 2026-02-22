@@ -9,6 +9,7 @@ use biome_rowan::{SyntaxKind, TextLen};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::*;
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextSize};
+use biome_unicode_table::{Dispatch::*, lookup_byte};
 
 pub(crate) struct TailwindLexer<'src> {
     /// Source text
@@ -40,18 +41,22 @@ impl<'src> TailwindLexer<'src> {
     }
 
     fn consume_token(&mut self, current: u8) -> TailwindSyntaxKind {
-        match current {
-            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
-            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, b']'),
-            _ if self.current_kind == T!['('] => self.consume_bracketed_thing(TW_VALUE, b')'),
+        let dispatched = lookup_byte(current);
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, BTC),
+            _ if self.current_kind == T!['('] => self.consume_bracketed_thing(TW_VALUE, PNC),
             _ if self.current_kind == T![-] => self.consume_after_dash(),
             _ if self.current_kind == T![/] => self.consume_modifier(),
-            b':' => self.consume_byte(T![:]),
-            b'-' => self.consume_byte(T![-]),
-            b'!' => self.consume_byte(T![!]),
-            b'/' => self.consume_byte(T![/]),
-            _ if current.is_ascii_alphanumeric() => self.consume_base(),
+            COL => self.consume_byte(T![:]),
+            MIN => self.consume_byte(T![-]),
+            EXL => self.consume_byte(T![!]),
+            SLH => self.consume_byte(T![/]),
+            IDT | ZER | DIG => self.consume_base(),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
@@ -65,61 +70,66 @@ impl<'src> TailwindLexer<'src> {
     }
 
     fn consume_token_saw_negative(&mut self, current: u8) -> TailwindSyntaxKind {
-        match current {
-            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
-            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, b']'),
-            _ if self.current_kind == T!['('] => self.consume_bracketed_thing(TW_VALUE, b')'),
-            b':' => self.consume_byte(T![:]),
-            b'-' => self.consume_byte(T![-]),
-            b'!' => self.consume_byte(T![!]),
-            b'/' => self.consume_byte(T![/]),
-            _ if current.is_ascii_alphabetic() => self.consume_base(),
+        let dispatched = lookup_byte(current);
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, BTC),
+            _ if self.current_kind == T!['('] => self.consume_bracketed_thing(TW_VALUE, PNC),
+            COL => self.consume_byte(T![:]),
+            MIN => self.consume_byte(T![-]),
+            EXL => self.consume_byte(T![!]),
+            SLH => self.consume_byte(T![/]),
+            IDT | ZER | DIG => self.consume_base(),
             _ => self.consume_unexpected_character(),
         }
     }
 
     /// Consume a token in the arbitrary context
     fn consume_token_arbitrary(&mut self, current: u8) -> TailwindSyntaxKind {
-        match current {
-            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
-            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_VALUE, b']'),
+        let dispatched = lookup_byte(current);
+        match dispatched {
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            WHS => self.consume_newline_or_whitespaces(),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_VALUE, BTC),
             _ => self.consume_named_value(),
         }
     }
 
     /// Consume a token in the arbitrary variant context
     fn consume_token_arbitrary_variant(&mut self, current: u8) -> TailwindSyntaxKind {
-        match current {
-            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
-            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, b']'),
+        let dispatched = lookup_byte(current);
+        match dispatched {
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            WHS => self.consume_newline_or_whitespaces(),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, BTC),
             _ => self.consume_named_value(),
         }
     }
 
     /// Consume a token in the arbitrary candidate context
     fn consume_token_arbitrary_candidate(&mut self, current: u8) -> TailwindSyntaxKind {
-        match current {
-            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
-            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            b':' => self.consume_byte(T![:]),
-            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_PROPERTY, b':'),
-            _ if self.current_kind == T![:] => self.consume_bracketed_thing(TW_VALUE, b']'),
+        let dispatched = lookup_byte(current);
+        match dispatched {
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            WHS => self.consume_newline_or_whitespaces(),
+            COL => self.consume_byte(T![:]),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_PROPERTY, COL),
+            _ if self.current_kind == T![:] => self.consume_bracketed_thing(TW_VALUE, BTC),
             _ => self.consume_named_value(),
         }
-    }
-
-    fn consume_bracket(&mut self, byte: u8) -> TailwindSyntaxKind {
-        let kind = match byte {
-            b'[' => T!['['],
-            b']' => T![']'],
-            b'(' => T!['('],
-            b')' => T![')'],
-            _ => unreachable!(),
-        };
-        self.consume_byte(kind)
     }
 
     fn consume_base(&mut self) -> TailwindSyntaxKind {
@@ -133,7 +143,8 @@ impl<'src> TailwindLexer<'src> {
         let mut end = 0usize;
         while end < slice.len() {
             let b = slice[end];
-            if b == b'-' || is_delimiter(b) {
+            let dispatched = lookup_byte(b);
+            if dispatched == MIN || is_delimiter(dispatched) {
                 break;
             }
             end += 1;
@@ -144,7 +155,7 @@ impl<'src> TailwindLexer<'src> {
             return DATA_KW;
         }
 
-        if end > 0 && (end == slice.len() || is_delimiter(slice[end])) {
+        if end > 0 && (end == slice.len() || is_delimiter(lookup_byte(slice[end]))) {
             self.advance(end);
             return TW_BASE;
         }
@@ -164,16 +175,11 @@ impl<'src> TailwindLexer<'src> {
         self.assert_current_char_boundary();
 
         while let Some(byte) = self.current_byte() {
-            let char = self.current_char_unchecked();
-            if char.is_whitespace()
-                || byte == b':'
-                || byte == b'/'
-                || byte == b'!'
-                || byte == b']'
-                || byte == b')'
-            {
+            let dispatched = lookup_byte(byte);
+            if matches!(dispatched, WHS | COL | SLH | EXL | BTC | PNC) {
                 break;
             }
+            let char = self.current_char_unchecked();
             self.advance(char.len_utf8());
         }
 
@@ -203,8 +209,9 @@ impl<'src> TailwindLexer<'src> {
 
         let mut empty = true;
         while let Some(byte) = self.current_byte() {
+            let dispatched = lookup_byte(byte);
             let char = self.current_char_unchecked();
-            if char.is_whitespace() || byte == b'!' {
+            if matches!(dispatched, WHS | EXL) {
                 break;
             }
             self.advance(char.len_utf8());
@@ -217,16 +224,17 @@ impl<'src> TailwindLexer<'src> {
     fn consume_bracketed_thing(
         &mut self,
         kind: TailwindSyntaxKind,
-        looking_for: u8,
+        looking_for: biome_unicode_table::Dispatch,
     ) -> TailwindSyntaxKind {
         self.assert_current_char_boundary();
 
         let mut empty = true;
         while let Some(byte) = self.current_byte() {
-            let char = self.current_char_unchecked();
-            if byte == looking_for || (byte as char).is_whitespace() {
+            let dispatched = lookup_byte(byte);
+            if dispatched == looking_for || dispatched == WHS {
                 break;
             }
+            let char = self.current_char_unchecked();
             self.advance(char.len_utf8());
             empty = false;
         }

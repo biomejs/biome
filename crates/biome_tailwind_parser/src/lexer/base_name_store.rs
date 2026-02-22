@@ -1,6 +1,7 @@
 use std::sync::LazyLock;
 
 use biome_tailwind_syntax::metadata::BASENAMES_WITH_DASHES;
+use biome_unicode_table::{Dispatch, Dispatch::*, lookup_byte};
 
 /// A global store of dashed basenames for efficient reuse across lexing.
 ///
@@ -108,7 +109,8 @@ impl<'s, 't> BaseNameMatcher<'s, 't> {
         let mut i = 0usize;
         while i < self.text.len() {
             let b = self.text[i];
-            if is_delimiter(b) {
+            let dispatched = lookup_byte(b);
+            if is_delimiter(dispatched) {
                 break;
             }
 
@@ -130,7 +132,10 @@ impl<'s, 't> BaseNameMatcher<'s, 't> {
 
         // If we found a dashed match, accept it only if the next byte is a valid boundary or end-of-input
         if let Some(end) = best_end
-            && self.text.get(end).is_none_or(|b| is_boundary_byte(*b))
+            && self
+                .text
+                .get(end)
+                .is_none_or(|b| is_boundary_byte(lookup_byte(*b)))
         {
             return end;
         }
@@ -139,7 +144,8 @@ impl<'s, 't> BaseNameMatcher<'s, 't> {
         let mut j = 0usize;
         while j < self.text.len() {
             let b = self.text[j];
-            if b == b'-' || is_delimiter(b) {
+            let dispatched = lookup_byte(b);
+            if dispatched == MIN || is_delimiter(dispatched) {
                 break;
             }
             j += 1;
@@ -149,21 +155,21 @@ impl<'s, 't> BaseNameMatcher<'s, 't> {
 }
 
 #[inline]
-pub(crate) const fn is_delimiter(b: u8) -> bool {
+pub(crate) const fn is_delimiter(b: Dispatch) -> bool {
     // Delimiters that cannot be part of a basename (excluding '-' which may be inside dashed basenames):
     // - whitespace
     // - '!' important modifier
     // - ':' variant separator
-    matches!(b, b' ' | b'\n' | b'\r' | b'\t' | b'!' | b':')
+    matches!(b, WHS | EXL | COL)
 }
 
 #[inline]
-const fn is_boundary_byte(b: u8) -> bool {
+const fn is_boundary_byte(b: Dispatch) -> bool {
     // Valid boundary after a dashed basename:
     // - '-' indicates a value follows
     // - ':' indicates a variant boundary
     // - whitespace
-    b == b'-' || b == b':' || matches!(b, b' ' | b'\n' | b'\r' | b'\t')
+    matches!(b, WHS | MIN | COL)
 }
 
 #[cfg(test)]
