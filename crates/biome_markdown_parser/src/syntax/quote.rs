@@ -286,7 +286,7 @@ fn has_empty_line_before(p: &MarkdownParser) -> bool {
     matches!(source.get(start - 1), Some(b'\n' | b'\r'))
 }
 
-fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
+pub(crate) fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
     let mut column = 0usize;
 
     for c in p.source_after_current().chars() {
@@ -341,7 +341,7 @@ fn parse_quote_indented_code_block(p: &mut MarkdownParser, depth: usize) -> Pars
     Present(m.complete(p, MD_INDENT_CODE_BLOCK))
 }
 
-fn skip_optional_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bool {
+pub(crate) fn skip_optional_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bool {
     if !p.at(MD_TEXTUAL_LITERAL) {
         return false;
     }
