@@ -2072,16 +2072,27 @@ impl JsCallExpression {
                 }
 
                 // Pattern: (name, callback, [duration])
-                if is_function_with_block_body(&second)? {
-                    // Validate optional third argument is a number (duration)
-                    return Ok(matches!(
-                        third,
-                        None | Some(Ok(AnyJsCallArgument::AnyJsExpression(
-                            AnyJsLiteralExpression(
-                                self::AnyJsLiteralExpression::JsNumberLiteralExpression(_)
-                            )
-                        )))
-                    ));
+                if matches!(
+                    second,
+                    AnyJsCallArgument::AnyJsExpression(
+                        JsFunctionExpression(_) | JsArrowFunctionExpression(_)
+                    )
+                ) {
+                    // Pattern: (name, callback) - no param restrictions to match Prettier
+                    if arguments.args().len() == 2 {
+                        return Ok(true);
+                    }
+                    // Pattern: (name, callback, timeout) - stricter: requires block body and ≤1 param
+                    if is_function_with_block_body(&second)? {
+                        return Ok(matches!(
+                            third,
+                            None | Some(Ok(AnyJsCallArgument::AnyJsExpression(
+                                AnyJsLiteralExpression(
+                                    self::AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                                )
+                            )))
+                        ));
+                    }
                 }
 
                 // Pattern: (name, options, callback)
