@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-conditional-ref-assignment.vue
+---
+# Input
+```ts
+import { ref } from 'vue'
+let foo;
+
+if (!foo) {
+  foo = ref(5);
+}
+
+```
