@@ -1266,6 +1266,26 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
                         len += text.len();
                         p.bump(MD_TEXTUAL_LITERAL);
                     }
+
+                    // After stripping list indent, check for setext underlines
+                    // and thematic breaks. This matches handle_inline_newline
+                    // (which checks after indent stripping at L957-973).
+                    // Without this, the prescan would include the indent bytes
+                    // and catch it on the next iteration via the non-NEWLINE
+                    // path — harmless, but imprecise.
+                    //
+                    // NOTE: block interrupts after indent stripping are NOT
+                    // checked here (handle_inline_newline uses a heavier
+                    // with_virtual_line_start + temporary state reset). Those
+                    // are caught on the next iteration via the non-NEWLINE
+                    // `at_block_interrupt` check, which is sufficient for the
+                    // prescan's emphasis-context length calculation.
+                    if p.at(MD_SETEXT_UNDERLINE_LITERAL)
+                        || (p.at(MD_THEMATIC_BREAK_LITERAL)
+                            && is_dash_only_thematic_break_text(p.cur_text()))
+                    {
+                        break;
+                    }
                 }
 
                 continue;
