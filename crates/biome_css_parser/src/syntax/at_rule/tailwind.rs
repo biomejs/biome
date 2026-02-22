@@ -38,7 +38,7 @@ pub(crate) fn parse_utility_at_rule(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump(T![utility]);
+    p.bump_with_context(T![utility], CssLexContext::TailwindUtilityName);
 
     // Parse utility name - can be simple or functional
     if !is_at_utility_identifier(p) {
