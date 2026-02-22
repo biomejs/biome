@@ -2,10 +2,8 @@ use crate::JsRuleAction;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_factory::make::js_directive;
 use biome_js_syntax::{
     AnyJsClass, JsDirective, JsDirectiveList, JsFileSource, JsFunctionBody, JsModule, JsScript,
-    JsSyntaxKind, JsSyntaxToken,
 };
 use biome_rule_options::no_redundant_use_strict::NoRedundantUseStrictOptions;
 
@@ -191,17 +189,7 @@ impl Rule for NoRedundantUseStrict {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        let value_token = node.value_token().ok()?;
-        let new_node = js_directive(JsSyntaxToken::new_detached(
-            JsSyntaxKind::JSX_TEXT_LITERAL,
-            "",
-            [],
-            [],
-        ))
-        .build()
-        .with_leading_trivia_pieces(value_token.leading_trivia().pieces())?;
-
-        mutation.replace_node_discard_trivia(node.clone(), new_node);
+        mutation.remove_node_keep_trivia(node.clone());
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
