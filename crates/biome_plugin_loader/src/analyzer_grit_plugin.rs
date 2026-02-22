@@ -258,4 +258,12 @@ mod tests {
         // Users should use `**/src/**/*.ts` for absolute path matching.
         assert!(!plugin.applies_to_file(Utf8Path::new("/project/src/main.ts")));
     }
+
+    #[test]
+    fn empty_includes_matches_nothing() {
+        let globs: Vec<NormalizedGlob> = vec![];
+        let plugin = load_test_plugin(Some(&globs));
+        assert!(!plugin.applies_to_file(Utf8Path::new("src/main.ts")));
+        assert!(!plugin.applies_to_file(Utf8Path::new("any/file.js")));
+    }
 }
