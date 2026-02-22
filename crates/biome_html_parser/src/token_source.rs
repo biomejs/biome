@@ -30,6 +30,9 @@ pub(crate) enum HtmlLexContext {
     /// Like [InsideTag], but with Vue-specific tokens enabled.
     /// This enables parsing of Component directives (v-bind, :, @, #, etc.)
     InsideTagWithDirectives,
+    /// Like [InsideTag], but with Svelte-specific tokens enabled.
+    /// This enables parsing of JS-style `//` and `/* */` comments as trivia.
+    InsideTagSvelte,
     /// Like [InsideTag], but with Astro-specific tokens enabled.
     /// This enables parsing of Astro directives (client:, set:, class:, is:, server:)
     InsideTagAstro,
