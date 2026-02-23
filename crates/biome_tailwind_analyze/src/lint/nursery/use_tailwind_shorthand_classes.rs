@@ -276,11 +276,12 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
                         candidates
                             .iter()
                             .find(|candidate| match candidate.candidate().ok() {
-                                Some(AnyTwCandidate::TwFunctionalCandidate(func)) => {
-                                    func.base_token().ok().is_some_and(|t| t.text() == rb)
-                                }
+                                Some(AnyTwCandidate::TwFunctionalCandidate(func)) => func
+                                    .base_token()
+                                    .ok()
+                                    .is_some_and(|t| t.text_trimmed() == rb),
                                 Some(AnyTwCandidate::TwStaticCandidate(st)) => {
-                                    st.base_token().ok().is_some_and(|t| t.text() == rb)
+                                    st.base_token().ok().is_some_and(|t| t.text_trimmed() == rb)
                                 }
                                 _ => false,
                             })
