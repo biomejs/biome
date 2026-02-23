@@ -206,7 +206,13 @@ fn is_expect_expression(expr: &AnyJsExpression) -> bool {
             if let Ok(name) = id.name()
                 && let Ok(token) = name.value_token()
             {
-                return token.text_trimmed() == "expect";
+                let text = token.text_trimmed();
+                return text == "expect"
+                // support chai-style `assert` syntax from Vitest
+                || text == "assert"
+                // Include `expectTypeOf`/`assertType` for type assertions from `expect-type`
+                || text == "expectTypeOf"
+                || text == "assertType";
             }
             false
         }
@@ -215,6 +221,8 @@ fn is_expect_expression(expr: &AnyJsExpression) -> bool {
             if let Ok(object) = member.object() {
                 // Recursively check the object - this handles chained member expressions
                 // like expect(page).not where the object is itself a member expression
+                // NB: This is overly permissive for certain Vitest constructs (ex: `expect.stringContaining()`)
+                // that do not assert anything in and of themselves (see issue #9174)
                 return is_expect_expression(&object);
             }
             false

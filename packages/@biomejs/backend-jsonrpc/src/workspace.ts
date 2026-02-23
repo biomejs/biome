@@ -2355,7 +2355,7 @@ See https://biomejs.dev/linter/rules/use-exhaustive-switch-cases
 	 */
 	useExhaustiveSwitchCases?: UseExhaustiveSwitchCasesConfiguration;
 	/**
-	* Ensure that test functions contain at least one expect() assertion.
+	* Ensure that test functions contain at least one expect() or similar assertion.
 See https://biomejs.dev/linter/rules/use-expect 
 	 */
 	useExpect?: UseExpectConfiguration;
