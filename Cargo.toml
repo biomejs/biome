@@ -15,7 +15,7 @@ categories = ["development-tools", "web-programming"]
 
 [workspace.dependencies]
 # Crates needed in the workspace
-anyhow                       = "1.0.101"
+anyhow                       = "1.0.102"
 # publish
 biome_analyze                = { path = "./crates/biome_analyze", version = "0.5.7" }
 biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
