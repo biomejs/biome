@@ -12,9 +12,8 @@ categories.workspace = true
 publish              = false
 
 [[bench]]
-harness           = false
-name              = "grit_query"
-required-features = ["testing"]
+harness = false
+name    = "grit_query"
 
 [dependencies]
 biome_analyze        = { workspace = true }
@@ -55,9 +54,8 @@ tikv-jemallocator = { workspace = true }
 mimalloc = { workspace = true }
 
 [features]
-schema  = ["biome_js_parser/schema", "dep:schemars", "serde"]
-serde   = ["dep:serde", "dep:serde_json"]
-testing = []
+schema = ["biome_js_parser/schema", "dep:schemars", "serde"]
+serde  = ["dep:serde", "dep:serde_json"]
 
 [lints]
 workspace = true
