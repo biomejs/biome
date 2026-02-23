@@ -1,0 +1,203 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 131
+expression: snapshot
+---
+
+## Input
+
+```
+> paragraph line
+> - nested bullet
+
+> paragraph line
+> 1. nested ordered
+
+> paragraph line
+> still paragraph
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            marker_token: R_ANGLE@0..1 ">" [] [],
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@1..16 "paragraph line" [Skipped(" ")] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@16..17 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+                MdBulletListItem {
+                    md_bullet_list: MdBulletList [
+                        MdBullet {
+                            bullet: MINUS@17..20 "-" [Skipped(">"), Skipped(" ")] [],
+                            content: MdBlockList [
+                                MdParagraph {
+                                    list: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@20..34 " nested bullet" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@34..35 "\n" [] [],
+                                        },
+                                    ],
+                                    hard_line: missing (optional),
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@35..36 "\n" [] [],
+        },
+        MdQuote {
+            marker_token: R_ANGLE@36..37 ">" [] [],
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@37..52 "paragraph line" [Skipped(" ")] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@52..53 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+                MdOrderedListItem {
+                    md_bullet_list: MdBulletList [
+                        MdBullet {
+                            bullet: MD_ORDERED_LIST_MARKER@53..57 "1." [Skipped(">"), Skipped(" ")] [],
+                            content: MdBlockList [
+                                MdParagraph {
+                                    list: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@57..72 " nested ordered" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@72..73 "\n" [] [],
+                                        },
+                                    ],
+                                    hard_line: missing (optional),
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@73..74 "\n" [] [],
+        },
+        MdQuote {
+            marker_token: R_ANGLE@74..75 ">" [] [],
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@75..90 "paragraph line" [Skipped(" ")] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@90..91 "\n" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@91..108 "still paragraph" [Skipped(">"), Skipped(" ")] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@108..109 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@109..109 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..109
+  0: (empty)
+  1: MD_BLOCK_LIST@0..109
+    0: MD_QUOTE@0..35
+      0: R_ANGLE@0..1 ">" [] []
+      1: MD_BLOCK_LIST@1..35
+        0: MD_PARAGRAPH@1..17
+          0: MD_INLINE_ITEM_LIST@1..17
+            0: MD_TEXTUAL@1..16
+              0: MD_TEXTUAL_LITERAL@1..16 "paragraph line" [Skipped(" ")] []
+            1: MD_TEXTUAL@16..17
+              0: MD_TEXTUAL_LITERAL@16..17 "\n" [] []
+          1: (empty)
+        1: MD_BULLET_LIST_ITEM@17..35
+          0: MD_BULLET_LIST@17..35
+            0: MD_BULLET@17..35
+              0: MINUS@17..20 "-" [Skipped(">"), Skipped(" ")] []
+              1: MD_BLOCK_LIST@20..35
+                0: MD_PARAGRAPH@20..35
+                  0: MD_INLINE_ITEM_LIST@20..35
+                    0: MD_TEXTUAL@20..34
+                      0: MD_TEXTUAL_LITERAL@20..34 " nested bullet" [] []
+                    1: MD_TEXTUAL@34..35
+                      0: MD_TEXTUAL_LITERAL@34..35 "\n" [] []
+                  1: (empty)
+    1: MD_NEWLINE@35..36
+      0: NEWLINE@35..36 "\n" [] []
+    2: MD_QUOTE@36..73
+      0: R_ANGLE@36..37 ">" [] []
+      1: MD_BLOCK_LIST@37..73
+        0: MD_PARAGRAPH@37..53
+          0: MD_INLINE_ITEM_LIST@37..53
+            0: MD_TEXTUAL@37..52
+              0: MD_TEXTUAL_LITERAL@37..52 "paragraph line" [Skipped(" ")] []
+            1: MD_TEXTUAL@52..53
+              0: MD_TEXTUAL_LITERAL@52..53 "\n" [] []
+          1: (empty)
+        1: MD_ORDERED_LIST_ITEM@53..73
+          0: MD_BULLET_LIST@53..73
+            0: MD_BULLET@53..73
+              0: MD_ORDERED_LIST_MARKER@53..57 "1." [Skipped(">"), Skipped(" ")] []
+              1: MD_BLOCK_LIST@57..73
+                0: MD_PARAGRAPH@57..73
+                  0: MD_INLINE_ITEM_LIST@57..73
+                    0: MD_TEXTUAL@57..72
+                      0: MD_TEXTUAL_LITERAL@57..72 " nested ordered" [] []
+                    1: MD_TEXTUAL@72..73
+                      0: MD_TEXTUAL_LITERAL@72..73 "\n" [] []
+                  1: (empty)
+    3: MD_NEWLINE@73..74
+      0: NEWLINE@73..74 "\n" [] []
+    4: MD_QUOTE@74..109
+      0: R_ANGLE@74..75 ">" [] []
+      1: MD_BLOCK_LIST@75..109
+        0: MD_PARAGRAPH@75..109
+          0: MD_INLINE_ITEM_LIST@75..109
+            0: MD_TEXTUAL@75..90
+              0: MD_TEXTUAL_LITERAL@75..90 "paragraph line" [Skipped(" ")] []
+            1: MD_TEXTUAL@90..91
+              0: MD_TEXTUAL_LITERAL@90..91 "\n" [] []
+            2: MD_TEXTUAL@91..108
+              0: MD_TEXTUAL_LITERAL@91..108 "still paragraph" [Skipped(">"), Skipped(" ")] []
+            3: MD_TEXTUAL@108..109
+              0: MD_TEXTUAL_LITERAL@108..109 "\n" [] []
+          1: (empty)
+  2: EOF@109..109 "" [] []
+
+```
