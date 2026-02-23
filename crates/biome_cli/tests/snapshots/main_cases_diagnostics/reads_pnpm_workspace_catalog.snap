@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 432
+assertion_line: 481
 expression: redactor(content)
 ---
 ## `biome.json`
@@ -9,7 +9,7 @@ expression: redactor(content)
 {
   "linter": {
     "rules": {
-      "nursery": {
+      "suspicious": {
         "noReactForwardRef": "error"
       }
     }
@@ -68,7 +68,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-src/input.jsx:4:26 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+src/input.jsx:4:26 lint/suspicious/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use of forwardRef is detected, which is deprecated.
   

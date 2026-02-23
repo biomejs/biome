@@ -132,9 +132,9 @@ catalogs:
         Utf8Path::new("biome.json").into(),
         r#"
 {
-  "linter": {
+    "linter": {
     "rules": {
-      "nursery": {
+      "suspicious": {
         "noReactForwardRef": "error"
       }
     }
