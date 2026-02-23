@@ -135,24 +135,26 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
 
                 // Pair each real diagnostic with its action by position.
                 let mut action_iter = actions.drain(..);
-                let diag_entries =
-                    result
-                        .diagnostics
-                        .into_iter()
-                        .map(|(diagnostic, applicability)| {
-                            let mut action = action_iter.next();
-                            if let Some(ref mut action) = action {
-                                action.applicability = applicability;
-                            }
-                            PluginDiagnosticEntry {
-                                diagnostic: diagnostic.subcategory(name.to_string()),
-                                action,
-                            }
-                        });
+                let diag_entries: Vec<_> = result
+                    .diagnostics
+                    .into_iter()
+                    .map(|(diagnostic, applicability)| {
+                        let mut action = action_iter.next();
+                        if let Some(ref mut action) = action {
+                            action.applicability = applicability;
+                        }
+                        PluginDiagnosticEntry {
+                            diagnostic: diagnostic.subcategory(name.to_string()),
+                            action,
+                        }
+                    })
+                    .collect();
+
+                let has_missing_span = diag_entries.iter().any(|e| e.diagnostic.span().is_none());
 
                 let mut entries: Vec<_> = log_entries.chain(diag_entries).collect();
 
-                if entries.iter().any(|e| e.diagnostic.span().is_none()) {
+                if has_missing_span {
                     entries.push(PluginDiagnosticEntry {
                         diagnostic: RuleDiagnostic::new(
                             category!("plugin"),
