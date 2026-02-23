@@ -7,7 +7,7 @@ Added `graphql` to valid embedded graphql template tags inside JavaScript files,
 Now, code snippets like the following are correctly formatted and limited:
 
 ```js
-import { graphql } from "@biomejs/biome";
+import { graphql } from "react-relay";
 
 const query = graphql`
   query {
